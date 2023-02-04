@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { View, Alert, ScrollView, Text, StyleSheet, TouchableOpacity, Button, ToastAndroid, BackHandler, ActivityIndicator, PermissionsAndroid } from 'react-native';
+import { StatusBar, View, Alert, ScrollView, Text, StyleSheet, TouchableOpacity, Button, ToastAndroid, BackHandler, ActivityIndicator, PermissionsAndroid } from 'react-native';
 import Videos from 'react-native-video-controls';
 import Orientation from 'react-native-orientation-locker';
 import RNFetchBlob from "rn-fetch-blob";
@@ -50,20 +50,23 @@ class Video extends Component {
     componentWillUnmount() {
         Orientation.unlockAllOrientations();
         this.back.remove();
-        SystemNavigationBar.fullScreen(false);
+        StatusBar.setHidden(false);
+        SystemNavigationBar.navigationShow();
     }
 
     enterFullscreen() {
         Orientation.lockToLandscape();
-        SystemNavigationBar.fullScreen(true);
+        StatusBar.setHidden(true);
+        SystemNavigationBar.navigationHide();
         this.setState({
             fullscreen: true
         })
     }
 
     exitFullscreen() {
+        StatusBar.setHidden(false);
         Orientation.lockToPortrait();
-        SystemNavigationBar.fullScreen(false);
+        SystemNavigationBar.navigationShow();
         this.setState({
             fullscreen: false
         })
