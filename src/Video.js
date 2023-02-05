@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { StatusBar, View, Alert, ScrollView, Text, StyleSheet, TouchableOpacity, Button, ToastAndroid, BackHandler, ActivityIndicator, PermissionsAndroid } from 'react-native';
-import Videos from 'react-native-video-controls';
+import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import RNFetchBlob from "rn-fetch-blob";
 import style from './assets/style';
@@ -43,8 +43,15 @@ class Video extends Component {
     componentDidMount() {
         Orientation.lockToPortrait();
         this.back = BackHandler.addEventListener('hardwareBackPress', () => {
-            Orientation.unlockAllOrientations();
-            return false;
+            if (!this.state.fullscreen) {
+                Orientation.unlockAllOrientations();
+                StatusBar.setHidden(false);
+                SystemNavigationBar.navigationShow();
+                return false;
+            } else {
+                this.exitFullscreen();
+                return true
+            }
         });
     }
     componentWillUnmount() {
@@ -88,7 +95,7 @@ class Video extends Component {
             .then((resp) => {
                 // the path of downloaded file
                 resp.path()
-            }).catch(() => {});
+            }).catch(() => { });
         ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
     }
 
@@ -99,6 +106,9 @@ class Video extends Component {
             });
         }
     }
+    onBack = () => {
+        this.exitFullscreen();
+    }
 
     render() {
         return (
@@ -107,7 +117,7 @@ class Video extends Component {
                 <View style={[this.state.fullscreen ? styles.fullscreen : styles.notFullscreen]}>
                     {
                         this.state.data.streamingLink?.[this.state.part]?.sources[0].src ? (
-                            <Videos key={this.state.data.resolution} title={this.state.data.title} disableBack toggleResizeModeOnFullscreen={false} isFullscreen={this.state.fullscreen} onEnterFullscreen={this.enterFullscreen.bind(this)} onExitFullscreen={this.exitFullscreen.bind(this)} source={{ uri: this.state.data.streamingLink[this.state.part].sources[0].src }} onEnd={this.onEnd} />
+                            <Videos key={this.state.data.streamingLink[this.state.part].sources[0].src} title={this.state.data.title} disableBack={!this.state.fullscreen} onBack={this.onBack} toggleResizeModeOnFullscreen={false} isFullscreen={this.state.fullscreen} onEnterFullscreen={this.enterFullscreen.bind(this)} onExitFullscreen={this.exitFullscreen.bind(this)} source={{ uri: this.state.data.streamingLink[this.state.part].sources[0].src }} onEnd={this.onEnd} rewindTime={10} showDuration={true} />
                         )
                             : <Text style={style.text}>Video tidak tersedia</Text>
                     }
