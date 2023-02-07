@@ -27,12 +27,12 @@ class EpsList extends Component {
                 </View>
 
                 <Text style={[{ fontSize: 20 }, styles.text]}>Sinopsis: </Text>
-                <ScrollView nestedScrollEnabled style={{ maxHeight: 250, borderWidth: 1, borderColor: '#1f5f44', flexShrink:1 }}>
+                <ScrollView nestedScrollEnabled style={{ maxHeight: 250, borderRadius: 5, backgroundColor: '#494949', flexShrink:1, marginHorizontal: 10 }}>
                     <Text style={styles.text}>{this.props.route.params.data.synopsys}</Text>
                 </ScrollView>
 
                 <Text style={[{ fontSize: 20, marginTop: 16 }, styles.text]}>Pilih Episode: </Text>
-                <TextInput placeholder="Cari episode di sini" keyboardType="numeric" placeholderTextColor={'#616161'} style={[styles.text, { flexShrink:0.4, height: 35, borderWidth: 1, borderColor: '#2e2ebb', marginHorizontal: 2, paddingVertical: 1 }]} onChangeText={(text) => {
+                <TextInput placeholder="Cari episode di sini" keyboardType="numeric" placeholderTextColor={'#616161'} style={[styles.text, { flexShrink:0.4, height: 35, borderWidth: 1, borderColor: '#2e2ebb', marginHorizontal: 10, paddingVertical: 1 }]} onChangeText={(text) => {
                     if (text === '') {
                         this.setState({
                             result: this.props.route.params.data.episodeList
@@ -47,7 +47,7 @@ class EpsList extends Component {
                         })
                     }
                 }} />
-                <View style={{ maxHeight: 200, marginTop: 10, borderWidth: 1, borderColor: '#40af6a',flexShrink:1 }}>
+                <View style={{ maxHeight: 200, marginTop: 10, backgroundColor: '#494949', marginHorizontal: 10, borderRadius:7, flexShrink:1 }}>
                     {this.state.result[0] !== undefined ?
                         <FlatList
                             nestedScrollEnabled

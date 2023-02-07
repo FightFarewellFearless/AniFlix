@@ -2,10 +2,9 @@
 /* eslint-disable semi */
 /* eslint-disable prettier/prettier */
 import React, { Component } from 'react';
-import RNFetchBlob from 'rn-fetch-blob'
-import { NavigationContainer, DarkTheme, StackActions } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'react-native';
+import { StatusBar, ToastAndroid } from 'react-native';
 
 import Loading from './src/Loading';
 import EpsList from './src/EpsList';
@@ -14,6 +13,7 @@ import FromUrl from './src/FromUrl';
 import Video from './src/Video';
 import Blocked from './src/Blocked';
 import Search from './src/Search';
+import FailedToConnect from './src/FailedToConnect';
 
 class App extends Component {
     constructor() {
@@ -22,6 +22,10 @@ class App extends Component {
             loading: true,
             result: null,
         }
+    }
+
+    componentDidMount () {
+        ToastAndroid.show('Aplikasi masih dalam tahap pengembangan!', ToastAndroid.SHORT);
     }
 
     render() {
@@ -38,6 +42,7 @@ class App extends Component {
                         <Stack.Screen name="Search" component={Search} />
                         <Stack.Screen name="loading" component={Loading} />
                         <Stack.Screen name="Blocked" component={Blocked} />
+                        <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </>

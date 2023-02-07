@@ -52,9 +52,11 @@ class FromUrl extends Component {
                 Alert.alert('Error', err.message);
                 this.props.navigation.goBack();
             });
+            if (results === undefined) return;
+            const resulted = await results.text();
             try {
+                const result = JSON.parse(resulted);
                 if (results && this.state.unmount === false) {
-                    const result = await results.json();
                     if (result.blocked) {
                         this.props.navigation.dispatch(StackActions.replace('Blocked'));
                     }
@@ -71,7 +73,11 @@ class FromUrl extends Component {
                     }
                 };
             } catch (e) {
-                Alert.alert('Error', e.message);
+                console.log(resulted)
+                if(resulted == 'Unsupported') {
+                    Alert.alert('Tidak didukung!', 'Anime yang kamu tuju tidak memiliki data yang didukung!');
+                }
+                else Alert.alert('Error', e.message);
                 this.props.navigation.goBack();
             }
         }

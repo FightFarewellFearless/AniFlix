@@ -2,9 +2,8 @@
 /* eslint-disable quotes */
 /* eslint-disable no-trailing-spaces */
 import { Component } from "react";
-import { View, ActivityIndicator, Text, ToastAndroid } from 'react-native';
+import { View, ActivityIndicator, Text, Image } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import RNExitApp from 'react-native-exit-app';
 import styles from './assets/style';
 
 
@@ -14,27 +13,27 @@ class Loading extends Component {
     }
 
     componentDidMount() {
-        ToastAndroid.show('Aplikasi masih dalam tahap pengembangan!', ToastAndroid.SHORT);
         fetch('https://animeapi.aceracia.repl.co/newAnime').then(async (data) => {
             const jsondata = await data.json();
             this.props.navigation.dispatch(StackActions.replace('Home', {
                 data: jsondata,
             }))
         }).catch(e => {
-            ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
-            setTimeout(() => RNExitApp.exitApp(), 200)
-        })
+            this.props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+        });
     }
 
     render() {
         return (
-            <>
-                <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-                    <ActivityIndicator size='large' />
-                    <Text style={styles.text}>Mengubungkan ke server mohon tunggu.</Text>
+            <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                <ActivityIndicator size='large' />
+                <Text style={styles.text}>Mengubungkan ke server mohon tunggu.</Text>
+                <View style={{ position: 'absolute', bottom:80, alignItems:'center' }}>
+                    <Image source={require('./assets/RNlogo.png')} style={{ height: 40, width: 40 }} />
+                    <Text style={[styles.text, { fontSize: 12 }]}>Created using react-native</Text>
                 </View>
-                <Text style={[styles.text]}>{require('../package.json').version}</Text>
-            </>
+                <Text style={[styles.text, { position: 'absolute', bottom: 0, left: 0 }]}>{require('../package.json').version}</Text>
+            </View>
         )
     }
 
