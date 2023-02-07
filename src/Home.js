@@ -9,7 +9,7 @@ import styles from './assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 
-class Loading extends Component {
+class Home extends Component {
     constructor() {
         super();
         this.state = {
@@ -93,4 +93,4 @@ class Loading extends Component {
 
 }
 
-export default Loading;
+export default Home;
