@@ -7,6 +7,7 @@ import { Component } from "react";
 import { View, ActivityIndicator, Text, Alert, BackHandler, ToastAndroid } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import styles from './assets/style';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 class FromUrl extends Component {
@@ -70,10 +71,33 @@ class FromUrl extends Component {
                             data: result,
                             link: this.props.route.params.link
                         }));
+
+
+                        ;(async () => {
+                            let data = await AsyncStorage.getItem('history');
+                            if(data === null) data = '[]';
+                            data = JSON.parse(data);
+                            const title = result.title.slice(0, result.title.toLowerCase().indexOf('episode'));
+                            const episodeI = result.title.toLowerCase().indexOf('episode');
+                            const episode = episodeI < 0 ? null : result.title.slice(episodeI);
+                            const dataINDEX = data.findIndex(val => val.title === title);
+                            if(dataINDEX >= 0) {
+                                data.splice(dataINDEX, 1);
+                            };
+                            data.splice(0, 0, {
+                                title,
+                                episode,
+                                link: this.props.route.params.link,
+                                thumbnailUrl: result.thumbnailUrl,
+                                date: Date.now()
+                            })
+                            AsyncStorage.setItem('history', JSON.stringify(data));
+                        })();
+
+
                     }
                 };
             } catch (e) {
-                console.log(resulted)
                 if(resulted == 'Unsupported') {
                     Alert.alert('Tidak didukung!', 'Anime yang kamu tuju tidak memiliki data yang didukung!');
                 }

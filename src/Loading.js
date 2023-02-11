@@ -28,7 +28,7 @@ class Loading extends Component {
             <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
                 <ActivityIndicator size='large' />
                 <Text style={styles.text}>Mengubungkan ke server mohon tunggu.</Text>
-                <View style={{ position: 'absolute', bottom:80, alignItems:'center' }}>
+                <View style={{ position: 'absolute', bottom:40, alignItems:'center' }}>
                     <Image source={require('./assets/RNlogo.png')} style={{ height: 40, width: 40 }} />
                     <Text style={[styles.text, { fontSize: 12 }]}>Created using react-native</Text>
                 </View>

@@ -7,6 +7,8 @@ import { View, RefreshControl, Text, ScrollView, ImageBackground, TouchableOpaci
 import { StackActions } from '@react-navigation/native';
 import styles from './assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import History from './History';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 
 class Home extends Component {
@@ -93,4 +95,22 @@ class Home extends Component {
 
 }
 
-export default Home;
+class BottomTabs extends Component {
+
+    constructor(props) {
+        super(props);
+        this.Tab = createBottomTabNavigator();
+    }
+
+    render() {
+        const Tab = this.Tab;
+        return (
+            <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { height: 40 } }}>
+                <Tab.Screen name='Home1' component={Home} initialParams={this.props.route.params} options={{ tabBarIcon: ({ color }) => <Icon name='home' color={color} size={20} />, tabBarLabel: 'Home' }} />
+                <Tab.Screen name='History' options={{ unmountOnBlur: true, tabBarIcon: ({ color }) => <Icon name='history' color={color} size={20} /> }} component={History} />
+            </Tab.Navigator>
+        )
+    }
+}
+
+export default BottomTabs;

@@ -37,7 +37,7 @@ class FailedToConnect extends Component {
                     >
                         <Text style={[{ fontSize: 17 }, styles.text]}><Icon name="refresh" size={17} /> Coba lagi</Text>
                     </TouchableOpacity>
-                    <View style={{ position: 'absolute', bottom: 80, justifyContent:'center', alignItems:'center' }}>
+                    <View style={{ position: 'absolute', bottom: 40, justifyContent:'center', alignItems:'center' }}>
                         <Image source={require('./assets/RNlogo.png')} style={{ height: 40, width: 40 }} />
                         <Text style={[styles.text, { fontSize: 12 }]}>Created using react-native</Text>
                     </View>

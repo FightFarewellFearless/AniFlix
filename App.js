@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar, ToastAndroid } from 'react-native';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import Loading from './src/Loading';
 import EpsList from './src/EpsList';
@@ -22,31 +23,35 @@ class App extends Component {
             loading: true,
             result: null,
         }
+        this.Stack = createNativeStackNavigator();
+        StatusBar.setHidden(false)
     }
 
-    componentDidMount () {
+    componentDidMount() {
+        SystemNavigationBar.setBarMode('dark');
+        StatusBar.setBarStyle('light-content')
         ToastAndroid.show('Aplikasi masih dalam tahap pengembangan!', ToastAndroid.SHORT);
     }
 
     render() {
-        const Stack = createNativeStackNavigator();
+        const Stack = this.Stack;
         return (
-            <>
-            <StatusBar hidden={false} />
-                <NavigationContainer theme={DarkTheme}>
-                    <Stack.Navigator initialRouteName='loading' screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="Home" component={Home} />
-                        <Stack.Screen name="EpisodeList" component={EpsList} />
-                        <Stack.Screen name="FromUrl" component={FromUrl} />
-                        <Stack.Screen name="Video" component={Video} />
-                        <Stack.Screen name="Search" component={Search} />
-                        <Stack.Screen name="loading" component={Loading} />
-                        <Stack.Screen name="Blocked" component={Blocked} />
-                        <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </>
+            <NavigationContainer theme={DarkTheme}>
+                <Stack.Navigator initialRouteName='loading' screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Home" component={Home} />
+                    <Stack.Screen name="EpisodeList" component={EpsList} />
+                    <Stack.Screen name="FromUrl" component={FromUrl} />
+                    <Stack.Screen name="Video" component={Video} />
+                    <Stack.Screen name="Search" component={Search} />
+                    <Stack.Screen name="loading" component={Loading} />
+                    <Stack.Screen name="Blocked" component={Blocked} />
+                    <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
+                </Stack.Navigator>
+            </NavigationContainer>
         )
     }
 }
+
+
+
 export default App;
