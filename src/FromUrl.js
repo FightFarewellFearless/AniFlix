@@ -72,13 +72,14 @@ class FromUrl extends Component {
                             link: this.props.route.params.link
                         }));
 
-
+                        // History 
+                        
                         ;(async () => {
                             let data = await AsyncStorage.getItem('history');
                             if(data === null) data = '[]';
                             data = JSON.parse(data);
-                            const title = result.title.slice(0, result.title.toLowerCase().indexOf('episode'));
                             const episodeI = result.title.toLowerCase().indexOf('episode');
+                            const title = episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
                             const episode = episodeI < 0 ? null : result.title.slice(episodeI);
                             const dataINDEX = data.findIndex(val => val.title === title);
                             if(dataINDEX >= 0) {
