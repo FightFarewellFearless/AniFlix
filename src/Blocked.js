@@ -1,42 +1,32 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import styles from './assets/style';
+import { Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
+import styles from './assets/style';
 
 class Loading extends Component {
-    constructor() {
-        super();
-    }
-    render() {
-        return (
-            <View
-                style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flex: 1,
-                }}>
-                <Text style={[{ fontSize: 20 }, styles.text]}>
-                    Anime yang kamu tuju tidak di izinkan!
-                </Text>
-                <TouchableOpacity
-                    style={{
-                        borderRadius: 2,
-                        borderWidth: 3,
-                        backgroundColor: 'lightblue',
-                    }}
-                    onPress={() => this.props.navigation.goBack()}>
-                    <Text style={{ color: 'black' }}>
-                        <Icon
-                            name="back"
-                            size={14}
-                            style={{ color: 'black' }}
-                        />{' '}
-                        Kembali
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
+  constructor() {
+    super();
+  }
+  render() {
+    return (
+      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+        <Text style={[{ fontSize: 20 }, styles.text]}>
+          Anime yang kamu tuju tidak di izinkan!
+        </Text>
+        <TouchableOpacity
+          style={{
+            borderRadius: 2,
+            borderWidth: 3,
+            backgroundColor: 'lightblue',
+          }}
+          onPress={() => this.props.navigation.goBack()}>
+          <Text style={{ color: 'black' }}>
+            <Icon name="back" size={14} style={{ color: 'black' }} /> Kembali
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 }
 
 export default Loading;
