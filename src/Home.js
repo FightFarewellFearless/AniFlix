@@ -135,7 +135,7 @@ class Home extends Component {
                     height: 210,
                     borderWidth: 2,
                     borderColor: 'red',
-                    marginRight: 12,
+                    marginRight: 5,
                     flex: 2,
                   }}>
                   <View

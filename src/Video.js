@@ -16,6 +16,7 @@ import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import RNFetchBlob from 'rn-fetch-blob';
 import style from './assets/style';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 class Video extends Component {
@@ -157,6 +158,7 @@ class Video extends Component {
                 key={
                   this.state.data.streamingLink[this.state.part].sources[0].src
                 }
+                showOnEnd={true}
                 title={this.state.data.title}
                 disableBack={!this.state.fullscreen}
                 onBack={this.onBack}
@@ -226,7 +228,15 @@ class Video extends Component {
                             this.setResolution(res);
                           }
                         }}>
-                        <Text style={style.text}>{res}</Text>
+                        <Text
+                          style={{
+                            color:
+                              this.state.data.resolution === res
+                                ? '#181818'
+                                : style.text.color,
+                          }}>
+                          {res}
+                        </Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -246,6 +256,18 @@ class Video extends Component {
                       paddingLeft: 4,
                       paddingVertical: 5,
                     }}>
+                    {/* info tentang part */}
+                    <TouchableOpacity
+                      hitSlop={8}
+                      onPress={() => {
+                        Alert.alert(
+                          'Mengapa episode di bagi menjadi beberapa part?',
+                          'Kami menjadikan episode anime dengan durasi yang panjang atau resolusi yang besar menjadi beberapa part agar proses streaming menjadi lebih lancar dan bebas error.',
+                        );
+                      }}
+                      style={{ position: 'absolute', right: 5 }}>
+                      <Icon name="info-circle" size={17} />
+                    </TouchableOpacity>
                     <Text style={style.text}>Silahkan pilih part:</Text>
                     <View
                       style={{
@@ -269,7 +291,15 @@ class Video extends Component {
                                 part: i,
                               });
                             }}>
-                            <Text style={style.text}>{'Part ' + (i + 1)}</Text>
+                            <Text
+                              style={{
+                                color:
+                                  this.state.part === i
+                                    ? '#181818'
+                                    : style.text.color,
+                              }}>
+                              {'Part ' + (i + 1)}
+                            </Text>
                           </TouchableOpacity>
                         );
                       })}
