@@ -28,6 +28,7 @@ class Video extends Component {
       part: 0,
       loading: false,
       data: this.props.route.params.data,
+      downloadSource: [],
     };
   }
 
@@ -100,11 +101,45 @@ class Video extends Component {
     });
   }
 
-  downloadAnime = async () => {
-    const Title =
+  downloadAnime = async (force = false) => {
+    const source =
+      this.state.data.streamingLink[this.state.part].sources[0].src;
+
+    if (this.state.downloadSource.includes(source) && force === false) {
+      Alert.alert(
+        'Lanjutkan?',
+        'kamu sudah mengunduh bagian ini. Masih ingin melanjutkan?',
+        [
+          {
+            text: 'Batalkan',
+            style: 'cancel',
+            onPress: () => null,
+          },
+          {
+            text: 'Lanjutkan',
+            onPress: () => {
+              this.downloadAnime(true);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    let Title =
       this.state.data.streamingLink.length > 1
         ? this.state.data.title + ' Part ' + (this.state.part + 1)
         : this.state.data.title;
+
+    if (force === true) {
+      Title +=
+        ' (' + this.state.downloadSource.filter(z => z === source).length + ')';
+    }
+
+    this.setState({
+      downloadSource: [...this.state.downloadSource, source],
+    });
+
     RNFetchBlob.config({
       addAndroidDownloads: {
         useDownloadManager: true,
@@ -120,10 +155,7 @@ class Video extends Component {
         title: Title + ' ' + this.state.data.resolution + '.mp4',
       },
     })
-      .fetch(
-        'GET',
-        this.state.data.streamingLink[this.state.part].sources[0].src,
-      )
+      .fetch('GET', source)
       .then(resp => {
         // the path of downloaded file
         resp.path();
@@ -216,7 +248,9 @@ class Video extends Component {
                       <TouchableOpacity
                         key={res}
                         style={{
-                          width: 50,
+                          alignSelf: 'flex-start',
+                          paddingVertical: 1,
+                          paddingHorizontal: 9,
                           marginRight: 5,
                           backgroundColor:
                             this.state.data.resolution === res
@@ -280,7 +314,9 @@ class Video extends Component {
                           <TouchableOpacity
                             key={i}
                             style={{
-                              width: 50,
+                              alignSelf: 'flex-start',
+                              paddingVertical: 1,
+                              paddingHorizontal: 9,
                               marginRight: 5,
                               marginBottom: 5,
                               backgroundColor:
@@ -323,6 +359,7 @@ class Video extends Component {
                       {this.state.data.synopsys}
                     </Text>
                     <TouchableOpacity
+                      style={{ alignSelf: 'flex-start' }}
                       onPress={() =>
                         this.setState({
                           showSynopsys: false,
@@ -335,6 +372,7 @@ class Video extends Component {
                   </>
                 ) : (
                   <TouchableOpacity
+                    style={{ alignSelf: 'flex-start' }}
                     onPress={() =>
                       this.setState({
                         showSynopsys: true,
@@ -350,7 +388,7 @@ class Video extends Component {
                   'Download' +
                   (this.state.data.streamingLink.length > 1 ? ' part ini' : '')
                 }
-                onPress={this.downloadAnime}
+                onPress={() => this.downloadAnime()}
               />
             </ScrollView>
           )
