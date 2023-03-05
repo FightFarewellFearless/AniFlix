@@ -290,18 +290,6 @@ class Video extends Component {
                       paddingLeft: 4,
                       paddingVertical: 5,
                     }}>
-                    {/* info tentang part */}
-                    <TouchableOpacity
-                      hitSlop={8}
-                      onPress={() => {
-                        Alert.alert(
-                          'Mengapa episode di bagi menjadi beberapa part?',
-                          'Kami menjadikan episode anime dengan durasi yang panjang atau resolusi yang besar menjadi beberapa part agar proses streaming menjadi lebih lancar dan bebas error.',
-                        );
-                      }}
-                      style={{ position: 'absolute', right: 5 }}>
-                      <Icon name="info-circle" size={17} />
-                    </TouchableOpacity>
                     <Text style={style.text}>Silahkan pilih part:</Text>
                     <View
                       style={{
@@ -340,6 +328,18 @@ class Video extends Component {
                         );
                       })}
                     </View>
+                    {/* info tentang part */}
+                    <TouchableOpacity
+                      hitSlop={8}
+                      onPress={() => {
+                        Alert.alert(
+                          'Mengapa episode di bagi menjadi beberapa part?',
+                          'Kami menjadikan episode anime dengan durasi yang panjang atau resolusi yang besar menjadi beberapa part agar proses streaming menjadi lebih lancar dan bebas error.',
+                        );
+                      }}
+                      style={{ position: 'absolute', right: 5, top: 2 }}>
+                      <Icon name="info-circle" size={17} />
+                    </TouchableOpacity>
                   </View>
                 )
               }

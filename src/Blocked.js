@@ -9,20 +9,21 @@ class Loading extends Component {
   constructor() {
     super();
     this.state = {
-      animatedSize: new Animated.Value(35),
+      animatedOpacity: new Animated.Value(1),
     };
 
     this.animated = Animated.loop(
       Animated.sequence([
-        Animated.timing(this.state.animatedSize, {
-          toValue: 45,
+        Animated.timing(this.state.animatedOpacity, {
+          toValue: 0.1,
           duration: 150,
-          useNativeDriver: false,
+          delay: 300,
+          useNativeDriver: true,
         }),
-        Animated.timing(this.state.animatedSize, {
-          toValue: 35,
+        Animated.timing(this.state.animatedOpacity, {
+          toValue: 1,
           duration: 500,
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
       ]),
       {
@@ -39,16 +40,15 @@ class Loading extends Component {
   render() {
     return (
       <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-        <View style={{ paddingBottom: 45 }}>
+        <View>
           <AnimatedIcon
             name="warning"
+            size={45}
             style={{
               color: '#ff0000',
-              fontSize: this.state.animatedSize,
-              position: 'absolute',
+              opacity: this.state.animatedOpacity,
               alignSelf: 'center',
               justifyContent: 'center',
-              top: 0,
             }}
           />
         </View>
@@ -57,15 +57,17 @@ class Loading extends Component {
         </Text>
         <TouchableOpacity
           style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
             borderRadius: 6,
             padding: 3,
             borderWidth: 3,
             backgroundColor: 'lightblue',
           }}
           onPress={() => this.props.navigation.goBack()}>
-          <Text style={{ color: 'black' }}>
-            <Icon name="back" size={14} style={{ color: 'black' }} /> Kembali
-          </Text>
+          <Icon name="back" size={15} style={{ color: 'black' }} />
+          <Text style={{ color: 'black', fontSize: 15 }}> Kembali</Text>
         </TouchableOpacity>
       </View>
     );

@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import styles from './assets/style';
@@ -15,34 +16,63 @@ class EpsList extends Component {
     super(props);
     this.state = {
       result: this.props.route.params.data.episodeList,
+      titleLines: undefined,
     };
   }
+
+  checkReadMoreFunc = e => {
+    this.setState({
+      titleLines: e.nativeEvent.lines.length,
+    });
+  };
+
+  readMoreFunc = () => {
+    if (this.state.titleLines > 2) {
+      Alert.alert('Judul lengkap', this.props.route.params.data.title);
+    }
+  };
 
   render() {
     return (
       <View style={{ flexShrink: 1 }}>
-        <View>
-          <Text style={[{ fontSize: 25 }, styles.text]}>
+        <View style={{ flexShrink: 0.2 }}>
+          <Text
+            numberOfLines={2}
+            onTextLayout={this.checkReadMoreFunc}
+            onPress={this.readMoreFunc}
+            style={[{ fontSize: 25 }, styles.text]}>
             {this.props.route.params.data.title}{' '}
-            <Text style={[styles.text, { backgroundColor: '#159cc5' }]}>
-              {this.props.route.params.data.releaseYear}
-            </Text>
-            {'\n'}
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontSize: 15,
-                  padding: 4,
-                  borderRadius: 4,
-                  backgroundColor:
-                    this.props.route.params.data.status === 'Ongoing'
-                      ? '#ac0000'
-                      : '#22b422',
-                },
-              ]}>
-              {this.props.route.params.data.status}
-            </Text>
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', flexShrink: 0.2 }}>
+          <Text
+            style={[
+              styles.text,
+              {
+                backgroundColor: '#159cc5',
+                fontSize: 15,
+                padding: 4,
+                borderRadius: 4,
+                marginRight: 5,
+              },
+            ]}>
+            {this.props.route.params.data.releaseYear}
+          </Text>
+          <Text
+            style={[
+              styles.text,
+              {
+                fontSize: 15,
+                padding: 4,
+                borderRadius: 4,
+                backgroundColor:
+                  this.props.route.params.data.status === 'Ongoing'
+                    ? '#ac0000'
+                    : '#22b422',
+              },
+            ]}>
+            {this.props.route.params.data.status}
           </Text>
         </View>
 
@@ -156,6 +186,8 @@ class EpsList extends Component {
                     marginTop: 10,
                     backgroundColor: '#004680',
                     marginHorizontal: 3,
+                    padding: 2,
+                    borderRadius: 3,
                   },
                   styles.text,
                 ]}>

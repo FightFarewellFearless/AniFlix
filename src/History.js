@@ -12,6 +12,8 @@ import { StackActions } from '@react-navigation/native';
 import React, { Component } from 'react';
 import styles from './assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import moment from 'moment';
+require('moment/locale/id');
 
 class History extends Component {
   constructor(props) {
@@ -139,7 +141,13 @@ class History extends Component {
                         left: 0,
                       }}>
                       <Text style={styles.text}>
-                        {new Date(item.date).toLocaleString()}
+                        {moment
+                          .duration(
+                            moment(Date.now()).diff(item.date, 'seconds'),
+                            'seconds',
+                          )
+                          .humanize() + ' '}
+                        yang lalu
                       </Text>
                     </View>
 

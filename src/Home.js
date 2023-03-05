@@ -88,8 +88,8 @@ class Home extends Component {
             style={{
               width: this.state.searchText !== '' ? '87%' : '98%',
               height: 35,
-              borderWidth: 1,
-              borderColor: 'red',
+              borderWidth: 0.8,
+              borderColor: '#c5c5c5',
               marginLeft: 2,
               color: styles.text.color,
             }}
@@ -101,7 +101,7 @@ class Home extends Component {
                 justifyContent: 'center',
                 alignItems: 'center',
                 width: '12%',
-                backgroundColor: '#007AFF',
+                backgroundColor: '#ffa43cff',
               }}>
               <Text style={{ color: '#ffffff' }}>
                 <Icon name="search" size={17} />
@@ -142,25 +142,43 @@ class Home extends Component {
                     style={{
                       justifyContent: 'flex-start',
                       alignItems: 'flex-start',
-                      height: '50%',
-                      width: '100%',
                     }}>
                     <Text
+                      numberOfLines={2}
                       style={{
                         fontSize: 10,
                         color: 'black',
                         backgroundColor: 'orange',
-                        opacity: 0.78,
+                        opacity: 0.8,
                       }}>
                       {z.title}
                     </Text>
                   </View>
+
                   <View
                     style={{
-                      justifyContent: 'flex-end',
-                      alignItems: 'flex-end',
-                      height: '50%',
-                      width: '100%',
+                      position: 'absolute',
+                      left: 0,
+                      bottom: 0,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 10,
+                        color: '#000000',
+                        backgroundColor: '#0099ff',
+                        opacity: 0.8,
+                        borderRadius: 2,
+                        padding: 1,
+                      }}>
+                      {z.episode}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
                     }}>
                     <Text
                       style={{
@@ -168,8 +186,10 @@ class Home extends Component {
                         color: 'black',
                         backgroundColor: 'orange',
                         opacity: 0.8,
+                        padding: 2,
+                        borderRadius: 3,
                       }}>
-                      {z.episode}
+                      <Icon name="star" /> {z.rating}
                     </Text>
                   </View>
                 </ImageBackground>
