@@ -7,10 +7,10 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Button,
   ToastAndroid,
   BackHandler,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
@@ -28,8 +28,25 @@ class Video extends Component {
       part: 0,
       loading: false,
       data: this.props.route.params.data,
-      downloadSource: [],
+      shouldPrepareNextPart: false,
+      preparePartAnimation: new Animated.Value(0),
     };
+    this.downloadSource = [];
+    this.hasDownloadAllPart = false;
+    this.hasPart = this.state.data.streamingLink.length > 1;
+    this.preparePartAnimation = Animated.sequence([
+      Animated.timing(this.state.preparePartAnimation, {
+        toValue: 1,
+        useNativeDriver: true,
+        duration: 500,
+      }),
+      Animated.timing(this.state.preparePartAnimation, {
+        toValue: 0,
+        useNativeDriver: true,
+        duration: 500,
+        delay: 3000,
+      }),
+    ]);
   }
 
   async setResolution(res) {
@@ -55,6 +72,7 @@ class Video extends Component {
       return;
     }
     const data = await results.json();
+    this.hasPart = data.streamingLink.length > 1;
     this.setState({
       data,
       loading: false,
@@ -105,7 +123,7 @@ class Video extends Component {
     const source =
       this.state.data.streamingLink[this.state.part].sources[0].src;
 
-    if (this.state.downloadSource.includes(source) && force === false) {
+    if (this.downloadSource.includes(source) && force === false) {
       Alert.alert(
         'Lanjutkan?',
         'kamu sudah mengunduh bagian ini. Masih ingin melanjutkan?',
@@ -133,12 +151,10 @@ class Video extends Component {
 
     if (force === true) {
       Title +=
-        ' (' + this.state.downloadSource.filter(z => z === source).length + ')';
+        ' (' + this.downloadSource.filter(z => z === source).length + ')';
     }
 
-    this.setState({
-      downloadSource: [...this.state.downloadSource, source],
-    });
+    this.downloadSource = [...this.downloadSource, source];
 
     RNFetchBlob.config({
       addAndroidDownloads: {
@@ -168,11 +184,92 @@ class Video extends Component {
     if (this.state.part < this.state.data.streamingLink.length - 1) {
       this.setState({
         part: this.state.part + 1,
+        shouldPrepareNextPart: false,
       });
     }
   };
   onBack = () => {
     this.exitFullscreen();
+  };
+
+  downloadAllAnimePart = async (force = false) => {
+    if (this.hasDownloadAllPart && force === false) {
+      Alert.alert(
+        'Lanjutkan?',
+        'kamu sudah mengunduh semua part. Masih ingin melanjutkan?',
+        [
+          {
+            text: 'Batalkan',
+            style: 'cancel',
+            onPress: () => null,
+          },
+          {
+            text: 'Lanjutkan',
+            onPress: () => {
+              this.downloadAllAnimePart(true);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    for (let i = 0; i < this.state.data.streamingLink.length; i++) {
+      const source = this.state.data.streamingLink[i].sources[0].src;
+
+      let Title = this.state.data.title + ' Part ' + (i + 1);
+
+      if (force === true) {
+        Title +=
+          ' (' + this.downloadSource.filter(z => z === source).length + ')';
+      }
+
+      this.downloadSource = [...this.downloadSource, source];
+
+      RNFetchBlob.config({
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          path:
+            '/storage/emulated/0/Download' +
+            '/' +
+            Title +
+            ' ' +
+            this.state.data.resolution +
+            '.mp4',
+          notification: true,
+          mime: 'video/mp4',
+          title: Title + ' ' + this.state.data.resolution + '.mp4',
+        },
+      })
+        .fetch('GET', source)
+        .then(resp => {
+          // the path of downloaded file
+          resp.path();
+        })
+        .catch(() => {});
+      ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
+    }
+    this.hasDownloadAllPart = true;
+  };
+
+  handleProgress = data => {
+    if (this.hasPart) {
+      const remainingTime = data.seekableDuration - data.currentTime;
+      if (remainingTime < 10 && this.state.shouldPrepareNextPart === false) {
+        this.setState(
+          {
+            shouldPrepareNextPart: true,
+          },
+          () =>
+            Animated.loop(this.preparePartAnimation, { iterations: 1 }).start(),
+        );
+      }
+      if (remainingTime > 10 && this.state.shouldPrepareNextPart === true) {
+        this.setState({
+          shouldPrepareNextPart: false,
+        });
+      }
+    }
   };
 
   render() {
@@ -183,6 +280,30 @@ class Video extends Component {
           style={[
             this.state.fullscreen ? styles.fullscreen : styles.notFullscreen,
           ]}>
+          {this.state.shouldPrepareNextPart && (
+            <>
+              <Animated.View
+                style={{
+                  zIndex: 1,
+                  alignItems: 'center',
+                  opacity: this.state.preparePartAnimation,
+                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    backgroundColor: '#0000005e',
+                    padding: 3,
+                    borderRadius: 5,
+                  }}>
+                  <Text style={{ color: style.text.color, opacity: 1 }}>
+                    Bersiap ke part selanjutnya
+                  </Text>
+                </View>
+              </Animated.View>
+            </>
+          )}
+
           {
             // mengecek apakah video tersedia
             this.state.data.streamingLink?.[this.state.part]?.sources[0].src ? (
@@ -205,6 +326,7 @@ class Video extends Component {
                 onEnd={this.onEnd}
                 rewindTime={10}
                 showDuration={true}
+                onProgress={this.handleProgress}
               />
             ) : (
               <Text style={style.text}>Video tidak tersedia</Text>
@@ -382,14 +504,45 @@ class Video extends Component {
                   </TouchableOpacity>
                 )}
               </View>
-              <Button
-                style={styles.dlbtn}
-                title={
-                  'Download' +
-                  (this.state.data.streamingLink.length > 1 ? ' part ini' : '')
-                }
-                onPress={() => this.downloadAnime()}
-              />
+              <View style={styles.dlbtn}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#00749b',
+                    flex: 1,
+                    marginRight: 5,
+                  }}
+                  onPress={() => this.downloadAnime()}>
+                  <Text
+                    style={[
+                      { fontWeight: 'bold', fontSize: 18, textAlign: 'center' },
+                      style.text,
+                    ]}>
+                    Download
+                    {this.state.data.streamingLink.length > 1 && ' part ini'}
+                  </Text>
+                </TouchableOpacity>
+
+                {this.state.data.streamingLink?.length > 1 && (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#e27800',
+                      flex: 1,
+                    }}
+                    onPress={() => this.downloadAllAnimePart()}>
+                    <Text
+                      style={[
+                        {
+                          fontWeight: 'bold',
+                          fontSize: 18,
+                          textAlign: 'center',
+                        },
+                        style.text,
+                      ]}>
+                      Download semua part
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </ScrollView>
           )
         }
@@ -411,7 +564,8 @@ const styles = StyleSheet.create({
     flex: 0.4,
   },
   dlbtn: {
-    marginTop: 20,
+    flex: 1,
+    flexDirection: 'row',
   },
 });
 export default Video;

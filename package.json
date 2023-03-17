@@ -1,6 +1,6 @@
 {
   "name": "anime",
-  "version": "beta-0.6.0",
+  "version": "beta-0.6.5",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
