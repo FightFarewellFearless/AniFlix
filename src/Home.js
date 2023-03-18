@@ -170,7 +170,7 @@ class Home extends Component {
                         borderRadius: 2,
                         padding: 1,
                       }}>
-                      {z.episode}
+                      {z.episode === '' ? 'MOVIE' : z.episode}
                     </Text>
                   </View>
 

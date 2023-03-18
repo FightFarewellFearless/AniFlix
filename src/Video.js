@@ -28,7 +28,7 @@ class Video extends Component {
       part: 0,
       loading: false,
       data: this.props.route.params.data,
-      shouldPrepareNextPart: false,
+      shouldShowNextPartNotification: false,
       preparePartAnimation: new Animated.Value(0),
     };
     this.downloadSource = [];
@@ -101,23 +101,23 @@ class Video extends Component {
     SystemNavigationBar.navigationShow();
   }
 
-  enterFullscreen() {
+  enterFullscreen = () => {
     Orientation.lockToLandscape();
     StatusBar.setHidden(true);
     SystemNavigationBar.navigationHide();
     this.setState({
       fullscreen: true,
     });
-  }
+  };
 
-  exitFullscreen() {
+  exitFullscreen = () => {
     StatusBar.setHidden(false);
     Orientation.lockToPortrait();
     SystemNavigationBar.navigationShow();
     this.setState({
       fullscreen: false,
     });
-  }
+  };
 
   downloadAnime = async (force = false) => {
     const source =
@@ -184,7 +184,7 @@ class Video extends Component {
     if (this.state.part < this.state.data.streamingLink.length - 1) {
       this.setState({
         part: this.state.part + 1,
-        shouldPrepareNextPart: false,
+        shouldShowNextPartNotification: false,
       });
     }
   };
@@ -255,18 +255,25 @@ class Video extends Component {
   handleProgress = data => {
     if (this.hasPart) {
       const remainingTime = data.seekableDuration - data.currentTime;
-      if (remainingTime < 10 && this.state.shouldPrepareNextPart === false) {
+      if (
+        remainingTime < 10 &&
+        this.state.shouldShowNextPartNotification === false &&
+        this.state.part < this.state.data.streamingLink.length - 1
+      ) {
         this.setState(
           {
-            shouldPrepareNextPart: true,
+            shouldShowNextPartNotification: true,
           },
           () =>
             Animated.loop(this.preparePartAnimation, { iterations: 1 }).start(),
         );
       }
-      if (remainingTime > 10 && this.state.shouldPrepareNextPart === true) {
+      if (
+        remainingTime > 10 &&
+        this.state.shouldShowNextPartNotification === true
+      ) {
         this.setState({
-          shouldPrepareNextPart: false,
+          shouldShowNextPartNotification: false,
         });
       }
     }
@@ -280,7 +287,7 @@ class Video extends Component {
           style={[
             this.state.fullscreen ? styles.fullscreen : styles.notFullscreen,
           ]}>
-          {this.state.shouldPrepareNextPart && (
+          {this.state.shouldShowNextPartNotification && (
             <>
               <Animated.View
                 style={{
@@ -317,8 +324,8 @@ class Video extends Component {
                 onBack={this.onBack}
                 toggleResizeModeOnFullscreen={false}
                 isFullscreen={this.state.fullscreen}
-                onEnterFullscreen={this.enterFullscreen.bind(this)}
-                onExitFullscreen={this.exitFullscreen.bind(this)}
+                onEnterFullscreen={this.enterFullscreen}
+                onExitFullscreen={this.exitFullscreen}
                 source={{
                   uri: this.state.data.streamingLink[this.state.part].sources[0]
                     .src,
