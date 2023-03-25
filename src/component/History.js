@@ -10,7 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
 import React, { Component } from 'react';
-import styles from './assets/style';
+import styles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 require('moment/locale/id');
@@ -139,6 +139,7 @@ class History extends Component {
                       style={{
                         position: 'absolute',
                         left: 0,
+                        zIndex: 0,
                       }}>
                       <Text style={styles.text}>
                         {moment
@@ -147,7 +148,7 @@ class History extends Component {
                             'seconds',
                           )
                           .humanize() + ' '}
-                        yang lalu
+                        yang lalu pukul {moment(item.date).format('HH:mm')}
                       </Text>
                     </View>
 

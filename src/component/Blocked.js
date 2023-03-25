@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Text, TouchableOpacity, View, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
-import styles from './assets/style';
+import styles from '../assets/style';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 

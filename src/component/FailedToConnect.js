@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from './assets/style';
+import styles from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -69,7 +69,7 @@ class FailedToConnect extends Component {
               alignItems: 'center',
             }}>
             <Image
-              source={require('./assets/RNlogo.png')}
+              source={require('../assets/RNlogo.png')}
               style={{ height: 40, width: 40 }}
             />
             <Text style={[styles.text, { fontSize: 12 }]}>
@@ -78,7 +78,7 @@ class FailedToConnect extends Component {
           </View>
         </View>
         <Text style={[styles.text, { position: 'absolute', bottom: 0 }]}>
-          {require('../package.json').version}
+          {require('../../package.json').version}
         </Text>
       </View>
     );

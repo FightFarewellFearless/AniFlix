@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, ActivityIndicator, Text, Image } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import styles from './assets/style';
+import styles from '../assets/style';
 
 class Loading extends Component {
   constructor() {
@@ -9,7 +9,7 @@ class Loading extends Component {
   }
 
   componentDidMount() {
-    fetch('https://animeapi.aceracia.repl.co/newAnime')
+    fetch('https://animeapi.aceracia.repl.co/v2/home')
       .then(async data => {
         const jsondata = await data.json();
         this.props.navigation.dispatch(
@@ -40,7 +40,7 @@ class Loading extends Component {
             alignItems: 'center',
           }}>
           <Image
-            source={require('./assets/RNlogo.png')}
+            source={require('../assets/RNlogo.png')}
             style={{ height: 40, width: 40 }}
           />
           <Text style={[styles.text, { fontSize: 12 }]}>
@@ -49,7 +49,7 @@ class Loading extends Component {
         </View>
         <Text
           style={[styles.text, { position: 'absolute', bottom: 0, left: 0 }]}>
-          {require('../package.json').version}
+          {require('../../package.json').version}
         </Text>
       </View>
     );

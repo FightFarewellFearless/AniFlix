@@ -9,7 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import styles from './assets/style';
+import styles from '../assets/style';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 class EpsList extends Component {
   constructor(props) {
@@ -66,6 +67,7 @@ class EpsList extends Component {
                 fontSize: 15,
                 padding: 4,
                 borderRadius: 4,
+                marginRight: 5,
                 backgroundColor:
                   this.props.route.params.data.status === 'Ongoing'
                     ? '#ac0000'
@@ -73,6 +75,18 @@ class EpsList extends Component {
               },
             ]}>
             {this.props.route.params.data.status}
+          </Text>
+          <Text
+            style={[
+              {
+                fontSize: 15,
+                color: '#1f1f1f',
+                padding: 4,
+                borderRadius: 4,
+                backgroundColor: '#ffd000',
+              },
+            ]}>
+            <Icon name="star" /> {this.props.route.params.data.rating}
           </Text>
         </View>
 

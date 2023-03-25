@@ -7,7 +7,7 @@ import {
   BackHandler,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import styles from './assets/style';
+import styles from '../assets/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class FromUrl extends Component {
@@ -29,7 +29,7 @@ class FromUrl extends Component {
     });
     if (this.props.route.params.type === 'search') {
       const results = await fetch(
-        'https://animeapi.aceracia.repl.co/search?q=' +
+        'https://animeapi.aceracia.repl.co/v2/search?q=' +
           this.props.route.params.query,
         {
           signal: abort.signal,
@@ -52,7 +52,7 @@ class FromUrl extends Component {
       }
     } else {
       const results = await fetch(
-        'https://animeapi.aceracia.repl.co/fromUrl?link=' +
+        'https://animeapi.aceracia.repl.co/v2/fromUrl?link=' +
           this.props.route.params.link,
         {
           signal: abort.signal,

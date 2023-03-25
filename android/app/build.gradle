@@ -99,8 +99,8 @@ android {
         applicationId "com.pirles.anime"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "beta-0.6.6"
+        versionCode 25
+        versionName "beta-1.0.0"
     }
 
     splits {

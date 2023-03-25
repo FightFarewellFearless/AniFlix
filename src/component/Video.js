@@ -15,9 +15,10 @@ import {
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import RNFetchBlob from 'rn-fetch-blob';
-import style from './assets/style';
+import style from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Video extends Component {
   constructor(props) {
@@ -30,6 +31,7 @@ class Video extends Component {
       data: this.props.route.params.data,
       shouldShowNextPartNotification: false,
       preparePartAnimation: new Animated.Value(0),
+      episodeDataLoadingStatus: false,
     };
     this.downloadSource = [];
     this.hasDownloadAllPart = false;
@@ -47,6 +49,8 @@ class Video extends Component {
         delay: 3000,
       }),
     ]);
+
+    this.abortController = new AbortController();
   }
 
   async setResolution(res) {
@@ -57,12 +61,18 @@ class Video extends Component {
       loading: true,
     });
     const results = await fetch(
-      'https://animeapi.aceracia.repl.co/fromUrl' +
+      'https://animeapi.aceracia.repl.co/v2/fromUrl' +
         '?res=' +
         res +
         '&link=' +
         this.props.route.params.link,
+      {
+        signal: this.abortController.signal,
+      },
     ).catch(err => {
+      if (err.message === 'Aborted') {
+        return;
+      }
       Alert.alert('Error', err.message);
       this.setState({
         loading: false,
@@ -80,13 +90,26 @@ class Video extends Component {
     });
   }
 
+  willUnmountHandler() {
+    Orientation.removeDeviceOrientationListener(this.orientationDidChange);
+    Orientation.unlockAllOrientations();
+    StatusBar.setHidden(false);
+    SystemNavigationBar.navigationShow();
+  }
+
+  orientationDidChange = orientation => {
+    if (orientation === 'PORTRAIT') {
+      this.exitFullscreen();
+    } else if (orientation !== 'PORTRAIT' && orientation !== 'UNKNOWN') {
+      this.enterFullscreen();
+    }
+  };
+
   componentDidMount() {
-    Orientation.lockToPortrait();
+    Orientation.addDeviceOrientationListener(this.orientationDidChange);
     this.back = BackHandler.addEventListener('hardwareBackPress', () => {
       if (!this.state.fullscreen) {
-        Orientation.unlockAllOrientations();
-        StatusBar.setHidden(false);
-        SystemNavigationBar.navigationShow();
+        this.willUnmountHandler();
         return false;
       } else {
         this.exitFullscreen();
@@ -95,10 +118,9 @@ class Video extends Component {
     });
   }
   componentWillUnmount() {
-    Orientation.unlockAllOrientations();
+    this.willUnmountHandler();
     this.back.remove();
-    StatusBar.setHidden(false);
-    SystemNavigationBar.navigationShow();
+    this.abortController.abort();
   }
 
   enterFullscreen = () => {
@@ -279,6 +301,62 @@ class Video extends Component {
     }
   };
 
+  episodeDataControl = async url => {
+    if (this.state.episodeDataLoadingStatus) {
+      return;
+    }
+    this.setState({
+      episodeDataLoadingStatus: true,
+    });
+    const results = await fetch(
+      'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
+      {
+        signal: this.abortController.signal,
+      },
+    ).catch(err => {
+      if (err.message === 'Aborted') {
+        return;
+      }
+      Alert.alert('Error', err.message);
+      this.setState({
+        episodeDataLoadingStatus: false,
+      });
+    });
+    if (results === undefined) {
+      return;
+    }
+    const result = await results.json();
+    this.hasPart = result.streamingLink.length > 1;
+    this.setState({
+      data: result,
+      episodeDataLoadingStatus: false,
+      part: 0,
+    });
+    (async () => {
+      let data = await AsyncStorage.getItem('history');
+      if (data === null) {
+        data = '[]';
+      }
+      data = JSON.parse(data);
+      const episodeI = result.title.toLowerCase().indexOf('episode');
+      const title =
+        episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
+      const episode = episodeI < 0 ? null : result.title.slice(episodeI);
+      const dataINDEX = data.findIndex(val => val.title === title);
+      if (dataINDEX >= 0) {
+        data.splice(dataINDEX, 1);
+      }
+      data.splice(0, 0, {
+        title,
+        episode,
+        link: url,
+        thumbnailUrl: result.thumbnailUrl,
+        date: Date.now(),
+      });
+      AsyncStorage.setItem('history', JSON.stringify(data));
+    })();
+  };
+
   render() {
     return (
       <View style={{ flex: 2 }}>
@@ -358,6 +436,67 @@ class Video extends Component {
                   {this.state.data.title}
                 </Text>
               </View>
+              {
+                /* mengecek apakah episodeData tersedia */
+                this.state.data.episodeData && (
+                  <View
+                    style={{
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity
+                      key="prev"
+                      disabled={
+                        !this.state.data.episodeData.previous ||
+                        this.state.episodeDataLoadingStatus
+                      }
+                      style={{
+                        backgroundColor: this.state.data.episodeData.previous
+                          ? '#00ccff'
+                          : '#525252',
+                        padding: 5,
+                      }}
+                      onPress={() =>
+                        this.episodeDataControl(
+                          this.state.data.episodeData.previous,
+                        )
+                      }>
+                      <Icon name="arrow-left" size={18} />
+                    </TouchableOpacity>
+
+                    <View
+                      style={{
+                        height: 20,
+                        width: 20,
+                      }}>
+                      {this.state.episodeDataLoadingStatus && (
+                        <ActivityIndicator size={20} />
+                      )}
+                    </View>
+
+                    <TouchableOpacity
+                      key="next"
+                      disabled={
+                        !this.state.data.episodeData.next ||
+                        this.state.episodeDataLoadingStatus
+                      }
+                      style={{
+                        backgroundColor: this.state.data.episodeData.next
+                          ? '#00ccff'
+                          : '#525252',
+                        padding: 5,
+                      }}
+                      onPress={() =>
+                        this.episodeDataControl(
+                          this.state.data.episodeData.next,
+                        )
+                      }>
+                      <Icon name="arrow-right" size={18} />
+                    </TouchableOpacity>
+                  </View>
+                )
+              }
 
               <View
                 style={{
@@ -384,7 +523,7 @@ class Video extends Component {
                           backgroundColor:
                             this.state.data.resolution === res
                               ? 'orange'
-                              : 'blue',
+                              : '#005ca7',
                         }}
                         onPress={() => {
                           if (this.state.data.resolution !== res) {
@@ -437,7 +576,7 @@ class Video extends Component {
                               marginRight: 5,
                               marginBottom: 5,
                               backgroundColor:
-                                this.state.part === i ? 'orange' : 'blue',
+                                this.state.part === i ? 'orange' : '#005ca7',
                             }}
                             onPress={() => {
                               this.setState({
@@ -472,6 +611,84 @@ class Video extends Component {
                   </View>
                 )
               }
+
+              <View
+                style={{
+                  backgroundColor: '#363636',
+                  marginVertical: 10,
+                  marginHorizontal: 4,
+                  borderRadius: 9,
+                  paddingLeft: 4,
+                }}>
+                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+                  <Text style={style.text}>Status:</Text>
+                  <Text
+                    style={[
+                      style.text,
+                      {
+                        position: 'absolute',
+                        left: '40%',
+                      },
+                    ]}>
+                    {this.state.data.status}
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+                  <Text style={style.text}>Tahun rilis:</Text>
+                  <Text
+                    style={[
+                      style.text,
+                      {
+                        position: 'absolute',
+                        left: '40%',
+                      },
+                    ]}>
+                    {this.state.data.releaseYear}
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+                  <Text style={style.text}>Rating:</Text>
+                  <Text
+                    style={[
+                      style.text,
+                      {
+                        position: 'absolute',
+                        left: '40%',
+                      },
+                    ]}>
+                    {this.state.data.rating}
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+                  <Text style={[style.text]}>Genre:</Text>
+                  <View style={{ marginLeft: '5%', width: '60%' }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'space-around',
+                      }}>
+                      {this.state.data.genre.map(data => {
+                        return (
+                          <View
+                            key={data}
+                            style={{
+                              flexWrap: 'wrap',
+                              backgroundColor: '#005272',
+                              borderRadius: 2,
+                              marginBottom: 5,
+                            }}>
+                            <Text style={[style.text]}>{data}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </View>
+              </View>
 
               <View
                 style={{
