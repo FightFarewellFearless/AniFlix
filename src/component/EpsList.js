@@ -61,6 +61,25 @@ class EpsList extends Component {
                 {this.data.title}
               </Text>
             </View>
+            {/* sinopsis */}
+            <View style={styles.synopsys}>
+              <ScrollView
+                contentContainerStyle={styles.synopsysScrollView}
+                ref={this.synopsys}>
+                <Text style={[globalStyles.text, styles.synopsysText]}>
+                  {this.data.synopsys}
+                </Text>
+              </ScrollView>
+            </View>
+
+            {/* genre */}
+            <View style={styles.genre}>
+              {this.data.genre.map(genre => (
+                <Text key={genre} style={[globalStyles.text, styles.genreText]}>
+                  {genre}
+                </Text>
+              ))}
+            </View>
             {/* info */}
             <View style={styles.info}>
               <Text style={[globalStyles.text, styles.textInfo]}>
@@ -88,20 +107,6 @@ class EpsList extends Component {
                 <Icon name="tv" size={15} /> {this.data.episodeList.length}
               </Text>
             </View>
-
-            <View style={styles.genre}>
-              {this.data.genre.map(genre => (
-                <Text key={genre} style={[globalStyles.text, styles.genreText]}>
-                  {genre}
-                </Text>
-              ))}
-            </View>
-
-            <ScrollView style={styles.synopsys} ref={this.synopsys}>
-              <Text style={[globalStyles.text, { textAlign: 'center' }]}>
-                {this.data.synopsys}
-              </Text>
-            </ScrollView>
           </ImageBackground>
         </View>
 
@@ -170,13 +175,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flex: 1,
+    flex: 1.2,
     marginBottom: 5,
   },
+  textJudul: {
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  judul: {
+    flex: 0.2,
+  },
   synopsys: {
-    maxHeight: 80,
-    marginHorizontal: 30,
-    backgroundColor: '#000000cc',
+    maxHeight: '35%',
+    backgroundColor: '#000000b6',
+  },
+  synopsysScrollView: {},
+  synopsysText: {
+    flex: 1,
+    textAlign: 'center',
   },
   epsList: {
     flex: 1,
@@ -195,36 +211,30 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     zIndex: 0,
   },
-  textJudul: {
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  judul: {
-    flex: 0.15,
-  },
   info: {
-    flex: 0.25,
+    flex: 0.2,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
   },
   textInfo: {
     borderColor: '#ffffff',
     borderWidth: 1,
-    alignSelf: 'flex-start',
     padding: 3,
     backgroundColor: '#0000009f',
   },
   genre: {
-    flex: 0.2,
+    flex: 0.4,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
+    alignContent: 'center',
+    alignItems: 'center',
     flexWrap: 'wrap',
   },
   genreText: {
     backgroundColor: '#00d300b4',
     borderColor: 'black',
     borderWidth: 1.2,
-    alignSelf: 'flex-start',
     padding: 2,
   },
   cariEpisode: {

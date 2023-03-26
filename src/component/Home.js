@@ -129,7 +129,7 @@ class Home extends Component {
                       width: 120,
                       height: 210,
                       borderWidth: 2,
-                      borderColor: 'red',
+                      borderColor: z.status === 'Ongoing' ? 'red' : '#00d100',
                       marginRight: 5,
                       flex: 2,
                     }}>
@@ -149,19 +149,6 @@ class Home extends Component {
                         {z.title}
                       </Text>
                     </View>
-
-                    <View
-                      style={{
-                        position: 'absolute',
-                        backgroundColor:
-                          z.status === 'Ongoing' ? 'red' : '#00d100',
-                        height: 20,
-                        width: 10,
-                        borderRadius: 10,
-                        bottom: '50%',
-                        left: 2,
-                      }}
-                    />
 
                     <View
                       style={{

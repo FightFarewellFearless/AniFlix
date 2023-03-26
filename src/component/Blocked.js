@@ -1,28 +1,36 @@
 import React, { Component } from 'react';
-import { Text, TouchableOpacity, View, Animated } from 'react-native';
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  Animated,
+  Vibration,
+  StyleSheet,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
-import styles from '../assets/style';
+import globalStyles from '../assets/style';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-class Loading extends Component {
+class Blocked extends Component {
   constructor() {
     super();
     this.state = {
-      animatedOpacity: new Animated.Value(1),
+      animatedScale: new Animated.Value(1),
     };
 
     this.animated = Animated.loop(
       Animated.sequence([
-        Animated.timing(this.state.animatedOpacity, {
-          toValue: 0.1,
+        Animated.timing(this.state.animatedScale, {
+          toValue: 1.3,
           duration: 150,
-          delay: 300,
+          delay: 500,
           useNativeDriver: true,
         }),
-        Animated.timing(this.state.animatedOpacity, {
+        Animated.timing(this.state.animatedScale, {
           toValue: 1,
-          duration: 500,
+          duration: 200,
+          delay: 20,
           useNativeDriver: true,
         }),
       ]),
@@ -37,6 +45,10 @@ class Loading extends Component {
     this.animated.stop();
   }
 
+  componentDidMount() {
+    Vibration.vibrate([500, 150, 90, 200]);
+  }
+
   render() {
     return (
       <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
@@ -44,15 +56,13 @@ class Loading extends Component {
           <AnimatedIcon
             name="warning"
             size={45}
-            style={{
-              color: '#ff0000',
-              opacity: this.state.animatedOpacity,
-              alignSelf: 'center',
-              justifyContent: 'center',
-            }}
+            style={[
+              styles.animatedIcon,
+              { transform: [{ scale: this.state.animatedScale }] },
+            ]}
           />
         </View>
-        <Text style={[{ fontSize: 20 }, styles.text]}>
+        <Text style={[{ fontSize: 20 }, globalStyles.text]}>
           Anime yang kamu tuju tidak di izinkan!
         </Text>
         <TouchableOpacity
@@ -74,4 +84,12 @@ class Loading extends Component {
   }
 }
 
-export default Loading;
+const styles = StyleSheet.create({
+  animatedIcon: {
+    color: '#ff0000',
+    alignSelf: 'center',
+    justifyContent: 'center',
+  },
+});
+
+export default Blocked;
