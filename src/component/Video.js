@@ -32,6 +32,7 @@ class Video extends Component {
       shouldShowNextPartNotification: false,
       preparePartAnimation: new Animated.Value(0),
       episodeDataLoadingStatus: false,
+      currentLink: this.props.route.params.link,
     };
     this.downloadSource = [];
     this.hasDownloadAllPart = false;
@@ -65,7 +66,7 @@ class Video extends Component {
         '?res=' +
         res +
         '&link=' +
-        this.props.route.params.link,
+        this.state.currentLink,
       {
         signal: this.abortController.signal,
       },
@@ -330,6 +331,7 @@ class Video extends Component {
     this.setState({
       data: result,
       episodeDataLoadingStatus: false,
+      currentLink: url,
       part: 0,
     });
     (async () => {
