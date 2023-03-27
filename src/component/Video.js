@@ -32,9 +32,9 @@ class Video extends Component {
       shouldShowNextPartNotification: false,
       preparePartAnimation: new Animated.Value(0),
       episodeDataLoadingStatus: false,
-      currentLink: this.props.route.params.link,
     };
     this.downloadSource = [];
+    this.currentLink = this.props.route.params.link;
     this.hasDownloadAllPart = false;
     this.hasPart = this.state.data.streamingLink.length > 1;
     this.preparePartAnimation = Animated.sequence([
@@ -66,7 +66,7 @@ class Video extends Component {
         '?res=' +
         res +
         '&link=' +
-        this.state.currentLink,
+        this.currentLink,
       {
         signal: this.abortController.signal,
       },
@@ -328,12 +328,14 @@ class Video extends Component {
     }
     const result = await results.json();
     this.hasPart = result.streamingLink.length > 1;
-    this.setState({
-      data: result,
-      episodeDataLoadingStatus: false,
-      currentLink: url,
-      part: 0,
-    });
+    this.setState(
+      {
+        data: result,
+        episodeDataLoadingStatus: false,
+        part: 0,
+      },
+      () => (this.currentLink = url),
+    );
     (async () => {
       let data = await AsyncStorage.getItem('history');
       if (data === null) {
