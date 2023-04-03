@@ -215,7 +215,7 @@ class Video extends Component {
     this.exitFullscreen();
   };
 
-  downloadAllAnimePart = async (force = false) => {
+  downloadAllAnimePart = async (force = false, askForDownload = false) => {
     if (this.hasDownloadAllPart && force === false) {
       Alert.alert(
         'Lanjutkan?',
@@ -228,6 +228,27 @@ class Video extends Component {
           },
           {
             text: 'Lanjutkan',
+            onPress: () => {
+              this.downloadAllAnimePart(true, true);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    if (askForDownload) {
+      Alert.alert(
+        'Download semua part?',
+        `Ini akan mendownload semua (${this.state.data.streamingLink.length}) part`,
+        [
+          {
+            text: 'Tidak',
+            style: 'cancel',
+            onPress: () => null,
+          },
+          {
+            text: 'Ya',
             onPress: () => {
               this.downloadAllAnimePart(true);
             },
@@ -242,7 +263,7 @@ class Video extends Component {
 
       let Title = this.state.data.title + ' Part ' + (i + 1);
 
-      if (force === true) {
+      if (this.hasDownloadAllPart) {
         Title +=
           ' (' + this.downloadSource.filter(z => z === source).length + ')';
       }
@@ -376,7 +397,8 @@ class Video extends Component {
                   zIndex: 1,
                   alignItems: 'center',
                   opacity: this.state.preparePartAnimation,
-                }}>
+                }}
+                pointerEvents="none">
                 <View
                   style={{
                     position: 'absolute',
@@ -756,7 +778,7 @@ class Video extends Component {
                       backgroundColor: '#e27800',
                       flex: 1,
                     }}
-                    onPress={() => this.downloadAllAnimePart()}>
+                    onPress={() => this.downloadAllAnimePart(undefined, true)}>
                     <Text
                       style={[
                         {

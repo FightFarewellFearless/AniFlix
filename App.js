@@ -39,7 +39,9 @@ class App extends Component {
       <NavigationContainer theme={DarkTheme}>
         <Stack.Navigator
           initialRouteName="loading"
-          screenOptions={{ headerShown: false }}>
+          screenOptions={{
+            headerShown: false,
+          }}>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="EpisodeList" component={EpsList} />
           <Stack.Screen name="FromUrl" component={FromUrl} />

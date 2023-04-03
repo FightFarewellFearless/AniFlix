@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  Alert,
   StyleSheet,
   ImageBackground,
 } from 'react-native';
@@ -30,18 +29,6 @@ class EpsList extends Component {
     this.synopsys.current.flashScrollIndicators();
     this.epsList.current.flashScrollIndicators();
   }
-
-  checkReadMoreFunc = e => {
-    this.setState({
-      titleLines: e.nativeEvent.lines.length,
-    });
-  };
-
-  readMoreFunc = () => {
-    if (this.state.titleLines > 2) {
-      Alert.alert('Judul lengkap', this.data.title);
-    }
-  };
 
   render() {
     return (
@@ -232,10 +219,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   genreText: {
-    backgroundColor: '#00d300b4',
+    backgroundColor: '#1a9c1ab4',
     borderColor: 'black',
     borderWidth: 1.2,
     padding: 2,
+    textAlign: 'center',
   },
   cariEpisode: {
     backgroundColor: '#2e2e2e',

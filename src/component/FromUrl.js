@@ -7,18 +7,34 @@ import {
   BackHandler,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import styles from '../assets/style';
+import globalStyles from '../assets/style';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import randomTipsArray from '../assets/loadingTips.json';
 
 class FromUrl extends Component {
   constructor() {
     super();
     this.state = {
       unmount: false,
+      dots: '',
     };
+    this.randomTips =
+      // eslint-disable-next-line no-bitwise
+      randomTipsArray[~~(Math.random() * randomTipsArray.length)];
   }
 
   async componentDidMount() {
+    this.dotsInterval = setInterval(() => {
+      if (this.state.dots === '...') {
+        this.setState({
+          dots: '',
+        });
+        return;
+      }
+      this.setState({
+        dots: this.state.dots + '.',
+      });
+    }, 250);
     const abort = new AbortController();
     this.backhandler = BackHandler.addEventListener('hardwareBackPress', () => {
       this.setState({
@@ -27,6 +43,7 @@ class FromUrl extends Component {
       abort.abort();
       return false;
     });
+    // await new Promise(res => setTimeout(res, 1500));
     if (this.props.route.params.type === 'search') {
       const results = await fetch(
         'https://animeapi.aceracia.repl.co/v2/search?q=' +
@@ -131,18 +148,29 @@ class FromUrl extends Component {
 
   componentWillUnmount() {
     this.backhandler.remove();
+    clearInterval(this.dotsInterval);
   }
 
   render() {
     return (
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-        }}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.text}>Loading.</Text>
+      <View style={{ flex: 1 }}>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+          }}>
+          <ActivityIndicator size="large" />
+          <Text style={globalStyles.text}>Loading{this.state.dots}</Text>
+        </View>
+        {/* tips */}
+        <View style={{ alignItems: 'center' }}>
+          <View style={{ position: 'absolute', bottom: 10 }}>
+            <Text style={[{ textAlign: 'center' }, globalStyles.text]}>
+              {this.randomTips}
+            </Text>
+          </View>
+        </View>
       </View>
     );
   }
