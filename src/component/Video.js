@@ -52,6 +52,10 @@ class Video extends Component {
     ]);
 
     this.abortController = new AbortController();
+
+    AsyncStorage.getItem('enableNextPartNotification').then(value => {
+      this.nextPartEnable = value === 'true' || value === null;
+    });
   }
 
   async setResolution(res) {
@@ -302,7 +306,8 @@ class Video extends Component {
       if (
         remainingTime < 10 &&
         this.state.shouldShowNextPartNotification === false &&
-        this.state.part < this.state.data.streamingLink.length - 1
+        this.state.part < this.state.data.streamingLink.length - 1 &&
+        this.nextPartEnable
       ) {
         this.setState(
           {
