@@ -30,6 +30,22 @@ class EpsList extends Component {
     this.epsList.current.flashScrollIndicators();
   }
 
+  renderItem = ({ item }) => {
+    return (
+      <TouchableOpacity
+        style={{ paddingBottom: 12 }}
+        onPress={() => {
+          this.props.navigation.dispatch(
+            StackActions.push('FromUrl', {
+              link: item.link,
+            }),
+          );
+        }}>
+        <Text style={{ color: 'lightblue' }}>{item.episode}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   render() {
     return (
       <View style={styles.container}>
@@ -132,21 +148,7 @@ class EpsList extends Component {
               keyExtractor={item => item.link}
               initialNumToRender={15}
               ref={this.epsList}
-              renderItem={({ item }) => {
-                return (
-                  <TouchableOpacity
-                    style={{ paddingBottom: 12 }}
-                    onPress={() => {
-                      this.props.navigation.dispatch(
-                        StackActions.push('FromUrl', {
-                          link: item.link,
-                        }),
-                      );
-                    }}>
-                    <Text style={{ color: 'lightblue' }}>{item.episode}</Text>
-                  </TouchableOpacity>
-                );
-              }}
+              renderItem={this.renderItem}
             />
           ) : (
             <Text style={styles.text}>Tidak ada episode</Text>

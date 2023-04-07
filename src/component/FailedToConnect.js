@@ -10,6 +10,7 @@ import {
   View,
   Image,
 } from 'react-native';
+import rnLogo from '../assets/RNlogo.png';
 
 class FailedToConnect extends Component {
   constructor(props) {
@@ -68,10 +69,7 @@ class FailedToConnect extends Component {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <Image
-              source={require('../assets/RNlogo.png')}
-              style={{ height: 40, width: 40 }}
-            />
+            <Image source={rnLogo} style={{ height: 40, width: 40 }} />
             <Text style={[styles.text, { fontSize: 12 }]}>
               Created using react-native
             </Text>

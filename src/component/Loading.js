@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, ActivityIndicator, Text, Image } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import styles from '../assets/style';
+import rnLogo from '../assets/RNlogo.png';
 
 class Loading extends Component {
   constructor() {
@@ -39,10 +40,7 @@ class Loading extends Component {
             bottom: 40,
             alignItems: 'center',
           }}>
-          <Image
-            source={require('../assets/RNlogo.png')}
-            style={{ height: 40, width: 40 }}
-          />
+          <Image source={rnLogo} style={{ height: 40, width: 40 }} />
           <Text style={[styles.text, { fontSize: 12 }]}>
             Created using react-native
           </Text>

@@ -76,7 +76,7 @@ class Home extends Component {
               this.setState({ searchText: text });
             }}
             placeholder="Cari anime disini"
-            placeholderTextColor={styles.text.color}
+            placeholderTextColor="#707070"
             style={{
               width: this.state.searchText !== '' ? '87%' : '98%',
               height: 35,

@@ -118,7 +118,7 @@ function Setting(props) {
             'Bersiap untuk restore backup kamu!',
             `Kode tersedia dan siap untuk di restore.\nbackupID: ${code}\ntanggal backup: ${new Date(
               backupData.dateStamp,
-            ).toLocaleDateString()}`,
+            ).toLocaleDateString()}\n(Histori terbaru tidak akan ditimpa)`,
             [
               {
                 text: 'Batal',
@@ -142,9 +142,12 @@ function Setting(props) {
                         val => val.title === result.title,
                       );
                       if (dataINDEX >= 0) {
+                        if (currentHistory[dataINDEX].date > result.date) {
+                          continue;
+                        }
                         currentHistory.splice(dataINDEX, 1);
                       }
-                      currentHistory.splice(0, 0, {
+                      currentHistory.push({
                         title: result.title,
                         episode: result.episode,
                         link: result.link,
@@ -152,16 +155,14 @@ function Setting(props) {
                         date: result.date,
                       });
                     }
-                    currentHistory = currentHistory.sort(
-                      (a, b) => b.date - a.date,
-                    );
+                    currentHistory.sort((a, b) => b.date - a.date);
                     await AsyncStorage.setItem(
                       'history',
                       JSON.stringify(currentHistory),
                     );
                     Alert.alert(
                       'Restore berhasil!',
-                      'Kamu berhasil kembali ke backup sebelumnya! (Histori yang baru tidak akan menghilang)',
+                      'Kamu berhasil kembali ke backup sebelumnya!',
                     );
                   } catch (e) {
                     Alert.alert('Restore gagal!', e.message);
@@ -181,8 +182,44 @@ function Setting(props) {
     }
   };
 
+  const deleteHistory = () => {
+    Alert.alert(
+      'Peringatan!!!',
+      'Ini akan menghapus semua histori tontonan kamu.\nApakah kamu yakin ingin lanjut?',
+      [
+        {
+          text: 'Batal',
+        },
+        {
+          text: 'Lanjut dan hapus',
+          onPress: async () => {
+            setModalText('Menghapus histori tontonan kamu...');
+            setModalVisible(true);
+            try {
+              await AsyncStorage.setItem('history', '[]');
+              Alert.alert(
+                'Histori dihapus',
+                'Histori tontonan kamu sudah di hapus',
+              );
+            } catch (e) {
+              Alert.alert('Gagal menghapus histori!', e.message);
+            } finally {
+              setModalVisible(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <ScrollView>
+      <View style={styles.waktuServer}>
+        <Text style={globalStyles.text}>Waktu server: </Text>
+        <Text style={globalStyles.text}>
+          {props.route.params.data.waktuServer}
+        </Text>
+      </View>
       {/* Modal backup */}
       <Modal transparent visible={modalVisible}>
         <View style={styles.modalContainer}>
@@ -209,7 +246,8 @@ function Setting(props) {
                 </TouchableOpacity>
                 <Text style={globalStyles.text}>Masukkan kode backup:</Text>
                 <TextInput
-                  placeholderTextColor={globalStyles.text.color}
+                  placeholderTextColor="#707070"
+                  placeholder="Kode"
                   keyboardType="numeric"
                   value={backupCode}
                   onChangeText={text => setBackupCode(text)}
@@ -221,6 +259,7 @@ function Setting(props) {
                       backgroundColor: '#474747',
                       height: 45,
                       width: 100,
+                      textAlign: 'center',
                     },
                   ]}
                 />
@@ -249,6 +288,12 @@ function Setting(props) {
         icon={<Icon name="history" size={15} />}
         handler={() => restoreHistory()}
       />
+
+      <SettingList
+        text="Hapus histori tontonan"
+        icon={<Icon name="trash" style={{ color: 'red' }} size={15} />}
+        handler={() => deleteHistory()}
+      />
     </ScrollView>
   );
 }
@@ -271,6 +316,11 @@ function SettingList(props) {
 }
 
 const styles = StyleSheet.create({
+  waktuServer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#835604',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

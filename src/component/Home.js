@@ -42,9 +42,10 @@ class BottomTabs extends Component {
         />
         <Tab.Screen
           name="Setting"
+          initialParams={this.props.route.params}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name="gear" color={color} size={20} />
+              <Icon name="gears" color={color} size={20} />
             ),
           }}
           component={Setting}
