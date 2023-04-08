@@ -18,7 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 function Setting(props) {
-  const [switchValue, setSwitch] = useState(false);
+  const [notificationSwitch, setNotificationSwitch] = useState(false);
+  const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
@@ -26,14 +27,23 @@ function Setting(props) {
 
   useEffect(() => {
     AsyncStorage.getItem('enableNextPartNotification').then(data => {
-      setSwitch(data === 'true' || data === null);
+      setNotificationSwitch(data === 'true' || data === null);
+    });
+    AsyncStorage.getItem('enableBatteryTimeInfo').then(data => {
+      setBatteryTimeInfoSwitch(data === 'true');
     });
   }, []);
 
   const nextPartNotification = () => {
-    const newValue = !switchValue;
-    setSwitch(newValue);
+    const newValue = !notificationSwitch;
+    setNotificationSwitch(newValue);
     AsyncStorage.setItem('enableNextPartNotification', newValue.toString());
+  };
+
+  const batteryTimeSwitchHandler = () => {
+    const newValue = !batteryTimeInfoSwitch;
+    setBatteryTimeInfoSwitch(newValue);
+    AsyncStorage.setItem('enableBatteryTimeInfo', newValue.toString());
   };
 
   const backupHistory = () => {
@@ -272,9 +282,24 @@ function Setting(props) {
         text="Nyalakan notifikasi part selanjutnya"
         icon={<Icon name="cube" size={15} />}
         rightComponent={
-          <Switch value={switchValue} onValueChange={nextPartNotification} />
+          <Switch
+            value={notificationSwitch}
+            onValueChange={nextPartNotification}
+          />
         }
         handler={nextPartNotification}
+      />
+
+      <SettingList
+        text="Nyalakan informasi baterai dan jam"
+        icon={<Icon name="battery" size={15} />}
+        rightComponent={
+          <Switch
+            value={batteryTimeInfoSwitch}
+            onValueChange={batteryTimeSwitchHandler}
+          />
+        }
+        handler={batteryTimeSwitchHandler}
       />
 
       <SettingList

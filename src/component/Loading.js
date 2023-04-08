@@ -32,6 +32,11 @@ class Loading extends Component {
           alignItems: 'center',
           flex: 1,
         }}>
+        <View style={{ position: 'absolute', top: 15 }}>
+          <Text style={{ color: '#da2424' }}>
+            Aplikasi masih dalam tahap pengembangan
+          </Text>
+        </View>
         <ActivityIndicator size="large" />
         <Text style={styles.text}>Mengubungkan ke server mohon tunggu.</Text>
         <View

@@ -176,12 +176,13 @@ const styles = StyleSheet.create({
   },
   synopsys: {
     maxHeight: '35%',
-    backgroundColor: '#000000b6',
+    backgroundColor: '#0000008a',
   },
   synopsysScrollView: {},
   synopsysText: {
     flex: 1,
     textAlign: 'center',
+    opacity: 0.7,
   },
   epsList: {
     flex: 1,

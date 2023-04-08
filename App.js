@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar, ToastAndroid } from 'react-native';
+import { StatusBar } from 'react-native';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import Loading from './src/component/Loading';
@@ -27,10 +27,6 @@ class App extends Component {
   componentDidMount() {
     SystemNavigationBar.setBarMode('dark');
     StatusBar.setBarStyle('light-content');
-    ToastAndroid.show(
-      'Aplikasi masih dalam tahap pengembangan!',
-      ToastAndroid.SHORT,
-    );
   }
 
   render() {

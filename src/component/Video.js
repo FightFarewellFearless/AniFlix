@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import {
   StatusBar,
   View,
@@ -15,15 +15,18 @@ import {
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import RNFetchBlob from 'rn-fetch-blob';
-import style from '../assets/style';
+import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Battery from 'react-native-device-battery';
 
 class Video extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      batteryLevel: 0,
+      showBatteryLevel: false,
       showSynopsys: false,
       fullscreen: false,
       part: 0,
@@ -102,6 +105,30 @@ class Video extends Component {
     SystemNavigationBar.navigationShow();
   }
 
+  getBatteryIconComponent = () => {
+    let iconName = 'battery-';
+    const batteryLevel = Math.round(this.state.batteryLevel * 100);
+    if (batteryLevel > 75) {
+      iconName += '4';
+    } else if (batteryLevel > 50) {
+      iconName += '3';
+    } else if (batteryLevel > 25) {
+      iconName += '2';
+    } else if (batteryLevel > 15) {
+      iconName += '1';
+    } else {
+      iconName += '0';
+    }
+    console.log(batteryLevel);
+    return <Icon name={iconName} />;
+  };
+
+  onBatteryStateChange = ({ level }) => {
+    this.setState({
+      batteryLevel: level,
+    });
+  };
+
   orientationDidChange = orientation => {
     if (orientation === 'PORTRAIT') {
       this.exitFullscreen();
@@ -121,8 +148,20 @@ class Video extends Component {
         return true;
       }
     });
+
+    AsyncStorage.getItem('enableBatteryTimeInfo').then(async data => {
+      if (data === 'true') {
+        const batteryLevel = await Battery.getBatteryLevel();
+        this.setState({
+          batteryLevel,
+        });
+        Battery.addListener(this.onBatteryStateChange);
+        this.batteryTimeEnable = true;
+      }
+    });
   }
   componentWillUnmount() {
+    Battery.removeListener(this.onBatteryStateChange);
     this.willUnmountHandler();
     this.back.remove();
     this.abortController.abort();
@@ -395,6 +434,7 @@ class Video extends Component {
           style={[
             this.state.fullscreen ? styles.fullscreen : styles.notFullscreen,
           ]}>
+          {/* notifikasi part selanjutnya */}
           {this.state.shouldShowNextPartNotification && (
             <>
               <Animated.View
@@ -412,12 +452,27 @@ class Video extends Component {
                     padding: 3,
                     borderRadius: 5,
                   }}>
-                  <Text style={{ color: style.text.color, opacity: 1 }}>
+                  <Text style={{ color: globalStyles.text.color, opacity: 1 }}>
                     Bersiap ke part selanjutnya
                   </Text>
                 </View>
               </Animated.View>
             </>
+          )}
+
+          {/* info baterai */}
+          {this.state.fullscreen && this.batteryTimeEnable && (
+            <View style={styles.batteryInfo} pointerEvents="none">
+              {this.getBatteryIconComponent()}
+              <Text> {Math.round(this.state.batteryLevel * 100)}%</Text>
+            </View>
+          )}
+
+          {/* info waktu/jam */}
+          {this.state.fullscreen && this.batteryTimeEnable && (
+            <View style={styles.timeInfo} pointerEvents="none">
+              <TimeInfo />
+            </View>
           )}
 
           {
@@ -445,7 +500,7 @@ class Video extends Component {
                 onProgress={this.handleProgress}
               />
             ) : (
-              <Text style={style.text}>Video tidak tersedia</Text>
+              <Text style={globalStyles.text}>Video tidak tersedia</Text>
             )
           }
         </View>
@@ -463,7 +518,7 @@ class Video extends Component {
                   borderRadius: 9,
                   paddingLeft: 4,
                 }}>
-                <Text style={[{ fontSize: 17 }, style.text]}>
+                <Text style={[{ fontSize: 17 }, globalStyles.text]}>
                   {this.state.data.title}
                 </Text>
               </View>
@@ -538,7 +593,7 @@ class Video extends Component {
                   borderRadius: 9,
                   paddingLeft: 4,
                 }}>
-                <Text style={[style.text, { fontSize: 15 }]}>
+                <Text style={[globalStyles.text, { fontSize: 15 }]}>
                   Silahkan pilih resolusi:
                 </Text>
                 <View style={{ flexDirection: 'row' }}>
@@ -566,7 +621,7 @@ class Video extends Component {
                             color:
                               this.state.data.resolution === res
                                 ? '#181818'
-                                : style.text.color,
+                                : globalStyles.text.color,
                           }}>
                           {res}
                         </Text>
@@ -589,7 +644,7 @@ class Video extends Component {
                       paddingLeft: 4,
                       paddingVertical: 5,
                     }}>
-                    <Text style={style.text}>Silahkan pilih part:</Text>
+                    <Text style={globalStyles.text}>Silahkan pilih part:</Text>
                     <View
                       style={{
                         flex: 1,
@@ -619,7 +674,7 @@ class Video extends Component {
                                 color:
                                   this.state.part === i
                                     ? '#181818'
-                                    : style.text.color,
+                                    : globalStyles.text.color,
                               }}>
                               {'Part ' + (i + 1)}
                             </Text>
@@ -652,10 +707,10 @@ class Video extends Component {
                   paddingLeft: 4,
                 }}>
                 <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={style.text}>Status:</Text>
+                  <Text style={globalStyles.text}>Status:</Text>
                   <Text
                     style={[
-                      style.text,
+                      globalStyles.text,
                       {
                         position: 'absolute',
                         left: '40%',
@@ -666,10 +721,10 @@ class Video extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={style.text}>Tahun rilis:</Text>
+                  <Text style={globalStyles.text}>Tahun rilis:</Text>
                   <Text
                     style={[
-                      style.text,
+                      globalStyles.text,
                       {
                         position: 'absolute',
                         left: '40%',
@@ -680,10 +735,10 @@ class Video extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={style.text}>Rating:</Text>
+                  <Text style={globalStyles.text}>Rating:</Text>
                   <Text
                     style={[
-                      style.text,
+                      globalStyles.text,
                       {
                         position: 'absolute',
                         left: '40%',
@@ -694,7 +749,7 @@ class Video extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={[style.text]}>Genre:</Text>
+                  <Text style={[globalStyles.text]}>Genre:</Text>
                   <View style={{ marginLeft: '5%', width: '60%' }}>
                     <View
                       style={{
@@ -712,7 +767,7 @@ class Video extends Component {
                               borderRadius: 2,
                               marginBottom: 5,
                             }}>
-                            <Text style={[style.text]}>{data}</Text>
+                            <Text style={[globalStyles.text]}>{data}</Text>
                           </View>
                         );
                       })}
@@ -732,7 +787,7 @@ class Video extends Component {
                 }}>
                 {this.state.showSynopsys ? (
                   <>
-                    <Text style={[style.text, { fontSize: 13 }]}>
+                    <Text style={[globalStyles.text, { fontSize: 13 }]}>
                       {this.state.data.synopsys}
                     </Text>
                     <TouchableOpacity
@@ -770,7 +825,7 @@ class Video extends Component {
                   <Text
                     style={[
                       { fontWeight: 'bold', fontSize: 18, textAlign: 'center' },
-                      style.text,
+                      globalStyles.text,
                     ]}>
                     Download
                     {this.state.data.streamingLink.length > 1 && ' part ini'}
@@ -791,7 +846,7 @@ class Video extends Component {
                           fontSize: 18,
                           textAlign: 'center',
                         },
-                        style.text,
+                        globalStyles.text,
                       ]}>
                       Download semua part
                     </Text>
@@ -806,7 +861,44 @@ class Video extends Component {
   }
 }
 
+function TimeInfo() {
+  const date = new Date();
+  const [time, setTime] = useState(`${date.getHours()}:${date.getMinutes()}`);
+
+  const interval = setInterval(() => {
+    const currentDate = new Date();
+    const newDate = `${currentDate.getHours()}:${currentDate.getMinutes()}`;
+    if (time !== newDate) {
+      setTime(newDate);
+    }
+  }, 1_000);
+
+  useEffect(() => {
+    return () => {
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <Text>{time}</Text>;
+}
+
 const styles = StyleSheet.create({
+  batteryInfo: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeInfo: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   fullscreen: {
     position: 'absolute',
     top: 0,
@@ -816,7 +908,7 @@ const styles = StyleSheet.create({
   },
   notFullscreen: {
     position: 'relative',
-    flex: 0.4,
+    flex: 0.44,
   },
   dlbtn: {
     flex: 1,

@@ -40,6 +40,11 @@ class FailedToConnect extends Component {
             alignItems: 'center',
             flex: 1,
           }}>
+          <View style={{ position: 'absolute', top: 15 }}>
+            <Text style={{ color: '#da2424' }}>
+              Aplikasi masih dalam tahap pengembangan
+            </Text>
+          </View>
           <Icon name="server-network-off" style={styles.text} size={40} />
           <Text style={[{ textAlign: 'center' }, styles.text]}>
             Gagal terhubung ke server{'\n'}
