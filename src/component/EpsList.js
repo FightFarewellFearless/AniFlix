@@ -151,7 +151,7 @@ class EpsList extends Component {
               renderItem={this.renderItem}
             />
           ) : (
-            <Text style={styles.text}>Tidak ada episode</Text>
+            <Text style={globalStyles.text}>Tidak ada episode</Text>
           )}
         </View>
       </View>

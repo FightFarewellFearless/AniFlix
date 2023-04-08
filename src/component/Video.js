@@ -464,7 +464,10 @@ class Video extends Component {
           {this.state.fullscreen && this.batteryTimeEnable && (
             <View style={styles.batteryInfo} pointerEvents="none">
               {this.getBatteryIconComponent()}
-              <Text> {Math.round(this.state.batteryLevel * 100)}%</Text>
+              <Text style={globalStyles.text}>
+                {' '}
+                {Math.round(this.state.batteryLevel * 100)}%
+              </Text>
             </View>
           )}
 
@@ -879,7 +882,7 @@ function TimeInfo() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return <Text>{time}</Text>;
+  return <Text style={globalStyles.text}>{time}</Text>;
 }
 
 const styles = StyleSheet.create({
