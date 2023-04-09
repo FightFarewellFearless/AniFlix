@@ -25,7 +25,7 @@ class BottomTabs extends Component {
           initialParams={this.props.route.params}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name="home" color={color} size={20} />
+              <Icon name="home" style={{ color }} size={20} />
             ),
             tabBarLabel: 'Home',
           }}
@@ -35,7 +35,7 @@ class BottomTabs extends Component {
           options={{
             unmountOnBlur: true,
             tabBarIcon: ({ color }) => (
-              <Icon name="history" color={color} size={20} />
+              <Icon name="history" style={{ color }} size={20} />
             ),
           }}
           component={History}
@@ -45,7 +45,7 @@ class BottomTabs extends Component {
           initialParams={this.props.route.params}
           options={{
             tabBarIcon: ({ color }) => (
-              <Icon name="gears" color={color} size={20} />
+              <Icon name="gears" style={{ color }} size={20} />
             ),
           }}
           component={Setting}

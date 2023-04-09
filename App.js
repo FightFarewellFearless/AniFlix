@@ -25,8 +25,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    SystemNavigationBar.setBarMode('dark');
-    StatusBar.setBarStyle('light-content');
+    SystemNavigationBar.setNavigationColor('black');
+    StatusBar.setBackgroundColor('black');
   }
 
   render() {

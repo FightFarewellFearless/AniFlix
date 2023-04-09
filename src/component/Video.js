@@ -68,7 +68,7 @@ class Video extends Component {
     this.setState({
       loading: true,
     });
-    const results = await fetch(
+    const data = await fetch(
       'https://animeapi.aceracia.repl.co/v2/fromUrl' +
         '?res=' +
         res +
@@ -77,19 +77,20 @@ class Video extends Component {
       {
         signal: this.abortController.signal,
       },
-    ).catch(err => {
-      if (err.message === 'Aborted') {
-        return;
-      }
-      Alert.alert('Error', err.message);
-      this.setState({
-        loading: false,
+    )
+      .then(results => results.json())
+      .catch(err => {
+        if (err.message === 'Aborted') {
+          return;
+        }
+        Alert.alert('Error', err.message);
+        this.setState({
+          loading: false,
+        });
       });
-    });
-    if (results === undefined) {
+    if (data === undefined) {
       return;
     }
-    const data = await results.json();
     this.hasPart = data.streamingLink.length > 1;
     this.setState({
       data,
@@ -112,15 +113,14 @@ class Video extends Component {
       iconName += '4';
     } else if (batteryLevel > 50) {
       iconName += '3';
-    } else if (batteryLevel > 25) {
+    } else if (batteryLevel > 30) {
       iconName += '2';
     } else if (batteryLevel > 15) {
       iconName += '1';
     } else {
       iconName += '0';
     }
-    console.log(batteryLevel);
-    return <Icon name={iconName} />;
+    return <Icon name={iconName} style={globalStyles.text} />;
   };
 
   onBatteryStateChange = ({ level }) => {
@@ -374,24 +374,25 @@ class Video extends Component {
     this.setState({
       episodeDataLoadingStatus: true,
     });
-    const results = await fetch(
+    const result = await fetch(
       'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
       {
         signal: this.abortController.signal,
       },
-    ).catch(err => {
-      if (err.message === 'Aborted') {
-        return;
-      }
-      Alert.alert('Error', err.message);
-      this.setState({
-        episodeDataLoadingStatus: false,
+    )
+      .then(data => data.json())
+      .catch(err => {
+        if (err.message === 'Aborted') {
+          return;
+        }
+        Alert.alert('Error', err.message);
+        this.setState({
+          episodeDataLoadingStatus: false,
+        });
       });
-    });
-    if (results === undefined) {
+    if (result === undefined) {
       return;
     }
-    const result = await results.json();
     this.hasPart = result.streamingLink.length > 1;
     this.setState(
       {
@@ -551,7 +552,11 @@ class Video extends Component {
                           this.state.data.episodeData.previous,
                         )
                       }>
-                      <Icon name="arrow-left" size={18} />
+                      <Icon
+                        name="arrow-left"
+                        style={{ color: '#000000' }}
+                        size={18}
+                      />
                     </TouchableOpacity>
 
                     <View
@@ -581,7 +586,11 @@ class Video extends Component {
                           this.state.data.episodeData.next,
                         )
                       }>
-                      <Icon name="arrow-right" size={18} />
+                      <Icon
+                        name="arrow-right"
+                        style={{ color: '#000000' }}
+                        size={18}
+                      />
                     </TouchableOpacity>
                   </View>
                 )
@@ -695,7 +704,11 @@ class Video extends Component {
                         );
                       }}
                       style={{ position: 'absolute', right: 5, top: 2 }}>
-                      <Icon name="info-circle" size={17} />
+                      <Icon
+                        name="info-circle"
+                        style={globalStyles.text}
+                        size={17}
+                      />
                     </TouchableOpacity>
                   </View>
                 )
@@ -865,16 +878,22 @@ class Video extends Component {
 }
 
 function TimeInfo() {
-  const date = new Date();
-  const [time, setTime] = useState(`${date.getHours()}:${date.getMinutes()}`);
+  const [time, setTime] = useState();
 
-  const interval = setInterval(() => {
+  const changeTime = () => {
     const currentDate = new Date();
-    const newDate = `${currentDate.getHours()}:${currentDate.getMinutes()}`;
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const newDate = `${hours < 10 ? '0' + hours : hours}:${
+      minutes < 10 ? '0' + minutes : minutes
+    }`;
     if (time !== newDate) {
       setTime(newDate);
     }
-  }, 1_000);
+  };
+  changeTime();
+
+  const interval = setInterval(changeTime, 1_000);
 
   useEffect(() => {
     return () => {

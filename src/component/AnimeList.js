@@ -11,7 +11,7 @@ import {
   TouchableHighlight,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import styles from '../assets/style';
+import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 class Home extends Component {
@@ -83,7 +83,7 @@ class Home extends Component {
               borderWidth: 0.8,
               borderColor: '#c5c5c5',
               marginLeft: 2,
-              color: styles.text.color,
+              color: globalStyles.text.color,
             }}
           />
           {this.state.searchText !== '' && (
@@ -96,7 +96,7 @@ class Home extends Component {
                 backgroundColor: '#ffa43cff',
               }}>
               <Text style={{ color: '#ffffff' }}>
-                <Icon name="search" size={17} />
+                <Icon name="search" style={{ color: '#413939' }} size={17} />
                 Cari
               </Text>
             </TouchableHighlight>
@@ -104,7 +104,9 @@ class Home extends Component {
         </View>
         <View>
           <View>
-            <Text style={[{ fontSize: 20 }, styles.text]}>Anime terbaru: </Text>
+            <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+              Anime terbaru:{' '}
+            </Text>
           </View>
           <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
             {this.state.data.newAnime.map(z => (
@@ -119,7 +121,9 @@ class Home extends Component {
 
         <View style={{ paddingTop: 13 }}>
           <View>
-            <Text style={[{ fontSize: 20 }, styles.text]}>Movie terbaru: </Text>
+            <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+              Movie terbaru:{' '}
+            </Text>
           </View>
 
           <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>

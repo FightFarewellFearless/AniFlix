@@ -280,7 +280,7 @@ function Setting(props) {
       </Modal>
       <SettingList
         text="Nyalakan notifikasi part selanjutnya"
-        icon={<Icon name="cube" size={15} />}
+        icon={<Icon name="cube" style={globalStyles.text} size={15} />}
         rightComponent={
           <Switch
             value={notificationSwitch}
@@ -292,7 +292,7 @@ function Setting(props) {
 
       <SettingList
         text="Nyalakan informasi baterai dan jam"
-        icon={<Icon name="battery" size={15} />}
+        icon={<Icon name="battery" style={globalStyles.text} size={15} />}
         rightComponent={
           <Switch
             value={batteryTimeInfoSwitch}
@@ -304,13 +304,13 @@ function Setting(props) {
 
       <SettingList
         text="Backup histori tontonan"
-        icon={<Icon name="cloud-upload" size={15} />}
+        icon={<Icon name="cloud-upload" style={globalStyles.text} size={15} />}
         handler={backupHistory}
       />
 
       <SettingList
         text="Restore histori tontonan"
-        icon={<Icon name="history" size={15} />}
+        icon={<Icon name="history" style={globalStyles.text} size={15} />}
         handler={() => restoreHistory()}
       />
 

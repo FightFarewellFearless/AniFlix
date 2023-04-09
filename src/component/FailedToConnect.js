@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styles from '../assets/style';
+import globalStyles from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -45,8 +45,8 @@ class FailedToConnect extends Component {
               Aplikasi masih dalam tahap pengembangan
             </Text>
           </View>
-          <Icon name="server-network-off" style={styles.text} size={40} />
-          <Text style={[{ textAlign: 'center' }, styles.text]}>
+          <Icon name="server-network-off" style={globalStyles.text} size={40} />
+          <Text style={[{ textAlign: 'center' }, globalStyles.text]}>
             Gagal terhubung ke server{'\n'}
             Pastikan kamu terhubung ke internet dan coba lagi.{'\n'}
             Jika masalah berlanjut, kemungkinan server sedang down atau ada
@@ -63,7 +63,7 @@ class FailedToConnect extends Component {
               marginTop: 14,
             }}
             onPress={this.tryagain}>
-            <Text style={[{ fontSize: 17 }, styles.text]}>
+            <Text style={[{ fontSize: 17 }, globalStyles.text]}>
               <Icon name="refresh" size={17} /> Coba lagi
             </Text>
           </TouchableOpacity>
@@ -75,12 +75,12 @@ class FailedToConnect extends Component {
               alignItems: 'center',
             }}>
             <Image source={rnLogo} style={{ height: 40, width: 40 }} />
-            <Text style={[styles.text, { fontSize: 12 }]}>
+            <Text style={[globalStyles.text, { fontSize: 12 }]}>
               Created using react-native
             </Text>
           </View>
         </View>
-        <Text style={[styles.text, { position: 'absolute', bottom: 0 }]}>
+        <Text style={[globalStyles.text, { position: 'absolute', bottom: 0 }]}>
           {require('../../package.json').version}
         </Text>
       </View>
