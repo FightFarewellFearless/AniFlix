@@ -1,3 +1,5 @@
+> ⚠️ This project won't be maintained temporarily!
+
 # Aplikasi nonton anime gratis tanpa iklan
 
 Video yang terdapat di aplikasi bukan berasal dari server kami.
