@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
@@ -21,24 +22,32 @@ class History extends Component {
     this.state = {
       loading: true,
       data: [],
+      historyRefreshing: false,
     };
   }
 
-  updateHistory = async () => {
-    let history = await AsyncStorage.getItem('history');
-    if (history === null) {
-      await AsyncStorage.setItem('history', '[]');
-      this.setState({
-        loading: false,
-      });
-    } else {
-      history = JSON.parse(history);
-      this.setState({
-        loading: false,
-        data: history,
-      });
-    }
-  };
+  updateHistory = () =>
+    new Promise(async res => {
+      let history = await AsyncStorage.getItem('history');
+      if (history === null) {
+        await AsyncStorage.setItem('history', '[]');
+        this.setState(
+          {
+            loading: false,
+          },
+          res,
+        );
+      } else {
+        history = JSON.parse(history);
+        this.setState(
+          {
+            loading: false,
+            data: history,
+          },
+          res,
+        );
+      }
+    });
 
   componentDidMount() {
     this.unsubscribe = this.props.navigation.addListener(
@@ -77,6 +86,24 @@ class History extends Component {
           <FlatList
             data={this.state.data}
             keyExtractor={item => item.title}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.historyRefreshing}
+                onRefresh={() => {
+                  this.setState(
+                    {
+                      historyRefreshing: true,
+                    },
+                    async () => {
+                      await this.updateHistory();
+                      this.setState({
+                        historyRefreshing: false,
+                      });
+                    },
+                  );
+                }}
+              />
+            }
             renderItem={({ item, index }) => {
               return (
                 <TouchableOpacity

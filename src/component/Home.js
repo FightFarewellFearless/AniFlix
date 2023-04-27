@@ -33,7 +33,7 @@ class BottomTabs extends Component {
         <Tab.Screen
           name="History"
           options={{
-            unmountOnBlur: true,
+            // unmountOnBlur: true,
             tabBarIcon: ({ color }) => (
               <Icon name="history" style={{ color }} size={20} />
             ),

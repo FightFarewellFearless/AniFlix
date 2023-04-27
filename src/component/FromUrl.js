@@ -139,7 +139,7 @@ class FromUrl extends Component {
             'Anime yang kamu tuju tidak memiliki data yang didukung!',
           );
         } else {
-          Alert.alert('Error', e.message);
+          Alert.alert('Error', e.stack);
         }
         this.props.navigation.goBack();
       }

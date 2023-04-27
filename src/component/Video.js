@@ -19,7 +19,7 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Battery from 'react-native-device-battery';
+import * as Battery from 'expo-battery';
 
 class Video extends Component {
   constructor(props) {
@@ -123,9 +123,9 @@ class Video extends Component {
     return <Icon name={iconName} style={globalStyles.text} />;
   };
 
-  onBatteryStateChange = ({ level }) => {
+  onBatteryStateChange = ({ batteryLevel }) => {
     this.setState({
-      batteryLevel: level,
+      batteryLevel,
     });
   };
 
@@ -151,17 +151,20 @@ class Video extends Component {
 
     AsyncStorage.getItem('enableBatteryTimeInfo').then(async data => {
       if (data === 'true') {
-        const batteryLevel = await Battery.getBatteryLevel();
+        const batteryLevel = await Battery.getBatteryLevelAsync();
         this.setState({
           batteryLevel,
         });
-        Battery.addListener(this.onBatteryStateChange);
+        this._batteryEvent = Battery.addBatteryLevelListener(
+          this.onBatteryStateChange,
+        );
         this.batteryTimeEnable = true;
       }
     });
   }
   componentWillUnmount() {
-    Battery.removeListener(this.onBatteryStateChange);
+    this._batteryEvent && this._batteryEvent.remove();
+    this._batteryEvent = null;
     this.willUnmountHandler();
     this.back.remove();
     this.abortController.abort();
