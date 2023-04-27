@@ -133,7 +133,7 @@ class Video extends Component {
     if (orientation === 'PORTRAIT') {
       this.exitFullscreen();
     } else if (orientation !== 'PORTRAIT' && orientation !== 'UNKNOWN') {
-      this.enterFullscreen();
+      this.enterFullscreen(orientation);
     }
   };
 
@@ -155,23 +155,40 @@ class Video extends Component {
         this.setState({
           batteryLevel,
         });
-        this._batteryEvent = Battery.addBatteryLevelListener(
-          this.onBatteryStateChange,
-        );
+        this._batteryEvent = setInterval(async () => {
+          // eslint-disable-next-line no-shadow
+          const batteryLevel = await Battery.getBatteryLevelAsync();
+          if (batteryLevel !== this.state.batteryLevel) {
+            this.onBatteryStateChange({ batteryLevel });
+          }
+        }, 60_000);
         this.batteryTimeEnable = true;
       }
     });
   }
   componentWillUnmount() {
-    this._batteryEvent && this._batteryEvent.remove();
+    this._batteryEvent && clearInterval(this._batteryEvent);
     this._batteryEvent = null;
     this.willUnmountHandler();
     this.back.remove();
     this.abortController.abort();
   }
 
-  enterFullscreen = () => {
-    Orientation.lockToLandscape();
+  enterFullscreen = landscape => {
+    if (landscape === undefined) {
+      Orientation.lockToLandscape();
+    } else {
+      switch (landscape) {
+        case 'LANDSCAPE-LEFT':
+          Orientation.lockToLandscapeLeft();
+          break;
+        case 'LANDSCAPE-RIGHT':
+          Orientation.lockToLandscapeRight();
+          break;
+        default:
+          Orientation.lockToLandscape();
+      }
+    }
     StatusBar.setHidden(true);
     SystemNavigationBar.navigationHide();
     this.setState({

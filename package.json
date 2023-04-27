@@ -1,9 +1,9 @@
 {
   "name": "anime",
-  "version": "beta-1.1.4",
+  "version": "beta-1.2.0",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

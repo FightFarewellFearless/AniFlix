@@ -1,4 +1,4 @@
-import React, { Component, createRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,34 +8,36 @@ import {
   TextInput,
   StyleSheet,
   ImageBackground,
+  useWindowDimensions,
+  Alert,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class EpsList extends Component {
-  constructor(props) {
-    super(props);
-    this.data = this.props.route.params.data;
-    this.state = {
-      result: this.data.episodeList,
-      titleLines: undefined,
-    };
-    this.synopsys = createRef();
-    this.epsList = createRef();
-  }
+function EpsList(props) {
+  const data = props.route.params.data;
+  const [result, setResult] = useState(data.episodeList);
+  const { height, width } = useWindowDimensions();
 
-  componentDidMount() {
-    this.synopsys.current.flashScrollIndicators();
-    this.epsList.current.flashScrollIndicators();
-  }
+  const synopsys = useRef();
+  const epsList = useRef();
 
-  renderItem = ({ item }) => {
+  useEffect(() => {
+    try {
+      synopsys.current.flashScrollIndicators();
+      epsList.current.flashScrollIndicators();
+    } catch (e) {
+      Alert.alert('Error', e.stack);
+    }
+  }, []);
+
+  const renderItem = useCallback(({ item }) => {
     return (
       <TouchableOpacity
         style={{ paddingBottom: 12 }}
         onPress={() => {
-          this.props.navigation.dispatch(
+          props.navigation.dispatch(
             StackActions.push('FromUrl', {
               link: item.link,
             }),
@@ -44,119 +46,119 @@ class EpsList extends Component {
         <Text style={{ color: 'lightblue' }}>{item.episode}</Text>
       </TouchableOpacity>
     );
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  render() {
-    return (
-      <View style={styles.container}>
-        {/* header */}
-        <View style={styles.header}>
-          <ImageBackground
-            source={{ uri: this.data.thumbnailUrl }}
-            style={styles.imageHeader}
-            resizeMethod="resize">
-            <View style={styles.shadow} />
-            {/* judul */}
-            <View style={styles.judul}>
-              <Text
-                style={[globalStyles.text, styles.textJudul]}
-                numberOfLines={2}>
-                {this.data.title}
+  const keyExtractor = item => item.link;
+
+  return (
+    <View
+      style={[
+        styles.container,
+        !(height >= width) && { flexDirection: 'row' },
+      ]}>
+      {/* header */}
+      <View style={styles.header}>
+        <ImageBackground
+          source={{ uri: data.thumbnailUrl }}
+          style={styles.imageHeader}
+          resizeMethod="resize">
+          <View style={styles.shadow} />
+          {/* judul */}
+          <View style={styles.judul}>
+            <Text
+              style={[globalStyles.text, styles.textJudul]}
+              numberOfLines={2}>
+              {data.title}
+            </Text>
+          </View>
+          {/* sinopsis */}
+          <View style={styles.synopsys}>
+            <ScrollView
+              contentContainerStyle={styles.synopsysScrollView}
+              ref={synopsys}>
+              <Text style={[globalStyles.text, styles.synopsysText]}>
+                {data.synopsys}
               </Text>
-            </View>
-            {/* sinopsis */}
-            <View style={styles.synopsys}>
-              <ScrollView
-                contentContainerStyle={styles.synopsysScrollView}
-                ref={this.synopsys}>
-                <Text style={[globalStyles.text, styles.synopsysText]}>
-                  {this.data.synopsys}
-                </Text>
-              </ScrollView>
-            </View>
+            </ScrollView>
+          </View>
 
-            {/* genre */}
-            <View style={styles.genre}>
-              {this.data.genre.map(genre => (
-                <Text key={genre} style={[globalStyles.text, styles.genreText]}>
-                  {genre}
-                </Text>
-              ))}
-            </View>
-            {/* info */}
-            <View style={styles.info}>
-              <Text style={[globalStyles.text, styles.textInfo]}>
-                <Icon name="calendar" size={15} /> {this.data.releaseYear}
+          {/* genre */}
+          <View style={styles.genre}>
+            {data.genre.map(genre => (
+              <Text key={genre} style={[globalStyles.text, styles.genreText]}>
+                {genre}
               </Text>
+            ))}
+          </View>
+          {/* info */}
+          <View style={styles.info}>
+            <Text style={[globalStyles.text, styles.textInfo]}>
+              <Icon name="calendar" size={15} /> {data.releaseYear}
+            </Text>
 
-              <Text style={[globalStyles.text, styles.textInfo]}>
-                <Icon
-                  name="tags"
-                  style={{
-                    color:
-                      this.data.status === 'Ongoing' ? '#cf0000' : '#22b422',
-                  }}
-                  size={15}
-                />{' '}
-                {this.data.status}
-              </Text>
+            <Text style={[globalStyles.text, styles.textInfo]}>
+              <Icon
+                name="tags"
+                style={{
+                  color: data.status === 'Ongoing' ? '#cf0000' : '#22b422',
+                }}
+                size={15}
+              />{' '}
+              {data.status}
+            </Text>
 
-              <Text style={[globalStyles.text, styles.textInfo]}>
-                <Icon name="star" style={{ color: 'gold' }} size={15} />{' '}
-                {this.data.rating}
-              </Text>
+            <Text style={[globalStyles.text, styles.textInfo]}>
+              <Icon name="star" style={{ color: 'gold' }} size={15} />{' '}
+              {data.rating}
+            </Text>
 
-              <Text style={[globalStyles.text, styles.textInfo]}>
-                <Icon name="tv" size={15} /> {this.data.episodeList.length}
-              </Text>
-            </View>
-          </ImageBackground>
-        </View>
-
-        <View style={styles.epsList}>
-          <TextInput
-            placeholder="Cari episode di sini"
-            keyboardType="numeric"
-            placeholderTextColor={'#616161'}
-            style={[globalStyles.text, styles.cariEpisode]}
-            onChangeText={text => {
-              if (text === '') {
-                this.setState({
-                  result: this.props.route.params.data.episodeList,
-                });
-              } else {
-                this.setState({
-                  result: [
-                    JSON.parse(
-                      JSON.stringify(this.props.route.params.data.episodeList),
-                    )
-                      .reverse()
-                      .find(x => {
-                        const index = x.episode.indexOf('episode');
-                        const slice =
-                          index > 0 ? x.episode.slice(index) : x.episode;
-                        return slice.includes(text);
-                      }),
-                  ],
-                });
-              }
-            }}
-          />
-          {this.state.result[0] !== undefined ? (
-            <FlatList
-              data={this.state.result}
-              keyExtractor={item => item.link}
-              initialNumToRender={15}
-              ref={this.epsList}
-              renderItem={this.renderItem}
-            />
-          ) : (
-            <Text style={globalStyles.text}>Tidak ada episode</Text>
-          )}
-        </View>
+            <Text style={[globalStyles.text, styles.textInfo]}>
+              <Icon name="tv" size={15} /> {data.episodeList.length}
+            </Text>
+          </View>
+        </ImageBackground>
       </View>
-    );
-  }
+
+      <View style={styles.epsList}>
+        <TextInput
+          placeholder="Cari episode di sini"
+          keyboardType="numeric"
+          placeholderTextColor={'#616161'}
+          style={[globalStyles.text, styles.cariEpisode]}
+          onChangeText={text => {
+            if (text === '') {
+              setResult(props.route.params.data.episodeList);
+            } else {
+              setResult([
+                JSON.parse(JSON.stringify(props.route.params.data.episodeList))
+                  .reverse()
+                  .find(x => {
+                    const index = x.episode.indexOf('episode');
+                    const slice =
+                      index > 0 ? x.episode.slice(index) : x.episode;
+                    return slice.includes(text);
+                  }),
+              ]);
+            }
+          }}
+        />
+        {result[0] !== undefined ? (
+          <FlatList
+            data={result}
+            keyExtractor={keyExtractor}
+            initialNumToRender={15}
+            ref={epsList}
+            renderItem={renderItem}
+            removeClippedSubviews={true}
+            windowSize={16}
+          />
+        ) : (
+          <Text style={globalStyles.text}>Tidak ada episode</Text>
+        )}
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
