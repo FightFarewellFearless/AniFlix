@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,10 @@ import {
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+const TouchableOpacityMemo = memo(TouchableOpacity);
+const FlatListMemo = memo(FlatList, (prev, next) => {
+  return prev.data === next.data;
+});
 
 function EpsList(props) {
   const data = props.route.params.data;
@@ -32,9 +36,13 @@ function EpsList(props) {
     }
   }, []);
 
+  useEffect(() => {
+    epsList.current?.scrollToOffset({ animated: true, offset: 0 });
+  }, [result]);
+
   const renderItem = useCallback(({ item }) => {
     return (
-      <TouchableOpacity
+      <TouchableOpacityMemo
         style={{ paddingBottom: 12 }}
         onPress={() => {
           props.navigation.dispatch(
@@ -44,12 +52,29 @@ function EpsList(props) {
           );
         }}>
         <Text style={{ color: 'lightblue' }}>{item.episode}</Text>
-      </TouchableOpacity>
+      </TouchableOpacityMemo>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const keyExtractor = item => item.link;
+  const keyExtractor = useCallback(item => item.link, []);
+
+  const searchEpisode = useCallback(text => {
+    if (text === '') {
+      setResult(props.route.params.data.episodeList);
+    } else {
+      setResult(
+        JSON.parse(JSON.stringify(props.route.params.data.episodeList))
+          .reverse()
+          .filter(x => {
+            const index = x.episode.indexOf('episode');
+            const slice = index > 0 ? x.episode.slice(index) : x.episode;
+            return slice.includes(text);
+          }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View
@@ -126,31 +151,17 @@ function EpsList(props) {
           keyboardType="numeric"
           placeholderTextColor={'#616161'}
           style={[globalStyles.text, styles.cariEpisode]}
-          onChangeText={text => {
-            if (text === '') {
-              setResult(props.route.params.data.episodeList);
-            } else {
-              setResult([
-                JSON.parse(JSON.stringify(props.route.params.data.episodeList))
-                  .reverse()
-                  .find(x => {
-                    const index = x.episode.indexOf('episode');
-                    const slice =
-                      index > 0 ? x.episode.slice(index) : x.episode;
-                    return slice.includes(text);
-                  }),
-              ]);
-            }
-          }}
+          onChangeText={searchEpisode}
         />
         {result[0] !== undefined ? (
-          <FlatList
+          <FlatListMemo
+            key="episodelist"
             data={result}
             keyExtractor={keyExtractor}
             initialNumToRender={15}
+            maxToRenderPerBatch={5}
             ref={epsList}
             renderItem={renderItem}
-            removeClippedSubviews={true}
             windowSize={16}
           />
         ) : (

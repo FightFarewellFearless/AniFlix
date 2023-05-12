@@ -114,6 +114,9 @@ function Setting(props) {
     if (code === undefined) {
       setRestoreVisible(true);
     } else {
+      if (code === '') {
+        return;
+      }
       setRestoreVisible(false);
       setModalText('Mengecek apakah kode valid...');
       setModalVisible(true);
@@ -240,9 +243,12 @@ function Setting(props) {
         </View>
       </Modal>
       {/* Modal restore */}
-      <Modal transparent visible={restoreVisible}>
+      <Modal
+        transparent
+        visible={restoreVisible}
+        onRequestClose={() => setRestoreVisible(false)}>
         <TouchableWithoutFeedback onPress={() => setRestoreVisible(false)}>
-          <View style={styles.modalContainer}>
+          <View style={[styles.modalContainer]}>
             <TouchableWithoutFeedback>
               <View
                 style={[
@@ -254,7 +260,7 @@ function Setting(props) {
                   onPress={() => setRestoreVisible(false)}>
                   <Icon name="close" size={28} style={{ color: 'red' }} />
                 </TouchableOpacity>
-                <Text style={globalStyles.text}>Masukkan kode backup:</Text>
+                <Text style={[globalStyles.text]}>Masukkan kode backup:</Text>
                 <TextInput
                   placeholderTextColor="#707070"
                   placeholder="Kode"
@@ -270,9 +276,15 @@ function Setting(props) {
                       height: 45,
                       width: 100,
                       textAlign: 'center',
+                      justifyContent: 'center',
                     },
                   ]}
                 />
+                <TouchableOpacity
+                  style={styles.acceptRestoreModalButton}
+                  onPress={() => restoreHistory(backupCode)}>
+                  <Text style={[globalStyles.text]}>Restore</Text>
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -350,6 +362,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#0000008a',
   },
   modalContent: {
     flex: 0.15,
@@ -385,6 +398,12 @@ const styles = StyleSheet.create({
   },
   settingListRightComponent: {
     alignItems: 'flex-end',
+  },
+  acceptRestoreModalButton: {
+    backgroundColor: 'green',
+    padding: 7,
+    borderRadius: 3,
+    marginTop: 10,
   },
 });
 

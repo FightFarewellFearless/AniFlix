@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   RefreshControl,
@@ -14,131 +14,115 @@ import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchText: '',
-      data: this.props.route.params.data,
-      refresh: false,
-    };
-  }
+function Home(props) {
+  const [searchText, setSearchText] = useState('');
+  const [data, setData] = useState(props.route.params.data);
+  const [refresh, setRefresh] = useState(false);
 
-  submit = () => {
-    if (this.state.searchText === '') {
+  const submit = useCallback(() => {
+    if (searchText === '') {
       return ToastAndroid.show(
         'Masukkan anime yang kamu cari ke dalam kolom pencarian',
         ToastAndroid.SHORT,
       );
     }
-    this.props.navigation.dispatch(
+    props.navigation.dispatch(
       StackActions.push('FromUrl', {
-        query: this.state.searchText,
+        query: searchText,
         type: 'search',
       }),
     );
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText]);
 
-  refreshing() {
-    this.setState({
-      refresh: true,
-    });
+  const refreshing = useCallback(() => {
+    setRefresh(true);
 
     fetch('https://animeapi.aceracia.repl.co/v2/home')
-      .then(async data => {
-        const jsondata = await data.json();
-        this.setState({
-          data: jsondata,
-          refresh: false,
-        });
+      .then(async fetchData => {
+        const jsondata = await fetchData.json();
+        setData(jsondata);
+        setRefresh(false);
       })
       .catch(e => {
         ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
-        this.setState({
-          refresh: false,
-        });
+        setRefresh(false);
       });
-  }
-
-  render() {
-    return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.refresh}
-            onRefresh={() => this.refreshing()}
-          />
-        }>
-        <View style={{ flexDirection: 'row' }}>
-          <TextInput
-            onSubmitEditing={this.submit}
-            onChangeText={text => {
-              this.setState({ searchText: text });
-            }}
-            placeholder="Cari anime disini"
-            placeholderTextColor="#707070"
+  }, []);
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refresh} onRefresh={() => refreshing()} />
+      }>
+      <View style={{ flexDirection: 'row' }}>
+        <TextInput
+          onSubmitEditing={submit}
+          onChangeText={text => {
+            setSearchText(text);
+          }}
+          placeholder="Cari anime disini"
+          placeholderTextColor="#707070"
+          style={{
+            width: searchText !== '' ? '87%' : '98%',
+            height: 35,
+            borderWidth: 0.8,
+            borderColor: '#c5c5c5',
+            marginLeft: 2,
+            color: globalStyles.text.color,
+          }}
+        />
+        {searchText !== '' && (
+          <TouchableHighlight
+            onPress={submit}
             style={{
-              width: this.state.searchText !== '' ? '87%' : '98%',
-              height: 35,
-              borderWidth: 0.8,
-              borderColor: '#c5c5c5',
-              marginLeft: 2,
-              color: globalStyles.text.color,
-            }}
-          />
-          {this.state.searchText !== '' && (
-            <TouchableHighlight
-              onPress={this.submit}
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '12%',
-                backgroundColor: '#ffa43cff',
-              }}>
-              <Text style={{ color: '#ffffff' }}>
-                <Icon name="search" style={{ color: '#413939' }} size={17} />
-                Cari
-              </Text>
-            </TouchableHighlight>
-          )}
-        </View>
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '12%',
+              backgroundColor: '#ffa43cff',
+            }}>
+            <Text style={{ color: '#ffffff' }}>
+              <Icon name="search" style={{ color: '#413939' }} size={17} />
+              Cari
+            </Text>
+          </TouchableHighlight>
+        )}
+      </View>
+      <View>
         <View>
-          <View>
-            <Text style={[{ fontSize: 20 }, globalStyles.text]}>
-              Anime terbaru:{' '}
-            </Text>
-          </View>
-          <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
-            {this.state.data.newAnime.map(z => (
-              <AnimeList
-                newAnimeData={z}
-                key={'btn' + z.title + z.episode}
-                navigationProp={this.props.navigation}
-              />
-            ))}
-          </ScrollView>
+          <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+            Anime terbaru:{' '}
+          </Text>
+        </View>
+        <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
+          {data.newAnime.map(z => (
+            <AnimeList
+              newAnimeData={z}
+              key={'btn' + z.title + z.episode}
+              navigationProp={props.navigation}
+            />
+          ))}
+        </ScrollView>
+      </View>
+
+      <View style={{ paddingTop: 13 }}>
+        <View>
+          <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+            Movie terbaru:{' '}
+          </Text>
         </View>
 
-        <View style={{ paddingTop: 13 }}>
-          <View>
-            <Text style={[{ fontSize: 20 }, globalStyles.text]}>
-              Movie terbaru:{' '}
-            </Text>
-          </View>
-
-          <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
-            {this.state.data.movie.map(z => (
-              <MovieList
-                movieData={z}
-                key={'btn' + z.title + z.episode}
-                navigationProp={this.props.navigation}
-              />
-            ))}
-          </ScrollView>
-        </View>
-      </ScrollView>
-    );
-  }
+        <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
+          {data.movie.map(z => (
+            <MovieList
+              movieData={z}
+              key={'btn' + z.title + z.episode}
+              navigationProp={props.navigation}
+            />
+          ))}
+        </ScrollView>
+      </View>
+    </ScrollView>
+  );
 }
 
 function AnimeList(props) {

@@ -1,4 +1,10 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import {
   StatusBar,
   View,
@@ -7,174 +13,195 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ToastAndroid,
   BackHandler,
   ActivityIndicator,
   Animated,
+  ToastAndroid,
+  Modal,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
-import RNFetchBlob from 'rn-fetch-blob';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Battery from 'expo-battery';
+import downloadAnimeFunction from '../utils/downloadAnime';
+import Dropdown from 'react-native-dropdown-picker';
 
-class Video extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      batteryLevel: 0,
-      showBatteryLevel: false,
-      showSynopsys: false,
-      fullscreen: false,
-      part: 0,
-      loading: false,
-      data: this.props.route.params.data,
-      shouldShowNextPartNotification: false,
-      preparePartAnimation: new Animated.Value(0),
-      episodeDataLoadingStatus: false,
-    };
-    this.downloadSource = [];
-    this.currentLink = this.props.route.params.link;
-    this.hasDownloadAllPart = false;
-    this.hasPart = this.state.data.streamingLink.length > 1;
-    this.preparePartAnimation = Animated.sequence([
-      Animated.timing(this.state.preparePartAnimation, {
-        toValue: 1,
-        useNativeDriver: true,
-        duration: 500,
-      }),
-      Animated.timing(this.state.preparePartAnimation, {
-        toValue: 0,
-        useNativeDriver: true,
-        duration: 500,
-        delay: 3000,
-      }),
-    ]);
+function Video(props) {
+  const [batteryLevel, setBatteryLevel] = useState(0);
+  // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
+  const [showSynopsys, setShowSynopsys] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [part, setPart] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(props.route.params.data);
+  const [shouldShowNextPartNotification, setShouldShowNextPartNotification] =
+    useState(false);
+  const preparePartAnimation = useRef(new Animated.Value(0)).current;
+  const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
 
-    this.abortController = new AbortController();
+  const [openResolution, setOpenResolution] = useState(false);
+  const [openPart, setOpenPart] = useState(false);
 
+  const downloadSource = useRef([]);
+  const currentLink = useRef(props.route.params.link);
+  const hasDownloadAllPart = useRef(false);
+  const hasPart = useRef(data.streamingLink.length > 1);
+
+  const preparePartAnimationSequence = useMemo(
+    () =>
+      Animated.sequence([
+        Animated.timing(preparePartAnimation, {
+          toValue: 1,
+          useNativeDriver: true,
+          duration: 500,
+        }),
+        Animated.timing(preparePartAnimation, {
+          toValue: 0,
+          useNativeDriver: true,
+          duration: 500,
+          delay: 3000,
+        }),
+      ]),
+    [preparePartAnimation],
+  );
+
+  const abortController = useRef(null);
+  if (abortController.current === null) {
+    abortController.current = new AbortController();
+  }
+
+  const nextPartEnable = useRef();
+
+  // didMount and willUnmount
+  useEffect(() => {
     AsyncStorage.getItem('enableNextPartNotification').then(value => {
-      this.nextPartEnable = value === 'true' || value === null;
+      nextPartEnable.current = value === 'true' || value === null;
     });
-  }
 
-  async setResolution(res) {
-    if (this.state.loading) {
-      return;
-    }
-    this.setState({
-      loading: true,
+    Orientation.addDeviceOrientationListener(orientationDidChange);
+    let _batteryEvent;
+    AsyncStorage.getItem('enableBatteryTimeInfo').then(async dbData => {
+      if (dbData === 'true') {
+        const batteryLevels = await Battery.getBatteryLevelAsync();
+        setBatteryLevel(batteryLevels);
+        _batteryEvent = setInterval(async () => {
+          const batteryLevelsInterval = await Battery.getBatteryLevelAsync();
+          if (batteryLevel !== batteryLevelsInterval) {
+            onBatteryStateChange({ batteryLevel: batteryLevelsInterval });
+          }
+        }, 60_000);
+        setBatteryTimeEnable(true);
+      }
     });
-    const data = await fetch(
-      'https://animeapi.aceracia.repl.co/v2/fromUrl' +
-        '?res=' +
-        res +
-        '&link=' +
-        this.currentLink,
-      {
-        signal: this.abortController.signal,
-      },
-    )
-      .then(results => results.json())
-      .catch(err => {
-        if (err.message === 'Aborted') {
-          return;
-        }
-        Alert.alert('Error', err.message);
-        this.setState({
-          loading: false,
+    return () => {
+      _batteryEvent && clearInterval(_batteryEvent);
+      _batteryEvent = null;
+      willUnmountHandler();
+      abortController.current.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // BackHandler event
+  useEffect(() => {
+    const backHandlerEvent = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onHardwareBackPress,
+    );
+    return () => {
+      backHandlerEvent.remove();
+    };
+  }, [fullscreen, onHardwareBackPress]);
+
+  const onHardwareBackPress = useCallback(() => {
+    if (!fullscreen) {
+      willUnmountHandler();
+      return false;
+    } else {
+      exitFullscreen();
+      return true;
+    }
+  }, [fullscreen, willUnmountHandler, exitFullscreen]);
+
+  const setResolution = useCallback(
+    async res => {
+      if (loading) {
+        return;
+      }
+      setLoading(true);
+      const resultData = await fetch(
+        // eslint-disable-next-line prettier/prettier
+        'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
+        {
+          signal: abortController.current.signal,
+        },
+      )
+        .then(results => results.json())
+        .catch(err => {
+          if (err.message === 'Aborted') {
+            return;
+          }
+          Alert.alert('Error', err.message);
+          setLoading(false);
         });
-      });
-    if (data === undefined) {
-      return;
-    }
-    this.hasPart = data.streamingLink.length > 1;
-    this.setState({
-      data,
-      loading: false,
-      part: 0,
-    });
-  }
+      if (resultData === undefined) {
+        return;
+      }
+      hasPart.current = resultData.streamingLink.length > 1;
+      setData(resultData);
+      setLoading(false);
+      setPart(0);
+    },
+    [loading],
+  );
 
-  willUnmountHandler() {
-    Orientation.removeDeviceOrientationListener(this.orientationDidChange);
+  const willUnmountHandler = useCallback(() => {
+    Orientation.removeDeviceOrientationListener(orientationDidChange);
     Orientation.unlockAllOrientations();
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  getBatteryIconComponent = () => {
+  const getBatteryIconComponent = useCallback(() => {
     let iconName = 'battery-';
-    const batteryLevel = Math.round(this.state.batteryLevel * 100);
-    if (batteryLevel > 75) {
+    const batteryLevelPercentage = Math.round(batteryLevel * 100);
+    if (batteryLevelPercentage > 75) {
       iconName += '4';
-    } else if (batteryLevel > 50) {
+    } else if (batteryLevelPercentage > 50) {
       iconName += '3';
-    } else if (batteryLevel > 30) {
+    } else if (batteryLevelPercentage > 30) {
       iconName += '2';
-    } else if (batteryLevel > 15) {
+    } else if (batteryLevelPercentage > 15) {
       iconName += '1';
     } else {
       iconName += '0';
     }
     return <Icon name={iconName} style={globalStyles.text} />;
-  };
+  }, [batteryLevel]);
 
-  onBatteryStateChange = ({ batteryLevel }) => {
-    this.setState({
-      batteryLevel,
-    });
-  };
+  const onBatteryStateChange = useCallback(
+    ({ batteryLevel: currentBatteryLevel }) => {
+      setBatteryLevel(currentBatteryLevel);
+    },
+    [],
+  );
 
-  orientationDidChange = orientation => {
-    if (orientation === 'PORTRAIT') {
-      this.exitFullscreen();
-    } else if (orientation !== 'PORTRAIT' && orientation !== 'UNKNOWN') {
-      this.enterFullscreen(orientation);
-    }
-  };
-
-  componentDidMount() {
-    Orientation.addDeviceOrientationListener(this.orientationDidChange);
-    this.back = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (!this.state.fullscreen) {
-        this.willUnmountHandler();
-        return false;
-      } else {
-        this.exitFullscreen();
-        return true;
+  const orientationDidChange = useCallback(
+    orientation => {
+      if (orientation === 'PORTRAIT') {
+        exitFullscreen();
+      } else if (orientation !== 'PORTRAIT' && orientation !== 'UNKNOWN') {
+        enterFullscreen(orientation);
       }
-    });
+    },
+    [enterFullscreen, exitFullscreen],
+  );
 
-    AsyncStorage.getItem('enableBatteryTimeInfo').then(async data => {
-      if (data === 'true') {
-        const batteryLevel = await Battery.getBatteryLevelAsync();
-        this.setState({
-          batteryLevel,
-        });
-        this._batteryEvent = setInterval(async () => {
-          // eslint-disable-next-line no-shadow
-          const batteryLevel = await Battery.getBatteryLevelAsync();
-          if (batteryLevel !== this.state.batteryLevel) {
-            this.onBatteryStateChange({ batteryLevel });
-          }
-        }, 60_000);
-        this.batteryTimeEnable = true;
-      }
-    });
-  }
-  componentWillUnmount() {
-    this._batteryEvent && clearInterval(this._batteryEvent);
-    this._batteryEvent = null;
-    this.willUnmountHandler();
-    this.back.remove();
-    this.abortController.abort();
-  }
-
-  enterFullscreen = landscape => {
+  const enterFullscreen = useCallback(landscape => {
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -191,710 +218,436 @@ class Video extends Component {
     }
     StatusBar.setHidden(true);
     SystemNavigationBar.navigationHide();
-    this.setState({
-      fullscreen: true,
-    });
-  };
+    setFullscreen(true);
+  }, []);
 
-  exitFullscreen = () => {
+  const exitFullscreen = useCallback(() => {
     StatusBar.setHidden(false);
     Orientation.lockToPortrait();
     SystemNavigationBar.navigationShow();
-    this.setState({
-      fullscreen: false,
-    });
-  };
+    setFullscreen(false);
+  }, []);
 
-  downloadAnime = async (force = false) => {
-    const source =
-      this.state.data.streamingLink[this.state.part].sources[0].src;
-
-    if (this.downloadSource.includes(source) && force === false) {
-      Alert.alert(
-        'Lanjutkan?',
-        'kamu sudah mengunduh bagian ini. Masih ingin melanjutkan?',
-        [
-          {
-            text: 'Batalkan',
-            style: 'cancel',
-            onPress: () => null,
-          },
-          {
-            text: 'Lanjutkan',
-            onPress: () => {
-              this.downloadAnime(true);
-            },
-          },
-        ],
-      );
-      return;
-    }
-
-    let Title =
-      this.state.data.streamingLink.length > 1
-        ? this.state.data.title + ' Part ' + (this.state.part + 1)
-        : this.state.data.title;
-
-    if (force === true) {
-      Title +=
-        ' (' + this.downloadSource.filter(z => z === source).length + ')';
-    }
-
-    this.downloadSource = [...this.downloadSource, source];
-
-    RNFetchBlob.config({
-      addAndroidDownloads: {
-        useDownloadManager: true,
-        path:
-          '/storage/emulated/0/Download' +
-          '/' +
-          Title +
-          ' ' +
-          this.state.data.resolution +
-          '.mp4',
-        notification: true,
-        mime: 'video/mp4',
-        title: Title + ' ' + this.state.data.resolution + '.mp4',
+  const downloadAnime = useCallback(async () => {
+    const source = data.streamingLink[part].sources[0].src;
+    const resolution = data.resolution;
+    await downloadAnimeFunction(
+      source,
+      downloadSource.current,
+      data.streamingLink.length > 1
+        ? data.title + ' Part ' + (part + 1)
+        : data.title,
+      resolution,
+      undefined,
+      () => {
+        downloadSource.current = [...downloadSource.current, source];
+        ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
       },
-    })
-      .fetch('GET', source)
-      .then(resp => {
-        // the path of downloaded file
-        resp.path();
-      })
-      .catch(() => {});
-    ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
-  };
+    );
+  }, [data, part]);
 
-  onEnd = () => {
-    if (this.state.part < this.state.data.streamingLink.length - 1) {
-      this.setState({
-        part: this.state.part + 1,
-        shouldShowNextPartNotification: false,
-      });
+  const onEnd = useCallback(() => {
+    if (part < data.streamingLink.length - 1) {
+      setPart(part + 1);
+      setShouldShowNextPartNotification(false);
     }
-  };
-  onBack = () => {
-    this.exitFullscreen();
-  };
+  }, [data, part]);
+  const onBack = useCallback(() => {
+    exitFullscreen();
+  }, [exitFullscreen]);
 
-  downloadAllAnimePart = async (force = false, askForDownload = false) => {
-    if (this.hasDownloadAllPart && force === false) {
-      Alert.alert(
-        'Lanjutkan?',
-        'kamu sudah mengunduh semua part. Masih ingin melanjutkan?',
-        [
-          {
-            text: 'Batalkan',
-            style: 'cancel',
-            onPress: () => null,
-          },
-          {
-            text: 'Lanjutkan',
-            onPress: () => {
-              this.downloadAllAnimePart(true, true);
+  const downloadAllAnimePart = useCallback(
+    async (force = false, askForDownload = true) => {
+      if (hasDownloadAllPart.current && force === false) {
+        Alert.alert(
+          'Lanjutkan?',
+          'kamu sudah mengunduh semua part. Masih ingin melanjutkan?',
+          [
+            {
+              text: 'Batalkan',
+              style: 'cancel',
+              onPress: () => null,
             },
-          },
-        ],
-      );
-      return;
-    }
-
-    if (askForDownload) {
-      Alert.alert(
-        'Download semua part?',
-        `Ini akan mendownload semua (${this.state.data.streamingLink.length}) part`,
-        [
-          {
-            text: 'Tidak',
-            style: 'cancel',
-            onPress: () => null,
-          },
-          {
-            text: 'Ya',
-            onPress: () => {
-              this.downloadAllAnimePart(true);
+            {
+              text: 'Lanjutkan',
+              onPress: () => {
+                downloadAllAnimePart(true);
+              },
             },
-          },
-        ],
-      );
-      return;
-    }
-
-    for (let i = 0; i < this.state.data.streamingLink.length; i++) {
-      const source = this.state.data.streamingLink[i].sources[0].src;
-
-      let Title = this.state.data.title + ' Part ' + (i + 1);
-
-      if (this.hasDownloadAllPart) {
-        Title +=
-          ' (' + this.downloadSource.filter(z => z === source).length + ')';
+          ],
+        );
+        return;
       }
 
-      this.downloadSource = [...this.downloadSource, source];
+      if (askForDownload) {
+        Alert.alert(
+          'Download semua part?',
+          `Ini akan mendownload semua (${data.streamingLink.length}) part`,
+          [
+            {
+              text: 'Tidak',
+              style: 'cancel',
+              onPress: () => null,
+            },
+            {
+              text: 'Ya',
+              onPress: () => {
+                downloadAllAnimePart(force, false);
+              },
+            },
+          ],
+        );
+        return;
+      }
 
-      RNFetchBlob.config({
-        addAndroidDownloads: {
-          useDownloadManager: true,
-          path:
-            '/storage/emulated/0/Download' +
-            '/' +
-            Title +
-            ' ' +
-            this.state.data.resolution +
-            '.mp4',
-          notification: true,
-          mime: 'video/mp4',
-          title: Title + ' ' + this.state.data.resolution + '.mp4',
-        },
-      })
-        .fetch('GET', source)
-        .then(resp => {
-          // the path of downloaded file
-          resp.path();
-        })
-        .catch(() => {});
-      ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
-    }
-    this.hasDownloadAllPart = true;
-  };
+      for (let i = 0; i < data.streamingLink.length; i++) {
+        const source = data.streamingLink[i].sources[0].src;
 
-  handleProgress = data => {
-    if (this.hasPart) {
-      const remainingTime = data.seekableDuration - data.currentTime;
-      if (
-        remainingTime < 10 &&
-        this.state.shouldShowNextPartNotification === false &&
-        this.state.part < this.state.data.streamingLink.length - 1 &&
-        this.nextPartEnable
-      ) {
-        this.setState(
-          {
-            shouldShowNextPartNotification: true,
+        let Title = data.title + ' Part ' + (i + 1);
+
+        if (hasDownloadAllPart.current) {
+          Title +=
+            ' (' +
+            downloadSource.current.filter(z => z === source).length +
+            ')';
+        }
+
+        await downloadAnimeFunction(
+          source,
+          downloadSource.current,
+          Title,
+          data.resolution,
+          true,
+          () => {
+            downloadSource.current = [...downloadSource.current, source];
           },
-          () =>
-            Animated.loop(this.preparePartAnimation, { iterations: 1 }).start(),
         );
       }
-      if (
-        remainingTime > 10 &&
-        this.state.shouldShowNextPartNotification === true
-      ) {
-        this.setState({
-          shouldShowNextPartNotification: false,
-        });
-      }
-    }
-  };
+      hasDownloadAllPart.current = true;
+      ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
+    },
+    [data],
+  );
 
-  episodeDataControl = async url => {
-    if (this.state.episodeDataLoadingStatus) {
-      return;
-    }
-    this.setState({
-      episodeDataLoadingStatus: true,
-    });
-    const result = await fetch(
-      'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
-      {
-        signal: this.abortController.signal,
-      },
-    )
-      .then(data => data.json())
-      .catch(err => {
-        if (err.message === 'Aborted') {
-          return;
+  const handleProgress = useCallback(
+    progressData => {
+      if (hasPart.current) {
+        const remainingTime =
+          progressData.seekableDuration - progressData.currentTime;
+        if (
+          remainingTime < 10 &&
+          shouldShowNextPartNotification === false &&
+          part < data.streamingLink.length - 1 &&
+          nextPartEnable.current
+        ) {
+          setShouldShowNextPartNotification(true);
+          Animated.loop(preparePartAnimationSequence, {
+            iterations: 1,
+          }).start();
         }
-        Alert.alert('Error', err.message);
-        this.setState({
-          episodeDataLoadingStatus: false,
-        });
-      });
-    if (result === undefined) {
-      return;
-    }
-    this.hasPart = result.streamingLink.length > 1;
-    this.setState(
-      {
-        data: result,
-        episodeDataLoadingStatus: false,
-        part: 0,
-      },
-      () => (this.currentLink = url),
-    );
-    (async () => {
-      let data = await AsyncStorage.getItem('history');
-      if (data === null) {
-        data = '[]';
+        if (remainingTime > 10 && shouldShowNextPartNotification === true) {
+          setShouldShowNextPartNotification(false);
+        }
       }
-      data = JSON.parse(data);
-      const episodeI = result.title.toLowerCase().indexOf('episode');
-      const title =
-        episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
-      const episode = episodeI < 0 ? null : result.title.slice(episodeI);
-      const dataINDEX = data.findIndex(val => val.title === title);
-      if (dataINDEX >= 0) {
-        data.splice(dataINDEX, 1);
+    },
+    [data, part, preparePartAnimationSequence, shouldShowNextPartNotification],
+  );
+
+  const episodeDataControl = useCallback(
+    async url => {
+      if (loading) {
+        return;
       }
-      data.splice(0, 0, {
-        title,
-        episode,
-        link: url,
-        thumbnailUrl: result.thumbnailUrl,
-        date: Date.now(),
-      });
-      AsyncStorage.setItem('history', JSON.stringify(data));
-    })();
-  };
-
-  render() {
-    return (
-      <View style={{ flex: 2 }}>
-        {/* VIDEO ELEMENT */}
-        <View
-          style={[
-            this.state.fullscreen ? styles.fullscreen : styles.notFullscreen,
-          ]}>
-          {/* notifikasi part selanjutnya */}
-          {this.state.shouldShowNextPartNotification && (
-            <>
-              <Animated.View
-                style={{
-                  zIndex: 1,
-                  alignItems: 'center',
-                  opacity: this.state.preparePartAnimation,
-                }}
-                pointerEvents="none">
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    backgroundColor: '#0000005e',
-                    padding: 3,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{ color: globalStyles.text.color, opacity: 1 }}>
-                    Bersiap ke part selanjutnya
-                  </Text>
-                </View>
-              </Animated.View>
-            </>
-          )}
-
-          {/* info baterai */}
-          {this.state.fullscreen && this.batteryTimeEnable && (
-            <View style={styles.batteryInfo} pointerEvents="none">
-              {this.getBatteryIconComponent()}
-              <Text style={globalStyles.text}>
-                {' '}
-                {Math.round(this.state.batteryLevel * 100)}%
-              </Text>
-            </View>
-          )}
-
-          {/* info waktu/jam */}
-          {this.state.fullscreen && this.batteryTimeEnable && (
-            <View style={styles.timeInfo} pointerEvents="none">
-              <TimeInfo />
-            </View>
-          )}
-
-          {
-            // mengecek apakah video tersedia
-            this.state.data.streamingLink?.[this.state.part]?.sources[0].src ? (
-              <Videos
-                key={
-                  this.state.data.streamingLink[this.state.part].sources[0].src
-                }
-                showOnEnd={true}
-                title={this.state.data.title}
-                disableBack={!this.state.fullscreen}
-                onBack={this.onBack}
-                toggleResizeModeOnFullscreen={false}
-                isFullscreen={this.state.fullscreen}
-                onEnterFullscreen={this.enterFullscreen}
-                onExitFullscreen={this.exitFullscreen}
-                source={{
-                  uri: this.state.data.streamingLink[this.state.part].sources[0]
-                    .src,
-                }}
-                onEnd={this.onEnd}
-                rewindTime={10}
-                showDuration={true}
-                onProgress={this.handleProgress}
-              />
-            ) : (
-              <Text style={globalStyles.text}>Video tidak tersedia</Text>
-            )
-          }
-        </View>
-        {/* END OF VIDEO ELEMENT */}
+      setLoading(true);
+      const result = await fetch(
+        'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
         {
-          // mengecek apakah sedang dalam keadaan fullscreen atau tidak
-          // jika ya, maka hanya menampilkan video saja
-          !this.state.fullscreen && (
-            <ScrollView style={{ flex: 1 }}>
+          signal: abortController.current.signal,
+        },
+      )
+        .then(resultData => resultData.json())
+        .catch(err => {
+          if (err.message === 'Aborted') {
+            return;
+          }
+          Alert.alert('Error', err.message);
+          setLoading(false);
+        });
+      if (result === undefined) {
+        return;
+      }
+      hasPart.current = result.streamingLink.length > 1;
+
+      setData(result);
+      setLoading(false);
+      setPart(0);
+      currentLink.current = url;
+
+      (async () => {
+        let historyData = await AsyncStorage.getItem('history');
+        if (historyData === null) {
+          historyData = '[]';
+        }
+        historyData = JSON.parse(historyData);
+        const episodeI = result.title.toLowerCase().indexOf('episode');
+        const title =
+          episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
+        const episode = episodeI < 0 ? null : result.title.slice(episodeI);
+        const dataINDEX = historyData.findIndex(val => val.title === title);
+        if (dataINDEX >= 0) {
+          historyData.splice(dataINDEX, 1);
+        }
+        historyData.splice(0, 0, {
+          title,
+          episode,
+          link: url,
+          thumbnailUrl: result.thumbnailUrl,
+          date: Date.now(),
+        });
+        AsyncStorage.setItem('history', JSON.stringify(historyData));
+      })();
+    },
+    [loading],
+  );
+  return (
+    <View style={{ flex: 2 }}>
+      {/* Loading modal */}
+      <Modal
+        visible={loading}
+        transparent
+        onRequestClose={() => {
+          abortController.current.abort();
+          setLoading(false);
+          abortController.current = new AbortController();
+        }}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <ActivityIndicator size={'large'} />
+            <Text style={globalStyles.text}>Loading...</Text>
+          </View>
+        </View>
+      </Modal>
+      {/* VIDEO ELEMENT */}
+      <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
+        {/* notifikasi part selanjutnya */}
+        {shouldShowNextPartNotification && (
+          <>
+            <Animated.View
+              style={{
+                zIndex: 1,
+                alignItems: 'center',
+                opacity: preparePartAnimation,
+              }}
+              pointerEvents="none">
               <View
                 style={{
-                  backgroundColor: '#363636',
-                  marginVertical: 10,
-                  marginHorizontal: 4,
-                  borderRadius: 9,
-                  paddingLeft: 4,
+                  position: 'absolute',
+                  top: 10,
+                  backgroundColor: '#0000005e',
+                  padding: 3,
+                  borderRadius: 5,
                 }}>
-                <Text style={[{ fontSize: 17 }, globalStyles.text]}>
-                  {this.state.data.title}
+                <Text style={{ color: globalStyles.text.color, opacity: 1 }}>
+                  Bersiap ke part selanjutnya
                 </Text>
               </View>
-              {
-                /* mengecek apakah episodeData tersedia */
-                this.state.data.episodeData && (
-                  <View
-                    style={{
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                    }}>
-                    <TouchableOpacity
-                      key="prev"
-                      disabled={
-                        !this.state.data.episodeData.previous ||
-                        this.state.episodeDataLoadingStatus
-                      }
-                      style={{
-                        backgroundColor: this.state.data.episodeData.previous
-                          ? '#00ccff'
-                          : '#525252',
-                        padding: 5,
-                      }}
-                      onPress={() =>
-                        this.episodeDataControl(
-                          this.state.data.episodeData.previous,
-                        )
-                      }>
-                      <Icon
-                        name="arrow-left"
-                        style={{ color: '#000000' }}
-                        size={18}
-                      />
-                    </TouchableOpacity>
+            </Animated.View>
+          </>
+        )}
 
-                    <View
-                      style={{
-                        height: 20,
-                        width: 20,
-                      }}>
-                      {this.state.episodeDataLoadingStatus && (
-                        <ActivityIndicator size={20} />
-                      )}
-                    </View>
+        {/* info baterai */}
+        {fullscreen && batteryTimeEnable && (
+          <View style={styles.batteryInfo} pointerEvents="none">
+            {getBatteryIconComponent()}
+            <Text style={globalStyles.text}>
+              {' '}
+              {Math.round(batteryLevel * 100)}%
+            </Text>
+          </View>
+        )}
 
-                    <TouchableOpacity
-                      key="next"
-                      disabled={
-                        !this.state.data.episodeData.next ||
-                        this.state.episodeDataLoadingStatus
-                      }
-                      style={{
-                        backgroundColor: this.state.data.episodeData.next
-                          ? '#00ccff'
-                          : '#525252',
-                        padding: 5,
-                      }}
-                      onPress={() =>
-                        this.episodeDataControl(
-                          this.state.data.episodeData.next,
-                        )
-                      }>
-                      <Icon
-                        name="arrow-right"
-                        style={{ color: '#000000' }}
-                        size={18}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )
-              }
+        {/* info waktu/jam */}
+        {fullscreen && batteryTimeEnable && (
+          <View style={styles.timeInfo} pointerEvents="none">
+            <TimeInfo />
+          </View>
+        )}
 
-              <View
-                style={{
-                  backgroundColor: '#363636',
-                  marginVertical: 10,
-                  marginHorizontal: 2,
-                  paddingVertical: 5,
-                  borderRadius: 9,
-                  paddingLeft: 4,
-                }}>
-                <Text style={[globalStyles.text, { fontSize: 15 }]}>
-                  Silahkan pilih resolusi:
-                </Text>
-                <View style={{ flexDirection: 'row' }}>
-                  {this.state.data.validResolution.map(res => {
-                    return (
-                      <TouchableOpacity
-                        key={res}
-                        style={{
-                          alignSelf: 'flex-start',
-                          paddingVertical: 1,
-                          paddingHorizontal: 9,
-                          marginRight: 5,
-                          backgroundColor:
-                            this.state.data.resolution === res
-                              ? 'orange'
-                              : '#005ca7',
-                        }}
-                        onPress={() => {
-                          if (this.state.data.resolution !== res) {
-                            this.setResolution(res);
-                          }
-                        }}>
-                        <Text
-                          style={{
-                            color:
-                              this.state.data.resolution === res
-                                ? '#181818'
-                                : globalStyles.text.color,
-                          }}>
-                          {res}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {this.state.loading && <ActivityIndicator />}
-                </View>
-              </View>
-
-              {
-                // mengecek apakah anime terdiri dari beberapa part
-                this.state.data.streamingLink?.length > 1 && (
-                  <View
-                    style={{
-                      backgroundColor: '#363636',
-                      marginVertical: 10,
-                      marginHorizontal: 4,
-                      borderRadius: 9,
-                      paddingLeft: 4,
-                      paddingVertical: 5,
-                    }}>
-                    <Text style={globalStyles.text}>Silahkan pilih part:</Text>
-                    <View
-                      style={{
-                        flex: 1,
-                        flexWrap: 'wrap',
-                        flexDirection: 'row',
-                      }}>
-                      {this.state.data.streamingLink.map((_, i) => {
-                        return (
-                          <TouchableOpacity
-                            key={i}
-                            style={{
-                              alignSelf: 'flex-start',
-                              paddingVertical: 1,
-                              paddingHorizontal: 9,
-                              marginRight: 5,
-                              marginBottom: 5,
-                              backgroundColor:
-                                this.state.part === i ? 'orange' : '#005ca7',
-                            }}
-                            onPress={() => {
-                              this.setState({
-                                part: i,
-                              });
-                            }}>
-                            <Text
-                              style={{
-                                color:
-                                  this.state.part === i
-                                    ? '#181818'
-                                    : globalStyles.text.color,
-                              }}>
-                              {'Part ' + (i + 1)}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                    {/* info tentang part */}
-                    <TouchableOpacity
-                      hitSlop={8}
-                      onPress={() => {
-                        Alert.alert(
-                          'Mengapa episode di bagi menjadi beberapa part?',
-                          'Kami menjadikan episode anime dengan durasi yang panjang atau resolusi yang besar menjadi beberapa part agar proses streaming menjadi lebih lancar dan bebas error.',
-                        );
-                      }}
-                      style={{ position: 'absolute', right: 5, top: 2 }}>
-                      <Icon
-                        name="info-circle"
-                        style={globalStyles.text}
-                        size={17}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )
-              }
-
-              <View
-                style={{
-                  backgroundColor: '#363636',
-                  marginVertical: 10,
-                  marginHorizontal: 4,
-                  borderRadius: 9,
-                  paddingLeft: 4,
-                }}>
-                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={globalStyles.text}>Status:</Text>
-                  <Text
-                    style={[
-                      globalStyles.text,
-                      {
-                        position: 'absolute',
-                        left: '40%',
-                      },
-                    ]}>
-                    {this.state.data.status}
-                  </Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={globalStyles.text}>Tahun rilis:</Text>
-                  <Text
-                    style={[
-                      globalStyles.text,
-                      {
-                        position: 'absolute',
-                        left: '40%',
-                      },
-                    ]}>
-                    {this.state.data.releaseYear}
-                  </Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={globalStyles.text}>Rating:</Text>
-                  <Text
-                    style={[
-                      globalStyles.text,
-                      {
-                        position: 'absolute',
-                        left: '40%',
-                      },
-                    ]}>
-                    {this.state.data.rating}
-                  </Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                  <Text style={[globalStyles.text]}>Genre:</Text>
-                  <View style={{ marginLeft: '5%', width: '60%' }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                        justifyContent: 'space-around',
-                      }}>
-                      {this.state.data.genre.map(data => {
-                        return (
-                          <View
-                            key={data}
-                            style={{
-                              flexWrap: 'wrap',
-                              backgroundColor: '#005272',
-                              borderRadius: 2,
-                              marginBottom: 5,
-                            }}>
-                            <Text style={[globalStyles.text]}>{data}</Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  </View>
-                </View>
-              </View>
-
-              <View
-                style={{
-                  backgroundColor: '#363636',
-                  marginTop: 10,
-                  marginBottom: 20,
-                  marginHorizontal: 4,
-                  borderRadius: 9,
-                  paddingLeft: 4,
-                }}>
-                {this.state.showSynopsys ? (
-                  <>
-                    <Text style={[globalStyles.text, { fontSize: 13 }]}>
-                      {this.state.data.synopsys}
-                    </Text>
-                    <TouchableOpacity
-                      style={{ alignSelf: 'flex-start' }}
-                      onPress={() =>
-                        this.setState({
-                          showSynopsys: false,
-                        })
-                      }>
-                      <Text style={{ color: '#7a86f1' }}>
-                        Sembunyikan sinopsis
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <TouchableOpacity
-                    style={{ alignSelf: 'flex-start' }}
-                    onPress={() =>
-                      this.setState({
-                        showSynopsys: true,
-                      })
-                    }>
-                    <Text style={{ color: '#7a86f1' }}>Tampilkan sinopsis</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-              <View style={styles.dlbtn}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#00749b',
-                    flex: 1,
-                    marginRight: 5,
-                  }}
-                  onPress={() => this.downloadAnime()}>
-                  <Text
-                    style={[
-                      { fontWeight: 'bold', fontSize: 18, textAlign: 'center' },
-                      globalStyles.text,
-                    ]}>
-                    Download
-                    {this.state.data.streamingLink.length > 1 && ' part ini'}
-                  </Text>
-                </TouchableOpacity>
-
-                {this.state.data.streamingLink?.length > 1 && (
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: '#e27800',
-                      flex: 1,
-                    }}
-                    onPress={() => this.downloadAllAnimePart(undefined, true)}>
-                    <Text
-                      style={[
-                        {
-                          fontWeight: 'bold',
-                          fontSize: 18,
-                          textAlign: 'center',
-                        },
-                        globalStyles.text,
-                      ]}>
-                      Download semua part
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </ScrollView>
+        {
+          // mengecek apakah video tersedia
+          data.streamingLink?.[part]?.sources[0].src ? (
+            <Videos
+              key={data.streamingLink[part].sources[0].src}
+              showOnEnd={true}
+              title={data.title}
+              disableBack={!fullscreen}
+              onBack={onBack}
+              toggleResizeModeOnFullscreen={false}
+              isFullscreen={fullscreen}
+              onEnterFullscreen={enterFullscreen}
+              onExitFullscreen={exitFullscreen}
+              source={{
+                uri: data.streamingLink[part].sources[0].src,
+              }}
+              onEnd={onEnd}
+              rewindTime={10}
+              showDuration={true}
+              onProgress={handleProgress}
+            />
+          ) : (
+            <Text style={globalStyles.text}>Video tidak tersedia</Text>
           )
         }
       </View>
-    );
-  }
+      {/* END OF VIDEO ELEMENT */}
+      {
+        // mengecek apakah sedang dalam keadaan fullscreen atau tidak
+        // jika ya, maka hanya menampilkan video saja
+        !fullscreen && (
+          <ScrollView style={{ flex: 1 }}>
+            <TouchableOpacity
+              style={[styles.container]}
+              onPress={() => setShowSynopsys(!showSynopsys)}>
+              <Text style={[globalStyles.text, styles.infoTitle]}>
+                {data.title}
+              </Text>
+
+              <Text
+                style={[globalStyles.text, styles.infoSinopsis]}
+                numberOfLines={!showSynopsys ? 2 : undefined}>
+                {data.synopsys}
+              </Text>
+
+              <View style={[styles.infoGenre]}>
+                {data.genre.map(genre => (
+                  <Text key={genre} style={[globalStyles.text, styles.genre]}>
+                    {genre}
+                  </Text>
+                ))}
+              </View>
+
+              <View style={styles.infoData}>
+                <Text style={[globalStyles.text, styles.status]}>
+                  {data.status}
+                </Text>
+                <Text style={[globalStyles.text, styles.releaseYear]}>
+                  {data.releaseYear}
+                </Text>
+                <Text style={[globalStyles.text, styles.rating]}>
+                  <Icon name="star" color="gold" /> {data.rating}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <View style={[styles.container, { marginTop: 10 }]}>
+              {data.episodeData && (
+                <View style={[styles.episodeDataControl]}>
+                  <TouchableOpacity
+                    key="prev"
+                    disabled={!data.episodeData.previous}
+                    style={[
+                      styles.episodeDataControlButton,
+                      {
+                        backgroundColor: data.episodeData.previous
+                          ? '#00ccff'
+                          : '#525252',
+                        marginRight: 5,
+                      },
+                    ]}
+                    onPress={() =>
+                      episodeDataControl(data.episodeData.previous)
+                    }>
+                    <Icon name="arrow-left" size={18} color="black" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    key="next"
+                    disabled={!data.episodeData.next}
+                    style={[
+                      styles.episodeDataControlButton,
+                      {
+                        backgroundColor: data.episodeData.next
+                          ? '#00ccff'
+                          : '#525252',
+                      },
+                    ]}
+                    onPress={() => episodeDataControl(data.episodeData.next)}>
+                    <Icon name="arrow-right" size={18} color="black" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              <View style={{ width: 120 }}>
+                <Dropdown
+                  open={openResolution}
+                  value={data.resolution}
+                  items={data.validResolution.map(z => {
+                    return { label: z, value: z };
+                  })}
+                  setOpen={setOpenResolution}
+                  setValue={val => {
+                    setResolution(val());
+                  }}
+                  listMode="MODAL"
+                  modalTitle="Pilih resolusi"
+                  theme="DARK"
+                  style={{
+                    width: 120,
+                  }}
+                />
+              </View>
+              {data.streamingLink?.length > 1 && (
+                <View style={styles.dropdownPart}>
+                  <Dropdown
+                    open={openPart}
+                    value={part}
+                    items={data.streamingLink.map((_, i) => {
+                      return { label: 'Part ' + (i + 1), value: i };
+                    })}
+                    setOpen={setOpenPart}
+                    setValue={val => {
+                      setPart(val());
+                    }}
+                    listMode="MODAL"
+                    modalTitle="Pilih part"
+                    theme="DARK"
+                    containerStyle={{
+                      width: 120,
+                    }}
+                  />
+                  {/* <Icon name="info-circle" /> */}
+                </View>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={styles.downloadButton}
+              onPress={downloadAnime}>
+              <Icon name="download" size={23} color={globalStyles.text.color} />
+              <Text style={globalStyles.text}>
+                Download {data.streamingLink?.length > 1 && 'Part ini'}
+              </Text>
+            </TouchableOpacity>
+
+            {data.streamingLink?.length > 1 && (
+              <TouchableOpacity
+                style={[
+                  styles.downloadButton,
+                  { backgroundColor: '#996300', marginTop: 5 },
+                ]}
+                onPress={downloadAllAnimePart}>
+                <Icon
+                  name="download"
+                  size={23}
+                  color={globalStyles.text.color}
+                />
+                <Text style={globalStyles.text}>Download semua part</Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+        )
+      }
+    </View>
+  );
 }
 
 function TimeInfo() {
@@ -925,6 +678,22 @@ function TimeInfo() {
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0000008a',
+  },
+  modalContent: {
+    flex: 0.15,
+    minWidth: 300,
+    minHeight: 100,
+    backgroundColor: '#2c2c2c',
+    borderColor: 'gold',
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   batteryInfo: {
     position: 'absolute',
     right: 10,
@@ -955,6 +724,63 @@ const styles = StyleSheet.create({
   dlbtn: {
     flex: 1,
     flexDirection: 'row',
+  },
+  container: {
+    backgroundColor: '#1d1d1d',
+    padding: 13,
+  },
+  infoTitle: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 5,
+  },
+  infoSinopsis: {
+    fontSize: 13.5,
+  },
+  infoGenre: {
+    marginVertical: 5,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  genre: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    padding: 1,
+    margin: 2,
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  infoData: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  status: {},
+  releaseYear: {
+    borderWidth: 1,
+    borderColor: 'green',
+    paddingHorizontal: 5,
+  },
+  episodeDataControl: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  episodeDataControlButton: {
+    padding: 5,
+  },
+  dropdownPart: {
+    width: 120,
+    position: 'absolute',
+    bottom: 13,
+    right: 13,
+  },
+  downloadButton: {
+    backgroundColor: '#0050ac',
+    marginTop: 40,
+    padding: 9,
+    width: '85%',
+    alignItems: 'center',
+    alignSelf: 'center',
   },
 });
 export default Video;
