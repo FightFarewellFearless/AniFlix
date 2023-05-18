@@ -1,3 +1,6 @@
+![screenshot](./githubAssets/screenshot.jpg)
+
+
 # Aplikasi nonton anime gratis tanpa iklan
 
 Video yang terdapat di aplikasi bukan berasal dari server kami.
