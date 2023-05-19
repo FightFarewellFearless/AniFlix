@@ -1,3 +1,6 @@
+![screenshot](./githubAssets/screenshot.jpg)
+
+
 # Aplikasi nonton anime gratis tanpa iklan
 
 Video yang terdapat di aplikasi bukan berasal dari server kami.
@@ -33,7 +36,9 @@ A: video yang sudah di download bisa kamu temukan di `Penyimpanan Internal/Downl
 
 # LICENSE
 
-This project is under Creative Commons Attribution Non-Commercial (CC BY-NC) license
+![CC BY-NC](http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by-nc.png)
+
+&copy; 2023 pirles, This project is licensed under [Creative Commons Attribution Non-Commercial (CC BY-NC) license](https://creativecommons.org/licenses/by-nc/4.0/)
 
 You are allowed to:
 * Distribute (copy and share) the project.
