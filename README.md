@@ -3,21 +3,24 @@
 
 # Aplikasi nonton anime gratis tanpa iklan
 
-Video yang terdapat di aplikasi bukan berasal dari server kami.
-
-Semua video berasal dari server pihak ke tiga dan kami tidak punya akses sama sekali.
-
 ## Lengkap dan terbaru!
 
 Tonton anime favorit mu sekarang! Episode lengkap dan terbaru.
-
-\* Note: Kami memblokir/memfilter anime dengan genre Ecchi
 
 ## Mudah digunakan
 
 Target utama kami adalah UI yang simpel dan mudah digunakan.
 
-Kamu bisa mendownload episode anime dengan satu klik.
+Download episode anime dengan satu klik. Tonton tanpa login!
+
+# Cara Download
+
+Kamu bisa download aplikasi dengan cara berikut ini:
+
+- Pergi ke [Halaman rilis](https://github.com/FightFarewellFearless/anime-react-native/releases)
+- Pilih rilis terbaru
+- Klik bagian **assets**
+- Pilih file **anime.apk**
 
 # FAQ
 
@@ -33,6 +36,11 @@ A: server kami dijalankan di versi gratis [replit](https://replit.com), jadi tid
 
 A: video yang sudah di download bisa kamu temukan di `Penyimpanan Internal/Download/`
 
+# Catatan
+
+- Kami memblokir anime dengan genre ecchi dan hentai agar aplikasi aman untuk semua usia
+- Video yang terdapat di aplikasi bukan berasal dari server kami.
+Semua video berasal dari server pihak ke tiga dan kami tidak punya akses sama sekali.
 
 # LICENSE
 
