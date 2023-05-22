@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   ActivityIndicator,
   Alert,
   Modal,
-  ScrollView,
+  Animated,
   StyleSheet,
   Switch,
   Text,
@@ -16,6 +22,8 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { HomeContext } from '../misc/context';
+import { useFocusEffect } from '@react-navigation/native';
 
 function Setting(props) {
   const [notificationSwitch, setNotificationSwitch] = useState(false);
@@ -24,6 +32,9 @@ function Setting(props) {
   const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
   const [backupCode, setBackupCode] = useState('');
+  const { paramsState } = useContext(HomeContext);
+
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
     AsyncStorage.getItem('enableNextPartNotification').then(data => {
@@ -33,6 +44,26 @@ function Setting(props) {
       setBatteryTimeInfoSwitch(data === 'true');
     });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        // speed: 18,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+      return () => {
+        Animated.timing(scaleAnim, {
+          toValue: 0.5,
+          // speed: 18,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   const nextPartNotification = () => {
     const newValue = !notificationSwitch;
@@ -226,12 +257,10 @@ function Setting(props) {
   };
 
   return (
-    <ScrollView>
+    <Animated.ScrollView style={{ transform: [{ scale: scaleAnim }] }}>
       <View style={styles.waktuServer}>
         <Text style={globalStyles.text}>Waktu server: </Text>
-        <Text style={globalStyles.text}>
-          {props.route.params.data.waktuServer}
-        </Text>
+        <Text style={globalStyles.text}>{paramsState.waktuServer}</Text>
       </View>
       {/* Modal backup */}
       <Modal transparent visible={modalVisible}>
@@ -331,7 +360,7 @@ function Setting(props) {
         icon={<Icon name="trash" style={{ color: 'red' }} size={15} />}
         handler={() => deleteHistory()}
       />
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 

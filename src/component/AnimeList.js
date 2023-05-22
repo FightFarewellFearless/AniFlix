@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import {
+  Animated,
   View,
   RefreshControl,
   Text,
@@ -10,14 +11,38 @@ import {
   ToastAndroid,
   TouchableHighlight,
 } from 'react-native';
-import { StackActions } from '@react-navigation/native';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { HomeContext } from '../misc/context';
 
 function Home(props) {
   const [searchText, setSearchText] = useState('');
-  const [data, setData] = useState(props.route.params.data);
+  const { paramsState: data, setParamsState: setData } =
+    useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
+
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        // speed: 18,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+      return () => {
+        Animated.timing(scaleAnim, {
+          toValue: 0.5,
+          // speed: 18,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   const submit = useCallback(() => {
     if (searchText === '') {
@@ -48,9 +73,11 @@ function Home(props) {
         ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
         setRefresh(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <ScrollView
+    <Animated.ScrollView
+      style={{ transform: [{ scale: scaleAnim }] }}
       refreshControl={
         <RefreshControl refreshing={refresh} onRefresh={() => refreshing()} />
       }>
@@ -121,7 +148,7 @@ function Home(props) {
           ))}
         </ScrollView>
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
   );
 }
 

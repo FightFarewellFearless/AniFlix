@@ -7,221 +7,218 @@ import {
   Image,
   Alert,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StackActions } from '@react-navigation/native';
-import React, { Component } from 'react';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useRef, useState } from 'react';
 import styles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 require('moment/locale/id');
 
-class History extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: true,
-      data: [],
-      historyRefreshing: false,
-    };
-  }
+function History(props) {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [historyRefreshing, setHistoryRefreshing] = useState(false);
 
-  updateHistory = () =>
-    new Promise(async res => {
-      let history = await AsyncStorage.getItem('history');
-      if (history === null) {
-        await AsyncStorage.setItem('history', '[]');
-        this.setState(
-          {
-            loading: false,
-          },
-          res,
-        );
-      } else {
-        history = JSON.parse(history);
-        this.setState(
-          {
-            loading: false,
-            data: history,
-          },
-          res,
-        );
-      }
-    });
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
-  componentDidMount() {
-    this.unsubscribe = this.props.navigation.addListener(
-      'focus',
-      this.updateHistory,
-    );
-    this.updateHistory();
-  }
+  useFocusEffect(
+    useCallback(() => {
+      updateHistory();
 
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        // speed: 18,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
 
-  async deleteHistori(index) {
-    const data = JSON.parse(await AsyncStorage.getItem('history'));
-    data.splice(index, 1);
-    await AsyncStorage.setItem('history', JSON.stringify(data));
-    this.updateHistory();
-  }
+      return () => {
+        Animated.timing(scaleAnim, {
+          toValue: 0.5,
+          // speed: 18,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
-  render() {
-    return (
-      <View style={{ flex: 1 }}>
-        {this.state.loading ? (
-          <ActivityIndicator />
-        ) : this.state.data.length === 0 ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={[styles.text]}>Tidak ada histori tontonan</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={this.state.data}
-            keyExtractor={item => item.title}
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.historyRefreshing}
-                onRefresh={() => {
-                  this.setState(
-                    {
-                      historyRefreshing: true,
-                    },
-                    async () => {
-                      await this.updateHistory();
-                      this.setState({
-                        historyRefreshing: false,
-                      });
-                    },
-                  );
+  const updateHistory = useCallback(
+    () =>
+      new Promise(async res => {
+        let history = await AsyncStorage.getItem('history');
+        if (history === null) {
+          await AsyncStorage.setItem('history', '[]');
+          setLoading(false);
+          res();
+        } else {
+          history = JSON.parse(history);
+          setLoading(false);
+          setData(history);
+          res();
+        }
+      }),
+    [],
+  );
+
+  const deleteHistori = useCallback(async index => {
+    const historyData = JSON.parse(await AsyncStorage.getItem('history'));
+    historyData.splice(index, 1);
+    await AsyncStorage.setItem('history', JSON.stringify(historyData));
+    updateHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
+      {loading ? (
+        <ActivityIndicator />
+      ) : data.length === 0 ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[styles.text]}>Tidak ada histori tontonan</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={item => item.title}
+          refreshControl={
+            <RefreshControl
+              refreshing={historyRefreshing}
+              onRefresh={() => {
+                setHistoryRefreshing(true);
+                (async () => {
+                  await updateHistory();
+                  setHistoryRefreshing(false);
+                })();
+              }}
+            />
+          }
+          renderItem={({ item, index }) => {
+            return (
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  marginVertical: 5,
+                  backgroundColor: '#444242',
+                  borderRadius: 16,
                 }}
-              />
-            }
-            renderItem={({ item, index }) => {
-              return (
-                <TouchableOpacity
+                key={'btn' + item.title}
+                onPress={() => {
+                  props.navigation.dispatch(
+                    StackActions.push('FromUrl', {
+                      link: item.link,
+                    }),
+                  );
+                }}>
+                <Image
+                  resizeMode="stretch"
+                  source={{ uri: item.thumbnailUrl }}
                   style={{
-                    flexDirection: 'row',
-                    marginVertical: 5,
-                    backgroundColor: '#444242',
-                    borderRadius: 16,
+                    width: 120,
+                    height: 210,
+                    borderTopLeftRadius: 16,
+                    borderBottomLeftRadius: 16,
+                    marginRight: 7,
                   }}
-                  key={'btn' + item.title}
-                  onPress={() => {
-                    this.props.navigation.dispatch(
-                      StackActions.push('FromUrl', {
-                        link: item.link,
-                      }),
-                    );
+                />
+
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    flex: 1,
                   }}>
-                  <Image
-                    resizeMode="stretch"
-                    source={{ uri: item.thumbnailUrl }}
+                  <View
                     style={{
-                      width: 120,
-                      height: 210,
-                      borderTopLeftRadius: 16,
-                      borderBottomLeftRadius: 16,
-                      marginRight: 7,
-                    }}
-                  />
+                      flexShrink: 1,
+                      justifyContent: 'center',
+                      flex: 1,
+                    }}>
+                    <Text style={[{ flexShrink: 1 }, styles.text]}>
+                      {item.title}
+                    </Text>
+                  </View>
 
                   <View
                     style={{
-                      flexDirection: 'column',
-                      flex: 1,
+                      justifyContent: 'flex-end',
                     }}>
-                    <View
+                    <Text
                       style={{
-                        flexShrink: 1,
-                        justifyContent: 'center',
-                        flex: 1,
+                        color: '#1eb1a9',
+                        fontSize: 12,
                       }}>
-                      <Text style={[{ flexShrink: 1 }, styles.text]}>
-                        {item.title}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={{
-                        justifyContent: 'flex-end',
-                      }}>
-                      <Text
-                        style={{
-                          color: '#1eb1a9',
-                          fontSize: 12,
-                        }}>
-                        {item.episode}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        zIndex: 0,
-                      }}>
-                      <Text style={styles.text}>
-                        {moment
-                          .duration(
-                            moment(Date.now()).diff(item.date, 'seconds'),
-                            'seconds',
-                          )
-                          .humanize() + ' '}
-                        yang lalu pukul {moment(item.date).format('HH:mm')}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={{
-                        position: 'absolute',
-                        right: 5,
-                        top: 5,
-                      }}>
-                      <TouchableOpacity
-                        hitSlop={10}
-                        onPress={() => {
-                          Alert.alert(
-                            'Yakin?',
-                            'Yakin kamu ingin menghapus "' +
-                              item.title.trim() +
-                              '" dari histori?',
-                            [
-                              {
-                                text: 'Tidak',
-                                onPress: () => null,
-                                style: 'cancel',
-                              },
-                              {
-                                text: 'Ya',
-                                onPress: () => this.deleteHistori(index),
-                              },
-                            ],
-                          );
-                        }}>
-                        <Icon
-                          name="trash"
-                          size={22}
-                          style={{ color: '#cc2525' }}
-                        />
-                      </TouchableOpacity>
-                    </View>
+                      {item.episode}
+                    </Text>
                   </View>
-                </TouchableOpacity>
-              );
-            }}
-          />
-        )}
-      </View>
-    );
-  }
+
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      zIndex: 0,
+                    }}>
+                    <Text style={styles.text}>
+                      {moment
+                        .duration(
+                          moment(Date.now()).diff(item.date, 'seconds'),
+                          'seconds',
+                        )
+                        .humanize() + ' '}
+                      yang lalu pukul {moment(item.date).format('HH:mm')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      position: 'absolute',
+                      right: 5,
+                      top: 5,
+                    }}>
+                    <TouchableOpacity
+                      hitSlop={10}
+                      onPress={() => {
+                        Alert.alert(
+                          'Yakin?',
+                          'Yakin kamu ingin menghapus "' +
+                            item.title.trim() +
+                            '" dari histori?',
+                          [
+                            {
+                              text: 'Tidak',
+                              onPress: () => null,
+                              style: 'cancel',
+                            },
+                            {
+                              text: 'Ya',
+                              onPress: () => deleteHistori(index),
+                            },
+                          ],
+                        );
+                      }}>
+                      <Icon
+                        name="trash"
+                        size={22}
+                        style={{ color: '#cc2525' }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      )}
+    </Animated.View>
+  );
 }
 
 export default History;

@@ -1,19 +1,17 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import History from './History';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './AnimeList';
 import Setting from './Setting';
+import { HomeContext } from '../misc/context';
 
-class BottomTabs extends Component {
-  constructor(props) {
-    super(props);
-    this.Tab = createBottomTabNavigator();
-  }
+function BottomTabs(props) {
+  const Tab = createBottomTabNavigator();
 
-  render() {
-    const Tab = this.Tab;
-    return (
+  const [paramsState, setParamsState] = useState(props.route.params.data);
+  return (
+    <HomeContext.Provider value={{ paramsState, setParamsState }}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -22,7 +20,6 @@ class BottomTabs extends Component {
         <Tab.Screen
           name="Home1"
           component={Home}
-          initialParams={this.props.route.params}
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="home" style={{ color }} size={20} />
@@ -42,7 +39,6 @@ class BottomTabs extends Component {
         />
         <Tab.Screen
           name="Setting"
-          initialParams={this.props.route.params}
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="gears" style={{ color }} size={20} />
@@ -51,8 +47,8 @@ class BottomTabs extends Component {
           component={Setting}
         />
       </Tab.Navigator>
-    );
-  }
+    </HomeContext.Provider>
+  );
 }
 
 export default BottomTabs;

@@ -409,19 +409,24 @@ function Video(props) {
     },
     [loading],
   );
+
+  const cancelLoading = useCallback(() => {
+    abortController.current.abort();
+    setLoading(false);
+    abortController.current = new AbortController();
+  }, []);
+
   return (
     <View style={{ flex: 2 }}>
       {/* Loading modal */}
-      <Modal
-        visible={loading}
-        transparent
-        onRequestClose={() => {
-          abortController.current.abort();
-          setLoading(false);
-          abortController.current = new AbortController();
-        }}>
+      <Modal visible={loading} transparent onRequestClose={cancelLoading}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <TouchableOpacity
+              onPress={cancelLoading}
+              style={{ position: 'absolute', top: 5, right: 5 }}>
+              <Icon name="close" size={28} style={{ color: 'red' }} />
+            </TouchableOpacity>
             <ActivityIndicator size={'large'} />
             <Text style={globalStyles.text}>Loading...</Text>
           </View>
@@ -527,14 +532,22 @@ function Video(props) {
               </View>
 
               <View style={styles.infoData}>
-                <Text style={[globalStyles.text, styles.status]}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.status,
+                    {
+                      backgroundColor:
+                        data.status === 'Ended' ? 'green' : 'red',
+                    },
+                  ]}>
                   {data.status}
                 </Text>
                 <Text style={[globalStyles.text, styles.releaseYear]}>
                   {data.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
-                  <Icon name="star" color="gold" /> {data.rating}
+                  <Icon name="star" color="black" /> {data.rating}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -687,10 +700,10 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 0.15,
     minWidth: 300,
-    minHeight: 100,
+    minHeight: 80,
     backgroundColor: '#2c2c2c',
     borderColor: 'gold',
-    borderWidth: 2,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -746,7 +759,7 @@ const styles = StyleSheet.create({
   genre: {
     borderWidth: 1,
     borderColor: 'gray',
-    padding: 1,
+    padding: 2,
     margin: 2,
     fontSize: 11,
     textAlign: 'center',
@@ -755,11 +768,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
   },
-  status: {},
+  status: {
+    borderRadius: 5,
+    padding: 3,
+  },
   releaseYear: {
     borderWidth: 1,
     borderColor: 'green',
     paddingHorizontal: 5,
+    textAlign: 'center',
+    alignSelf: 'center',
+  },
+  rating: {
+    backgroundColor: 'orange',
+    borderRadius: 5,
+    color: '#1f1f1f',
+    padding: 3,
   },
   episodeDataControl: {
     flexDirection: 'row',
@@ -776,6 +800,7 @@ const styles = StyleSheet.create({
   },
   downloadButton: {
     backgroundColor: '#0050ac',
+    borderRadius: 5,
     marginTop: 40,
     padding: 9,
     width: '85%',
