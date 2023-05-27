@@ -38,7 +38,7 @@ function Video(props) {
   // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
   const [showSynopsys, setShowSynopsys] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [part, setPart] = useState(historyData.part ?? 0);
+  const [part, setPart] = useState(historyData?.part ?? 0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
   const [shouldShowNextPartNotification, setShouldShowNextPartNotification] =

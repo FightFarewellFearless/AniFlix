@@ -191,9 +191,7 @@ function Setting(props) {
                         }
                         currentHistory.splice(dataINDEX, 1);
                       }
-                      currentHistory.push({
-                        ...result,
-                      });
+                      currentHistory.push(result);
                     }
                     currentHistory.sort((a, b) => b.date - a.date);
                     await AsyncStorage.setItem(
