@@ -22,7 +22,7 @@ function History(props) {
   const [data, setData] = useState([]);
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
 
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -37,7 +37,7 @@ function History(props) {
 
       return () => {
         Animated.timing(scaleAnim, {
-          toValue: 0.5,
+          toValue: 0.8,
           // speed: 18,
           duration: 250,
           useNativeDriver: true,
@@ -65,7 +65,7 @@ function History(props) {
     [],
   );
 
-  const deleteHistori = useCallback(async index => {
+  const deleteHistory = useCallback(async index => {
     const historyData = JSON.parse(await AsyncStorage.getItem('history'));
     historyData.splice(index, 1);
     await AsyncStorage.setItem('history', JSON.stringify(historyData));
@@ -116,6 +116,7 @@ function History(props) {
                   props.navigation.dispatch(
                     StackActions.push('FromUrl', {
                       link: item.link,
+                      historyData: item,
                     }),
                   );
                 }}>
@@ -157,8 +158,25 @@ function History(props) {
                         fontSize: 12,
                       }}>
                       {item.episode}
+                      {item.part !== undefined && (
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: 'red',
+                          }}>
+                          {' Part ' + (item.part + 1)}
+                        </Text>
+                      )}
                     </Text>
                   </View>
+
+                  {item.lastDuration !== undefined && (
+                    <View style={{ position: 'absolute', bottom: 1, right: 1 }}>
+                      <Text style={styles.text}>
+                        {formatTimeFromSeconds(item.lastDuration)}
+                      </Text>
+                    </View>
+                  )}
 
                   <View
                     style={{
@@ -199,7 +217,7 @@ function History(props) {
                             },
                             {
                               text: 'Ya',
-                              onPress: () => deleteHistori(index),
+                              onPress: () => deleteHistory(index),
                             },
                           ],
                         );
@@ -219,6 +237,18 @@ function History(props) {
       )}
     </Animated.View>
   );
+}
+
+function formatTimeFromSeconds(seconds) {
+  const duration = moment.duration(seconds, 'seconds');
+  const hours = duration.hours();
+  const minutes = duration.minutes();
+  const secondsResult = duration.seconds();
+
+  const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${secondsResult.toString().padStart(2, '0')}`;
+  return formattedTime;
 }
 
 export default History;

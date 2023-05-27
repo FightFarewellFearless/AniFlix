@@ -22,7 +22,7 @@ function Home(props) {
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
 
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -34,7 +34,7 @@ function Home(props) {
       }).start();
       return () => {
         Animated.timing(scaleAnim, {
-          toValue: 0.5,
+          toValue: 0.8,
           // speed: 18,
           duration: 250,
           useNativeDriver: true,

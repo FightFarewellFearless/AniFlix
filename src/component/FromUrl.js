@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import randomTipsArray from '../assets/loadingTips.json';
+import setHistory from '../utils/historyControl';
 
 class FromUrl extends Component {
   constructor() {
@@ -68,9 +68,14 @@ class FromUrl extends Component {
         );
       }
     } else {
+      const resolution = this.props.route.params.historyData?.resolution; // only if FromUrl is called from history component
+      const providedResolution =
+        resolution !== undefined ? `&res=${resolution}` : '';
+
       const results = await fetch(
         'https://animeapi.aceracia.repl.co/v2/fromUrl?link=' +
-          this.props.route.params.link,
+          this.props.route.params.link +
+          providedResolution,
         {
           signal: abort.signal,
         },
@@ -101,35 +106,17 @@ class FromUrl extends Component {
               StackActions.replace('Video', {
                 data: result,
                 link: this.props.route.params.link,
+                historyData: this.props.route.params.historyData,
               }),
             );
 
             // History
-
-            (async () => {
-              let data = await AsyncStorage.getItem('history');
-              if (data === null) {
-                data = '[]';
-              }
-              data = JSON.parse(data);
-              const episodeI = result.title.toLowerCase().indexOf('episode');
-              const title =
-                episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
-              const episode =
-                episodeI < 0 ? null : result.title.slice(episodeI);
-              const dataINDEX = data.findIndex(val => val.title === title);
-              if (dataINDEX >= 0) {
-                data.splice(dataINDEX, 1);
-              }
-              data.splice(0, 0, {
-                title,
-                episode,
-                link: this.props.route.params.link,
-                thumbnailUrl: result.thumbnailUrl,
-                date: Date.now(),
-              });
-              AsyncStorage.setItem('history', JSON.stringify(data));
-            })();
+            setHistory(
+              result,
+              this.props.route.params.link,
+              false,
+              this.props.route.params.historyData,
+            );
           }
         }
       } catch (e) {

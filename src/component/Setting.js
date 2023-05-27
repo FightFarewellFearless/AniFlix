@@ -34,7 +34,7 @@ function Setting(props) {
   const [backupCode, setBackupCode] = useState('');
   const { paramsState } = useContext(HomeContext);
 
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
     AsyncStorage.getItem('enableNextPartNotification').then(data => {
@@ -55,7 +55,7 @@ function Setting(props) {
       }).start();
       return () => {
         Animated.timing(scaleAnim, {
-          toValue: 0.5,
+          toValue: 0.8,
           // speed: 18,
           duration: 250,
           useNativeDriver: true,

@@ -28,13 +28,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Battery from 'expo-battery';
 import downloadAnimeFunction from '../utils/downloadAnime';
 import Dropdown from 'react-native-dropdown-picker';
+import setHistory from '../utils/historyControl';
+import throttleFunction from '../utils/throttleFunction';
 
 function Video(props) {
+  const historyData = useRef(props.route.params.historyData).current;
+
   const [batteryLevel, setBatteryLevel] = useState(0);
   // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
   const [showSynopsys, setShowSynopsys] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [part, setPart] = useState(0);
+  const [part, setPart] = useState(historyData.part ?? 0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
   const [shouldShowNextPartNotification, setShouldShowNextPartNotification] =
@@ -49,6 +53,23 @@ function Video(props) {
   const currentLink = useRef(props.route.params.link);
   const hasDownloadAllPart = useRef(false);
   const hasPart = useRef(data.streamingLink.length > 1);
+  const firstTimeLoad = useRef(true);
+  const videoRef = useRef();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateHistoryThrottle = useCallback(
+    throttleFunction(progressData => {
+      if (Math.floor(progressData.currentTime) === 0) {
+        return;
+      }
+      setHistory(data, currentLink.current, true, {
+        part: hasPart.current ? part : undefined,
+        resolution: data.resolution,
+        lastDuration: progressData.currentTime,
+      });
+    }, 3000),
+    [part, data, hasPart],
+  );
 
   const preparePartAnimationSequence = useMemo(
     () =>
@@ -331,6 +352,22 @@ function Video(props) {
 
   const handleProgress = useCallback(
     progressData => {
+      nextPartNotificationControl(progressData);
+      updateHistoryThrottle(progressData);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      nextPartNotificationControl,
+      updateHistoryThrottle,
+      data,
+      part,
+      preparePartAnimationSequence,
+      shouldShowNextPartNotification,
+    ],
+  );
+
+  const nextPartNotificationControl = useCallback(
+    progressData => {
       if (hasPart.current) {
         const remainingTime =
           progressData.seekableDuration - progressData.currentTime;
@@ -383,29 +420,7 @@ function Video(props) {
       setPart(0);
       currentLink.current = url;
 
-      (async () => {
-        let historyData = await AsyncStorage.getItem('history');
-        if (historyData === null) {
-          historyData = '[]';
-        }
-        historyData = JSON.parse(historyData);
-        const episodeI = result.title.toLowerCase().indexOf('episode');
-        const title =
-          episodeI >= 0 ? result.title.slice(0, episodeI) : result.title;
-        const episode = episodeI < 0 ? null : result.title.slice(episodeI);
-        const dataINDEX = historyData.findIndex(val => val.title === title);
-        if (dataINDEX >= 0) {
-          historyData.splice(dataINDEX, 1);
-        }
-        historyData.splice(0, 0, {
-          title,
-          episode,
-          link: url,
-          thumbnailUrl: result.thumbnailUrl,
-          date: Date.now(),
-        });
-        AsyncStorage.setItem('history', JSON.stringify(historyData));
-      })();
+      setHistory(result, url);
     },
     [loading],
   );
@@ -414,6 +429,18 @@ function Video(props) {
     abortController.current.abort();
     setLoading(false);
     abortController.current = new AbortController();
+  }, []);
+
+  const handleVideoLoad = useCallback(() => {
+    if (firstTimeLoad.current === false) {
+      return;
+    }
+    firstTimeLoad.current = false;
+    if (historyData === undefined || historyData.lastDuration === undefined) {
+      return;
+    }
+    videoRef.current?.seek(historyData.lastDuration);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -444,15 +471,8 @@ function Video(props) {
                 opacity: preparePartAnimation,
               }}
               pointerEvents="none">
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  backgroundColor: '#0000005e',
-                  padding: 3,
-                  borderRadius: 5,
-                }}>
-                <Text style={{ color: globalStyles.text.color, opacity: 1 }}>
+              <View style={styles.partNotificationContainer}>
+                <Text style={globalStyles.text}>
                   Bersiap ke part selanjutnya
                 </Text>
               </View>
@@ -498,6 +518,8 @@ function Video(props) {
               rewindTime={10}
               showDuration={true}
               onProgress={handleProgress}
+              onLoad={handleVideoLoad}
+              videoRef={videoRef}
             />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
@@ -806,6 +828,13 @@ const styles = StyleSheet.create({
     width: '85%',
     alignItems: 'center',
     alignSelf: 'center',
+  },
+  partNotificationContainer: {
+    position: 'absolute',
+    top: 10,
+    backgroundColor: '#0000008f',
+    padding: 3,
+    borderRadius: 5,
   },
 });
 export default Video;
