@@ -192,11 +192,7 @@ function Setting(props) {
                         currentHistory.splice(dataINDEX, 1);
                       }
                       currentHistory.push({
-                        title: result.title,
-                        episode: result.episode,
-                        link: result.link,
-                        thumbnailUrl: result.thumbnailUrl,
-                        date: result.date,
+                        ...result,
                       });
                     }
                     currentHistory.sort((a, b) => b.date - a.date);
