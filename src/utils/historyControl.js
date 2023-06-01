@@ -20,7 +20,7 @@ async function setHistory(
     episodeIndex < 0 ? null : targetData.title.slice(episodeIndex);
   const dataINDEX = data.findIndex(val => val.title === title);
 
-  const date = data[dataINDEX].date;
+  const date = data[dataINDEX]?.date;
 
   if (dataINDEX >= 0) {
     data.splice(dataINDEX, 1);
