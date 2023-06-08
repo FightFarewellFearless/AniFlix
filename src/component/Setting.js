@@ -18,12 +18,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { HomeContext } from '../misc/context';
 import { useFocusEffect } from '@react-navigation/native';
+import globalStyles from '../assets/style';
+import { HomeContext } from '../misc/context';
 
 function Setting(props) {
   const [notificationSwitch, setNotificationSwitch] = useState(false);
@@ -32,6 +32,8 @@ function Setting(props) {
   const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
   const [backupCode, setBackupCode] = useState('');
+  const [downloadFrom, setDownloadFrom] = useState('native');
+
   const { paramsState } = useContext(HomeContext);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -42,6 +44,9 @@ function Setting(props) {
     });
     AsyncStorage.getItem('enableBatteryTimeInfo').then(data => {
       setBatteryTimeInfoSwitch(data === 'true');
+    });
+    AsyncStorage.getItem('downloadFrom').then(data => {
+      setDownloadFrom(data ?? 'native');
     });
   }, []);
 
@@ -77,7 +82,7 @@ function Setting(props) {
     AsyncStorage.setItem('enableBatteryTimeInfo', newValue.toString());
   };
 
-  const backupHistory = () => {
+  const backupHistory = useCallback(() => {
     Alert.alert(
       'Backup histori',
       'Saat backup sedang berlangsung, kamu tidak bisa membatalkannya. Mau lanjut?',
@@ -139,9 +144,9 @@ function Setting(props) {
         },
       ],
     );
-  };
+  }, []);
 
-  const restoreHistory = async code => {
+  const restoreHistory = useCallback(async code => {
     if (code === undefined) {
       setRestoreVisible(true);
     } else {
@@ -218,9 +223,9 @@ function Setting(props) {
         setModalVisible(false);
       }
     }
-  };
+  }, []);
 
-  const deleteHistory = () => {
+  const deleteHistory = useCallback(() => {
     Alert.alert(
       'Peringatan!!!',
       'Ini akan menghapus semua histori tontonan kamu.\nApakah kamu yakin ingin lanjut?',
@@ -248,7 +253,13 @@ function Setting(props) {
         },
       ],
     );
-  };
+  }, []);
+
+  const toggleDownloadFrom = useCallback(async () => {
+    const newDownloadFrom = downloadFrom === 'native' ? 'browser' : 'native';
+    await AsyncStorage.setItem('downloadFrom', newDownloadFrom);
+    setDownloadFrom(newDownloadFrom);
+  }, [downloadFrom]);
 
   return (
     <Animated.ScrollView style={{ transform: [{ scale: scaleAnim }] }}>
@@ -313,6 +324,7 @@ function Setting(props) {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
       <SettingList
         text="Nyalakan notifikasi part selanjutnya"
         icon={<Icon name="cube" style={globalStyles.text} size={15} />}
@@ -335,6 +347,20 @@ function Setting(props) {
           />
         }
         handler={batteryTimeSwitchHandler}
+      />
+
+      <SettingList
+        text="Download Anime melalui"
+        icon={<Icon name="download" style={globalStyles.text} size={15} />}
+        rightComponent={
+          <Text
+            style={{
+              color: downloadFrom === 'native' ? '#09a709' : '#ff7300',
+            }}>
+            {downloadFrom}
+          </Text>
+        }
+        handler={toggleDownloadFrom}
       />
 
       <SettingList

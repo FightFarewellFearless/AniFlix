@@ -18,16 +18,18 @@ import {
   Animated,
   ToastAndroid,
   Modal,
+  Linking,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
-import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Battery from 'expo-battery';
-import downloadAnimeFunction from '../utils/downloadAnime';
 import Dropdown from 'react-native-dropdown-picker';
+
+import globalStyles from '../assets/style';
+import downloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
@@ -48,6 +50,8 @@ function Video(props) {
 
   const [openResolution, setOpenResolution] = useState(false);
   const [openPart, setOpenPart] = useState(false);
+
+  const [isControlsHidden, setIsControlsHidden] = useState(true);
 
   const downloadSource = useRef([]);
   const currentLink = useRef(props.route.params.link);
@@ -201,7 +205,14 @@ function Video(props) {
     } else {
       iconName += '0';
     }
-    return <Icon name={iconName} style={globalStyles.text} />;
+    return (
+      <Icon
+        name={iconName}
+        style={{
+          color: iconName === 'battery-0' ? 'red' : globalStyles.text.color,
+        }}
+      />
+    );
   }, [batteryLevel]);
 
   const onBatteryStateChange = useCallback(
@@ -321,6 +332,8 @@ function Video(props) {
         return;
       }
 
+      const downloadFrom = await AsyncStorage.getItem('downloadFrom');
+
       for (let i = 0; i < data.streamingLink.length; i++) {
         const source = data.streamingLink[i].sources[0].src;
 
@@ -333,16 +346,25 @@ function Video(props) {
             ')';
         }
 
-        await downloadAnimeFunction(
-          source,
-          downloadSource.current,
-          Title,
-          data.resolution,
-          true,
-          () => {
-            downloadSource.current = [...downloadSource.current, source];
-          },
-        );
+        if (downloadFrom === 'native' || downloadFrom === null) {
+          await downloadAnimeFunction(
+            source,
+            downloadSource.current,
+            Title,
+            data.resolution,
+            true,
+            () => {
+              downloadSource.current = [...downloadSource.current, source];
+            },
+          );
+        }
+      }
+      if (downloadFrom === 'browser') {
+        if (await Linking.canOpenURL(data.downloadLink)) {
+          Linking.openURL(data.downloadLink);
+        } else {
+          ToastAndroid.show('https tidak didukung', ToastAndroid.SHORT);
+        }
       }
       hasDownloadAllPart.current = true;
       ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
@@ -443,6 +465,13 @@ function Video(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const hideControls = useCallback(() => {
+    setIsControlsHidden(true);
+  }, []);
+  const showControls = useCallback(() => {
+    setIsControlsHidden(false);
+  }, []);
+
   return (
     <View style={{ flex: 2 }}>
       {/* Loading modal */}
@@ -482,7 +511,9 @@ function Video(props) {
 
         {/* info baterai */}
         {fullscreen && batteryTimeEnable && (
-          <View style={styles.batteryInfo} pointerEvents="none">
+          <View
+            style={[styles.batteryInfo, { zIndex: isControlsHidden ? 1 : 0 }]}
+            pointerEvents="none">
             {getBatteryIconComponent()}
             <Text style={globalStyles.text}>
               {' '}
@@ -493,7 +524,9 @@ function Video(props) {
 
         {/* info waktu/jam */}
         {fullscreen && batteryTimeEnable && (
-          <View style={styles.timeInfo} pointerEvents="none">
+          <View
+            style={[styles.timeInfo, { zIndex: isControlsHidden ? 1 : 0 }]}
+            pointerEvents="none">
             <TimeInfo />
           </View>
         )}
@@ -520,6 +553,8 @@ function Video(props) {
               onProgress={handleProgress}
               onLoad={handleVideoLoad}
               videoRef={videoRef}
+              onHideControls={hideControls}
+              onShowControls={showControls}
             />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
@@ -688,7 +723,7 @@ function Video(props) {
 function TimeInfo() {
   const [time, setTime] = useState();
 
-  const changeTime = () => {
+  const changeTime = useCallback(() => {
     const currentDate = new Date();
     const hours = currentDate.getHours();
     const minutes = currentDate.getMinutes();
@@ -698,17 +733,15 @@ function TimeInfo() {
     if (time !== newDate) {
       setTime(newDate);
     }
-  };
-  changeTime();
-
-  const interval = setInterval(changeTime, 1_000);
+  }, [time]);
 
   useEffect(() => {
+    changeTime();
+    const interval = setInterval(changeTime, 1_000);
     return () => {
       clearInterval(interval);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [changeTime, time]);
   return <Text style={globalStyles.text}>{time}</Text>;
 }
 
@@ -733,17 +766,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 10,
-    zIndex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 3,
+    borderRadius: 7,
+    backgroundColor: '#00000085',
   },
   timeInfo: {
     position: 'absolute',
     left: 10,
     top: 10,
-    zIndex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 3,
+    borderRadius: 7,
+    backgroundColor: '#00000085',
   },
   fullscreen: {
     position: 'absolute',

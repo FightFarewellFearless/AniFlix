@@ -1,4 +1,5 @@
-import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert, Linking, ToastAndroid } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 
 async function downloadAnime(
@@ -40,28 +41,37 @@ async function downloadAnime(
   if (force === true && sourceLength > 0) {
     Title += ' (' + sourceLength + ')';
   }
+  const downloadFrom = await AsyncStorage.getItem('downloadFrom');
 
-  RNFetchBlob.config({
-    addAndroidDownloads: {
-      useDownloadManager: true,
-      path:
-        '/storage/emulated/0/Download' +
-        '/' +
-        Title +
-        ' ' +
-        resolution +
-        '.mp4',
-      notification: true,
-      mime: 'video/mp4',
-      title: Title + ' ' + resolution + '.mp4',
-    },
-  })
-    .fetch('GET', source)
-    .then(resp => {
-      // the path of downloaded file
-      // resp.path();
+  if (downloadFrom === 'native' || downloadFrom === null) {
+    RNFetchBlob.config({
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        path:
+          '/storage/emulated/0/Download' +
+          '/' +
+          Title +
+          ' ' +
+          resolution +
+          '.mp4',
+        notification: true,
+        mime: 'video/mp4',
+        title: Title + ' ' + resolution + '.mp4',
+      },
     })
-    .catch(() => {});
+      .fetch('GET', source)
+      .then(resp => {
+        // the path of downloaded file
+        // resp.path();
+      })
+      .catch(() => {});
+  } else {
+    if (await Linking.canOpenURL(source)) {
+      Linking.openURL(source);
+    } else {
+      ToastAndroid.show('https tidak didukung', ToastAndroid.SHORT);
+    }
+  }
   callback?.();
 }
 
