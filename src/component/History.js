@@ -9,12 +9,18 @@ import {
   RefreshControl,
   Animated,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
+import { SettingsContext } from '../misc/context';
 require('moment/locale/id');
 
 function History(props) {
@@ -22,7 +28,15 @@ function History(props) {
   const [data, setData] = useState([]);
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
 
+  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  const updateHistory = useCallback(() => {
+    const history = JSON.parse(settingsContext.history);
+    setLoading(false);
+    setData(history);
+  }, [settingsContext.history]);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,34 +58,24 @@ function History(props) {
         }).start();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [updateHistory]),
   );
 
-  const updateHistory = useCallback(
-    () =>
-      new Promise(async res => {
-        let history = await AsyncStorage.getItem('history');
-        if (history === null) {
-          await AsyncStorage.setItem('history', '[]');
-          setLoading(false);
-          res();
-        } else {
-          history = JSON.parse(history);
-          setLoading(false);
-          setData(history);
-          res();
-        }
-      }),
-    [],
-  );
-
-  const deleteHistory = useCallback(async index => {
-    const historyData = JSON.parse(await AsyncStorage.getItem('history'));
-    historyData.splice(index, 1);
-    await AsyncStorage.setItem('history', JSON.stringify(historyData));
+  useEffect(() => {
     updateHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateHistory]);
+
+  const deleteHistory = useCallback(
+    async index => {
+      const historyData = JSON.parse(settingsContext.history);
+      historyData.splice(index, 1);
+      dispatchSettings({
+        target: 'history',
+        value: JSON.stringify(historyData),
+      });
+    },
+    [dispatchSettings, settingsContext.history],
+  );
 
   return (
     <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
@@ -96,13 +100,13 @@ function History(props) {
               onRefresh={() => {
                 setHistoryRefreshing(true);
                 (async () => {
-                  await updateHistory();
+                  updateHistory();
                   setHistoryRefreshing(false);
                 })();
               }}
             />
           }
-          renderItem={({ item, index }) => {
+          renderItem={({ item }) => {
             return (
               <TouchableOpacity
                 style={{
@@ -217,7 +221,12 @@ function History(props) {
                             },
                             {
                               text: 'Ya',
-                              onPress: () => deleteHistory(index),
+                              onPress: () =>
+                                deleteHistory(
+                                  data.findIndex(
+                                    val => val.title === item.title,
+                                  ),
+                                ),
                             },
                           ],
                         );

@@ -79,7 +79,7 @@ function Home(props) {
     <Animated.ScrollView
       style={{ transform: [{ scale: scaleAnim }] }}
       refreshControl={
-        <RefreshControl refreshing={refresh} onRefresh={() => refreshing()} />
+        <RefreshControl refreshing={refresh} onRefresh={refreshing} />
       }>
       <View style={{ flexDirection: 'row' }}>
         <TextInput

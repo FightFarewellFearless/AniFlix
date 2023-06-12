@@ -1,8 +1,11 @@
-import React, { Component } from 'react';
+import React, { useEffect, useMemo, useReducer } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { SettingsContext } from './src/misc/context';
 
 import Loading from './src/component/Loading';
 import EpsList from './src/component/EpsList';
@@ -12,26 +15,36 @@ import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
 import Search from './src/component/Search';
 import FailedToConnect from './src/component/FailedToConnect';
+import defaultDatabase from './src/misc/defaultDatabaseValue.json';
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      loading: true,
-      result: null,
-    };
-    this.Stack = createNativeStackNavigator();
+function reducer(state, action) {
+  const value =
+    typeof action.value !== 'string'
+      ? JSON.stringify(action.value)
+      : action.value;
+  AsyncStorage.setItem(action.target, value);
+  return {
+    ...state,
+    [action.target]: value,
+  };
+}
+
+function App() {
+  const [settingsContext, dispatchSettings] = useReducer(
+    reducer,
+    defaultDatabase,
+  );
+
+  const Stack = useMemo(createNativeStackNavigator, []);
+
+  useEffect(() => {
     StatusBar.setHidden(false);
-  }
-
-  componentDidMount() {
     SystemNavigationBar.setNavigationColor('black');
     StatusBar.setBackgroundColor('black');
-  }
+  }, []);
 
-  render() {
-    const Stack = this.Stack;
-    return (
+  return (
+    <SettingsContext.Provider value={{ settingsContext, dispatchSettings }}>
       <NavigationContainer theme={DarkTheme}>
         <Stack.Navigator
           initialRouteName="loading"
@@ -48,8 +61,7 @@ class App extends Component {
           <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
         </Stack.Navigator>
       </NavigationContainer>
-    );
-  }
+    </SettingsContext.Provider>
+  );
 }
-
 export default App;

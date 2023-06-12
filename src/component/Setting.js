@@ -1,10 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useContext, useState, useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -19,36 +13,50 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
-import { HomeContext } from '../misc/context';
+import { HomeContext, SettingsContext } from '../misc/context';
 
 function Setting(props) {
-  const [notificationSwitch, setNotificationSwitch] = useState(false);
-  const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
+  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+  // const [notificationSwitch, setNotificationSwitch] = useState(false);
+  const notificationSwitch =
+    settingsContext.enableNextPartNotification === 'true';
+  const setNotificationSwitch = value => {
+    dispatchSettings({
+      target: 'enableNextPartNotification',
+      value,
+    });
+  };
+  // const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
+  const batteryTimeInfoSwitch =
+    settingsContext.enableBatteryTimeInfo === 'true';
+  const setBatteryTimeInfoSwitch = value => {
+    dispatchSettings({
+      target: 'enableBatteryTimeInfo',
+      value,
+    });
+  };
+  // const [downloadFrom, setDownloadFrom] = useState('native');
+  const downloadFrom = settingsContext.downloadFrom;
+  const setDownloadFrom = useCallback(
+    value => {
+      dispatchSettings({
+        target: 'downloadFrom',
+        value,
+      });
+    },
+    [dispatchSettings],
+  );
   const [modalVisible, setModalVisible] = useState(false);
   const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
   const [backupCode, setBackupCode] = useState('');
-  const [downloadFrom, setDownloadFrom] = useState('native');
 
   const { paramsState } = useContext(HomeContext);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-
-  useEffect(() => {
-    AsyncStorage.getItem('enableNextPartNotification').then(data => {
-      setNotificationSwitch(data === 'true' || data === null);
-    });
-    AsyncStorage.getItem('enableBatteryTimeInfo').then(data => {
-      setBatteryTimeInfoSwitch(data === 'true');
-    });
-    AsyncStorage.getItem('downloadFrom').then(data => {
-      setDownloadFrom(data ?? 'native');
-    });
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,13 +81,11 @@ function Setting(props) {
   const nextPartNotification = () => {
     const newValue = !notificationSwitch;
     setNotificationSwitch(newValue);
-    AsyncStorage.setItem('enableNextPartNotification', newValue.toString());
   };
 
   const batteryTimeSwitchHandler = () => {
     const newValue = !batteryTimeInfoSwitch;
     setBatteryTimeInfoSwitch(newValue);
-    AsyncStorage.setItem('enableBatteryTimeInfo', newValue.toString());
   };
 
   const backupHistory = useCallback(() => {
@@ -96,8 +102,8 @@ function Setting(props) {
             setModalText('Backup sedang berlangsung...');
             setModalVisible(true);
             try {
-              const historyData = await AsyncStorage.getItem('history');
-              if (historyData === null || historyData === '[]') {
+              const historyData = settingsContext.history;
+              if (historyData === '[]') {
                 Alert.alert(
                   'Tidak ada histori!',
                   'kamu tidak memiliki histori tontonan, Backup dibatalkan',
@@ -144,86 +150,86 @@ function Setting(props) {
         },
       ],
     );
-  }, []);
+  }, [settingsContext.history]);
 
-  const restoreHistory = useCallback(async code => {
-    if (code === undefined) {
-      setRestoreVisible(true);
-    } else {
-      if (code === '') {
-        return;
-      }
-      setRestoreVisible(false);
-      setModalText('Mengecek apakah kode valid...');
-      setModalVisible(true);
-      try {
-        const backupData = await fetch(
-          'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
-        ).then(a => a.json());
-        if (backupData.error) {
-          Alert.alert('Restore gagal!', backupData.message);
-        } else {
-          Alert.alert(
-            'Bersiap untuk restore backup kamu!',
-            `Kode tersedia dan siap untuk di restore.\nbackupID: ${code}\ntanggal backup: ${new Date(
-              backupData.dateStamp,
-            ).toLocaleDateString()}\n(Histori terbaru tidak akan ditimpa)`,
-            [
-              {
-                text: 'Batal',
-              },
-              {
-                text: 'lakukan restore',
-                onPress: async () => {
-                  let currentHistory = await AsyncStorage.getItem('history');
-                  if (currentHistory === null) {
-                    currentHistory = '[]';
-                  }
-                  currentHistory = JSON.parse(currentHistory);
-                  const backup = JSON.parse(backupData.backupData);
-                  setModalVisible(true);
-                  setModalText(
-                    'Mohon tunggu, ini bisa memakan beberapa waktu...',
-                  );
-                  try {
-                    for (const result of backup) {
-                      const dataINDEX = currentHistory.findIndex(
-                        val => val.title === result.title,
-                      );
-                      if (dataINDEX >= 0) {
-                        if (currentHistory[dataINDEX].date > result.date) {
-                          continue;
-                        }
-                        currentHistory.splice(dataINDEX, 1);
-                      }
-                      currentHistory.push(result);
-                    }
-                    currentHistory.sort((a, b) => b.date - a.date);
-                    await AsyncStorage.setItem(
-                      'history',
-                      JSON.stringify(currentHistory),
-                    );
-                    Alert.alert(
-                      'Restore berhasil!',
-                      'Kamu berhasil kembali ke backup sebelumnya!',
-                    );
-                  } catch (e) {
-                    Alert.alert('Restore gagal!', e.message);
-                  } finally {
-                    setModalVisible(false);
-                  }
-                },
-              },
-            ],
-          );
+  const restoreHistory = useCallback(
+    async code => {
+      if (code === undefined) {
+        setRestoreVisible(true);
+      } else {
+        if (code === '') {
+          return;
         }
-      } catch (e) {
-        Alert.alert('Restore gagal!', e.message);
-      } finally {
-        setModalVisible(false);
+        setRestoreVisible(false);
+        setModalText('Mengecek apakah kode valid...');
+        setModalVisible(true);
+        try {
+          const backupData = await fetch(
+            'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
+          ).then(a => a.json());
+          if (backupData.error) {
+            Alert.alert('Restore gagal!', backupData.message);
+          } else {
+            Alert.alert(
+              'Bersiap untuk restore backup kamu!',
+              `Kode tersedia dan siap untuk di restore.\nbackupID: ${code}\ntanggal backup: ${new Date(
+                backupData.dateStamp,
+              ).toLocaleDateString()}\n(Histori terbaru tidak akan ditimpa)`,
+              [
+                {
+                  text: 'Batal',
+                },
+                {
+                  text: 'lakukan restore',
+                  onPress: async () => {
+                    const currentHistory = JSON.parse(settingsContext.history);
+                    const backup = JSON.parse(backupData.backupData);
+                    setModalVisible(true);
+                    setModalText(
+                      'Mohon tunggu, ini bisa memakan beberapa waktu...',
+                    );
+                    await new Promise(res => setTimeout(res, 1)); // make sure to not restoring too early
+                    try {
+                      for (const result of backup) {
+                        const dataINDEX = currentHistory.findIndex(
+                          val => val.title === result.title,
+                        );
+                        if (dataINDEX >= 0) {
+                          if (currentHistory[dataINDEX].date > result.date) {
+                            continue;
+                          }
+                          currentHistory.splice(dataINDEX, 1);
+                        }
+                        currentHistory.push(result);
+                      }
+                      currentHistory.sort((a, b) => b.date - a.date);
+                      dispatchSettings({
+                        target: 'history',
+                        value: JSON.stringify(currentHistory),
+                      });
+                      Alert.alert(
+                        'Restore berhasil!',
+                        'Kamu berhasil kembali ke backup sebelumnya!',
+                      );
+                    } catch (e) {
+                      Alert.alert('Restore gagal!', e.message);
+                    } finally {
+                      setModalVisible(false);
+                    }
+                  },
+                },
+              ],
+            );
+          }
+        } catch (e) {
+          Alert.alert('Restore gagal!', e.message);
+        } finally {
+          setModalVisible(false);
+        }
       }
-    }
-  }, []);
+    },
+    [dispatchSettings, settingsContext.history],
+  );
 
   const deleteHistory = useCallback(() => {
     Alert.alert(
@@ -239,7 +245,10 @@ function Setting(props) {
             setModalText('Menghapus histori tontonan kamu...');
             setModalVisible(true);
             try {
-              await AsyncStorage.setItem('history', '[]');
+              dispatchSettings({
+                target: 'history',
+                value: '[]',
+              });
               Alert.alert(
                 'Histori dihapus',
                 'Histori tontonan kamu sudah di hapus',
@@ -253,13 +262,12 @@ function Setting(props) {
         },
       ],
     );
-  }, []);
+  }, [dispatchSettings]);
 
   const toggleDownloadFrom = useCallback(async () => {
     const newDownloadFrom = downloadFrom === 'native' ? 'browser' : 'native';
-    await AsyncStorage.setItem('downloadFrom', newDownloadFrom);
     setDownloadFrom(newDownloadFrom);
-  }, [downloadFrom]);
+  }, [downloadFrom, setDownloadFrom]);
 
   return (
     <Animated.ScrollView style={{ transform: [{ scale: scaleAnim }] }}>

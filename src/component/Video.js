@@ -4,6 +4,7 @@ import React, {
   useRef,
   useCallback,
   useMemo,
+  useContext,
 } from 'react';
 import {
   StatusBar,
@@ -24,16 +25,17 @@ import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Battery from 'expo-battery';
 import Dropdown from 'react-native-dropdown-picker';
 
 import globalStyles from '../assets/style';
-import downloadAnimeFunction from '../utils/downloadAnime';
-import setHistory from '../utils/historyControl';
+import useDownloadAnimeFunction from '../utils/downloadAnime';
+import useSetHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
+import { SettingsContext } from '../misc/context';
 
 function Video(props) {
+  const { settingsContext } = useContext(SettingsContext);
   const historyData = useRef(props.route.params.historyData).current;
 
   const [batteryLevel, setBatteryLevel] = useState(0);
@@ -60,6 +62,9 @@ function Video(props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef();
 
+  const setHistory = useSetHistory();
+  const downloadAnimeFunction = useDownloadAnimeFunction();
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
     throttleFunction(progressData => {
@@ -72,7 +77,7 @@ function Video(props) {
         lastDuration: progressData.currentTime,
       });
     }, 3000),
-    [part, data, hasPart],
+    [part, data, hasPart, setHistory],
   );
 
   const preparePartAnimationSequence = useMemo(
@@ -102,15 +107,13 @@ function Video(props) {
 
   // didMount and willUnmount
   useEffect(() => {
-    AsyncStorage.getItem('enableNextPartNotification').then(value => {
-      nextPartEnable.current = value === 'true' || value === null;
-    });
+    nextPartEnable.current = settingsContext.enableNextPartNotification;
 
     Orientation.addDeviceOrientationListener(orientationDidChange);
     let _batteryEvent;
-    AsyncStorage.getItem('enableBatteryTimeInfo').then(async dbData => {
-      if (dbData === 'true') {
-        const batteryLevels = await Battery.getBatteryLevelAsync();
+    const dbData = settingsContext.enableBatteryTimeInfo;
+    if (dbData === 'true') {
+      Battery.getBatteryLevelAsync().then(async batteryLevels => {
         setBatteryLevel(batteryLevels);
         _batteryEvent = setInterval(async () => {
           const batteryLevelsInterval = await Battery.getBatteryLevelAsync();
@@ -119,8 +122,8 @@ function Video(props) {
           }
         }, 60_000);
         setBatteryTimeEnable(true);
-      }
-    });
+      });
+    }
     return () => {
       _batteryEvent && clearInterval(_batteryEvent);
       _batteryEvent = null;
@@ -276,7 +279,7 @@ function Video(props) {
         ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
       },
     );
-  }, [data, part]);
+  }, [data, downloadAnimeFunction, part]);
 
   const onEnd = useCallback(() => {
     if (part < data.streamingLink.length - 1) {
@@ -332,7 +335,7 @@ function Video(props) {
         return;
       }
 
-      const downloadFrom = await AsyncStorage.getItem('downloadFrom');
+      const downloadFrom = settingsContext.downloadFrom;
 
       for (let i = 0; i < data.streamingLink.length; i++) {
         const source = data.streamingLink[i].sources[0].src;
@@ -369,7 +372,7 @@ function Video(props) {
       hasDownloadAllPart.current = true;
       ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
     },
-    [data],
+    [data, settingsContext.downloadFrom, downloadAnimeFunction],
   );
 
   const handleProgress = useCallback(
@@ -444,7 +447,7 @@ function Video(props) {
 
       setHistory(result, url);
     },
-    [loading],
+    [loading, setHistory],
   );
 
   const cancelLoading = useCallback(() => {
