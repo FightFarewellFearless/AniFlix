@@ -20,7 +20,6 @@ import {
   ToastAndroid,
   Modal,
   Linking,
-  InteractionManager,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
@@ -72,7 +71,7 @@ function Video(props) {
         if (Math.floor(progressData.currentTime) === 0) {
           return;
         }
-        InteractionManager.runAfterInteractions(() =>
+        requestAnimationFrame(() =>
           setHistory(
             stateData,
             currentLink.current,
