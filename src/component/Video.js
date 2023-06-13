@@ -20,6 +20,7 @@ import {
   ToastAndroid,
   Modal,
   Linking,
+  InteractionManager,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
@@ -71,17 +72,19 @@ function Video(props) {
         if (Math.floor(progressData.currentTime) === 0) {
           return;
         }
-        setHistory(
-          stateData,
-          currentLink.current,
-          true,
-          {
-            part: hasPart.current ? statePart : undefined,
-            resolution: stateData.resolution,
-            lastDuration: progressData.currentTime,
-          },
-          settContext,
-          dispatchContext,
+        InteractionManager.runAfterInteractions(() =>
+          setHistory(
+            stateData,
+            currentLink.current,
+            true,
+            {
+              part: hasPart.current ? statePart : undefined,
+              resolution: stateData.resolution,
+              lastDuration: progressData.currentTime,
+            },
+            settContext,
+            dispatchContext,
+          ),
         );
       },
       3000,
