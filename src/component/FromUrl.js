@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -9,13 +9,14 @@ import {
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import randomTipsArray from '../assets/loadingTips.json';
-import useSetHistory from '../utils/historyControl';
+import setHistory from '../utils/historyControl';
+import { SettingsContext } from '../misc/context';
 
 function FromUrl(props) {
   const [unmount, setUnmount] = useState(false);
   const [dots, setDots] = useState('');
 
-  const setHistory = useSetHistory();
+  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
 
   const randomTips =
     // eslint-disable-next-line no-bitwise
@@ -102,6 +103,8 @@ function FromUrl(props) {
                   props.route.params.link,
                   false,
                   props.route.params.historyData,
+                  settingsContext,
+                  dispatchSettings,
                 );
               }
             }
@@ -129,12 +132,13 @@ function FromUrl(props) {
       backhandler.remove();
     };
   }, [
+    dispatchSettings,
     props.navigation,
     props.route.params.historyData,
     props.route.params.link,
     props.route.params.query,
     props.route.params.type,
-    setHistory,
+    settingsContext,
     unmount,
   ]);
 

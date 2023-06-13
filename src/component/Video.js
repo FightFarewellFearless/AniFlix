@@ -30,12 +30,12 @@ import Dropdown from 'react-native-dropdown-picker';
 
 import globalStyles from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
-import useSetHistory from '../utils/historyControl';
+import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 import { SettingsContext } from '../misc/context';
 
 function Video(props) {
-  const { settingsContext } = useContext(SettingsContext);
+  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
   const historyData = useRef(props.route.params.historyData).current;
 
   const [batteryLevel, setBatteryLevel] = useState(0);
@@ -62,22 +62,31 @@ function Video(props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef();
 
-  const setHistory = useSetHistory();
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
-    throttleFunction(progressData => {
-      if (Math.floor(progressData.currentTime) === 0) {
-        return;
-      }
-      setHistory(data, currentLink.current, true, {
-        part: hasPart.current ? part : undefined,
-        resolution: data.resolution,
-        lastDuration: progressData.currentTime,
-      });
-    }, 3000),
-    [part, data, hasPart, setHistory],
+    throttleFunction(
+      (progressData, stateData, statePart, settContext, dispatchContext) => {
+        if (Math.floor(progressData.currentTime) === 0) {
+          return;
+        }
+        setHistory(
+          stateData,
+          currentLink.current,
+          true,
+          {
+            part: hasPart.current ? statePart : undefined,
+            resolution: stateData.resolution,
+            lastDuration: progressData.currentTime,
+          },
+          settContext,
+          dispatchContext,
+        );
+      },
+      3000,
+    ),
+    [],
   );
 
   const preparePartAnimationSequence = useMemo(
@@ -375,22 +384,6 @@ function Video(props) {
     [data, settingsContext.downloadFrom, downloadAnimeFunction],
   );
 
-  const handleProgress = useCallback(
-    progressData => {
-      nextPartNotificationControl(progressData);
-      updateHistoryThrottle(progressData);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      nextPartNotificationControl,
-      updateHistoryThrottle,
-      data,
-      part,
-      preparePartAnimationSequence,
-      shouldShowNextPartNotification,
-    ],
-  );
-
   const nextPartNotificationControl = useCallback(
     progressData => {
       if (hasPart.current) {
@@ -413,6 +406,27 @@ function Video(props) {
       }
     },
     [data, part, preparePartAnimationSequence, shouldShowNextPartNotification],
+  );
+
+  const handleProgress = useCallback(
+    progressData => {
+      nextPartNotificationControl(progressData);
+      updateHistoryThrottle(
+        progressData,
+        data,
+        part,
+        settingsContext,
+        dispatchSettings,
+      );
+    },
+    [
+      nextPartNotificationControl,
+      updateHistoryThrottle,
+      data,
+      part,
+      settingsContext,
+      dispatchSettings,
+    ],
   );
 
   const episodeDataControl = useCallback(
@@ -445,9 +459,16 @@ function Video(props) {
       setPart(0);
       currentLink.current = url;
 
-      setHistory(result, url);
+      setHistory(
+        result,
+        url,
+        undefined,
+        undefined,
+        settingsContext,
+        dispatchSettings,
+      );
     },
-    [loading, setHistory],
+    [loading, settingsContext, dispatchSettings],
   );
 
   const cancelLoading = useCallback(() => {

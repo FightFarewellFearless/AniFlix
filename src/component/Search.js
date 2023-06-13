@@ -30,7 +30,7 @@ class Search extends Component {
                   style={{
                     flexDirection: 'row',
                     marginVertical: 5,
-                    backgroundColor: '#444242',
+                    backgroundColor: '#3b3939',
                     borderRadius: 16,
                   }}
                   key={'btn' + z.title}
@@ -47,7 +47,7 @@ class Search extends Component {
                     source={{ uri: z.thumbnailUrl }}
                     style={{
                       width: 120,
-                      height: 210,
+                      height: 200,
                       borderTopLeftRadius: 16,
                       borderBottomLeftRadius: 16,
                       marginRight: 7,

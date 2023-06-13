@@ -15,6 +15,7 @@ import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
 import Search from './src/component/Search';
 import FailedToConnect from './src/component/FailedToConnect';
+import NeedUpdate from './src/component/NeedUpdate';
 import defaultDatabase from './src/misc/defaultDatabaseValue.json';
 
 function reducer(state, action) {
@@ -57,6 +58,7 @@ function App() {
           <Stack.Screen name="Video" component={Video} />
           <Stack.Screen name="Search" component={Search} />
           <Stack.Screen name="loading" component={Loading} />
+          <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
           <Stack.Screen name="Blocked" component={Blocked} />
           <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
         </Stack.Navigator>

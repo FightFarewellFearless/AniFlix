@@ -70,14 +70,29 @@ class FailedToConnect extends Component {
           <View
             style={{
               position: 'absolute',
-              bottom: 40,
-              justifyContent: 'center',
+              bottom: 45,
               alignItems: 'center',
             }}>
-            <Image source={rnLogo} style={{ height: 40, width: 40 }} />
-            <Text style={[globalStyles.text, { fontSize: 12 }]}>
-              Created using react-native
-            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                Linking.openURL(
+                  'https://github.com/FightFarewellFearless/anime-react-native',
+                );
+              }}
+              style={{
+                flexDirection: 'row',
+                backgroundColor: '#2b2b2b',
+                padding: 10,
+                borderRadius: 8,
+                alignItems: 'center',
+              }}>
+              <Image source={rnLogo} style={{ height: 40, width: 40 }} />
+              <Icon name="github" size={43} color={globalStyles.text.color} />
+              <Text style={[globalStyles.text, { fontSize: 12 }]}>
+                {' '}
+                Open-Sourced on github
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <Text style={[globalStyles.text, { position: 'absolute', bottom: 0 }]}>
