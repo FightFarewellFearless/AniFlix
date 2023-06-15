@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -10,8 +10,9 @@ import {
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useDispatch } from 'react-redux';
 
-import { SettingsContext } from '../misc/context';
+import { setDatabase } from '../misc/reduxSlice';
 import styles from '../assets/style';
 import rnLogo from '../assets/RNlogo.png';
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
@@ -19,7 +20,8 @@ import { version as appVersion } from '../../package.json';
 
 function Loading(props) {
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
-  const { dispatchSettings } = useContext(SettingsContext);
+
+  const dispatchSettings = useDispatch();
 
   const connectToServer = useCallback(async () => {
     const jsondata = await fetch('https://animeapi.aceracia.repl.co/v2/home')
@@ -42,16 +44,20 @@ function Loading(props) {
     for (const dataKey of arrOfData) {
       const data = await AsyncStorage.getItem(dataKey);
       if (data === null) {
-        dispatchSettings({
-          target: dataKey,
-          value: defaultDatabase[dataKey],
-        });
+        dispatchSettings(
+          setDatabase({
+            target: dataKey,
+            value: defaultDatabase[dataKey],
+          }),
+        );
         return;
       }
-      dispatchSettings({
-        target: dataKey,
-        value: data,
-      });
+      dispatchSettings(
+        setDatabase({
+          target: dataKey,
+          value: data,
+        }),
+      );
     }
   }, [dispatchSettings]);
 

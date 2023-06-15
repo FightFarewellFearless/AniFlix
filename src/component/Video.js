@@ -4,7 +4,6 @@ import React, {
   useRef,
   useCallback,
   useMemo,
-  useContext,
 } from 'react';
 import {
   StatusBar,
@@ -32,10 +31,21 @@ import globalStyles from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
-import { SettingsContext } from '../misc/context';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 function Video(props) {
-  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+  const enableNextPartNotification = useSelector(
+    state => state.settings.enableNextPartNotification,
+  );
+  const enableBatteryTimeInfo = useSelector(
+    state => state.settings.enableBatteryTimeInfo,
+  );
+  const downloadFrom = useSelector(state => state.settings.downloadFrom);
+  const history = useSelector(state => state.settings.history);
+
+  const dispatchSettings = useDispatch();
+
   const historyData = useRef(props.route.params.historyData).current;
 
   const [batteryLevel, setBatteryLevel] = useState(0);
@@ -118,12 +128,21 @@ function Video(props) {
 
   // didMount and willUnmount
   useEffect(() => {
-    nextPartEnable.current = settingsContext.enableNextPartNotification;
+    nextPartEnable.current = enableNextPartNotification;
 
     Orientation.addDeviceOrientationListener(orientationDidChange);
+
+    return () => {
+      willUnmountHandler();
+      abortController.current.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Battery level
+  useEffect(() => {
     let _batteryEvent;
-    const dbData = settingsContext.enableBatteryTimeInfo;
-    if (dbData === 'true') {
+    if (enableBatteryTimeInfo === 'true') {
       Battery.getBatteryLevelAsync().then(async batteryLevels => {
         setBatteryLevel(batteryLevels);
         _batteryEvent = setInterval(async () => {
@@ -138,32 +157,30 @@ function Video(props) {
     return () => {
       _batteryEvent && clearInterval(_batteryEvent);
       _batteryEvent = null;
-      willUnmountHandler();
-      abortController.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [batteryLevel, enableBatteryTimeInfo]);
 
   // BackHandler event
   useEffect(() => {
     const backHandlerEvent = BackHandler.addEventListener(
       'hardwareBackPress',
-      onHardwareBackPress,
+      () => onHardwareBackPress(fullscreen),
     );
     return () => {
       backHandlerEvent.remove();
     };
-  }, [fullscreen, onHardwareBackPress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullscreen]);
 
-  const onHardwareBackPress = useCallback(() => {
-    if (!fullscreen) {
+  const onHardwareBackPress = isFullsc => {
+    if (!isFullsc) {
       willUnmountHandler();
       return false;
     } else {
       exitFullscreen();
       return true;
     }
-  }, [fullscreen, willUnmountHandler, exitFullscreen]);
+  };
 
   const setResolution = useCallback(
     async res => {
@@ -197,13 +214,12 @@ function Video(props) {
     [loading],
   );
 
-  const willUnmountHandler = useCallback(() => {
+  const willUnmountHandler = () => {
     Orientation.removeDeviceOrientationListener(orientationDidChange);
     Orientation.unlockAllOrientations();
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   const getBatteryIconComponent = useCallback(() => {
     let iconName = 'battery-';
@@ -229,12 +245,9 @@ function Video(props) {
     );
   }, [batteryLevel]);
 
-  const onBatteryStateChange = useCallback(
-    ({ batteryLevel: currentBatteryLevel }) => {
-      setBatteryLevel(currentBatteryLevel);
-    },
-    [],
-  );
+  const onBatteryStateChange = ({ batteryLevel: currentBatteryLevel }) => {
+    setBatteryLevel(currentBatteryLevel);
+  };
 
   const orientationDidChange = useCallback(
     orientation => {
@@ -346,8 +359,6 @@ function Video(props) {
         return;
       }
 
-      const downloadFrom = settingsContext.downloadFrom;
-
       for (let i = 0; i < data.streamingLink.length; i++) {
         const source = data.streamingLink[i].sources[0].src;
 
@@ -383,7 +394,7 @@ function Video(props) {
       hasDownloadAllPart.current = true;
       ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
     },
-    [data, settingsContext.downloadFrom, downloadAnimeFunction],
+    [data, downloadFrom, downloadAnimeFunction],
   );
 
   const nextPartNotificationControl = useCallback(
@@ -417,7 +428,7 @@ function Video(props) {
         progressData,
         data,
         part,
-        settingsContext,
+        history,
         dispatchSettings,
       );
     },
@@ -426,7 +437,7 @@ function Video(props) {
       updateHistoryThrottle,
       data,
       part,
-      settingsContext,
+      history,
       dispatchSettings,
     ],
   );
@@ -461,16 +472,9 @@ function Video(props) {
       setPart(0);
       currentLink.current = url;
 
-      setHistory(
-        result,
-        url,
-        undefined,
-        undefined,
-        settingsContext,
-        dispatchSettings,
-      );
+      setHistory(result, url, undefined, undefined, history, dispatchSettings);
     },
-    [loading, settingsContext, dispatchSettings],
+    [loading, history, dispatchSettings],
   );
 
   const cancelLoading = useCallback(() => {

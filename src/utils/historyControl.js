@@ -1,12 +1,14 @@
+import { setDatabase } from '../misc/reduxSlice';
+
 function setHistory(
   targetData,
   link,
   skipUpdateDate = false,
   additionalData = {},
-  settingsContext,
+  historyData,
   dispatchSettings,
 ) {
-  const data = JSON.parse(settingsContext.history);
+  const data = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
   const title =
     episodeIndex >= 0 // Episode is exist (anime is not movie)
@@ -29,10 +31,12 @@ function setHistory(
     thumbnailUrl: targetData.thumbnailUrl,
     date: skipUpdateDate ? date : Date.now(),
   });
-  dispatchSettings({
-    target: 'history',
-    value: JSON.stringify(data),
-  });
+  dispatchSettings(
+    setDatabase({
+      target: 'history',
+      value: JSON.stringify(data),
+    }),
+  );
   return setHistory;
 }
 export default setHistory;

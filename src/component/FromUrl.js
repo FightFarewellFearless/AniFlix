@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -10,13 +10,16 @@ import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import randomTipsArray from '../assets/loadingTips.json';
 import setHistory from '../utils/historyControl';
-import { SettingsContext } from '../misc/context';
+import { useDispatch, useSelector } from 'react-redux';
+
+// import { setDatabase } from '../misc/reduxSlice';
 
 function FromUrl(props) {
   const [unmount, setUnmount] = useState(false);
   const [dots, setDots] = useState('');
 
-  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+  const historyData = useSelector(state => state.settings.history);
+  const dispatchSettings = useDispatch();
 
   const randomTips =
     // eslint-disable-next-line no-bitwise
@@ -103,7 +106,7 @@ function FromUrl(props) {
                   props.route.params.link,
                   false,
                   props.route.params.historyData,
-                  settingsContext,
+                  historyData,
                   dispatchSettings,
                 );
               }
@@ -133,12 +136,12 @@ function FromUrl(props) {
     };
   }, [
     dispatchSettings,
+    historyData,
     props.navigation,
     props.route.params.historyData,
     props.route.params.link,
     props.route.params.query,
     props.route.params.type,
-    settingsContext,
     unmount,
   ]);
 

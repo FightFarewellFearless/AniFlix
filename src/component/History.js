@@ -10,17 +10,12 @@ import {
   Animated,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
-import { SettingsContext } from '../misc/context';
+import { setDatabase } from '../misc/reduxSlice';
 require('moment/locale/id');
 
 function History(props) {
@@ -28,15 +23,16 @@ function History(props) {
   const [data, setData] = useState([]);
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
 
-  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+  const history = useSelector(state => state.settings.history);
+  const dispatchSettings = useDispatch();
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   const updateHistory = useCallback(() => {
-    const history = JSON.parse(settingsContext.history);
+    const newHistory = JSON.parse(history);
     setLoading(false);
-    setData(history);
-  }, [settingsContext.history]);
+    setData(newHistory);
+  }, [history]);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,15 +63,22 @@ function History(props) {
 
   const deleteHistory = useCallback(
     async index => {
-      const historyData = JSON.parse(settingsContext.history);
+      // const time = Date.now();
+      const historyData = JSON.parse(history);
       historyData.splice(index, 1);
-      dispatchSettings({
-        target: 'history',
-        value: JSON.stringify(historyData),
-      });
+      const newValue = JSON.stringify(historyData);
+      // console.log(Date.now() - time);
+      dispatchSettings(
+        setDatabase({
+          target: 'history',
+          value: newValue,
+        }),
+      );
     },
-    [dispatchSettings, settingsContext.history],
+    [dispatchSettings, history],
   );
+
+  const keyExtractor = useCallback(item => item.title, []);
 
   return (
     <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
@@ -93,7 +96,7 @@ function History(props) {
       ) : (
         <FlatList
           data={data}
-          keyExtractor={item => item.title}
+          keyExtractor={keyExtractor}
           refreshControl={
             <RefreshControl
               refreshing={historyRefreshing}

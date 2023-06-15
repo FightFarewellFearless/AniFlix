@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useReducer } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { SettingsContext } from './src/misc/context';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider } from 'react-redux';
 
 import Loading from './src/component/Loading';
 import EpsList from './src/component/EpsList';
@@ -16,26 +15,22 @@ import Blocked from './src/component/Blocked';
 import Search from './src/component/Search';
 import FailedToConnect from './src/component/FailedToConnect';
 import NeedUpdate from './src/component/NeedUpdate';
-import defaultDatabase from './src/misc/defaultDatabaseValue.json';
+// import defaultDatabase from './src/misc/defaultDatabaseValue.json';
+import store from './src/misc/reduxStore';
 
-function reducer(state, action) {
-  const value =
-    typeof action.value !== 'string'
-      ? JSON.stringify(action.value)
-      : action.value;
-  AsyncStorage.setItem(action.target, value);
-  return {
-    ...state,
-    [action.target]: value,
-  };
-}
+// function reducer(state, action) {
+//   const value =
+//     typeof action.value !== 'string'
+//       ? JSON.stringify(action.value)
+//       : action.value;
+//   AsyncStorage.setItem(action.target, value);
+//   return {
+//     ...state,
+//     [action.target]: value,
+//   };
+// }
 
 function App() {
-  const [settingsContext, dispatchSettings] = useReducer(
-    reducer,
-    defaultDatabase,
-  );
-
   const Stack = useMemo(createNativeStackNavigator, []);
 
   useEffect(() => {
@@ -45,8 +40,8 @@ function App() {
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settingsContext, dispatchSettings }}>
-      <NavigationContainer theme={DarkTheme}>
+    <NavigationContainer theme={DarkTheme}>
+      <Provider store={store}>
         <Stack.Navigator
           initialRouteName="loading"
           screenOptions={{
@@ -62,8 +57,8 @@ function App() {
           <Stack.Screen name="Blocked" component={Blocked} />
           <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
         </Stack.Navigator>
-      </NavigationContainer>
-    </SettingsContext.Provider>
+      </Provider>
+    </NavigationContainer>
   );
 }
 export default App;

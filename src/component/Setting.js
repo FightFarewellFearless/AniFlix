@@ -16,36 +16,53 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
-import { HomeContext, SettingsContext } from '../misc/context';
+import { HomeContext } from '../misc/context';
+
+import { useDispatch, useSelector } from 'react-redux';
+
+import { setDatabase } from '../misc/reduxSlice';
 
 function Setting(props) {
-  const { settingsContext, dispatchSettings } = useContext(SettingsContext);
+  const enableNextPartNotification = useSelector(
+    state => state.settings.enableNextPartNotification,
+  );
+  const enableBatteryTimeInfo = useSelector(
+    state => state.settings.enableBatteryTimeInfo,
+  );
+  const history = useSelector(state => state.settings.history);
+
+  const dispatchSettings = useDispatch();
+
   // const [notificationSwitch, setNotificationSwitch] = useState(false);
-  const notificationSwitch =
-    settingsContext.enableNextPartNotification === 'true';
+  const notificationSwitch = enableNextPartNotification === 'true';
   const setNotificationSwitch = value => {
-    dispatchSettings({
-      target: 'enableNextPartNotification',
-      value,
-    });
+    dispatchSettings(
+      setDatabase({
+        target: 'enableNextPartNotification',
+        value,
+      }),
+    );
   };
   // const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
-  const batteryTimeInfoSwitch =
-    settingsContext.enableBatteryTimeInfo === 'true';
+  const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const setBatteryTimeInfoSwitch = value => {
-    dispatchSettings({
-      target: 'enableBatteryTimeInfo',
-      value,
-    });
+    dispatchSettings(
+      setDatabase({
+        target: 'enableBatteryTimeInfo',
+        value,
+      }),
+    );
   };
   // const [downloadFrom, setDownloadFrom] = useState('native');
-  const downloadFrom = settingsContext.downloadFrom;
+  const downloadFrom = useSelector(state => state.settings.downloadFrom);
   const setDownloadFrom = useCallback(
     value => {
-      dispatchSettings({
-        target: 'downloadFrom',
-        value,
-      });
+      dispatchSettings(
+        setDatabase({
+          target: 'downloadFrom',
+          value,
+        }),
+      );
     },
     [dispatchSettings],
   );
@@ -102,7 +119,7 @@ function Setting(props) {
             setModalText('Backup sedang berlangsung...');
             setModalVisible(true);
             try {
-              const historyData = settingsContext.history;
+              const historyData = history;
               if (historyData === '[]') {
                 Alert.alert(
                   'Tidak ada histori!',
@@ -150,7 +167,7 @@ function Setting(props) {
         },
       ],
     );
-  }, [settingsContext.history]);
+  }, [history]);
 
   const restoreHistory = useCallback(
     async code => {
@@ -182,7 +199,7 @@ function Setting(props) {
                 {
                   text: 'lakukan restore',
                   onPress: async () => {
-                    const currentHistory = JSON.parse(settingsContext.history);
+                    const currentHistory = JSON.parse(history);
                     const backup = JSON.parse(backupData.backupData);
                     setModalVisible(true);
                     setModalText(
@@ -203,10 +220,12 @@ function Setting(props) {
                         currentHistory.push(result);
                       }
                       currentHistory.sort((a, b) => b.date - a.date);
-                      dispatchSettings({
-                        target: 'history',
-                        value: JSON.stringify(currentHistory),
-                      });
+                      dispatchSettings(
+                        setDatabase({
+                          target: 'history',
+                          value: JSON.stringify(currentHistory),
+                        }),
+                      );
                       Alert.alert(
                         'Restore berhasil!',
                         'Kamu berhasil kembali ke backup sebelumnya!',
@@ -228,7 +247,7 @@ function Setting(props) {
         }
       }
     },
-    [dispatchSettings, settingsContext.history],
+    [dispatchSettings, history],
   );
 
   const deleteHistory = useCallback(() => {
@@ -244,11 +263,14 @@ function Setting(props) {
           onPress: async () => {
             setModalText('Menghapus histori tontonan kamu...');
             setModalVisible(true);
+            await new Promise(res => setTimeout(res, 1));
             try {
-              dispatchSettings({
-                target: 'history',
-                value: '[]',
-              });
+              dispatchSettings(
+                setDatabase({
+                  target: 'history',
+                  value: '[]',
+                }),
+              );
               Alert.alert(
                 'Histori dihapus',
                 'Histori tontonan kamu sudah di hapus',

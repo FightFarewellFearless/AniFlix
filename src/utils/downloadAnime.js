@@ -1,10 +1,10 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { Alert, Linking, ToastAndroid } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
-import { SettingsContext } from '../misc/context';
+import { useSelector } from 'react-redux';
 
 function useDownloadAnime() {
-  const { settingsContext } = useContext(SettingsContext);
+  const downloadFrom = useSelector(state => state.settings.downloadFrom);
 
   const downloadAnime = useCallback(
     async (
@@ -46,7 +46,6 @@ function useDownloadAnime() {
       if (force === true && sourceLength > 0) {
         Title += ' (' + sourceLength + ')';
       }
-      const downloadFrom = settingsContext.downloadFrom;
 
       if (downloadFrom === 'native' || downloadFrom === null) {
         RNFetchBlob.config({
@@ -79,7 +78,7 @@ function useDownloadAnime() {
       }
       callback?.();
     },
-    [settingsContext.downloadFrom],
+    [downloadFrom],
   );
   return downloadAnime;
 }
