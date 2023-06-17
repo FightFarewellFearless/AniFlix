@@ -81,19 +81,17 @@ function Video(props) {
         if (Math.floor(progressData.currentTime) === 0) {
           return;
         }
-        requestAnimationFrame(() =>
-          setHistory(
-            stateData,
-            currentLink.current,
-            true,
-            {
-              part: hasPart.current ? statePart : undefined,
-              resolution: stateData.resolution,
-              lastDuration: progressData.currentTime,
-            },
-            settContext,
-            dispatchContext,
-          ),
+        setHistory(
+          stateData,
+          currentLink.current,
+          true,
+          {
+            part: hasPart.current ? statePart : undefined,
+            resolution: stateData.resolution,
+            lastDuration: progressData.currentTime,
+          },
+          settContext,
+          dispatchContext,
         );
       },
       3000,

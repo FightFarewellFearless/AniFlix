@@ -62,13 +62,17 @@ function Loading(props) {
   }, [dispatchSettings]);
 
   const checkVersion = useCallback(async () => {
-    const [data] = await fetch(
+    const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/anime-react-native/releases',
-    ).then(d => d.json());
-    if (data.tag_name === appVersion) {
+    )
+      .then(d => d.json())
+      .catch(() => {});
+    if (data === undefined) {
+      return null;
+    } else if (data[0].tag_name === appVersion) {
       return true;
     }
-    return data;
+    return data[0];
   }, []);
 
   useEffect(() => {
@@ -76,7 +80,9 @@ function Loading(props) {
       await prepareData();
       setLoadStatus('Mengecek versi aplikasi');
       const version = await checkVersion();
-      if (version === true || __DEV__) {
+      if (version === null) {
+        props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+      } else if (version === true || __DEV__) {
         // skip update when app is in dev mode
         setLoadStatus('Menghubungkan ke server');
         await connectToServer();
