@@ -35,102 +35,73 @@ function FromUrl(props) {
         return false;
       },
     );
-    // await new Promise(res => setTimeout(res, 1500));
-    if (props.route.params.type === 'search') {
-      fetch(
-        'https://animeapi.aceracia.repl.co/v2/search?q=' +
-          props.route.params.query,
-        {
-          signal: abort.signal,
-        },
-      )
-        .then(async results => {
+    const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
+    const providedResolution =
+      resolution !== undefined ? `&res=${resolution}` : '';
+
+    fetch(
+      'https://animeapi.aceracia.repl.co/v2/fromUrl?link=' +
+        props.route.params.link +
+        providedResolution,
+      {
+        signal: abort.signal,
+      },
+    )
+      .then(async results => {
+        if (results === undefined) {
+          return;
+        }
+        const resulted = await results.text();
+        try {
+          const result = JSON.parse(resulted);
           if (results && unmount === false) {
-            const result = await results.json();
-            props.navigation.dispatch(
-              StackActions.replace('Search', {
-                data: result,
-                query: props.route.params.query,
-              }),
-            );
-          }
-        })
-        .catch(err => {
-          if (err.message === 'Aborted') {
-            return;
-          }
-          Alert.alert('Error', err.message);
-          props.navigation.goBack();
-        });
-    } else {
-      const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
-      const providedResolution =
-        resolution !== undefined ? `&res=${resolution}` : '';
-
-      fetch(
-        'https://animeapi.aceracia.repl.co/v2/fromUrl?link=' +
-          props.route.params.link +
-          providedResolution,
-        {
-          signal: abort.signal,
-        },
-      )
-        .then(async results => {
-          if (results === undefined) {
-            return;
-          }
-          const resulted = await results.text();
-          try {
-            const result = JSON.parse(resulted);
-            if (results && unmount === false) {
-              if (result.blocked) {
-                props.navigation.dispatch(StackActions.replace('Blocked'));
-              } else if (result.type === 'epsList') {
-                props.navigation.dispatch(
-                  StackActions.replace('EpisodeList', {
-                    data: result,
-                  }),
-                );
-              } else if (result.type === 'singleEps') {
-                props.navigation.dispatch(
-                  StackActions.replace('Video', {
-                    data: result,
-                    link: props.route.params.link,
-                    historyData: props.route.params.historyData,
-                  }),
-                );
-
-                // History
-                setHistory(
-                  result,
-                  props.route.params.link,
-                  false,
-                  props.route.params.historyData,
-                  historyData,
-                  dispatchSettings,
-                );
-              }
-            }
-          } catch (e) {
-            if (resulted === 'Unsupported') {
-              Alert.alert(
-                'Tidak didukung!',
-                'Anime yang kamu tuju tidak memiliki data yang didukung!',
+            if (result.blocked) {
+              props.navigation.dispatch(StackActions.replace('Blocked'));
+            } else if (result.type === 'epsList') {
+              props.navigation.dispatch(
+                StackActions.replace('EpisodeList', {
+                  data: result,
+                }),
               );
-            } else {
-              Alert.alert('Error', e.stack);
+            } else if (result.type === 'singleEps') {
+              props.navigation.dispatch(
+                StackActions.replace('Video', {
+                  data: result,
+                  link: props.route.params.link,
+                  historyData: props.route.params.historyData,
+                }),
+              );
+
+              // History
+              setHistory(
+                result,
+                props.route.params.link,
+                false,
+                props.route.params.historyData,
+                historyData,
+                dispatchSettings,
+              );
             }
-            props.navigation.goBack();
           }
-        })
-        .catch(err => {
-          if (err.message === 'Aborted') {
-            return;
+        } catch (e) {
+          if (resulted === 'Unsupported') {
+            Alert.alert(
+              'Tidak didukung!',
+              'Anime yang kamu tuju tidak memiliki data yang didukung!',
+            );
+          } else {
+            Alert.alert('Error', e.stack);
           }
-          Alert.alert('Error', err.message);
           props.navigation.goBack();
-        });
-    }
+        }
+      })
+      .catch(err => {
+        if (err.message === 'Aborted') {
+          return;
+        }
+        Alert.alert('Error', err.message);
+        props.navigation.goBack();
+      });
     return () => {
       backhandler.remove();
     };

@@ -12,7 +12,6 @@ import Home from './src/component/Home';
 import FromUrl from './src/component/FromUrl';
 import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
-import Search from './src/component/Search';
 import FailedToConnect from './src/component/FailedToConnect';
 import NeedUpdate from './src/component/NeedUpdate';
 // import defaultDatabase from './src/misc/defaultDatabaseValue.json';
@@ -51,7 +50,6 @@ function App() {
           <Stack.Screen name="EpisodeList" component={EpsList} />
           <Stack.Screen name="FromUrl" component={FromUrl} />
           <Stack.Screen name="Video" component={Video} />
-          <Stack.Screen name="Search" component={Search} />
           <Stack.Screen name="loading" component={Loading} />
           <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
           <Stack.Screen name="Blocked" component={Blocked} />

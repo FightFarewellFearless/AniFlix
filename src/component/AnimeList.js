@@ -7,9 +7,8 @@ import {
   ScrollView,
   ImageBackground,
   TouchableOpacity,
-  TextInput,
   ToastAndroid,
-  TouchableHighlight,
+  StyleSheet,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -17,12 +16,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
 
 function Home(props) {
-  const [searchText, setSearchText] = useState('');
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  const localTime = useLocalTime();
 
   useFocusEffect(
     useCallback(() => {
@@ -44,22 +44,6 @@ function Home(props) {
     }, []),
   );
 
-  const submit = useCallback(() => {
-    if (searchText === '') {
-      return ToastAndroid.show(
-        'Masukkan anime yang kamu cari ke dalam kolom pencarian',
-        ToastAndroid.SHORT,
-      );
-    }
-    props.navigation.dispatch(
-      StackActions.push('FromUrl', {
-        query: searchText,
-        type: 'search',
-      }),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
-
   const refreshing = useCallback(() => {
     setRefresh(true);
 
@@ -77,50 +61,23 @@ function Home(props) {
   }, []);
   return (
     <Animated.ScrollView
-      style={{ transform: [{ scale: scaleAnim }] }}
+      style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
       refreshControl={
         <RefreshControl refreshing={refresh} onRefresh={refreshing} />
       }>
-      <View style={{ flexDirection: 'row' }}>
-        <TextInput
-          onSubmitEditing={submit}
-          onChangeText={text => {
-            setSearchText(text);
-          }}
-          placeholder="Cari anime disini"
-          placeholderTextColor="#707070"
-          style={{
-            width: searchText !== '' ? '87%' : '98%',
-            height: 35,
-            borderWidth: 0.8,
-            borderColor: '#c5c5c5',
-            marginLeft: 2,
-            color: globalStyles.text.color,
-          }}
-        />
-        {searchText !== '' && (
-          <TouchableHighlight
-            onPress={submit}
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '12%',
-              backgroundColor: '#ffa43cff',
-            }}>
-            <Text style={{ color: '#ffffff' }}>
-              <Icon name="search" style={{ color: '#413939' }} size={17} />
-              Cari
-            </Text>
-          </TouchableHighlight>
-        )}
+      <View style={styles.box}>
+        <View style={styles.boxItem}>
+          <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
+        </View>
       </View>
-      <View>
-        <View>
-          <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+      <View style={styles.listContainer}>
+        <View style={styles.titleContainer}>
+          <Text
+            style={[{ fontSize: 20, fontWeight: 'bold' }, globalStyles.text]}>
             Anime terbaru:{' '}
           </Text>
         </View>
-        <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
+        <ScrollView horizontal style={{ overflow: 'hidden', height: 200 }}>
           {data.newAnime.map(z => (
             <AnimeList
               newAnimeData={z}
@@ -131,14 +88,15 @@ function Home(props) {
         </ScrollView>
       </View>
 
-      <View style={{ paddingTop: 13 }}>
-        <View>
-          <Text style={[{ fontSize: 20 }, globalStyles.text]}>
+      <View style={[{ marginTop: 13 }, styles.listContainer]}>
+        <View style={styles.titleContainer}>
+          <Text
+            style={[{ fontSize: 20, fontWeight: 'bold' }, globalStyles.text]}>
             Movie terbaru:{' '}
           </Text>
         </View>
 
-        <ScrollView horizontal style={{ overflow: 'hidden', height: 215 }}>
+        <ScrollView horizontal style={{ overflow: 'hidden', height: 200 }}>
           {data.movie.map(z => (
             <MovieList
               movieData={z}
@@ -168,66 +126,23 @@ function AnimeList(props) {
         resizeMode="stretch"
         key={z.title + z.episode}
         source={{ uri: z.thumbnailUrl }}
-        style={{
-          overflow: 'hidden',
-          width: 120,
-          height: 210,
-          borderWidth: 2,
-          borderColor: z.status === 'Ongoing' ? 'red' : '#00d100',
-          marginRight: 5,
-          flex: 2,
-        }}>
-        <View
-          style={{
-            justifyContent: 'flex-start',
-            alignItems: 'flex-start',
-          }}>
-          <Text
-            numberOfLines={2}
-            style={{
-              fontSize: 10,
-              color: 'black',
-              backgroundColor: 'orange',
-              opacity: 0.8,
-            }}>
+        style={[
+          styles.listBackground,
+          { borderColor: z.status === 'Ongoing' ? 'red' : '#00d100' },
+        ]}>
+        <View style={styles.animeTitleContainer}>
+          <Text numberOfLines={2} style={styles.animeTitle}>
             {z.title}
           </Text>
         </View>
 
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            flexDirection: 'row',
-          }}>
-          <Text
-            style={{
-              fontSize: 10,
-              color: '#000000',
-              backgroundColor: '#0099ff',
-              opacity: 0.8,
-              borderRadius: 2,
-              padding: 1,
-            }}>
+        <View style={styles.animeEpisodeContainer}>
+          <Text style={styles.animeEpisode}>
             {z.episode === '' ? 'MOVIE' : z.episode}
           </Text>
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-          }}>
-          <Text
-            style={{
-              fontSize: 10,
-              color: 'black',
-              backgroundColor: 'orange',
-              opacity: 0.8,
-              padding: 2,
-              borderRadius: 3,
-            }}>
+        <View style={styles.animeRatingContainer}>
+          <Text style={styles.animeRating}>
             <Icon name="star" /> {z.rating}
           </Text>
         </View>
@@ -252,66 +167,21 @@ function MovieList(props) {
         resizeMode="stretch"
         key={z.title + z.episode}
         source={{ uri: z.thumbnailUrl }}
-        style={{
-          overflow: 'hidden',
-          width: 120,
-          height: 210,
-          borderWidth: 2,
-          borderColor: 'red',
-          marginRight: 5,
-          flex: 2,
-        }}>
-        <View
-          style={{
-            justifyContent: 'flex-start',
-            alignItems: 'flex-start',
-          }}>
-          <Text
-            numberOfLines={2}
-            style={{
-              fontSize: 10,
-              color: 'black',
-              backgroundColor: 'orange',
-              opacity: 0.8,
-            }}>
+        style={[styles.listBackground, { borderColor: 'orange' }]}>
+        <View style={styles.animeTitleContainer}>
+          <Text numberOfLines={2} style={styles.animeTitle}>
             {z.title}
           </Text>
         </View>
 
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-          }}>
-          <Text
-            style={{
-              fontSize: 12,
-              color: '#000000',
-              backgroundColor: '#0099ff',
-              opacity: 0.8,
-              borderRadius: 2,
-              padding: 1,
-            }}>
+        <View style={styles.animeEpisodeContainer}>
+          <Text style={[styles.animeEpisode, { fontSize: 12 }]}>
             {z.releaseYear}
           </Text>
         </View>
 
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-          }}>
-          <Text
-            style={{
-              fontSize: 10,
-              color: 'black',
-              backgroundColor: 'orange',
-              opacity: 0.8,
-              padding: 2,
-              borderRadius: 3,
-            }}>
+        <View style={styles.animeRatingContainer}>
+          <Text style={styles.animeRating}>
             <Icon name="star" /> {z.rating}
           </Text>
         </View>
@@ -319,5 +189,98 @@ function MovieList(props) {
     </TouchableOpacity>
   );
 }
+
+function useLocalTime() {
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  useFocusEffect(
+    useCallback(() => {
+      setTime(new Date().toLocaleTimeString());
+      const interval = setInterval(() => {
+        setTime(new Date().toLocaleTimeString());
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }, []),
+  );
+  return time;
+}
+
+const styles = StyleSheet.create({
+  box: {
+    flex: 1,
+    height: 100,
+    margin: 10,
+  },
+  boxItem: {
+    flex: 1,
+    backgroundColor: '#363636',
+    borderColor: 'gold',
+    borderWidth: 1.2,
+    justifyContent: 'center',
+  },
+  boxTime: {
+    alignSelf: 'center',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    position: 'relative',
+    backgroundColor: '#272727',
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  titleContainer: {
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  listBackground: {
+    overflow: 'hidden',
+    width: 120,
+    height: 200,
+    borderWidth: 1,
+    marginRight: 5,
+    flex: 2,
+    borderRadius: 7,
+  },
+  animeTitleContainer: {
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  animeTitle: {
+    fontSize: 10,
+    color: 'black',
+    backgroundColor: 'orange',
+    opacity: 0.8,
+    textAlign: 'center',
+  },
+  animeEpisodeContainer: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    flexDirection: 'row',
+  },
+  animeEpisode: {
+    fontSize: 10,
+    color: '#000000',
+    backgroundColor: '#0099ff',
+    opacity: 0.8,
+    borderRadius: 2,
+    padding: 1,
+  },
+  animeRatingContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  animeRating: {
+    fontSize: 10,
+    color: 'black',
+    backgroundColor: 'orange',
+    opacity: 0.8,
+    padding: 2,
+    borderRadius: 3,
+  },
+});
 
 export default Home;

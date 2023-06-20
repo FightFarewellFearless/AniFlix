@@ -4,6 +4,7 @@ import History from './History';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './AnimeList';
 import Setting from './Setting';
+import Search from './Search';
 import { HomeContext } from '../misc/context';
 
 function BottomTabs(props) {
@@ -25,6 +26,16 @@ function BottomTabs(props) {
               <Icon name="home" style={{ color }} size={20} />
             ),
             tabBarLabel: 'Home',
+          }}
+        />
+        <Tab.Screen
+          name="Search"
+          component={Search}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <Icon name="search" style={{ color }} size={20} />
+            ),
+            tabBarLabel: 'Search',
           }}
         />
         <Tab.Screen
