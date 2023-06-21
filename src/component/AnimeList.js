@@ -4,11 +4,12 @@ import {
   View,
   RefreshControl,
   Text,
-  ScrollView,
   ImageBackground,
   TouchableOpacity,
   ToastAndroid,
   StyleSheet,
+  FlatList,
+  useWindowDimensions,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -20,12 +21,30 @@ function Home(props) {
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
 
+  const windowSize = useWindowDimensions();
+
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const boxTextAnim = useRef(new Animated.Value(0)).current;
 
   const localTime = useLocalTime();
 
   useFocusEffect(
     useCallback(() => {
+      const textAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(boxTextAnim, {
+            toValue: 1,
+            duration: 15000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(boxTextAnim, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      textAnimation.start();
       Animated.timing(scaleAnim, {
         toValue: 1,
         // speed: 18,
@@ -39,6 +58,7 @@ function Home(props) {
           duration: 250,
           useNativeDriver: true,
         }).start();
+        textAnimation.reset();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
@@ -59,6 +79,28 @@ function Home(props) {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const renderNewAnime = useCallback(
+    ({ item }) => (
+      <AnimeList
+        newAnimeData={item}
+        key={'btn' + item.title + item.episode}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+  const renderMovie = useCallback(
+    ({ item }) => (
+      <MovieList
+        movieData={item}
+        key={'btn' + item.title + item.episode}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
   return (
     <Animated.ScrollView
       style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
@@ -68,6 +110,28 @@ function Home(props) {
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
+          <View style={styles.boxTextContainer}>
+            <Animated.Text
+              style={[
+                styles.boxText,
+                {
+                  transform: [
+                    {
+                      translateX: boxTextAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [
+                          windowSize.width,
+                          -(windowSize.width + 100),
+                        ],
+                      }),
+                    },
+                  ],
+                },
+              ]}>
+              Aplikasi masih dalam tahap pengembangan sampai benar-benar siap
+              untuk dirilis
+            </Animated.Text>
+          </View>
         </View>
       </View>
       <View style={styles.listContainer}>
@@ -77,15 +141,7 @@ function Home(props) {
             Anime terbaru:{' '}
           </Text>
         </View>
-        <ScrollView horizontal style={{ overflow: 'hidden', height: 200 }}>
-          {data.newAnime.map(z => (
-            <AnimeList
-              newAnimeData={z}
-              key={'btn' + z.title + z.episode}
-              navigationProp={props.navigation}
-            />
-          ))}
-        </ScrollView>
+        <FlatList horizontal data={data.newAnime} renderItem={renderNewAnime} />
       </View>
 
       <View style={[{ marginTop: 13 }, styles.listContainer]}>
@@ -96,15 +152,7 @@ function Home(props) {
           </Text>
         </View>
 
-        <ScrollView horizontal style={{ overflow: 'hidden', height: 200 }}>
-          {data.movie.map(z => (
-            <MovieList
-              movieData={z}
-              key={'btn' + z.title + z.episode}
-              navigationProp={props.navigation}
-            />
-          ))}
-        </ScrollView>
+        <FlatList horizontal data={data.movie} renderItem={renderMovie} />
       </View>
     </Animated.ScrollView>
   );
@@ -218,11 +266,20 @@ const styles = StyleSheet.create({
     borderColor: 'gold',
     borderWidth: 1.2,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   boxTime: {
     alignSelf: 'center',
     fontSize: 17,
     fontWeight: 'bold',
+  },
+  boxTextContainer: { flexWrap: 'wrap', position: 'absolute', bottom: 0 },
+  boxText: {
+    color: '#ff2020',
+    fontWeight: 'bold',
+    textShadowColor: 'black',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   listContainer: {
     position: 'relative',

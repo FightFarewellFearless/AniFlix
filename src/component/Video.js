@@ -503,19 +503,7 @@ function Video(props) {
   return (
     <View style={{ flex: 2 }}>
       {/* Loading modal */}
-      <Modal visible={loading} transparent onRequestClose={cancelLoading}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              onPress={cancelLoading}
-              style={{ position: 'absolute', top: 5, right: 5 }}>
-              <Icon name="close" size={28} style={{ color: 'red' }} />
-            </TouchableOpacity>
-            <ActivityIndicator size={'large'} />
-            <Text style={globalStyles.text}>Loading...</Text>
-          </View>
-        </View>
-      </Modal>
+      <LoadingModal loading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
         {/* notifikasi part selanjutnya */}
@@ -745,6 +733,24 @@ function Video(props) {
         )
       }
     </View>
+  );
+}
+
+function LoadingModal({ loading, cancelLoading }) {
+  return (
+    <Modal visible={loading} transparent onRequestClose={cancelLoading}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity
+            onPress={cancelLoading}
+            style={{ position: 'absolute', top: 5, right: 5 }}>
+            <Icon name="close" size={28} style={{ color: 'red' }} />
+          </TouchableOpacity>
+          <ActivityIndicator size={'large'} />
+          <Text style={globalStyles.text}>Loading...</Text>
+        </View>
+      </View>
+    </Modal>
   );
 }
 

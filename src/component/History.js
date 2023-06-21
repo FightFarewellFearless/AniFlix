@@ -8,11 +8,12 @@ import {
   Alert,
   RefreshControl,
   Animated,
+  StyleSheet,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styles from '../assets/style';
+import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../misc/reduxSlice';
@@ -50,8 +51,6 @@ function History(props) {
         duration: 150,
         useNativeDriver: true,
       }).start();
-
-      updateHistory();
       return () => {
         isFocus.current = false;
         Animated.timing(scaleAnim, {
@@ -62,6 +61,12 @@ function History(props) {
         }).start();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      updateHistory();
     }, [updateHistory]),
   );
 
@@ -96,12 +101,7 @@ function History(props) {
     ({ item }) => {
       return (
         <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            marginVertical: 5,
-            backgroundColor: '#3b3939',
-            borderRadius: 16,
-          }}
+          style={styles.listContainerButton}
           key={'btn' + item.title}
           onPress={() => {
             props.navigation.dispatch(
@@ -114,45 +114,21 @@ function History(props) {
           <Image
             resizeMode="stretch"
             source={{ uri: item.thumbnailUrl }}
-            style={{
-              width: 120,
-              height: 200,
-              borderTopLeftRadius: 16,
-              borderBottomLeftRadius: 16,
-              marginRight: 7,
-            }}
+            style={styles.listImage}
           />
 
-          <View
-            style={{
-              flexDirection: 'column',
-              flex: 1,
-            }}>
-            <View
-              style={{
-                flexShrink: 1,
-                justifyContent: 'center',
-                flex: 1,
-              }}>
-              <Text style={[{ flexShrink: 1 }, styles.text]}>{item.title}</Text>
+          <View style={styles.listInfoContainer}>
+            <View style={styles.listTitle}>
+              <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
+                {item.title}
+              </Text>
             </View>
 
-            <View
-              style={{
-                justifyContent: 'flex-end',
-              }}>
-              <Text
-                style={{
-                  color: '#1eb1a9',
-                  fontSize: 12,
-                }}>
+            <View style={styles.listEpisodeAndPart}>
+              <Text style={styles.listEpisode}>
                 {item.episode}
                 {item.part !== undefined && (
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: 'red',
-                    }}>
+                  <Text style={styles.listPart}>
                     {' Part ' + (item.part + 1)}
                   </Text>
                 )}
@@ -160,20 +136,15 @@ function History(props) {
             </View>
 
             {item.lastDuration !== undefined && (
-              <View style={{ position: 'absolute', bottom: 1, right: 1 }}>
-                <Text style={styles.text}>
+              <View style={styles.lastDuration}>
+                <Text style={globalStyles.text}>
                   {formatTimeFromSeconds(item.lastDuration)}
                 </Text>
               </View>
             )}
 
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                zIndex: 0,
-              }}>
-              <Text style={styles.text}>
+            <View style={styles.listWatchTime}>
+              <Text style={globalStyles.text}>
                 {moment
                   .duration(
                     moment(Date.now()).diff(item.date, 'seconds'),
@@ -184,12 +155,7 @@ function History(props) {
               </Text>
             </View>
 
-            <View
-              style={{
-                position: 'absolute',
-                right: 5,
-                top: 5,
-              }}>
+            <View style={styles.deleteContainer}>
               <TouchableOpacity
                 hitSlop={10}
                 onPress={() => {
@@ -229,13 +195,8 @@ function History(props) {
       {loading ? (
         <ActivityIndicator />
       ) : data.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Text style={[styles.text]}>Tidak ada histori tontonan</Text>
+        <View style={styles.noHistory}>
+          <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
         </View>
       ) : (
         <FlatList
@@ -248,6 +209,8 @@ function History(props) {
             />
           }
           renderItem={renderFlatList}
+          removeClippedSubviews={true}
+          windowSize={13}
         />
       )}
     </Animated.View>
@@ -265,5 +228,57 @@ function formatTimeFromSeconds(seconds) {
     .padStart(2, '0')}:${secondsResult.toString().padStart(2, '0')}`;
   return formattedTime;
 }
+
+const styles = StyleSheet.create({
+  listContainerButton: {
+    flexDirection: 'row',
+    marginVertical: 5,
+    backgroundColor: '#3b3939',
+    borderRadius: 16,
+  },
+  listImage: {
+    width: 120,
+    height: 200,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+    marginRight: 7,
+  },
+  listInfoContainer: {
+    flexDirection: 'column',
+    flex: 1,
+  },
+  listTitle: {
+    flexShrink: 1,
+    justifyContent: 'center',
+    flex: 1,
+  },
+  listEpisodeAndPart: {
+    justifyContent: 'flex-end',
+  },
+  listEpisode: {
+    color: '#1eb1a9',
+    fontSize: 12,
+  },
+  listPart: {
+    fontSize: 12,
+    color: 'red',
+  },
+  lastDuration: { position: 'absolute', bottom: 1, right: 1 },
+  listWatchTime: {
+    position: 'absolute',
+    left: 0,
+    zIndex: 0,
+  },
+  deleteContainer: {
+    position: 'absolute',
+    right: 5,
+    top: 5,
+  },
+  noHistory: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default History;

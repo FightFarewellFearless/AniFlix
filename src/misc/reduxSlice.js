@@ -9,7 +9,7 @@ export const setDatabase = createAsyncThunk(
       typeof action.value !== 'string'
         ? JSON.stringify(action.value)
         : action.value;
-    await AsyncStorage.setItem(action.target, value);
+    AsyncStorage.setItem(action.target, value);
     return { target: action.target, value };
   },
 );
