@@ -19,12 +19,15 @@ import {
   ToastAndroid,
   Modal,
   Linking,
+  NativeEventEmitter,
+  NativeModules,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import * as Battery from 'expo-battery';
+import DeviceInfo from 'react-native-device-info';
+const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import Dropdown from 'react-native-dropdown-picker';
 
 import globalStyles from '../assets/style';
@@ -141,19 +144,21 @@ function Video(props) {
   useEffect(() => {
     let _batteryEvent;
     if (enableBatteryTimeInfo === 'true') {
-      Battery.getBatteryLevelAsync().then(async batteryLevels => {
+      DeviceInfo.getBatteryLevel().then(async batteryLevels => {
         setBatteryLevel(batteryLevels);
-        _batteryEvent = setInterval(async () => {
-          const batteryLevelsInterval = await Battery.getBatteryLevelAsync();
-          if (batteryLevel !== batteryLevelsInterval) {
-            onBatteryStateChange({ batteryLevel: batteryLevelsInterval });
-          }
-        }, 60_000);
+        _batteryEvent = deviceInfoEmitter.addListener(
+          'RNDeviceInfo_batteryLevelDidChange',
+          async batteryLvel => {
+            if (batteryLevel !== batteryLvel) {
+              onBatteryStateChange({ batteryLevel: batteryLvel });
+            }
+          },
+        );
         setBatteryTimeEnable(true);
       });
     }
     return () => {
-      _batteryEvent && clearInterval(_batteryEvent);
+      _batteryEvent && _batteryEvent.remove();
       _batteryEvent = null;
     };
   }, [batteryLevel, enableBatteryTimeInfo]);

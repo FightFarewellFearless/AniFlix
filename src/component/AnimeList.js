@@ -10,6 +10,7 @@ import {
   StyleSheet,
   FlatList,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -25,6 +26,7 @@ function Home(props) {
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const boxTextAnim = useRef(new Animated.Value(0)).current;
+  const boxTextLayout = useRef(0);
 
   const localTime = useLocalTime();
 
@@ -110,8 +112,15 @@ function Home(props) {
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
-          <View style={styles.boxTextContainer}>
+          <ScrollView
+            horizontal
+            scrollEnabled={false}
+            showsHorizontalScrollIndicator={false}
+            style={styles.boxTextContainer}>
             <Animated.Text
+              onLayout={nativeEvent =>
+                (boxTextLayout.current = nativeEvent.nativeEvent.layout.width)
+              }
               style={[
                 styles.boxText,
                 {
@@ -119,10 +128,7 @@ function Home(props) {
                     {
                       translateX: boxTextAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [
-                          windowSize.width,
-                          -(windowSize.width + 100),
-                        ],
+                        outputRange: [windowSize.width, -boxTextLayout.current],
                       }),
                     },
                   ],
@@ -131,7 +137,7 @@ function Home(props) {
               Aplikasi masih dalam tahap pengembangan sampai benar-benar siap
               untuk dirilis
             </Animated.Text>
-          </View>
+          </ScrollView>
         </View>
       </View>
       <View style={styles.listContainer}>
@@ -273,7 +279,11 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
   },
-  boxTextContainer: { flexWrap: 'wrap', position: 'absolute', bottom: 0 },
+  boxTextContainer: {
+    position: 'absolute',
+    bottom: 0,
+    flexWrap: 'wrap',
+  },
   boxText: {
     color: '#ff2020',
     fontWeight: 'bold',

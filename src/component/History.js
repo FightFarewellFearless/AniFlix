@@ -12,11 +12,12 @@ import {
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../misc/reduxSlice';
+import store from '../misc/reduxStore';
 require('moment/locale/id');
 
 function History(props) {
@@ -25,22 +26,29 @@ function History(props) {
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
   const isFocus = useRef(true);
 
-  const history = useSelector(
-    state => state.settings.history,
-    (oldValue, newValue) => {
-      const isEq = oldValue === newValue || isFocus.current === false;
-      return isEq; // this equality function make sure component won't re render if navigation is blur
-    },
-  );
   const dispatchSettings = useDispatch();
 
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      // manually handle dispatch action
+      const unsubscribe = store.subscribe(() => {
+        setData(JSON.parse(store.getState().settings.history));
+      });
+      return () => {
+        unsubscribe();
+      };
+    }, []),
+  );
 
   const updateHistory = useCallback(() => {
-    const newHistory = JSON.parse(history);
+    const historyStore = store.getState().settings.history;
     setLoading(false);
-    setData(newHistory);
-  }, [history]);
+    if (JSON.stringify(data) !== historyStore) {
+      setData(JSON.parse(historyStore));
+    }
+  }, [data]);
 
   useFocusEffect(
     useCallback(() => {
@@ -66,14 +74,18 @@ function History(props) {
 
   useFocusEffect(
     useCallback(() => {
+      // setTimeout(() => {
+      setHistoryRefreshing(true);
       updateHistory();
+      setHistoryRefreshing(false);
+      // }, 0);
     }, [updateHistory]),
   );
 
   const deleteHistory = useCallback(
     async index => {
       // const time = Date.now();
-      const historyData = JSON.parse(history);
+      const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
       // console.log(Date.now() - time);
@@ -84,18 +96,16 @@ function History(props) {
         }),
       );
     },
-    [dispatchSettings, history],
+    [dispatchSettings, data],
   );
 
   const keyExtractor = useCallback(item => item.title, []);
 
   const onRefreshControl = useCallback(() => {
     setHistoryRefreshing(true);
-    (async () => {
-      updateHistory();
-      setHistoryRefreshing(false);
-    })();
-  }, [updateHistory]);
+    setData(JSON.parse(store.getState().settings.history));
+    setHistoryRefreshing(false);
+  }, []);
 
   const renderFlatList = useCallback(
     ({ item }) => {

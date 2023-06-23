@@ -45,6 +45,7 @@ function App() {
           initialRouteName="loading"
           screenOptions={{
             headerShown: false,
+            animation: 'fade_from_bottom',
           }}>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="EpisodeList" component={EpsList} />
