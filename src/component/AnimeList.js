@@ -10,17 +10,20 @@ import {
   StyleSheet,
   FlatList,
   useWindowDimensions,
-  ScrollView,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
+import runningText from '../assets/runningText.json';
+import DeviceInfo from 'react-native-device-info';
 
 function Home(props) {
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
+  const [textLayoutWidth, setTextLayoutWidth] = useState(undefined);
+  const [animationText, setAnimationText] = useState(runningText[0]);
 
   const windowSize = useWindowDimensions();
 
@@ -38,6 +41,7 @@ function Home(props) {
             toValue: 1,
             duration: 15000,
             useNativeDriver: true,
+            delay: 1000,
           }),
           Animated.timing(boxTextAnim, {
             toValue: 0,
@@ -47,6 +51,11 @@ function Home(props) {
         ]),
       );
       textAnimation.start();
+      const interval = setInterval(() => {
+        setAnimationText(
+          runningText[Math.floor(Math.random() * runningText.length)],
+        );
+      }, 16500);
       Animated.timing(scaleAnim, {
         toValue: 1,
         // speed: 18,
@@ -61,6 +70,7 @@ function Home(props) {
           useNativeDriver: true,
         }).start();
         textAnimation.reset();
+        clearInterval(interval);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
@@ -69,7 +79,11 @@ function Home(props) {
   const refreshing = useCallback(() => {
     setRefresh(true);
 
-    fetch('https://animeapi.aceracia.repl.co/v2/home')
+    fetch('https://animeapi.aceracia.repl.co/v2/home', {
+      headers: {
+        'User-Agent': DeviceInfo.getUserAgentSync(),
+      },
+    })
       .then(async fetchData => {
         const jsondata = await fetchData.json();
         setData(jsondata);
@@ -112,32 +126,34 @@ function Home(props) {
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
-          <ScrollView
-            horizontal
-            scrollEnabled={false}
-            showsHorizontalScrollIndicator={false}
-            style={styles.boxTextContainer}>
-            <Animated.Text
-              onLayout={nativeEvent =>
-                (boxTextLayout.current = nativeEvent.nativeEvent.layout.width)
-              }
-              style={[
-                styles.boxText,
-                {
-                  transform: [
-                    {
-                      translateX: boxTextAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [windowSize.width, -boxTextLayout.current],
-                      }),
-                    },
-                  ],
-                },
-              ]}>
-              Aplikasi masih dalam tahap pengembangan sampai benar-benar siap
-              untuk dirilis
-            </Animated.Text>
-          </ScrollView>
+          {/* running text animation */}
+          <Animated.Text
+            onLayout={nativeEvent =>
+              (boxTextLayout.current = nativeEvent.nativeEvent.layout.width)
+            }
+            onTextLayout={layout => {
+              setTextLayoutWidth(
+                layout.nativeEvent.lines.reduce((a, b) => {
+                  return a + b.width;
+                }, 0),
+              );
+            }}
+            style={[
+              styles.boxText,
+              { width: textLayoutWidth || 'auto' },
+              {
+                transform: [
+                  {
+                    translateX: boxTextAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [windowSize.width, -boxTextLayout.current],
+                    }),
+                  },
+                ],
+              },
+            ]}>
+            {animationText}
+          </Animated.Text>
         </View>
       </View>
       <View style={styles.listContainer}>
@@ -279,12 +295,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
   },
-  boxTextContainer: {
+  boxText: {
     position: 'absolute',
     bottom: 0,
-    flexWrap: 'wrap',
-  },
-  boxText: {
     color: '#ff2020',
     fontWeight: 'bold',
     textShadowColor: 'black',

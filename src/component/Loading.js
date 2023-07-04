@@ -17,6 +17,7 @@ import styles from '../assets/style';
 import rnLogo from '../assets/RNlogo.png';
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
 import { version as appVersion } from '../../package.json';
+import DeviceInfo from 'react-native-device-info';
 
 function Loading(props) {
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
@@ -24,7 +25,11 @@ function Loading(props) {
   const dispatchSettings = useDispatch();
 
   const connectToServer = useCallback(async () => {
-    const jsondata = await fetch('https://animeapi.aceracia.repl.co/v2/home')
+    const jsondata = await fetch('https://animeapi.aceracia.repl.co/v2/home', {
+      headers: {
+        'User-Agent': DeviceInfo.getUserAgentSync(),
+      },
+    })
       .then(data => data.json())
       .catch(e => {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
@@ -64,6 +69,11 @@ function Loading(props) {
   const checkVersion = useCallback(async () => {
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/anime-react-native/releases',
+      {
+        headers: {
+          'User-Agent': DeviceInfo.getUserAgentSync(),
+        },
+      },
     )
       .then(d => d.json())
       .catch(() => {});

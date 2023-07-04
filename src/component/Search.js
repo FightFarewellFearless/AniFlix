@@ -14,6 +14,7 @@ import {
 import { useFocusEffect, StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DeviceInfo from 'react-native-device-info';
 
 function Search(props) {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -52,7 +53,11 @@ function Search(props) {
       return;
     }
     setLoading(true);
-    fetch('https://animeapi.aceracia.repl.co/v2/search?q=' + searchText)
+    fetch('https://animeapi.aceracia.repl.co/v2/search?q=' + searchText, {
+      headers: {
+        'User-Agent': DeviceInfo.getUserAgentSync(),
+      },
+    })
       .then(async results => {
         if (results) {
           const result = await results.json();

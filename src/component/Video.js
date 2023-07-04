@@ -196,6 +196,9 @@ function Video(props) {
         'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
         {
           signal: abortController.current.signal,
+          headers: {
+            'User-Agent': DeviceInfo.getUserAgentSync(),
+          },
         },
       )
         .then(results => results.json())
@@ -455,6 +458,9 @@ function Video(props) {
         'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
         {
           signal: abortController.current.signal,
+          headers: {
+            'User-Agent': DeviceInfo.getUserAgentSync(),
+          },
         },
       )
         .then(resultData => resultData.json())

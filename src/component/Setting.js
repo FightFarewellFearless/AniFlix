@@ -21,6 +21,7 @@ import { HomeContext } from '../misc/context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { setDatabase } from '../misc/reduxSlice';
+import DeviceInfo from 'react-native-device-info';
 
 function Setting(props) {
   const enableNextPartNotification = useSelector(
@@ -137,6 +138,7 @@ function Setting(props) {
                   headers: {
                     Accept: 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
+                    'User-Agent': DeviceInfo.getUserAgentSync(),
                   },
                 },
               ).then(a => a.json());
@@ -183,6 +185,11 @@ function Setting(props) {
         try {
           const backupData = await fetch(
             'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
+            {
+              headers: {
+                'User-Agent': DeviceInfo.getUserAgentSync(),
+              },
+            },
           ).then(a => a.json());
           if (backupData.error) {
             Alert.alert('Restore gagal!', backupData.message);
