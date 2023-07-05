@@ -52,6 +52,7 @@ function Home(props) {
       );
       textAnimation.start();
       const interval = setInterval(() => {
+        setTextLayoutWidth(undefined);
         setAnimationText(
           runningText[Math.floor(Math.random() * runningText.length)],
         );
@@ -132,11 +133,12 @@ function Home(props) {
               (boxTextLayout.current = nativeEvent.nativeEvent.layout.width)
             }
             onTextLayout={layout => {
-              setTextLayoutWidth(
+              const width = Math.round(
                 layout.nativeEvent.lines.reduce((a, b) => {
                   return a + b.width;
                 }, 0),
               );
+              setTextLayoutWidth(width + 10);
             }}
             style={[
               styles.boxText,

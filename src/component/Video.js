@@ -687,6 +687,12 @@ function Video(props) {
                   listMode="MODAL"
                   modalTitle="Pilih resolusi"
                   theme="DARK"
+                  selectedItemContainerStyle={{
+                    backgroundColor: '#00461b',
+                  }}
+                  listItemContainerStyle={{
+                    backgroundColor: '#442619',
+                  }}
                   style={{
                     width: 120,
                   }}
@@ -707,6 +713,12 @@ function Video(props) {
                     listMode="MODAL"
                     modalTitle="Pilih part"
                     theme="DARK"
+                    selectedItemContainerStyle={{
+                      backgroundColor: '#00461b',
+                    }}
+                    listItemContainerStyle={{
+                      backgroundColor: '#442619',
+                    }}
                     containerStyle={{
                       width: 120,
                     }}

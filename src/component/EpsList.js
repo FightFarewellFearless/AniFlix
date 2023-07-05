@@ -87,6 +87,7 @@ function EpsList(props) {
         <ImageBackground
           source={{ uri: data.thumbnailUrl }}
           style={styles.imageHeader}
+          blurRadius={5}
           resizeMethod="resize">
           <View style={styles.shadow} />
           {/* judul */}
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   genreText: {
-    backgroundColor: '#1a9c1ab4',
+    backgroundColor: '#e97508b4',
     borderColor: 'black',
     borderWidth: 1.2,
     padding: 2,
