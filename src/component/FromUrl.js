@@ -11,7 +11,7 @@ import globalStyles from '../assets/style';
 import randomTipsArray from '../assets/loadingTips.json';
 import setHistory from '../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
-import DeviceInfo from 'react-native-device-info';
+import deviceUserAgent from '../utils/deviceUserAgent';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
@@ -47,7 +47,7 @@ function FromUrl(props) {
       {
         signal: abort.signal,
         headers: {
-          'User-Agent': DeviceInfo.getUserAgentSync(),
+          'User-Agent': deviceUserAgent,
         },
       },
     )

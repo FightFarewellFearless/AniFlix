@@ -16,7 +16,7 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
 import runningText from '../assets/runningText.json';
-import DeviceInfo from 'react-native-device-info';
+import deviceUserAgent from '../utils/deviceUserAgent';
 
 function Home(props) {
   const { paramsState: data, setParamsState: setData } =
@@ -82,7 +82,7 @@ function Home(props) {
 
     fetch('https://animeapi.aceracia.repl.co/v2/home', {
       headers: {
-        'User-Agent': DeviceInfo.getUserAgentSync(),
+        'User-Agent': deviceUserAgent,
       },
     })
       .then(async fetchData => {
@@ -162,7 +162,7 @@ function Home(props) {
         <View style={styles.titleContainer}>
           <Text
             style={[{ fontSize: 20, fontWeight: 'bold' }, globalStyles.text]}>
-            Anime terbaru:{' '}
+            Episode terbaru:{' '}
           </Text>
         </View>
         <FlatList horizontal data={data.newAnime} renderItem={renderNewAnime} />

@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -21,7 +22,8 @@ import { HomeContext } from '../misc/context';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { setDatabase } from '../misc/reduxSlice';
-import DeviceInfo from 'react-native-device-info';
+import Orientation from 'react-native-orientation-locker';
+import deviceUserAgent from '../utils/deviceUserAgent';
 
 function Setting(props) {
   const enableNextPartNotification = useSelector(
@@ -67,6 +69,28 @@ function Setting(props) {
     },
     [dispatchSettings],
   );
+
+  const lockScreenOrientation = useSelector(
+    state => state.settings.lockScreenOrientation,
+  );
+  const lockScreenOrientationSwitch = lockScreenOrientation === 'true';
+  const toggleScreenOrientation = useCallback(() => {
+    const newValue = lockScreenOrientation !== 'true';
+
+    if (newValue === true) {
+      Orientation.lockToPortrait();
+    } else {
+      Orientation.unlockAllOrientations();
+    }
+
+    dispatchSettings(
+      setDatabase({
+        target: 'lockScreenOrientation',
+        value: newValue,
+      }),
+    );
+  }, [dispatchSettings, lockScreenOrientation]);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
@@ -138,7 +162,7 @@ function Setting(props) {
                   headers: {
                     Accept: 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
-                    'User-Agent': DeviceInfo.getUserAgentSync(),
+                    'User-Agent': deviceUserAgent,
                   },
                 },
               ).then(a => a.json());
@@ -187,7 +211,7 @@ function Setting(props) {
             'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
             {
               headers: {
-                'User-Agent': DeviceInfo.getUserAgentSync(),
+                'User-Agent': deviceUserAgent,
               },
             },
           ).then(a => a.json());
@@ -298,8 +322,90 @@ function Setting(props) {
     setDownloadFrom(newDownloadFrom);
   }, [downloadFrom, setDownloadFrom]);
 
+  const iconSize = 18;
+
+  const settingsData = [
+    {
+      title: 'Nyalakan notifikasi part selanjutnya',
+      description:
+        'Beri tahu saya saat akan berpindah part anime secara otomatis',
+      icon: <Icon name="cube" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Switch
+          value={notificationSwitch}
+          onValueChange={nextPartNotification}
+        />
+      ),
+      handler: nextPartNotification,
+    },
+    {
+      title: 'Nyalakan informasi baterai dan jam',
+      description:
+        'Beri tahu saya persentase baterai dan waktu saat sedang streaming fullscreen',
+      icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Switch
+          value={batteryTimeInfoSwitch}
+          onValueChange={batteryTimeSwitchHandler}
+        />
+      ),
+      handler: batteryTimeSwitchHandler,
+    },
+    {
+      title: 'Kunci orientasi',
+      description: 'Mengunci orientasi ke portrait',
+      icon: <Icon name="lock" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Switch
+          value={lockScreenOrientationSwitch}
+          onValueChange={toggleScreenOrientation}
+        />
+      ),
+      handler: toggleScreenOrientation,
+    },
+    {
+      title: 'Download anime melalui',
+      description:
+        'Download anime melalui browser atau download manager bawaan android',
+      icon: <Icon name="download" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Text
+          style={{
+            color: downloadFrom === 'native' ? '#09a709' : '#ff7300',
+            borderWidth: 1,
+            borderColor: 'yellow',
+            padding: 5,
+            margin: 2,
+          }}>
+          {downloadFrom}
+        </Text>
+      ),
+      handler: toggleDownloadFrom,
+    },
+    {
+      title: 'Cadangkan histori tontonan',
+      description: 'Cadangkan histori tontonan saya',
+      icon: (
+        <Icon name="cloud-upload" style={globalStyles.text} size={iconSize} />
+      ),
+      handler: backupHistory,
+    },
+    {
+      title: 'Pulihkan histori tontonan',
+      description: 'Pulihkan histori tontonan menggunakan kode backup',
+      icon: <Icon name="history" style={globalStyles.text} size={iconSize} />,
+      handler: () => restoreHistory(),
+    },
+    {
+      title: 'Hapus histori tontonan',
+      description: 'Menghapus semua histori tontonan kamu',
+      icon: <Icon name="trash" style={{ color: 'red' }} size={iconSize} />,
+      handler: deleteHistory,
+    },
+  ];
+
   return (
-    <Animated.ScrollView style={{ transform: [{ scale: scaleAnim }] }}>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
       <View style={styles.waktuServer}>
         <Text style={globalStyles.text}>Waktu server: </Text>
         <Text style={globalStyles.text}>{paramsState.waktuServer}</Text>
@@ -362,76 +468,43 @@ function Setting(props) {
         </TouchableWithoutFeedback>
       </Modal>
 
-      <SettingList
-        text="Nyalakan notifikasi part selanjutnya"
-        icon={<Icon name="cube" style={globalStyles.text} size={15} />}
-        rightComponent={
-          <Switch
-            value={notificationSwitch}
-            onValueChange={nextPartNotification}
-          />
-        }
-        handler={nextPartNotification}
-      />
-
-      <SettingList
-        text="Nyalakan informasi baterai dan jam"
-        icon={<Icon name="battery" style={globalStyles.text} size={15} />}
-        rightComponent={
-          <Switch
-            value={batteryTimeInfoSwitch}
-            onValueChange={batteryTimeSwitchHandler}
-          />
-        }
-        handler={batteryTimeSwitchHandler}
-      />
-
-      <SettingList
-        text="Download Anime melalui"
-        icon={<Icon name="download" style={globalStyles.text} size={15} />}
-        rightComponent={
-          <Text
+      <FlatList
+        data={settingsData}
+        keyExtractor={keyExtractor}
+        renderItem={SettingList}
+        ItemSeparatorComponent={
+          <View
             style={{
-              color: downloadFrom === 'native' ? '#09a709' : '#ff7300',
-            }}>
-            {downloadFrom}
-          </Text>
+              width: '100%',
+              borderBottomWidth: 0.5,
+              borderColor: 'white',
+            }}
+          />
         }
-        handler={toggleDownloadFrom}
       />
-
-      <SettingList
-        text="Backup histori tontonan"
-        icon={<Icon name="cloud-upload" style={globalStyles.text} size={15} />}
-        handler={backupHistory}
-      />
-
-      <SettingList
-        text="Restore histori tontonan"
-        icon={<Icon name="history" style={globalStyles.text} size={15} />}
-        handler={() => restoreHistory()}
-      />
-
-      <SettingList
-        text="Hapus histori tontonan"
-        icon={<Icon name="trash" style={{ color: 'red' }} size={15} />}
-        handler={() => deleteHistory()}
-      />
-    </Animated.ScrollView>
+    </Animated.View>
   );
 }
 
-function SettingList(props) {
-  const icon = props.icon;
-  const text = props.text;
-  const handler = props.handler;
-  const rightComponent = props.rightComponent;
+function keyExtractor(item) {
+  return item.title;
+}
+
+function SettingList({ item }) {
+  const icon = item.icon;
+  const title = item.title;
+  const description = item.description;
+  const handler = item.handler;
+  const rightComponent = item.rightComponent;
 
   return (
     <TouchableOpacity style={styles.settingListContainer} onPress={handler}>
       <View style={styles.settingListIcon}>{icon}</View>
       <View style={styles.settingListText}>
-        <Text style={globalStyles.text}>{text}</Text>
+        <Text style={[globalStyles.text, styles.settingListTextTitle]}>
+          {title}
+        </Text>
+        <Text style={styles.settingListTextDescription}>{description}</Text>
       </View>
       <View style={styles.settingListRightComponent}>{rightComponent}</View>
     </TouchableOpacity>
@@ -439,6 +512,32 @@ function SettingList(props) {
 }
 
 const styles = StyleSheet.create({
+  settingListContainer: {
+    flex: 1,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+  },
+  settingListIcon: {
+    alignSelf: 'center',
+    padding: 5,
+  },
+  settingListText: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+  settingListTextTitle: {
+    fontWeight: 'bold',
+  },
+  settingListTextDescription: {
+    textAlign: 'center',
+    color: 'gray',
+  },
+  settingListRightComponent: {
+    alignItems: 'flex-end',
+  },
   waktuServer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -457,33 +556,6 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  settingListContainer: {
-    flex: 1,
-    backgroundColor: '#303030',
-    borderWidth: 1,
-    borderColor: 'gray',
-    marginHorizontal: 14,
-    marginVertical: 14,
-    borderRadius: 7,
-    flexDirection: 'row',
-    paddingVertical: 5,
-    alignItems: 'center',
-    alignContent: 'center',
-  },
-  settingListIcon: {
-    borderRightWidth: 1,
-    borderRightColor: '#cfcfcf',
-    paddingRight: 8,
-    paddingLeft: 4,
-    alignSelf: 'center',
-  },
-  settingListText: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  settingListRightComponent: {
-    alignItems: 'flex-end',
   },
   acceptRestoreModalButton: {
     backgroundColor: 'green',

@@ -36,6 +36,7 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { useDispatch, useSelector } from 'react-redux';
+import deviceUserAgent from '../utils/deviceUserAgent';
 
 function Video(props) {
   const enableNextPartNotification = useSelector(
@@ -46,6 +47,9 @@ function Video(props) {
   );
   const downloadFrom = useSelector(state => state.settings.downloadFrom);
   const history = useSelector(state => state.settings.history);
+  const lockScreenOrientation = useSelector(
+    state => state.settings.lockScreenOrientation,
+  );
 
   const dispatchSettings = useDispatch();
 
@@ -197,7 +201,7 @@ function Video(props) {
         {
           signal: abortController.current.signal,
           headers: {
-            'User-Agent': DeviceInfo.getUserAgentSync(),
+            'User-Agent': deviceUserAgent,
           },
         },
       )
@@ -222,7 +226,11 @@ function Video(props) {
 
   const willUnmountHandler = () => {
     Orientation.removeDeviceOrientationListener(orientationDidChange);
-    Orientation.unlockAllOrientations();
+    if (lockScreenOrientation === 'true') {
+      Orientation.lockToPortrait();
+    } else {
+      Orientation.unlockAllOrientations();
+    }
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
   };
@@ -459,7 +467,7 @@ function Video(props) {
         {
           signal: abortController.current.signal,
           headers: {
-            'User-Agent': DeviceInfo.getUserAgentSync(),
+            'User-Agent': deviceUserAgent,
           },
         },
       )

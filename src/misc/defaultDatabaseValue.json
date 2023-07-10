@@ -2,5 +2,6 @@
     "history": "[]",
     "enableNextPartNotification": "true",
     "enableBatteryTimeInfo": "false",
-    "downloadFrom": "native"
+    "downloadFrom": "native",
+    "lockScreenOrientation": "false"
 }

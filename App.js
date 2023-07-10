@@ -3,7 +3,6 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Provider } from 'react-redux';
 
 import Loading from './src/component/Loading';
@@ -14,20 +13,7 @@ import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
 import FailedToConnect from './src/component/FailedToConnect';
 import NeedUpdate from './src/component/NeedUpdate';
-// import defaultDatabase from './src/misc/defaultDatabaseValue.json';
 import store from './src/misc/reduxStore';
-
-// function reducer(state, action) {
-//   const value =
-//     typeof action.value !== 'string'
-//       ? JSON.stringify(action.value)
-//       : action.value;
-//   AsyncStorage.setItem(action.target, value);
-//   return {
-//     ...state,
-//     [action.target]: value,
-//   };
-// }
 
 function App() {
   const Stack = useMemo(createNativeStackNavigator, []);
