@@ -41,7 +41,7 @@ function FromUrl(props) {
       resolution !== undefined ? `&res=${resolution}` : '';
 
     fetch(
-      'https://animeapi.aceracia.repl.co/v2/fromUrl?link=' +
+      'https://animeapi.aceracia.repl.co/v3/fromUrl?link=' +
         props.route.params.link +
         providedResolution,
       {
@@ -61,6 +61,8 @@ function FromUrl(props) {
           if (results && unmount === false) {
             if (result.blocked) {
               props.navigation.dispatch(StackActions.replace('Blocked'));
+            } else if (result.maintenance) {
+              props.navigation.dispatch(StackActions.replace('Maintenance'));
             } else if (result.type === 'epsList') {
               props.navigation.dispatch(
                 StackActions.replace('EpisodeList', {
@@ -103,7 +105,11 @@ function FromUrl(props) {
         if (err.message === 'Aborted') {
           return;
         }
-        Alert.alert('Error', err.message);
+        const errMessage =
+          err.message === 'Network request failed'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + err.message;
+        Alert.alert('Error', errMessage);
         props.navigation.goBack();
       });
     return () => {

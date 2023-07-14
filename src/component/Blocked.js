@@ -62,8 +62,12 @@ class Blocked extends Component {
             ]}
           />
         </View>
-        <Text style={[{ fontSize: 20 }, globalStyles.text]}>
-          Anime yang kamu tuju tidak di izinkan!
+        <Text
+          style={[
+            { fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
+            globalStyles.text,
+          ]}>
+          Anime yang kamu tuju tidak di izinkan atau di blacklist!
         </Text>
         <TouchableOpacity
           style={{

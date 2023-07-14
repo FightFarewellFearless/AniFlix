@@ -13,6 +13,7 @@ import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
 import FailedToConnect from './src/component/FailedToConnect';
 import NeedUpdate from './src/component/NeedUpdate';
+import Maintenance from './src/component/Maintenance';
 import store from './src/misc/reduxStore';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
           <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
           <Stack.Screen name="Blocked" component={Blocked} />
           <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
+          <Stack.Screen name="Maintenance" component={Maintenance} />
         </Stack.Navigator>
       </Provider>
     </NavigationContainer>

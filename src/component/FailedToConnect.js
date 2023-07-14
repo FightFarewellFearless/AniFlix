@@ -61,6 +61,9 @@ class FailedToConnect extends Component {
               borderRadius: 5,
               padding: 3,
               marginTop: 14,
+              zIndex: 1,
+              elevation: 7,
+              shadowColor: 'white',
             }}
             onPress={this.tryagain}>
             <Text style={[{ fontSize: 17 }, globalStyles.text]}>

@@ -53,7 +53,7 @@ function Search(props) {
       return;
     }
     setLoading(true);
-    fetch('https://animeapi.aceracia.repl.co/v2/search?q=' + searchText, {
+    fetch('https://animeapi.aceracia.repl.co/v3/search?q=' + searchText, {
       headers: {
         'User-Agent': deviceUserAgent,
       },
@@ -61,6 +61,11 @@ function Search(props) {
       .then(async results => {
         if (results) {
           const result = await results.json();
+          if (result.maintenance) {
+            props.navigation.navigate('Maintenance');
+            setLoading(false);
+            return;
+          }
           query.current = searchText;
           setData(result);
           setLoading(false);
@@ -70,10 +75,14 @@ function Search(props) {
         if (err.message === 'Aborted') {
           return;
         }
-        Alert.alert('Error', err.message);
+        const errMessage =
+          err.message === 'Network request failed'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + err.message;
+        Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [searchText]);
+  }, [props.navigation, searchText]);
 
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>

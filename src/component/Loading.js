@@ -27,7 +27,7 @@ function Loading(props) {
   const dispatchSettings = useDispatch();
 
   const connectToServer = useCallback(async () => {
-    const jsondata = await fetch('https://animeapi.aceracia.repl.co/v2/home', {
+    const jsondata = await fetch('https://animeapi.aceracia.repl.co/v3/home', {
       headers: {
         'User-Agent': deviceUserAgent,
       },
@@ -37,6 +37,10 @@ function Loading(props) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       });
     if (jsondata === undefined) {
+      return;
+    }
+    if (jsondata.maintenance === true) {
+      props.navigation.dispatch(StackActions.replace('Maintenance'));
       return;
     }
     props.navigation.dispatch(

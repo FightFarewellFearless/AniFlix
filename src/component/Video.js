@@ -197,7 +197,7 @@ function Video(props) {
       setLoading(true);
       const resultData = await fetch(
         // eslint-disable-next-line prettier/prettier
-        'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
+        'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
         {
           signal: abortController.current.signal,
           headers: {
@@ -210,16 +210,26 @@ function Video(props) {
           if (err.message === 'Aborted') {
             return;
           }
-          Alert.alert('Error', err.message);
+          const errMessage =
+            err.message === 'Network request failed'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + err.message;
+          Alert.alert('Error', errMessage);
           setLoading(false);
         });
       if (resultData === undefined) {
+        return;
+      }
+      if (resultData.maintenance) {
+        setLoading(false);
+        ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
         return;
       }
       hasPart.current = resultData.streamingLink.length > 1;
       setData(resultData);
       setLoading(false);
       setPart(0);
+      firstTimeLoad.current = false;
     },
     [loading],
   );
@@ -463,7 +473,7 @@ function Video(props) {
       }
       setLoading(true);
       const result = await fetch(
-        'https://animeapi.aceracia.repl.co/v2/fromUrl' + '?link=' + url,
+        'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?link=' + url,
         {
           signal: abortController.current.signal,
           headers: {
@@ -476,10 +486,19 @@ function Video(props) {
           if (err.message === 'Aborted') {
             return;
           }
-          Alert.alert('Error', err.message);
+          const errMessage =
+            err.message === 'Network request failed'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + err.message;
+          Alert.alert('Error', errMessage);
           setLoading(false);
         });
       if (result === undefined) {
+        return;
+      }
+      if (result.maintenance) {
+        setLoading(false);
+        ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
         return;
       }
       hasPart.current = result.streamingLink.length > 1;
@@ -487,6 +506,7 @@ function Video(props) {
       setData(result);
       setLoading(false);
       setPart(0);
+      firstTimeLoad.current = false;
       currentLink.current = url;
 
       setHistory(result, url, undefined, undefined, history, dispatchSettings);
@@ -717,6 +737,8 @@ function Video(props) {
                     })}
                     setOpen={setOpenPart}
                     setValue={val => {
+                      firstTimeLoad.current = false;
+
                       setPart(val());
                     }}
                     listMode="MODAL"

@@ -32,7 +32,10 @@ function EpsList(props) {
       synopsys.current.flashScrollIndicators();
       epsList.current.flashScrollIndicators();
     } catch (e) {
-      Alert.alert('Error', e.stack);
+      Alert.alert(
+        'Error',
+        'Kemungkinan kamu ingin membaca manga, Jika iya, aplikasi tidak mendukung manga saat ini.',
+      );
     }
   }, []);
 
@@ -51,7 +54,14 @@ function EpsList(props) {
             }),
           );
         }}>
-        <Text style={{ color: 'lightblue' }}>{item.episode}</Text>
+        <Text style={{ color: 'lightblue' }}>
+          {item.episode
+            .replace(
+              data.title.replace('Nonton Anime ', '').replace(' Sub Indo', ''),
+              '',
+            )
+            .replace('e', 'E')}
+        </Text>
       </TouchableOpacityMemo>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

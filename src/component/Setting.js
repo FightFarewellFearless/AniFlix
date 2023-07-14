@@ -272,7 +272,11 @@ function Setting(props) {
             );
           }
         } catch (e) {
-          Alert.alert('Restore gagal!', e.message);
+          const errMessage =
+            e.message === 'Network request failed'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + e.message;
+          Alert.alert('Restore gagal!', errMessage);
         } finally {
           setModalVisible(false);
         }

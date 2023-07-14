@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Animated,
   View,
@@ -10,6 +16,8 @@ import {
   StyleSheet,
   FlatList,
   useWindowDimensions,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -24,6 +32,7 @@ function Home(props) {
   const [refresh, setRefresh] = useState(false);
   const [textLayoutWidth, setTextLayoutWidth] = useState(undefined);
   const [animationText, setAnimationText] = useState(runningText[0]);
+  const [announcmentVisible, setAnnouncmentVisible] = useState(false);
 
   const windowSize = useWindowDimensions();
 
@@ -32,6 +41,13 @@ function Home(props) {
   const boxTextLayout = useRef(0);
 
   const localTime = useLocalTime();
+
+  useEffect(() => {
+    if (data.announcment.enable === true) {
+      setAnnouncmentVisible(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -80,13 +96,18 @@ function Home(props) {
   const refreshing = useCallback(() => {
     setRefresh(true);
 
-    fetch('https://animeapi.aceracia.repl.co/v2/home', {
+    fetch('https://animeapi.aceracia.repl.co/v3/home', {
       headers: {
         'User-Agent': deviceUserAgent,
       },
     })
       .then(async fetchData => {
         const jsondata = await fetchData.json();
+        if (jsondata.maintenance) {
+          ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
+          setRefresh(false);
+          return;
+        }
         setData(jsondata);
         setRefresh(false);
       })
@@ -129,6 +150,11 @@ function Home(props) {
           colors={['#00a2ff', 'red']}
         />
       }>
+      <AnnoucmentModal
+        visible={announcmentVisible}
+        announcmentMessage={data.announcment.message}
+        setVisible={setAnnouncmentVisible}
+      />
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
@@ -194,6 +220,39 @@ function Home(props) {
         />
       </View>
     </Animated.ScrollView>
+  );
+}
+
+function AnnoucmentModal({ visible, setVisible, announcmentMessage }) {
+  return (
+    <Modal transparent visible={visible}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalPengumuman}>
+            <Text style={[globalStyles.text, styles.pengumuman]}>
+              Pengumuman!
+            </Text>
+          </View>
+          <View style={styles.announcmentText}>
+            <ScrollView>
+              <Text style={[globalStyles.text, styles.announcmentMessage]}>
+                {announcmentMessage}
+              </Text>
+            </ScrollView>
+          </View>
+          <View style={styles.announcmentOK}>
+            <TouchableOpacity
+              hitSlop={7}
+              onPress={() => setVisible(false)}
+              style={styles.announcmentOKButton}>
+              <Text style={[globalStyles.text, styles.announcmentOKText]}>
+                OK
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -294,6 +353,61 @@ function useLocalTime() {
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0000008a',
+  },
+  modalContent: {
+    flex: 0.15,
+    backgroundColor: '#202020',
+    borderWidth: 1,
+    borderColor: '#525252',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 100,
+    minWidth: 250,
+    elevation: 16,
+    shadowColor: '#02bb7d',
+  },
+  modalPengumuman: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  pengumuman: {
+    fontSize: 19,
+    color: '#ff0000b6',
+    fontWeight: 'bold',
+  },
+  announcmentText: {
+    flex: 1,
+    flexGrow: 3,
+    minWidth: 120,
+    borderColor: '#01463cff',
+    borderWidth: 1,
+  },
+  announcmentMessage: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  announcmentOK: {
+    flex: 1,
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
+  },
+  announcmentOKButton: {
+    backgroundColor: 'white',
+    width: 50,
+    padding: 5,
+    borderRadius: 3,
+  },
+  announcmentOKText: {
+    color: '#006bcf',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   box: {
     flex: 1,
     height: 100,

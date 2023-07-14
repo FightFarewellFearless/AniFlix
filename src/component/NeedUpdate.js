@@ -7,6 +7,7 @@ import {
   Linking,
 } from 'react-native';
 import Markdown from 'react-native-marked';
+import Colors from 'react-native-marked/dist/module/theme/colors';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { version as appVersion } from '../../package.json';
@@ -32,7 +33,10 @@ function NeedUpdate(props) {
             {props.route.params.latestVersion}
           </Text>
         </View>
-        <Markdown value={props.route.params.changelog} />
+        <Markdown
+          value={props.route.params.changelog}
+          theme={{ colors: Colors.dark }}
+        />
         <TouchableOpacity
           style={styles.download}
           onPress={() => {
