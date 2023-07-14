@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   Linking,
+  ScrollView,
 } from 'react-native';
-import Markdown from 'react-native-marked';
-import Colors from 'react-native-marked/dist/module/theme/colors';
+import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { version as appVersion } from '../../package.json';
 import globalStyles from '../assets/style';
 
 function NeedUpdate(props) {
+  const markdownElement = useMarkdown(props.route.params.changelog, {
+    colorScheme: 'dark',
+  });
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -33,10 +36,11 @@ function NeedUpdate(props) {
             {props.route.params.latestVersion}
           </Text>
         </View>
-        <Markdown
-          value={props.route.params.changelog}
-          theme={{ colors: Colors.dark }}
-        />
+        <ScrollView>
+          {markdownElement.map((el, i) => (
+            <Fragment key={`changelog_${i}`}>{el}</Fragment>
+          ))}
+        </ScrollView>
         <TouchableOpacity
           style={styles.download}
           onPress={() => {
