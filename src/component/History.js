@@ -216,6 +216,8 @@ function History(props) {
             <RefreshControl
               refreshing={historyRefreshing}
               onRefresh={onRefreshControl}
+              progressBackgroundColor="#292929"
+              colors={['#00a2ff', 'red']}
             />
           }
           renderItem={renderFlatList}

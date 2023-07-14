@@ -12,12 +12,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux';
 
+import store from '../misc/reduxStore';
 import { setDatabase } from '../misc/reduxSlice';
 import styles from '../assets/style';
 import rnLogo from '../assets/RNlogo.png';
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
 import { version as appVersion } from '../../package.json';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import Orientation from 'react-native-orientation-locker';
 
 function Loading(props) {
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
@@ -64,6 +66,11 @@ function Loading(props) {
         }),
       );
     }
+    setTimeout(() => {
+      if (store.getState().settings.lockScreenOrientation === 'true') {
+        Orientation.lockToPortrait();
+      }
+    }, 1000);
   }, [dispatchSettings]);
 
   const checkVersion = useCallback(async () => {

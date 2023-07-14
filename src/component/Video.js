@@ -636,6 +636,7 @@ function Video(props) {
                   {data.status}
                 </Text>
                 <Text style={[globalStyles.text, styles.releaseYear]}>
+                  <Icon name="calendar" color={globalStyles.text.color} />{' '}
                   {data.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
@@ -698,9 +699,9 @@ function Video(props) {
                   selectedItemContainerStyle={{
                     backgroundColor: '#00461b',
                   }}
-                  listItemContainerStyle={{
-                    backgroundColor: '#442619',
-                  }}
+                  // listItemContainerStyle={{
+                  //   backgroundColor: '#442619',
+                  // }}
                   style={{
                     width: 120,
                   }}
@@ -724,9 +725,9 @@ function Video(props) {
                     selectedItemContainerStyle={{
                       backgroundColor: '#00461b',
                     }}
-                    listItemContainerStyle={{
-                      backgroundColor: '#442619',
-                    }}
+                    // listItemContainerStyle={{
+                    //   backgroundColor: '#442619',
+                    // }}
                     containerStyle={{
                       width: 120,
                     }}
@@ -871,9 +872,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 5,
+    fontFamily: '',
   },
   infoSinopsis: {
     fontSize: 13.5,
+    color: '#a5a5a5',
   },
   infoGenre: {
     marginVertical: 5,
@@ -897,8 +900,9 @@ const styles = StyleSheet.create({
     padding: 3,
   },
   releaseYear: {
-    borderWidth: 1,
-    borderColor: 'green',
+    backgroundColor: '#4b4b4b',
+    borderRadius: 5,
+    padding: 3,
     paddingHorizontal: 5,
     textAlign: 'center',
     alignSelf: 'center',

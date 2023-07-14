@@ -122,7 +122,12 @@ function Home(props) {
     <Animated.ScrollView
       style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
       refreshControl={
-        <RefreshControl refreshing={refresh} onRefresh={refreshing} />
+        <RefreshControl
+          refreshing={refresh}
+          onRefresh={refreshing}
+          progressBackgroundColor="#292929"
+          colors={['#00a2ff', 'red']}
+        />
       }>
       <View style={styles.box}>
         <View style={styles.boxItem}>
@@ -165,7 +170,12 @@ function Home(props) {
             Episode terbaru:{' '}
           </Text>
         </View>
-        <FlatList horizontal data={data.newAnime} renderItem={renderNewAnime} />
+        <FlatList
+          horizontal
+          data={data.newAnime}
+          renderItem={renderNewAnime}
+          showsHorizontalScrollIndicator={false}
+        />
       </View>
 
       <View style={[{ marginTop: 13 }, styles.listContainer]}>
@@ -176,7 +186,12 @@ function Home(props) {
           </Text>
         </View>
 
-        <FlatList horizontal data={data.movie} renderItem={renderMovie} />
+        <FlatList
+          horizontal
+          data={data.movie}
+          renderItem={renderMovie}
+          showsHorizontalScrollIndicator={false}
+        />
       </View>
     </Animated.ScrollView>
   );

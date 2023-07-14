@@ -405,7 +405,7 @@ function Setting(props) {
   ];
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }], flex: 1 }}>
       <View style={styles.waktuServer}>
         <Text style={globalStyles.text}>Waktu server: </Text>
         <Text style={globalStyles.text}>{paramsState.waktuServer}</Text>
@@ -432,36 +432,57 @@ function Setting(props) {
                   styles.modalContent,
                   { minHeight: 100, minWidth: 250 },
                 ]}>
-                <TouchableOpacity
-                  style={{ position: 'absolute', top: 0, right: 0 }}
-                  onPress={() => setRestoreVisible(false)}>
-                  <Icon name="close" size={28} style={{ color: 'red' }} />
-                </TouchableOpacity>
-                <Text style={[globalStyles.text]}>Masukkan kode backup:</Text>
-                <TextInput
-                  placeholderTextColor="#707070"
-                  placeholder="Kode"
-                  keyboardType="numeric"
-                  value={backupCode}
-                  onChangeText={text => setBackupCode(text)}
-                  onSubmitEditing={() => restoreHistory(backupCode)}
+                <View
                   style={[
-                    globalStyles.text,
+                    styles.modalRestorePart,
+                    { justifyContent: 'center' },
+                  ]}>
+                  <Text style={[globalStyles.text, styles.modalRestoreText]}>
+                    Masukkan kode backup
+                  </Text>
+                </View>
+                <View style={styles.modalRestorePart}>
+                  <TextInput
+                    placeholderTextColor="#707070"
+                    placeholder="Kode"
+                    keyboardType="numeric"
+                    value={backupCode}
+                    onChangeText={text => setBackupCode(text)}
+                    onSubmitEditing={() => restoreHistory(backupCode)}
+                    style={[
+                      globalStyles.text,
+                      {
+                        borderBottomWidth: 1,
+                        borderBottomColor: '#00af00',
+                        // backgroundColor: '#474747',
+                        height: 45,
+                        width: 100,
+                        textAlign: 'center',
+                        justifyContent: 'center',
+                      },
+                    ]}
+                  />
+                </View>
+                <View
+                  style={[
+                    styles.modalRestorePart,
                     {
-                      borderWidth: 1,
-                      backgroundColor: '#474747',
-                      height: 45,
-                      width: 100,
-                      textAlign: 'center',
-                      justifyContent: 'center',
+                      alignSelf: 'flex-end',
+                      alignItems: 'flex-end',
+                      flexDirection: 'row',
                     },
-                  ]}
-                />
-                <TouchableOpacity
-                  style={styles.acceptRestoreModalButton}
-                  onPress={() => restoreHistory(backupCode)}>
-                  <Text style={[globalStyles.text]}>Restore</Text>
-                </TouchableOpacity>
+                  ]}>
+                  <TouchableOpacity
+                    style={styles.cancelRestoreModalButton}
+                    onPress={() => setRestoreVisible(false)}>
+                    <Text style={[globalStyles.text]}>Batal</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.acceptRestoreModalButton}
+                    onPress={() => restoreHistory(backupCode)}>
+                    <Text style={[globalStyles.text]}>Restore</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -520,8 +541,13 @@ const styles = StyleSheet.create({
     alignContent: 'center',
   },
   settingListIcon: {
-    alignSelf: 'center',
     padding: 5,
+    width: '10%',
+    maxWidth: 50,
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: 'white',
+    marginRight: 5,
   },
   settingListText: {
     flex: 1,
@@ -551,17 +577,27 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 0.15,
-    backgroundColor: '#383838',
+    backgroundColor: '#202020',
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: '#525252',
     justifyContent: 'center',
     alignItems: 'center',
   },
   acceptRestoreModalButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#005300',
     padding: 7,
     borderRadius: 3,
-    marginTop: 10,
+  },
+  cancelRestoreModalButton: {
+    backgroundColor: '#b40000',
+    padding: 7,
+    marginRight: 2,
+    borderRadius: 3,
+  },
+  modalRestorePart: { flex: 1 },
+  modalRestoreText: {
+    fontWeight: 'bold',
+    fontSize: 17,
   },
 });
 
