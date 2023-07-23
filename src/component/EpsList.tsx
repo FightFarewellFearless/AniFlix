@@ -17,7 +17,7 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
-import { EpsList, EpsListEpisodeList } from '../types/anime';
+import { EpsList as EpisodeListType, EpsListEpisodeList } from '../types/anime';
 const TouchableOpacityMemo = memo(TouchableOpacity);
 const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
   FlatList,
@@ -30,7 +30,7 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'EpisodeList'>;
 
 function EpsList(props: Props) {
   const data = props.route.params.data;
-  const [result, setResult] = useState<EpsList['episodeList']>(
+  const [result, setResult] = useState<EpisodeListType['episodeList']>(
     data.episodeList,
   );
   const { height, width } = useWindowDimensions();
@@ -93,7 +93,7 @@ function EpsList(props: Props) {
         (
           JSON.parse(
             JSON.stringify(props.route.params.data.episodeList),
-          ) as EpsList['episodeList']
+          ) as EpisodeListType['episodeList']
         )
           .reverse()
           .filter(x => {
