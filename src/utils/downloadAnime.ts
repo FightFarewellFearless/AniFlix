@@ -2,18 +2,21 @@ import { useCallback } from 'react';
 import { Alert, Linking, ToastAndroid } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 import { useSelector } from 'react-redux';
+import { RootState } from '../misc/reduxStore';
 
 function useDownloadAnime() {
-  const downloadFrom = useSelector(state => state.settings.downloadFrom);
+  const downloadFrom = useSelector(
+    (state: RootState) => state.settings.downloadFrom,
+  );
 
   const downloadAnime = useCallback(
     async (
-      source,
-      downloadSource,
-      Title,
-      resolution,
-      force = false,
-      callback,
+      source: string,
+      downloadSource: string[],
+      Title: string,
+      resolution: string,
+      force: boolean | undefined = false,
+      callback: () => any,
     ) => {
       if (downloadSource.includes(source) && force === false) {
         Alert.alert(
@@ -64,10 +67,10 @@ function useDownloadAnime() {
           },
         })
           .fetch('GET', source)
-          .then(resp => {
-            // the path of downloaded file
-            // resp.path();
-          })
+          // .then(resp => {
+          //   // the path of downloaded file
+          //   // resp.path();
+          // })
           .catch(() => {});
       } else {
         if (await Linking.canOpenURL(source)) {

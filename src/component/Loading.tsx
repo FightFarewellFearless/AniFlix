@@ -12,28 +12,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux';
 
-import store from '../misc/reduxStore';
+import store, { AppDispatch } from '../misc/reduxStore';
 import { setDatabase } from '../misc/reduxSlice';
 import styles from '../assets/style';
-import rnLogo from '../assets/RNlogo.png';
+const rnLogo = require('../assets/RNlogo.png');
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
 import { version as appVersion } from '../../package.json';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackNavigator } from '../types/navigation';
+import { SetDatabaseTarget } from '../types/redux';
+import { Home } from '../types/anime';
 
-function Loading(props) {
+type Props = NativeStackScreenProps<RootStackNavigator, 'EpisodeList'>;
+
+function Loading(props: Props) {
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
 
-  const dispatchSettings = useDispatch();
+  const dispatchSettings = useDispatch<AppDispatch>();
 
   const connectToServer = useCallback(async () => {
-    const jsondata = await fetch('https://animeapi.aceracia.repl.co/v3/home', {
-      headers: {
-        'User-Agent': deviceUserAgent,
+    const jsondata: Home | undefined = await fetch(
+      'https://animeapi.aceracia.repl.co/v3/home',
+      {
+        headers: {
+          'User-Agent': deviceUserAgent,
+        },
       },
-    })
+    )
       .then(data => data.json())
-      .catch(e => {
+      .catch(() => {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       });
     if (jsondata === undefined) {
@@ -51,7 +60,7 @@ function Loading(props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
-    const arrOfData = Object.keys(defaultDatabase);
+    const arrOfData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
     for (const dataKey of arrOfData) {
       const data = await AsyncStorage.getItem(dataKey);
       if (data === null) {

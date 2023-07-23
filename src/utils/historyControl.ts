@@ -1,14 +1,17 @@
 import { setDatabase } from '../misc/reduxSlice';
+import { SingleEps } from '../types/anime';
+import { AppDispatch } from '../misc/reduxStore';
+import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 
 function setHistory(
-  targetData,
-  link,
+  targetData: SingleEps,
+  link: string,
   skipUpdateDate = false,
-  additionalData = {},
-  historyData,
-  dispatchSettings,
+  additionalData: HistoryAdditionalData | {} = {},
+  historyData: string,
+  dispatchSettings: AppDispatch,
 ) {
-  const data = JSON.parse(historyData);
+  const data: HistoryJSON[] = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
   const title =
     episodeIndex >= 0 // Episode is exist (anime is not movie)

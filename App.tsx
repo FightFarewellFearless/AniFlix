@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
@@ -15,9 +15,10 @@ import FailedToConnect from './src/component/FailedToConnect';
 import NeedUpdate from './src/component/NeedUpdate';
 import Maintenance from './src/component/Maintenance';
 import store from './src/misc/reduxStore';
+import { RootStackNavigator } from './src/types/navigation';
 
 function App() {
-  const Stack = useMemo(createNativeStackNavigator, []);
+  const Stack = createNativeStackNavigator<RootStackNavigator>();
 
   useEffect(() => {
     StatusBar.setHidden(false);

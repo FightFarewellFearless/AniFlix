@@ -17,16 +17,21 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../misc/reduxSlice';
-import store from '../misc/reduxStore';
+import store, { AppDispatch } from '../misc/reduxStore';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { HomeNavigator } from '../types/navigation';
+import { HistoryJSON } from '../types/historyJSON';
 require('moment/locale/id');
 
-function History(props) {
+type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
+
+function History(props: Props) {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<HistoryJSON[]>([]);
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
   const isFocus = useRef(true);
 
-  const dispatchSettings = useDispatch();
+  const dispatchSettings = useDispatch<AppDispatch>();
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -83,7 +88,7 @@ function History(props) {
   );
 
   const deleteHistory = useCallback(
-    async index => {
+    async (index: number) => {
       // const time = Date.now();
       const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
@@ -99,7 +104,7 @@ function History(props) {
     [dispatchSettings, data],
   );
 
-  const keyExtractor = useCallback(item => item.title, []);
+  const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
   const onRefreshControl = useCallback(() => {
     setHistoryRefreshing(true);
@@ -108,7 +113,7 @@ function History(props) {
   }, []);
 
   const renderFlatList = useCallback(
-    ({ item }) => {
+    ({ item }: { item: HistoryJSON }) => {
       return (
         <TouchableOpacity
           style={styles.listContainerButton}
@@ -229,7 +234,7 @@ function History(props) {
   );
 }
 
-function formatTimeFromSeconds(seconds) {
+function formatTimeFromSeconds(seconds: number) {
   const duration = moment.duration(seconds, 'seconds');
   const hours = duration.hours();
   const minutes = duration.minutes();

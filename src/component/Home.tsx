@@ -6,11 +6,18 @@ import Home from './AnimeList';
 import Setting from './Setting';
 import Search from './Search';
 import { HomeContext } from '../misc/context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Home as HomeType } from '../types/anime';
+import { HomeNavigator, RootStackNavigator } from '../types/navigation';
 
-function BottomTabs(props) {
-  const Tab = createBottomTabNavigator();
+type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 
-  const [paramsState, setParamsState] = useState(props.route.params.data);
+function BottomTabs(props: Props) {
+  const Tab = createBottomTabNavigator<HomeNavigator>();
+
+  const [paramsState, setParamsState] = useState<HomeType>(
+    props.route.params.data,
+  );
   return (
     <HomeContext.Provider value={{ paramsState, setParamsState }}>
       <Tab.Navigator
@@ -19,7 +26,7 @@ function BottomTabs(props) {
           tabBarStyle: { height: 40 },
         }}>
         <Tab.Screen
-          name="Home1"
+          name="AnimeList"
           component={Home}
           options={{
             tabBarIcon: ({ color }) => (

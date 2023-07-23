@@ -14,23 +14,33 @@ import {
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackNavigator } from '../types/navigation';
+import { EpsList, EpsListEpisodeList } from '../types/anime';
 const TouchableOpacityMemo = memo(TouchableOpacity);
-const FlatListMemo = memo(FlatList, (prev, next) => {
-  return prev.data === next.data;
-});
+const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
+  FlatList,
+  (prev, next) => {
+    return prev.data === next.data;
+  },
+);
 
-function EpsList(props) {
+type Props = NativeStackScreenProps<RootStackNavigator, 'EpisodeList'>;
+
+function EpsList(props: Props) {
   const data = props.route.params.data;
-  const [result, setResult] = useState(data.episodeList);
+  const [result, setResult] = useState<EpsList['episodeList']>(
+    data.episodeList,
+  );
   const { height, width } = useWindowDimensions();
 
-  const synopsys = useRef();
-  const epsList = useRef();
+  const synopsys = useRef<ScrollView>(null);
+  const epsList = useRef<FlatList>(null);
 
   useEffect(() => {
     try {
-      synopsys.current.flashScrollIndicators();
-      epsList.current.flashScrollIndicators();
+      synopsys.current?.flashScrollIndicators();
+      epsList.current?.flashScrollIndicators();
     } catch (e) {
       Alert.alert(
         'Error',
@@ -43,7 +53,7 @@ function EpsList(props) {
     epsList.current?.scrollToOffset({ animated: true, offset: 0 });
   }, [result]);
 
-  const renderItem = useCallback(({ item }) => {
+  const renderItem = useCallback(({ item }: { item: EpsListEpisodeList }) => {
     return (
       <TouchableOpacityMemo
         style={{ paddingBottom: 12 }}
@@ -67,14 +77,18 @@ function EpsList(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const keyExtractor = useCallback(item => item.link, []);
+  const keyExtractor = useCallback((item: EpsListEpisodeList) => item.link, []);
 
-  const searchEpisode = useCallback(text => {
+  const searchEpisode = useCallback((text: string) => {
     if (text === '') {
       setResult(props.route.params.data.episodeList);
     } else {
       setResult(
-        JSON.parse(JSON.stringify(props.route.params.data.episodeList))
+        (
+          JSON.parse(
+            JSON.stringify(props.route.params.data.episodeList),
+          ) as EpsList['episodeList']
+        )
           .reverse()
           .filter(x => {
             const index = x.episode.indexOf('episode');

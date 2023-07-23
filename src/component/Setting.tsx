@@ -1,4 +1,10 @@
-import React, { useContext, useState, useCallback, useRef } from 'react';
+import React, {
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  ReactElement,
+} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -24,21 +30,35 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setDatabase } from '../misc/reduxSlice';
 import Orientation from 'react-native-orientation-locker';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { HomeNavigator } from '../types/navigation';
+import { AppDispatch, RootState } from '../misc/reduxStore';
+import { HistoryJSON } from '../types/historyJSON';
 
-function Setting(props) {
+interface SettingsData {
+  title: string;
+  description: string;
+  icon: ReactElement<Icon>;
+  rightComponent?: JSX.Element;
+  handler: () => any;
+}
+
+type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
+
+function Setting(_props: Props) {
   const enableNextPartNotification = useSelector(
-    state => state.settings.enableNextPartNotification,
+    (state: RootState) => state.settings.enableNextPartNotification,
   );
   const enableBatteryTimeInfo = useSelector(
-    state => state.settings.enableBatteryTimeInfo,
+    (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const history = useSelector(state => state.settings.history);
+  const history = useSelector((state: RootState) => state.settings.history);
 
-  const dispatchSettings = useDispatch();
+  const dispatchSettings = useDispatch<AppDispatch>();
 
   // const [notificationSwitch, setNotificationSwitch] = useState(false);
   const notificationSwitch = enableNextPartNotification === 'true';
-  const setNotificationSwitch = value => {
+  const setNotificationSwitch = (value: string) => {
     dispatchSettings(
       setDatabase({
         target: 'enableNextPartNotification',
@@ -48,7 +68,7 @@ function Setting(props) {
   };
   // const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
-  const setBatteryTimeInfoSwitch = value => {
+  const setBatteryTimeInfoSwitch = (value: string) => {
     dispatchSettings(
       setDatabase({
         target: 'enableBatteryTimeInfo',
@@ -57,9 +77,11 @@ function Setting(props) {
     );
   };
   // const [downloadFrom, setDownloadFrom] = useState('native');
-  const downloadFrom = useSelector(state => state.settings.downloadFrom);
+  const downloadFrom = useSelector(
+    (state: RootState) => state.settings.downloadFrom,
+  );
   const setDownloadFrom = useCallback(
-    value => {
+    (value: string) => {
       dispatchSettings(
         setDatabase({
           target: 'downloadFrom',
@@ -71,7 +93,7 @@ function Setting(props) {
   );
 
   const lockScreenOrientation = useSelector(
-    state => state.settings.lockScreenOrientation,
+    (state: RootState) => state.settings.lockScreenOrientation,
   );
   const lockScreenOrientationSwitch = lockScreenOrientation === 'true';
   const toggleScreenOrientation = useCallback(() => {
@@ -121,12 +143,12 @@ function Setting(props) {
   );
 
   const nextPartNotification = () => {
-    const newValue = !notificationSwitch;
+    const newValue = String(!notificationSwitch);
     setNotificationSwitch(newValue);
   };
 
   const batteryTimeSwitchHandler = () => {
-    const newValue = !batteryTimeInfoSwitch;
+    const newValue = String(!batteryTimeInfoSwitch);
     setBatteryTimeInfoSwitch(newValue);
   };
 
@@ -181,7 +203,7 @@ function Setting(props) {
                   },
                 ],
               );
-            } catch (e) {
+            } catch (e: any) {
               Alert.alert(
                 'Backup gagal!',
                 `Backup gagal karna alasan berikut:\n${e.message}`,
@@ -196,7 +218,7 @@ function Setting(props) {
   }, [history]);
 
   const restoreHistory = useCallback(
-    async code => {
+    async (code?: string) => {
       if (code === undefined) {
         setRestoreVisible(true);
       } else {
@@ -230,7 +252,7 @@ function Setting(props) {
                 {
                   text: 'lakukan restore',
                   onPress: async () => {
-                    const currentHistory = JSON.parse(history);
+                    const currentHistory: HistoryJSON[] = JSON.parse(history);
                     const backup = JSON.parse(backupData.backupData);
                     setModalVisible(true);
                     setModalText(
@@ -261,7 +283,7 @@ function Setting(props) {
                         'Restore berhasil!',
                         'Kamu berhasil kembali ke backup sebelumnya!',
                       );
-                    } catch (e) {
+                    } catch (e: any) {
                       Alert.alert('Restore gagal!', e.message);
                     } finally {
                       setModalVisible(false);
@@ -271,7 +293,7 @@ function Setting(props) {
               ],
             );
           }
-        } catch (e) {
+        } catch (e: any) {
           const errMessage =
             e.message === 'Network request failed'
               ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
@@ -310,7 +332,7 @@ function Setting(props) {
                 'Histori dihapus',
                 'Histori tontonan kamu sudah di hapus',
               );
-            } catch (e) {
+            } catch (e: any) {
               Alert.alert('Gagal menghapus histori!', e.message);
             } finally {
               setModalVisible(false);
@@ -328,7 +350,7 @@ function Setting(props) {
 
   const iconSize = 18;
 
-  const settingsData = [
+  const settingsData: SettingsData[] = [
     {
       title: 'Nyalakan notifikasi part selanjutnya',
       description:
@@ -412,7 +434,7 @@ function Setting(props) {
     <Animated.View style={{ transform: [{ scale: scaleAnim }], flex: 1 }}>
       <View style={styles.waktuServer}>
         <Text style={globalStyles.text}>Waktu server: </Text>
-        <Text style={globalStyles.text}>{paramsState.waktuServer}</Text>
+        <Text style={globalStyles.text}>{paramsState?.waktuServer}</Text>
       </View>
       {/* Modal backup */}
       <Modal transparent visible={modalVisible}>
@@ -497,25 +519,29 @@ function Setting(props) {
         data={settingsData}
         keyExtractor={keyExtractor}
         renderItem={SettingList}
-        ItemSeparatorComponent={
-          <View
-            style={{
-              width: '100%',
-              borderBottomWidth: 0.5,
-              borderColor: 'white',
-            }}
-          />
-        }
+        ItemSeparatorComponent={ItemSeparator}
       />
     </Animated.View>
   );
 }
 
-function keyExtractor(item) {
+function ItemSeparator() {
+  return (
+    <View
+      style={{
+        width: '100%',
+        borderBottomWidth: 0.5,
+        borderColor: 'white',
+      }}
+    />
+  );
+}
+
+function keyExtractor(item: SettingsData) {
   return item.title;
 }
 
-function SettingList({ item }) {
+function SettingList({ item }: { item: SettingsData }) {
   const icon = item.icon;
   const title = item.title;
   const description = item.description;

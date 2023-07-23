@@ -11,12 +11,25 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useFocusEffect, StackActions } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  StackActions,
+  CompositeScreenProps,
+} from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { HomeNavigator, RootStackNavigator } from '../types/navigation';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SearchAnimeList } from '../types/anime';
 
-function Search(props) {
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<HomeNavigator, 'Search'>,
+  NativeStackScreenProps<RootStackNavigator>
+>;
+
+function Search(props: Props) {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
@@ -39,12 +52,12 @@ function Search(props) {
     }, []),
   );
 
-  const [searchText, setSearchText] = useState('');
-  const [data, setData] = useState(null);
+  const [searchText, setSearchText] = useState<string>('');
+  const [data, setData] = useState<null | SearchAnimeList[]>(null);
   const [loading, setLoading] = useState(false);
-  const query = useRef();
+  const query = useRef<undefined | string>();
 
-  const onChangeText = useCallback(text => {
+  const onChangeText = useCallback((text: string) => {
     setSearchText(text);
   }, []);
 

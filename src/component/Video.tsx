@@ -21,9 +21,10 @@ import {
   Linking,
   NativeEventEmitter,
   NativeModules,
+  EmitterSubscription,
 } from 'react-native';
 import Videos from 'react-native-media-console';
-import Orientation from 'react-native-orientation-locker';
+import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import DeviceInfo from 'react-native-device-info';
@@ -37,21 +38,29 @@ import throttleFunction from '../utils/throttleFunction';
 
 import { useDispatch, useSelector } from 'react-redux';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackNavigator } from '../types/navigation';
+import { AppDispatch, RootState } from '../misc/reduxStore';
+import VideoType, { OnProgressData } from 'react-native-video';
 
-function Video(props) {
+type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
+
+function Video(props: Props) {
   const enableNextPartNotification = useSelector(
-    state => state.settings.enableNextPartNotification,
+    (state: RootState) => state.settings.enableNextPartNotification,
   );
   const enableBatteryTimeInfo = useSelector(
-    state => state.settings.enableBatteryTimeInfo,
+    (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const downloadFrom = useSelector(state => state.settings.downloadFrom);
-  const history = useSelector(state => state.settings.history);
+  const downloadFrom = useSelector(
+    (state: RootState) => state.settings.downloadFrom,
+  );
+  const history = useSelector((state: RootState) => state.settings.history);
   const lockScreenOrientation = useSelector(
-    state => state.settings.lockScreenOrientation,
+    (state: RootState) => state.settings.lockScreenOrientation,
   );
 
-  const dispatchSettings = useDispatch();
+  const dispatchSettings = useDispatch<AppDispatch>();
 
   const historyData = useRef(props.route.params.historyData).current;
 
@@ -72,12 +81,12 @@ function Video(props) {
 
   const [isControlsHidden, setIsControlsHidden] = useState(true);
 
-  const downloadSource = useRef([]);
+  const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const hasDownloadAllPart = useRef(false);
   const hasPart = useRef(data.streamingLink.length > 1);
   const firstTimeLoad = useRef(true);
-  const videoRef = useRef();
+  const videoRef = useRef<VideoType>(null);
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
@@ -124,12 +133,12 @@ function Video(props) {
     [preparePartAnimation],
   );
 
-  const abortController = useRef(null);
+  const abortController = useRef<AbortController | null>(null);
   if (abortController.current === null) {
     abortController.current = new AbortController();
   }
 
-  const nextPartEnable = useRef();
+  const nextPartEnable = useRef<string>();
 
   // didMount and willUnmount
   useEffect(() => {
@@ -139,14 +148,14 @@ function Video(props) {
 
     return () => {
       willUnmountHandler();
-      abortController.current.abort();
+      abortController.current?.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Battery level
   useEffect(() => {
-    let _batteryEvent;
+    let _batteryEvent: EmitterSubscription | null;
     if (enableBatteryTimeInfo === 'true') {
       DeviceInfo.getBatteryLevel().then(async batteryLevels => {
         setBatteryLevel(batteryLevels);
@@ -179,7 +188,7 @@ function Video(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fullscreen]);
 
-  const onHardwareBackPress = isFullsc => {
+  const onHardwareBackPress = (isFullsc: boolean) => {
     if (!isFullsc) {
       willUnmountHandler();
       return false;
@@ -190,7 +199,7 @@ function Video(props) {
   };
 
   const setResolution = useCallback(
-    async res => {
+    async (res: string) => {
       if (loading) {
         return;
       }
@@ -199,7 +208,7 @@ function Video(props) {
         // eslint-disable-next-line prettier/prettier
         'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
         {
-          signal: abortController.current.signal,
+          signal: abortController.current?.signal,
           headers: {
             'User-Agent': deviceUserAgent,
           },
@@ -269,22 +278,15 @@ function Video(props) {
     );
   }, [batteryLevel]);
 
-  const onBatteryStateChange = ({ batteryLevel: currentBatteryLevel }) => {
+  const onBatteryStateChange = ({
+    batteryLevel: currentBatteryLevel,
+  }: {
+    batteryLevel: number;
+  }) => {
     setBatteryLevel(currentBatteryLevel);
   };
 
-  const orientationDidChange = useCallback(
-    orientation => {
-      if (orientation === 'PORTRAIT') {
-        exitFullscreen();
-      } else if (orientation !== 'PORTRAIT' && orientation !== 'UNKNOWN') {
-        enterFullscreen(orientation);
-      }
-    },
-    [enterFullscreen, exitFullscreen],
-  );
-
-  const enterFullscreen = useCallback(landscape => {
+  const enterFullscreen = useCallback((landscape?: OrientationType) => {
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -310,6 +312,17 @@ function Video(props) {
     SystemNavigationBar.navigationShow();
     setFullscreen(false);
   }, []);
+
+  const orientationDidChange = useCallback(
+    (orientation: OrientationType) => {
+      if (orientation === 'PORTRAIT') {
+        exitFullscreen();
+      } else if (orientation !== 'UNKNOWN') {
+        enterFullscreen(orientation);
+      }
+    },
+    [enterFullscreen, exitFullscreen],
+  );
 
   const downloadAnime = useCallback(async () => {
     const source = data.streamingLink[part].sources[0].src;
@@ -422,7 +435,7 @@ function Video(props) {
   );
 
   const nextPartNotificationControl = useCallback(
-    progressData => {
+    (progressData: OnProgressData) => {
       if (hasPart.current) {
         const remainingTime =
           progressData.seekableDuration - progressData.currentTime;
@@ -446,7 +459,7 @@ function Video(props) {
   );
 
   const handleProgress = useCallback(
-    progressData => {
+    (progressData: OnProgressData) => {
       nextPartNotificationControl(progressData);
       updateHistoryThrottle(
         progressData,
@@ -467,7 +480,7 @@ function Video(props) {
   );
 
   const episodeDataControl = useCallback(
-    async url => {
+    async (url: string) => {
       if (loading) {
         return;
       }
@@ -475,7 +488,7 @@ function Video(props) {
       const result = await fetch(
         'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?link=' + url,
         {
-          signal: abortController.current.signal,
+          signal: abortController.current?.signal,
           headers: {
             'User-Agent': deviceUserAgent,
           },
@@ -515,7 +528,7 @@ function Video(props) {
   );
 
   const cancelLoading = useCallback(() => {
-    abortController.current.abort();
+    abortController.current?.abort();
     setLoading(false);
     abortController.current = new AbortController();
   }, []);
@@ -680,8 +693,9 @@ function Video(props) {
                         marginRight: 5,
                       },
                     ]}
-                    onPress={() =>
-                      episodeDataControl(data.episodeData.previous)
+                    onPress={
+                      () =>
+                        episodeDataControl(data.episodeData.previous as string) // ignoring the undefined type because we already have the button disabled
                     }>
                     <Icon name="arrow-left" size={18} color="black" />
                   </TouchableOpacity>
@@ -697,7 +711,9 @@ function Video(props) {
                           : '#525252',
                       },
                     ]}
-                    onPress={() => episodeDataControl(data.episodeData.next)}>
+                    onPress={
+                      () => episodeDataControl(data.episodeData.next as string) // ignoring the undefined type because we already have the button disabled
+                    }>
                     <Icon name="arrow-right" size={18} color="black" />
                   </TouchableOpacity>
                 </View>
@@ -711,7 +727,7 @@ function Video(props) {
                   })}
                   setOpen={setOpenResolution}
                   setValue={val => {
-                    setResolution(val());
+                    setResolution(val(data.resolution));
                   }}
                   listMode="MODAL"
                   modalTitle="Pilih resolusi"
@@ -739,7 +755,7 @@ function Video(props) {
                     setValue={val => {
                       firstTimeLoad.current = false;
 
-                      setPart(val());
+                      setPart(val(data.resolution));
                     }}
                     listMode="MODAL"
                     modalTitle="Pilih part"
@@ -774,7 +790,7 @@ function Video(props) {
                   styles.downloadButton,
                   { backgroundColor: '#996300', marginTop: 5 },
                 ]}
-                onPress={downloadAllAnimePart}>
+                onPress={downloadAllAnimePart as () => void}>
                 <Icon
                   name="download"
                   size={23}
@@ -790,7 +806,13 @@ function Video(props) {
   );
 }
 
-function LoadingModal({ loading, cancelLoading }) {
+function LoadingModal({
+  loading,
+  cancelLoading,
+}: {
+  loading: boolean;
+  cancelLoading: () => void;
+}) {
   return (
     <Modal visible={loading} transparent onRequestClose={cancelLoading}>
       <View style={styles.modalContainer}>
@@ -809,7 +831,7 @@ function LoadingModal({ loading, cancelLoading }) {
 }
 
 function TimeInfo() {
-  const [time, setTime] = useState();
+  const [time, setTime] = useState<string>();
 
   const changeTime = useCallback(() => {
     const currentDate = new Date();

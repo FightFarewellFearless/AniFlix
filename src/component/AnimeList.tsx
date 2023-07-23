@@ -18,6 +18,7 @@ import {
   useWindowDimensions,
   Modal,
   ScrollView,
+  ListRenderItemInfo,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -25,12 +26,22 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
 import runningText from '../assets/runningText.json';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import { MovieList, NewAnimeList } from '../types/anime';
+import { HomeNavigator } from '../types/navigation';
+import {
+  BottomTabNavigationProp,
+  BottomTabScreenProps,
+} from '@react-navigation/bottom-tabs';
 
-function Home(props) {
+type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+
+function Home(props: Props) {
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
-  const [textLayoutWidth, setTextLayoutWidth] = useState(undefined);
+  const [textLayoutWidth, setTextLayoutWidth] = useState<undefined | number>(
+    undefined,
+  );
   const [animationText, setAnimationText] = useState(runningText[0]);
   const [announcmentVisible, setAnnouncmentVisible] = useState(false);
 
@@ -43,7 +54,7 @@ function Home(props) {
   const localTime = useLocalTime();
 
   useEffect(() => {
-    if (data.announcment.enable === true) {
+    if (data?.announcment.enable === true) {
       setAnnouncmentVisible(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,10 +119,10 @@ function Home(props) {
           setRefresh(false);
           return;
         }
-        setData(jsondata);
+        setData?.(jsondata);
         setRefresh(false);
       })
-      .catch(e => {
+      .catch(() => {
         ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
         setRefresh(false);
       });
@@ -119,7 +130,7 @@ function Home(props) {
   }, []);
 
   const renderNewAnime = useCallback(
-    ({ item }) => (
+    ({ item }: ListRenderItemInfo<NewAnimeList>) => (
       <AnimeList
         newAnimeData={item}
         key={'btn' + item.title + item.episode}
@@ -129,10 +140,10 @@ function Home(props) {
     [props.navigation],
   );
   const renderMovie = useCallback(
-    ({ item }) => (
+    ({ item }: ListRenderItemInfo<MovieList>) => (
       <MovieList
         movieData={item}
-        key={'btn' + item.title + item.episode}
+        key={'btn' + item.title}
         navigationProp={props.navigation}
       />
     ),
@@ -152,7 +163,11 @@ function Home(props) {
       }>
       <AnnoucmentModal
         visible={announcmentVisible}
-        announcmentMessage={data.announcment.message}
+        announcmentMessage={
+          data?.announcment.enable === true
+            ? data?.announcment.message
+            : undefined
+        }
         setVisible={setAnnouncmentVisible}
       />
       <View style={styles.box}>
@@ -198,7 +213,7 @@ function Home(props) {
         </View>
         <FlatList
           horizontal
-          data={data.newAnime}
+          data={data?.newAnime}
           renderItem={renderNewAnime}
           showsHorizontalScrollIndicator={false}
         />
@@ -214,7 +229,7 @@ function Home(props) {
 
         <FlatList
           horizontal
-          data={data.movie}
+          data={data?.movie}
           renderItem={renderMovie}
           showsHorizontalScrollIndicator={false}
         />
@@ -223,7 +238,15 @@ function Home(props) {
   );
 }
 
-function AnnoucmentModal({ visible, setVisible, announcmentMessage }) {
+function AnnoucmentModal({
+  visible,
+  setVisible,
+  announcmentMessage,
+}: {
+  visible: boolean;
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  announcmentMessage: string | undefined;
+}): React.JSX.Element {
   return (
     <Modal transparent visible={visible}>
       <View style={styles.modalContainer}>
@@ -256,7 +279,14 @@ function AnnoucmentModal({ visible, setVisible, announcmentMessage }) {
   );
 }
 
-function AnimeList(props) {
+function AnimeList(props: {
+  newAnimeData: NewAnimeList;
+  navigationProp: BottomTabNavigationProp<
+    HomeNavigator,
+    'AnimeList',
+    undefined
+  >;
+}) {
   const z = props.newAnimeData;
   const navigation = props.navigationProp;
   return (
@@ -297,7 +327,14 @@ function AnimeList(props) {
   );
 }
 
-function MovieList(props) {
+function MovieList(props: {
+  movieData: MovieList;
+  navigationProp: BottomTabNavigationProp<
+    HomeNavigator,
+    'AnimeList',
+    undefined
+  >;
+}) {
   const z = props.movieData;
   const navigation = props.navigationProp;
   return (
@@ -311,7 +348,7 @@ function MovieList(props) {
       }}>
       <ImageBackground
         resizeMode="stretch"
-        key={z.title + z.episode}
+        key={z.title}
         source={{ uri: z.thumbnailUrl }}
         style={[styles.listBackground, { borderColor: 'orange' }]}>
         <View style={styles.animeTitleContainer}>

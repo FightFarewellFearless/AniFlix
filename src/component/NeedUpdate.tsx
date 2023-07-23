@@ -12,8 +12,12 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { version as appVersion } from '../../package.json';
 import globalStyles from '../assets/style';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackNavigator } from '../types/navigation';
 
-function NeedUpdate(props) {
+type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
+
+function NeedUpdate(props: Props) {
   const markdownElement = useMarkdown(props.route.params.changelog, {
     colorScheme: 'dark',
   });

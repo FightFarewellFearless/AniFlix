@@ -5,6 +5,7 @@ import {
   Text,
   Alert,
   BackHandler,
+  NativeEventSubscription,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -12,23 +13,34 @@ import randomTipsArray from '../assets/loadingTips.json';
 import setHistory from '../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import {
+  Blocked,
+  EpsList,
+  FromUrlMaintenance,
+  RootStackNavigator,
+  SingleEps,
+} from '../types/anime';
+import { AppDispatch, RootState } from '../misc/reduxStore';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
-function FromUrl(props) {
-  const [unmount, setUnmount] = useState(false);
-  const [dots, setDots] = useState('');
+type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
-  const historyData = useSelector(state => state.settings.history);
-  const dispatchSettings = useDispatch();
+function FromUrl(props: Props) {
+  const [unmount, setUnmount] = useState<boolean>(false);
+  const [dots, setDots] = useState<string>('');
 
-  const randomTips =
+  const historyData = useSelector((state: RootState) => state.settings.history);
+  const dispatchSettings = useDispatch<AppDispatch>();
+
+  const randomTips = useRef<string>(
     // eslint-disable-next-line no-bitwise
-    useRef(randomTipsArray[~~(Math.random() * randomTipsArray.length)]).current;
-
-  useEffect(() => {
-    const abort = new AbortController();
-    const backhandler = BackHandler.addEventListener(
+    randomTipsArray[~~(Math.random() * randomTipsArray.length)],
+  ).current;
+  useEffect((): (() => void) => {
+    const abort: AbortController = new AbortController();
+    const backhandler: NativeEventSubscription = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
         setUnmount(true);
@@ -51,13 +63,14 @@ function FromUrl(props) {
         },
       },
     )
-      .then(async results => {
+      .then(async (results: Response) => {
         if (results === undefined) {
           return;
         }
         const resulted = await results.text();
         try {
-          const result = JSON.parse(resulted);
+          const result: Blocked | EpsList | SingleEps | FromUrlMaintenance =
+            JSON.parse(resulted);
           if (results && unmount === false) {
             if (result.blocked) {
               props.navigation.dispatch(StackActions.replace('Blocked'));
@@ -89,7 +102,7 @@ function FromUrl(props) {
               );
             }
           }
-        } catch (e) {
+        } catch (e: any) {
           if (resulted === 'Unsupported') {
             Alert.alert(
               'Tidak didukung!',
@@ -121,8 +134,6 @@ function FromUrl(props) {
     props.navigation,
     props.route.params.historyData,
     props.route.params.link,
-    props.route.params.query,
-    props.route.params.type,
     unmount,
   ]);
 
