@@ -10,6 +10,7 @@ import {
   ImageBackground,
   useWindowDimensions,
   Alert,
+  ListRenderItemInfo,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -53,29 +54,34 @@ function EpsList(props: Props) {
     epsList.current?.scrollToOffset({ animated: true, offset: 0 });
   }, [result]);
 
-  const renderItem = useCallback(({ item }: { item: EpsListEpisodeList }) => {
-    return (
-      <TouchableOpacityMemo
-        style={{ paddingBottom: 12 }}
-        onPress={() => {
-          props.navigation.dispatch(
-            StackActions.push('FromUrl', {
-              link: item.link,
-            }),
-          );
-        }}>
-        <Text style={{ color: 'lightblue' }}>
-          {item.episode
-            .replace(
-              data.title.replace('Nonton Anime ', '').replace(' Sub Indo', ''),
-              '',
-            )
-            .replace('e', 'E')}
-        </Text>
-      </TouchableOpacityMemo>
-    );
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<EpsListEpisodeList>) => {
+      return (
+        <TouchableOpacityMemo
+          style={{ paddingBottom: 12 }}
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('FromUrl', {
+                link: item.link,
+              }),
+            );
+          }}>
+          <Text style={{ color: 'lightblue' }}>
+            {item.episode
+              .replace(
+                data.title
+                  .replace('Nonton Anime ', '')
+                  .replace(' Sub Indo', ''),
+                '',
+              )
+              .replace('e', 'E')}
+          </Text>
+        </TouchableOpacityMemo>
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    [],
+  );
 
   const keyExtractor = useCallback((item: EpsListEpisodeList) => item.link, []);
 

@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Animated,
   StyleSheet,
+  ListRenderItemInfo,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useRef, useState } from 'react';
@@ -113,7 +114,7 @@ function History(props: Props) {
   }, []);
 
   const renderFlatList = useCallback(
-    ({ item }: { item: HistoryJSON }) => {
+    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
       return (
         <TouchableOpacity
           style={styles.listContainerButton}
