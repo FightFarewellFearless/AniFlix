@@ -26,7 +26,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
 import runningText from '../assets/runningText.json';
 import deviceUserAgent from '../utils/deviceUserAgent';
-import { MovieList, NewAnimeList } from '../types/anime';
+import { MovieList as MovieListType, NewAnimeList } from '../types/anime';
 import { HomeNavigator } from '../types/navigation';
 import {
   BottomTabNavigationProp,
@@ -140,7 +140,7 @@ function Home(props: Props) {
     [props.navigation],
   );
   const renderMovie = useCallback(
-    ({ item }: ListRenderItemInfo<MovieList>) => (
+    ({ item }: ListRenderItemInfo<MovieListType>) => (
       <MovieList
         movieData={item}
         key={'btn' + item.title}
@@ -328,7 +328,7 @@ function AnimeList(props: {
 }
 
 function MovieList(props: {
-  movieData: MovieList;
+  movieData: MovieListType;
   navigationProp: BottomTabNavigationProp<
     HomeNavigator,
     'AnimeList',
