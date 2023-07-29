@@ -258,6 +258,7 @@ function History(props: Props) {
             renderItem={renderFlatList}
             removeClippedSubviews={true}
             windowSize={13}
+            disableScrollViewPanResponder={true}
           />
           <Animated.View
             style={[

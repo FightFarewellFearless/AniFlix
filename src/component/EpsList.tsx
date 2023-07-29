@@ -58,7 +58,7 @@ function EpsList(props: Props) {
     ({ item }: ListRenderItemInfo<EpsListEpisodeList>) => {
       return (
         <TouchableOpacityMemo
-          style={{ paddingBottom: 12 }}
+          style={{ paddingVertical: 12, alignItems: 'center' }}
           onPress={() => {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
@@ -66,7 +66,7 @@ function EpsList(props: Props) {
               }),
             );
           }}>
-          <Text style={{ color: 'lightblue' }}>
+          <Text style={{ color: '#2c9ec4' }}>
             {item.episode
               .replace(
                 data.title
@@ -74,7 +74,7 @@ function EpsList(props: Props) {
                   .replace(' Sub Indo', ''),
                 '',
               )
-              .replace('e', 'E')}
+              .replace('episode', 'Episode')}
           </Text>
         </TouchableOpacityMemo>
       );
@@ -193,6 +193,15 @@ function EpsList(props: Props) {
             maxToRenderPerBatch={5}
             ref={epsList}
             renderItem={renderItem}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{
+                  width: '100%',
+                  borderBottomWidth: 0.5,
+                  borderColor: 'white',
+                }}
+              />
+            )}
             windowSize={16}
           />
         ) : (
