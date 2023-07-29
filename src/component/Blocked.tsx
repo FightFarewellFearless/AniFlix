@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -17,7 +17,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 type Props = NativeStackScreenProps<RootStackNavigator, 'Blocked'>;
 
 function Blocked(props: Props) {
-  const [animatedScale, _] = useState(new Animated.Value(1));
+  const animatedScale = useRef(new Animated.Value(1)).current;
 
   const animated = useRef(
     Animated.loop(
