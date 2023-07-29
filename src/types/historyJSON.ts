@@ -1,4 +1,4 @@
-interface HistoryJSON extends HistoryAdditionalData {
+interface HistoryJSON extends Partial<HistoryAdditionalData> {
   title: string;
   episode: string | null;
   link: string;
@@ -7,9 +7,9 @@ interface HistoryJSON extends HistoryAdditionalData {
 }
 
 interface HistoryAdditionalData {
-  part?: number | undefined;
-  resolution?: string;
-  lastDuration?: number;
+  part: number | undefined;
+  resolution: string;
+  lastDuration: number;
 }
 
 export type { HistoryJSON, HistoryAdditionalData };

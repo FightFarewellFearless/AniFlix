@@ -7,7 +7,7 @@ function setHistory(
   targetData: SingleEps,
   link: string,
   skipUpdateDate = false,
-  additionalData: HistoryAdditionalData | {} = {},
+  additionalData: Partial<HistoryAdditionalData> | {} = {},
   historyData: string,
   dispatchSettings: AppDispatch,
 ) {
