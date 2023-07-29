@@ -1,4 +1,5 @@
 import React, {
+  memo,
   useCallback,
   useContext,
   useEffect,
@@ -19,6 +20,8 @@ import {
   Modal,
   ScrollView,
   ListRenderItemInfo,
+  TouchableHighlight,
+  Linking,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -34,6 +37,10 @@ import {
 } from '@react-navigation/bottom-tabs';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+
+interface CustomArraySplice<T> extends Array<T> {
+  splice(start: number, deleteCount?: number, ...items: T[]): T[];
+}
 
 function Home(props: Props) {
   const { paramsState: data, setParamsState: setData } =
@@ -161,7 +168,7 @@ function Home(props: Props) {
           colors={['#00a2ff', 'red']}
         />
       }>
-      <AnnoucmentModal
+      <AnnouncmentModalMemo
         visible={announcmentVisible}
         announcmentMessage={
           data?.announcment.enable === true
@@ -238,7 +245,9 @@ function Home(props: Props) {
   );
 }
 
-function AnnoucmentModal({
+const AnnouncmentModalMemo = memo(AnnouncmentModal);
+
+function AnnouncmentModal({
   visible,
   setVisible,
   announcmentMessage,
@@ -247,6 +256,32 @@ function AnnoucmentModal({
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   announcmentMessage: string | undefined;
 }): React.JSX.Element {
+  const linksInAnnouncment = findAllLinks(announcmentMessage as string);
+  let announcment: string | (string | JSX.Element)[] | undefined;
+  if (linksInAnnouncment === null) {
+    announcment = announcmentMessage;
+  } else {
+    const split: CustomArraySplice<string | JSX.Element> = (
+      announcmentMessage as string
+    ).split('');
+    linksInAnnouncment.forEach(link => {
+      const indexStart = announcmentMessage?.indexOf(link) as number;
+      const indexEnd = indexStart + link.length;
+      split.splice(
+        indexStart,
+        indexEnd,
+        <TouchableHighlight
+          key={link}
+          onPress={() => {
+            Linking.openURL(link);
+          }}
+          underlayColor={'#0077ff'}>
+          <Text style={{ color: '#0066ff' }}>{link}</Text>
+        </TouchableHighlight>,
+      );
+    });
+    announcment = split;
+  }
   return (
     <Modal transparent visible={visible}>
       <View style={styles.modalContainer}>
@@ -259,7 +294,7 @@ function AnnoucmentModal({
           <View style={styles.announcmentText}>
             <ScrollView>
               <Text style={[globalStyles.text, styles.announcmentMessage]}>
-                {announcmentMessage}
+                {announcment}
               </Text>
             </ScrollView>
           </View>
@@ -389,6 +424,12 @@ function useLocalTime() {
   return time;
 }
 
+function findAllLinks(texts: string): RegExpMatchArray | null {
+  return texts.match(
+    /https?:\/\/[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
+  );
+}
+
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -422,6 +463,7 @@ const styles = StyleSheet.create({
     flexGrow: 3,
     minWidth: 120,
     borderColor: '#01463cff',
+    backgroundColor: '#414141',
     borderWidth: 1,
   },
   announcmentMessage: {

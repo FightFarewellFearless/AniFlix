@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  FlatList,
   Text,
   View,
   TouchableOpacity,
@@ -32,9 +31,18 @@ function History(props: Props) {
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
   const isFocus = useRef(true);
 
+  const flatListRef = useRef<Animated.FlatList>(null);
+
   const dispatchSettings = useDispatch<AppDispatch>();
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const scrollValue = useRef(new Animated.Value(0)).current;
+  const scrollToTopButtonX = scrollValue.interpolate({
+    inputRange: [500, 800],
+    outputRange: [120, 0],
+    extrapolate: 'clamp',
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -206,6 +214,13 @@ function History(props: Props) {
     [data, deleteHistory, props.navigation],
   );
 
+  const scrollToTop = useCallback(() => {
+    flatListRef.current?.scrollToOffset({
+      animated: true,
+      offset: 0,
+    });
+  }, []);
+
   return (
     <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
       {loading ? (
@@ -215,21 +230,57 @@ function History(props: Props) {
           <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
         </View>
       ) : (
-        <FlatList
-          data={data}
-          keyExtractor={keyExtractor}
-          refreshControl={
-            <RefreshControl
-              refreshing={historyRefreshing}
-              onRefresh={onRefreshControl}
-              progressBackgroundColor="#292929"
-              colors={['#00a2ff', 'red']}
-            />
-          }
-          renderItem={renderFlatList}
-          removeClippedSubviews={true}
-          windowSize={13}
-        />
+        <View>
+          <Animated.FlatList<HistoryJSON>
+            data={data}
+            ref={flatListRef}
+            keyExtractor={keyExtractor}
+            refreshControl={
+              <RefreshControl
+                refreshing={historyRefreshing}
+                onRefresh={onRefreshControl}
+                progressBackgroundColor="#292929"
+                colors={['#00a2ff', 'red']}
+              />
+            }
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {
+                      y: scrollValue,
+                    },
+                  },
+                },
+              ],
+              { useNativeDriver: true },
+            )}
+            renderItem={renderFlatList}
+            removeClippedSubviews={true}
+            windowSize={13}
+          />
+          <Animated.View
+            style={[
+              {
+                transform: [
+                  {
+                    translateX: scrollToTopButtonX,
+                  },
+                ],
+              },
+              styles.scrollToTopView,
+            ]}>
+            <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
+              <View style={styles.scrollToTopIcon}>
+                <Icon
+                  name="arrow-up"
+                  color={globalStyles.text.color}
+                  size={15}
+                />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
       )}
     </Animated.View>
   );
@@ -248,6 +299,25 @@ function formatTimeFromSeconds(seconds: number) {
 }
 
 const styles = StyleSheet.create({
+  scrollToTopView: {
+    position: 'absolute',
+    bottom: 50,
+    right: 5,
+    zIndex: 1,
+  },
+  scrollToTop: {
+    height: 50,
+    width: 50,
+    borderRadius: 100,
+    backgroundColor: '#0060af',
+    elevation: 3,
+    shadowColor: 'white',
+  },
+  scrollToTopIcon: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   listContainerButton: {
     flexDirection: 'row',
     marginVertical: 5,
