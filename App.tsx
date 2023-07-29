@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'react-native';
+import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { Provider } from 'react-redux';
 
@@ -16,6 +16,7 @@ import NeedUpdate from './src/component/NeedUpdate';
 import Maintenance from './src/component/Maintenance';
 import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
+import globalStyles from './src/assets/style';
 
 function App() {
   const Stack = createNativeStackNavigator<RootStackNavigator>();
@@ -28,6 +29,11 @@ function App() {
 
   return (
     <NavigationContainer theme={DarkTheme}>
+      {__DEV__ && (
+        <View style={styles.Dev} pointerEvents="none">
+          <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+        </View>
+      )}
       <Provider store={store}>
         <Stack.Navigator
           initialRouteName="loading"
@@ -49,4 +55,22 @@ function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  Dev: {
+    position: 'absolute',
+    bottom: 40,
+    zIndex: 100,
+    backgroundColor: '#c2c2047e',
+    padding: 5,
+    paddingHorizontal: 20,
+    borderTopRightRadius: 40,
+    borderBottomLeftRadius: 40,
+  },
+  DevText: {
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+});
+
 export default App;

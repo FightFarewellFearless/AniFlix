@@ -1,9 +1,9 @@
 import {StyleSheet} from 'react-native';
 
-const styles = StyleSheet.create({
+const globalStyles = StyleSheet.create({
     text: {
         color: "#dadada"
     }
 })
 
-export default styles;
+export default globalStyles;
