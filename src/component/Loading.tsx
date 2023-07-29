@@ -25,7 +25,7 @@ import { RootStackNavigator } from '../types/navigation';
 import { SetDatabaseTarget } from '../types/redux';
 import { Home } from '../types/anime';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'EpisodeList'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
 
 function Loading(props: Props) {
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');

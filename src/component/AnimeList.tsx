@@ -264,14 +264,14 @@ function AnnouncmentModal({
     const split: CustomArraySplice<string | JSX.Element> = (
       announcmentMessage as string
     ).split('');
-    linksInAnnouncment.forEach(link => {
+    linksInAnnouncment.forEach((link, index) => {
       const indexStart = announcmentMessage?.indexOf(link) as number;
       const indexEnd = indexStart + link.length;
       split.splice(
         indexStart,
         indexEnd,
         <TouchableHighlight
-          key={link}
+          key={link + index}
           onPress={() => {
             Linking.openURL(link);
           }}
