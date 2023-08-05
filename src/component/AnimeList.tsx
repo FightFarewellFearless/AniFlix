@@ -274,6 +274,7 @@ function AnnouncmentModal({
           onPress={() => {
             Linking.openURL(link);
           }}
+          key={index + 1 + loopLength}
           style={{ color: '#0066ff' }}>
           {link}
         </Text>,
