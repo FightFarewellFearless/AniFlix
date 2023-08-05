@@ -38,9 +38,9 @@ function History(props: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const scrollValue = useRef(new Animated.Value(0)).current;
-  const scrollToTopButtonX = scrollValue.interpolate({
+  const scrollToTopButtonY = scrollValue.interpolate({
     inputRange: [500, 800],
-    outputRange: [120, 0],
+    outputRange: [150, 0],
     extrapolate: 'clamp',
   });
 
@@ -230,7 +230,7 @@ function History(props: Props) {
           <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
         </View>
       ) : (
-        <View>
+        <View style={styles.historyContainer}>
           <Animated.FlatList<HistoryJSON>
             data={data}
             ref={flatListRef}
@@ -265,7 +265,7 @@ function History(props: Props) {
               {
                 transform: [
                   {
-                    translateX: scrollToTopButtonX,
+                    translateY: scrollToTopButtonY,
                   },
                 ],
               },
@@ -300,10 +300,13 @@ function formatTimeFromSeconds(seconds: number) {
 }
 
 const styles = StyleSheet.create({
+  historyContainer: {
+    overflow: 'hidden',
+  },
   scrollToTopView: {
     position: 'absolute',
-    bottom: 50,
-    right: 5,
+    bottom: 40,
+    right: 10,
     zIndex: 1,
   },
   scrollToTop: {
