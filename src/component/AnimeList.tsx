@@ -20,7 +20,6 @@ import {
   Modal,
   ScrollView,
   ListRenderItemInfo,
-  TouchableHighlight,
   Linking,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
@@ -264,27 +263,24 @@ function AnnouncmentModal({
   if (linksInAnnouncment === null) {
     announcment = announcmentMessage;
   } else {
-    const split: CustomArraySplice<string | JSX.Element> = (
-      announcmentMessage as string
-    ).split('');
+    const splittedLinks: CustomArraySplice<string | JSX.Element> =
+      splitAllLinks(announcmentMessage as string);
+    let loopLength = 0;
     linksInAnnouncment.forEach((link, index) => {
-      const indexStart = announcmentMessage.indexOf(link);
-      const indexEnd = indexStart + link.length;
-      split.splice(
-        // Masalah saat ada 2 link yang sama
-        indexStart,
-        indexEnd,
-        <TouchableHighlight
-          key={link + index}
+      splittedLinks.splice(
+        index + 1 + loopLength,
+        0,
+        <Text
           onPress={() => {
             Linking.openURL(link);
           }}
-          underlayColor={'#0077ff'}>
-          <Text style={{ color: '#0066ff' }}>{link}</Text>
-        </TouchableHighlight>,
+          style={{ color: '#0066ff' }}>
+          {link}
+        </Text>,
       );
+      loopLength += 1;
     });
-    announcment = split;
+    announcment = splittedLinks;
   }
   return (
     <Modal transparent visible={visible}>
@@ -429,9 +425,11 @@ function useLocalTime() {
 }
 
 function findAllLinks(texts: string): RegExpMatchArray | null {
-  return texts.match(
-    /https?:\/\/[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
-  );
+  return texts.match(/(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi);
+}
+
+function splitAllLinks(texts: string): string[] {
+  return texts.split(/(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi);
 }
 
 const styles = StyleSheet.create({
