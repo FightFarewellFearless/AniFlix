@@ -39,15 +39,15 @@ function EpsList(props: Props) {
   const epsList = useRef<FlatList>(null);
 
   useEffect(() => {
-    try {
-      synopsys.current?.flashScrollIndicators();
-      epsList.current?.flashScrollIndicators();
-    } catch (e) {
+    if (synopsys.current === null || epsList.current === null) {
       Alert.alert(
         'Error',
         'Kemungkinan kamu ingin membaca manga, Jika iya, aplikasi tidak mendukung manga saat ini.',
       );
+      return;
     }
+    synopsys.current.flashScrollIndicators();
+    epsList.current.flashScrollIndicators();
   }, []);
 
   useEffect(() => {

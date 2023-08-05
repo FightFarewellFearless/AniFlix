@@ -256,6 +256,9 @@ function AnnouncmentModal({
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   announcmentMessage: string | undefined;
 }): React.JSX.Element {
+  if (announcmentMessage === undefined) {
+    return <></>;
+  }
   const linksInAnnouncment = findAllLinks(announcmentMessage as string);
   let announcment: string | (string | JSX.Element)[] | undefined;
   if (linksInAnnouncment === null) {
@@ -265,9 +268,10 @@ function AnnouncmentModal({
       announcmentMessage as string
     ).split('');
     linksInAnnouncment.forEach((link, index) => {
-      const indexStart = announcmentMessage?.indexOf(link) as number;
+      const indexStart = announcmentMessage.indexOf(link);
       const indexEnd = indexStart + link.length;
       split.splice(
+        // Masalah saat ada 2 link yang sama
         indexStart,
         indexEnd,
         <TouchableHighlight
