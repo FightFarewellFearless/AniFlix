@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { EpsList as EpisodeListType, EpsListEpisodeList } from '../types/anime';
+import colorScheme from '../utils/colorScheme';
 const TouchableOpacityMemo = memo(TouchableOpacity);
 const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
   FlatList,
@@ -66,7 +67,8 @@ function EpsList(props: Props) {
               }),
             );
           }}>
-          <Text style={{ color: '#2c9ec4' }}>
+          <Text
+            style={{ color: colorScheme === 'dark' ? '#2c9ec4' : '#005977' }}>
             {item.episode
               .replace(
                 data.title
@@ -180,7 +182,7 @@ function EpsList(props: Props) {
         <TextInput
           placeholder="Cari episode di sini"
           keyboardType="numeric"
-          placeholderTextColor={'#616161'}
+          placeholderTextColor={colorScheme === 'dark' ? '#616161' : 'white'}
           style={[globalStyles.text, styles.cariEpisode]}
           onChangeText={searchEpisode}
         />
@@ -198,7 +200,7 @@ function EpsList(props: Props) {
                 style={{
                   width: '100%',
                   borderBottomWidth: 0.5,
-                  borderColor: 'white',
+                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
                 }}
               />
             )}
@@ -229,7 +231,7 @@ const styles = StyleSheet.create({
   },
   synopsys: {
     maxHeight: '35%',
-    backgroundColor: '#0000008a',
+    backgroundColor: colorScheme === 'dark' ? '#0000008a' : '#d8d8d89d',
   },
   synopsysScrollView: {},
   synopsysText: {
@@ -265,6 +267,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 3,
     backgroundColor: '#0000009f',
+    color: colorScheme === 'dark' ? globalStyles.text.color : 'white',
   },
   genre: {
     flex: 0.4,
@@ -280,9 +283,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     padding: 2,
     textAlign: 'center',
+    color: colorScheme === 'dark' ? globalStyles.text.color : 'white',
   },
   cariEpisode: {
-    backgroundColor: '#2e2e2e',
+    backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : 'gray',
     height: 35,
     paddingVertical: 1,
   },

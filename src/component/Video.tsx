@@ -29,9 +29,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import DeviceInfo from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
-import Dropdown from 'react-native-dropdown-picker';
+import Dropdown, { ThemeNameType } from 'react-native-dropdown-picker';
 
-import globalStyles from '../assets/style';
+import globalStyles, { darkText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
@@ -42,6 +42,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import VideoType, { OnProgressData } from 'react-native-video';
+import colorScheme from '../utils/colorScheme';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -272,7 +273,7 @@ function Video(props: Props) {
       <Icon
         name={iconName}
         style={{
-          color: iconName === 'battery-0' ? 'red' : globalStyles.text.color,
+          color: iconName === 'battery-0' ? 'red' : darkText,
         }}
       />
     );
@@ -569,7 +570,7 @@ function Video(props: Props) {
               }}
               pointerEvents="none">
               <View style={styles.partNotificationContainer}>
-                <Text style={globalStyles.text}>
+                <Text style={{ color: darkText }}>
                   Bersiap ke part selanjutnya
                 </Text>
               </View>
@@ -583,7 +584,7 @@ function Video(props: Props) {
             style={[styles.batteryInfo, { zIndex: isControlsHidden ? 1 : 0 }]}
             pointerEvents="none">
             {getBatteryIconComponent()}
-            <Text style={globalStyles.text}>
+            <Text style={{ color: darkText }}>
               {' '}
               {Math.round(batteryLevel * 100)}%
             </Text>
@@ -668,9 +669,8 @@ function Video(props: Props) {
                   ]}>
                   {data.status}
                 </Text>
-                <Text style={[globalStyles.text, styles.releaseYear]}>
-                  <Icon name="calendar" color={globalStyles.text.color} />{' '}
-                  {data.releaseYear}
+                <Text style={[{ color: darkText }, styles.releaseYear]}>
+                  <Icon name="calendar" color={darkText} /> {data.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
                   <Icon name="star" color="black" /> {data.rating}
@@ -731,9 +731,12 @@ function Video(props: Props) {
                   }}
                   listMode="MODAL"
                   modalTitle="Pilih resolusi"
-                  theme="DARK"
+                  theme={
+                    (colorScheme?.toUpperCase() ?? 'DEFAULT') as ThemeNameType
+                  }
                   selectedItemContainerStyle={{
-                    backgroundColor: '#00461b',
+                    backgroundColor:
+                      colorScheme === 'dark' ? '#00461b' : '#00bd48',
                   }}
                   // listItemContainerStyle={{
                   //   backgroundColor: '#442619',
@@ -759,9 +762,12 @@ function Video(props: Props) {
                     }}
                     listMode="MODAL"
                     modalTitle="Pilih part"
-                    theme="DARK"
+                    theme={
+                      (colorScheme?.toUpperCase() ?? 'DEFAULT') as ThemeNameType
+                    }
                     selectedItemContainerStyle={{
-                      backgroundColor: '#00461b',
+                      backgroundColor:
+                        colorScheme === 'dark' ? '#00461b' : '#00bd48',
                     }}
                     // listItemContainerStyle={{
                     //   backgroundColor: '#442619',
@@ -778,8 +784,8 @@ function Video(props: Props) {
             <TouchableOpacity
               style={styles.downloadButton}
               onPress={downloadAnime}>
-              <Icon name="download" size={23} color={globalStyles.text.color} />
-              <Text style={globalStyles.text}>
+              <Icon name="download" size={23} color={darkText} />
+              <Text style={{ color: darkText }}>
                 Download {data.streamingLink?.length > 1 && 'Part ini'}
               </Text>
             </TouchableOpacity>
@@ -791,12 +797,8 @@ function Video(props: Props) {
                   { backgroundColor: '#996300', marginTop: 5 },
                 ]}
                 onPress={downloadAllAnimePart as () => void}>
-                <Icon
-                  name="download"
-                  size={23}
-                  color={globalStyles.text.color}
-                />
-                <Text style={globalStyles.text}>Download semua part</Text>
+                <Icon name="download" size={23} color={darkText} />
+                <Text style={{ color: darkText }}>Download semua part</Text>
               </TouchableOpacity>
             )}
           </ScrollView>
@@ -852,7 +854,7 @@ function TimeInfo() {
       clearInterval(interval);
     };
   }, [changeTime, time]);
-  return <Text style={globalStyles.text}>{time}</Text>;
+  return <Text style={{ color: '#dadada' }}>{time}</Text>;
 }
 
 const styles = StyleSheet.create({
@@ -866,7 +868,7 @@ const styles = StyleSheet.create({
     flex: 0.15,
     minWidth: 300,
     minHeight: 80,
-    backgroundColor: '#2c2c2c',
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
     borderColor: 'gold',
     borderWidth: 1,
     justifyContent: 'center',
@@ -908,7 +910,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   container: {
-    backgroundColor: '#1d1d1d',
+    backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#d8d8d8',
+    elevation: colorScheme === 'light' ? 3 : undefined,
     padding: 13,
   },
   infoTitle: {
@@ -920,7 +923,7 @@ const styles = StyleSheet.create({
   },
   infoSinopsis: {
     fontSize: 13.5,
-    color: '#a5a5a5',
+    color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
   },
   infoGenre: {
     marginVertical: 5,

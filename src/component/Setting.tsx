@@ -34,6 +34,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import { HistoryJSON } from '../types/historyJSON';
+import colorScheme from '../utils/colorScheme';
 
 interface SettingsData {
   title: string;
@@ -531,7 +532,7 @@ function ItemSeparator() {
       style={{
         width: '100%',
         borderBottomWidth: 0.5,
-        borderColor: 'white',
+        borderColor: colorScheme === 'dark' ? 'white' : 'black',
       }}
     />
   );
@@ -576,7 +577,7 @@ const styles = StyleSheet.create({
     maxWidth: 50,
     alignItems: 'center',
     borderRightWidth: 1,
-    borderRightColor: 'white',
+    borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
     marginRight: 5,
   },
   settingListText: {
@@ -597,7 +598,7 @@ const styles = StyleSheet.create({
   waktuServer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#835604',
+    backgroundColor: '#aa6f00',
   },
   modalContainer: {
     flex: 1,
@@ -607,7 +608,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 0.15,
-    backgroundColor: '#202020',
+    backgroundColor: colorScheme === 'dark' ? '#202020' : '#c2c2c2',
     borderWidth: 1,
     borderColor: '#525252',
     justifyContent: 'center',

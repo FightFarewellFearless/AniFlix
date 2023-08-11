@@ -21,6 +21,7 @@ import store, { AppDispatch } from '../misc/reduxStore';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../types/navigation';
 import { HistoryJSON } from '../types/historyJSON';
+import colorScheme from '../utils/colorScheme';
 require('moment/locale/id');
 
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
@@ -325,8 +326,9 @@ const styles = StyleSheet.create({
   listContainerButton: {
     flexDirection: 'row',
     marginVertical: 5,
-    backgroundColor: '#3b3939',
+    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#bebebe',
     borderRadius: 16,
+    elevation: 5,
   },
   listImage: {
     width: 120,

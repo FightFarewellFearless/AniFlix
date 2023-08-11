@@ -17,6 +17,7 @@ import Maintenance from './src/component/Maintenance';
 import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
 import globalStyles from './src/assets/style';
+import colorScheme from './src/utils/colorScheme';
 
 function App() {
   const Stack = createNativeStackNavigator<RootStackNavigator>();
@@ -28,7 +29,7 @@ function App() {
   }, []);
 
   return (
-    <NavigationContainer theme={DarkTheme}>
+    <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : undefined}>
       {__DEV__ && (
         <View style={styles.Dev} pointerEvents="none">
           <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>

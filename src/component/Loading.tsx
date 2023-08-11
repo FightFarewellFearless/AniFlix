@@ -24,6 +24,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { SetDatabaseTarget } from '../types/redux';
 import { Home } from '../types/anime';
+import colorScheme from '../utils/colorScheme';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
 
@@ -160,7 +161,7 @@ function Loading(props: Props) {
           }}
           style={{
             flexDirection: 'row',
-            backgroundColor: '#2b2b2b',
+            backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
             padding: 10,
             borderRadius: 8,
             alignItems: 'center',

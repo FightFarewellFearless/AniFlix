@@ -23,6 +23,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchAnimeList } from '../types/anime';
+import colorScheme from '../utils/colorScheme';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
@@ -104,7 +105,7 @@ function Search(props: Props) {
           onSubmitEditing={submit}
           onChangeText={onChangeText}
           placeholder="Cari anime disini"
-          placeholderTextColor="#707070"
+          placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
           style={[
             styles.searchInput,
             { width: searchText !== '' ? '87%' : '98%' },
@@ -201,7 +202,9 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 35,
     borderWidth: 0.8,
-    borderColor: '#c5c5c5',
+    borderColor: colorScheme === 'dark' ? '#c5c5c5' : 'black',
+    borderRadius: 10,
+    backgroundColor: colorScheme === 'dark' ? '#202020' : 'gray',
     marginLeft: 2,
     color: globalStyles.text.color,
   },
@@ -214,8 +217,9 @@ const styles = StyleSheet.create({
   listContainer: {
     flexDirection: 'row',
     marginVertical: 5,
-    backgroundColor: '#3b3939',
+    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#bebebe',
     borderRadius: 16,
+    elevation: 5,
   },
   listImage: {
     width: 120,

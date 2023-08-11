@@ -34,6 +34,7 @@ import {
   BottomTabNavigationProp,
   BottomTabScreenProps,
 } from '@react-navigation/bottom-tabs';
+import colorScheme from '../utils/colorScheme';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
@@ -442,7 +443,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 0.15,
-    backgroundColor: '#202020',
+    backgroundColor: colorScheme === 'dark' ? '#202020' : '#d1d1d1',
+    borderRadius: 9,
     borderWidth: 1,
     borderColor: '#525252',
     justifyContent: 'center',
@@ -466,7 +468,7 @@ const styles = StyleSheet.create({
     flexGrow: 3,
     minWidth: 120,
     borderColor: '#01463cff',
-    backgroundColor: '#414141',
+    backgroundColor: colorScheme === 'dark' ? '#414141' : 'white',
     borderWidth: 1,
   },
   announcmentMessage: {
@@ -480,7 +482,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   announcmentOKButton: {
-    backgroundColor: 'white',
+    backgroundColor: colorScheme === 'dark' ? 'white' : 'black',
     width: 50,
     padding: 5,
     borderRadius: 3,
@@ -497,7 +499,7 @@ const styles = StyleSheet.create({
   },
   boxItem: {
     flex: 1,
-    backgroundColor: '#363636',
+    backgroundColor: colorScheme === 'dark' ? '#363636' : '#c4c4c4',
     borderColor: 'gold',
     borderWidth: 1.2,
     justifyContent: 'center',
@@ -519,9 +521,10 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     position: 'relative',
-    backgroundColor: '#272727',
+    backgroundColor: colorScheme === 'dark' ? '#272727' : '#d8d8d8',
     paddingVertical: 10,
     borderRadius: 10,
+    elevation: 5,
   },
   titleContainer: {
     marginBottom: 10,
