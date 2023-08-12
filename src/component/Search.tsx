@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Image,
@@ -10,6 +10,7 @@ import {
   Animated,
   Alert,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -29,6 +30,8 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
 >;
+
+const PressableAnimation = Animated.createAnimatedComponent(Pressable);
 
 function Search(props: Props) {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -57,6 +60,31 @@ function Search(props: Props) {
   const [data, setData] = useState<null | SearchAnimeList[]>(null);
   const [loading, setLoading] = useState(false);
   const query = useRef<undefined | string>();
+  const searchButtonAnimation = useRef(new Animated.Value(100)).current;
+  const searchButtonOpacity = useRef(new Animated.Value(1)).current;
+  const searchButtonMounted = useRef(false);
+
+  useEffect(() => {
+    if (searchText !== '' && searchButtonMounted.current === false) {
+      Animated.spring(searchButtonAnimation, {
+        toValue: 0,
+        // duration: 700,
+        useNativeDriver: true,
+      }).start();
+    } else if (searchButtonMounted.current === true && searchText === '') {
+      Animated.spring(searchButtonAnimation, {
+        toValue: 100,
+        // duration: 700,
+        useNativeDriver: true,
+      }).start();
+    }
+    if (searchText === '') {
+      searchButtonMounted.current = false;
+    } else {
+      searchButtonMounted.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText]);
 
   const onChangeText = useCallback((text: string) => {
     setSearchText(text);
@@ -98,6 +126,24 @@ function Search(props: Props) {
       });
   }, [props.navigation, searchText]);
 
+  const onPressIn = useCallback(() => {
+    Animated.timing(searchButtonOpacity, {
+      toValue: 0.4,
+      useNativeDriver: true,
+      duration: 100,
+    }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onPressOut = useCallback(() => {
+    Animated.timing(searchButtonOpacity, {
+      toValue: 1,
+      useNativeDriver: true,
+      duration: 100,
+    }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
       <View style={{ flexDirection: 'row' }}>
@@ -111,14 +157,26 @@ function Search(props: Props) {
             { width: searchText !== '' ? '87%' : '98%' },
           ]}
         />
-        {searchText !== '' && (
-          <TouchableOpacity onPress={submit} style={styles.searchButton}>
-            <Text style={{ color: '#272727' }}>
-              <Icon name="search" style={{ color: '#413939' }} size={17} />
-              Cari
-            </Text>
-          </TouchableOpacity>
-        )}
+        <PressableAnimation
+          onPress={submit}
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          style={[
+            styles.searchButton,
+            {
+              opacity: searchButtonOpacity,
+              transform: [
+                {
+                  translateX: searchButtonAnimation,
+                },
+              ],
+            },
+          ]}>
+          <Text style={{ color: '#272727' }}>
+            <Icon name="search" style={{ color: '#413939' }} size={17} />
+            Cari
+          </Text>
+        </PressableAnimation>
       </View>
       {loading && <ActivityIndicator />}
       {data === null ? (
