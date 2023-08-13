@@ -26,6 +26,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchAnimeList } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
 
+const TextInputAnimation = Animated.createAnimatedComponent(TextInput);
+
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
@@ -64,18 +66,20 @@ function Search(props: Props) {
   const searchButtonOpacity = useRef(new Animated.Value(1)).current;
   const searchButtonMounted = useRef(false);
 
+  const searchTextAnimationColor = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     if (searchText !== '' && searchButtonMounted.current === false) {
       Animated.spring(searchButtonAnimation, {
         toValue: 0,
         // duration: 700,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     } else if (searchButtonMounted.current === true && searchText === '') {
       Animated.spring(searchButtonAnimation, {
         toValue: 100,
         // duration: 700,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     }
     if (searchText === '') {
@@ -129,7 +133,7 @@ function Search(props: Props) {
   const onPressIn = useCallback(() => {
     Animated.timing(searchButtonOpacity, {
       toValue: 0.4,
-      useNativeDriver: true,
+      useNativeDriver: false,
       duration: 100,
     }).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -138,8 +142,26 @@ function Search(props: Props) {
   const onPressOut = useCallback(() => {
     Animated.timing(searchButtonOpacity, {
       toValue: 1,
-      useNativeDriver: true,
+      useNativeDriver: false,
       duration: 100,
+    }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSearchTextFocus = useCallback(() => {
+    Animated.timing(searchTextAnimationColor, {
+      toValue: 1,
+      useNativeDriver: false,
+      duration: 400,
+    }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSearchTextBlur = useCallback(() => {
+    Animated.timing(searchTextAnimationColor, {
+      toValue: 0,
+      useNativeDriver: false,
+      duration: 400,
     }).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -147,14 +169,32 @@ function Search(props: Props) {
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
       <View style={{ flexDirection: 'row' }}>
-        <TextInput
+        <TextInputAnimation
           onSubmitEditing={submit}
           onChangeText={onChangeText}
           placeholder="Cari anime disini"
           placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
+          onFocus={onSearchTextFocus}
+          onBlur={onSearchTextBlur}
           style={[
             styles.searchInput,
-            { width: searchText !== '' ? '87%' : '98%' },
+            {
+              // width: searchText !== '' ? '87%' : '98%',
+              width: searchButtonAnimation.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['87%', '98%'],
+              }),
+              // borderColor: colorScheme === 'dark' ? '#c5c5c5' : 'black',
+              borderColor: searchTextAnimationColor.interpolate({
+                inputRange: [0, 1],
+                outputRange: [
+                  colorScheme === 'dark'
+                    ? 'rgb(197, 197, 197)'
+                    : 'rgb(0, 0, 0)',
+                  'rgb(0, 128, 0)',
+                ],
+              }),
+            },
           ]}
         />
         <PressableAnimation
@@ -260,7 +300,6 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 35,
     borderWidth: 0.8,
-    borderColor: colorScheme === 'dark' ? '#c5c5c5' : 'black',
     borderRadius: 10,
     backgroundColor: colorScheme === 'dark' ? '#202020' : 'gray',
     marginLeft: 2,
