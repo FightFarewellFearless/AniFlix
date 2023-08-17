@@ -39,11 +39,45 @@ function History(props: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const scrollValue = useRef(new Animated.Value(0)).current;
-  const scrollToTopButtonY = scrollValue.interpolate({
-    inputRange: [500, 800],
-    outputRange: [150, 0],
-    extrapolate: 'clamp',
-  });
+  const scrollLastValue = useRef(0);
+  const scrollToTopButtonState = useRef<'hide' | 'show'>('show');
+  const scrollToTopButtonY = useRef(new Animated.Value(0)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      const listener = scrollValue.addListener(({ value }) => {
+        if (value <= 1000 && scrollToTopButtonState.current === 'show') {
+          Animated.spring(scrollToTopButtonY, {
+            useNativeDriver: true,
+            toValue: 150,
+          }).start();
+          scrollToTopButtonState.current = 'hide';
+        } else if (
+          value < scrollLastValue.current &&
+          scrollToTopButtonState.current === 'hide'
+        ) {
+          Animated.spring(scrollToTopButtonY, {
+            useNativeDriver: true,
+            toValue: 0,
+          }).start();
+          scrollToTopButtonState.current = 'show';
+        } else if (
+          value > scrollLastValue.current &&
+          scrollToTopButtonState.current === 'show'
+        ) {
+          Animated.spring(scrollToTopButtonY, {
+            useNativeDriver: true,
+            toValue: 150,
+          }).start();
+          scrollToTopButtonState.current = 'hide';
+        }
+        scrollLastValue.current = value;
+      });
+      return () => {
+        scrollValue.removeListener(listener);
+      };
+    }, [scrollToTopButtonY, scrollValue]),
+  );
 
   useFocusEffect(
     useCallback(() => {
