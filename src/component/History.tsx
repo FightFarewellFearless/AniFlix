@@ -46,11 +46,13 @@ function History(props: Props) {
   useFocusEffect(
     useCallback(() => {
       const listener = scrollValue.addListener(({ value }) => {
-        if (value <= 1000 && scrollToTopButtonState.current === 'show') {
-          Animated.spring(scrollToTopButtonY, {
-            useNativeDriver: true,
-            toValue: 150,
-          }).start();
+        if (value <= 1000) {
+          if (scrollToTopButtonState.current === 'show') {
+            Animated.spring(scrollToTopButtonY, {
+              useNativeDriver: true,
+              toValue: 150,
+            }).start();
+          }
           scrollToTopButtonState.current = 'hide';
         } else if (
           value < scrollLastValue.current &&
