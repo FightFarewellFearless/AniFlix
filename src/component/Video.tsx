@@ -26,7 +26,6 @@ import {
 import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import DeviceInfo from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import Dropdown, { ThemeNameType } from 'react-native-dropdown-picker';
@@ -252,7 +251,6 @@ function Video(props: Props) {
       Orientation.unlockAllOrientations();
     }
     StatusBar.setHidden(false);
-    SystemNavigationBar.navigationShow();
   };
 
   const getBatteryIconComponent = useCallback(() => {
@@ -303,14 +301,12 @@ function Video(props: Props) {
       }
     }
     StatusBar.setHidden(true);
-    SystemNavigationBar.navigationHide();
     setFullscreen(true);
   }, []);
 
   const exitFullscreen = useCallback(() => {
     StatusBar.setHidden(false);
     Orientation.lockToPortrait();
-    SystemNavigationBar.navigationShow();
     setFullscreen(false);
   }, []);
 

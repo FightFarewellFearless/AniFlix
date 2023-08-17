@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { Provider } from 'react-redux';
 
 import Loading from './src/component/Loading';
@@ -24,8 +23,6 @@ function App() {
 
   useEffect(() => {
     StatusBar.setHidden(false);
-    SystemNavigationBar.setNavigationColor('black');
-    StatusBar.setBackgroundColor('black');
   }, []);
 
   return (
