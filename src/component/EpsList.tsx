@@ -186,29 +186,28 @@ function EpsList(props: Props) {
           style={[globalStyles.text, styles.cariEpisode]}
           onChangeText={searchEpisode}
         />
-        {result[0] !== undefined ? (
-          <FlatListMemo
-            key="episodelist"
-            data={result}
-            keyExtractor={keyExtractor}
-            initialNumToRender={15}
-            maxToRenderPerBatch={5}
-            ref={epsList}
-            renderItem={renderItem}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{
-                  width: '100%',
-                  borderBottomWidth: 0.5,
-                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
-                }}
-              />
-            )}
-            windowSize={16}
-          />
-        ) : (
-          <Text style={globalStyles.text}>Tidak ada episode</Text>
-        )}
+        <FlatListMemo
+          key="episodelist"
+          data={result}
+          ListEmptyComponent={
+            <Text style={globalStyles.text}>Tidak ada episode</Text>
+          }
+          keyExtractor={keyExtractor}
+          initialNumToRender={15}
+          maxToRenderPerBatch={5}
+          ref={epsList}
+          renderItem={renderItem}
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                width: '100%',
+                borderBottomWidth: 0.5,
+                borderColor: colorScheme === 'dark' ? 'white' : 'black',
+              }}
+            />
+          )}
+          windowSize={16}
+        />
       </View>
     </View>
   );
