@@ -40,6 +40,5 @@ function setHistory(
       value: JSON.stringify(data),
     }),
   );
-  return setHistory;
 }
 export default setHistory;
