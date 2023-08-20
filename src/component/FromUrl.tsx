@@ -18,10 +18,10 @@ import {
   Blocked,
   EpsList,
   FromUrlMaintenance,
-  RootStackNavigator,
   SingleEps,
 } from '../types/anime';
 import { AppDispatch, RootState } from '../misc/reduxStore';
+import { RootStackNavigator } from '../types/navigation';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
