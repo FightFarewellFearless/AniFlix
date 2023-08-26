@@ -22,7 +22,6 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../types/navigation';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
-require('moment/locale/id');
 
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
@@ -43,6 +42,7 @@ function History(props: Props) {
   const scrollToTopButtonState = useRef<'hide' | 'show'>('show');
   const scrollToTopButtonY = useRef(new Animated.Value(0)).current;
 
+  // scroll to top animation ONSCROLL
   useFocusEffect(
     useCallback(() => {
       const listener = scrollValue.addListener(({ value }) => {
