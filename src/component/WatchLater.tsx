@@ -94,11 +94,17 @@ function WatchLater(props: Props) {
 
   return (
     <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
-      <FlatList
-        data={watchLaterLists}
-        renderItem={renderItem}
-        keyExtractor={extractKey}
-      />
+      {watchLaterLists.length === 0 ? (
+        <View style={styles.emptyList}>
+          <Text style={[globalStyles.text]}>Belum ada daftar tonton nanti</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={watchLaterLists}
+          renderItem={renderItem}
+          keyExtractor={extractKey}
+        />
+      )}
     </Animated.View>
   );
 }
@@ -147,6 +153,11 @@ const styles = StyleSheet.create({
   listGenreText: {
     color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
     fontWeight: 'bold',
+  },
+  emptyList: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
