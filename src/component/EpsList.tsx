@@ -24,6 +24,7 @@ import colorScheme from '../utils/colorScheme';
 import controlWatchLater from '../utils/watchLaterControl';
 import watchLaterJSON from '../types/watchLaterJSON';
 import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+
 const TouchableOpacityMemo = memo(TouchableOpacity);
 const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
   FlatList,
@@ -229,40 +230,42 @@ function EpsList(props: Props) {
             </Text>
           </View>
           {/* Tonton Nanti */}
-          <View style={styles.watchLater}>
-            {watchLaterListsJson.find(
-              z =>
-                z.title ===
-                data.title
-                  .replace('Nonton Anime ', '')
-                  .replace(' Sub Indo', ''),
-            ) === undefined ? (
-              <TouchableOpacity
-                style={styles.watchLaterButton}
-                // @ts-ignore
-                onPress={watchLater}>
-                <MaterialIcons
-                  name="watch-later"
-                  color={globalStyles.text.color}
-                  style={styles.watchLaterIcon}
-                />
-                <Text style={[globalStyles.text, styles.watchLaterText]}>
-                  Tonton nanti
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.watchLaterButton}>
-                <Icon
-                  name="check"
-                  color={globalStyles.text.color}
-                  style={[styles.watchLaterIcon, { fontSize: 17 }]}
-                />
-                <Text style={[globalStyles.text, styles.haveWatchLaterText]}>
-                  Sudah di list tonton nanti!
-                </Text>
-              </View>
-            )}
-          </View>
+          {data.title.includes('Baca Manga') === false && (
+            <View style={styles.watchLater}>
+              {watchLaterListsJson.find(
+                z =>
+                  z.title ===
+                  data.title
+                    .replace('Nonton Anime ', '')
+                    .replace(' Sub Indo', ''),
+              ) === undefined ? (
+                <TouchableOpacity
+                  style={styles.watchLaterButton}
+                  // @ts-ignore
+                  onPress={watchLater}>
+                  <MaterialIcons
+                    name="watch-later"
+                    color={globalStyles.text.color}
+                    style={styles.watchLaterIcon}
+                  />
+                  <Text style={[globalStyles.text, styles.watchLaterText]}>
+                    Tonton nanti
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.watchLaterButton}>
+                  <Icon
+                    name="check"
+                    color={globalStyles.text.color}
+                    style={[styles.watchLaterIcon, { fontSize: 17 }]}
+                  />
+                  <Text style={[globalStyles.text, styles.haveWatchLaterText]}>
+                    Sudah di list tonton nanti!
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
         </ImageBackground>
       </View>
 
@@ -392,7 +395,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     maxWidth: 150,
-    backgroundColor: colorScheme === 'dark' ? '#003a55' : '#c5c5c5',
+    backgroundColor: colorScheme === 'dark' ? '#003a55' : '#8dd1e7',
     borderRadius: 8,
     padding: 5,
   },
