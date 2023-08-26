@@ -3,5 +3,6 @@
     "enableNextPartNotification": "true",
     "enableBatteryTimeInfo": "false",
     "downloadFrom": "native",
-    "lockScreenOrientation": "false"
+    "lockScreenOrientation": "false",
+    "watchLater": "[]"
 }

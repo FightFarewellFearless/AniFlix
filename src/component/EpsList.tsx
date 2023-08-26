@@ -11,14 +11,19 @@ import {
   useWindowDimensions,
   Alert,
   ListRenderItemInfo,
+  ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { EpsList as EpisodeListType, EpsListEpisodeList } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
+import controlWatchLater from '../utils/watchLaterControl';
+import watchLaterJSON from '../types/watchLaterJSON';
+import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
 const TouchableOpacityMemo = memo(TouchableOpacity);
 const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
   FlatList,
@@ -39,17 +44,27 @@ function EpsList(props: Props) {
   const synopsys = useRef<ScrollView>(null);
   const epsList = useRef<FlatList>(null);
 
+  const watchLaterListsJson = useSelectorOnFocus(
+    state => state.settings.watchLater,
+    true,
+    state => JSON.parse(state) as watchLaterJSON[],
+  );
+
   useEffect(() => {
-    if (synopsys.current === null || epsList.current === null) {
+    if (
+      data.genre.length === 0 &&
+      data.episodeList.length === 0 &&
+      data.status === ''
+    ) {
       Alert.alert(
         'Error',
         'Kemungkinan kamu ingin membaca manga, Jika iya, aplikasi tidak mendukung manga saat ini.',
       );
       return;
     }
-    synopsys.current.flashScrollIndicators();
-    epsList.current.flashScrollIndicators();
-  }, []);
+    synopsys.current?.flashScrollIndicators();
+    epsList.current?.flashScrollIndicators();
+  }, [data]);
 
   useEffect(() => {
     epsList.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -103,6 +118,44 @@ function EpsList(props: Props) {
             const slice = index > 0 ? x.episode.slice(index) : x.episode;
             return slice.includes(text);
           }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const watchLater = useCallback((confirmed?: boolean) => {
+    if (confirmed === true) {
+      const title = createWatchLaterTitle(data.title);
+      const watchLaterJson: watchLaterJSON = {
+        title,
+        link: props.route.params.link,
+        rating: data.rating,
+        releaseYear: data.releaseYear,
+        thumbnailUrl: data.thumbnailUrl,
+        genre: data.genre,
+        date: Date.now(),
+      };
+      controlWatchLater('add', watchLaterJson);
+      ToastAndroid.show(
+        `${title} ditambahkan ke daftar tonton nanti`,
+        ToastAndroid.SHORT,
+      );
+    } else {
+      Alert.alert(
+        'Tambah ke tonton nanti?',
+        'Tambahkan anime ini ke daftar tonton nanti?\n\nAnime akan otomatis dihapus dari daftar setelah kamu menonton salah satu episode anime ini.',
+        [
+          {
+            text: 'Batal',
+            onPress: () => undefined,
+          },
+          {
+            text: 'Tambah',
+            onPress: () => {
+              watchLater(true);
+            },
+          },
+        ],
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -175,6 +228,41 @@ function EpsList(props: Props) {
               <Icon name="tv" size={15} /> {data.episodeList.length}
             </Text>
           </View>
+          {/* Tonton Nanti */}
+          <View style={styles.watchLater}>
+            {watchLaterListsJson.find(
+              z =>
+                z.title ===
+                data.title
+                  .replace('Nonton Anime ', '')
+                  .replace(' Sub Indo', ''),
+            ) === undefined ? (
+              <TouchableOpacity
+                style={styles.watchLaterButton}
+                // @ts-ignore
+                onPress={watchLater}>
+                <MaterialIcons
+                  name="watch-later"
+                  color={globalStyles.text.color}
+                  style={styles.watchLaterIcon}
+                />
+                <Text style={[globalStyles.text, styles.watchLaterText]}>
+                  Tonton nanti
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.watchLaterButton}>
+                <Icon
+                  name="check"
+                  color={globalStyles.text.color}
+                  style={[styles.watchLaterIcon, { fontSize: 17 }]}
+                />
+                <Text style={[globalStyles.text, styles.haveWatchLaterText]}>
+                  Sudah di list tonton nanti!
+                </Text>
+              </View>
+            )}
+          </View>
         </ImageBackground>
       </View>
 
@@ -211,6 +299,10 @@ function EpsList(props: Props) {
       </View>
     </View>
   );
+}
+
+function createWatchLaterTitle(rawTitle: string): string {
+  return rawTitle.replace('Nonton Anime ', '').replace(' Sub Indo', '');
 }
 
 const styles = StyleSheet.create({
@@ -288,6 +380,42 @@ const styles = StyleSheet.create({
     backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : 'gray',
     height: 35,
     paddingVertical: 1,
+  },
+  watchLater: {
+    flex: 0.25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  watchLaterButton: {
+    width: '40%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: 150,
+    backgroundColor: colorScheme === 'dark' ? '#003a55' : '#c5c5c5',
+    borderRadius: 8,
+    padding: 5,
+  },
+  watchLaterText: {
+    textAlign: 'center',
+    textShadowColor: '#ffa600',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    zIndex: 2,
+  },
+  haveWatchLaterText: {
+    textAlign: 'center',
+  },
+  watchLaterIconContainer: {
+    position: 'absolute',
+    width: '100%',
+  },
+  watchLaterIcon: {
+    color: 'gray',
+    alignSelf: 'center',
+    fontSize: 30,
+    justifyContent: 'center',
+    zIndex: 1,
   },
 });
 

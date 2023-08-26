@@ -25,7 +25,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import { HomeContext } from '../misc/context';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { setDatabase } from '../misc/reduxSlice';
 import Orientation from 'react-native-orientation-locker';
@@ -35,6 +35,7 @@ import { HomeNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
+import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
 
 interface SettingsData {
   title: string;
@@ -47,13 +48,15 @@ interface SettingsData {
 type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
-  const enableNextPartNotification = useSelector(
+  const enableNextPartNotification = useSelectorOnFocus(
     (state: RootState) => state.settings.enableNextPartNotification,
   );
-  const enableBatteryTimeInfo = useSelector(
+  const enableBatteryTimeInfo = useSelectorOnFocus(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const history = useSelector((state: RootState) => state.settings.history);
+  const history = useSelectorOnFocus(
+    (state: RootState) => state.settings.history,
+  );
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -78,7 +81,7 @@ function Setting(_props: Props) {
     );
   };
   // const [downloadFrom, setDownloadFrom] = useState('native');
-  const downloadFrom = useSelector(
+  const downloadFrom = useSelectorOnFocus(
     (state: RootState) => state.settings.downloadFrom,
   );
   const setDownloadFrom = useCallback(
@@ -93,7 +96,7 @@ function Setting(_props: Props) {
     [dispatchSettings],
   );
 
-  const lockScreenOrientation = useSelector(
+  const lockScreenOrientation = useSelectorOnFocus(
     (state: RootState) => state.settings.lockScreenOrientation,
   );
   const lockScreenOrientationSwitch = lockScreenOrientation === 'true';
@@ -109,7 +112,7 @@ function Setting(_props: Props) {
     dispatchSettings(
       setDatabase({
         target: 'lockScreenOrientation',
-        value: newValue,
+        value: String(newValue),
       }),
     );
   }, [dispatchSettings, lockScreenOrientation]);
@@ -254,7 +257,9 @@ function Setting(_props: Props) {
                   text: 'lakukan restore',
                   onPress: async () => {
                     const currentHistory: HistoryJSON[] = JSON.parse(history);
-                    const backup = JSON.parse(backupData.backupData);
+                    const backup: HistoryJSON[] = JSON.parse(
+                      backupData.backupData,
+                    );
                     setModalVisible(true);
                     setModalText(
                       'Mohon tunggu, ini bisa memakan beberapa waktu...',

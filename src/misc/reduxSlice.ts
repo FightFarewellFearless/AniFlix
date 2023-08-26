@@ -33,6 +33,7 @@ export const settingsSlice: Slice<
     enableBatteryTimeInfo: string;
     downloadFrom: string;
     lockScreenOrientation: string;
+    watchLater: string;
   },
   {},
   'settings'

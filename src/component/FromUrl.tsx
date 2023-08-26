@@ -6,6 +6,7 @@ import {
   Alert,
   BackHandler,
   NativeEventSubscription,
+  ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
@@ -20,8 +21,10 @@ import {
   FromUrlMaintenance,
   SingleEps,
 } from '../types/anime';
-import { AppDispatch, RootState } from '../misc/reduxStore';
+import store, { AppDispatch, RootState } from '../misc/reduxStore';
 import { RootStackNavigator } from '../types/navigation';
+import watchLaterJSON from '../types/watchLaterJSON';
+import controlWatchLater from '../utils/watchLaterControl';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
@@ -80,6 +83,7 @@ function FromUrl(props: Props) {
               props.navigation.dispatch(
                 StackActions.replace('EpisodeList', {
                   data: result,
+                  link: props.route.params.link,
                 }),
               );
             } else if (result.type === 'singleEps') {
@@ -100,6 +104,27 @@ function FromUrl(props: Props) {
                 historyData,
                 dispatchSettings,
               );
+
+              const episodeIndex = result.title
+                .toLowerCase()
+                .indexOf(' episode');
+              const title =
+                episodeIndex >= 0
+                  ? result.title.slice(0, episodeIndex)
+                  : result.title;
+              const watchLater: watchLaterJSON[] = JSON.parse(
+                store.getState().settings.watchLater,
+              );
+              const watchLaterIndex = watchLater.findIndex(
+                z => z.title === title,
+              );
+              if (watchLaterIndex >= 0) {
+                controlWatchLater('delete', watchLaterIndex);
+                ToastAndroid.show(
+                  `${title} dihapus dari daftar tonton nanti`,
+                  ToastAndroid.SHORT,
+                );
+              }
             }
           }
         } catch (e: any) {

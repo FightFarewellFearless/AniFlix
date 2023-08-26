@@ -3,4 +3,5 @@ export type SetDatabaseTarget =
   | 'enableNextPartNotification'
   | 'enableBatteryTimeInfo'
   | 'downloadFrom'
-  | 'lockScreenOrientation';
+  | 'lockScreenOrientation'
+  | 'watchLater';

@@ -3,8 +3,9 @@ import { Home, EpsList, SingleEps } from './anime';
 type HomeNavigator = {
   AnimeList: undefined;
   Search: undefined;
-  Setting: undefined;
   History: undefined;
+  WatchLater: undefined;
+  Setting: undefined;
 };
 
 type RootStackNavigator = {
@@ -14,6 +15,7 @@ type RootStackNavigator = {
   };
   EpisodeList: {
     data: EpsList;
+    link: string;
   };
   FromUrl: {
     link: string;

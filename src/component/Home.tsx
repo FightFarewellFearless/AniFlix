@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import History from './History';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './AnimeList';
@@ -9,6 +10,7 @@ import { HomeContext } from '../misc/context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Home as HomeType } from '../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../types/navigation';
+import WatchLater from './WatchLater';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 
@@ -32,7 +34,7 @@ function BottomTabs(props: Props) {
             tabBarIcon: ({ color }) => (
               <Icon name="home" style={{ color }} size={20} />
             ),
-            tabBarLabel: 'Home',
+            tabBarLabel: 'Beranda',
           }}
         />
         <Tab.Screen
@@ -42,7 +44,7 @@ function BottomTabs(props: Props) {
             tabBarIcon: ({ color }) => (
               <Icon name="search" style={{ color }} size={20} />
             ),
-            tabBarLabel: 'Search',
+            tabBarLabel: 'Cari',
           }}
         />
         <Tab.Screen
@@ -56,11 +58,22 @@ function BottomTabs(props: Props) {
           component={History}
         />
         <Tab.Screen
+          name="WatchLater"
+          options={{
+            tabBarLabel: 'Tonton nanti',
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons name="watch-later" style={{ color }} size={20} />
+            ),
+          }}
+          component={WatchLater}
+        />
+        <Tab.Screen
           name="Setting"
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="gears" style={{ color }} size={20} />
             ),
+            tabBarLabel: 'Pengaturan',
           }}
           component={Setting}
         />
