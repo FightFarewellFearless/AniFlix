@@ -25,11 +25,11 @@ function useSelectorOnFocus<T = string>(
   const fetchData = () => {
     const stateNow = selector(store.getState());
     if (lastValue.current !== stateNow) {
-      let result: T;
+      let result: T | string;
       if (modifierFunc) {
         result = modifierFunc(stateNow);
       } else {
-        result = stateNow as T;
+        result = stateNow;
       }
       setData(result);
     }
