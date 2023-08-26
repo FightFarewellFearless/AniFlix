@@ -412,12 +412,17 @@ function MovieList(props: {
 
 function useLocalTime() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const currTime = useRef<string>();
   useFocusEffect(
     useCallback(() => {
       setTime(new Date().toLocaleTimeString());
       const interval = setInterval(() => {
-        setTime(new Date().toLocaleTimeString());
-      }, 1000);
+        const string = new Date().toLocaleTimeString();
+        if (currTime.current !== string) {
+          setTime(string);
+          currTime.current = string;
+        }
+      }, 100);
       return () => {
         clearInterval(interval);
       };
