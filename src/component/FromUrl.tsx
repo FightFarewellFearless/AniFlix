@@ -4,8 +4,6 @@ import {
   ActivityIndicator,
   Text,
   Alert,
-  BackHandler,
-  NativeEventSubscription,
   ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
@@ -31,7 +29,6 @@ import controlWatchLater from '../utils/watchLaterControl';
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
-  const [unmount, setUnmount] = useState<boolean>(false);
   const [dots, setDots] = useState<string>('');
 
   const historyData = useSelector((state: RootState) => state.settings.history);
@@ -43,14 +40,6 @@ function FromUrl(props: Props) {
   ).current;
   useEffect((): (() => void) => {
     const abort: AbortController = new AbortController();
-    const backhandler: NativeEventSubscription = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        setUnmount(true);
-        abort.abort();
-        return false;
-      },
-    );
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
     const providedResolution =
       resolution !== undefined ? `&res=${resolution}` : '';
@@ -74,7 +63,7 @@ function FromUrl(props: Props) {
         try {
           const result: Blocked | EpsList | SingleEps | FromUrlMaintenance =
             JSON.parse(resulted);
-          if (results && unmount === false) {
+          if (results) {
             if (result.blocked) {
               props.navigation.dispatch(StackActions.replace('Blocked'));
             } else if (result.maintenance) {
@@ -151,16 +140,10 @@ function FromUrl(props: Props) {
         props.navigation.goBack();
       });
     return () => {
-      backhandler.remove();
+      abort.abort();
     };
-  }, [
-    dispatchSettings,
-    historyData,
-    props.navigation,
-    props.route.params.historyData,
-    props.route.params.link,
-    unmount,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const dotsInterval = setInterval(() => {
