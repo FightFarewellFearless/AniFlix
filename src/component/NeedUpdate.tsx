@@ -14,12 +14,13 @@ import { version as appVersion } from '../../package.json';
 import globalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
+import colorScheme from '../utils/colorScheme';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
 function NeedUpdate(props: Props) {
   const markdownElement = useMarkdown(props.route.params.changelog, {
-    colorScheme: 'dark',
+    colorScheme: colorScheme,
   });
   return (
     <View style={styles.container}>
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colorScheme === 'dark' ? '#5f5f5f' : '#cccccc',
     flex: 0.3,
   },
   needUpdate: {
@@ -85,6 +87,9 @@ const styles = StyleSheet.create({
   versionInfo: {
     flexDirection: 'row',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colorScheme === 'dark' ? 'white' : 'black',
+    borderRadius: 3,
   },
   version: {
     fontSize: 22,
@@ -102,6 +107,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     backgroundColor: '#008b13',
+    borderRadius: 5,
     justifyContent: 'center',
   },
 });
