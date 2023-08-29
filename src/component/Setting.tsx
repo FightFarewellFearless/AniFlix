@@ -50,12 +50,15 @@ type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
 function Setting(_props: Props) {
   const enableNextPartNotification = useSelectorOnFocus(
     (state: RootState) => state.settings.enableNextPartNotification,
+    true,
   );
   const enableBatteryTimeInfo = useSelectorOnFocus(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
+    true,
   );
   const history = useSelectorOnFocus(
     (state: RootState) => state.settings.history,
+    true,
   );
 
   const dispatchSettings = useDispatch<AppDispatch>();
