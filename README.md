@@ -1,7 +1,7 @@
 ![screenshot](./githubAssets/screenshot.jpg)
 
 
-# Aplikasi nonton anime gratis tanpa iklan
+# AniFlix
 
 <img src="./android/app/src/main/res/playstore-icon.png" width="250" height="250" alt="logo aplikasi" align="center">
 
