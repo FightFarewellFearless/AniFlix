@@ -273,7 +273,7 @@ function EpsList(props: Props) {
         <TextInput
           placeholder="Cari episode di sini"
           keyboardType="numeric"
-          placeholderTextColor={colorScheme === 'dark' ? '#616161' : 'white'}
+          placeholderTextColor={colorScheme === 'dark' ? '#616161' : '#3d3d3d'}
           style={[globalStyles.text, styles.cariEpisode]}
           onChangeText={searchEpisode}
         />
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     color: colorScheme === 'dark' ? globalStyles.text.color : 'white',
   },
   cariEpisode: {
-    backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : 'gray',
+    backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#bdbdbd',
     height: 35,
     paddingVertical: 1,
   },
@@ -395,13 +395,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     maxWidth: 150,
-    backgroundColor: colorScheme === 'dark' ? '#003a55' : '#8dd1e7',
+    backgroundColor: colorScheme === 'dark' ? '#003a55' : '#4ebadf',
     borderRadius: 8,
     padding: 5,
   },
   watchLaterText: {
     textAlign: 'center',
-    textShadowColor: '#ffa600',
+    textShadowColor: colorScheme === 'dark' ? '#ffa600' : '#56df08ff',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
     zIndex: 2,

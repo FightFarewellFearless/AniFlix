@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     height: 35,
     borderWidth: 0.8,
     borderRadius: 10,
-    backgroundColor: colorScheme === 'dark' ? '#202020' : 'gray',
+    backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
     marginLeft: 2,
     color: globalStyles.text.color,
   },

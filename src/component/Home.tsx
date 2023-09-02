@@ -26,6 +26,7 @@ function BottomTabs(props: Props) {
         screenOptions={{
           headerShown: false,
           tabBarStyle: { height: 40 },
+          tabBarHideOnKeyboard: true,
         }}>
         <Tab.Screen
           name="AnimeList"
