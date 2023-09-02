@@ -25,6 +25,7 @@ import { RootStackNavigator } from '../types/navigation';
 import { SetDatabaseTarget } from '../types/redux';
 import { Home } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
+import AnimeAPI from '../utils/AnimeAPI';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
 
@@ -34,18 +35,9 @@ function Loading(props: Props) {
   const dispatchSettings = useDispatch<AppDispatch>();
 
   const connectToServer = useCallback(async () => {
-    const jsondata: Home | undefined = await fetch(
-      'https://animeapi.aceracia.repl.co/v3/home',
-      {
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
-      },
-    )
-      .then(data => data.json())
-      .catch(() => {
-        props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      });
+    const jsondata: Home | void = await AnimeAPI.home().catch(() => {
+      props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+    });
     if (jsondata === undefined) {
       return;
     }

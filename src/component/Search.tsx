@@ -19,12 +19,12 @@ import {
 } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import deviceUserAgent from '../utils/deviceUserAgent';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchAnimeList } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
+import AnimeAPI from '../utils/AnimeAPI';
 
 const TextInputAnimation = Animated.createAnimatedComponent(TextInput);
 
@@ -99,28 +99,21 @@ function Search(props: Props) {
       return;
     }
     setLoading(true);
-    fetch('https://animeapi.aceracia.repl.co/v3/search?q=' + searchText, {
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
-    })
-      .then(async results => {
-        if (results) {
-          const result = await results.json();
-          if (result.maintenance) {
-            props.navigation.navigate('Maintenance');
-            setLoading(false);
-            return;
-          }
-          query.current = searchText;
-          setData(result);
+    AnimeAPI.search(searchText)
+      .then(async result => {
+        if ('maintenance' in result && result.maintenance === true) {
+          props.navigation.navigate('Maintenance');
           setLoading(false);
-        }
-      })
-      .catch(err => {
-        if (err.message === 'Aborted') {
           return;
         }
+        query.current = searchText;
+        setData(result as SearchAnimeList[]);
+        setLoading(false);
+      })
+      .catch(err => {
+        // if (err.message === 'Aborted') {
+        //   return;
+        // }
         const errMessage =
           err.message === 'Network request failed'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'

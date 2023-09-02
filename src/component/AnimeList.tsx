@@ -27,7 +27,6 @@ import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../misc/context';
 import runningText from '../assets/runningText.json';
-import deviceUserAgent from '../utils/deviceUserAgent';
 import { MovieList as MovieListType, NewAnimeList } from '../types/anime';
 import { HomeNavigator } from '../types/navigation';
 import {
@@ -35,6 +34,7 @@ import {
   BottomTabScreenProps,
 } from '@react-navigation/bottom-tabs';
 import colorScheme from '../utils/colorScheme';
+import AnimeAPI from '../utils/AnimeAPI';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
@@ -114,13 +114,8 @@ function Home(props: Props) {
   const refreshing = useCallback(() => {
     setRefresh(true);
 
-    fetch('https://animeapi.aceracia.repl.co/v3/home', {
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
-    })
-      .then(async fetchData => {
-        const jsondata = await fetchData.json();
+    AnimeAPI.home()
+      .then(async jsondata => {
         if (jsondata.maintenance) {
           ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
           setRefresh(false);

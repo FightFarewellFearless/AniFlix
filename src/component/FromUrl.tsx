@@ -11,18 +11,12 @@ import globalStyles from '../assets/style';
 import randomTipsArray from '../assets/loadingTips.json';
 import setHistory from '../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
-import deviceUserAgent from '../utils/deviceUserAgent';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  Blocked,
-  EpsList,
-  FromUrlMaintenance,
-  SingleEps,
-} from '../types/anime';
 import store, { AppDispatch, RootState } from '../misc/reduxStore';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
+import AnimeAPI from '../utils/AnimeAPI';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
@@ -41,90 +35,69 @@ function FromUrl(props: Props) {
   useEffect((): (() => void) => {
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
-    const providedResolution =
-      resolution !== undefined ? `&res=${resolution}` : '';
 
-    fetch(
-      'https://animeapi.aceracia.repl.co/v3/fromUrl?link=' +
-        props.route.params.link +
-        providedResolution,
-      {
-        signal: abort.signal,
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
-      },
-    )
-      .then(async (results: Response) => {
-        if (results === undefined) {
+    AnimeAPI.fromUrl(props.route.params.link, resolution, abort.signal)
+      .then(async result => {
+        if (result === 'Unsupported') {
+          Alert.alert(
+            'Tidak didukung!',
+            'Anime yang kamu tuju tidak memiliki data yang didukung!',
+          );
+          props.navigation.goBack();
           return;
         }
-        const resulted = await results.text();
         try {
-          const result: Blocked | EpsList | SingleEps | FromUrlMaintenance =
-            JSON.parse(resulted);
-          if (results) {
-            if (result.blocked) {
-              props.navigation.dispatch(StackActions.replace('Blocked'));
-            } else if (result.maintenance) {
-              props.navigation.dispatch(StackActions.replace('Maintenance'));
-            } else if (result.type === 'epsList') {
-              props.navigation.dispatch(
-                StackActions.replace('EpisodeList', {
-                  data: result,
-                  link: props.route.params.link,
-                }),
-              );
-            } else if (result.type === 'singleEps') {
-              props.navigation.dispatch(
-                StackActions.replace('Video', {
-                  data: result,
-                  link: props.route.params.link,
-                  historyData: props.route.params.historyData,
-                }),
-              );
+          if (result.blocked) {
+            props.navigation.dispatch(StackActions.replace('Blocked'));
+          } else if (result.maintenance) {
+            props.navigation.dispatch(StackActions.replace('Maintenance'));
+          } else if (result.type === 'epsList') {
+            props.navigation.dispatch(
+              StackActions.replace('EpisodeList', {
+                data: result,
+                link: props.route.params.link,
+              }),
+            );
+          } else if (result.type === 'singleEps') {
+            props.navigation.dispatch(
+              StackActions.replace('Video', {
+                data: result,
+                link: props.route.params.link,
+                historyData: props.route.params.historyData,
+              }),
+            );
 
-              // History
-              setHistory(
-                result,
-                props.route.params.link,
-                false,
-                props.route.params.historyData,
-                historyData,
-                dispatchSettings,
-              );
+            // History
+            setHistory(
+              result,
+              props.route.params.link,
+              false,
+              props.route.params.historyData,
+              historyData,
+              dispatchSettings,
+            );
 
-              const episodeIndex = result.title
-                .toLowerCase()
-                .indexOf(' episode');
-              const title =
-                episodeIndex >= 0
-                  ? result.title.slice(0, episodeIndex)
-                  : result.title;
-              const watchLater: watchLaterJSON[] = JSON.parse(
-                store.getState().settings.watchLater,
+            const episodeIndex = result.title.toLowerCase().indexOf(' episode');
+            const title =
+              episodeIndex >= 0
+                ? result.title.slice(0, episodeIndex)
+                : result.title;
+            const watchLater: watchLaterJSON[] = JSON.parse(
+              store.getState().settings.watchLater,
+            );
+            const watchLaterIndex = watchLater.findIndex(
+              z => z.title === title,
+            );
+            if (watchLaterIndex >= 0) {
+              controlWatchLater('delete', watchLaterIndex);
+              ToastAndroid.show(
+                `${title} dihapus dari daftar tonton nanti`,
+                ToastAndroid.SHORT,
               );
-              const watchLaterIndex = watchLater.findIndex(
-                z => z.title === title,
-              );
-              if (watchLaterIndex >= 0) {
-                controlWatchLater('delete', watchLaterIndex);
-                ToastAndroid.show(
-                  `${title} dihapus dari daftar tonton nanti`,
-                  ToastAndroid.SHORT,
-                );
-              }
             }
           }
         } catch (e: any) {
-          if (resulted === 'Unsupported') {
-            Alert.alert(
-              'Tidak didukung!',
-              'Anime yang kamu tuju tidak memiliki data yang didukung!',
-            );
-          } else {
-            Alert.alert('Error', e.stack);
-          }
+          Alert.alert('Error', e.stack);
           props.navigation.goBack();
         }
       })

@@ -37,12 +37,12 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { useDispatch, useSelector } from 'react-redux';
-import deviceUserAgent from '../utils/deviceUserAgent';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import VideoType, { OnProgressData } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
+import AnimeAPI from '../utils/AnimeAPI';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -205,34 +205,48 @@ function Video(props: Props) {
         return;
       }
       setLoading(true);
-      const resultData = await fetch(
-        // eslint-disable-next-line prettier/prettier
-        'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?res=' + res + '&link=' + currentLink.current,
-        {
-          signal: abortController.current?.signal,
-          headers: {
-            'User-Agent': deviceUserAgent,
-          },
-        },
-      )
-        .then(results => results.json())
-        .catch(err => {
-          if (err.message === 'Aborted') {
-            return;
-          }
-          const errMessage =
-            err.message === 'Network request failed'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + err.message;
-          Alert.alert('Error', errMessage);
-          setLoading(false);
-        });
+      const resultData = await AnimeAPI.fromUrl(
+        currentLink.current,
+        res,
+        abortController.current?.signal,
+      ).catch(err => {
+        if (err.message === 'Aborted') {
+          return;
+        }
+        const errMessage =
+          err.message === 'Network request failed'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + err.message;
+        Alert.alert('Error', errMessage);
+        setLoading(false);
+      });
       if (resultData === undefined) {
+        return;
+      }
+      if (resultData === 'Unsupported') {
+        Alert.alert(
+          'Tidak didukung!',
+          'Anime yang kamu tuju tidak memiliki data yang didukung!',
+        );
+        setLoading(false);
         return;
       }
       if (resultData.maintenance) {
         setLoading(false);
         ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
+        return;
+      }
+      if (resultData.blocked) {
+        setLoading(false);
+        Alert.alert('Gagal mengganti resolusi', 'Karena data di blokir');
+        return;
+      }
+      if (resultData.type !== 'singleEps') {
+        setLoading(false);
+        Alert.alert(
+          'Kesalahan!!',
+          'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
+        );
         return;
       }
       hasPart.current = resultData.streamingLink.length > 1;
@@ -486,28 +500,30 @@ function Video(props: Props) {
         return;
       }
       setLoading(true);
-      const result = await fetch(
-        'https://animeapi.aceracia.repl.co/v3/fromUrl' + '?link=' + url,
-        {
-          signal: abortController.current?.signal,
-          headers: {
-            'User-Agent': deviceUserAgent,
-          },
-        },
-      )
-        .then(resultData => resultData.json())
-        .catch(err => {
-          if (err.message === 'Aborted') {
-            return;
-          }
-          const errMessage =
-            err.message === 'Network request failed'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + err.message;
-          Alert.alert('Error', errMessage);
-          setLoading(false);
-        });
+      const result = await AnimeAPI.fromUrl(
+        url,
+        undefined,
+        abortController.current?.signal,
+      ).catch(err => {
+        if (err.message === 'Aborted') {
+          return;
+        }
+        const errMessage =
+          err.message === 'Network request failed'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + err.message;
+        Alert.alert('Error', errMessage);
+        setLoading(false);
+      });
       if (result === undefined) {
+        return;
+      }
+      if (result === 'Unsupported') {
+        Alert.alert(
+          'Tidak didukung!',
+          'Anime yang kamu tuju tidak memiliki data yang didukung!',
+        );
+        setLoading(false);
         return;
       }
       if (result.maintenance) {
@@ -515,6 +531,20 @@ function Video(props: Props) {
         ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
         return;
       }
+      if (result.blocked) {
+        setLoading(false);
+        Alert.alert('Gagal mengganti episode', 'Karena data di blokir');
+        return;
+      }
+      if (result.type !== 'singleEps') {
+        setLoading(false);
+        Alert.alert(
+          'Kesalahan!!',
+          'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
+        );
+        return;
+      }
+
       hasPart.current = result.streamingLink.length > 1;
 
       setData(result);
