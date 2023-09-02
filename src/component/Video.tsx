@@ -693,10 +693,9 @@ function Video(props: Props) {
                         marginRight: 5,
                       },
                     ]}
-                    onPress={
-                      () =>
-                        episodeDataControl(data.episodeData.previous as string) // ignoring the undefined type because we already have the button disabled
-                    }>
+                    onPress={() => {
+                      episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                    }}>
                     <Icon name="arrow-left" size={18} color="black" />
                   </TouchableOpacity>
 
@@ -711,9 +710,9 @@ function Video(props: Props) {
                           : '#525252',
                       },
                     ]}
-                    onPress={
-                      () => episodeDataControl(data.episodeData.next as string) // ignoring the undefined type because we already have the button disabled
-                    }>
+                    onPress={() => {
+                      episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                    }}>
                     <Icon name="arrow-right" size={18} color="black" />
                   </TouchableOpacity>
                 </View>

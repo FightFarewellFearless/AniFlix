@@ -75,7 +75,7 @@ interface SingleEps extends FromUrl {
   releaseYear: string;
   status: 'Ongoing' | 'Ended';
   rating: string;
-  episodeData: {
+  episodeData?: {
     previous?: string;
     episodeList: string;
     next?: string;
