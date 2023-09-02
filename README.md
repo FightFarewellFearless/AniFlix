@@ -3,6 +3,12 @@
 
 # Aplikasi nonton anime gratis tanpa iklan
 
+<img src="./android/app/src/main/res/playstore-icon.png" width="250" height="250" alt="logo aplikasi" align="center">
+
+Aplikasi streaming anime gratis tanpa iklan, open source!
+
+**_Written in typescript built with react native_** :heart:
+
 ## Lengkap dan terbaru!
 
 Tonton anime favorit mu sekarang! Episode lengkap dan terbaru.
@@ -35,6 +41,10 @@ A: server kami dijalankan di versi gratis [replit](https://replit.com), jadi tid
 > Q: Dimana video yang sudah saya download berada?
 
 A: video yang sudah di download bisa kamu temukan di `Penyimpanan Internal/Download/`
+
+> Q: Mengapa ada anime yang diblokir?
+
+A: Kami memblokir anime dengan genre ecchi dan hentai. Tapi ada beberapa anime bergenre ecchi yang diizinkan untuk tayang
 
 # Catatan
 
