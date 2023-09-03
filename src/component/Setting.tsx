@@ -32,10 +32,12 @@ import Orientation from 'react-native-orientation-locker';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeNavigator } from '../types/navigation';
-import { AppDispatch, RootState } from '../misc/reduxStore';
+import store, { AppDispatch, RootState } from '../misc/reduxStore';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
 import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+import watchLaterJSON from '../types/watchLaterJSON';
+import { SetDatabaseTarget } from '../types/redux';
 
 interface SettingsData {
   title: string;
@@ -54,10 +56,6 @@ function Setting(_props: Props) {
   );
   const enableBatteryTimeInfo = useSelectorOnFocus(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
-    true,
-  );
-  const history = useSelectorOnFocus(
-    (state: RootState) => state.settings.history,
     true,
   );
 
@@ -159,10 +157,10 @@ function Setting(_props: Props) {
     setBatteryTimeInfoSwitch(newValue);
   };
 
-  const backupHistory = useCallback(() => {
+  const backupData = useCallback(() => {
     Alert.alert(
-      'Backup histori',
-      'Saat backup sedang berlangsung, kamu tidak bisa membatalkannya. Mau lanjut?',
+      'Backup data',
+      'Backup seluruh data aplikasi termasuk histori tontonan, pengaturan, dan tonton nanti, lanjutkan?',
       [
         {
           text: 'Batal',
@@ -173,20 +171,16 @@ function Setting(_props: Props) {
             setModalText('Backup sedang berlangsung...');
             setModalVisible(true);
             try {
-              const historyData = history;
-              if (historyData === '[]') {
-                Alert.alert(
-                  'Tidak ada histori!',
-                  'kamu tidak memiliki histori tontonan, Backup dibatalkan',
-                );
-                return;
-              }
+              const databaseDataAll: { [key: string]: string } = {};
+              Object.entries(store.getState().settings).forEach(z => {
+                databaseDataAll[z[0]] = z[1];
+              });
               const fetchData = await fetch(
                 'https://animeapi.aceracia.repl.co/backupHistory',
                 {
                   method: 'POST',
                   body: JSON.stringify({
-                    history: historyData,
+                    history: databaseDataAll,
                   }),
                   headers: {
                     Accept: 'application/json, text/plain, */*',
@@ -222,9 +216,9 @@ function Setting(_props: Props) {
         },
       ],
     );
-  }, [history]);
+  }, []);
 
-  const restoreHistory = useCallback(
+  const restoreData = useCallback(
     async (code?: string) => {
       if (code === undefined) {
         setRestoreVisible(true);
@@ -236,7 +230,17 @@ function Setting(_props: Props) {
         setModalText('Mengecek apakah kode valid...');
         setModalVisible(true);
         try {
-          const backupData = await fetch(
+          const backupToRestore:
+            | { error: true; message: string }
+            | {
+                error: false;
+                dateStamp: number;
+                backupData:
+                  | string
+                  | {
+                      [key in SetDatabaseTarget]: string;
+                    };
+              } = await fetch(
             'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
             {
               headers: {
@@ -244,13 +248,13 @@ function Setting(_props: Props) {
               },
             },
           ).then(a => a.json());
-          if (backupData.error) {
-            Alert.alert('Restore gagal!', backupData.message);
+          if (backupToRestore.error) {
+            Alert.alert('Restore gagal!', backupToRestore.message);
           } else {
             Alert.alert(
               'Bersiap untuk restore backup kamu!',
               `Kode tersedia dan siap untuk di restore.\nbackupID: ${code}\ntanggal backup: ${new Date(
-                backupData.dateStamp,
+                backupToRestore.dateStamp,
               ).toLocaleDateString()}\n(Histori terbaru tidak akan ditimpa)`,
               [
                 {
@@ -259,35 +263,39 @@ function Setting(_props: Props) {
                 {
                   text: 'lakukan restore',
                   onPress: async () => {
-                    const currentHistory: HistoryJSON[] = JSON.parse(history);
-                    const backup: HistoryJSON[] = JSON.parse(
-                      backupData.backupData,
-                    );
                     setModalVisible(true);
                     setModalText(
                       'Mohon tunggu, ini bisa memakan beberapa waktu...',
                     );
                     await new Promise(res => setTimeout(res, 1)); // make sure to not restoring too early
                     try {
-                      for (const result of backup) {
-                        const dataINDEX = currentHistory.findIndex(
-                          val => val.title === result.title,
-                        );
-                        if (dataINDEX >= 0) {
-                          if (currentHistory[dataINDEX].date > result.date) {
-                            continue;
+                      const backupDataJSON = backupToRestore.backupData;
+                      if (typeof backupDataJSON === 'string') {
+                        const backupDataHistory: HistoryJSON[] =
+                          JSON.parse(backupDataJSON);
+                        restoreHistoryOrWatchLater(
+                          backupDataHistory,
+                          'history',
+                        ); // Legacy backup data
+                      } else {
+                        (
+                          Object.keys(backupDataJSON) as SetDatabaseTarget[]
+                        ).forEach(value => {
+                          if (value === 'history' || value === 'watchLater') {
+                            restoreHistoryOrWatchLater(
+                              JSON.parse(backupDataJSON[value]),
+                              value,
+                            );
+                          } else {
+                            dispatchSettings(
+                              setDatabase({
+                                target: value,
+                                value: backupDataJSON[value],
+                              }),
+                            );
                           }
-                          currentHistory.splice(dataINDEX, 1);
-                        }
-                        currentHistory.push(result);
+                        });
                       }
-                      currentHistory.sort((a, b) => b.date - a.date);
-                      dispatchSettings(
-                        setDatabase({
-                          target: 'history',
-                          value: JSON.stringify(currentHistory),
-                        }),
-                      );
                       Alert.alert(
                         'Restore berhasil!',
                         'Kamu berhasil kembali ke backup sebelumnya!',
@@ -313,7 +321,8 @@ function Setting(_props: Props) {
         }
       }
     },
-    [dispatchSettings, history],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   const deleteHistory = useCallback(() => {
@@ -351,6 +360,36 @@ function Setting(_props: Props) {
       ],
     );
   }, [dispatchSettings]);
+
+  const restoreHistoryOrWatchLater = (
+    restoreDataFromBackup: (HistoryJSON | watchLaterJSON)[],
+    target: 'history' | 'watchLater',
+  ) => {
+    const currentData: typeof restoreDataFromBackup = JSON.parse(
+      store.getState().settings[target],
+    );
+
+    for (const result of restoreDataFromBackup) {
+      const dataINDEX = currentData.findIndex(
+        val => val.title === result.title,
+      );
+
+      if (dataINDEX >= 0) {
+        if (currentData[dataINDEX].date > result.date) {
+          continue;
+        }
+        currentData.splice(dataINDEX, 1);
+      }
+      currentData.push(result);
+    }
+    currentData.sort((a, b) => b.date - a.date);
+    dispatchSettings(
+      setDatabase({
+        target,
+        value: JSON.stringify(currentData),
+      }),
+    );
+  };
 
   const toggleDownloadFrom = useCallback(async () => {
     const newDownloadFrom = downloadFrom === 'native' ? 'browser' : 'native';
@@ -418,18 +457,18 @@ function Setting(_props: Props) {
       handler: toggleDownloadFrom,
     },
     {
-      title: 'Cadangkan histori tontonan',
-      description: 'Cadangkan histori tontonan saya',
+      title: 'Cadangkan data',
+      description: 'Cadangkan seluruh data aplikasi',
       icon: (
         <Icon name="cloud-upload" style={globalStyles.text} size={iconSize} />
       ),
-      handler: backupHistory,
+      handler: backupData,
     },
     {
-      title: 'Pulihkan histori tontonan',
-      description: 'Pulihkan histori tontonan menggunakan kode backup',
+      title: 'Pulihkan data',
+      description: 'Pulihkan seluruh data aplikasi',
       icon: <Icon name="history" style={globalStyles.text} size={iconSize} />,
-      handler: () => restoreHistory(),
+      handler: () => restoreData(),
     },
     {
       title: 'Hapus histori tontonan',
@@ -483,7 +522,7 @@ function Setting(_props: Props) {
                     keyboardType="numeric"
                     value={backupCode}
                     onChangeText={text => setBackupCode(text)}
-                    onSubmitEditing={() => restoreHistory(backupCode)}
+                    onSubmitEditing={() => restoreData(backupCode)}
                     style={[
                       globalStyles.text,
                       {
@@ -514,7 +553,7 @@ function Setting(_props: Props) {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.acceptRestoreModalButton}
-                    onPress={() => restoreHistory(backupCode)}>
+                    onPress={() => restoreData(backupCode)}>
                     <Text style={[globalStyles.text]}>Restore</Text>
                   </TouchableOpacity>
                 </View>
