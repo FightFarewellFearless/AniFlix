@@ -8,11 +8,11 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
-  Image,
+  StyleSheet,
 } from 'react-native';
-const rnLogo = require('../assets/RNlogo.png');
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
+import colorScheme from '../utils/colorScheme';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
@@ -45,7 +45,11 @@ function FailedToConnect(props: Props) {
           </Text>
         </View>
         <Icon name="server-network-off" style={globalStyles.text} size={40} />
-        <Text style={[{ textAlign: 'center' }, globalStyles.text]}>
+        <Text
+          style={[
+            { textAlign: 'center', fontWeight: '400' },
+            globalStyles.text,
+          ]}>
           Gagal terhubung ke server{'\n'}
           Pastikan kamu terhubung ke internet dan coba lagi.{'\n'}
           Jika masalah berlanjut, kemungkinan server sedang down atau ada
@@ -53,6 +57,7 @@ function FailedToConnect(props: Props) {
           <Text onPress={openLink} style={{ color: '#0066CC' }}>
             Buat issues baru di github
           </Text>
+          {'\n'} Atau bisa dengan join discord dengan klik tombol dibawah
         </Text>
         <TouchableOpacity
           style={{
@@ -65,15 +70,17 @@ function FailedToConnect(props: Props) {
             shadowColor: 'white',
           }}
           onPress={tryagain}>
-          <Text style={[{ fontSize: 17 }, globalStyles.text]}>
+          <Text
+            style={[{ fontSize: 17, fontWeight: 'bold' }, globalStyles.text]}>
             <Icon name="refresh" size={17} /> Coba lagi
           </Text>
         </TouchableOpacity>
         <View
           style={{
             position: 'absolute',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
             bottom: 45,
-            alignItems: 'center',
           }}>
           <TouchableOpacity
             onPress={() => {
@@ -81,18 +88,25 @@ function FailedToConnect(props: Props) {
                 'https://github.com/FightFarewellFearless/anime-react-native',
               );
             }}
-            style={{
-              flexDirection: 'row',
-              backgroundColor: '#2b2b2b',
-              padding: 10,
-              borderRadius: 8,
-              alignItems: 'center',
-            }}>
-            <Image source={rnLogo} style={{ height: 40, width: 40 }} />
+            style={[styles.bottomCredits, { marginRight: 8 }]}>
+            {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
             <Icon name="github" size={43} color={globalStyles.text.color} />
             <Text style={[globalStyles.text, { fontSize: 12 }]}>
               {' '}
               Open-Sourced on github
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              Linking.openURL('https://discord.gg/sbTwxHb9NM');
+            }}
+            style={styles.bottomCredits}>
+            {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
+            <Icon name="discord" size={43} color={'#7289d9'} />
+            <Text style={[globalStyles.text, { fontSize: 12 }]}>
+              {' '}
+              Join discord
             </Text>
           </TouchableOpacity>
         </View>
@@ -103,5 +117,15 @@ function FailedToConnect(props: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bottomCredits: {
+    flexDirection: 'row',
+    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+});
 
 export default FailedToConnect;

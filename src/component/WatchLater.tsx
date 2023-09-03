@@ -6,7 +6,7 @@ import { useCallback, useRef } from 'react';
 import React, {
   Animated,
   FlatList,
-  ImageBackground,
+  Image,
   ListRenderItemInfo,
   StyleSheet,
   Text,
@@ -17,6 +17,8 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import colorScheme from '../utils/colorScheme';
 import globalStyles from '../assets/style';
 import moment from 'moment';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import controlWatchLater from '../utils/watchLaterControl';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'WatchLater'>;
 
@@ -49,7 +51,7 @@ function WatchLater(props: Props) {
   );
 
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<watchLaterJSON>) => {
+    ({ item, index }: ListRenderItemInfo<watchLaterJSON>) => {
       return (
         <TouchableOpacity
           style={styles.listContainer}
@@ -60,30 +62,36 @@ function WatchLater(props: Props) {
               }),
             );
           }}>
-          <ImageBackground
-            source={{ uri: item.thumbnailUrl }}
-            style={styles.thumbnail}>
+          <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
+          <View style={styles.listInfoContainer}>
+            <View>
+              <Text style={[globalStyles.text]}>
+                {moment(item.date).format('dddd DD-MM-YYYY [Pukul] HH:mm:ss')}
+              </Text>
+            </View>
             <View style={styles.ratingContainer}>
               <Text style={[globalStyles.text, styles.listRatingText]}>
                 {item.rating}
               </Text>
             </View>
-          </ImageBackground>
-          <View style={styles.listInfoContainer}>
-            <View>
-              <Text style={[globalStyles.text]}>
-                {moment(item.date).format(
-                  '[Hari] dddd DD-MM-YYYY [Pukul] HH:mm:ss',
-                )}
-              </Text>
-            </View>
             <View style={styles.titleContainer}>
               <Text style={[globalStyles.text]}>{item.title}</Text>
             </View>
-            <View style={styles.listGenreContainer}>
-              <Text style={styles.listGenreText} numberOfLines={1}>
-                {item.genre.toString()}
-              </Text>
+
+            <View style={styles.listBottom}>
+              <View style={styles.listGenreContainer}>
+                <Text style={styles.listGenreText} numberOfLines={1}>
+                  {item.genre.toString()}
+                </Text>
+              </View>
+              <TouchableOpacity
+                hitSlop={4}
+                onPress={() => {
+                  controlWatchLater('delete', index);
+                }}
+                style={styles.listDeleteContainer}>
+                <Icon name="trash" size={20} color="red" />
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -132,7 +140,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 16,
     marginRight: 7,
   },
-  ratingContainer: { flexDirection: 'row' },
+  ratingContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    right: 3,
+    top: 0,
+  },
   listRatingText: {
     backgroundColor: 'orange',
     color: 'black',
@@ -147,9 +160,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
   },
-  listGenreContainer: {
-    // justifyContent: 'flex-end',
-  },
   listGenreText: {
     color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
     fontWeight: 'bold',
@@ -158,6 +168,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  listBottom: {
+    flexDirection: 'row',
+  },
+  listGenreContainer: {
+    justifyContent: 'flex-start',
+    flex: 1,
+  },
+  listDeleteContainer: {
+    justifyContent: 'flex-end',
+    backgroundColor: 'orange',
+    borderRadius: 5,
+    padding: 3,
+    marginHorizontal: 2,
   },
 });
 

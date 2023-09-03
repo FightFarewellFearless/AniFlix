@@ -3,19 +3,19 @@ import {
   View,
   ActivityIndicator,
   Text,
-  Image,
   TouchableOpacity,
   Linking,
+  StyleSheet,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 
 import store, { AppDispatch } from '../misc/reduxStore';
 import { setDatabase } from '../misc/reduxSlice';
-import styles from '../assets/style';
-const rnLogo = require('../assets/RNlogo.png');
+import globalStyles from '../assets/style';
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
 import { version as appVersion } from '../../package.json';
 import deviceUserAgent from '../utils/deviceUserAgent';
@@ -138,12 +138,13 @@ function Loading(props: Props) {
         </Text>
       </View>
       <ActivityIndicator size="large" />
-      <Text style={styles.text}>{loadStatus}, mohon tunggu...</Text>
+      <Text style={globalStyles.text}>{loadStatus}, mohon tunggu...</Text>
       <View
         style={{
           position: 'absolute',
+          flexDirection: 'row',
+          justifyContent: 'space-around',
           bottom: 45,
-          alignItems: 'center',
         }}>
         <TouchableOpacity
           onPress={() => {
@@ -151,26 +152,47 @@ function Loading(props: Props) {
               'https://github.com/FightFarewellFearless/anime-react-native',
             );
           }}
-          style={{
-            flexDirection: 'row',
-            backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-            padding: 10,
-            borderRadius: 8,
-            alignItems: 'center',
-          }}>
-          <Image source={rnLogo} style={{ height: 40, width: 40 }} />
-          <Icon name="github" size={43} color={styles.text.color} />
-          <Text style={[styles.text, { fontSize: 12 }]}>
+          style={[styles.bottomCredits, { marginRight: 8 }]}>
+          {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
+          <Icon name="github" size={43} color={globalStyles.text.color} />
+          <Text style={[globalStyles.text, { fontSize: 12 }]}>
             {' '}
             Open-Sourced on github
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            Linking.openURL('https://discord.gg/sbTwxHb9NM');
+          }}
+          style={styles.bottomCredits}>
+          {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
+          <MaterialIcon name="discord" size={43} color={'#7289d9'} />
+          <Text style={[globalStyles.text, { fontSize: 12 }]}>
+            {' '}
+            Join discord
+          </Text>
+        </TouchableOpacity>
       </View>
-      <Text style={[styles.text, { position: 'absolute', bottom: 0, left: 0 }]}>
+      <Text
+        style={[
+          globalStyles.text,
+          { position: 'absolute', bottom: 0, left: 0 },
+        ]}>
         {appVersion}
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bottomCredits: {
+    flexDirection: 'row',
+    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+});
 
 export default Loading;

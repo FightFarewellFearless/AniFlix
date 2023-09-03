@@ -218,6 +218,7 @@ function History(props: Props) {
 
             <View style={styles.deleteContainer}>
               <TouchableOpacity
+                style={styles.deleteButton}
                 hitSlop={10}
                 onPress={() => {
                   Alert.alert(
@@ -401,8 +402,13 @@ const styles = StyleSheet.create({
   },
   deleteContainer: {
     position: 'absolute',
-    right: 5,
+    right: 2,
     top: 5,
+  },
+  deleteButton: {
+    backgroundColor: 'orange',
+    padding: 2,
+    borderRadius: 3,
   },
   noHistory: {
     flex: 1,
