@@ -38,6 +38,7 @@ import colorScheme from '../utils/colorScheme';
 import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
 import watchLaterJSON from '../types/watchLaterJSON';
 import { SetDatabaseTarget } from '../types/redux';
+import moment from 'moment';
 
 interface SettingsData {
   title: string;
@@ -191,7 +192,7 @@ function Setting(_props: Props) {
               ).then(a => a.json());
               Alert.alert(
                 'Backup berhasil!',
-                `Histori tontonan kamu sudah berhasil di backup ke server.\nGunakan kode "${fetchData.id}" saat kamu ingin mengembalikan ke backup saat ini`,
+                `Data kamu sudah berhasil di backup ke server.\nGunakan kode "${fetchData.id}" saat kamu ingin mengembalikan ke backup saat ini`,
                 [
                   {
                     text: 'OK',
@@ -253,9 +254,9 @@ function Setting(_props: Props) {
           } else {
             Alert.alert(
               'Bersiap untuk restore backup kamu!',
-              `Kode tersedia dan siap untuk di restore.\nbackupID: ${code}\ntanggal backup: ${new Date(
+              `Kode tersedia dan siap untuk di restore.\n\nbackupID: ${code}\ntanggal backup: ${moment(
                 backupToRestore.dateStamp,
-              ).toLocaleDateString()}\n(Histori terbaru tidak akan ditimpa)`,
+              ).format('DD/MM/YYYY HH:mm:ss')}`,
               [
                 {
                   text: 'Batal',
