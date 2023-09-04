@@ -72,7 +72,7 @@ class AnimeAPI {
       this.base_url +
         `fromUrl?link=${link}${
           resolution !== undefined ? '&res=' + resolution : ''
-        }`,
+        }&appVer=pre-view`,
       {
         signal,
         headers: {

@@ -414,9 +414,9 @@ function Setting(_props: Props) {
       handler: nextPartNotification,
     },
     {
-      title: 'Nyalakan informasi baterai dan jam',
+      title: 'Nyalakan informasi baterai dan waktu',
       description:
-        'Beri tahu saya persentase baterai dan waktu saat sedang streaming fullscreen',
+        'Beri tahu saya persentase baterai dan waktu, saat sedang streaming fullscreen',
       icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Switch

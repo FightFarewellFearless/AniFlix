@@ -63,17 +63,16 @@ function WatchLater(props: Props) {
             );
           }}>
           <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
+          <View style={styles.ratingContainer}>
+            <Text style={[globalStyles.text, styles.listRatingText]}>
+              <Icon name="star" /> {item.rating}
+            </Text>
+          </View>
           <View style={styles.listInfoContainer}>
-            <View>
-              <Text style={[globalStyles.text]}>
-                {moment(item.date).format('dddd DD-MM-YYYY [Pukul] HH:mm:ss')}
-              </Text>
-            </View>
-            <View style={styles.ratingContainer}>
-              <Text style={[globalStyles.text, styles.listRatingText]}>
-                {item.rating}
-              </Text>
-            </View>
+            <Text style={[globalStyles.text]}>
+              {moment(item.date).format('dddd DD-MM-YYYY [Pukul] HH:mm:ss')}
+            </Text>
+
             <View style={styles.titleContainer}>
               <Text style={[globalStyles.text]}>{item.title}</Text>
             </View>
@@ -141,9 +140,8 @@ const styles = StyleSheet.create({
     marginRight: 7,
   },
   ratingContainer: {
-    flexDirection: 'row',
     position: 'absolute',
-    right: 3,
+    left: 3,
     top: 0,
   },
   listRatingText: {

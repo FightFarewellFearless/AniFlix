@@ -211,9 +211,13 @@ function Search(props: Props) {
           </Text>
         </PressableAnimation>
       </View>
-      {loading && <ActivityIndicator />}
+      {loading && (
+        <ActivityIndicator style={styles.centerLoading} size="large" />
+      )}
       {data === null ? (
-        ''
+        <View style={styles.center}>
+          <Text style={styles.nullDataText}>Silahkan cari terlebih dahulu</Text>
+        </View>
       ) : (
         <>
           <Text style={globalStyles.text}>
@@ -290,6 +294,17 @@ function Search(props: Props) {
 }
 
 const styles = StyleSheet.create({
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  nullDataText: {
+    color: globalStyles.text.color,
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+  centerLoading: { position: 'absolute', right: '50%', top: '50%', zIndex: 1 },
   searchInput: {
     height: 35,
     borderWidth: 0.8,
