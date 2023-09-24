@@ -4,8 +4,9 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Linking,
   ScrollView,
+  ToastAndroid,
+  Alert,
 } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -15,6 +16,7 @@ import globalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import colorScheme from '../utils/colorScheme';
+import RNFetchBlob from 'rn-fetch-blob';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
@@ -49,7 +51,29 @@ function NeedUpdate(props: Props) {
         <TouchableOpacity
           style={styles.download}
           onPress={() => {
-            Linking.openURL(props.route.params.download);
+            ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
+            Alert.alert(
+              'Perhatian',
+              'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
+            );
+            RNFetchBlob.config({
+              addAndroidDownloads: {
+                useDownloadManager: true,
+                path: `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+                title: 'Sedang memperbarui',
+                description: 'Pembaruan aplikasi',
+                mime: 'application/vnd.android.package-archive',
+                mediaScannable: true,
+                notification: true,
+              },
+            })
+              .fetch('GET', props.route.params.download)
+              .then(async res => {
+                await RNFetchBlob.android.actionViewIntent(
+                  res.path(),
+                  'application/vnd.android.package-archive',
+                );
+              });
           }}>
           <Icon
             name="file-download"
