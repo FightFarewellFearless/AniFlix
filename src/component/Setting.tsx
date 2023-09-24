@@ -102,22 +102,26 @@ function Setting(_props: Props) {
     (state: RootState) => state.settings.lockScreenOrientation,
   );
   const lockScreenOrientationSwitch = lockScreenOrientation === 'true';
-  const toggleScreenOrientation = useCallback(() => {
-    const newValue = lockScreenOrientation !== 'true';
+  const toggleScreenOrientation = useCallback(
+    (value?: string) => {
+      const newValue =
+        value === undefined ? lockScreenOrientation !== 'true' : value;
 
-    if (newValue === true) {
-      Orientation.lockToPortrait();
-    } else {
-      Orientation.unlockAllOrientations();
-    }
+      if (newValue === true) {
+        Orientation.lockToPortrait();
+      } else {
+        Orientation.unlockAllOrientations();
+      }
 
-    dispatchSettings(
-      setDatabase({
-        target: 'lockScreenOrientation',
-        value: String(newValue),
-      }),
-    );
-  }, [dispatchSettings, lockScreenOrientation]);
+      dispatchSettings(
+        setDatabase({
+          target: 'lockScreenOrientation',
+          value: String(newValue),
+        }),
+      );
+    },
+    [dispatchSettings, lockScreenOrientation],
+  );
 
   const [modalVisible, setModalVisible] = useState(false);
   const [restoreVisible, setRestoreVisible] = useState(false);
@@ -272,12 +276,13 @@ function Setting(_props: Props) {
                     try {
                       const backupDataJSON = backupToRestore.backupData;
                       if (typeof backupDataJSON === 'string') {
+                        // Legacy backup data
                         const backupDataHistory: HistoryJSON[] =
                           JSON.parse(backupDataJSON);
                         restoreHistoryOrWatchLater(
                           backupDataHistory,
                           'history',
-                        ); // Legacy backup data
+                        );
                       } else {
                         (
                           Object.keys(backupDataJSON) as SetDatabaseTarget[]
@@ -287,6 +292,8 @@ function Setting(_props: Props) {
                               JSON.parse(backupDataJSON[value]),
                               value,
                             );
+                          } else if (value === 'lockScreenOrientation') {
+                            toggleScreenOrientation(backupDataJSON[value]);
                           } else {
                             dispatchSettings(
                               setDatabase({
@@ -433,7 +440,9 @@ function Setting(_props: Props) {
       rightComponent: (
         <Switch
           value={lockScreenOrientationSwitch}
-          onValueChange={toggleScreenOrientation}
+          onValueChange={() => {
+            toggleScreenOrientation();
+          }}
         />
       ),
       handler: toggleScreenOrientation,
