@@ -105,7 +105,7 @@ function Setting(_props: Props) {
   const toggleScreenOrientation = useCallback(
     (value?: string) => {
       const newValue =
-        value === undefined ? lockScreenOrientation !== 'true' : value;
+        value === undefined ? lockScreenOrientation !== 'true' : Boolean(value);
 
       if (newValue === true) {
         Orientation.lockToPortrait();
@@ -445,7 +445,7 @@ function Setting(_props: Props) {
           }}
         />
       ),
-      handler: toggleScreenOrientation,
+      handler: () => toggleScreenOrientation(),
     },
     {
       title: 'Download anime melalui',
