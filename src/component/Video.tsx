@@ -43,6 +43,7 @@ import { AppDispatch, RootState } from '../misc/reduxStore';
 import VideoType, { OnProgressData } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
+import { useAnimations } from '@react-native-media-console/reanimated';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -634,6 +635,7 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingLink?.[part]?.sources[0].src ? (
             <Videos
+              useAnimations={useAnimations}
               key={data.streamingLink[part].sources[0].src}
               showOnEnd={true}
               title={data.title}
@@ -654,6 +656,7 @@ function Video(props: Props) {
               videoRef={videoRef}
               onHideControls={hideControls}
               onShowControls={showControls}
+              playInBackground={false}
             />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
