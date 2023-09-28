@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,6 +17,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import colorScheme from '../utils/colorScheme';
 import RNFetchBlob from 'rn-fetch-blob';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
@@ -26,7 +33,19 @@ function NeedUpdate(props: Props) {
   });
 
   const [isDownloadStart, setIsDownloadStart] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
+  const downloadProgress = useSharedValue(0);
+  const [isProgress100, setIsProgress100] = useState(true);
+
+  useAnimatedReaction(
+    () => downloadProgress.value,
+    value => {
+      if (value === 100) {
+        runOnJS(setIsProgress100)(true);
+      } else {
+        runOnJS(setIsProgress100)(false);
+      }
+    },
+  );
 
   useEffect(() => {
     RNFetchBlob.fs
@@ -35,9 +54,56 @@ function NeedUpdate(props: Props) {
       )
       .then(value => {
         setIsDownloadStart(value);
-        setDownloadProgress(value ? 100 : 0);
+        downloadProgress.value = value ? 100 : 0;
       });
+  }, [downloadProgress, props.route.params.latestVersion]);
+
+  const downloadUpdate = useCallback(() => {
+    setIsDownloadStart(true);
+    ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
+    Alert.alert(
+      'Perhatian',
+      'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
+    );
+    RNFetchBlob.config({
+      path: `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+    })
+      .fetch('GET', props.route.params.download)
+      .progress((received, total) => {
+        downloadProgress.value = withTiming(
+          Math.floor((received / total) * 100),
+        );
+      })
+      .then(async res => {
+        setIsDownloadStart(true);
+        downloadProgress.value = 100;
+        await RNFetchBlob.android.actionViewIntent(
+          res.path(),
+          'application/vnd.android.package-archive',
+        );
+      })
+      .catch(() => {
+        setIsDownloadStart(false);
+        ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+      });
+  }, [
+    downloadProgress,
+    props.route.params.download,
+    props.route.params.latestVersion,
+  ]);
+
+  const installUpdate = useCallback(() => {
+    RNFetchBlob.android.actionViewIntent(
+      `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+      'application/vnd.android.package-archive',
+    );
   }, [props.route.params.latestVersion]);
+
+  const downloadProgressAnimaton = useAnimatedStyle(() => {
+    return {
+      width: `${downloadProgress.value}%`,
+    };
+  });
 
   return (
     <View style={styles.container}>
@@ -64,35 +130,7 @@ function NeedUpdate(props: Props) {
           ))}
         </ScrollView>
         {!isDownloadStart ? (
-          <TouchableOpacity
-            style={styles.download}
-            onPress={() => {
-              setIsDownloadStart(true);
-              ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
-              Alert.alert(
-                'Perhatian',
-                'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
-              );
-              RNFetchBlob.config({
-                path: `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
-              })
-                .fetch('GET', props.route.params.download)
-                .progress((received, total) => {
-                  setDownloadProgress(Math.floor((received / total) * 100));
-                })
-                .then(async res => {
-                  setIsDownloadStart(true);
-                  setDownloadProgress(100);
-                  await RNFetchBlob.android.actionViewIntent(
-                    res.path(),
-                    'application/vnd.android.package-archive',
-                  );
-                })
-                .catch(() => {
-                  setIsDownloadStart(false);
-                  ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-                });
-            }}>
+          <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
             <Icon
               name="file-download"
               color={globalStyles.text.color}
@@ -100,28 +138,30 @@ function NeedUpdate(props: Props) {
             />
             <Text style={globalStyles.text}>Download update</Text>
           </TouchableOpacity>
-        ) : downloadProgress === 100 ? (
-          <TouchableOpacity
-            style={styles.download}
-            onPress={() => {
-              RNFetchBlob.android.actionViewIntent(
-                `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
-                'application/vnd.android.package-archive',
-              );
-            }}>
-            <Icon name="download" color={globalStyles.text.color} size={20} />
-            <Text style={globalStyles.text}>Instal update</Text>
-          </TouchableOpacity>
+        ) : isProgress100 === true ? (
+          <View style={styles.installOrRedownload}>
+            <TouchableOpacity
+              style={[styles.download, { flex: 1, backgroundColor: '#1d1d66' }]}
+              onPress={installUpdate}>
+              <Icon name="download" color={globalStyles.text.color} size={20} />
+              <Text style={globalStyles.text}>Instal update</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.download, { flex: 1 }]}
+              onPress={downloadUpdate}>
+              <Icon
+                name="file-download"
+                color={globalStyles.text.color}
+                size={20}
+              />
+              <Text style={globalStyles.text}>Download ulang update</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <View style={styles.download}>
             <View style={styles.sliderContainer}>
-              <View
-                style={[
-                  styles.slider,
-                  {
-                    width: `${downloadProgress}%`,
-                  },
-                ]}
+              <Animated.View
+                style={[styles.slider, downloadProgressAnimaton]}
               />
             </View>
           </View>
@@ -187,7 +227,10 @@ const styles = StyleSheet.create({
   slider: {
     height: 20,
     borderRadius: 5,
-    backgroundColor: 'blue',
+    backgroundColor: '#105494',
+  },
+  installOrRedownload: {
+    flexDirection: 'row',
   },
 });
 
