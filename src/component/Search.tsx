@@ -26,14 +26,23 @@ import { SearchAnimeList } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 
-const TextInputAnimation = Animated.createAnimatedComponent(TextInput);
+import Reanimated, {
+  interpolate,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+
+const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
 >;
 
-const PressableAnimation = Animated.createAnimatedComponent(Pressable);
+const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
 
 function Search(props: Props) {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -62,25 +71,17 @@ function Search(props: Props) {
   const [data, setData] = useState<null | SearchAnimeList[]>(null);
   const [loading, setLoading] = useState(false);
   const query = useRef<undefined | string>();
-  const searchButtonAnimation = useRef(new Animated.Value(100)).current;
-  const searchButtonOpacity = useRef(new Animated.Value(1)).current;
+  const searchButtonAnimation = useSharedValue(100);
+  const searchButtonOpacity = useSharedValue(1);
   const searchButtonMounted = useRef(false);
 
-  const searchTextAnimationColor = useRef(new Animated.Value(0)).current;
+  const searchTextAnimationColor = useSharedValue(0);
 
   useEffect(() => {
     if (searchText !== '' && searchButtonMounted.current === false) {
-      Animated.spring(searchButtonAnimation, {
-        toValue: 0,
-        // duration: 700,
-        useNativeDriver: false,
-      }).start();
+      searchButtonAnimation.value = withSpring(0);
     } else if (searchButtonMounted.current === true && searchText === '') {
-      Animated.spring(searchButtonAnimation, {
-        toValue: 100,
-        // duration: 700,
-        useNativeDriver: false,
-      }).start();
+      searchButtonAnimation.value = withSpring(100);
     }
     if (searchText === '') {
       searchButtonMounted.current = false;
@@ -124,40 +125,39 @@ function Search(props: Props) {
   }, [props.navigation, searchText]);
 
   const onPressIn = useCallback(() => {
-    Animated.timing(searchButtonOpacity, {
-      toValue: 0.4,
-      useNativeDriver: false,
-      duration: 100,
-    }).start();
+    searchButtonOpacity.value = withTiming(0.4, { duration: 100 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onPressOut = useCallback(() => {
-    Animated.timing(searchButtonOpacity, {
-      toValue: 1,
-      useNativeDriver: false,
-      duration: 100,
-    }).start();
+    searchButtonOpacity.value = withTiming(1, { duration: 100 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextFocus = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, {
-      toValue: 1,
-      useNativeDriver: false,
-      duration: 400,
-    }).start();
+    searchTextAnimationColor.value = withTiming(1, { duration: 400 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextBlur = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, {
-      toValue: 0,
-      useNativeDriver: false,
-      duration: 400,
-    }).start();
+    searchTextAnimationColor.value = withTiming(0, { duration: 400 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // @ts-ignore
+  const textInputAnimation = useAnimatedStyle(() => {
+    return {
+      width: interpolate(searchButtonAnimation.value, [0, 100], [87, 98]) + '%',
+      borderColor: interpolateColor(
+        searchTextAnimationColor.value,
+        [0, 1],
+        [
+          colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
+          'rgb(0, 128, 0)',
+        ],
+      ),
+    };
+  });
 
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
@@ -169,26 +169,7 @@ function Search(props: Props) {
           placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
           onFocus={onSearchTextFocus}
           onBlur={onSearchTextBlur}
-          style={[
-            styles.searchInput,
-            {
-              // width: searchText !== '' ? '87%' : '98%',
-              width: searchButtonAnimation.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['87%', '98%'],
-              }),
-              // borderColor: colorScheme === 'dark' ? '#c5c5c5' : 'black',
-              borderColor: searchTextAnimationColor.interpolate({
-                inputRange: [0, 1],
-                outputRange: [
-                  colorScheme === 'dark'
-                    ? 'rgb(197, 197, 197)'
-                    : 'rgb(0, 0, 0)',
-                  'rgb(0, 128, 0)',
-                ],
-              }),
-            },
-          ]}
+          style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
           onPress={submit}
