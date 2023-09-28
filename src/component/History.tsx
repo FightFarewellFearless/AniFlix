@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Animated as RNAnimated,
   RefreshControl,
-  Animated,
   StyleSheet,
   ListRenderItemInfo,
 } from 'react-native';
@@ -22,6 +22,12 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../types/navigation';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
+import Animated, {
+  useAnimatedRef,
+  useAnimatedScrollHandler,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
@@ -31,55 +37,38 @@ function History(props: Props) {
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
   const isFocus = useRef(true);
 
-  const flatListRef = useRef<Animated.FlatList>(null);
+  const flatListRef = useAnimatedRef<Animated.FlatList<HistoryJSON>>();
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new RNAnimated.Value(1)).current;
 
-  const scrollValue = useRef(new Animated.Value(0)).current;
-  const scrollLastValue = useRef(0);
-  const scrollToTopButtonState = useRef<'hide' | 'show'>('show');
-  const scrollToTopButtonY = useRef(new Animated.Value(0)).current;
+  const scrollLastValue = useSharedValue(0);
+  const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('show');
+  const scrollToTopButtonY = useSharedValue(0);
 
-  // scroll to top animation ONSCROLL
-  useFocusEffect(
-    useCallback(() => {
-      const listener = scrollValue.addListener(({ value }) => {
-        if (value <= 1000) {
-          if (scrollToTopButtonState.current === 'show') {
-            Animated.spring(scrollToTopButtonY, {
-              useNativeDriver: true,
-              toValue: 150,
-            }).start();
-          }
-          scrollToTopButtonState.current = 'hide';
-        } else if (
-          value < scrollLastValue.current &&
-          scrollToTopButtonState.current === 'hide'
-        ) {
-          Animated.spring(scrollToTopButtonY, {
-            useNativeDriver: true,
-            toValue: 0,
-          }).start();
-          scrollToTopButtonState.current = 'show';
-        } else if (
-          value > scrollLastValue.current &&
-          scrollToTopButtonState.current === 'show'
-        ) {
-          Animated.spring(scrollToTopButtonY, {
-            useNativeDriver: true,
-            toValue: 150,
-          }).start();
-          scrollToTopButtonState.current = 'hide';
-        }
-        scrollLastValue.current = value;
-      });
-      return () => {
-        scrollValue.removeListener(listener);
-      };
-    }, [scrollToTopButtonY, scrollValue]),
-  );
+  const scrollHandler = useAnimatedScrollHandler(event => {
+    const value = event.contentOffset.y;
+    if (value <= 500) {
+      if (scrollToTopButtonState.value === 'show') {
+        scrollToTopButtonY.value = withSpring(150);
+      }
+      scrollToTopButtonState.value = 'hide';
+    } else if (
+      value < scrollLastValue.value &&
+      scrollToTopButtonState.value === 'hide'
+    ) {
+      scrollToTopButtonY.value = withSpring(0);
+      scrollToTopButtonState.value = 'show';
+    } else if (
+      value > scrollLastValue.value &&
+      scrollToTopButtonState.value === 'show'
+    ) {
+      scrollToTopButtonY.value = withSpring(150);
+      scrollToTopButtonState.value = 'hide';
+    }
+    scrollLastValue.value = event.contentOffset.y;
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -104,7 +93,7 @@ function History(props: Props) {
   useFocusEffect(
     useCallback(() => {
       isFocus.current = true;
-      Animated.timing(scaleAnim, {
+      RNAnimated.timing(scaleAnim, {
         toValue: 1,
         // speed: 18,
         duration: 150,
@@ -112,7 +101,7 @@ function History(props: Props) {
       }).start();
       return () => {
         isFocus.current = false;
-        Animated.timing(scaleAnim, {
+        RNAnimated.timing(scaleAnim, {
           toValue: 0.8,
           // speed: 18,
           duration: 250,
@@ -257,10 +246,11 @@ function History(props: Props) {
       animated: true,
       offset: 0,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
+    <RNAnimated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
       {loading ? (
         <ActivityIndicator />
       ) : data.length === 0 ? (
@@ -269,8 +259,9 @@ function History(props: Props) {
         </View>
       ) : (
         <View style={styles.historyContainer}>
-          <Animated.FlatList<HistoryJSON>
+          <Animated.FlatList
             data={data}
+            // @ts-ignore
             ref={flatListRef}
             keyExtractor={keyExtractor}
             refreshControl={
@@ -281,18 +272,7 @@ function History(props: Props) {
                 colors={['#00a2ff', 'red']}
               />
             }
-            onScroll={Animated.event(
-              [
-                {
-                  nativeEvent: {
-                    contentOffset: {
-                      y: scrollValue,
-                    },
-                  },
-                },
-              ],
-              { useNativeDriver: true },
-            )}
+            onScroll={scrollHandler}
             renderItem={renderFlatList}
             removeClippedSubviews={true}
             windowSize={13}
@@ -321,7 +301,7 @@ function History(props: Props) {
           </Animated.View>
         </View>
       )}
-    </Animated.View>
+    </RNAnimated.View>
   );
 }
 
