@@ -19,7 +19,7 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 function FailedToConnect(props: Props) {
   const openLink = async () => {
     const url =
-      'https://github.com/FightFarewellFearless/anime-react-native/issues/new';
+      'https://github.com/FightFarewellFearless/AniFlix/issues/new';
     if (await Linking.canOpenURL(url)) {
       Linking.openURL(url);
     } else {
@@ -85,7 +85,7 @@ function FailedToConnect(props: Props) {
           <TouchableOpacity
             onPress={() => {
               Linking.openURL(
-                'https://github.com/FightFarewellFearless/anime-react-native',
+                'https://github.com/FightFarewellFearless/AniFlix',
               );
             }}
             style={[styles.bottomCredits, { marginRight: 8 }]}>

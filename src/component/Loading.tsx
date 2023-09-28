@@ -81,7 +81,7 @@ function Loading(props: Props) {
 
   const checkVersion = useCallback(async () => {
     const data = await fetch(
-      'https://api.github.com/repos/FightFarewellFearless/anime-react-native/releases?per_page=1',
+      'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
       {
         headers: {
           'User-Agent': deviceUserAgent,
@@ -148,9 +148,7 @@ function Loading(props: Props) {
         }}>
         <TouchableOpacity
           onPress={() => {
-            Linking.openURL(
-              'https://github.com/FightFarewellFearless/anime-react-native',
-            );
+            Linking.openURL('https://github.com/FightFarewellFearless/AniFlix');
           }}
           style={[styles.bottomCredits, { marginRight: 8 }]}>
           {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}

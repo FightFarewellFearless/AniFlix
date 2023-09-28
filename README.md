@@ -23,7 +23,7 @@ Download episode anime dengan satu klik. Tonton tanpa login!
 
 Kamu bisa download aplikasi dengan cara berikut ini:
 
-- Pergi ke [Halaman rilis](https://github.com/FightFarewellFearless/anime-react-native/releases)
+- Pergi ke [Halaman rilis](https://github.com/FightFarewellFearless/AniFlix/releases)
 - Pilih rilis terbaru
 - Klik bagian **assets**
 - Pilih file **anime.apk**
