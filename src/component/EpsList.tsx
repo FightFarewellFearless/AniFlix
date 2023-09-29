@@ -42,6 +42,8 @@ function EpsList(props: Props) {
   );
   const { height, width } = useWindowDimensions();
 
+  const episodeItemHeight = useRef<number>();
+
   const synopsys = useRef<ScrollView>(null);
   const epsList = useRef<FlatList>(null);
 
@@ -75,6 +77,11 @@ function EpsList(props: Props) {
     ({ item }: ListRenderItemInfo<EpsListEpisodeList>) => {
       return (
         <TouchableOpacityMemo
+          onLayout={event => {
+            if (!episodeItemHeight.current) {
+              episodeItemHeight.current = event.nativeEvent.layout.height;
+            }
+          }}
           style={{ paddingVertical: 12, alignItems: 'center' }}
           onPress={() => {
             props.navigation.dispatch(
@@ -279,6 +286,11 @@ function EpsList(props: Props) {
         />
         <FlatListMemo
           key="episodelist"
+          getItemLayout={(_, index) => {
+            let ITEM_HEIGHT = episodeItemHeight.current ?? 43.733333587646484;
+            ITEM_HEIGHT += 0.5333333611488342; // exact separator height
+            return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index };
+          }}
           data={result}
           ListEmptyComponent={
             <Text style={globalStyles.text}>Tidak ada episode</Text>
