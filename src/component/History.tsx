@@ -23,11 +23,16 @@ import { HomeNavigator } from '../types/navigation';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
 import Animated, {
+  FadeInRight,
+  ZoomOutEasyUp,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+
+const TouchableOpacityAnimated =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
@@ -44,8 +49,8 @@ function History(props: Props) {
   const scaleAnim = useRef(new RNAnimated.Value(1)).current;
 
   const scrollLastValue = useSharedValue(0);
-  const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('show');
-  const scrollToTopButtonY = useSharedValue(0);
+  const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
+  const scrollToTopButtonY = useSharedValue(150);
 
   const scrollHandler = useAnimatedScrollHandler(event => {
     const value = event.contentOffset.y;
@@ -150,7 +155,9 @@ function History(props: Props) {
   const renderFlatList = useCallback(
     ({ item }: ListRenderItemInfo<HistoryJSON>) => {
       return (
-        <TouchableOpacity
+        <TouchableOpacityAnimated
+          entering={FadeInRight}
+          exiting={ZoomOutEasyUp}
           style={styles.listContainerButton}
           key={'btn' + item.title}
           onPress={() => {
@@ -235,7 +242,7 @@ function History(props: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacityAnimated>
       );
     },
     [data, deleteHistory, props.navigation],
