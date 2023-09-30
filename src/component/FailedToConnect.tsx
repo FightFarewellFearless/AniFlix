@@ -1,5 +1,5 @@
 import React from 'react';
-import globalStyles from '../assets/style';
+import globalStyles, { darkText } from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -18,8 +18,7 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
 function FailedToConnect(props: Props) {
   const openLink = async () => {
-    const url =
-      'https://github.com/FightFarewellFearless/AniFlix/issues/new';
+    const url = 'https://github.com/FightFarewellFearless/AniFlix/issues/new';
     if (await Linking.canOpenURL(url)) {
       Linking.openURL(url);
     } else {
@@ -44,7 +43,18 @@ function FailedToConnect(props: Props) {
             Aplikasi masih dalam tahap pengembangan
           </Text>
         </View>
-        <Icon name="server-network-off" style={globalStyles.text} size={40} />
+        <Icon
+          name="server-network-off"
+          style={[
+            globalStyles.text,
+            {
+              textShadowColor: 'red',
+              textShadowOffset: { width: 1, height: 0 },
+              textShadowRadius: 5,
+            },
+          ]}
+          size={40}
+        />
         <Text
           style={[
             { textAlign: 'center', fontWeight: '400' },
@@ -61,7 +71,7 @@ function FailedToConnect(props: Props) {
         </Text>
         <TouchableOpacity
           style={{
-            backgroundColor: '#8a1c00',
+            backgroundColor: '#008a83',
             borderRadius: 5,
             padding: 3,
             marginTop: 14,
@@ -71,7 +81,7 @@ function FailedToConnect(props: Props) {
           }}
           onPress={tryagain}>
           <Text
-            style={[{ fontSize: 17, fontWeight: 'bold' }, globalStyles.text]}>
+            style={[{ fontSize: 17, fontWeight: 'bold' }, { color: darkText }]}>
             <Icon name="refresh" size={17} /> Coba lagi
           </Text>
         </TouchableOpacity>
