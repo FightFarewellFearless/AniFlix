@@ -41,7 +41,9 @@ type RootStackNavigator = {
   };
   Blocked: undefined;
   FailedToConnect: undefined;
-  Maintenance: undefined;
+  Maintenance: {
+    message?: string;
+  };
 };
 
 export type { RootStackNavigator, HomeNavigator };

@@ -50,7 +50,11 @@ function FromUrl(props: Props) {
           if (result.blocked) {
             props.navigation.dispatch(StackActions.replace('Blocked'));
           } else if (result.maintenance) {
-            props.navigation.dispatch(StackActions.replace('Maintenance'));
+            props.navigation.dispatch(
+              StackActions.replace('Maintenance', {
+                message: result.message,
+              }),
+            );
           } else if (result.type === 'epsList') {
             props.navigation.dispatch(
               StackActions.replace('EpisodeList', {

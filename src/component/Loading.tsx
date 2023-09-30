@@ -42,7 +42,11 @@ function Loading(props: Props) {
       return;
     }
     if (jsondata.maintenance === true) {
-      props.navigation.dispatch(StackActions.replace('Maintenance'));
+      props.navigation.dispatch(
+        StackActions.replace('Maintenance', {
+          message: jsondata.message,
+        }),
+      );
       return;
     }
     props.navigation.dispatch(

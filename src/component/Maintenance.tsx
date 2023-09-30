@@ -6,7 +6,7 @@ import { RootStackNavigator } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Maintenance'>;
 
-function Manintenance(_props: Props) {
+function Manintenance(props: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.center}>
@@ -20,16 +20,31 @@ function Manintenance(_props: Props) {
         </Text>
         <Text style={[globalStyles.text]}>Silahkan cek kembali nanti.</Text>
       </View>
+      <View style={styles.bottom}>
+        <Text style={[globalStyles.text, styles.message]}>
+          {props.route.params.message}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, justifyContent: 'flex-end', alignItems: 'center' },
   maintenanceText: {
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  bottom: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  message: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    textAlign: 'center',
   },
 });
 

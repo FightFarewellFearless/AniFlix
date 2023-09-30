@@ -1,5 +1,6 @@
 interface Maintenance {
   maintenance: boolean;
+  message?: string;
 }
 
 interface FromUrl extends Maintenance {
