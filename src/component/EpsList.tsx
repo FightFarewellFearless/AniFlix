@@ -64,8 +64,9 @@ function EpsList(props: Props) {
       );
       return;
     }
-    // synopsys.current?.flashScrollIndicators();
-    // epsList.current?.flashScrollIndicators();
+    synopsys.current?.flashScrollIndicators();
+    synopsys.current?.scrollToEnd({ animated: true });
+    setTimeout(() => synopsys.current?.scrollTo({ y: 0 }), 1000);
   }, [data]);
 
   useEffect(() => {
@@ -330,12 +331,16 @@ const styles = StyleSheet.create({
   synopsys: {
     maxHeight: '35%',
     backgroundColor: colorScheme === 'dark' ? '#0000008a' : '#d8d8d89d',
+    paddingVertical: 2,
+    borderWidth: 2,
+    borderColor: 'purple',
   },
   synopsysScrollView: {},
   synopsysText: {
     flex: 1,
     textAlign: 'center',
-    opacity: 0.7,
+    opacity: 0.8,
+    fontWeight: 'bold',
   },
   epsList: {
     flex: 1,
