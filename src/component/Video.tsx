@@ -22,6 +22,7 @@ import {
   NativeEventEmitter,
   NativeModules,
   EmitterSubscription,
+  AppState,
 } from 'react-native';
 import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -142,8 +143,14 @@ function Video(props: Props) {
 
   const nextPartEnable = useRef<string>();
 
+  const [isBackground, setIsBackground] = useState(false);
+
   // didMount and willUnmount
   useEffect(() => {
+    const appState = AppState.addEventListener('change', state => {
+      setIsBackground(state === 'background');
+    });
+
     nextPartEnable.current = enableNextPartNotification;
 
     Orientation.addDeviceOrientationListener(orientationDidChange);
@@ -151,6 +158,7 @@ function Video(props: Props) {
     return () => {
       willUnmountHandler();
       abortController.current?.abort();
+      appState.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -657,6 +665,7 @@ function Video(props: Props) {
               onHideControls={hideControls}
               onShowControls={showControls}
               playInBackground={false}
+              paused={isBackground}
             />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
