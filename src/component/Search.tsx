@@ -27,6 +27,7 @@ import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 
 import Reanimated, {
+  FadeInRight,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
@@ -36,6 +37,8 @@ import Reanimated, {
 } from 'react-native-reanimated';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
+const TouchableOpacityAnimated =
+  Reanimated.createAnimatedComponent(TouchableOpacity);
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
@@ -194,9 +197,6 @@ function Search(props: Props) {
           </Text>
         </PressableAnimation>
       </View>
-      {loading && (
-        <ActivityIndicator style={styles.centerLoading} size="large" />
-      )}
       {data === null ? (
         <View style={styles.center}>
           <Text style={styles.nullDataText}>Silahkan cari terlebih dahulu</Text>
@@ -210,7 +210,8 @@ function Search(props: Props) {
             <ScrollView style={{ zIndex: 1 }}>
               {data.map(z => {
                 return (
-                  <TouchableOpacity
+                  <TouchableOpacityAnimated
+                    entering={FadeInRight}
                     style={styles.listContainer}
                     key={'btn' + z.title}
                     onPress={() => {
@@ -263,7 +264,7 @@ function Search(props: Props) {
                         </Text>
                       </View>
                     </View>
-                  </TouchableOpacity>
+                  </TouchableOpacityAnimated>
                 );
               })}
             </ScrollView>
@@ -271,6 +272,9 @@ function Search(props: Props) {
             <Text style={globalStyles.text}>Tidak ada hasil!</Text>
           )}
         </>
+      )}
+      {loading && (
+        <ActivityIndicator style={styles.centerLoading} size="large" />
       )}
     </Animated.View>
   );
