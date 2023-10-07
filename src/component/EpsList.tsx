@@ -3,16 +3,15 @@ import {
   View,
   Text,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   TextInput,
   StyleSheet,
   ImageBackground,
   useWindowDimensions,
   Alert,
-  ListRenderItemInfo,
   ToastAndroid,
 } from 'react-native';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { StackActions } from '@react-navigation/native';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -26,8 +25,8 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
 
 const TouchableOpacityMemo = memo(TouchableOpacity);
-const FlatListMemo = memo<typeof FlatList<EpsListEpisodeList>>(
-  FlatList,
+const FlashListMemo = memo<typeof FlashList<EpsListEpisodeList>>(
+  FlashList,
   (prev, next) => {
     return prev.data === next.data;
   },
@@ -45,7 +44,7 @@ function EpsList(props: Props) {
   const episodeItemHeight = useRef<number>();
 
   const synopsys = useRef<ScrollView>(null);
-  const epsList = useRef<FlatList>(null);
+  const epsList = useRef<FlashList<EpsListEpisodeList>>(null);
 
   const watchLaterListsJson = useSelectorOnFocus(
     state => state.settings.watchLater,
@@ -65,16 +64,16 @@ function EpsList(props: Props) {
       );
       return;
     }
-    synopsys.current?.flashScrollIndicators();
-    epsList.current?.flashScrollIndicators();
+    // synopsys.current?.flashScrollIndicators();
+    // epsList.current?.flashScrollIndicators();
   }, [data]);
 
   useEffect(() => {
     epsList.current?.scrollToOffset({ animated: true, offset: 0 });
   }, [result]);
 
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<EpsListEpisodeList>) => {
+  const renderItem = useCallback<ListRenderItem<EpsListEpisodeList>>(
+    ({ item }) => {
       return (
         <TouchableOpacityMemo
           onLayout={event => {
@@ -284,20 +283,14 @@ function EpsList(props: Props) {
           style={[globalStyles.text, styles.cariEpisode]}
           onChangeText={searchEpisode}
         />
-        <FlatListMemo
+        <FlashListMemo
           key="episodelist"
-          getItemLayout={(_, index) => {
-            let ITEM_HEIGHT = episodeItemHeight.current ?? 43.733333587646484;
-            ITEM_HEIGHT += 0.5333333611488342; // exact separator height
-            return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index };
-          }}
           data={result}
           ListEmptyComponent={
             <Text style={globalStyles.text}>Tidak ada episode</Text>
           }
+          estimatedItemSize={44}
           keyExtractor={keyExtractor}
-          initialNumToRender={15}
-          maxToRenderPerBatch={5}
           ref={epsList}
           renderItem={renderItem}
           ItemSeparatorComponent={() => (
@@ -309,7 +302,6 @@ function EpsList(props: Props) {
               }}
             />
           )}
-          windowSize={16}
         />
       </View>
     </View>

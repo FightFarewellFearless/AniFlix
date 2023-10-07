@@ -1,48 +1,53 @@
 import {
-  ActivityIndicator,
   Text,
   View,
   TouchableOpacity,
   Image,
   Alert,
   Animated as RNAnimated,
-  RefreshControl,
   StyleSheet,
-  ListRenderItemInfo,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import globalStyles from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../misc/reduxSlice';
-import store, { AppDispatch } from '../misc/reduxStore';
+import { AppDispatch } from '../misc/reduxStore';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../types/navigation';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
 import Animated, {
   FadeInRight,
-  ZoomOutEasyUp,
+  FadeOutLeft,
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
 
+const AnimatedFlashList = Animated.createAnimatedComponent(
+  FlashList as typeof FlashList<HistoryJSON>,
+);
 const TouchableOpacityAnimated =
   Animated.createAnimatedComponent(TouchableOpacity);
 
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
 function History(props: Props) {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<HistoryJSON[]>([]);
-  const [historyRefreshing, setHistoryRefreshing] = useState(false);
+  const data = useSelectorOnFocus(
+    state => state.settings.history,
+    true,
+    state => JSON.parse(state) as HistoryJSON[],
+  );
+
   const isFocus = useRef(true);
 
-  const flatListRef = useAnimatedRef<Animated.FlatList<HistoryJSON>>();
+  const flatListRef = useAnimatedRef<FlashList<HistoryJSON>>();
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -54,7 +59,7 @@ function History(props: Props) {
 
   const scrollHandler = useAnimatedScrollHandler(event => {
     const value = event.contentOffset.y;
-    if (value <= 500) {
+    if (value <= 100) {
       if (scrollToTopButtonState.value === 'show') {
         scrollToTopButtonY.value = withSpring(150);
       }
@@ -74,26 +79,6 @@ function History(props: Props) {
     }
     scrollLastValue.value = event.contentOffset.y;
   });
-
-  useFocusEffect(
-    useCallback(() => {
-      // manually handle dispatch action
-      const unsubscribe = store.subscribe(() => {
-        setData(JSON.parse(store.getState().settings.history));
-      });
-      return () => {
-        unsubscribe();
-      };
-    }, []),
-  );
-
-  const updateHistory = useCallback(() => {
-    const historyStore = store.getState().settings.history;
-    setLoading(false);
-    if (JSON.stringify(data) !== historyStore) {
-      setData(JSON.parse(historyStore));
-    }
-  }, [data]);
 
   useFocusEffect(
     useCallback(() => {
@@ -117,16 +102,6 @@ function History(props: Props) {
     }, []),
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      // setTimeout(() => {
-      setHistoryRefreshing(true);
-      updateHistory();
-      setHistoryRefreshing(false);
-      // }, 0);
-    }, [updateHistory]),
-  );
-
   const deleteHistory = useCallback(
     async (index: number) => {
       // const time = Date.now();
@@ -146,20 +121,13 @@ function History(props: Props) {
 
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
-  const onRefreshControl = useCallback(() => {
-    setHistoryRefreshing(true);
-    setData(JSON.parse(store.getState().settings.history));
-    setHistoryRefreshing(false);
-  }, []);
-
-  const renderFlatList = useCallback(
-    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
+  const renderFlatList = useCallback<ListRenderItem<HistoryJSON>>(
+    ({ item }) => {
       return (
         <TouchableOpacityAnimated
           entering={FadeInRight}
-          exiting={ZoomOutEasyUp}
+          exiting={FadeOutLeft}
           style={styles.listContainerButton}
-          key={'btn' + item.title}
           onPress={() => {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
@@ -258,32 +226,19 @@ function History(props: Props) {
 
   return (
     <RNAnimated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
-      {loading ? (
-        <ActivityIndicator />
-      ) : data.length === 0 ? (
+      {data.length === 0 ? (
         <View style={styles.noHistory}>
           <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
         </View>
       ) : (
         <View style={styles.historyContainer}>
-          <Animated.FlatList
+          <AnimatedFlashList
             data={data}
-            // @ts-ignore
+            estimatedItemSize={210}
             ref={flatListRef}
             keyExtractor={keyExtractor}
-            refreshControl={
-              <RefreshControl
-                refreshing={historyRefreshing}
-                onRefresh={onRefreshControl}
-                progressBackgroundColor="#292929"
-                colors={['#00a2ff', 'red']}
-              />
-            }
             onScroll={scrollHandler}
             renderItem={renderFlatList}
-            removeClippedSubviews={true}
-            windowSize={13}
-            disableScrollViewPanResponder={true}
           />
           <Animated.View
             style={[
@@ -327,6 +282,7 @@ function formatTimeFromSeconds(seconds: number) {
 const styles = StyleSheet.create({
   historyContainer: {
     overflow: 'hidden',
+    flex: 1,
   },
   scrollToTopView: {
     position: 'absolute',

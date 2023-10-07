@@ -5,14 +5,14 @@ import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef } from 'react';
 import React, {
   Animated,
-  FlatList,
   Image,
-  ListRenderItemInfo,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Reanimated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../types/watchLaterJSON';
 import colorScheme from '../utils/colorScheme';
 import globalStyles from '../assets/style';
@@ -21,6 +21,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import controlWatchLater from '../utils/watchLaterControl';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'WatchLater'>;
+const TouchableOpacityAnimated =
+  Reanimated.createAnimatedComponent(TouchableOpacity);
 
 function WatchLater(props: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -50,10 +52,12 @@ function WatchLater(props: Props) {
     result => JSON.parse(result) as watchLaterJSON[],
   );
 
-  const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<watchLaterJSON>) => {
+  const renderItem = useCallback<ListRenderItem<watchLaterJSON>>(
+    ({ item, index }) => {
       return (
-        <TouchableOpacity
+        <TouchableOpacityAnimated
+          entering={FadeInRight}
+          exiting={FadeOutLeft}
           style={styles.listContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -93,7 +97,7 @@ function WatchLater(props: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacityAnimated>
       );
     },
     [props.navigation],
@@ -106,8 +110,9 @@ function WatchLater(props: Props) {
           <Text style={[globalStyles.text]}>Belum ada daftar tonton nanti</Text>
         </View>
       ) : (
-        <FlatList
+        <FlashList
           data={watchLaterLists}
+          estimatedItemSize={210}
           renderItem={renderItem}
           keyExtractor={extractKey}
         />
