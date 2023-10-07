@@ -1,6 +1,6 @@
 {
   "name": "aniflix",
-  "version": "v0.0.2-preview",
+  "version": "v0.0.3-preview",
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
