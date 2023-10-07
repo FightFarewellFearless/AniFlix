@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Linking,
   StyleSheet,
+  ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,6 +27,7 @@ import { SetDatabaseTarget } from '../types/redux';
 import { Home } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
+import RNFetchBlob from 'rn-fetch-blob';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
 
@@ -83,6 +85,18 @@ function Loading(props: Props) {
     }, 1000);
   }, [dispatchSettings]);
 
+  const deleteUnnecessaryUpdate = useCallback(async () => {
+    const isExist = await RNFetchBlob.fs.exists(
+      `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`,
+    );
+    if (isExist) {
+      await RNFetchBlob.fs.unlink(
+        `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`,
+      );
+      ToastAndroid.show('Menghapus update tidak terpakai', ToastAndroid.SHORT);
+    }
+  }, []);
+
   const checkVersion = useCallback(async () => {
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
@@ -105,6 +119,7 @@ function Loading(props: Props) {
   useEffect(() => {
     (async () => {
       await prepareData();
+      await deleteUnnecessaryUpdate();
       setLoadStatus('Mengecek versi aplikasi');
       const version = await checkVersion();
       if (version === null) {
@@ -127,7 +142,13 @@ function Loading(props: Props) {
         );
       }
     })();
-  }, [connectToServer, prepareData, checkVersion, props.navigation]);
+  }, [
+    connectToServer,
+    prepareData,
+    checkVersion,
+    props.navigation,
+    deleteUnnecessaryUpdate,
+  ]);
 
   return (
     <View
