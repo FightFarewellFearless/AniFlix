@@ -207,7 +207,7 @@ function Search(props: Props) {
             Hasil pencarian untuk: {query.current}
           </Text>
           {data.length > 0 ? (
-            <ScrollView>
+            <ScrollView style={{ zIndex: 1 }}>
               {data.map(z => {
                 return (
                   <TouchableOpacity
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 17,
   },
-  centerLoading: { position: 'absolute', right: '50%', top: '50%', zIndex: 1 },
+  centerLoading: { position: 'absolute', right: '50%', top: '50%', zIndex: 2 },
   searchInput: {
     height: 35,
     borderWidth: 0.8,
