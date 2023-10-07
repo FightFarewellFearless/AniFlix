@@ -61,20 +61,26 @@ function History(props: Props) {
     const value = event.contentOffset.y;
     if (value <= 100) {
       if (scrollToTopButtonState.value === 'show') {
-        scrollToTopButtonY.value = withSpring(150);
+        scrollToTopButtonY.value = withSpring(150, {
+          damping: 12,
+        });
       }
       scrollToTopButtonState.value = 'hide';
     } else if (
       value < scrollLastValue.value &&
       scrollToTopButtonState.value === 'hide'
     ) {
-      scrollToTopButtonY.value = withSpring(0);
+      scrollToTopButtonY.value = withSpring(0, {
+        damping: 12,
+      });
       scrollToTopButtonState.value = 'show';
     } else if (
       value > scrollLastValue.value &&
       scrollToTopButtonState.value === 'show'
     ) {
-      scrollToTopButtonY.value = withSpring(150);
+      scrollToTopButtonY.value = withSpring(150, {
+        damping: 12,
+      });
       scrollToTopButtonState.value = 'hide';
     }
     scrollLastValue.value = event.contentOffset.y;

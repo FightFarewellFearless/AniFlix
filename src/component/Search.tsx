@@ -82,7 +82,9 @@ function Search(props: Props) {
 
   useEffect(() => {
     if (searchText !== '' && searchButtonMounted.current === false) {
-      searchButtonAnimation.value = withSpring(0);
+      searchButtonAnimation.value = withSpring(0, {
+        damping: 12,
+      });
     } else if (searchButtonMounted.current === true && searchText === '') {
       searchButtonAnimation.value = withSpring(100);
     }
