@@ -29,7 +29,7 @@ import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
-import Dropdown, { ThemeNameType } from 'react-native-dropdown-picker';
+import { Dropdown } from 'react-native-element-dropdown';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import globalStyles, { darkText } from '../assets/style';
@@ -79,8 +79,7 @@ function Video(props: Props) {
   const preparePartAnimation = useRef(new Animated.Value(0)).current;
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
 
-  const [openResolution, setOpenResolution] = useState(false);
-  const [openPart, setOpenPart] = useState(false);
+  const [synopsysTextLayout, setSynopsysTextLayout] = useState(0);
 
   const [isControlsHidden, setIsControlsHidden] = useState(true);
 
@@ -680,14 +679,18 @@ function Video(props: Props) {
           <ScrollView style={{ flex: 1 }}>
             <TouchableOpacity
               style={[styles.container]}
-              onPress={() => setShowSynopsys(!showSynopsys)}>
+              onPress={() => setShowSynopsys(!showSynopsys)}
+              disabled={synopsysTextLayout <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>
                 {data.title}
               </Text>
 
               <Text
                 style={[globalStyles.text, styles.infoSinopsis]}
-                numberOfLines={!showSynopsys ? 2 : undefined}>
+                numberOfLines={!showSynopsys ? 2 : undefined}
+                onTextLayout={e =>
+                  setSynopsysTextLayout(e.nativeEvent.lines.length)
+                }>
                 {data.synopsys}
               </Text>
 
@@ -718,6 +721,16 @@ function Video(props: Props) {
                   <Icon name="star" color="black" /> {data.rating}
                 </Text>
               </View>
+
+              {synopsysTextLayout > 2 && (
+                <View style={{ alignItems: 'center', marginTop: 3 }}>
+                  {showSynopsys ? (
+                    <Icon name="chevron-up" size={20} />
+                  ) : (
+                    <Icon name="chevron-down" size={20} />
+                  )}
+                </View>
+              )}
             </TouchableOpacity>
 
             <View style={[styles.container, { marginTop: 10 }]}>
@@ -761,61 +774,43 @@ function Video(props: Props) {
               )}
               <View style={{ width: 120 }}>
                 <Dropdown
-                  open={openResolution}
                   value={data.resolution}
-                  items={data.validResolution.map(z => {
+                  data={data.validResolution.map(z => {
                     return { label: z, value: z };
                   })}
-                  setOpen={setOpenResolution}
-                  setValue={val => {
-                    setResolution(val(data.resolution));
+                  valueField="value"
+                  labelField="label"
+                  onChange={val => {
+                    setResolution(val.value);
                   }}
-                  listMode="MODAL"
-                  modalTitle="Pilih resolusi"
-                  theme={
-                    (colorScheme?.toUpperCase() ?? 'DEFAULT') as ThemeNameType
-                  }
-                  selectedItemContainerStyle={{
-                    backgroundColor:
-                      colorScheme === 'dark' ? '#00461b' : '#00bd48',
-                  }}
-                  // listItemContainerStyle={{
-                  //   backgroundColor: '#442619',
-                  // }}
-                  style={{
-                    width: 120,
-                  }}
+                  style={styles.dropdownStyle}
+                  containerStyle={styles.dropdownContainerStyle}
+                  itemTextStyle={styles.dropdownItemTextStyle}
+                  itemContainerStyle={styles.dropdownItemContainerStyle}
+                  activeColor="#16687c"
+                  selectedTextStyle={styles.dropdownSelectedTextStyle}
                 />
               </View>
               {data.streamingLink?.length > 1 && (
                 <View style={styles.dropdownPart}>
                   <Dropdown
-                    open={openPart}
+                    // @ts-ignore
                     value={part}
-                    items={data.streamingLink.map((_, i) => {
+                    data={data.streamingLink.map((_, i) => {
                       return { label: 'Part ' + (i + 1), value: i };
                     })}
-                    setOpen={setOpenPart}
-                    setValue={val => {
+                    valueField="value"
+                    labelField="label"
+                    onChange={val => {
+                      setPart(val.value);
                       firstTimeLoad.current = false;
-
-                      setPart(val(data.resolution));
                     }}
-                    listMode="MODAL"
-                    modalTitle="Pilih part"
-                    theme={
-                      (colorScheme?.toUpperCase() ?? 'DEFAULT') as ThemeNameType
-                    }
-                    selectedItemContainerStyle={{
-                      backgroundColor:
-                        colorScheme === 'dark' ? '#00461b' : '#00bd48',
-                    }}
-                    // listItemContainerStyle={{
-                    //   backgroundColor: '#442619',
-                    // }}
-                    containerStyle={{
-                      width: 120,
-                    }}
+                    style={styles.dropdownStyle}
+                    containerStyle={styles.dropdownContainerStyle}
+                    itemTextStyle={styles.dropdownItemTextStyle}
+                    itemContainerStyle={styles.dropdownItemContainerStyle}
+                    activeColor="#16687c"
+                    selectedTextStyle={styles.dropdownSelectedTextStyle}
                   />
                   {/* <Icon name="info-circle" /> */}
                 </View>
@@ -1029,6 +1024,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#0000008f',
     padding: 3,
     borderRadius: 5,
+  },
+  dropdownStyle: {
+    width: 120,
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    padding: 5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  dropdownContainerStyle: {
+    width: 120,
+  },
+  dropdownItemTextStyle: {
+    color: globalStyles.text.color,
+  },
+  dropdownItemContainerStyle: {
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+  },
+  dropdownSelectedTextStyle: {
+    color: globalStyles.text.color,
   },
 });
 export default Video;
