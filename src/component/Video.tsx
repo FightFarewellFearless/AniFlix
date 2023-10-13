@@ -616,28 +616,6 @@ function Video(props: Props) {
           </>
         )}
 
-        {/* info baterai */}
-        {fullscreen && batteryTimeEnable && (
-          <View
-            style={[styles.batteryInfo, { zIndex: isControlsHidden ? 1 : 0 }]}
-            pointerEvents="none">
-            {getBatteryIconComponent()}
-            <Text style={{ color: darkText }}>
-              {' '}
-              {Math.round(batteryLevel * 100)}%
-            </Text>
-          </View>
-        )}
-
-        {/* info waktu/jam */}
-        {fullscreen && batteryTimeEnable && (
-          <View
-            style={[styles.timeInfo, { zIndex: isControlsHidden ? 1 : 0 }]}
-            pointerEvents="none">
-            <TimeInfo />
-          </View>
-        )}
-
         {
           // mengecek apakah video tersedia
           data.streamingLink?.[part]?.sources[0].src ? (
@@ -670,6 +648,34 @@ function Video(props: Props) {
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
           )
         }
+
+        {/* info baterai */}
+        {fullscreen && batteryTimeEnable && (
+          <View
+            style={[
+              styles.batteryInfo,
+              { display: isControlsHidden ? 'flex' : 'none' },
+            ]}
+            pointerEvents="none">
+            {getBatteryIconComponent()}
+            <Text style={{ color: darkText }}>
+              {' '}
+              {Math.round(batteryLevel * 100)}%
+            </Text>
+          </View>
+        )}
+
+        {/* info waktu/jam */}
+        {fullscreen && batteryTimeEnable && (
+          <View
+            style={[
+              styles.timeInfo,
+              { display: isControlsHidden ? 'flex' : 'none' },
+            ]}
+            pointerEvents="none">
+            <TimeInfo />
+          </View>
+        )}
       </View>
       {/* END OF VIDEO ELEMENT */}
       {
