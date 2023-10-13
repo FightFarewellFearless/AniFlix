@@ -24,6 +24,7 @@ import Animated, {
   FadeOutLeft,
   useAnimatedRef,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
@@ -57,12 +58,24 @@ function History(props: Props) {
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
   const scrollToTopButtonY = useSharedValue(150);
 
+  const buttonTransformStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: scrollToTopButtonY.value,
+        },
+      ],
+    };
+  });
+
   const scrollHandler = useAnimatedScrollHandler(event => {
     const value = event.contentOffset.y;
+    const velocity = event.velocity?.y;
     if (value <= 100) {
       if (scrollToTopButtonState.value === 'show') {
         scrollToTopButtonY.value = withSpring(150, {
           damping: 12,
+          velocity,
         });
       }
       scrollToTopButtonState.value = 'hide';
@@ -72,6 +85,7 @@ function History(props: Props) {
     ) {
       scrollToTopButtonY.value = withSpring(0, {
         damping: 12,
+        velocity,
       });
       scrollToTopButtonState.value = 'show';
     } else if (
@@ -80,6 +94,7 @@ function History(props: Props) {
     ) {
       scrollToTopButtonY.value = withSpring(150, {
         damping: 12,
+        velocity,
       });
       scrollToTopButtonState.value = 'hide';
     }
@@ -246,17 +261,7 @@ function History(props: Props) {
             onScroll={scrollHandler}
             renderItem={renderFlatList}
           />
-          <Animated.View
-            style={[
-              {
-                transform: [
-                  {
-                    translateY: scrollToTopButtonY,
-                  },
-                ],
-              },
-              styles.scrollToTopView,
-            ]}>
+          <Animated.View style={[buttonTransformStyle, styles.scrollToTopView]}>
             <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
               <View style={styles.scrollToTopIcon}>
                 <Icon
