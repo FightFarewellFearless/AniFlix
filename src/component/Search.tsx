@@ -17,12 +17,12 @@ import {
   StackActions,
   CompositeScreenProps,
 } from '@react-navigation/native';
-import globalStyles from '../assets/style';
+import globalStyles, { lightText } from '../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SearchAnimeList } from '../types/anime';
+import { SearchAnime } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 
@@ -71,7 +71,7 @@ function Search(props: Props) {
   );
 
   const [searchText, setSearchText] = useState<string>('');
-  const [data, setData] = useState<null | SearchAnimeList[]>(null);
+  const [data, setData] = useState<null | SearchAnime>(null);
   const [loading, setLoading] = useState(false);
   const query = useRef<undefined | string>();
   const searchButtonAnimation = useSharedValue(100);
@@ -115,7 +115,7 @@ function Search(props: Props) {
           return;
         }
         query.current = searchText;
-        setData(result as SearchAnimeList[]);
+        setData(result);
         setLoading(false);
       })
       .catch(err => {
@@ -130,6 +130,27 @@ function Search(props: Props) {
         setLoading(false);
       });
   }, [props.navigation, searchText]);
+
+  const loadMore = useCallback(async (page: number) => {
+    try {
+      const searchResult = await AnimeAPI.search(query.current as string, page);
+      setData(old => {
+        if (old === null) {
+          return searchResult;
+        }
+        return {
+          ...searchResult,
+          result: old?.result.concat(searchResult.result),
+        };
+      });
+    } catch (err: any) {
+      const errMessage =
+        err.message === 'Network request failed'
+          ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+          : 'Error tidak diketahui: ' + err.message;
+      Alert.alert('Error', errMessage);
+    }
+  }, []);
 
   const onPressIn = useCallback(() => {
     searchButtonOpacity.value = withTiming(0.4, { duration: 100 });
@@ -208,14 +229,14 @@ function Search(props: Props) {
           <Text style={globalStyles.text}>
             Hasil pencarian untuk: {query.current}
           </Text>
-          {data.length > 0 ? (
+          {data.result.length > 0 ? (
             <ScrollView style={{ zIndex: 1 }}>
-              {data.map(z => {
+              {data.result.map((z, index) => {
                 return (
                   <TouchableOpacityAnimated
                     entering={FadeInRight}
                     style={styles.listContainer}
-                    key={'btn' + z.title}
+                    key={index}
                     onPress={() => {
                       props.navigation.dispatch(
                         StackActions.push('FromUrl', {
@@ -269,6 +290,19 @@ function Search(props: Props) {
                   </TouchableOpacityAnimated>
                 );
               })}
+              {data.nextPageAvailable && (
+                <View style={styles.nextPageView}>
+                  <TouchableOpacity
+                    style={styles.nextPageButton}
+                    onPress={() => {
+                      loadMore(data.nextPage);
+                    }}>
+                    <Text style={{ color: lightText }}>
+                      <Icon name="chevron-down" /> Muat lebih banyak
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </ScrollView>
           ) : (
             <Text style={globalStyles.text}>Tidak ada hasil!</Text>
@@ -343,6 +377,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 5,
+  },
+  nextPageView: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nextPageButton: {
+    backgroundColor: 'orange',
+    padding: 10,
   },
 });
 

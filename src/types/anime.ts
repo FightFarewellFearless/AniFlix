@@ -25,7 +25,7 @@ interface MovieList extends Maintenance {
   releaseYear: string;
 }
 
-interface SearchAnimeList extends Maintenance {
+interface SearchAnimeList {
   title: string;
   animeUrl: string;
   thumbnailUrl: string;
@@ -34,6 +34,19 @@ interface SearchAnimeList extends Maintenance {
   releaseYear: string;
   status: 'Ongoing' | 'Ended' | 'Movie';
 }
+
+type SearchAnime = {
+  result: SearchAnimeList[];
+} & Maintenance &
+  (
+    | {
+        nextPageAvailable: false;
+      }
+    | {
+        nextPageAvailable: true;
+        nextPage: number;
+      }
+  );
 
 interface Blocked extends FromUrl {
   blocked: true;
@@ -104,6 +117,7 @@ export type {
   NewAnimeList,
   MovieList,
   SearchAnimeList,
+  SearchAnime,
   EpsListEpisodeList,
   EpsList,
   Blocked,

@@ -3,16 +3,15 @@ import {
   EpsList,
   FromUrlMaintenance,
   Home,
-  Maintenance,
   MovieList,
   NewAnimeList,
-  SearchAnimeList,
+  SearchAnime,
   SingleEps,
 } from '../types/anime';
 import deviceUserAgent from './deviceUserAgent';
 
 class AnimeAPI {
-  private static base_url = 'https://animeapi.aceracia.repl.co/v3/';
+  private static base_url = 'https://animeapi.aceracia.repl.co/v4/';
 
   static async home(signal?: AbortSignal): Promise<Home> {
     const data = await fetch(this.base_url + 'home', {
@@ -52,15 +51,20 @@ class AnimeAPI {
 
   static async search(
     query: string,
+    page?: number,
     signal?: AbortSignal,
-  ): Promise<SearchAnimeList[] | Maintenance> {
-    const data = await fetch(this.base_url + `search?q=${query}`, {
-      signal,
-      headers: {
-        'User-Agent': deviceUserAgent,
+  ): Promise<SearchAnime> {
+    const data = await fetch(
+      this.base_url +
+        `search?q=${query}${page !== undefined ? '&page=' + page : ''}`,
+      {
+        signal,
+        headers: {
+          'User-Agent': deviceUserAgent,
+        },
       },
-    });
-    return await (data.json() as Promise<SearchAnimeList[] | Maintenance>);
+    );
+    return await (data.json() as Promise<SearchAnime>);
   }
 
   static async fromUrl(
