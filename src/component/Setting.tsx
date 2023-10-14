@@ -22,6 +22,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
+import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
 import globalStyles from '../assets/style';
 import { HomeContext } from '../misc/context';
 
@@ -129,6 +130,8 @@ function Setting(_props: Props) {
   const [backupCode, setBackupCode] = useState('');
 
   const { paramsState } = useContext(HomeContext);
+
+  const dropdownRef = useRef<IDropdownRef>(null);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -399,10 +402,14 @@ function Setting(_props: Props) {
     );
   };
 
-  const toggleDownloadFrom = useCallback(async () => {
-    const newDownloadFrom = downloadFrom === 'native' ? 'browser' : 'native';
-    setDownloadFrom(newDownloadFrom);
-  }, [downloadFrom, setDownloadFrom]);
+  const toggleDownloadFrom = useCallback(
+    async (value?: 'browser' | 'native') => {
+      const newDownloadFrom =
+        value ?? (downloadFrom === 'browser' ? 'native' : 'browser');
+      setDownloadFrom(newDownloadFrom);
+    },
+    [downloadFrom, setDownloadFrom],
+  );
 
   const iconSize = 18;
 
@@ -453,18 +460,52 @@ function Setting(_props: Props) {
         'Download anime melalui browser atau download manager bawaan android',
       icon: <Icon name="download" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
-        <Text
-          style={{
-            color: downloadFrom === 'native' ? '#09a709' : '#ff7300',
-            borderWidth: 1,
-            borderColor: 'yellow',
-            padding: 5,
-            margin: 2,
-          }}>
-          {downloadFrom}
-        </Text>
+        <Dropdown<{ value: 'browser' | 'native'; label: string }>
+          ref={dropdownRef}
+          data={[
+            { value: 'native', label: 'Native' },
+            { value: 'browser', label: 'Browser' },
+          ]}
+          value={downloadFrom}
+          mode="modal"
+          onConfirmSelectItem={value => {
+            dropdownRef.current?.close();
+            Alert.alert(
+              'Konfirmasi',
+              'Kamu yakin ingin mengubah mode download ke ' +
+                value.label +
+                '?' +
+                '\n\nPilih mode browser jika ingin mem-pause download ditengah-tengah dan memilih lokasi download.\nPilih mode native jika ingin memulai download dengan 1 klik.',
+              [
+                {
+                  text: 'Batal',
+                },
+                {
+                  text: 'Ya',
+                  onPress: () => {
+                    toggleDownloadFrom(value.value);
+                  },
+                },
+              ],
+            );
+          }}
+          onChange={value => {
+            toggleDownloadFrom(value.value);
+          }}
+          confirmSelectItem={true}
+          valueField={'value'}
+          labelField={'label'}
+          style={styles.dropdownStyle}
+          containerStyle={styles.dropdownContainerStyle}
+          itemTextStyle={styles.dropdownItemTextStyle}
+          itemContainerStyle={styles.dropdownItemContainerStyle}
+          activeColor="#16687c"
+          selectedTextStyle={styles.dropdownSelectedTextStyle}
+        />
       ),
-      handler: toggleDownloadFrom,
+      handler: () => {
+        dropdownRef.current?.open();
+      },
     },
     {
       title: 'Cadangkan data',
@@ -686,6 +727,28 @@ const styles = StyleSheet.create({
   modalRestoreText: {
     fontWeight: 'bold',
     fontSize: 17,
+  },
+  dropdownStyle: {
+    width: 100,
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    padding: 5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  dropdownContainerStyle: {
+    width: 120,
+  },
+  dropdownItemTextStyle: {
+    color: globalStyles.text.color,
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  dropdownItemContainerStyle: {
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+  },
+  dropdownSelectedTextStyle: {
+    color: globalStyles.text.color,
   },
 });
 
