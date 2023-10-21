@@ -11,12 +11,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Home as HomeType } from '../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../types/navigation';
 import WatchLater from './WatchLater';
+import { TouchableOpacity } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
+const Tab = createBottomTabNavigator<HomeNavigator>();
 
 function BottomTabs(props: Props) {
-  const Tab = createBottomTabNavigator<HomeNavigator>();
-
   const [paramsState, setParamsState] = useState<HomeType>(
     props.route.params.data,
   );
@@ -27,6 +27,7 @@ function BottomTabs(props: Props) {
           headerShown: false,
           tabBarStyle: { height: 40 },
           tabBarHideOnKeyboard: true,
+          tabBarButton: Bprops => <TouchableOpacity {...Bprops} />,
         }}>
         <Tab.Screen
           name="AnimeList"
