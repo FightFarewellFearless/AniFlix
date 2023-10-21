@@ -180,8 +180,9 @@ function EpsList(props: Props) {
         <ImageBackground
           source={{ uri: data.thumbnailUrl }}
           style={styles.imageHeader}
-          blurRadius={5}
-          resizeMethod="resize">
+          blurRadius={3}
+          resizeMode="cover"
+          resizeMethod="scale">
           <View style={styles.shadow} />
           {/* judul */}
           <View style={styles.judul}>
