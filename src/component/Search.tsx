@@ -138,6 +138,7 @@ function Search(props: Props) {
       return;
     }
     loadMoreLoading.current = true;
+    setLoading(true);
     try {
       const searchResult = await AnimeAPI.search(query.current as string, page);
       setData(old => {
@@ -157,6 +158,7 @@ function Search(props: Props) {
       Alert.alert('Error', errMessage);
     } finally {
       loadMoreLoading.current = false;
+      setLoading(false);
     }
   }, []);
 
