@@ -31,6 +31,12 @@ import DeviceInfo from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import { useAnimations } from '@react-native-media-console/reanimated';
+import ReAnimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import globalStyles, { darkText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -44,9 +50,11 @@ import { AppDispatch, RootState } from '../misc/reduxStore';
 import VideoType, { OnProgressData } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
-import { useAnimations } from '@react-native-media-console/reanimated';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
+
+const TouchableOpacityAnimated =
+  ReAnimated.createAnimatedComponent(TouchableOpacity);
 
 function Video(props: Props) {
   const enableNextPartNotification = useSelector(
@@ -78,9 +86,6 @@ function Video(props: Props) {
     useState(false);
   const preparePartAnimation = useRef(new Animated.Value(0)).current;
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
-
-  const [synopsysTextLayout, setSynopsysTextLayout] = useState(0);
-
   const [isControlsHidden, setIsControlsHidden] = useState(true);
 
   const downloadSource = useRef<string[]>([]);
@@ -143,6 +148,15 @@ function Video(props: Props) {
   const nextPartEnable = useRef<string>();
 
   const [isBackground, setIsBackground] = useState(false);
+
+  const infoContainerHeight = useSharedValue(0);
+  const initialInfoContainerHeight = useRef<number>();
+  const [synopsysTextLength, setSynopsysTextLength] = useState(0);
+  const synopsysHeight = useRef(0);
+  const infoContainerStyle = useAnimatedStyle(() => ({
+    height:
+      infoContainerHeight.value === 0 ? 'auto' : infoContainerHeight.value,
+  }));
 
   // didMount and willUnmount
   useEffect(() => {
@@ -689,10 +703,30 @@ function Video(props: Props) {
         // jika ya, maka hanya menampilkan video saja
         !fullscreen && (
           <ScrollView style={{ flex: 1 }}>
-            <TouchableOpacity
-              style={[styles.container]}
-              onPress={() => setShowSynopsys(!showSynopsys)}
-              disabled={synopsysTextLayout <= 2}>
+            <TouchableOpacityAnimated
+              style={[styles.container, infoContainerStyle]}
+              onLayout={e => {
+                if (initialInfoContainerHeight.current === undefined) {
+                  infoContainerHeight.value = e.nativeEvent.layout.height;
+                  initialInfoContainerHeight.current =
+                    e.nativeEvent.layout.height;
+                }
+              }}
+              onPress={() => {
+                if (showSynopsys) {
+                  setTimeout(setShowSynopsys, 100, false);
+                  infoContainerHeight.value = withTiming(
+                    initialInfoContainerHeight.current as number,
+                  );
+                } else {
+                  setTimeout(setShowSynopsys, 100, true);
+                  infoContainerHeight.value = withTiming(
+                    (initialInfoContainerHeight.current as number) +
+                      synopsysHeight.current,
+                  );
+                }
+              }}
+              disabled={synopsysTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>
                 {data.title}
               </Text>
@@ -700,9 +734,12 @@ function Video(props: Props) {
               <Text
                 style={[globalStyles.text, styles.infoSinopsis]}
                 numberOfLines={!showSynopsys ? 2 : undefined}
-                onTextLayout={e =>
-                  setSynopsysTextLayout(e.nativeEvent.lines.length)
-                }>
+                onTextLayout={e => {
+                  setSynopsysTextLength(e.nativeEvent.lines.length);
+                  synopsysHeight.current = e.nativeEvent.lines
+                    .slice(1)
+                    .reduce((prev, curr) => prev + curr.height, 0);
+                }}>
                 {data.synopsys}
               </Text>
 
@@ -734,7 +771,7 @@ function Video(props: Props) {
                 </Text>
               </View>
 
-              {synopsysTextLayout > 2 && (
+              {synopsysTextLength > 2 && (
                 <View style={{ alignItems: 'center', marginTop: 3 }}>
                   {showSynopsys ? (
                     <Icon name="chevron-up" size={20} />
@@ -743,7 +780,7 @@ function Video(props: Props) {
                   )}
                 </View>
               )}
-            </TouchableOpacity>
+            </TouchableOpacityAnimated>
 
             <View style={[styles.container, { marginTop: 10 }]}>
               {data.episodeData && (
@@ -972,6 +1009,7 @@ const styles = StyleSheet.create({
   infoSinopsis: {
     fontSize: 13.5,
     color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
+    overflow: 'hidden',
   },
   infoGenre: {
     marginVertical: 5,
