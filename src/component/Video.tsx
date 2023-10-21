@@ -146,8 +146,11 @@ function Video(props: Props) {
 
   // didMount and willUnmount
   useEffect(() => {
-    const appState = AppState.addEventListener('change', state => {
-      setIsBackground(state === 'background');
+    const appStateBlur = AppState.addEventListener('blur', () => {
+      setIsBackground(true);
+    });
+    const appStateFocus = AppState.addEventListener('focus', () => {
+      setIsBackground(false);
     });
 
     nextPartEnable.current = enableNextPartNotification;
@@ -157,7 +160,8 @@ function Video(props: Props) {
     return () => {
       willUnmountHandler();
       abortController.current?.abort();
-      appState.remove();
+      appStateBlur.remove();
+      appStateFocus.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -325,12 +329,14 @@ function Video(props: Props) {
       }
     }
     StatusBar.setHidden(true);
+    StatusBar.setTranslucent(true);
     SystemNavigationBar.navigationHide();
     setFullscreen(true);
   }, []);
 
   const exitFullscreen = useCallback(() => {
     StatusBar.setHidden(false);
+    StatusBar.setTranslucent(false);
     Orientation.lockToPortrait();
     SystemNavigationBar.navigationShow();
     setFullscreen(false);
@@ -1044,6 +1050,8 @@ const styles = StyleSheet.create({
   },
   dropdownItemTextStyle: {
     color: globalStyles.text.color,
+    fontSize: 15,
+    textAlign: 'center',
   },
   dropdownItemContainerStyle: {
     backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
