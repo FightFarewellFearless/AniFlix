@@ -3,7 +3,6 @@ import {
   View,
   Image,
   Text,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   TextInput,
@@ -35,6 +34,7 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { FlashList } from '@shopify/flash-list';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -77,6 +77,8 @@ function Search(props: Props) {
   const searchButtonAnimation = useSharedValue(100);
   const searchButtonOpacity = useSharedValue(1);
   const searchButtonMounted = useRef(false);
+
+  const loadMoreLoading = useRef<boolean>(false);
 
   const searchTextAnimationColor = useSharedValue(0);
 
@@ -132,6 +134,10 @@ function Search(props: Props) {
   }, [props.navigation, searchText]);
 
   const loadMore = useCallback(async (page: number) => {
+    if (loadMoreLoading.current) {
+      return;
+    }
+    loadMoreLoading.current = true;
     try {
       const searchResult = await AnimeAPI.search(query.current as string, page);
       setData(old => {
@@ -149,6 +155,8 @@ function Search(props: Props) {
           ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
           : 'Error tidak diketahui: ' + err.message;
       Alert.alert('Error', errMessage);
+    } finally {
+      loadMoreLoading.current = false;
     }
   }, []);
 
@@ -230,80 +238,82 @@ function Search(props: Props) {
             Hasil pencarian untuk: {query.current}
           </Text>
           {data.result.length > 0 ? (
-            <ScrollView style={{ zIndex: 1 }}>
-              {data.result.map((z, index) => {
-                return (
-                  <TouchableOpacityAnimated
-                    entering={FadeInRight}
-                    style={styles.listContainer}
-                    key={index}
-                    onPress={() => {
-                      props.navigation.dispatch(
-                        StackActions.push('FromUrl', {
-                          link: z.animeUrl,
-                        }),
-                      );
-                    }}>
-                    <Image
-                      resizeMode="stretch"
-                      key={z.title + z.episode}
-                      source={{ uri: z.thumbnailUrl }}
-                      style={styles.listImage}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <View style={styles.listTitle}>
-                        <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
-                          {z.title}
-                        </Text>
-                      </View>
-
-                      <View style={styles.episodeInfo}>
-                        <Text style={globalStyles.text}>
-                          {z.episode === '' ? 'Movie' : z.episode}
-                        </Text>
-                      </View>
-
-                      <View style={styles.ratingInfo}>
-                        <Text style={globalStyles.text}>
-                          <Icon name="star" style={{ color: 'gold' }} />{' '}
-                          {z.rating}
-                        </Text>
-                      </View>
-
-                      <View
-                        style={[
-                          styles.statusInfo,
-                          {
-                            borderColor:
-                              z.status === 'Ongoing' ? '#cf0000' : '#22b422',
-                          },
-                        ]}>
-                        <Text style={globalStyles.text}>{z.status}</Text>
-                      </View>
-
-                      <View style={styles.releaseInfo}>
-                        <Text style={globalStyles.text}>
-                          <Icon name="calendar" /> {z.releaseYear}
-                        </Text>
-                      </View>
+            <FlashList
+              estimatedItemSize={209}
+              data={data.result}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item: z }) => (
+                <TouchableOpacityAnimated
+                  entering={FadeInRight}
+                  style={styles.listContainer}
+                  onPress={() => {
+                    props.navigation.dispatch(
+                      StackActions.push('FromUrl', {
+                        link: z.animeUrl,
+                      }),
+                    );
+                  }}>
+                  <Image
+                    resizeMode="stretch"
+                    key={z.title + z.episode}
+                    source={{ uri: z.thumbnailUrl }}
+                    style={styles.listImage}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.listTitle}>
+                      <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
+                        {z.title}
+                      </Text>
                     </View>
-                  </TouchableOpacityAnimated>
-                );
-              })}
-              {data.nextPageAvailable && (
-                <View style={styles.nextPageView}>
-                  <TouchableOpacity
-                    style={styles.nextPageButton}
-                    onPress={() => {
-                      loadMore(data.nextPage);
-                    }}>
-                    <Text style={{ color: lightText }}>
-                      <Icon name="chevron-down" /> Muat lebih banyak
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+
+                    <View style={styles.episodeInfo}>
+                      <Text style={globalStyles.text}>
+                        {z.episode === '' ? 'Movie' : z.episode}
+                      </Text>
+                    </View>
+
+                    <View style={styles.ratingInfo}>
+                      <Text style={globalStyles.text}>
+                        <Icon name="star" style={{ color: 'gold' }} />{' '}
+                        {z.rating}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.statusInfo,
+                        {
+                          borderColor:
+                            z.status === 'Ongoing' ? '#cf0000' : '#22b422',
+                        },
+                      ]}>
+                      <Text style={globalStyles.text}>{z.status}</Text>
+                    </View>
+
+                    <View style={styles.releaseInfo}>
+                      <Text style={globalStyles.text}>
+                        <Icon name="calendar" /> {z.releaseYear}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacityAnimated>
               )}
-            </ScrollView>
+              ListFooterComponent={() =>
+                data.nextPageAvailable && (
+                  <View style={styles.nextPageView}>
+                    <TouchableOpacity
+                      style={styles.nextPageButton}
+                      onPress={() => {
+                        loadMore(data.nextPage);
+                      }}>
+                      <Text style={{ color: lightText }}>
+                        <Icon name="chevron-down" /> Muat lebih banyak
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )
+              }
+            />
           ) : (
             <Text style={globalStyles.text}>Tidak ada hasil!</Text>
           )}
