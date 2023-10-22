@@ -301,7 +301,7 @@ function AnnouncmentModal({
               onPress={() => setVisible(false)}
               style={styles.announcmentOKButton}>
               <Text style={[globalStyles.text, styles.announcmentOKText]}>
-                OK
+                Tutup
               </Text>
             </TouchableOpacity>
           </View>
@@ -439,20 +439,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0000008a',
+    backgroundColor: '#000000d0',
   },
   modalContent: {
     flex: 0.15,
-    backgroundColor: colorScheme === 'dark' ? '#202020' : '#d1d1d1',
+    backgroundColor: colorScheme === 'dark' ? '#181818' : '#d1d1d1',
     borderRadius: 9,
-    borderWidth: 1,
-    borderColor: '#525252',
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 100,
     minWidth: 250,
     elevation: 16,
-    shadowColor: '#02bb7d',
+    shadowColor: '#202020',
   },
   modalPengumuman: {
     flex: 1,
@@ -467,9 +465,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexGrow: 3,
     minWidth: 120,
-    borderColor: '#01463cff',
-    backgroundColor: colorScheme === 'dark' ? '#414141' : 'white',
-    borderWidth: 1,
+    backgroundColor: colorScheme === 'dark' ? '#353535' : 'white',
+    paddingTop: 1,
+    borderTopWidth: 1,
+    borderTopColor: colorScheme === 'dark' ? 'white' : 'black',
   },
   announcmentMessage: {
     textAlign: 'center',
@@ -482,13 +481,16 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   announcmentOKButton: {
-    backgroundColor: colorScheme === 'dark' ? 'white' : 'black',
+    backgroundColor: '#264914',
     width: 50,
     padding: 5,
     borderRadius: 3,
   },
   announcmentOKText: {
-    color: '#006bcf',
+    color: '#44a4ff',
+    textShadowColor: 'black',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
     fontWeight: 'bold',
     textAlign: 'center',
   },
