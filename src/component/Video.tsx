@@ -160,6 +160,7 @@ function Video(props: Props) {
 
   // didMount and willUnmount
   useEffect(() => {
+    AppState.currentState === 'background' && setIsBackground(true);
     const appStateBlur = AppState.addEventListener('blur', () => {
       setIsBackground(true);
     });
@@ -737,7 +738,7 @@ function Video(props: Props) {
                 onTextLayout={e => {
                   setSynopsysTextLength(e.nativeEvent.lines.length);
                   synopsysHeight.current = e.nativeEvent.lines
-                    .slice(1)
+                    .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {data.synopsys}
@@ -998,6 +999,7 @@ const styles = StyleSheet.create({
     backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#d8d8d8',
     elevation: colorScheme === 'light' ? 3 : undefined,
     padding: 13,
+    overflow: 'hidden',
   },
   infoTitle: {
     textAlign: 'center',
@@ -1009,7 +1011,6 @@ const styles = StyleSheet.create({
   infoSinopsis: {
     fontSize: 13.5,
     color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
-    overflow: 'hidden',
   },
   infoGenre: {
     marginVertical: 5,
