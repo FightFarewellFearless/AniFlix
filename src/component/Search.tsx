@@ -184,16 +184,18 @@ function Search(props: Props) {
 
   // @ts-ignore
   const textInputAnimation = useAnimatedStyle(() => {
+    const borderColor = interpolateColor(
+      searchTextAnimationColor.value,
+      [0, 1],
+      [
+        colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
+        'rgb(0, 128, 0)',
+      ],
+    );
     return {
       width: interpolate(searchButtonAnimation.value, [0, 100], [87, 98]) + '%',
-      borderColor: interpolateColor(
-        searchTextAnimationColor.value,
-        [0, 1],
-        [
-          colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
-          'rgb(0, 128, 0)',
-        ],
-      ),
+      borderTopColor: borderColor,
+      borderBottomColor: borderColor,
     };
   });
 
@@ -207,6 +209,7 @@ function Search(props: Props) {
           placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
           onFocus={onSearchTextFocus}
           onBlur={onSearchTextBlur}
+          autoCorrect={false}
           style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
@@ -343,10 +346,11 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 35,
     borderWidth: 0.8,
-    borderRadius: 10,
+    borderRadius: 5,
     backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
     marginLeft: 2,
     color: globalStyles.text.color,
+    textAlign: 'center',
   },
   searchButton: {
     justifyContent: 'center',
