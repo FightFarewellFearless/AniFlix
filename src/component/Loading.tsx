@@ -164,11 +164,6 @@ function Loading(props: Props) {
         alignItems: 'center',
         flex: 1,
       }}>
-      <View style={{ position: 'absolute', top: 15 }}>
-        <Text style={{ color: '#da2424' }}>
-          Aplikasi masih dalam tahap pengembangan
-        </Text>
-      </View>
       <ActivityIndicator size="large" />
       <Text style={globalStyles.text}>{loadStatus}, mohon tunggu...</Text>
       <View

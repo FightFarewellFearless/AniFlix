@@ -38,11 +38,6 @@ function FailedToConnect(props: Props) {
           alignItems: 'center',
           flex: 1,
         }}>
-        <View style={{ position: 'absolute', top: 15 }}>
-          <Text style={{ color: '#da2424' }}>
-            Aplikasi masih dalam tahap pengembangan
-          </Text>
-        </View>
         <Icon
           name="server-network-off"
           style={[
