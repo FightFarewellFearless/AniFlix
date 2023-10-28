@@ -1,4 +1,10 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -27,6 +33,8 @@ import Animated, {
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
+const MB = 1000;
+
 function NeedUpdate(props: Props) {
   const markdownElement = useMarkdown(props.route.params.changelog, {
     colorScheme: colorScheme,
@@ -35,6 +43,11 @@ function NeedUpdate(props: Props) {
   const [isDownloadStart, setIsDownloadStart] = useState(false);
   const downloadProgress = useSharedValue(0);
   const [isProgress100, setIsProgress100] = useState(true);
+
+  const lastMB = useRef(0);
+  const lastMS = useRef(0);
+  const totalMB = useRef(0);
+  const [netSpeed, setNetSpeed] = useState('0 MB/s');
 
   useAnimatedReaction(
     () => downloadProgress.value,
@@ -50,7 +63,7 @@ function NeedUpdate(props: Props) {
   useEffect(() => {
     RNFetchBlob.fs
       .exists(
-        `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
       )
       .then(value => {
         setIsDownloadStart(value);
@@ -66,13 +79,24 @@ function NeedUpdate(props: Props) {
       'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
     );
     RNFetchBlob.config({
-      path: `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+      path: `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
     })
       .fetch('GET', props.route.params.download)
       .progress((received, total) => {
         downloadProgress.value = withTiming(
           Math.floor((received / total) * 100),
         );
+        setNetSpeed(
+          `${(
+            (received - lastMB.current) /
+            MB /
+            MB /
+            ((Date.now() - lastMS.current) / 1000)
+          ).toFixed(2)} MB/s`,
+        );
+        lastMB.current = received;
+        lastMS.current = Date.now();
+        totalMB.current = total;
       })
       .then(async res => {
         setIsDownloadStart(true);
@@ -94,7 +118,7 @@ function NeedUpdate(props: Props) {
 
   const installUpdate = useCallback(() => {
     RNFetchBlob.android.actionViewIntent(
-      `/storage/emulated/0/Download/AniFlix-${props.route.params.latestVersion}.apk`,
+      `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
       'application/vnd.android.package-archive',
     );
   }, [props.route.params.latestVersion]);
@@ -158,11 +182,19 @@ function NeedUpdate(props: Props) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.download}>
+          <View style={[styles.download, { flexDirection: 'column' }]}>
             <View style={styles.sliderContainer}>
               <Animated.View
                 style={[styles.slider, downloadProgressAnimaton]}
               />
+            </View>
+            <View style={styles.netContainer}>
+              <Text style={[globalStyles.text, styles.netSpeed]}>
+                {netSpeed}
+              </Text>
+              <Text style={[globalStyles.text, styles.netTotal]}>
+                {(totalMB.current / MB / MB).toFixed(2)} MB
+              </Text>
             </View>
           </View>
         )}
@@ -221,16 +253,28 @@ const styles = StyleSheet.create({
   sliderContainer: {
     width: '100%',
     backgroundColor: 'gray',
-    height: 20,
+    height: 10,
     borderRadius: 5,
   },
   slider: {
-    height: 20,
+    height: 10,
     borderRadius: 5,
     backgroundColor: '#105494',
   },
   installOrRedownload: {
     flexDirection: 'row',
+  },
+  netContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  netSpeed: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  netTotal: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 

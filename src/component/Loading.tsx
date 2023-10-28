@@ -86,13 +86,20 @@ function Loading(props: Props) {
   }, [dispatchSettings]);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
-    const isExist = await RNFetchBlob.fs.exists(
-      `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`,
-    );
-    if (isExist) {
-      await RNFetchBlob.fs.unlink(
+    const isExist = await Promise.all([
+      // TODO: delete this line in next 2 versions
+      RNFetchBlob.fs.exists(
         `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`,
-      );
+      ),
+      RNFetchBlob.fs.exists(
+        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`,
+      ),
+    ]);
+    if (isExist.includes(true)) {
+      const existingPath = isExist[0]
+        ? `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`
+        : `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`;
+      await RNFetchBlob.fs.unlink(existingPath);
       ToastAndroid.show('Menghapus update tidak terpakai', ToastAndroid.SHORT);
     }
   }, []);
