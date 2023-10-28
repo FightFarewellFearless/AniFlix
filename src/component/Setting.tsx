@@ -106,7 +106,9 @@ function Setting(_props: Props) {
   const toggleScreenOrientation = useCallback(
     (value?: string) => {
       const newValue =
-        value === undefined ? lockScreenOrientation !== 'true' : Boolean(value);
+        value === undefined
+          ? lockScreenOrientation !== 'true'
+          : value === 'true';
 
       if (newValue === true) {
         Orientation.lockToPortrait();
