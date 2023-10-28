@@ -235,6 +235,7 @@ function Video(props: Props) {
       const resultData = await AnimeAPI.fromUrl(
         currentLink.current,
         res,
+        true,
         abortController.current?.signal,
       ).catch(err => {
         if (err.message === 'Aborted') {
@@ -531,6 +532,7 @@ function Video(props: Props) {
       setLoading(true);
       const result = await AnimeAPI.fromUrl(
         url,
+        undefined,
         undefined,
         abortController.current?.signal,
       ).catch(err => {

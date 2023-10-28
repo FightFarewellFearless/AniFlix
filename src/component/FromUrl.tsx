@@ -36,7 +36,7 @@ function FromUrl(props: Props) {
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
 
-    AnimeAPI.fromUrl(props.route.params.link, resolution, abort.signal)
+    AnimeAPI.fromUrl(props.route.params.link, resolution, false, abort.signal)
       .then(async result => {
         if (result === 'Unsupported') {
           Alert.alert(

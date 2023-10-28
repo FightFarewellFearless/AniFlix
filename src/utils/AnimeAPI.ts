@@ -70,13 +70,14 @@ class AnimeAPI {
   static async fromUrl(
     link: string,
     resolution?: string,
+    skipAutoRes?: boolean,
     signal?: AbortSignal,
   ): Promise<fromUrlJSON | 'Unsupported'> {
     const data = await fetch(
       this.base_url +
         `fromUrl?link=${link}${
           resolution !== undefined ? '&res=' + resolution : ''
-        }&appVer=pre-view`,
+        }${skipAutoRes !== undefined ? '&skipAutoRes=' + skipAutoRes : ''}`,
       {
         signal,
         headers: {
