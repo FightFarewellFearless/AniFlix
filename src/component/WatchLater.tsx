@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../types/navigation';
-import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef } from 'react';
 import React, {
@@ -46,7 +46,7 @@ function WatchLater(props: Props) {
     }, []),
   );
 
-  const watchLaterLists = useSelectorOnFocus<watchLaterJSON[]>(
+  const watchLaterLists = useSelectorIfFocused<watchLaterJSON[]>(
     state => state.settings.watchLater,
     true,
     result => JSON.parse(result) as watchLaterJSON[],

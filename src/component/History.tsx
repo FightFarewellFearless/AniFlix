@@ -29,7 +29,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as typeof FlashList<HistoryJSON>,
@@ -40,7 +40,7 @@ const TouchableOpacityAnimated =
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
 function History(props: Props) {
-  const data = useSelectorOnFocus(
+  const data = useSelectorIfFocused(
     state => state.settings.history,
     true,
     state => JSON.parse(state) as HistoryJSON[],

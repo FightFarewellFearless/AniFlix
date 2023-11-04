@@ -2,16 +2,16 @@ import { useCallback, useRef, useState } from 'react';
 import store, { RootState } from '../misc/reduxStore';
 import { useFocusEffect } from '@react-navigation/native';
 
-function useSelectorOnFocus(
+function useSelectorIfFocused(
   selector: (state: RootState) => string,
   fetchOnFocus?: boolean,
 ): string;
-function useSelectorOnFocus<T = string>(
+function useSelectorIfFocused<T = string>(
   selector: (state: RootState) => string,
   fetchOnFocus?: boolean,
   modifierFunc?: (result: string) => T,
 ): T;
-function useSelectorOnFocus<T = string>(
+function useSelectorIfFocused<T = string>(
   selector: (state: RootState) => string,
   fetchOnFocus?: boolean,
   modifierFunc?: (result: string) => T,
@@ -50,4 +50,4 @@ function useSelectorOnFocus<T = string>(
   return data;
 }
 
-export default useSelectorOnFocus;
+export default useSelectorIfFocused;

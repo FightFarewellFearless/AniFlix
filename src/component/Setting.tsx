@@ -36,7 +36,7 @@ import { HomeNavigator } from '../types/navigation';
 import store, { AppDispatch, RootState } from '../misc/reduxStore';
 import { HistoryJSON } from '../types/historyJSON';
 import colorScheme from '../utils/colorScheme';
-import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../types/watchLaterJSON';
 import { SetDatabaseTarget } from '../types/redux';
 import moment from 'moment';
@@ -52,11 +52,11 @@ interface SettingsData {
 type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
-  const enableNextPartNotification = useSelectorOnFocus(
+  const enableNextPartNotification = useSelectorIfFocused(
     (state: RootState) => state.settings.enableNextPartNotification,
     true,
   );
-  const enableBatteryTimeInfo = useSelectorOnFocus(
+  const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
     true,
   );
@@ -84,7 +84,7 @@ function Setting(_props: Props) {
     );
   };
   // const [downloadFrom, setDownloadFrom] = useState('native');
-  const downloadFrom = useSelectorOnFocus(
+  const downloadFrom = useSelectorIfFocused(
     (state: RootState) => state.settings.downloadFrom,
   );
   const setDownloadFrom = useCallback(
@@ -99,7 +99,7 @@ function Setting(_props: Props) {
     [dispatchSettings],
   );
 
-  const lockScreenOrientation = useSelectorOnFocus(
+  const lockScreenOrientation = useSelectorIfFocused(
     (state: RootState) => state.settings.lockScreenOrientation,
   );
   const lockScreenOrientationSwitch = lockScreenOrientation === 'true';

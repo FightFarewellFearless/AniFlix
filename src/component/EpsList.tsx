@@ -22,7 +22,7 @@ import { EpsList as EpisodeListType, EpsListEpisodeList } from '../types/anime';
 import colorScheme from '../utils/colorScheme';
 import controlWatchLater from '../utils/watchLaterControl';
 import watchLaterJSON from '../types/watchLaterJSON';
-import useSelectorOnFocus from '../hooks/useSelectorOnFocus';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 
 const TouchableOpacityMemo = memo(TouchableOpacity);
 const FlashListMemo = memo<typeof FlashList<EpsListEpisodeList>>(
@@ -46,7 +46,7 @@ function EpsList(props: Props) {
   const synopsys = useRef<ScrollView>(null);
   const epsList = useRef<FlashList<EpsListEpisodeList>>(null);
 
-  const watchLaterListsJson = useSelectorOnFocus(
+  const watchLaterListsJson = useSelectorIfFocused(
     state => state.settings.watchLater,
     true,
     state => JSON.parse(state) as watchLaterJSON[],
