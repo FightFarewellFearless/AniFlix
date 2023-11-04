@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 
-import store, { AppDispatch } from '../misc/reduxStore';
+import { AppDispatch } from '../misc/reduxStore';
 import { setDatabase } from '../misc/reduxSlice';
 import globalStyles from '../assets/style';
 import defaultDatabase from '../misc/defaultDatabaseValue.json';
@@ -32,6 +32,14 @@ import RNFetchBlob from 'rn-fetch-blob';
 type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
 
 function Loading(props: Props) {
+  useEffect(() => {
+    Orientation.unlockAllOrientations(); // to prevent orientation locked during activity changes
+    (async () => {
+      if ((await AsyncStorage.getItem('lockScreenOrientation')) === 'true') {
+        Orientation.lockToPortrait();
+      }
+    })();
+  }, []);
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
 
   const dispatchSettings = useDispatch<AppDispatch>();
@@ -78,11 +86,6 @@ function Loading(props: Props) {
         }),
       );
     }
-    setTimeout(() => {
-      if (store.getState().settings.lockScreenOrientation === 'true') {
-        Orientation.lockToPortrait();
-      }
-    }, 1000);
   }, [dispatchSettings]);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
