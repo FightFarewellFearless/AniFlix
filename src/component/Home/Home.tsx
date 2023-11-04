@@ -6,10 +6,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './AnimeList';
 import Setting from './Setting';
 import Search from './Search';
-import { HomeContext } from '../misc/context';
+import { HomeContext } from '../../misc/context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Home as HomeType } from '../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../types/navigation';
+import { Home as HomeType } from '../../types/anime';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import WatchLater from './WatchLater';
 import { TouchableOpacity } from 'react-native';
 

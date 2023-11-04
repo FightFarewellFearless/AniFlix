@@ -7,16 +7,16 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import globalStyles from '../assets/style';
-import randomTipsArray from '../assets/loadingTips.json';
-import setHistory from '../utils/historyControl';
+import globalStyles from '../../assets/style';
+import randomTipsArray from '../../assets/loadingTips.json';
+import setHistory from '../../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import store, { AppDispatch, RootState } from '../misc/reduxStore';
-import { RootStackNavigator } from '../types/navigation';
-import watchLaterJSON from '../types/watchLaterJSON';
-import controlWatchLater from '../utils/watchLaterControl';
-import AnimeAPI from '../utils/AnimeAPI';
+import store, { AppDispatch, RootState } from '../../misc/reduxStore';
+import { RootStackNavigator } from '../../types/navigation';
+import watchLaterJSON from '../../types/watchLaterJSON';
+import controlWatchLater from '../../utils/watchLaterControl';
+import AnimeAPI from '../../utils/AnimeAPI';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
@@ -36,7 +36,12 @@ function FromUrl(props: Props) {
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
 
-    AnimeAPI.fromUrl(props.route.params.link, resolution, false, abort.signal)
+    AnimeAPI.fromUrl(
+      props.route.params.link,
+      resolution,
+      !!resolution,
+      abort.signal,
+    )
       .then(async result => {
         if (result === 'Unsupported') {
           Alert.alert(

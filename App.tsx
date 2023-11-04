@@ -4,10 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 
-import Loading from './src/component/Loading';
+import Connecting from './src/component/Loading Screen/Connect';
 import EpsList from './src/component/EpsList';
-import Home from './src/component/Home';
-import FromUrl from './src/component/FromUrl';
+import Home from './src/component/Home/Home';
+import FromUrl from './src/component/Loading Screen/FromUrl';
 import Video from './src/component/Video';
 import Blocked from './src/component/Blocked';
 import FailedToConnect from './src/component/FailedToConnect';
@@ -34,7 +34,7 @@ function App() {
       )}
       <Provider store={store}>
         <Stack.Navigator
-          initialRouteName="loading"
+          initialRouteName="connectToServer"
           screenOptions={{
             headerShown: false,
             animation: 'fade_from_bottom',
@@ -43,7 +43,7 @@ function App() {
           <Stack.Screen name="EpisodeList" component={EpsList} />
           <Stack.Screen name="FromUrl" component={FromUrl} />
           <Stack.Screen name="Video" component={Video} />
-          <Stack.Screen name="loading" component={Loading} />
+          <Stack.Screen name="connectToServer" component={Connecting} />
           <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
           <Stack.Screen name="Blocked" component={Blocked} />
           <Stack.Screen name="FailedToConnect" component={FailedToConnect} />

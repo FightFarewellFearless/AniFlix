@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
-  Image,
   Text,
   TouchableOpacity,
   StyleSheet,
@@ -16,14 +15,14 @@ import {
   StackActions,
   CompositeScreenProps,
 } from '@react-navigation/native';
-import globalStyles, { lightText } from '../assets/style';
+import globalStyles, { lightText } from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator, RootStackNavigator } from '../types/navigation';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SearchAnime } from '../types/anime';
-import colorScheme from '../utils/colorScheme';
-import AnimeAPI from '../utils/AnimeAPI';
+import { SearchAnime } from '../../types/anime';
+import colorScheme from '../../utils/colorScheme';
+import AnimeAPI from '../../utils/AnimeAPI';
 
 import Reanimated, {
   FadeInRight,
@@ -35,6 +34,7 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
+import ImageLoading from '../ImageLoading';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -258,9 +258,8 @@ function Search(props: Props) {
                       }),
                     );
                   }}>
-                  <Image
+                  <ImageLoading
                     resizeMode="stretch"
-                    key={z.title + z.episode}
                     source={{ uri: z.thumbnailUrl }}
                     style={styles.listImage}
                   />

@@ -9,7 +9,7 @@ type HomeNavigator = {
 };
 
 type RootStackNavigator = {
-  loading: undefined;
+  connectToServer: undefined;
   Home: {
     data: Home;
   };

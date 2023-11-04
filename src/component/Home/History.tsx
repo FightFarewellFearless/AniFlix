@@ -2,7 +2,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   Alert,
   Animated as RNAnimated,
   StyleSheet,
@@ -10,15 +9,15 @@ import {
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import globalStyles from '../assets/style';
+import globalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
-import { setDatabase } from '../misc/reduxSlice';
-import { AppDispatch } from '../misc/reduxStore';
+import { setDatabase } from '../../misc/reduxSlice';
+import { AppDispatch } from '../../misc/reduxStore';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator } from '../types/navigation';
-import { HistoryJSON } from '../types/historyJSON';
-import colorScheme from '../utils/colorScheme';
+import { HomeNavigator } from '../../types/navigation';
+import { HistoryJSON } from '../../types/historyJSON';
+import colorScheme from '../../utils/colorScheme';
 import Animated, {
   FadeInRight,
   FadeOutLeft,
@@ -29,7 +28,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
+import ImageLoading from '../ImageLoading';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as typeof FlashList<HistoryJSON>,
@@ -157,7 +157,7 @@ function History(props: Props) {
               }),
             );
           }}>
-          <Image
+          <ImageLoading
             resizeMode="stretch"
             source={{ uri: item.thumbnailUrl }}
             style={styles.listImage}

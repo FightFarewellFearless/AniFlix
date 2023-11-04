@@ -23,22 +23,22 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
-import globalStyles from '../assets/style';
-import { HomeContext } from '../misc/context';
+import globalStyles from '../../assets/style';
+import { HomeContext } from '../../misc/context';
 
 import { useDispatch } from 'react-redux';
 
-import { setDatabase } from '../misc/reduxSlice';
+import { setDatabase } from '../../misc/reduxSlice';
 import Orientation from 'react-native-orientation-locker';
-import deviceUserAgent from '../utils/deviceUserAgent';
+import deviceUserAgent from '../../utils/deviceUserAgent';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HomeNavigator } from '../types/navigation';
-import store, { AppDispatch, RootState } from '../misc/reduxStore';
-import { HistoryJSON } from '../types/historyJSON';
-import colorScheme from '../utils/colorScheme';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
-import watchLaterJSON from '../types/watchLaterJSON';
-import { SetDatabaseTarget } from '../types/redux';
+import { HomeNavigator } from '../../types/navigation';
+import store, { AppDispatch, RootState } from '../../misc/reduxStore';
+import { HistoryJSON } from '../../types/historyJSON';
+import colorScheme from '../../utils/colorScheme';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
+import watchLaterJSON from '../../types/watchLaterJSON';
+import { SetDatabaseTarget } from '../../types/redux';
 import moment from 'moment';
 
 interface SettingsData {

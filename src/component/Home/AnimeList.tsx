@@ -11,7 +11,6 @@ import {
   View,
   RefreshControl,
   Text,
-  ImageBackground,
   TouchableOpacity,
   ToastAndroid,
   StyleSheet,
@@ -23,18 +22,19 @@ import {
   Linking,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
-import globalStyles from '../assets/style';
+import globalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { HomeContext } from '../misc/context';
-import runningText from '../assets/runningText.json';
-import { MovieList as MovieListType, NewAnimeList } from '../types/anime';
-import { HomeNavigator } from '../types/navigation';
+import { HomeContext } from '../../misc/context';
+import runningText from '../../assets/runningText.json';
+import { MovieList as MovieListType, NewAnimeList } from '../../types/anime';
+import { HomeNavigator } from '../../types/navigation';
 import {
   BottomTabNavigationProp,
   BottomTabScreenProps,
 } from '@react-navigation/bottom-tabs';
-import colorScheme from '../utils/colorScheme';
-import AnimeAPI from '../utils/AnimeAPI';
+import colorScheme from '../../utils/colorScheme';
+import AnimeAPI from '../../utils/AnimeAPI';
+import ImageLoading from '../ImageLoading';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
@@ -330,7 +330,7 @@ function AnimeList(props: {
           }),
         );
       }}>
-      <ImageBackground
+      <ImageLoading
         resizeMode="stretch"
         key={z.title + z.episode}
         source={{ uri: z.thumbnailUrl }}
@@ -354,7 +354,7 @@ function AnimeList(props: {
             <Icon name="star" /> {z.rating}
           </Text>
         </View>
-      </ImageBackground>
+      </ImageLoading>
     </TouchableOpacity>
   );
 }
@@ -378,7 +378,7 @@ function MovieList(props: {
           }),
         );
       }}>
-      <ImageBackground
+      <ImageLoading
         resizeMode="stretch"
         key={z.title}
         source={{ uri: z.thumbnailUrl }}
@@ -400,7 +400,7 @@ function MovieList(props: {
             <Icon name="star" /> {z.rating}
           </Text>
         </View>
-      </ImageBackground>
+      </ImageLoading>
     </TouchableOpacity>
   );
 }

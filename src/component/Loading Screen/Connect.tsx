@@ -14,22 +14,22 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 
-import { AppDispatch } from '../misc/reduxStore';
-import { setDatabase } from '../misc/reduxSlice';
-import globalStyles from '../assets/style';
-import defaultDatabase from '../misc/defaultDatabaseValue.json';
-import { version as appVersion } from '../../package.json';
-import deviceUserAgent from '../utils/deviceUserAgent';
+import { AppDispatch } from '../../misc/reduxStore';
+import { setDatabase } from '../../misc/reduxSlice';
+import globalStyles from '../../assets/style';
+import defaultDatabase from '../../misc/defaultDatabaseValue.json';
+import { version as appVersion } from '../../../package.json';
+import deviceUserAgent from '../../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackNavigator } from '../types/navigation';
-import { SetDatabaseTarget } from '../types/redux';
-import { Home } from '../types/anime';
-import colorScheme from '../utils/colorScheme';
-import AnimeAPI from '../utils/AnimeAPI';
+import { RootStackNavigator } from '../../types/navigation';
+import { SetDatabaseTarget } from '../../types/redux';
+import { Home } from '../../types/anime';
+import colorScheme from '../../utils/colorScheme';
+import AnimeAPI from '../../utils/AnimeAPI';
 import RNFetchBlob from 'rn-fetch-blob';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'loading'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator } from '../types/navigation';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
+import { HomeNavigator } from '../../types/navigation';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef } from 'react';
 import React, {
@@ -13,12 +13,12 @@ import React, {
 } from 'react-native';
 import Reanimated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import watchLaterJSON from '../types/watchLaterJSON';
-import colorScheme from '../utils/colorScheme';
-import globalStyles from '../assets/style';
+import watchLaterJSON from '../../types/watchLaterJSON';
+import colorScheme from '../../utils/colorScheme';
+import globalStyles from '../../assets/style';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import controlWatchLater from '../utils/watchLaterControl';
+import controlWatchLater from '../../utils/watchLaterControl';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'WatchLater'>;
 const TouchableOpacityAnimated =
