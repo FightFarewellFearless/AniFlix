@@ -20,23 +20,21 @@ function ImageLoading(props: ImageBackgroundProps) {
   }
 
   return (
-    <View style={[props.style, { overflow: 'hidden' }]}>
-      <ImageBackground
-        {...props}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
-        onError={() => {
-          setError(true);
-          setLoading(false);
-        }}>
-        {props.children}
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          {loading && <ActivityIndicator />}
-          {error && <Icon name="exclamation-circle" />}
-        </View>
-      </ImageBackground>
-    </View>
+    <ImageBackground
+      {...props}
+      style={[props.style, { overflow: 'hidden' }]}
+      onLoadStart={() => setLoading(true)}
+      onLoadEnd={() => setLoading(false)}
+      onError={() => {
+        setError(true);
+        setLoading(false);
+      }}>
+      {props.children}
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        {loading && <ActivityIndicator />}
+        {error && <Icon name="exclamation-circle" />}
+      </View>
+    </ImageBackground>
   );
 }
 

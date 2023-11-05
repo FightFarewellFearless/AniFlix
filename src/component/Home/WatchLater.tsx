@@ -5,7 +5,6 @@ import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef } from 'react';
 import React, {
   Animated,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -19,6 +18,7 @@ import globalStyles from '../../assets/style';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import controlWatchLater from '../../utils/watchLaterControl';
+import ImageLoading from '../ImageLoading';
 
 type Props = BottomTabScreenProps<HomeNavigator, 'WatchLater'>;
 const TouchableOpacityAnimated =
@@ -66,7 +66,10 @@ function WatchLater(props: Props) {
               }),
             );
           }}>
-          <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
+          <ImageLoading
+            source={{ uri: item.thumbnailUrl }}
+            style={styles.thumbnail}
+          />
           <View style={styles.ratingContainer}>
             <Text style={[globalStyles.text, styles.listRatingText]}>
               <Icon name="star" /> {item.rating}
