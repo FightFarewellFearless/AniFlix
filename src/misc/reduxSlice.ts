@@ -26,27 +26,17 @@ export const setDatabase = createAsyncThunk<
   return { target: action.target, value };
 });
 
-export const settingsSlice: Slice<
-  {
-    history: string;
-    enableNextPartNotification: string;
-    enableBatteryTimeInfo: string;
-    downloadFrom: string;
-    lockScreenOrientation: string;
-    watchLater: string;
-  },
-  {},
-  'settings'
-> = createSlice({
-  name: 'settings',
-  initialState: defaultDatabase,
-  reducers: {},
-  extraReducers: builder => {
-    builder.addCase(setDatabase.fulfilled, (state, action) => {
-      const { target, value } = action.payload;
-      state[target] = value;
-    });
-  },
-});
+export const settingsSlice: Slice<typeof defaultDatabase, {}, 'settings'> =
+  createSlice({
+    name: 'settings',
+    initialState: defaultDatabase,
+    reducers: {},
+    extraReducers: builder => {
+      builder.addCase(setDatabase.fulfilled, (state, action) => {
+        const { target, value } = action.payload;
+        state[target] = value;
+      });
+    },
+  });
 
 export default settingsSlice.reducer;
