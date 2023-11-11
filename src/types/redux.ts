@@ -1,7 +1,3 @@
-export type SetDatabaseTarget =
-  | 'history'
-  | 'enableNextPartNotification'
-  | 'enableBatteryTimeInfo'
-  | 'downloadFrom'
-  | 'lockScreenOrientation'
-  | 'watchLater';
+import defaultDatabase from '../misc/defaultDatabaseValue.json';
+
+export type SetDatabaseTarget = keyof typeof defaultDatabase;
