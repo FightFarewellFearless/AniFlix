@@ -387,7 +387,7 @@ function Search(props: Props) {
                 <View
                   style={{
                     borderBottomWidth: 0.5,
-                    borderColor: 'gray',
+                    borderColor: colorScheme === 'dark' ? 'gray' : 'black',
                     width: '100%',
                   }}
                 />
@@ -423,7 +423,7 @@ function HistoryList({
         onChangeTextFunction(item);
       }}>
       <View style={{ alignItems: 'center', flex: 1 }}>
-        <Text>{item}</Text>
+        <Text style={globalStyles.text}>{item}</Text>
       </View>
       <TouchableOpacity
         hitSlop={14}
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   searchHistoryScrollBox: {
-    backgroundColor: '#2c2929',
+    backgroundColor: colorScheme === 'dark' ? '#2c2929' : 'gray',
   },
 });
 
