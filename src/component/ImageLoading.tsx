@@ -14,6 +14,7 @@ function ImageLoading(props: ImageBackgroundProps) {
   const [error, setError] = useState(false);
 
   if (lastLink.current !== props.source) {
+    // reset the state. useful on recycledView
     lastLink.current = props.source;
     setLoading(false);
     setError(false);
