@@ -4,5 +4,6 @@
     "enableBatteryTimeInfo": "false",
     "downloadFrom": "native",
     "lockScreenOrientation": "false",
-    "watchLater": "[]"
+    "watchLater": "[]",
+    "searchHistory": "[]"
 }

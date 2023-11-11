@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Pressable,
+  Keyboard,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -33,8 +34,12 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import ImageLoading from '../ImageLoading';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
+import { useDispatch } from 'react-redux';
+import { setDatabase } from '../../misc/reduxSlice';
+import { AppDispatch } from '../../misc/reduxStore';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -58,6 +63,11 @@ function Search(props: Props) {
         duration: 150,
         useNativeDriver: true,
       }).start();
+      const keyboardEvent = Keyboard.addListener('keyboardDidHide', () => {
+        if (textInputRef.current) {
+          textInputRef.current.blur();
+        }
+      });
       return () => {
         Animated.timing(scaleAnim, {
           toValue: 0.8,
@@ -65,6 +75,7 @@ function Search(props: Props) {
           duration: 250,
           useNativeDriver: true,
         }).start();
+        keyboardEvent.remove();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
@@ -73,10 +84,21 @@ function Search(props: Props) {
   const [searchText, setSearchText] = useState<string>('');
   const [data, setData] = useState<null | SearchAnime>(null);
   const [loading, setLoading] = useState(false);
+  const [searchHistoryDisplay, setSearchHistoryDisplay] =
+    useState<boolean>(false);
   const query = useRef<undefined | string>();
   const searchButtonAnimation = useSharedValue(100);
   const searchButtonOpacity = useSharedValue(1);
   const searchButtonMounted = useRef(false);
+
+  const searchHistory = useSelectorIfFocused(
+    state => state.settings.searchHistory,
+    true,
+    result => JSON.parse(result) as string[],
+  );
+  const dispatchSettings = useDispatch<AppDispatch>();
+
+  const textInputRef = useRef<TextInput>(null);
 
   const loadMoreLoading = useRef<boolean>(false);
 
@@ -107,6 +129,7 @@ function Search(props: Props) {
       return;
     }
     setLoading(true);
+    textInputRef.current?.blur();
     AnimeAPI.search(searchText)
       .then(async result => {
         if ('maintenance' in result && result.maintenance === true) {
@@ -119,6 +142,16 @@ function Search(props: Props) {
         query.current = searchText;
         setData(result);
         setLoading(false);
+        if (searchHistory.includes(searchText)) {
+          searchHistory.splice(searchHistory.indexOf(searchText), 1);
+        }
+        searchHistory.unshift(searchText);
+        dispatchSettings(
+          setDatabase({
+            target: 'searchHistory',
+            value: JSON.stringify(searchHistory),
+          }),
+        );
       })
       .catch(err => {
         // if (err.message === 'Aborted') {
@@ -131,7 +164,7 @@ function Search(props: Props) {
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [props.navigation, searchText]);
+  }, [dispatchSettings, props.navigation, searchHistory, searchText]);
 
   const loadMore = useCallback(async (page: number) => {
     if (loadMoreLoading.current) {
@@ -174,11 +207,13 @@ function Search(props: Props) {
 
   const onSearchTextFocus = useCallback(() => {
     searchTextAnimationColor.value = withTiming(1, { duration: 400 });
+    setSearchHistoryDisplay(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextBlur = useCallback(() => {
     searchTextAnimationColor.value = withTiming(0, { duration: 400 });
+    setSearchHistoryDisplay(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -198,11 +233,31 @@ function Search(props: Props) {
       borderBottomColor: borderColor,
     };
   });
+  const pressableAnimationStyle = useAnimatedStyle(() => ({
+    opacity: searchButtonOpacity.value,
+    transform: [
+      {
+        translateX: searchButtonAnimation.value,
+      },
+    ],
+  }));
+
+  function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
+    return (
+      <HistoryList
+        index={index}
+        item={item}
+        data={searchHistory}
+        onChangeTextFunction={onChangeText}
+      />
+    );
+  }
 
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
       <View style={{ flexDirection: 'row' }}>
         <TextInputAnimation
+          value={searchText}
           onSubmitEditing={submit}
           onChangeText={onChangeText}
           placeholder="Cari anime disini"
@@ -210,29 +265,21 @@ function Search(props: Props) {
           onFocus={onSearchTextFocus}
           onBlur={onSearchTextBlur}
           autoCorrect={false}
+          ref={textInputRef}
           style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
           onPress={submit}
           onPressIn={onPressIn}
           onPressOut={onPressOut}
-          style={[
-            styles.searchButton,
-            {
-              opacity: searchButtonOpacity,
-              transform: [
-                {
-                  translateX: searchButtonAnimation,
-                },
-              ],
-            },
-          ]}>
+          style={[styles.searchButton, pressableAnimationStyle]}>
           <Text style={{ color: '#272727' }}>
             <Icon name="search" style={{ color: '#413939' }} size={17} />
             Cari
           </Text>
         </PressableAnimation>
       </View>
+
       {data === null ? (
         <View style={styles.center}>
           <Text style={styles.nullDataText}>Silahkan cari terlebih dahulu</Text>
@@ -326,7 +373,73 @@ function Search(props: Props) {
       {loading && (
         <ActivityIndicator style={styles.centerLoading} size="large" />
       )}
+      {/* SEARCH HISTORY VIEW */}
+      {searchHistoryDisplay && (
+        <View style={[styles.searchHistoryContainer]}>
+          <View style={{ height: 120 }}>
+            <FlashList
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.searchHistoryScrollBox}
+              data={searchHistory}
+              renderItem={renderSearchHistory}
+              estimatedItemSize={32}
+              ItemSeparatorComponent={() => (
+                <View
+                  style={{
+                    borderBottomWidth: 0.5,
+                    borderColor: 'gray',
+                    width: '100%',
+                  }}
+                />
+              )}
+            />
+          </View>
+        </View>
+      )}
     </Animated.View>
+  );
+}
+
+function HistoryList({
+  index,
+  item,
+  onChangeTextFunction,
+  data: searchHistory,
+}: {
+  index: number;
+  item: string;
+  onChangeTextFunction: (text: string) => void;
+  data: string[];
+}) {
+  const dispatch = useDispatch<AppDispatch>();
+  return (
+    <TouchableOpacity
+      style={{
+        padding: 6,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      }}
+      onPress={() => {
+        onChangeTextFunction(item);
+      }}>
+      <View style={{ alignItems: 'center', flex: 1 }}>
+        <Text>{item}</Text>
+      </View>
+      <TouchableOpacity
+        hitSlop={14}
+        onPress={() => {
+          dispatch(
+            setDatabase({
+              target: 'searchHistory',
+              value: JSON.stringify(
+                searchHistory.filter((_, i) => i !== index),
+              ),
+            }),
+          );
+        }}>
+        <Icon name="close" size={20} />
+      </TouchableOpacity>
+    </TouchableOpacity>
   );
 }
 
@@ -401,6 +514,15 @@ const styles = StyleSheet.create({
   nextPageButton: {
     backgroundColor: 'orange',
     padding: 10,
+  },
+  searchHistoryContainer: {
+    position: 'absolute',
+    top: 37,
+    width: '100%',
+    zIndex: 2,
+  },
+  searchHistoryScrollBox: {
+    backgroundColor: '#2c2929',
   },
 });
 
