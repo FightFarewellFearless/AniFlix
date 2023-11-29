@@ -18,20 +18,14 @@ import { RootStackNavigator } from './src/types/navigation';
 import globalStyles from './src/assets/style';
 import colorScheme from './src/utils/colorScheme';
 
+const Stack = createNativeStackNavigator<RootStackNavigator>();
 function App() {
-  const Stack = createNativeStackNavigator<RootStackNavigator>();
-
   useEffect(() => {
     StatusBar.setHidden(false);
   }, []);
 
   return (
     <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : undefined}>
-      {__DEV__ && (
-        <View style={styles.Dev} pointerEvents="none">
-          <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-        </View>
-      )}
       <Provider store={store}>
         <Stack.Navigator
           initialRouteName="connectToServer"
@@ -50,6 +44,11 @@ function App() {
           <Stack.Screen name="Maintenance" component={Maintenance} />
         </Stack.Navigator>
       </Provider>
+      {__DEV__ && (
+        <View style={styles.Dev} pointerEvents="none">
+          <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+        </View>
+      )}
     </NavigationContainer>
   );
 }
