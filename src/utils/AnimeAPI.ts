@@ -11,7 +11,7 @@ import {
 import deviceUserAgent from './deviceUserAgent';
 
 class AnimeAPI {
-  private static base_url = 'https://animeapi.aceracia.repl.co/v4/';
+  private static base_url = 'http://pnode2.danbot.host:4007/v4/';
 
   static async home(signal?: AbortSignal): Promise<Home> {
     const data = await fetch(this.base_url + 'home', {
