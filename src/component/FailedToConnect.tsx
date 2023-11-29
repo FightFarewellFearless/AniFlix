@@ -27,7 +27,7 @@ function FailedToConnect(props: Props) {
   };
 
   const tryagain = () => {
-    props.navigation.dispatch(StackActions.replace('loading'));
+    props.navigation.dispatch(StackActions.replace('connectToServer'));
   };
 
   return (
