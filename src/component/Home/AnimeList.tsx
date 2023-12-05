@@ -27,22 +27,45 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../../misc/context';
 import runningText from '../../assets/runningText.json';
 import { MovieList as MovieListType, NewAnimeList } from '../../types/anime';
-import { HomeNavigator } from '../../types/navigation';
-import {
-  BottomTabNavigationProp,
-  BottomTabScreenProps,
-} from '@react-navigation/bottom-tabs';
+import { HomeNavigator, HomeStackNavigator } from '../../types/navigation';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 import ImageLoading from '../ImageLoading';
+import SeeMore from './SeeMore';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 
-type Props = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
 
 interface CustomArraySplice<T> extends Array<T> {
   splice(start: number, deleteCount?: number, ...items: T[]): T[];
 }
 
-function Home(props: Props) {
+const SeeMoreStack = createNativeStackNavigator<HomeStackNavigator>();
+
+function Home(_props: HomeProps) {
+  return (
+    <SeeMoreStack.Navigator
+      initialRouteName="HomeList"
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <SeeMoreStack.Screen name="HomeList" component={HomeList} />
+      <SeeMoreStack.Screen
+        name="SeeMore"
+        component={SeeMore}
+        options={{ headerShown: true }}
+      />
+    </SeeMoreStack.Navigator>
+  );
+}
+
+function HomeList(props: HomeListProps) {
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
@@ -208,14 +231,31 @@ function Home(props: Props) {
       </View>
       <View style={styles.listContainer}>
         <View style={styles.titleContainer}>
-          <Text
-            style={[{ fontSize: 20, fontWeight: 'bold' }, globalStyles.text]}>
+          <Text style={[styles.titleText, globalStyles.text]}>
             Episode terbaru:{' '}
           </Text>
+          <TouchableOpacity
+            style={styles.seeMoreContainer}
+            onPress={() => {
+              props.navigation.dispatch(
+                StackActions.push('SeeMore', {
+                  type: 'AnimeList',
+                }),
+              );
+            }}>
+            <Text style={[globalStyles.text, styles.seeMoreText]}>
+              Lihat semua{' '}
+            </Text>
+            <Icon
+              name="long-arrow-right"
+              color={globalStyles.text.color}
+              size={20}
+            />
+          </TouchableOpacity>
         </View>
         <FlatList
           horizontal
-          data={data?.newAnime}
+          data={data?.newAnime.slice(0, 11)}
           renderItem={renderNewAnime}
           showsHorizontalScrollIndicator={false}
         />
@@ -223,15 +263,32 @@ function Home(props: Props) {
 
       <View style={[{ marginTop: 13 }, styles.listContainer]}>
         <View style={styles.titleContainer}>
-          <Text
-            style={[{ fontSize: 20, fontWeight: 'bold' }, globalStyles.text]}>
+          <Text style={[styles.titleText, globalStyles.text]}>
             Movie terbaru:{' '}
           </Text>
+          <TouchableOpacity
+            style={styles.seeMoreContainer}
+            onPress={() => {
+              props.navigation.dispatch(
+                StackActions.push('SeeMore', {
+                  type: 'MovieList',
+                }),
+              );
+            }}>
+            <Text style={[globalStyles.text, styles.seeMoreText]}>
+              Lihat semua{' '}
+            </Text>
+            <Icon
+              name="long-arrow-right"
+              color={globalStyles.text.color}
+              size={20}
+            />
+          </TouchableOpacity>
         </View>
 
         <FlatList
           horizontal
-          data={data?.movie}
+          data={data?.movie.slice(0, 11)}
           renderItem={renderMovie}
           showsHorizontalScrollIndicator={false}
         />
@@ -313,11 +370,9 @@ function AnnouncmentModal({
 
 function AnimeList(props: {
   newAnimeData: NewAnimeList;
-  navigationProp: BottomTabNavigationProp<
-    HomeNavigator,
-    'AnimeList',
-    undefined
-  >;
+  navigationProp:
+    | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+    | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
 }) {
   const z = props.newAnimeData;
   const navigation = props.navigationProp;
@@ -361,11 +416,9 @@ function AnimeList(props: {
 
 function MovieList(props: {
   movieData: MovieListType;
-  navigationProp: BottomTabNavigationProp<
-    HomeNavigator,
-    'AnimeList',
-    undefined
-  >;
+  navigationProp:
+    | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+    | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
 }) {
   const z = props.movieData;
   const navigation = props.navigationProp;
@@ -529,8 +582,25 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   titleContainer: {
+    flex: 1,
+    flexDirection: 'row',
     marginBottom: 10,
+  },
+  titleText: {
+    fontSize: 20,
+    fontWeight: 'bold',
     alignSelf: 'center',
+  },
+  seeMoreContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignContent: 'flex-end',
+  },
+  seeMoreText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#009107',
   },
   listBackground: {
     overflow: 'hidden',
@@ -538,6 +608,7 @@ const styles = StyleSheet.create({
     height: 200,
     borderWidth: 1,
     marginRight: 5,
+    marginVertical: 5,
     flex: 2,
     borderRadius: 7,
   },
@@ -582,3 +653,4 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
+export { AnimeList, MovieList };

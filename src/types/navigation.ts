@@ -46,4 +46,11 @@ type RootStackNavigator = {
   };
 };
 
-export type { RootStackNavigator, HomeNavigator };
+type HomeStackNavigator = {
+  SeeMore: {
+    type: 'AnimeList' | 'MovieList';
+  };
+  HomeList: undefined;
+};
+
+export type { RootStackNavigator, HomeNavigator, HomeStackNavigator };
