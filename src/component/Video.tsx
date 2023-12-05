@@ -27,7 +27,7 @@ import {
 import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo, { getUserAgentSync } from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
@@ -55,6 +55,8 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const TouchableOpacityAnimated =
   ReAnimated.createAnimatedComponent(TouchableOpacity);
+
+const userAgent = getUserAgentSync();
 
 function Video(props: Props) {
   const enableNextPartNotification = useSelector(
@@ -655,6 +657,9 @@ function Video(props: Props) {
               onExitFullscreen={exitFullscreen}
               source={{
                 uri: data.streamingLink[part].sources[0].src,
+                headers: {
+                  'User-Agent': userAgent,
+                },
               }}
               onEnd={onEnd}
               rewindTime={10}
