@@ -1,6 +1,6 @@
 {
   "name": "aniflix",
-  "version": "v0.1.1",
+  "version": "v0.2.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
@@ -20,6 +20,8 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@shopify/flash-list": "^1.6.1",
     "@types/react-native-video": "^5.0.15",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
     "moment": "^2.29.4",
     "react": "18.2.0",
     "react-native": "^0.72.3",
@@ -37,7 +39,8 @@
     "react-native-video": "^5.2.1",
     "react-native-webview": "^13.6.3",
     "react-redux": "^8.1.0",
-    "rn-fetch-blob": "^0.13.0-beta.2"
+    "rn-fetch-blob": "^0.13.0-beta.2",
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
