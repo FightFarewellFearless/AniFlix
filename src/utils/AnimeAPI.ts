@@ -10,6 +10,9 @@ import {
 } from '../types/anime';
 import deviceUserAgent from './deviceUserAgent';
 
+// NEXT: This feature will be available in next version
+const localAPI = require('./animeLocalAPI');
+
 class AnimeAPI {
   private static base_url = 'http://pnode2.danbot.host:4007/v4/';
 
@@ -91,6 +94,7 @@ class AnimeAPI {
     }
     const dataJson: fromUrlJSON = JSON.parse(dataString);
     return dataJson;
+    // return await localAPI.fromUrl(link, resolution, skipAutoRes, signal) as fromUrlJSON;
   }
 }
 
