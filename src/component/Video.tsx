@@ -27,9 +27,11 @@ import {
 import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo, { getUserAgentSync } from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
+import url from 'url';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useAnimations } from '@react-native-media-console/reanimated';
 import ReAnimated, {
@@ -38,7 +40,7 @@ import ReAnimated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import globalStyles, { darkText } from '../assets/style';
+import globalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
@@ -50,6 +52,8 @@ import { AppDispatch, RootState } from '../misc/reduxStore';
 import VideoType, { OnProgressData } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
+import WebView from 'react-native-webview';
+import reqWithReferer from '../utils/reqWithReferer';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -96,6 +100,8 @@ function Video(props: Props) {
   const hasPart = useRef(data.streamingLink.length > 1);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoType>(null);
+
+  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif'});
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
@@ -182,6 +188,15 @@ function Video(props: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // EMBED PLAYER
+  useEffect(() => {
+    if (data.streamingType === 'embed') {
+      reqWithReferer(data.streamingLink).then(res => {
+        setStreamingEmbedLink({html: res});
+      });
+    }
+  }, [data.streamingLink]);
 
   // Battery level
   useEffect(() => {
@@ -372,6 +387,12 @@ function Video(props: Props) {
   );
 
   const downloadAnime = useCallback(async () => {
+    if (data.streamingType === 'embed') {
+      return ToastAndroid.show(
+        'Jenis format ini tidak mendukung fitur download',
+        ToastAndroid.SHORT,
+      );
+    }
     const source = data.streamingLink[part].sources[0].src;
     const resolution = data.resolution;
     await downloadAnimeFunction(
@@ -441,6 +462,13 @@ function Video(props: Props) {
           ],
         );
         return;
+      }
+
+      if (data.streamingType === 'embed') {
+        return ToastAndroid.show(
+          'Jenis format ini tidak mendukung fitur download',
+          ToastAndroid.SHORT,
+        );
       }
 
       for (let i = 0; i < data.streamingLink.length; i++) {
@@ -643,7 +671,7 @@ function Video(props: Props) {
 
         {
           // mengecek apakah video tersedia
-          data.streamingLink?.[part]?.sources[0].src ? (
+          data.streamingType === 'raw' ? (
             <Videos
               useAnimations={useAnimations}
               key={data.streamingLink[part].sources[0].src}
@@ -672,6 +700,17 @@ function Video(props: Props) {
               playInBackground={false}
               paused={isBackground}
             />
+          ) : data.streamingType === 'embed' ? (
+            <WebView
+            source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
+            userAgent={userAgent}
+            originWhitelist={['*']}
+            injectedJavaScript={`
+              window.alert = function() {}; // Disable alerts
+              window.confirm = function() {}; // Disable confirms
+              window.prompt = function() {}; // Disable prompts
+              window.open = function() {}; // Disable opening new windows
+              `} />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
           )
@@ -711,6 +750,27 @@ function Video(props: Props) {
         // jika ya, maka hanya menampilkan video saja
         !fullscreen && (
           <ScrollView style={{ flex: 1 }}>
+            {/* embed player information */}
+            {data.streamingType === 'embed' && (
+              <View>
+                <View style={{
+                  backgroundColor: '#c9c900'
+                }}>
+                  <Icon name="lightbulb-o" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+                  <Text style={{ color: lightText }}>Kamu saat ini menggunakan video player pihak ketiga dikarenakan data
+                    dengan format yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
+                    Kamu mungkin akan melihat iklan di dalam video.{'\n'}
+                    Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal</Text>
+                </View>
+                <View style={{
+                  marginTop: 5,
+                  backgroundColor: '#c99a00'
+                }}>
+                  <MaterialCommunityIcons name="screen-rotation" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+                  <Text style={{ color: lightText }}>Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape</Text>
+                </View>
+              </View>
+            )}
             <TouchableOpacityAnimated
               style={[styles.container, infoContainerStyle]}
               onLayout={e => {
@@ -730,7 +790,7 @@ function Video(props: Props) {
                   setTimeout(setShowSynopsys, 100, true);
                   infoContainerHeight.value = withTiming(
                     (initialInfoContainerHeight.current as number) +
-                      synopsysHeight.current,
+                    synopsysHeight.current,
                   );
                 }
               }}
@@ -848,7 +908,7 @@ function Video(props: Props) {
                   selectedTextStyle={styles.dropdownSelectedTextStyle}
                 />
               </View>
-              {data.streamingLink?.length > 1 && (
+              {data.streamingType === 'raw' && data.streamingLink?.length > 1 && (
                 <View style={styles.dropdownPart}>
                   <Dropdown
                     // @ts-ignore
@@ -932,9 +992,8 @@ function TimeInfo() {
     const currentDate = new Date();
     const hours = currentDate.getHours();
     const minutes = currentDate.getMinutes();
-    const newDate = `${hours < 10 ? '0' + hours : hours}:${
-      minutes < 10 ? '0' + minutes : minutes
-    }`;
+    const newDate = `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes
+      }`;
     if (time !== newDate) {
       setTime(newDate);
     }

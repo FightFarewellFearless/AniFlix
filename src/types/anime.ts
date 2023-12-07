@@ -72,14 +72,9 @@ interface EpsList extends FromUrl {
   rating: string;
 }
 
-interface SingleEps extends FromUrl {
+type SingleEps = FromUrl & {
   type: 'singleEps';
   title: string;
-  streamingLink: {
-    sources: {
-      src: string;
-    }[];
-  }[];
   downloadLink: string;
   genre: string[];
   resolution: string;
@@ -94,7 +89,17 @@ interface SingleEps extends FromUrl {
     episodeList: string;
     next?: string;
   };
-}
+} & ({
+  streamingType: 'raw';
+  streamingLink: {
+    sources: {
+      src: string;
+    }[];
+  }[];
+} | {
+  streamingType: 'embed';
+  streamingLink: string;
+});
 
 interface AnnouncmentEnabled {
   enable: true;
