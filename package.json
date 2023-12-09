@@ -19,7 +19,6 @@
     "@react-navigation/native-stack": "^6.9.17",
     "@reduxjs/toolkit": "^1.9.5",
     "@shopify/flash-list": "^1.6.3",
-    "@types/react-native-video": "^5.0.15",
     "axios": "^1.6.2",
     "cheerio": "^1.0.0-rc.12",
     "moment": "^2.29.4",
