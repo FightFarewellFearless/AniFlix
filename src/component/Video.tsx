@@ -673,32 +673,33 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <Videos
-              useAnimations={useAnimations}
-              key={data.streamingLink[part].sources[0].src}
-              showOnEnd={true}
-              title={data.title}
+              backBufferDurationMs={40_000}
               disableBack={!fullscreen}
-              onBack={onBack}
-              toggleResizeModeOnFullscreen={false}
               isFullscreen={fullscreen}
+              key={data.streamingLink[part].sources[0].src}
+              onBack={onBack}
+              onEnd={onEnd}
               onEnterFullscreen={enterFullscreen}
               onExitFullscreen={exitFullscreen}
+              onHideControls={hideControls}
+              onLoad={handleVideoLoad}
+              onProgress={handleProgress}
+              onShowControls={showControls}
+              paused={isBackground}
+              playInBackground={false}
+              rewindTime={10}
+              showDuration={true}
+              showOnEnd={true}
               source={{
-                uri: data.streamingLink[part].sources[0].src,
                 headers: {
                   'User-Agent': userAgent,
                 },
+                uri: data.streamingLink[part].sources[0].src,
               }}
-              onEnd={onEnd}
-              rewindTime={10}
-              showDuration={true}
-              onProgress={handleProgress}
-              onLoad={handleVideoLoad}
+              title={data.title}
+              toggleResizeModeOnFullscreen={false}
+              useAnimations={useAnimations}
               videoRef={videoRef}
-              onHideControls={hideControls}
-              onShowControls={showControls}
-              playInBackground={false}
-              paused={isBackground}
             />
           ) : data.streamingType === 'embed' ? (
             <WebView
