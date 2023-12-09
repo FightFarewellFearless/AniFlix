@@ -49,7 +49,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
-import VideoType, { OnProgressData } from 'react-native-video';
+import { OnProgressData, VideoRef } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
@@ -99,7 +99,7 @@ function Video(props: Props) {
   const hasDownloadAllPart = useRef(false);
   const hasPart = useRef(data.streamingLink.length > 1);
   const firstTimeLoad = useRef(true);
-  const videoRef = useRef<VideoType>(null);
+  const videoRef = useRef<VideoRef>(null);
 
   const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif'});
 
