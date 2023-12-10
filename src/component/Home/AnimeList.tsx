@@ -21,6 +21,7 @@ import {
   ListRenderItemInfo,
   Linking,
 } from 'react-native';
+import Reanimated, { useSharedValue } from 'react-native-reanimated';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -38,6 +39,7 @@ import {
   NativeStackScreenProps,
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
+import ReText from '../misc/ReText';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -197,7 +199,7 @@ function HomeList(props: HomeListProps) {
       />
       <View style={styles.box}>
         <View style={styles.boxItem}>
-          <Text style={[globalStyles.text, styles.boxTime]}>{localTime}</Text>
+          <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
           {/* running text animation */}
           <Animated.Text
             onLayout={nativeEvent =>
@@ -459,15 +461,15 @@ function MovieList(props: {
 }
 
 function useLocalTime() {
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const time = useSharedValue(new Date().toLocaleTimeString());
   const currTime = useRef<string>();
   useFocusEffect(
     useCallback(() => {
-      setTime(new Date().toLocaleTimeString());
+      time.value = new Date().toLocaleTimeString();
       const interval = setInterval(() => {
         const string = new Date().toLocaleTimeString();
         if (currTime.current !== string) {
-          setTime(string);
+          time.value = string;
           currTime.current = string;
         }
       }, 100);
