@@ -703,14 +703,14 @@ function Video(props: Props) {
             />
           ) : data.streamingType === 'embed' ? (
             <WebView
-            source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
-            userAgent={userAgent}
-            originWhitelist={['*']}
-            injectedJavaScript={`
-              window.alert = function() {}; // Disable alerts
-              window.confirm = function() {}; // Disable confirms
-              window.prompt = function() {}; // Disable prompts
-              window.open = function() {}; // Disable opening new windows
+              source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
+              userAgent={userAgent}
+              originWhitelist={['*']}
+              injectedJavaScript={`
+                window.alert = function() {}; // Disable alerts
+                window.confirm = function() {}; // Disable confirms
+                window.prompt = function() {}; // Disable prompts
+                window.open = function() {}; // Disable opening new windows
               `} />
           ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
