@@ -186,7 +186,7 @@ function Setting(_props: Props) {
                 databaseDataAll[z[0]] = z[1];
               });
               const fetchData = await fetch(
-                'https://animeapi.aceracia.repl.co/backupHistory',
+                'http://pnode2.danbot.host:4007/backupHistory',
                 {
                   method: 'POST',
                   body: JSON.stringify({
@@ -251,7 +251,7 @@ function Setting(_props: Props) {
                       [key in SetDatabaseTarget]: string;
                     };
               } = await fetch(
-            'https://animeapi.aceracia.repl.co/getBackup?id=' + code,
+            'http://pnode2.danbot.host:4007/getBackup?id=' + code,
             {
               headers: {
                 'User-Agent': deviceUserAgent,
