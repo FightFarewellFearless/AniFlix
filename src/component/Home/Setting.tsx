@@ -23,7 +23,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
-import globalStyles from '../../assets/style';
+import globalStyles, { darkText } from '../../assets/style';
 import { HomeContext } from '../../misc/context';
 
 import { useDispatch } from 'react-redux';
@@ -602,12 +602,12 @@ function Setting(_props: Props) {
                   <TouchableOpacity
                     style={styles.cancelRestoreModalButton}
                     onPress={() => setRestoreVisible(false)}>
-                    <Text style={[globalStyles.text]}>Batal</Text>
+                    <Text style={[globalStyles.text, styles.modalRestoreButtonText]}>Batal</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.acceptRestoreModalButton}
                     onPress={() => restoreData(backupCode)}>
-                    <Text style={[globalStyles.text]}>Restore</Text>
+                    <Text style={[globalStyles.text, styles.modalRestoreButtonText]}>Restore</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -708,11 +708,15 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 0.15,
-    backgroundColor: colorScheme === 'dark' ? '#202020' : '#c2c2c2',
+    backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
     borderWidth: 1,
     borderColor: '#525252',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalRestoreButtonText: {
+    fontWeight: 'bold',
+    color: darkText,
   },
   acceptRestoreModalButton: {
     backgroundColor: '#005300',
