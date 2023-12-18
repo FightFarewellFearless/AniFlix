@@ -118,6 +118,11 @@ interface Home extends Maintenance {
   waktuServer: string;
 }
 
+interface listAnimeTypeList {
+  title: string;
+  streamingLink: string;
+}
+
 export type {
   NewAnimeList,
   MovieList,
@@ -130,4 +135,5 @@ export type {
   FromUrlMaintenance,
   SingleEps,
   Home,
+  listAnimeTypeList
 };

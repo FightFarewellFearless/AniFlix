@@ -21,18 +21,22 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SearchAnime } from '../../types/anime';
+import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 
 import Reanimated, {
+  FadeOutDown,
   FadeInRight,
+  FadeInUp,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
+  ZoomIn,
+  ZoomOut,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import ImageLoading from '../ImageLoading';
@@ -82,6 +86,7 @@ function Search(props: Props) {
   );
 
   const [searchText, setSearchText] = useState<string>('');
+  const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [loading, setLoading] = useState(false);
   const [searchHistoryDisplay, setSearchHistoryDisplay] =
@@ -103,6 +108,12 @@ function Search(props: Props) {
   const loadMoreLoading = useRef<boolean>(false);
 
   const searchTextAnimationColor = useSharedValue(0);
+
+  useEffect(() => {
+    AnimeAPI.listAnime().then(setListAnime).catch(() => {
+      setListAnime(null);
+    });
+  }, []);
 
   useEffect(() => {
     if (searchText !== '' && searchButtonMounted.current === false) {
@@ -256,11 +267,16 @@ function Search(props: Props) {
   return (
     <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
       <View style={{ flexDirection: 'row' }}>
+        {/* {data !== null && (
+          <TouchableOpacity>
+            <Icon name="close" />
+          </TouchableOpacity>
+        )} */}
         <TextInputAnimation
           value={searchText}
           onSubmitEditing={submit}
           onChangeText={onChangeText}
-          placeholder="Cari anime disini"
+          placeholder="Ketik anime disini"
           placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
           onFocus={onSearchTextFocus}
           onBlur={onSearchTextBlur}
@@ -280,10 +296,49 @@ function Search(props: Props) {
         </PressableAnimation>
       </View>
 
-      {data === null ? (
-        <View style={styles.center}>
-          <Text style={styles.nullDataText}>Silahkan cari terlebih dahulu</Text>
-        </View>
+      {data === null && listAnime !== null ? (
+        <FlashList
+          data={listAnime}
+          estimatedItemSize={40}
+          keyExtractor={item => item.title}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  props.navigation.dispatch(
+                    StackActions.push('FromUrl', {
+                      link: item.streamingLink,
+                    }),
+                  );
+                }}
+                style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 10 }}>
+                <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+              </TouchableOpacity>
+            )
+          }}
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                width: '100%',
+                borderBottomWidth: 0.5,
+                borderColor: colorScheme === 'dark' ? 'white' : 'black',
+              }}
+            />
+          )}
+          ListEmptyComponent={() => <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} /> } />
+      ) : data === null ? (
+        <TouchableOpacity onPress={() => {
+          setListAnime([]);
+          AnimeAPI.listAnime().then(setListAnime).catch(() => {
+            setListAnime(null);
+          });
+        }}>
+          <Icon
+            name="exclamation-circle"
+            size={30}
+            style={{ alignSelf: 'center' }}
+            color={colorScheme === 'dark' ? '#dadada' : '#0f0f0f'} />
+        </TouchableOpacity>
       ) : (
         <>
           <Text style={globalStyles.text}>
@@ -375,8 +430,11 @@ function Search(props: Props) {
       )}
       {/* SEARCH HISTORY VIEW */}
       {searchHistoryDisplay && (
-        <View style={[styles.searchHistoryContainer]}>
-          <View style={{ height: 120 }}>
+        <Reanimated.View
+          entering={FadeInUp.duration(700)}
+          exiting={FadeOutDown}
+          style={[styles.searchHistoryContainer]}>
+          <View style={{ height: 160 }}>
             <FlashList
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.searchHistoryScrollBox}
@@ -394,7 +452,23 @@ function Search(props: Props) {
               )}
             />
           </View>
-        </View>
+        </Reanimated.View>
+      )}
+      {data !== null && (
+        <TouchableOpacityAnimated
+          style={styles.closeSearchResult}
+          onPress={() => {
+            setData(null);
+          }}
+          entering={ZoomIn}
+          exiting={ZoomOut}>
+          <Icon
+            name="times"
+            size={30}
+            style={{ alignSelf: 'center' }}
+            color="#dadada"
+          />
+        </TouchableOpacityAnimated>
       )}
     </Animated.View>
   );
@@ -523,6 +597,15 @@ const styles = StyleSheet.create({
   },
   searchHistoryScrollBox: {
     backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#b8b6b6',
+  },
+  closeSearchResult: {
+    position: 'absolute',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    padding: 10,
+    paddingHorizontal: 12,
+    bottom: 32,
+    right: 17,
   },
 });
 

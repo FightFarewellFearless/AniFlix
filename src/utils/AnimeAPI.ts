@@ -7,6 +7,7 @@ import {
   NewAnimeList,
   SearchAnime,
   SingleEps,
+  listAnimeTypeList,
 } from '../types/anime';
 import deviceUserAgent from './deviceUserAgent';
 
@@ -95,6 +96,20 @@ class AnimeAPI {
     const dataJson: fromUrlJSON = JSON.parse(dataString);
     return dataJson;
     // return await localAPI.fromUrl(link, resolution, skipAutoRes, signal) as fromUrlJSON;
+  }
+  
+  static async listAnime(signal?: AbortSignal): Promise<listAnimeTypeList[]> {
+    const data = await fetch(
+      this.base_url +
+        'listAnime',
+        {
+          signal,
+          headers: {
+            'User-Agent': deviceUserAgent,
+          }
+        }
+    ).then(a => a.json()) as listAnimeTypeList[];
+    return data;
   }
 }
 
