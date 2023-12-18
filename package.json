@@ -6,7 +6,7 @@
     "android": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "start": "react-native start",
+    "start": "react-native start --max-workers=3",
     "test": "jest"
   },
   "dependencies": {
