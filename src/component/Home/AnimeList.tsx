@@ -21,7 +21,7 @@ import {
   ListRenderItemInfo,
   Linking,
 } from 'react-native';
-import Reanimated, { useSharedValue } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import globalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -40,6 +40,8 @@ import {
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
 import ReText from '../misc/ReText';
+import { useBatteryLevel } from 'react-native-device-info';
+import {version} from '../../../package.json'
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -84,6 +86,7 @@ function HomeList(props: HomeListProps) {
   const boxTextLayout = useRef(0);
 
   const localTime = useLocalTime();
+  const battery = useBatteryLevel();
 
   useEffect(() => {
     if (data?.announcment.enable === true) {
@@ -200,6 +203,8 @@ function HomeList(props: HomeListProps) {
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
+          <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
+          <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}</Text></Text>
           {/* running text animation */}
           <Animated.Text
             onLayout={nativeEvent =>
@@ -556,16 +561,32 @@ const styles = StyleSheet.create({
   },
   boxItem: {
     flex: 1,
-    backgroundColor: colorScheme === 'dark' ? '#363636' : '#c4c4c4',
+    backgroundColor: colorScheme === 'dark' ? '#363636' : '#dbdbdb',
     borderColor: 'gold',
     borderWidth: 1.2,
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  boxTime: {
+  boxAppName: {
+    flexDirection: 'row',
     alignSelf: 'center',
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: 'bold',
+  },
+  boxAppVer: {
+    fontSize: 13,
+  },
+  boxTime: {
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: -10,
+    left: 0,
+  },
+  boxBattery: {
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
   boxText: {
     position: 'absolute',
@@ -578,7 +599,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     position: 'relative',
-    backgroundColor: colorScheme === 'dark' ? '#272727' : '#d8d8d8',
+    backgroundColor: colorScheme === 'dark' ? '#272727' : '#e0e0e0',
     paddingVertical: 10,
     borderRadius: 10,
     elevation: 5,
