@@ -61,6 +61,7 @@ const TouchableOpacityAnimated =
   ReAnimated.createAnimatedComponent(TouchableOpacity);
 
 const userAgent = getUserAgentSync();
+const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
 function Video(props: Props) {
   const enableNextPartNotification = useSelector(
@@ -100,8 +101,10 @@ function Video(props: Props) {
   const hasPart = useRef(data.streamingLink.length > 1);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoRef>(null);
+  const webviewRef = useRef<WebView>(null);
+  const [webViewKey, setWebViewKey] = useState(0);
 
-  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif'});
+  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: defaultLoadingGif});
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
@@ -688,6 +691,7 @@ function Video(props: Props) {
               paused={isBackground}
               playInBackground={false}
               rewindTime={10}
+              repeat={false}
               showDuration={true}
               showOnEnd={true}
               source={{
@@ -703,9 +707,19 @@ function Video(props: Props) {
             />
           ) : data.streamingType === 'embed' ? (
             <WebView
+              key={webViewKey}
+              setSupportMultipleWindows={false}
+              onShouldStartLoadWithRequest={navigator => {
+                const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
+                if(!res) {
+                  webviewRef.current?.stopLoading();
+                }
+                return res;
+              }}
               source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
               userAgent={userAgent}
               originWhitelist={['*']}
+              allowsFullscreenVideo={true}
               injectedJavaScript={`
                 window.alert = function() {}; // Disable alerts
                 window.confirm = function() {}; // Disable confirms
@@ -761,7 +775,8 @@ function Video(props: Props) {
                   <Text style={{ color: lightText }}>Kamu saat ini menggunakan video player pihak ketiga dikarenakan data
                     dengan format yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
                     Kamu mungkin akan melihat iklan di dalam video.{'\n'}
-                    Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal</Text>
+                    Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal.{'\n'}
+                    Jika menemui masalah seperti video berubah menjadi putih, silahkan reload video player!</Text>
                 </View>
                 <View style={{
                   marginTop: 5,
@@ -770,6 +785,12 @@ function Video(props: Props) {
                   <MaterialCommunityIcons name="screen-rotation" color={lightText} size={26} style={{ alignSelf: 'center' }} />
                   <Text style={{ color: lightText }}>Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape</Text>
                 </View>
+                <TouchableOpacity style={styles.reloadPlayer} onPress={() => {
+                  setWebViewKey(prev => prev + 1);
+                }}>
+                  <Icon name="refresh" color={darkText} size={15} style={{ alignSelf: 'center' }} />
+                  <Text style={{ color: darkText }}>Reload video player</Text>
+                </TouchableOpacity>
               </View>
             )}
             <TouchableOpacityAnimated
@@ -1164,6 +1185,15 @@ const styles = StyleSheet.create({
   },
   dropdownSelectedTextStyle: {
     color: globalStyles.text.color,
+  },
+  reloadPlayer: {
+    backgroundColor: '#0050ac',
+    borderRadius: 5,
+    marginTop: 6,
+    padding: 9,
+    width: '85%',
+    alignItems: 'center',
+    alignSelf: 'center',
   },
 });
 export default Video;
