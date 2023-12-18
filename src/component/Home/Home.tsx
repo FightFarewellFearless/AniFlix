@@ -56,6 +56,7 @@ function BottomTabs(props: Props) {
             tabBarIcon: ({ color }) => (
               <Icon name="history" style={{ color }} size={20} />
             ),
+            tabBarLabel: 'Histori'
           }}
           component={History}
         />
