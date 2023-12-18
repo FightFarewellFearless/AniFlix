@@ -1166,7 +1166,7 @@ const styles = StyleSheet.create({
   },
   dropdownStyle: {
     width: 120,
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
     padding: 5,
     borderRadius: 4,
     borderWidth: 1,
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   dropdownItemContainerStyle: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
   },
   dropdownSelectedTextStyle: {
     color: globalStyles.text.color,

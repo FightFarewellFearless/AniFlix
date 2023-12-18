@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   listContainerButton: {
     flexDirection: 'row',
     marginVertical: 5,
-    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#bebebe',
+    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
     borderRadius: 16,
     elevation: 5,
   },

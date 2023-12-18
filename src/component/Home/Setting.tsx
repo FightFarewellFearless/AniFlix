@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   waktuServer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#aa6f00',
+    backgroundColor: colorScheme === 'dark'  ?'#aa6f00' : '#ce8600',
   },
   modalContainer: {
     flex: 1,
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   },
   dropdownStyle: {
     width: 100,
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
     padding: 5,
     borderRadius: 4,
     borderWidth: 1,
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   dropdownItemContainerStyle: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
   },
   dropdownSelectedTextStyle: {
     color: globalStyles.text.color,

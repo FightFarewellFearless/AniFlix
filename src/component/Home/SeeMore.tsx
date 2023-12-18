@@ -13,7 +13,6 @@ import { HomeStackNavigator } from '../../types/navigation';
 import { AnimeList, MovieList } from './AnimeList';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { MovieList as MovieListType, NewAnimeList } from '../../types/anime';
-import globalStyles from '../../assets/style';
 
 type Props = NativeStackScreenProps<HomeStackNavigator, 'SeeMore'>;
 
@@ -84,7 +83,7 @@ function SeeMore(props: Props) {
                 setIsLoading(false);
               }
             }}>
-            <Text style={globalStyles.text}>Lihat lebih banyak</Text>
+            <Text style={{ color: "#fafafa" }}>Lihat lebih banyak</Text>
           </TouchableOpacity>
         )}
         ListFooterComponentStyle={{

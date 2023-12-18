@@ -437,7 +437,7 @@ function HistoryList({
             }),
           );
         }}>
-        <Icon name="close" size={20} />
+        <Icon name="close" size={20} style={{ color: '#ff0f0f' }} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   listContainer: {
     flexDirection: 'row',
     marginVertical: 5,
-    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#bebebe',
+    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
     borderRadius: 16,
     elevation: 5,
   },
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   searchHistoryScrollBox: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2929' : 'gray',
+    backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#b8b6b6',
   },
 });
 
