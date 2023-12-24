@@ -81,8 +81,8 @@ android {
         applicationId "com.pirles.anime"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 120
-        versionName "v0.2.0"
+        versionCode 130
+        versionName "v0.3.0"
     }
     signingConfigs {
         debug {
