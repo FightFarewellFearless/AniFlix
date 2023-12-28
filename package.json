@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",
-    "@react-native-clipboard/clipboard": "^1.12.1",
+    "@react-native-clipboard/clipboard": "^1.13.2",
     "@react-native-community/cli-platform-android": "^12.1.1",
     "@react-native-media-console/reanimated": "^2.2.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
@@ -30,7 +30,7 @@
     "react-native-media-console": "^2.2.0",
     "react-native-orientation-locker": "^1.6.0",
     "react-native-reanimated": "^3.6.1",
-    "react-native-safe-area-context": "^4.7.4",
+    "react-native-safe-area-context": "^4.8.2",
     "react-native-screens": "^3.29.0",
     "react-native-svg": "^14.0.0",
     "react-native-system-navigation-bar": "^2.6.3",
