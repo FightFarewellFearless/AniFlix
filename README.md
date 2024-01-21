@@ -101,7 +101,7 @@ Wait for the build to complete. If successful, you can find the APK in `android/
 
 ![CC BY-NC](http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by-nc.png)
 
-&copy; 2023 pirles, This project is licensed under [Creative Commons Attribution Non-Commercial (CC BY-NC) license](https://creativecommons.org/licenses/by-nc/4.0/)
+&copy; 2023-2024 pirles, This project is licensed under [Creative Commons Attribution Non-Commercial (CC BY-NC) license](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## What You Can and Can't Do with the CC BY-NC License
 
