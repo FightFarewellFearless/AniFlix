@@ -32,14 +32,19 @@ function FromUrl(props: Props) {
     // eslint-disable-next-line no-bitwise
     randomTipsArray[~~(Math.random() * randomTipsArray.length)],
   ).current;
-  useEffect((): (() => void) => {
+  useEffect(() => {
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
-
+    if(props.route.params.link.includes('nanimex')) {
+      props.navigation.goBack();
+      Alert.alert('Perhatian!', 'Dikarenakan data yang digunakan berbeda, history lama tidak didukung, sehingga sebagai solusi, kamu harus mencari anime ini secara manual di menu pencarian dan pilih episode yang sesuai.')
+      return;
+    }
     AnimeAPI.fromUrl(
       props.route.params.link,
       resolution,
       !!resolution,
+      undefined,
       abort.signal,
     )
       .then(async result => {
@@ -52,22 +57,22 @@ function FromUrl(props: Props) {
           return;
         }
         try {
-          if (result.blocked) {
-            props.navigation.dispatch(StackActions.replace('Blocked'));
-          } else if (result.maintenance) {
+          // if (result.blocked) {
+          //   props.navigation.dispatch(StackActions.replace('Blocked'));
+          // } else if (result.maintenance) {
+          //   props.navigation.dispatch(
+          //     StackActions.replace('Maintenance', {
+          //       message: result.message,
+          //     }),
+          //   );
+          if (result.type === 'animeDetail') {
             props.navigation.dispatch(
-              StackActions.replace('Maintenance', {
-                message: result.message,
-              }),
-            );
-          } else if (result.type === 'epsList') {
-            props.navigation.dispatch(
-              StackActions.replace('EpisodeList', {
+              StackActions.replace('AnimeDetail', {
                 data: result,
                 link: props.route.params.link,
               }),
             );
-          } else if (result.type === 'singleEps') {
+          } else if (result.type === 'animeStreaming') {
             props.navigation.dispatch(
               StackActions.replace('Video', {
                 data: result,
@@ -111,11 +116,11 @@ function FromUrl(props: Props) {
         }
       })
       .catch(err => {
-        if (err.message === 'Aborted') {
+        if (err.message === 'canceled') {
           return;
         }
         const errMessage =
-          err.message === 'Network request failed'
+          err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
             : 'Error tidak diketahui: ' + err.message;
         Alert.alert('Error', errMessage);

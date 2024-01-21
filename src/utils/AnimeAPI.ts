@@ -1,118 +1,146 @@
 import {
   Blocked,
-  EpsList,
+  AniDetail,
   FromUrlMaintenance,
   Home,
-  MovieList,
   NewAnimeList,
   SearchAnime,
-  SingleEps,
+  AniStreaming,
   listAnimeTypeList,
 } from '../types/anime';
 import deviceUserAgent from './deviceUserAgent';
-
-// NEXT: This feature will be available in next version
-const localAPI = require('./animeLocalAPI');
+import Anime from './animeLocalAPI';
 
 class AnimeAPI {
-  private static base_url = 'http://pnode2.danbot.host:4007/v4/';
+  private static base_url = 'https://aniflix.pirles.ix.tc/v5/';
 
   static async home(signal?: AbortSignal): Promise<Home> {
-    const data = await fetch(this.base_url + 'home', {
-      signal,
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
-    });
-    return await (data.json() as Promise<Home>);
+    // const data = await fetch(this.base_url + 'home', {
+    //   signal,
+    //   headers: {
+    //     'User-Agent': deviceUserAgent,
+    //   },
+    // });
+    // return await (data.json() as Promise<Home>);
+
+    const [newAnime, jadwalAnime] = await Promise.all([Anime.newAnime(undefined, signal), Anime.jadwalAnime(signal)]);
+
+    return {
+      newAnime,
+      jadwalAnime,
+      announcment: { enable: false },
+      uptime: 0,
+      waktuServer: 'Unavailable',
+    }
+
   }
 
   static async newAnime(
     page: number | undefined = 1,
     signal?: AbortSignal,
   ): Promise<NewAnimeList[]> {
-    const data = await fetch(this.base_url + `newAnime?page=${page}`, {
-      signal,
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
-    });
-    return await (data.json() as Promise<NewAnimeList[]>);
-  }
+    // const data = await fetch(this.base_url + `newAnime?page=${page}`, {
+    //   signal,
+    //   headers: {
+    //     'User-Agent': deviceUserAgent,
+    //   },
+    // });
+    // return await (data.json() as Promise<NewAnimeList[]>);
 
-  static async movie(
-    page: number | undefined = 1,
-    signal?: AbortSignal,
-  ): Promise<MovieList[]> {
-    const data = await fetch(this.base_url + `movie?page=${page}`, {
-      signal,
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
-    });
-    return await (data.json() as Promise<MovieList[]>);
+    return await Anime.newAnime(page, signal);
+
   }
 
   static async search(
     query: string,
-    page?: number,
     signal?: AbortSignal,
   ): Promise<SearchAnime> {
-    const data = await fetch(
-      this.base_url +
-        `search?q=${query}${page !== undefined ? '&page=' + page : ''}`,
-      {
-        signal,
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
-      },
-    );
-    return await (data.json() as Promise<SearchAnime>);
+    // const data = await fetch(
+    //   this.base_url +
+    //     `search?q=${query}`,
+    //   {
+    //     signal,
+    //     headers: {
+    //       'User-Agent': deviceUserAgent,
+    //     },
+    //   },
+    // );
+    // return await (data.json() as Promise<SearchAnime>);
+
+    return {
+      result: await Anime.searchAnime(query, signal)
+    };
   }
 
   static async fromUrl(
     link: string,
     resolution?: string,
     skipAutoRes?: boolean,
+    detailOnly?: boolean,
     signal?: AbortSignal,
   ): Promise<fromUrlJSON | 'Unsupported'> {
-    const data = await fetch(
-      this.base_url +
-        `fromUrl?link=${link}${
-          resolution !== undefined ? '&res=' + resolution : ''
-        }${skipAutoRes !== undefined ? '&skipAutoRes=' + skipAutoRes : ''}`,
-      {
-        signal,
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
-      },
-    );
-    const dataString = await data.text();
-    if (dataString === 'Unsupported') {
+    // const data = await fetch(
+    //   this.base_url +
+    //     `fromUrl?link=${link}${
+    //       resolution !== undefined ? '&res=' + resolution : ''
+    //     }${skipAutoRes !== undefined ? '&skipAutoRes=' + skipAutoRes : ''}`,
+    //   {
+    //     signal,
+    //     headers: {
+    //       'User-Agent': deviceUserAgent,
+    //     },
+    //   },
+    // );
+    // const dataString = await data.text();
+    // if (dataString === 'Unsupported') {
+    //   return 'Unsupported';
+    // }
+    // const dataJson: fromUrlJSON = JSON.parse(dataString);
+    // return dataJson;
+    try {
+      return await Anime.fromUrl(link, resolution, skipAutoRes, detailOnly, signal) as fromUrlJSON;
+    } catch (e) {
+      // console.error(e.message)
+      // @ts-expect-error
+      if(e.message !== 'Network Error' || e.message !== 'AbortError' || e.message !== 'canceled') {
+        throw e;
+      }
       return 'Unsupported';
     }
-    const dataJson: fromUrlJSON = JSON.parse(dataString);
-    return dataJson;
-    // return await localAPI.fromUrl(link, resolution, skipAutoRes, signal) as fromUrlJSON;
   }
   
   static async listAnime(signal?: AbortSignal): Promise<listAnimeTypeList[]> {
-    const data = await fetch(
-      this.base_url +
-        'listAnime',
-        {
-          signal,
-          headers: {
-            'User-Agent': deviceUserAgent,
-          }
-        }
-    ).then(a => a.json()) as listAnimeTypeList[];
-    return data;
+    // const data = await fetch(
+    //   this.base_url +
+    //     'listAnime',
+    //     {
+    //       signal,
+    //       headers: {
+    //         'User-Agent': deviceUserAgent,
+    //       }
+    //     }
+    // ).then(a => a.json()) as listAnimeTypeList[];
+    // return data;
+    return await Anime.listAnime(signal);
+  }
+
+  static async reqResolution(requestData: string, reqNonceAction: string, reqResolutionWithNonceAction: string, signal?: AbortSignal): Promise<string | undefined> {
+    // const data = await fetch(
+    //   this.base_url +
+    //     `reqResolution?requestData=${requestData}&reqNonceAction=${reqNonceAction}&reqResolutionWithNonceAction=${reqResolutionWithNonceAction}`,
+    //   {
+    //     signal,
+    //     headers: {
+    //       'User-Agent': deviceUserAgent,
+    //     }
+    //   }
+    // ).then(a => a.text()) as string;
+    // return data;
+
+    return await Anime.fetchStreamingResolution(requestData, reqNonceAction, reqResolutionWithNonceAction, undefined, signal);
   }
 }
 
-type fromUrlJSON = SingleEps | EpsList | FromUrlMaintenance | Blocked;
+type fromUrlJSON = AniStreaming | AniDetail;
 
 export default AnimeAPI;

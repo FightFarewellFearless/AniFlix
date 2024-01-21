@@ -1,4 +1,4 @@
-import { Home, EpsList, SingleEps } from './anime';
+import { Home, AniDetail, AniStreaming } from './anime';
 
 type HomeNavigator = {
   AnimeList: undefined;
@@ -13,23 +13,21 @@ type RootStackNavigator = {
   Home: {
     data: Home;
   };
-  EpisodeList: {
-    data: EpsList;
+  AnimeDetail: {
+    data: AniDetail;
     link: string;
   };
   FromUrl: {
     link: string;
     historyData?: {
-      part: number | undefined;
       resolution: string;
       lastDuration: number;
     };
   };
   Video: {
-    data: SingleEps;
+    data: AniStreaming;
     link: string;
     historyData?: {
-      part: number | undefined;
       resolution: string;
       lastDuration: number;
     };

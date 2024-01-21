@@ -5,7 +5,7 @@ import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 
 import Connecting from './src/component/Loading Screen/Connect';
-import EpsList from './src/component/EpsList';
+import AniDetail from './src/component/AniDetail';
 import Home from './src/component/Home/Home';
 import FromUrl from './src/component/Loading Screen/FromUrl';
 import Video from './src/component/Video';
@@ -34,7 +34,7 @@ function App() {
             animation: 'fade_from_bottom',
           }}>
           <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="EpisodeList" component={EpsList} />
+          <Stack.Screen name="AnimeDetail" component={AniDetail} />
           <Stack.Screen name="FromUrl" component={FromUrl} />
           <Stack.Screen name="Video" component={Video} />
           <Stack.Screen name="connectToServer" component={Connecting} />

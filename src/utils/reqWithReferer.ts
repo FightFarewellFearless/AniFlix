@@ -2,7 +2,9 @@ import url from 'url';
 import cheerio from 'cheerio';
 import axios from 'axios';
 import { getUserAgentSync } from 'react-native-device-info';
-const BASE_DOMAIN = 'nanimex2.com';
+import animeLocalAPI from '../utils/animeLocalAPI';
+
+const BASE_DOMAIN = animeLocalAPI.BASE_DOMAIN;
 
 const userAgent = getUserAgentSync();
 

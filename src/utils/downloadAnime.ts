@@ -3,6 +3,7 @@ import { Alert, Linking, ToastAndroid } from 'react-native';
 import RNFetchBlob from 'rn-fetch-blob';
 import { useSelector } from 'react-redux';
 import { RootState } from '../misc/reduxStore';
+import deviceUserAgent from './deviceUserAgent';
 
 function useDownloadAnime() {
   const downloadFrom = useSelector(
@@ -66,7 +67,9 @@ function useDownloadAnime() {
             title: Title + ' ' + resolution + '.mp4',
           },
         })
-          .fetch('GET', source)
+          .fetch('GET', source, {
+            'User-Agent': deviceUserAgent,
+          })
           // .then(resp => {
           //   // the path of downloaded file
           //   // resp.path();

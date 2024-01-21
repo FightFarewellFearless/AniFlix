@@ -18,6 +18,7 @@ import {
   TouchableWithoutFeedback,
   View,
   FlatList,
+  PermissionsAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -39,7 +40,11 @@ import colorScheme from '../../utils/colorScheme';
 import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import { SetDatabaseTarget } from '../../types/redux';
+
 import moment from 'moment';
+import RNFS from 'react-native-fs';
+import { Buffer } from 'buffer/';
+import DocumentPicker, { types } from 'react-native-document-picker';
 
 interface SettingsData {
   title: string;
@@ -52,10 +57,6 @@ interface SettingsData {
 type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
-  const enableNextPartNotification = useSelectorIfFocused(
-    (state: RootState) => state.settings.enableNextPartNotification,
-    true,
-  );
   const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
     true,
@@ -63,16 +64,6 @@ function Setting(_props: Props) {
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
-  // const [notificationSwitch, setNotificationSwitch] = useState(false);
-  const notificationSwitch = enableNextPartNotification === 'true';
-  const setNotificationSwitch = (value: string) => {
-    dispatchSettings(
-      setDatabase({
-        target: 'enableNextPartNotification',
-        value,
-      }),
-    );
-  };
   // const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const setBatteryTimeInfoSwitch = (value: string) => {
@@ -157,181 +148,67 @@ function Setting(_props: Props) {
     }, []),
   );
 
-  const nextPartNotification = () => {
-    const newValue = String(!notificationSwitch);
-    setNotificationSwitch(newValue);
-  };
-
   const batteryTimeSwitchHandler = () => {
     const newValue = String(!batteryTimeInfoSwitch);
     setBatteryTimeInfoSwitch(newValue);
   };
 
-  const backupData = useCallback(() => {
-    Alert.alert(
-      'Backup data',
-      'Backup seluruh data aplikasi termasuk histori tontonan, pengaturan, dan tonton nanti, lanjutkan?',
-      [
-        {
-          text: 'Batal',
-        },
-        {
-          text: 'Lanjut dan backup',
-          onPress: async () => {
-            setModalText('Backup sedang berlangsung...');
-            setModalVisible(true);
-            try {
-              const databaseDataAll: { [key: string]: string } = {};
-              Object.entries(store.getState().settings).forEach(z => {
-                databaseDataAll[z[0]] = z[1];
-              });
-              const fetchData = await fetch(
-                'http://pnode2.danbot.host:4007/backupHistory',
-                {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    history: databaseDataAll,
-                  }),
-                  headers: {
-                    Accept: 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json',
-                    'User-Agent': deviceUserAgent,
-                  },
-                },
-              ).then(a => a.json());
-              Alert.alert(
-                'Backup berhasil!',
-                `Data kamu sudah berhasil di backup ke server.\nGunakan kode "${fetchData.id}" saat kamu ingin mengembalikan ke backup saat ini`,
-                [
-                  {
-                    text: 'OK',
-                  },
-                  {
-                    text: 'Salin kode',
-                    onPress: () => {
-                      Clipboard.setString(fetchData.id);
-                    },
-                  },
-                ],
-              );
-            } catch (e: any) {
-              Alert.alert(
-                'Backup gagal!',
-                `Backup gagal karna alasan berikut:\n${e.message}`,
-              );
-            } finally {
-              setModalVisible(false);
-            }
-          },
-        },
-      ],
-    );
+  const backupData = useCallback(async () => {
+    const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
+    await RNFS.writeFile(RNFS.ExternalStorageDirectoryPath + '/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
+    Alert.alert('Backup selesai', `Backup data telah disimpan di ${'Penyimpanan internal/Download/' + fileuri}`);
   }, []);
 
   const restoreData = useCallback(
-    async (code?: string) => {
-      if (code === undefined) {
-        setRestoreVisible(true);
-      } else {
-        if (code === '') {
+    async () => {
+
+      try {
+        const doc = await DocumentPicker.pickSingle({
+          type: types.plainText,
+          copyTo: 'cachesDirectory',
+        });
+        if(!doc.name?.endsWith('.aniflix.txt')){
+          Alert.alert('File harus .aniflix.txt', 'Format file harus .aniflix.txt');
           return;
         }
-        setRestoreVisible(false);
-        setModalText('Mengecek apakah kode valid...');
-        setModalVisible(true);
+        // RNFS.readFile(doc.fileCopyUri).then(console.log);
+        const data = await RNFS.readFile(doc.fileCopyUri!);
+        const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
         try {
-          const backupToRestore:
-            | { error: true; message: string }
-            | {
-                error: false;
-                dateStamp: number;
-                backupData:
-                  | string
-                  | {
-                      [key in SetDatabaseTarget]: string;
-                    };
-              } = await fetch(
-            'http://pnode2.danbot.host:4007/getBackup?id=' + code,
-            {
-              headers: {
-                'User-Agent': deviceUserAgent,
-              },
-            },
-          ).then(a => a.json());
-          if (backupToRestore.error) {
-            Alert.alert('Restore gagal!', backupToRestore.message);
-          } else {
-            Alert.alert(
-              'Bersiap untuk restore backup kamu!',
-              `Kode tersedia dan siap untuk di restore.\n\nbackupID: ${code}\ntanggal backup: ${moment(
-                backupToRestore.dateStamp,
-              ).format('DD/MM/YYYY HH:mm:ss')}`,
-              [
-                {
-                  text: 'Batal',
-                },
-                {
-                  text: 'lakukan restore',
-                  onPress: async () => {
-                    setModalVisible(true);
-                    setModalText(
-                      'Mohon tunggu, ini bisa memakan beberapa waktu...',
-                    );
-                    await new Promise(res => setTimeout(res, 1)); // make sure to not restoring too early
-                    try {
-                      const backupDataJSON = backupToRestore.backupData;
-                      if (typeof backupDataJSON === 'string') {
-                        // Legacy backup data
-                        const backupDataHistory: HistoryJSON[] =
-                          JSON.parse(backupDataJSON);
-                        restoreHistoryOrWatchLater(
-                          backupDataHistory,
-                          'history',
-                        );
-                      } else {
-                        (
-                          Object.keys(backupDataJSON) as SetDatabaseTarget[]
-                        ).forEach(value => {
-                          if (value === 'history' || value === 'watchLater') {
-                            restoreHistoryOrWatchLater(
-                              JSON.parse(backupDataJSON[value]),
-                              value,
-                            );
-                          } else if (value === 'lockScreenOrientation') {
-                            toggleScreenOrientation(backupDataJSON[value]);
-                          } else {
-                            dispatchSettings(
-                              setDatabase({
-                                target: value,
-                                value: backupDataJSON[value],
-                              }),
-                            );
-                          }
-                        });
-                      }
-                      Alert.alert(
-                        'Restore berhasil!',
-                        'Kamu berhasil kembali ke backup sebelumnya!',
-                      );
-                    } catch (e: any) {
-                      Alert.alert('Restore gagal!', e.message);
-                    } finally {
-                      setModalVisible(false);
-                    }
-                  },
-                },
-              ],
-            );
-          }
+            (
+              Object.keys(backupDataJSON) as SetDatabaseTarget[]
+            ).forEach(value => {
+              if (value === 'history' || value === 'watchLater') {
+                restoreHistoryOrWatchLater(
+                  JSON.parse(backupDataJSON[value]),
+                  value,
+                );
+              } else if (value === 'lockScreenOrientation') {
+                toggleScreenOrientation(backupDataJSON[value]);
+              } else {
+                dispatchSettings(
+                  setDatabase({
+                    target: value,
+                    value: backupDataJSON[value],
+                  }),
+                );
+              }
+            });
+          Alert.alert(
+            'Restore berhasil!',
+            'Kamu berhasil kembali ke backup sebelumnya!',
+          );
         } catch (e: any) {
-          const errMessage =
-            e.message === 'Network request failed'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + e.message;
-          Alert.alert('Restore gagal!', errMessage);
-        } finally {
-          setModalVisible(false);
+          Alert.alert('Restore gagal!', e.message);
         }
+      } catch (e: any) {
+        const errMessage =
+          e.message === 'Network Error'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + e.message;
+        Alert.alert('Restore gagal!', errMessage);
+      } finally {
+        setModalVisible(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -417,19 +294,6 @@ function Setting(_props: Props) {
 
   const settingsData: SettingsData[] = [
     {
-      title: 'Nyalakan notifikasi part selanjutnya',
-      description:
-        'Beri tahu saya saat akan berpindah part anime secara otomatis',
-      icon: <Icon name="cube" style={globalStyles.text} size={iconSize} />,
-      rightComponent: (
-        <Switch
-          value={notificationSwitch}
-          onValueChange={nextPartNotification}
-        />
-      ),
-      handler: nextPartNotification,
-    },
-    {
       title: 'Nyalakan informasi baterai dan waktu',
       description:
         'Beri tahu saya persentase baterai dan waktu, saat sedang streaming fullscreen',
@@ -475,9 +339,9 @@ function Setting(_props: Props) {
             Alert.alert(
               'Konfirmasi',
               'Kamu yakin ingin mengubah mode download ke ' +
-                value.label +
-                '?' +
-                '\n\nPilih mode browser jika ingin mem-pause download ditengah-tengah dan memilih lokasi download.\nPilih mode native jika ingin memulai download dengan 1 klik.',
+              value.label +
+              '?' +
+              '\n\nPilih mode browser jika ingin mem-pause download ditengah-tengah dan memilih lokasi download.\nPilih mode native jika ingin memulai download dengan 1 klik.',
               [
                 {
                   text: 'Batal',
@@ -547,7 +411,7 @@ function Setting(_props: Props) {
         </View>
       </Modal>
       {/* Modal restore */}
-      <Modal
+      {/* <Modal
         transparent
         visible={restoreVisible}
         onRequestClose={() => setRestoreVisible(false)}>
@@ -614,7 +478,7 @@ function Setting(_props: Props) {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
-      </Modal>
+      </Modal> */}
 
       <FlatList
         data={settingsData}
@@ -698,7 +562,7 @@ const styles = StyleSheet.create({
   waktuServer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: colorScheme === 'dark'  ?'#aa6f00' : '#ce8600',
+    backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
   },
   modalContainer: {
     flex: 1,

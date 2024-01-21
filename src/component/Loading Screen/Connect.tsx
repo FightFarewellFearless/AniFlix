@@ -29,6 +29,8 @@ import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 import RNFetchBlob from 'rn-fetch-blob';
 
+import animeLocalAPI from '../../utils/animeLocalAPI';
+
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
@@ -51,14 +53,14 @@ function Loading(props: Props) {
     if (jsondata === undefined) {
       return;
     }
-    if (jsondata.maintenance === true) {
-      props.navigation.dispatch(
-        StackActions.replace('Maintenance', {
-          message: jsondata.message,
-        }),
-      );
-      return;
-    }
+    // if (jsondata.maintenance === true) {
+    //   props.navigation.dispatch(
+    //     StackActions.replace('Maintenance', {
+    //       message: jsondata.message,
+    //     }),
+    //   );
+    //   return;
+    // }
     props.navigation.dispatch(
       StackActions.replace('Home', {
         data: jsondata,
@@ -107,6 +109,12 @@ function Loading(props: Props) {
     }
   }, []);
 
+  const fetchDomain = useCallback(async() => {
+    await animeLocalAPI.fetchLatestDomain().catch(() => {
+      ToastAndroid.show('Gagal mendapatkan domain terbaru, menggunakan domain default', ToastAndroid.SHORT);
+    });
+  }, []);
+
   const checkVersion = useCallback(async () => {
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
@@ -130,6 +138,8 @@ function Loading(props: Props) {
     (async () => {
       await prepareData();
       await deleteUnnecessaryUpdate();
+      setLoadStatus('Mendapatkan domain');
+      await fetchDomain();
       setLoadStatus('Mengecek versi aplikasi');
       const version = await checkVersion();
       if (version === null) {

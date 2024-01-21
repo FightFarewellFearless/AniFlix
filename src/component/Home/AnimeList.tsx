@@ -27,7 +27,7 @@ import globalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../../misc/context';
 import runningText from '../../assets/runningText.json';
-import { MovieList as MovieListType, NewAnimeList } from '../../types/anime';
+import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, HomeStackNavigator } from '../../types/navigation';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import colorScheme from '../../utils/colorScheme';
@@ -144,11 +144,11 @@ function HomeList(props: HomeListProps) {
 
     AnimeAPI.home()
       .then(async jsondata => {
-        if (jsondata.maintenance) {
-          ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
-          setRefresh(false);
-          return;
-        }
+        // if (jsondata.maintenance) {
+        //   ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
+        //   setRefresh(false);
+        //   return;
+        // }
         setData?.(jsondata);
         setRefresh(false);
       })
@@ -169,17 +169,7 @@ function HomeList(props: HomeListProps) {
     ),
     [props.navigation],
   );
-  const renderMovie = useCallback(
-    ({ item }: ListRenderItemInfo<MovieListType>) => (
-      <MovieList
-        movieData={item}
-        key={'btn' + item.title}
-        navigationProp={props.navigation}
-      />
-    ),
-    [props.navigation],
-  );
-
+  
   return (
     <Animated.ScrollView
       style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
@@ -262,44 +252,35 @@ function HomeList(props: HomeListProps) {
         </View>
         <FlatList
           horizontal
-          data={data?.newAnime.slice(0, 11)}
+          data={data?.newAnime.slice(0, 25)}
           renderItem={renderNewAnime}
           showsHorizontalScrollIndicator={false}
         />
       </View>
 
-      <View style={[{ marginTop: 13 }, styles.listContainer]}>
-        <View style={styles.titleContainer}>
-          <Text style={[styles.titleText, globalStyles.text]}>
-            Movie terbaru:{' '}
-          </Text>
-          <TouchableOpacity
-            style={styles.seeMoreContainer}
+      {Object.keys(data?.jadwalAnime ?? {}).map((key) => {
+        return (
+        <View key={key} style={[styles.listContainer, { marginTop: 15 }]}>
+          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>{key}</Text>
+          {data?.jadwalAnime[key]!.map((item, index) => (
+            <TouchableOpacity
+            style={{
+              backgroundColor: index % 2 === 0 ? colorScheme === 'dark' ? '#292929' : '#fff' : colorScheme === 'dark' ? '#212121' : '#f5f5f5',
+            }}
+            key={item.title}
             onPress={() => {
               props.navigation.dispatch(
-                StackActions.push('SeeMore', {
-                  type: 'MovieList',
+                StackActions.push('FromUrl', {
+                  link: item.link,
                 }),
               );
             }}>
-            <Text style={[globalStyles.text, styles.seeMoreText]}>
-              Lihat semua{' '}
-            </Text>
-            <Icon
-              name="long-arrow-right"
-              color={globalStyles.text.color}
-              size={20}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          horizontal
-          data={data?.movie.slice(0, 11)}
-          renderItem={renderMovie}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
+              <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>)
+      })}
+      
     </Animated.ScrollView>
   );
 }
@@ -398,7 +379,7 @@ function AnimeList(props: {
         source={{ uri: z.thumbnailUrl }}
         style={[
           styles.listBackground,
-          { borderColor: z.status === 'Ongoing' ? 'red' : '#00d100' },
+          { borderColor: 'orange'},
         ]}>
         <View style={styles.animeTitleContainer}>
           <Text numberOfLines={2} style={styles.animeTitle}>
@@ -408,56 +389,12 @@ function AnimeList(props: {
 
         <View style={styles.animeEpisodeContainer}>
           <Text style={styles.animeEpisode}>
-            {z.episode === '' ? 'MOVIE' : z.episode}
+            {z.episode}
           </Text>
         </View>
         <View style={styles.animeRatingContainer}>
           <Text style={styles.animeRating}>
-            <Icon name="star" /> {z.rating}
-          </Text>
-        </View>
-      </ImageLoading>
-    </TouchableOpacity>
-  );
-}
-
-function MovieList(props: {
-  movieData: MovieListType;
-  navigationProp:
-    | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-    | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
-}) {
-  const z = props.movieData;
-  const navigation = props.navigationProp;
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        navigation.dispatch(
-          StackActions.push('FromUrl', {
-            link: z.streamingLink,
-          }),
-        );
-      }}>
-      <ImageLoading
-        resizeMode="stretch"
-        key={z.title}
-        source={{ uri: z.thumbnailUrl }}
-        style={[styles.listBackground, { borderColor: 'orange' }]}>
-        <View style={styles.animeTitleContainer}>
-          <Text numberOfLines={2} style={styles.animeTitle}>
-            {z.title}
-          </Text>
-        </View>
-
-        <View style={styles.animeEpisodeContainer}>
-          <Text style={[styles.animeEpisode, { fontSize: 12 }]}>
-            {z.releaseYear}
-          </Text>
-        </View>
-
-        <View style={styles.animeRatingContainer}>
-          <Text style={styles.animeRating}>
-            <Icon name="star" /> {z.rating}
+            <Icon name="calendar" /> {z.releaseDay}
           </Text>
         </View>
       </ImageLoading>
@@ -676,4 +613,4 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
-export { AnimeList, MovieList };
+export { AnimeList };

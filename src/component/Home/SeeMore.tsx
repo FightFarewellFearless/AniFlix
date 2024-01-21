@@ -10,9 +10,9 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useWindowDimensions } from 'react-native';
 import { HomeContext } from '../../misc/context';
 import { HomeStackNavigator } from '../../types/navigation';
-import { AnimeList, MovieList } from './AnimeList';
+import { AnimeList } from './AnimeList';
 import AnimeAPI from '../../utils/AnimeAPI';
-import { MovieList as MovieListType, NewAnimeList } from '../../types/anime';
+import { NewAnimeList } from '../../types/anime';
 
 type Props = NativeStackScreenProps<HomeStackNavigator, 'SeeMore'>;
 
@@ -21,18 +21,14 @@ function SeeMore(props: Props) {
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [isLoading, setIsLoading] = useState(false);
-  const objectInDataBaseOnType = type === 'AnimeList' ? 'newAnime' : 'movie';
-  const page = (data?.[objectInDataBaseOnType].length ?? 0) / 12;
+  const page = (data?.newAnime.length ?? 0) / 25;
   const windowWidth = useWindowDimensions().width;
   const columnWidth = 120;
   const numColumns = Math.floor(windowWidth / columnWidth);
 
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle:
-        props.route.params.type === 'AnimeList'
-          ? 'Anime terbaru'
-          : 'Movie terbaru',
+      headerTitle: 'Anime terbaru',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -42,21 +38,14 @@ function SeeMore(props: Props) {
       {isLoading && <ActivityIndicator />}
       <FlashList
         data={
-          data?.[objectInDataBaseOnType] as NewAnimeList[] | MovieListType[]
+          data?.newAnime as NewAnimeList[]
         }
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
-          objectInDataBaseOnType === 'newAnime' ? (
             <AnimeList
               newAnimeData={item as NewAnimeList}
               navigationProp={props.navigation}
             />
-          ) : (
-            <MovieList
-              movieData={item as MovieListType}
-              navigationProp={props.navigation}
-            />
-          )
         }
         numColumns={numColumns}
         estimatedItemSize={205}
@@ -69,13 +58,13 @@ function SeeMore(props: Props) {
               }
               setIsLoading(true);
               try {
-                const newdata = await AnimeAPI[objectInDataBaseOnType](
+                const newdata = await AnimeAPI.newAnime(
                   page + 1,
                 );
                 setData?.(prev => ({
                   ...prev,
-                  [objectInDataBaseOnType]: [
-                    ...prev[objectInDataBaseOnType],
+                  newAnime: [
+                    ...prev.newAnime,
                     ...newdata,
                   ],
                 }));

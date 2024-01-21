@@ -28,7 +28,7 @@ import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import DeviceInfo, { getUserAgentSync } from 'react-native-device-info';
+import DeviceInfo from 'react-native-device-info';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
 import url from 'url';
@@ -54,19 +54,18 @@ import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
 import reqWithReferer from '../utils/reqWithReferer';
+import deviceUserAgent from '../utils/deviceUserAgent';
+import { AniDetail } from '../types/anime';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const TouchableOpacityAnimated =
   ReAnimated.createAnimatedComponent(TouchableOpacity);
 
-const userAgent = getUserAgentSync();
 const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
 function Video(props: Props) {
-  const enableNextPartNotification = useSelector(
-    (state: RootState) => state.settings.enableNextPartNotification,
-  );
+
   const enableBatteryTimeInfo = useSelector(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
@@ -86,23 +85,28 @@ function Video(props: Props) {
   // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
   const [showSynopsys, setShowSynopsys] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const [part, setPart] = useState(historyData?.part ?? 0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
-  const [shouldShowNextPartNotification, setShouldShowNextPartNotification] =
-    useState(false);
-  const preparePartAnimation = useRef(new Animated.Value(0)).current;
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
   const [isControlsHidden, setIsControlsHidden] = useState(true);
 
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
-  const hasDownloadAllPart = useRef(false);
-  const hasPart = useRef(data.streamingLink.length > 1);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoRef>(null);
   const webviewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
+
+  const [animeDetail, setAnimeDetail] = useState<Omit<AniDetail, 'episodeList'> | undefined>();
+
+  useEffect(() => {
+    AnimeAPI.fromUrl(data.episodeData.animeDetail).then(detail => {
+      if(detail === 'Unsupported') return;
+      if(detail.type === 'animeDetail') {
+        setAnimeDetail(detail);
+      }
+    })
+  }, []);
 
   const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: defaultLoadingGif});
 
@@ -111,7 +115,7 @@ function Video(props: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
     throttleFunction(
-      (progressData, stateData, statePart, settContext, dispatchContext) => {
+      (progressData, stateData, settContext, dispatchContext) => {
         if (Math.floor(progressData.currentTime) === 0) {
           return;
         }
@@ -120,7 +124,6 @@ function Video(props: Props) {
           currentLink.current,
           true,
           {
-            part: hasPart.current ? statePart : undefined,
             resolution: stateData.resolution,
             lastDuration: progressData.currentTime,
           },
@@ -133,35 +136,16 @@ function Video(props: Props) {
     [],
   );
 
-  const preparePartAnimationSequence = useMemo(
-    () =>
-      Animated.sequence([
-        Animated.timing(preparePartAnimation, {
-          toValue: 1,
-          useNativeDriver: true,
-          duration: 500,
-        }),
-        Animated.timing(preparePartAnimation, {
-          toValue: 0,
-          useNativeDriver: true,
-          duration: 500,
-          delay: 3000,
-        }),
-      ]),
-    [preparePartAnimation],
-  );
-
   const abortController = useRef<AbortController | null>(null);
   if (abortController.current === null) {
     abortController.current = new AbortController();
   }
 
-  const nextPartEnable = useRef<string>();
-
   const [isBackground, setIsBackground] = useState(false);
 
   const infoContainerHeight = useSharedValue(0);
   const initialInfoContainerHeight = useRef<number>();
+  const isInfoPressed = useRef(false);
   const [synopsysTextLength, setSynopsysTextLength] = useState(0);
   const synopsysHeight = useRef(0);
   const infoContainerStyle = useAnimatedStyle(() => ({
@@ -178,8 +162,6 @@ function Video(props: Props) {
     const appStateFocus = AppState.addEventListener('focus', () => {
       setIsBackground(false);
     });
-
-    nextPartEnable.current = enableNextPartNotification;
 
     Orientation.addDeviceOrientationListener(orientationDidChange);
 
@@ -247,60 +229,38 @@ function Video(props: Props) {
   };
 
   const setResolution = useCallback(
-    async (res: string) => {
+    async (res: string, resolution: string) => {
       if (loading) {
         return;
       }
       setLoading(true);
-      const resultData = await AnimeAPI.fromUrl(
-        currentLink.current,
+      const resultData = await AnimeAPI.reqResolution(
         res,
-        true,
+        data.reqNonceAction,
+        data.reqResolutionWithNonceAction,
         abortController.current?.signal,
       ).catch(err => {
-        if (err.message === 'Aborted') {
+        if (err.message === 'canceled') {
           return;
         }
         const errMessage =
-          err.message === 'Network request failed'
+          err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.message;
+            : 'Error tidak diketahui: ' + err.stack;
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
       if (resultData === undefined) {
         return;
       }
-      if (resultData === 'Unsupported') {
-        Alert.alert(
-          'Tidak didukung!',
-          'Anime yang kamu tuju tidak memiliki data yang didukung!',
-        );
-        setLoading(false);
-        return;
-      }
-      if (resultData.maintenance) {
-        setLoading(false);
-        ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
-        return;
-      }
-      if (resultData.blocked) {
-        setLoading(false);
-        Alert.alert('Gagal mengganti resolusi', 'Karena data di blokir');
-        return;
-      }
-      if (resultData.type !== 'singleEps') {
-        setLoading(false);
-        Alert.alert(
-          'Kesalahan!!',
-          'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
-        );
-        return;
-      }
-      hasPart.current = resultData.streamingLink.length > 1;
-      setData(resultData);
+      setData(old => {
+        return {
+          ...old,
+          streamingLink: resultData,
+          resolution,
+        };
+      });
       setLoading(false);
-      setPart(0);
       firstTimeLoad.current = false;
     },
     [loading],
@@ -396,14 +356,12 @@ function Video(props: Props) {
         ToastAndroid.SHORT,
       );
     }
-    const source = data.streamingLink[part].sources[0].src;
+    const source = data.streamingLink;
     const resolution = data.resolution;
     await downloadAnimeFunction(
       source,
       downloadSource.current,
-      data.streamingLink.length > 1
-        ? data.title + ' Part ' + (part + 1)
-        : data.title,
+      data.title,
       resolution,
       undefined,
       () => {
@@ -411,147 +369,27 @@ function Video(props: Props) {
         ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
       },
     );
-  }, [data, downloadAnimeFunction, part]);
+  }, [data, downloadAnimeFunction]);
 
   const onEnd = useCallback(() => {
-    if (part < data.streamingLink.length - 1) {
-      setPart(part + 1);
-      setShouldShowNextPartNotification(false);
-    }
-  }, [data, part]);
+    // ON END TODOS
+  }, [data]);
   const onBack = useCallback(() => {
     exitFullscreen();
   }, [exitFullscreen]);
 
-  const downloadAllAnimePart = useCallback(
-    async (force = false, askForDownload = true) => {
-      if (hasDownloadAllPart.current && force === false) {
-        Alert.alert(
-          'Lanjutkan?',
-          'kamu sudah mengunduh semua part. Masih ingin melanjutkan?',
-          [
-            {
-              text: 'Batalkan',
-              style: 'cancel',
-              onPress: () => null,
-            },
-            {
-              text: 'Lanjutkan',
-              onPress: () => {
-                downloadAllAnimePart(true);
-              },
-            },
-          ],
-        );
-        return;
-      }
-
-      if (askForDownload) {
-        Alert.alert(
-          'Download semua part?',
-          `Ini akan mendownload semua (${data.streamingLink.length}) part`,
-          [
-            {
-              text: 'Tidak',
-              style: 'cancel',
-              onPress: () => null,
-            },
-            {
-              text: 'Ya',
-              onPress: () => {
-                downloadAllAnimePart(force, false);
-              },
-            },
-          ],
-        );
-        return;
-      }
-
-      if (data.streamingType === 'embed') {
-        return ToastAndroid.show(
-          'Jenis format ini tidak mendukung fitur download',
-          ToastAndroid.SHORT,
-        );
-      }
-
-      for (let i = 0; i < data.streamingLink.length; i++) {
-        const source = data.streamingLink[i].sources[0].src;
-
-        let Title = data.title + ' Part ' + (i + 1);
-
-        if (hasDownloadAllPart.current) {
-          Title +=
-            ' (' +
-            downloadSource.current.filter(z => z === source).length +
-            ')';
-        }
-
-        if (downloadFrom === 'native' || downloadFrom === null) {
-          await downloadAnimeFunction(
-            source,
-            downloadSource.current,
-            Title,
-            data.resolution,
-            true,
-            () => {
-              downloadSource.current = [...downloadSource.current, source];
-            },
-          );
-        }
-      }
-      if (downloadFrom === 'browser') {
-        if (await Linking.canOpenURL(data.downloadLink)) {
-          Linking.openURL(data.downloadLink);
-        } else {
-          ToastAndroid.show('https tidak didukung', ToastAndroid.SHORT);
-        }
-      }
-      hasDownloadAllPart.current = true;
-      ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
-    },
-    [data, downloadFrom, downloadAnimeFunction],
-  );
-
-  const nextPartNotificationControl = useCallback(
-    (progressData: OnProgressData) => {
-      if (hasPart.current) {
-        const remainingTime =
-          progressData.seekableDuration - progressData.currentTime;
-        if (
-          remainingTime < 10 &&
-          shouldShowNextPartNotification === false &&
-          part < data.streamingLink.length - 1 &&
-          nextPartEnable.current
-        ) {
-          setShouldShowNextPartNotification(true);
-          Animated.loop(preparePartAnimationSequence, {
-            iterations: 1,
-          }).start();
-        }
-        if (remainingTime > 10 && shouldShowNextPartNotification === true) {
-          setShouldShowNextPartNotification(false);
-        }
-      }
-    },
-    [data, part, preparePartAnimationSequence, shouldShowNextPartNotification],
-  );
-
   const handleProgress = useCallback(
     (progressData: OnProgressData) => {
-      nextPartNotificationControl(progressData);
       updateHistoryThrottle(
         progressData,
         data,
-        part,
         history,
         dispatchSettings,
       );
     },
     [
-      nextPartNotificationControl,
       updateHistoryThrottle,
       data,
-      part,
       history,
       dispatchSettings,
     ],
@@ -567,13 +405,14 @@ function Video(props: Props) {
         url,
         undefined,
         undefined,
+        undefined,
         abortController.current?.signal,
       ).catch(err => {
-        if (err.message === 'Aborted') {
+        if (err.message === 'canceled') {
           return;
         }
         const errMessage =
-          err.message === 'Network request failed'
+          err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
             : 'Error tidak diketahui: ' + err.message;
         Alert.alert('Error', errMessage);
@@ -590,30 +429,27 @@ function Video(props: Props) {
         setLoading(false);
         return;
       }
-      if (result.maintenance) {
-        setLoading(false);
-        ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
-        return;
-      }
-      if (result.blocked) {
-        setLoading(false);
-        Alert.alert('Gagal mengganti episode', 'Karena data di blokir');
-        return;
-      }
-      if (result.type !== 'singleEps') {
+      // if (result.maintenance) {
+      //   setLoading(false);
+      //   ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
+      //   return;
+      // }
+      // if (result.blocked) {
+      //   setLoading(false);
+      //   Alert.alert('Gagal mengganti episode', 'Karena data di blokir');
+      //   return;
+      // }
+      if (result.type !== 'animeStreaming') {
         setLoading(false);
         Alert.alert(
           'Kesalahan!!',
           'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
         );
         return;
-      }
-
-      hasPart.current = result.streamingLink.length > 1;
+        }
 
       setData(result);
       setLoading(false);
-      setPart(0);
       firstTimeLoad.current = false;
       currentLink.current = url;
 
@@ -653,24 +489,6 @@ function Video(props: Props) {
       <LoadingModal loading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
-        {/* notifikasi part selanjutnya */}
-        {shouldShowNextPartNotification && (
-          <>
-            <Animated.View
-              style={{
-                zIndex: 1,
-                alignItems: 'center',
-                opacity: preparePartAnimation,
-              }}
-              pointerEvents="none">
-              <View style={styles.partNotificationContainer}>
-                <Text style={{ color: darkText }}>
-                  Bersiap ke part selanjutnya
-                </Text>
-              </View>
-            </Animated.View>
-          </>
-        )}
 
         {
           // mengecek apakah video tersedia
@@ -679,7 +497,7 @@ function Video(props: Props) {
               backBufferDurationMs={40_000}
               disableBack={!fullscreen}
               isFullscreen={fullscreen}
-              key={data.streamingLink[part].sources[0].src}
+              key={data.streamingLink}
               onBack={onBack}
               onEnd={onEnd}
               onEnterFullscreen={enterFullscreen}
@@ -696,9 +514,9 @@ function Video(props: Props) {
               showOnEnd={true}
               source={{
                 headers: {
-                  'User-Agent': userAgent,
+                  'User-Agent': deviceUserAgent,
                 },
-                uri: data.streamingLink[part].sources[0].src,
+                uri: data.streamingLink,
               }}
               title={data.title}
               toggleResizeModeOnFullscreen={false}
@@ -717,7 +535,7 @@ function Video(props: Props) {
                 return res;
               }}
               source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
-              userAgent={userAgent}
+              userAgent={deviceUserAgent}
               originWhitelist={['*']}
               allowsFullscreenVideo={true}
               injectedJavaScript={`
@@ -796,13 +614,17 @@ function Video(props: Props) {
             <TouchableOpacityAnimated
               style={[styles.container, infoContainerStyle]}
               onLayout={e => {
-                if (initialInfoContainerHeight.current === undefined) {
-                  infoContainerHeight.value = e.nativeEvent.layout.height;
+                if (isInfoPressed.current === false) {
+                  // infoContainerHeight.value = e.nativeEvent.layout.height;
                   initialInfoContainerHeight.current =
                     e.nativeEvent.layout.height;
                 }
               }}
               onPress={() => {
+                if(!isInfoPressed.current) {
+                  infoContainerHeight.value = initialInfoContainerHeight.current!;
+                }
+                isInfoPressed.current = true;
                 if (showSynopsys) {
                   setTimeout(setShowSynopsys, 100, false);
                   infoContainerHeight.value = withTiming(
@@ -830,11 +652,11 @@ function Video(props: Props) {
                     .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
-                {data.synopsys}
+                {animeDetail?.synopsys || 'Tidak ada sinopsis'}
               </Text>
 
               <View style={[styles.infoGenre]}>
-                {data.genre.map(genre => (
+                {(animeDetail?.genres ?? ['Loading']).map(genre => (
                   <Text key={genre} style={[globalStyles.text, styles.genre]}>
                     {genre}
                   </Text>
@@ -848,16 +670,16 @@ function Video(props: Props) {
                     styles.status,
                     {
                       backgroundColor:
-                        data.status === 'Ended' ? 'green' : 'red',
+                        animeDetail?.status === 'Ended' ? 'green' : 'red',
                     },
                   ]}>
-                  {data.status}
+                  {animeDetail?.status}
                 </Text>
                 <Text style={[{ color: darkText }, styles.releaseYear]}>
-                  <Icon name="calendar" color={darkText} /> {data.releaseYear}
+                  <Icon name="calendar" color={darkText} /> {animeDetail?.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
-                  <Icon name="star" color="black" /> {data.rating}
+                  <Icon name="star" color="black" /> {animeDetail?.rating}
                 </Text>
               </View>
 
@@ -913,14 +735,14 @@ function Video(props: Props) {
               )}
               <View style={{ width: 120 }}>
                 <Dropdown
-                  value={data.resolution}
-                  data={data.validResolution.map(z => {
-                    return { label: z, value: z };
+                  value={data.resolutionRaw?.[data.resolution as '360p' |'480p' | '720p'] ?? '480p'}
+                  data={Object.entries(data.resolutionRaw).map(z => {
+                    return { label: z[0], value: z[1] };
                   })}
                   valueField="value"
                   labelField="label"
                   onChange={val => {
-                    setResolution(val.value);
+                    setResolution(val.value, val.label);
                   }}
                   style={styles.dropdownStyle}
                   containerStyle={styles.dropdownContainerStyle}
@@ -930,30 +752,6 @@ function Video(props: Props) {
                   selectedTextStyle={styles.dropdownSelectedTextStyle}
                 />
               </View>
-              {data.streamingType === 'raw' && data.streamingLink?.length > 1 && (
-                <View style={styles.dropdownPart}>
-                  <Dropdown
-                    // @ts-ignore
-                    value={part}
-                    data={data.streamingLink.map((_, i) => {
-                      return { label: 'Part ' + (i + 1), value: i };
-                    })}
-                    valueField="value"
-                    labelField="label"
-                    onChange={val => {
-                      setPart(val.value);
-                      firstTimeLoad.current = false;
-                    }}
-                    style={styles.dropdownStyle}
-                    containerStyle={styles.dropdownContainerStyle}
-                    itemTextStyle={styles.dropdownItemTextStyle}
-                    itemContainerStyle={styles.dropdownItemContainerStyle}
-                    activeColor="#16687c"
-                    selectedTextStyle={styles.dropdownSelectedTextStyle}
-                  />
-                  {/* <Icon name="info-circle" /> */}
-                </View>
-              )}
             </View>
 
             <TouchableOpacity
@@ -961,21 +759,9 @@ function Video(props: Props) {
               onPress={downloadAnime}>
               <Icon name="download" size={23} color={darkText} />
               <Text style={{ color: darkText }}>
-                Download {data.streamingLink?.length > 1 && 'Part ini'}
+                Download
               </Text>
             </TouchableOpacity>
-
-            {data.streamingLink?.length > 1 && (
-              <TouchableOpacity
-                style={[
-                  styles.downloadButton,
-                  { backgroundColor: '#996300', marginTop: 5 },
-                ]}
-                onPress={downloadAllAnimePart as () => void}>
-                <Icon name="download" size={23} color={darkText} />
-                <Text style={{ color: darkText }}>Download semua part</Text>
-              </TouchableOpacity>
-            )}
           </ScrollView>
         )
       }
@@ -1142,12 +928,6 @@ const styles = StyleSheet.create({
   episodeDataControlButton: {
     padding: 5,
   },
-  dropdownPart: {
-    width: 120,
-    position: 'absolute',
-    bottom: 13,
-    right: 13,
-  },
   downloadButton: {
     backgroundColor: '#0050ac',
     borderRadius: 5,
@@ -1156,13 +936,6 @@ const styles = StyleSheet.create({
     width: '85%',
     alignItems: 'center',
     alignSelf: 'center',
-  },
-  partNotificationContainer: {
-    position: 'absolute',
-    top: 10,
-    backgroundColor: '#0000008f',
-    padding: 3,
-    borderRadius: 5,
   },
   dropdownStyle: {
     width: 120,

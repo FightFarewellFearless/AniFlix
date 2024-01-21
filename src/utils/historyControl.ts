@@ -1,10 +1,10 @@
 import { setDatabase } from '../misc/reduxSlice';
-import { SingleEps } from '../types/anime';
+import { AniStreaming } from '../types/anime';
 import { AppDispatch } from '../misc/reduxStore';
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 
 function setHistory(
-  targetData: SingleEps,
+  targetData: AniStreaming,
   link: string,
   skipUpdateDate = false,
   additionalData: Partial<HistoryAdditionalData> | {} = {},
@@ -14,7 +14,7 @@ function setHistory(
   const data: HistoryJSON[] = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
   const title =
-    episodeIndex >= 0 // Episode is exist (anime is not movie)
+    episodeIndex >= 0
       ? targetData.title.slice(0, episodeIndex)
       : targetData.title;
   const episode =

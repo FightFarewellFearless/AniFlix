@@ -37,6 +37,8 @@ import Reanimated, {
   withTiming,
   ZoomIn,
   ZoomOut,
+  SlideInDown,
+  SlideOutDown,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import ImageLoading from '../ImageLoading';
@@ -143,13 +145,13 @@ function Search(props: Props) {
     textInputRef.current?.blur();
     AnimeAPI.search(searchText)
       .then(async result => {
-        if ('maintenance' in result && result.maintenance === true) {
-          props.navigation.navigate('Maintenance', {
-            message: result.message,
-          });
-          setLoading(false);
-          return;
-        }
+        // if ('maintenance' in result && result.maintenance === true) {
+        //   props.navigation.navigate('Maintenance', {
+        //     message: result.message,
+        //   });
+        //   setLoading(false);
+        //   return;
+        // }
         query.current = searchText;
         setData(result);
         setLoading(false);
@@ -165,46 +167,17 @@ function Search(props: Props) {
         );
       })
       .catch(err => {
-        // if (err.message === 'Aborted') {
+        // if (err.message === 'canceled') {
         //   return;
         // }
         const errMessage =
-          err.message === 'Network request failed'
+          err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
             : 'Error tidak diketahui: ' + err.message;
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
   }, [dispatchSettings, props.navigation, searchHistory, searchText]);
-
-  const loadMore = useCallback(async (page: number) => {
-    if (loadMoreLoading.current) {
-      return;
-    }
-    loadMoreLoading.current = true;
-    setLoading(true);
-    try {
-      const searchResult = await AnimeAPI.search(query.current as string, page);
-      setData(old => {
-        if (old === null) {
-          return searchResult;
-        }
-        return {
-          ...searchResult,
-          result: old?.result.concat(searchResult.result),
-        };
-      });
-    } catch (err: any) {
-      const errMessage =
-        err.message === 'Network request failed'
-          ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-          : 'Error tidak diketahui: ' + err.message;
-      Alert.alert('Error', errMessage);
-    } finally {
-      loadMoreLoading.current = false;
-      setLoading(false);
-    }
-  }, []);
 
   const onPressIn = useCallback(() => {
     searchButtonOpacity.value = withTiming(0.4, { duration: 100 });
@@ -372,12 +345,6 @@ function Search(props: Props) {
                       </Text>
                     </View>
 
-                    <View style={styles.episodeInfo}>
-                      <Text style={globalStyles.text}>
-                        {z.episode === '' ? 'Movie' : z.episode}
-                      </Text>
-                    </View>
-
                     <View style={styles.ratingInfo}>
                       <Text style={globalStyles.text}>
                         <Icon name="star" style={{ color: 'gold' }} />{' '}
@@ -397,28 +364,13 @@ function Search(props: Props) {
                     </View>
 
                     <View style={styles.releaseInfo}>
-                      <Text style={globalStyles.text}>
-                        <Icon name="calendar" /> {z.releaseYear}
+                      <Text style={globalStyles.text} numberOfLines={1}>
+                        <Icon name="quote-left" /> {z.genres.join(', ')}
                       </Text>
                     </View>
                   </View>
                 </TouchableOpacityAnimated>
               )}
-              ListFooterComponent={() =>
-                data.nextPageAvailable && (
-                  <View style={styles.nextPageView}>
-                    <TouchableOpacity
-                      style={styles.nextPageButton}
-                      onPress={() => {
-                        loadMore(data.nextPage);
-                      }}>
-                      <Text style={{ color: lightText }}>
-                        <Icon name="chevron-down" /> Muat lebih banyak
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )
-              }
             />
           ) : (
             <Text style={globalStyles.text}>Tidak ada hasil!</Text>
@@ -426,7 +378,9 @@ function Search(props: Props) {
         </>
       )}
       {loading && (
-        <ActivityIndicator style={styles.centerLoading} size="large" />
+        <Reanimated.View entering={SlideInDown} exiting={SlideOutDown} style={styles.loadingView}>
+          <Text style={[globalStyles.text, styles.loadingText]}>Memuat info...</Text>
+        </Reanimated.View>
       )}
       {/* SEARCH HISTORY VIEW */}
       {searchHistoryDisplay && (
@@ -528,7 +482,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 17,
   },
-  centerLoading: { position: 'absolute', right: '50%', top: '50%', zIndex: 2 },
+  loadingView: {
+    backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+    borderRadius: 3,
+    borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
+    borderWidth: 1.3,
+  },
+  loadingText: {
+  },
   searchInput: {
     height: 35,
     borderWidth: 0.8,
@@ -563,10 +531,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
   },
-  episodeInfo: {
-    position: 'absolute',
-    right: 5,
-  },
   ratingInfo: {
     position: 'absolute',
     left: 0,
@@ -579,15 +543,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 5,
-  },
-  nextPageView: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  nextPageButton: {
-    backgroundColor: 'orange',
-    padding: 10,
+    maxWidth: '85%',
   },
   searchHistoryContainer: {
     position: 'absolute',
@@ -606,6 +562,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     bottom: 32,
     right: 17,
+    zIndex: 1,
   },
 });
 

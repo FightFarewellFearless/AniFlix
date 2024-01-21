@@ -173,11 +173,11 @@ function History(props: Props) {
             <View style={styles.listEpisodeAndPart}>
               <Text style={styles.listEpisode}>
                 {item.episode}
-                {item.part !== undefined && (
+                {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
                     {' Part ' + (item.part + 1)}
                   </Text>
-                )}
+                )} */}
               </Text>
             </View>
 

@@ -7,7 +7,6 @@ interface HistoryJSON extends Partial<HistoryAdditionalData> {
 }
 
 interface HistoryAdditionalData {
-  part: number | undefined;
   resolution: string;
   lastDuration: number;
 }

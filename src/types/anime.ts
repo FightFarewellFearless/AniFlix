@@ -1,105 +1,97 @@
 interface Maintenance {
-  maintenance: boolean;
-  message?: string;
+  // maintenance: boolean;
+  // message?: string;
 }
 
 interface FromUrl extends Maintenance {
-  blocked: boolean;
+  // blocked: boolean;
 }
 
 interface NewAnimeList extends Maintenance {
   title: string;
   episode: string;
-  rating: string;
   thumbnailUrl: string;
   streamingLink: string;
-  releaseYear: string;
-  status: 'Ongoing' | 'Ended' | 'Movie';
+  releaseDate: string;
+  releaseDay: string;
 }
 
-interface MovieList extends Maintenance {
+interface AnimeSchedule extends Maintenance {
   title: string;
-  streamingLink: string;
-  thumbnailUrl: string;
-  rating: string;
-  releaseYear: string;
+  link: string;
 }
+
+type JadwalAnime = {
+  [hari: string]: AnimeSchedule[];
+};
 
 interface SearchAnimeList {
   title: string;
+  genres: string[];
+  status: string;
   animeUrl: string;
   thumbnailUrl: string;
-  episode: string;
   rating: string;
-  releaseYear: string;
-  status: 'Ongoing' | 'Ended' | 'Movie';
 }
 
 type SearchAnime = {
   result: SearchAnimeList[];
-} & Maintenance &
-  (
-    | {
-        nextPageAvailable: false;
-      }
-    | {
-        nextPageAvailable: true;
-        nextPage: number;
-      }
-  );
+} & Maintenance;
 
 interface Blocked extends FromUrl {
-  blocked: true;
-  maintenance: false;
+  // blocked: true;
+  // maintenance: false;
 }
 
 interface FromUrlMaintenance extends FromUrl {
-  blocked: false;
-  maintenance: true;
+  // blocked: false;
+  // maintenance: true;
 }
 
-type EpsListEpisodeList = { link: string; episode: string };
-
-interface EpsList extends FromUrl {
-  type: 'epsList';
+type AniDetailEpsList = {
   title: string;
+  link: string;
+  releaseDate: string;
+}
+interface AniDetail extends FromUrl {
+  type: 'animeDetail';
+  title: string;
+  genres: string[];
   synopsys: string;
+  detailOnly: boolean;
+  episodeList: AniDetailEpsList[];
+  epsTotal: string;
+  minutesPerEp: string;
   thumbnailUrl: string;
-  episodeList: EpsListEpisodeList[];
-  genre: string[];
+  alternativeTitle: string;
+  rating: string;
+  releaseYear: string;
   status: string;
-  releaseYear: string;
-  rating: string;
+  studio: string;
+  animeType: string;
 }
 
-type SingleEps = FromUrl & {
-  type: 'singleEps';
+type AniStreaming = FromUrl & {
+  type: 'animeStreaming';
   title: string;
+  streamingLink: string;
+  streamingType: 'raw' | 'embed';
   downloadLink: string;
-  genre: string[];
   resolution: string;
-  validResolution: string[];
-  synopsys: string;
+  resolutionRaw: {
+    "360p"?: string;
+    "480p"?: string;
+    "720p"?: string;
+  };
   thumbnailUrl: string;
-  releaseYear: string;
-  status: 'Ongoing' | 'Ended';
-  rating: string;
-  episodeData?: {
+  episodeData: {
     previous?: string;
-    episodeList: string;
+    animeDetail: string;
     next?: string;
   };
-} & ({
-  streamingType: 'raw';
-  streamingLink: {
-    sources: {
-      src: string;
-    }[];
-  }[];
-} | {
-  streamingType: 'embed';
-  streamingLink: string;
-});
+  reqNonceAction: string;
+  reqResolutionWithNonceAction: string;
+};
 
 interface AnnouncmentEnabled {
   enable: true;
@@ -111,8 +103,8 @@ interface AnnouncmentDisabled {
 }
 
 interface Home extends Maintenance {
-  movie: MovieList[];
   newAnime: NewAnimeList[];
+  jadwalAnime: JadwalAnime;
   announcment: AnnouncmentEnabled | AnnouncmentDisabled;
   uptime: number;
   waktuServer: string;
@@ -125,15 +117,15 @@ interface listAnimeTypeList {
 
 export type {
   NewAnimeList,
-  MovieList,
+  JadwalAnime,
   SearchAnimeList,
   SearchAnime,
-  EpsListEpisodeList,
-  EpsList,
+  AniDetailEpsList,
+  AniDetail,
   Blocked,
   Maintenance,
   FromUrlMaintenance,
-  SingleEps,
+  AniStreaming,
   Home,
   listAnimeTypeList
 };
