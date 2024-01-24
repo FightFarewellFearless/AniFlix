@@ -79,7 +79,7 @@ function Video(props: Props) {
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
-  const historyData = useRef(props.route.params.historyData).current;
+  const historyData = useRef(props.route.params.historyData);
 
   const [batteryLevel, setBatteryLevel] = useState(0);
   // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
@@ -119,17 +119,19 @@ function Video(props: Props) {
         if (Math.floor(progressData.currentTime) === 0) {
           return;
         }
+        const additionalData = {
+          resolution: stateData.resolution,
+          lastDuration: progressData.currentTime,
+        }
         setHistory(
           stateData,
           currentLink.current,
           true,
-          {
-            resolution: stateData.resolution,
-            lastDuration: progressData.currentTime,
-          },
+          additionalData,
           settContext,
           dispatchContext,
         );
+        historyData.current = additionalData;
       },
       3000,
     ),
@@ -261,7 +263,7 @@ function Video(props: Props) {
         };
       });
       setLoading(false);
-      firstTimeLoad.current = false;
+      firstTimeLoad.current = true;
     },
     [loading],
   );
@@ -451,6 +453,7 @@ function Video(props: Props) {
       setData(result);
       setLoading(false);
       firstTimeLoad.current = false;
+      historyData.current = undefined;
       currentLink.current = url;
 
       setHistory(result, url, undefined, undefined, history, dispatchSettings);
@@ -469,10 +472,11 @@ function Video(props: Props) {
       return;
     }
     firstTimeLoad.current = false;
-    if (historyData === undefined || historyData.lastDuration === undefined) {
+    if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    videoRef.current?.seek(historyData.lastDuration);
+    videoRef.current?.seek(historyData.current.lastDuration);
+    ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -670,7 +674,7 @@ function Video(props: Props) {
                     styles.status,
                     {
                       backgroundColor:
-                        animeDetail?.status === 'Ended' ? 'green' : 'red',
+                        animeDetail?.status === 'Completed' ? 'green' : 'red',
                     },
                   ]}>
                   {animeDetail?.status}
@@ -736,7 +740,7 @@ function Video(props: Props) {
               <View style={{ width: 120 }}>
                 <Dropdown
                   value={data.resolutionRaw?.[data.resolution as '360p' |'480p' | '720p'] ?? '480p'}
-                  data={Object.entries(data.resolutionRaw).map(z => {
+                  data={Object.entries(data.resolutionRaw).filter(z => z[1] !== undefined).map(z => {
                     return { label: z[0], value: z[1] };
                   })}
                   valueField="value"
