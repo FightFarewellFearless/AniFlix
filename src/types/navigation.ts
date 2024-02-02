@@ -2,6 +2,7 @@ import { Home, AniDetail, AniStreaming } from './anime';
 
 type HomeNavigator = {
   AnimeList: undefined;
+  Chat: undefined;
   Search: undefined;
   History: undefined;
   WatchLater: undefined;

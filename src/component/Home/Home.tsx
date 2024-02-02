@@ -12,6 +12,7 @@ import { Home as HomeType } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import WatchLater from './WatchLater';
 import { TouchableOpacity } from 'react-native';
+import Chat from './Chat';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createBottomTabNavigator<HomeNavigator>();
@@ -39,6 +40,10 @@ function BottomTabs(props: Props) {
             tabBarLabel: 'Beranda',
           }}
         />
+        <Tab.Screen
+          name='Chat'
+          component={Chat}
+          options={{ tabBarIcon: ({ color }) => <Icon name="comments" style={{ color }} size={20} /> }} />
         <Tab.Screen
           name="Search"
           component={Search}
