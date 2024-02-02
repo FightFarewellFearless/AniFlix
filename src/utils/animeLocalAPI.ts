@@ -222,9 +222,9 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         const reqResolutionWithNonceAction = changeResScript.split('processData:!0,cache:!0,data:{...e,nonce:window.__x__nonce,action:"')[1].split('"')[0];
 
         const mirrorStream = aniDetail.find('div.mirrorstream ul');
-        const m360p = mirrorStream.filter((i, el) => $(el).hasClass('m360p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().startsWith('moe')).attr('data-content');
-        const m480p = mirrorStream.filter((i, el) => $(el).hasClass('m480p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().startsWith('moe')).attr('data-content');
-        const m720p = mirrorStream.filter((i, el) => $(el).hasClass('m720p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().startsWith('moe')).attr('data-content');
+        const m360p = mirrorStream.filter((i, el) => $(el).hasClass('m360p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
+        const m480p = mirrorStream.filter((i, el) => $(el).hasClass('m480p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
+        const m720p = mirrorStream.filter((i, el) => $(el).hasClass('m720p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
 
         const resolutionRaw = {
             '360p': m360p,
