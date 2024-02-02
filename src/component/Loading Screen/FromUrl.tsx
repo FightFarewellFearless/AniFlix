@@ -100,7 +100,7 @@ function FromUrl(props: Props) {
               store.getState().settings.watchLater,
             );
             const watchLaterIndex = watchLater.findIndex(
-              z => z.title === title,
+              z => z.title.trim() === title.trim(),
             );
             if (watchLaterIndex >= 0) {
               controlWatchLater('delete', watchLaterIndex);
