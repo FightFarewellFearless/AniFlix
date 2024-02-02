@@ -174,6 +174,7 @@ function Setting(_props: Props) {
         // RNFS.readFile(doc.fileCopyUri).then(console.log);
         const data = await RNFS.readFile(doc.fileCopyUri!);
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+        await RNFS.unlink(doc.fileCopyUri!);
         try {
             (
               Object.keys(backupDataJSON) as SetDatabaseTarget[]
