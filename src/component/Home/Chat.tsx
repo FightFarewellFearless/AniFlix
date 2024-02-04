@@ -64,7 +64,7 @@ function Chat(props: Props) {
       setMessageLoading(false);
     });
     setMessageLoading(true);
-  }, []);
+  }, [streamChat]);
 
   return (
     <View style={{ flex: 1 }}>
