@@ -20,7 +20,7 @@ const fetchLatestDomain = async() => {
     if(domainName === '404: Not Found') {
         throw new Error('Domain not found');
     }
-    BASE.domain = domainName;
+    BASE.domain = domainName.trim();
     BASE.url = 'https://' + BASE.domain;
 };
 
