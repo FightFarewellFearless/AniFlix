@@ -7,22 +7,27 @@ import URL from 'url';
 
 import { Buffer } from 'buffer/';
 
-let BASE_DOMAIN = 'otakudesu.media';
+let BASE_DOMAIN = 'otakudesu.cloud';
 let BASE_URL = 'https://' + BASE_DOMAIN;
+
+const BASE = {
+    domain: BASE_DOMAIN,
+    url: BASE_URL
+};
 
 const fetchLatestDomain = async() => {
     const domainName = await fetch('https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/master/SCRAPE_DOMAIN.txt').then(res => res.text());
     if(domainName === '404: Not Found') {
         throw new Error('Domain not found');
     }
-    BASE_DOMAIN = domainName;
-    BASE_URL = 'https://' + BASE_DOMAIN;
+    BASE.domain = domainName;
+    BASE.url = 'https://' + BASE.domain;
 };
 
 const newAnime = async (page = 1, signal?: AbortSignal): Promise<NewAnimeList[]> => {
     let err = false;
     let errorObj: Error | null = null;
-    const response = await axios.get(BASE_URL + `/ongoing-anime/page/${page}`, {
+    const response = await axios.get(BASE.url + `/ongoing-anime/page/${page}`, {
         timeout: 40_000,
         headers: {
             "Accept-Encoding": "*",
@@ -65,7 +70,7 @@ const newAnime = async (page = 1, signal?: AbortSignal): Promise<NewAnimeList[]>
 const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAnimeList[]> => {
     let err = false;
     let errorObj: Error | null = null;
-    const data = await axios.get(BASE_URL + `/?s=${name}&post_type=anime`, {
+    const data = await axios.get(BASE.url + `/?s=${name}&post_type=anime`, {
         timeout: 40_000,
         headers: {
             "Accept-Encoding": "*",
@@ -110,7 +115,7 @@ const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAn
 const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, skipAutoRes = false, detailOnly = false, signal?: AbortSignal): Promise<AniStreaming | AniDetail | undefined> => {
     const withoutDomain = URL.parse(url);
     // to make sure only request with latest domain available
-    url = withoutDomain.protocol + '//' + BASE_DOMAIN + withoutDomain.pathname;
+    url = withoutDomain.protocol + '//' + BASE.domain + withoutDomain.pathname;
     let err = false;
     let errorObj: Error | null = null;
     const _axios = await axios.get(url, {
@@ -281,7 +286,7 @@ const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<st
 
 
 const listAnime = async (signal?: AbortSignal): Promise<listAnimeTypeList[]> => {
-    const url = BASE_URL + '/anime-list/';
+    const url = BASE.url + '/anime-list/';
     let err = false;
     let errorObj: Error | null = null;
     const response = await axios.get(url, {
@@ -340,7 +345,7 @@ async function fetchStreamingResolution(requestData: string | Object, reqNonceAc
         signal,
     };
     if (!nonce) {
-        const data = await axios.post(BASE_URL + '/wp-admin/admin-ajax.php', {
+        const data = await axios.post(BASE.url + '/wp-admin/admin-ajax.php', {
             action: reqNonceAction
         }, requestOptions).then(response => response.data).catch((e) => {
             err = true;
@@ -354,7 +359,7 @@ async function fetchStreamingResolution(requestData: string | Object, reqNonceAc
     }
     requestData = JSON.parse(Buffer.from(requestData as string, 'base64').toString('utf8')) as Object;
 
-    const response = await axios.post(BASE_URL + '/wp-admin/admin-ajax.php', {
+    const response = await axios.post(BASE.url + '/wp-admin/admin-ajax.php', {
         ...requestData,
         action: reqResolutionWithNonceAction,
         nonce
@@ -372,7 +377,7 @@ async function fetchStreamingResolution(requestData: string | Object, reqNonceAc
 async function jadwalAnime(signal?: AbortSignal) {
     let err = false;
     let errorObj: Error | null = null;
-    const response = await axios.get(BASE_URL + '/jadwal-rilis/', {
+    const response = await axios.get(BASE.url + '/jadwal-rilis/', {
         headers: {
             'User-Agent': deviceUserAgent,
         },
@@ -407,9 +412,8 @@ async function jadwalAnime(signal?: AbortSignal) {
 }
 
 export default {
-    BASE_DOMAIN,
+    BASE,
     fetchLatestDomain,
-    BASE_URL,
     newAnime,
     searchAnime,
     fromUrl,

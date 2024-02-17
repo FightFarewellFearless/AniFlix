@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getUserAgentSync } from 'react-native-device-info';
 import animeLocalAPI from '../utils/animeLocalAPI';
 
-const BASE_DOMAIN = animeLocalAPI.BASE_DOMAIN;
+const BASE_DOMAIN = animeLocalAPI.BASE.domain;
 
 const userAgent = getUserAgentSync();
 
