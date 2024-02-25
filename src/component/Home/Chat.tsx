@@ -1,14 +1,14 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { HomeNavigator } from "../../types/navigation";
-import { View, Text, TouchableOpacity, ToastAndroid, ScrollView, TextInput, StyleSheet, Switch } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import gpti from 'gpti';
-import Markdown, { useMarkdown } from "react-native-marked";
-import colorScheme from "../../utils/colorScheme";
-import throttle from "../../utils/throttleFunction";
-import globalStyles, { lightText } from "../../assets/style";
 import { FlashList } from "@shopify/flash-list";
+import gpti from 'gpti';
+import { useCallback, useRef, useState } from "react";
+import { StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useMarkdown } from "react-native-marked";
+import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
+import globalStyles, { lightText } from "../../assets/style";
+import { HomeNavigator } from "../../types/navigation";
+import colorScheme from "../../utils/colorScheme";
 
 const defaultMessages = [{
   content: 'SISTEM: Kamu adalah AniFlix Chat, sebuah aplikasi yang dibuat oleh FightFarewellFearless (Pirles).',
@@ -62,7 +62,7 @@ function Chat(props: Props) {
       return;
     }
     const delayScrollToEnd = () => setTimeout(() => {
-      flashList.current?.scrollToEnd();
+      flashList.current?.scrollToEnd({ animated: true });
     }, 50);
 
     setMessagesHistroy(old => [...old, { content: prompt.current, role: 'user' }, { content: 'Mohon tunggu sebentar...', role: 'assistant' }]);
@@ -109,9 +109,11 @@ function Chat(props: Props) {
         data={messagesHistroy}
         renderItem={({ item }) => {
           return (
-            <View style={[item.role === 'user' ? styles.userResponse : styles.assistantResponse, { marginVertical: 5, maxWidth: '80%' }]}>
+            <Reanimated.View
+              style={[item.role === 'user' ? styles.userResponse : styles.assistantResponse, { marginVertical: 5, maxWidth: '80%' }]}
+              entering={ZoomIn}>
               <CustomMarkdown content={item.content} />
-            </View>
+            </Reanimated.View>
           )
         }} />
       <View style={{ flexDirection: 'row' }}>
