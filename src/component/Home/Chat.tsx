@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { HomeNavigator } from "../../types/navigation";
-import { View, Text, TouchableOpacity, ToastAndroid, ScrollView, TextInput, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ToastAndroid, ScrollView, TextInput, StyleSheet, Switch } from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import gpti from 'gpti';
 import Markdown, { useMarkdown } from "react-native-marked";
@@ -11,9 +11,6 @@ import { FlashList } from "@shopify/flash-list";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 const defaultMessages = [{
-  content: 'SISTEM: Kamu merespon menggunakan markdown',
-  role: 'user',
-}, {
   content: 'SISTEM: Kamu adalah AniFlix Chat, sebuah aplikasi yang dibuat oleh FightFarewellFearless (Pirles).',
   role: 'user'
 }, {
@@ -35,16 +32,28 @@ function Chat(props: Props) {
   const [messagesHistroy, setMessagesHistroy] = useState<Message[]>([]);
   const [messageLoading, setMessageLoading] = useState(false);
 
-  const streamChat = useCallback((prompt: string, callback: (text: string | undefined) => void) => {
-    gpti.gpt({
-      messages: [...defaultMessages, ...messagesHistroy],
-      markdown: false,
-      model: 'gpt-4',
-      prompt,
-    }, (err, data) => {
-      callback(data?.gpt);
-    })
-  }, [messagesHistroy]);
+  const [useGptWeb, setUseGptWeb] = useState(false);
+
+  const requestToGpt = useCallback((prompt: string, callback: (text: string | undefined) => void) => {
+    if(useGptWeb) {
+      gpti.gptweb({
+        prompt: 'Respon menggunakan bahasa indonesia.\n\n' + prompt,
+        markdown: false,
+      }, (err, data) => {
+        callback(data?.gpt);
+      })
+    }
+    else {
+      gpti.gpt({
+        messages: [...defaultMessages, ...messagesHistroy],
+        markdown: false,
+        model: 'gpt-4',
+        prompt,
+      }, (err, data) => {
+        callback(data?.gpt);
+      })
+    }
+  }, [messagesHistroy, useGptWeb]);
 
   const prompt = useRef('');
 
@@ -56,15 +65,18 @@ function Chat(props: Props) {
       flashList.current?.scrollToEnd();
     }, 50);
 
-    setMessagesHistroy(old => [...old, { content: prompt.current, role: 'user' }]);
+    setMessagesHistroy(old => [...old, { content: prompt.current, role: 'user' }, { content: 'Mohon tunggu sebentar...', role: 'assistant' }]);
     delayScrollToEnd();
-    streamChat(prompt.current, (text) => {
-      setMessagesHistroy(old => [...old, { content: text ?? 'TERJADI ERROR: Pastikan kamu terhubung ke internet dan coba lagi', role: 'assistant' }]);
+    requestToGpt(prompt.current, (text) => {
+      setMessagesHistroy(old => {
+        old.pop();
+        return [...old, { content: text ?? 'TERJADI ERROR: Pastikan kamu terhubung ke internet dan coba lagi', role: 'assistant' }]
+      });
       delayScrollToEnd();
       setMessageLoading(false);
     });
     setMessageLoading(true);
-  }, [streamChat]);
+  }, [requestToGpt]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -75,11 +87,23 @@ function Chat(props: Props) {
           <View style={styles.center}>
             <Text style={[globalStyles.text, { fontSize: 30 }]}>AniFlix</Text>
             <Icon name="comments" size={37} color="orange" />
-            <Text style={[globalStyles.text, { fontSize: 30, fontWeight: 'bold' }]}>Chat (Beta)</Text>
+            <Text style={[globalStyles.text, { fontSize: 30, fontWeight: 'bold' }]}>Chat (Beta) {useGptWeb ? '(Web)' : ''}</Text>
+             <Switch value={useGptWeb} onValueChange={setUseGptWeb} />
+             <Text
+              style={[globalStyles.text, {
+                fontSize: 19,
+                textAlign: 'center',
+                fontWeight: 'bold' }, !useGptWeb ? { paddingBottom: 9 } : undefined]}>Aktifkan pencarian web</Text>
+             {useGptWeb && (
+               <Text
+                style={[globalStyles.text, 
+                  { fontSize: 15, paddingBottom: 9, color: 'orange' }]}>
+                    Pencarian web aktif, kamu akan mendapatkan respon yang lebih terkini tetapi chat history tidak akan bekerja
+                  </Text>
+               )}
             <Text style={[globalStyles.text, { fontSize: 15, textAlign: 'center' }]}>AniFlix Chat adalah fitur chat yang ada di AniFlix bertujuan 
             untuk memberikan pengalaman yang berbeda kepada pengguna.</Text>
-            <Text style={[globalStyles.text, { fontSize: 15, textAlign: 'center' }]}>Note: AI tidak terbatas pada informasi seputar anime. Kamu bisa menanyakan apa saja ke AI.
-             Dan juga tolong diingat bahwa informasi yang diberikan tidak terbaru dan mungkin salah</Text>
+            <Text style={[globalStyles.text, { fontSize: 15, textAlign: 'center' }]}>Note: AI tidak terbatas pada informasi seputar anime. Kamu bisa menanyakan apa saja ke AI.</Text>
           </View>
         }
         data={messagesHistroy}
