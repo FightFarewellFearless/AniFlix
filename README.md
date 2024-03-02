@@ -99,17 +99,10 @@ Wait for the build to complete. If successful, you can find the APK in `android/
 
 # LICENSE
 
-![CC BY-NC](http://mirrors.creativecommons.org/presskit/buttons/80x15/png/by-nc.png)
 
-&copy; 2023-2024 pirles, This project is licensed under [Creative Commons Attribution Non-Commercial (CC BY-NC) license](https://creativecommons.org/licenses/by-nc/4.0/)
+The AniFlix app is free and open source software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3 as published by the Free Software Foundation.
 
-## What You Can and Can't Do with the CC BY-NC License
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-### Allowed:
-- **Share** — copy and redistribute the material in any medium or format
-- **Adapt** — remix, transform, and build upon the material
-- The license allows for non-commercial use only. This means you can use it for anything that is not primarily intended for or directed toward commercial advantage or monetary compensation.
+You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-### Not Allowed:
-- **Commercial use** — You may not use the material for commercial purposes.
-- **No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
