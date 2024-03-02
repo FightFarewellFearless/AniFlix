@@ -22,7 +22,7 @@ import globalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import colorScheme from '../utils/colorScheme';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
   runOnJS,
   useAnimatedReaction,

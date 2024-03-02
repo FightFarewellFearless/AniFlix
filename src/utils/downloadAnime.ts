@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Alert, Linking, ToastAndroid } from 'react-native';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNFetchBlob from 'react-native-blob-util';
 import { useSelector } from 'react-redux';
 import { RootState } from '../misc/reduxStore';
 import deviceUserAgent from './deviceUserAgent';

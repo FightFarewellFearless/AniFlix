@@ -27,7 +27,7 @@ import { SetDatabaseTarget } from '../../types/redux';
 import { Home } from '../../types/anime';
 import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNFetchBlob from 'react-native-blob-util';
 
 import animeLocalAPI from '../../utils/animeLocalAPI';
 
