@@ -138,14 +138,14 @@ function Loading(props: Props) {
     (async () => {
       await prepareData();
       await deleteUnnecessaryUpdate();
-      setLoadStatus('Mendapatkan domain');
-      await fetchDomain();
       setLoadStatus('Mengecek versi aplikasi');
       const version = await checkVersion();
       if (version === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       } else if (version === true || __DEV__) {
         // skip update when app is in dev mode
+        setLoadStatus('Mendapatkan domain');
+        await fetchDomain();
         setLoadStatus('Menghubungkan ke server');
         await connectToServer();
       } else {
