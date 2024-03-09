@@ -57,13 +57,14 @@ function FailedToConnect(props: Props) {
           ]}>
           Gagal terhubung ke server{'\n'}
           Pastikan kamu terhubung ke internet dan coba lagi.{'\n'}
-          Jika masalah berlanjut, kemungkinan server sedang down atau ada
-          masalah lain. silahkan laporkan ke github issue: {'\n'}{' '}
+          Jika masalah berlanjut, silahkan laporkan ke github issue: {'\n'}{' '}
           <Text onPress={openLink} style={{ color: '#0066CC' }}>
             Buat issues baru di github
           </Text>
-          {'\n'} Atau bisa dengan join discord dengan klik tombol dibawah
+          {'\n'} Atau join discord dengan klik tombol "Join discord" dibawah
         </Text>
+        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>Jika kamu menggunakan DNS pastikan untuk tidak menggunakan versi "security" DNS tersebut (jika ada).</Text>
+        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>Direkomendasikan menggunakan DNS 1.1.1.1 atau 8.8.8.8</Text>
         <TouchableOpacity
           style={{
             backgroundColor: '#008a83',
