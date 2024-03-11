@@ -143,7 +143,7 @@ function Video(props: Props) {
     abortController.current = new AbortController();
   }
 
-  const [isBackground, setIsBackground] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const infoContainerHeight = useSharedValue(0);
   const initialInfoContainerHeight = useRef<number>();
@@ -157,12 +157,12 @@ function Video(props: Props) {
 
   // didMount and willUnmount
   useEffect(() => {
-    AppState.currentState === 'background' && setIsBackground(true);
+    AppState.currentState === 'background' && setIsPaused(true);
     const appStateBlur = AppState.addEventListener('blur', () => {
-      setIsBackground(true);
+      setIsPaused(true);
     });
     const appStateFocus = AppState.addEventListener('focus', () => {
-      setIsBackground(false);
+      setIsPaused(false);
     });
 
     Orientation.addDeviceOrientationListener(orientationDidChange);
@@ -374,8 +374,8 @@ function Video(props: Props) {
   }, [data, downloadAnimeFunction]);
 
   const onEnd = useCallback(() => {
-    // ON END TODOS
-  }, [data]);
+    setIsPaused(true);
+  }, []);
   const onBack = useCallback(() => {
     exitFullscreen();
   }, [exitFullscreen]);
@@ -510,7 +510,7 @@ function Video(props: Props) {
               onLoad={handleVideoLoad}
               onProgress={handleProgress}
               onShowControls={showControls}
-              paused={isBackground}
+              paused={isPaused}
               playInBackground={false}
               rewindTime={10}
               repeat={false}
