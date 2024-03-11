@@ -128,7 +128,11 @@ function Loading(props: Props) {
       .catch(() => {});
     if (data === undefined) {
       return null;
-    } else if (data[0].tag_name === appVersion) {
+    } else if (data[0]?.tag_name === appVersion) {
+      return true;
+    }
+    else if (data[0] === undefined) {
+      ToastAndroid.show('Melewatkan pengecekan versi karna terkena rate limit', ToastAndroid.SHORT);
       return true;
     }
     return data[0];
