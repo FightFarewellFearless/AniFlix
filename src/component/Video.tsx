@@ -3,7 +3,6 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useMemo,
 } from 'react';
 import {
   StatusBar,
@@ -15,16 +14,13 @@ import {
   TouchableOpacity,
   BackHandler,
   ActivityIndicator,
-  Animated,
   ToastAndroid,
   Modal,
-  Linking,
   NativeEventEmitter,
   NativeModules,
   EmitterSubscription,
   AppState,
 } from 'react-native';
-import Videos from 'react-native-media-console';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -33,12 +29,12 @@ const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
 import url from 'url';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { useAnimations } from '@react-native-media-console/reanimated';
 import ReAnimated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import RNVideo from 'react-native-video';
 
 import globalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -56,6 +52,7 @@ import WebView from 'react-native-webview';
 import reqWithReferer from '../utils/reqWithReferer';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail } from '../types/anime';
+import moment from 'moment';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -88,7 +85,6 @@ function Video(props: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
-  const [isControlsHidden, setIsControlsHidden] = useState(true);
 
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
@@ -101,14 +97,14 @@ function Video(props: Props) {
 
   useEffect(() => {
     AnimeAPI.fromUrl(data.episodeData.animeDetail).then(detail => {
-      if(detail === 'Unsupported') return;
-      if(detail.type === 'animeDetail') {
+      if (detail === 'Unsupported') return;
+      if (detail.type === 'animeDetail') {
         setAnimeDetail(detail);
       }
     })
   }, []);
 
-  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{uri: string} | {html: string}>({uri: defaultLoadingGif});
+  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{ uri: string } | { html: string }>({ uri: defaultLoadingGif });
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
@@ -180,7 +176,7 @@ function Video(props: Props) {
   useEffect(() => {
     if (data.streamingType === 'embed') {
       reqWithReferer(data.streamingLink).then(res => {
-        setStreamingEmbedLink({html: res});
+        setStreamingEmbedLink({ html: res });
       });
     }
   }, [data.streamingLink]);
@@ -376,9 +372,6 @@ function Video(props: Props) {
   const onEnd = useCallback(() => {
     setIsPaused(true);
   }, []);
-  const onBack = useCallback(() => {
-    exitFullscreen();
-  }, [exitFullscreen]);
 
   const handleProgress = useCallback(
     (progressData: OnProgressData) => {
@@ -448,7 +441,7 @@ function Video(props: Props) {
           'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
         );
         return;
-        }
+      }
 
       setData(result);
       setLoading(false);
@@ -475,16 +468,15 @@ function Video(props: Props) {
     if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    videoRef.current?.seek(historyData.current.lastDuration);
-    ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // videoRef.current?.seek(historyData.current.lastDuration);
+    // ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
-  const hideControls = useCallback(() => {
-    setIsControlsHidden(true);
-  }, []);
-  const showControls = useCallback(() => {
-    setIsControlsHidden(false);
+    Alert.alert('Perhatian', `
+    Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
+    Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
+    `)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -497,35 +489,34 @@ function Video(props: Props) {
         {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
-            <Videos
+            <RNVideo
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+              }}
               backBufferDurationMs={40_000}
-              disableBack={!fullscreen}
-              isFullscreen={fullscreen}
+              fullscreen={fullscreen}
               key={data.streamingLink}
-              onBack={onBack}
               onEnd={onEnd}
-              onEnterFullscreen={enterFullscreen}
-              onExitFullscreen={exitFullscreen}
-              onHideControls={hideControls}
+              onFullscreenPlayerDidPresent={enterFullscreen}
+              onFullscreenPlayerDidDismiss={exitFullscreen}
               onLoad={handleVideoLoad}
               onProgress={handleProgress}
-              onShowControls={showControls}
+              preventsDisplaySleepDuringVideoPlayback={true}
               paused={isPaused}
               playInBackground={false}
-              rewindTime={10}
               repeat={false}
-              showDuration={true}
-              showOnEnd={true}
               source={{
                 headers: {
                   'User-Agent': deviceUserAgent,
                 },
                 uri: data.streamingLink,
               }}
-              title={data.title}
-              toggleResizeModeOnFullscreen={false}
-              useAnimations={useAnimations}
-              videoRef={videoRef}
+              ref={videoRef}
+              controls={true}
             />
           ) : data.streamingType === 'embed' ? (
             <WebView
@@ -533,12 +524,12 @@ function Video(props: Props) {
               setSupportMultipleWindows={false}
               onShouldStartLoadWithRequest={navigator => {
                 const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
-                if(!res) {
+                if (!res) {
                   webviewRef.current?.stopLoading();
                 }
                 return res;
               }}
-              source={{...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host}}
+              source={{ ...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
               userAgent={deviceUserAgent}
               originWhitelist={['*']}
               allowsFullscreenVideo={true}
@@ -558,7 +549,6 @@ function Video(props: Props) {
           <View
             style={[
               styles.batteryInfo,
-              { display: isControlsHidden ? 'flex' : 'none' },
             ]}
             pointerEvents="none">
             {getBatteryIconComponent()}
@@ -574,7 +564,6 @@ function Video(props: Props) {
           <View
             style={[
               styles.timeInfo,
-              { display: isControlsHidden ? 'flex' : 'none' },
             ]}
             pointerEvents="none">
             <TimeInfo />
@@ -625,7 +614,7 @@ function Video(props: Props) {
                 }
               }}
               onPress={() => {
-                if(!isInfoPressed.current) {
+                if (!isInfoPressed.current) {
                   infoContainerHeight.value = initialInfoContainerHeight.current!;
                 }
                 isInfoPressed.current = true;
@@ -690,9 +679,9 @@ function Video(props: Props) {
               {synopsysTextLength > 2 && (
                 <View style={{ alignItems: 'center', marginTop: 3 }}>
                   {showSynopsys ? (
-                    <Icon name="chevron-up" size={20} />
+                    <Icon name="chevron-up" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />
                   ) : (
-                    <Icon name="chevron-down" size={20} />
+                    <Icon name="chevron-down" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />
                   )}
                 </View>
               )}
@@ -739,7 +728,7 @@ function Video(props: Props) {
               )}
               <View style={{ width: 120 }}>
                 <Dropdown
-                  value={data.resolutionRaw?.[data.resolution as '360p' |'480p' | '720p'] ?? '480p'}
+                  value={data.resolutionRaw?.[data.resolution as '360p' | '480p' | '720p'] ?? '480p'}
                   data={Object.entries(data.resolutionRaw).filter(z => z[1] !== undefined).map(z => {
                     return { label: z[0], value: z[1] };
                   })}
