@@ -23,6 +23,7 @@ import { AniDetail, AniDetailEpsList, AniStreaming, NewAnimeList, SearchAnime, S
 import URL from 'url';
 
 import { Buffer } from 'buffer/';
+import { createWorkletRuntime, runOnJS, runOnRuntime } from 'react-native-reanimated';
 
 let BASE_DOMAIN = 'otakudesu.cloud';
 let BASE_URL = 'https://' + BASE_DOMAIN;
@@ -32,9 +33,11 @@ const BASE = {
     url: BASE_URL
 };
 
-const fetchLatestDomain = async() => {
+const runtime = createWorkletRuntime('listAnime');
+
+const fetchLatestDomain = async () => {
     const domainName = await fetch('https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/master/SCRAPE_DOMAIN.txt').then(res => res.text());
-    if(domainName === '404: Not Found') {
+    if (domainName === '404: Not Found') {
         throw new Error('Domain not found');
     }
     BASE.domain = domainName.trim();
@@ -55,7 +58,7 @@ const newAnime = async (page = 1, signal?: AbortSignal): Promise<NewAnimeList[]>
         err = true;
         errorObj = e;
     });
-    if(err) {
+    if (err) {
         throw errorObj;
     }
     const html = response!.data;
@@ -98,7 +101,7 @@ const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAn
         err = true;
         errorObj = e;
     });
-    if(err) {
+    if (err) {
         throw errorObj;
     }
     const searchdata = data!.data;
@@ -146,7 +149,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         err = true;
         errorObj = e;
     });
-    if(err) {
+    if (err) {
         throw errorObj;
     }
     const data = _axios?.data;
@@ -226,7 +229,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         const resolution = '480p';
 
         const episode = aniDetail.find('div.flir a');
-        const episodeData: {previous?: string, animeDetail: string, next?: string} = {
+        const episodeData: { previous?: string, animeDetail: string, next?: string } = {
             animeDetail: episode.filter((i, el) => $(el).text().trim() === 'See All Episodes').attr('href')!,
         };
 
@@ -288,7 +291,7 @@ const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<st
             headers: {
                 "User-Agent": deviceUserAgent
             },
-            signal,    
+            signal,
         }).catch((e) => {
             err = true;
             errorObj = e;
@@ -321,30 +324,39 @@ const listAnime = async (signal?: AbortSignal): Promise<listAnimeTypeList[]> => 
     }
 
     const data = response!.data;
-    
-    const $ = cheerio.load(data, {
-        xmlMode: true,
-        xml: true,
-        // thoose two options somehow improve performance
-    });
 
-    const eachWord = $('div.jdlbar');
+    return await new Promise(res => {
+        runOnRuntime(runtime, () => {
+            'worklet';
+            function removeHtmlTags(str: string) {
+                return str.replace(/<[^>]*>?/gm, '');
+              }
+            const listAnimeData = [];
+            // Match the opening div tag with class "jdlbar" and capture until the closing div tag
+            const divRegex = /<div class="jdlbar"[^>]*>([\s\S]*?)<\/div>/g;
 
-    const eachWordArrays = eachWord.toArray();
-    const listAnimeData: listAnimeTypeList[] = [];
+            let divMatch;
+            while ((divMatch = divRegex.exec(data)) !== null) {
+                const divContent = divMatch[1];
+                // Match the anchor tag, capturing the text and href separately
+                const anchorRegex = /<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/;
 
-    let i = 0;
-    while (i < eachWordArrays.length) {
-        const elm = $(eachWordArrays[i++]);
-        listAnimeData.push({
-            title: elm.find('a').text().trim(),
-            streamingLink: elm.find('a').attr('href')!
-        })
-        if(i % 50 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 10));
-        }
-    }
-    return listAnimeData;
+                const anchorMatch = anchorRegex.exec(divContent);
+                if (anchorMatch) {
+                    const href = anchorMatch[1];
+                    const title = anchorMatch[2].trim();
+
+                    listAnimeData.push({
+                        title: removeHtmlTags(title),
+                        streamingLink: href
+                    });
+                }
+            }
+
+            // Assuming `runOnJS` is a function that you've defined elsewhere:
+            runOnJS(res)(listAnimeData);
+        })();
+    })
 }
 
 async function fetchStreamingResolution(requestData: string | Object, reqNonceAction: string, reqResolutionWithNonceAction: string, nonce?: string, signal?: AbortSignal): Promise<string | undefined> {
