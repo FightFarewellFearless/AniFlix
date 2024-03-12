@@ -2,7 +2,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FlashList } from "@shopify/flash-list";
 import gpti from 'gpti';
 import { useCallback, useRef, useState } from "react";
-import { StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -79,7 +79,7 @@ function Chat(props: Props) {
   }, [requestToGpt]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
       <FlashList
         // @ts-ignore
         ref={flashList}
@@ -124,7 +124,7 @@ function Chat(props: Props) {
           <Text style={{ color: lightText }}>{messageLoading ? 'Loading...' : 'Kirim'}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
