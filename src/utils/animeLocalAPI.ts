@@ -333,9 +333,9 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
               }
             const listAnimeData: listAnimeTypeList[] = [];
             // Match the opening div tag with class "jdlbar" and capture until the closing div tag
-            const divRegex = /<div class="jdlbar"[^>]*>([\s\S]*?)<\/div>/g;
+            const divRegex = /<div class="jdlbar">(.*?)<\/div>/g;
 
-            let divMatch;
+            let divMatch: RegExpExecArray | null;
             while ((divMatch = divRegex.exec(data)) !== null) {
                 const divContent = divMatch[1];
                 // Match the anchor tag, capturing the text and href separately
