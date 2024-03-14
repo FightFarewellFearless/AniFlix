@@ -7,7 +7,7 @@
   <img src="./android/app/src/main/res/playstore-icon.png" width="250" height="250" alt="logo aplikasi">
 </p>
 
-[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.73.2-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
+[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.73-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
 
 
 
@@ -52,21 +52,16 @@ Kamu bisa download aplikasi dengan cara berikut ini:
 
 A: ya, aplikasi ini sepenuh nya gratis, kami tidak mendapatkan keuntungan sedikit pun.
 
-> Q: jika tidak dapat keuntungan bagaimana bisa server tetap berjalan?
+> Q: Saya tidak bisa connect ke server!
 
-A: Kami menggunakan server hosting gratis yang tersedia. Tidak ada biaya satu rupiah pun yang dikeluarkan
+A: Coba gunakan DNS 8.8.8.8 atau 1.1.1.1, atau tunggu update dari developer. Jika tetap mengalami masalah, silahkan join server discord [di sini](https://discord.gg/sbTwxHb9NM)
 
 > Q: Dimana video yang sudah saya download berada?
 
 A: video yang sudah di download bisa kamu temukan di `Penyimpanan Internal/Download/`
 
-> Q: Mengapa ada anime yang diblokir?
-
-A: Kami memblokir anime dengan genre ecchi dan hentai. Tapi ada beberapa anime bergenre ecchi yang diizinkan untuk tayang
-
 # Catatan
 
-- Kami memblokir anime dengan genre ecchi dan hentai agar aplikasi aman untuk semua usia
 - Video yang terdapat di aplikasi bukan berasal dari server kami.
 Semua video berasal dari server pihak ke tiga dan kami tidak punya akses sama sekali.
 - Kami hanya membagikan video yang beredar di internet, kami tidak menyimpan satu video pun di server kami sendiri
@@ -86,6 +81,10 @@ cd AniFlix
 You will also need to create your own keystore. [Follow these steps in the React Native documentation](https://reactnative.dev/docs/signed-apk-android#generating-an-upload-key)
 
 Now you are ready to build! Just one last step remains. Install the required npm dependencies:
+```bash
+npm install
+```
+or add `legacy-peer-deps` flag if installation fail
 ```bash
 npm install --legacy-peer-deps
 ```
