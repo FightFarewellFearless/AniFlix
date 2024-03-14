@@ -350,12 +350,13 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
                         title: removeHtmlTags(title),
                         streamingLink: href
                     });
-                    if(streamingCallback !== undefined && listAnimeData.length % 100 === 0) // call every 100
+                    if(streamingCallback !== undefined && listAnimeData.length % 93 === 0) // call every 93
                         runOnJS(streamingCallback)(listAnimeData);
                 }
             }
             // Assuming `runOnJS` is a function that you've defined elsewhere:
             runOnJS(res)(listAnimeData);
+            globalThis.gc?.();
         })();
     })
 }
