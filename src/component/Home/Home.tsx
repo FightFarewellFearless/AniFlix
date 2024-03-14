@@ -24,6 +24,8 @@ function BottomTabs(props: Props) {
   return (
     <HomeContext.Provider value={{ paramsState, setParamsState }}>
       <Tab.Navigator
+        // TEMP: temporary fix for crashed app on nested navigator
+        detachInactiveScreens={false}
         screenOptions={{
           headerShown: false,
           tabBarStyle: { height: 40 },
