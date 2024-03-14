@@ -323,7 +323,7 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
         throw errorObj;
     }
 
-    const data = response!.data;
+    const data = response!.data as string;
 
     return await new Promise(res => {
         runOnRuntime(runtime, () => {
@@ -335,9 +335,11 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
             // Match the opening div tag with class "jdlbar" and capture until the closing div tag
             const divRegex = /<div class="jdlbar"[^>]*>([\s\S]*?)<\/div>/g;
 
-            let divMatch;
-            while ((divMatch = divRegex.exec(data)) !== null) {
-                const divContent = divMatch[1];
+            const matchedData = data.match(divRegex);
+            let i = 0;
+            while (matchedData && i < matchedData.length) {
+                const divContent = matchedData[i];
+                i++;
                 // Match the anchor tag, capturing the text and href separately
                 const anchorRegex = /<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/;
 
