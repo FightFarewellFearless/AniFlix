@@ -305,7 +305,7 @@ const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<st
 }
 
 
-const listAnime = async (signal?: AbortSignal): Promise<listAnimeTypeList[]> => {
+const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAnimeTypeList[]) => void): Promise<listAnimeTypeList[]> => {
     const url = BASE.url + '/anime-list/';
     let err = false;
     let errorObj: Error | null = null;
@@ -350,9 +350,10 @@ const listAnime = async (signal?: AbortSignal): Promise<listAnimeTypeList[]> => 
                         title: removeHtmlTags(title),
                         streamingLink: href
                     });
+                    if(streamingCallback !== undefined && listAnimeData.length % 100 === 0) // call every 100
+                        runOnJS(streamingCallback)(listAnimeData);
                 }
             }
-
             // Assuming `runOnJS` is a function that you've defined elsewhere:
             runOnJS(res)(listAnimeData);
         })();

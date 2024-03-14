@@ -109,7 +109,7 @@ class AnimeAPI {
     }
   }
   
-  static async listAnime(signal?: AbortSignal): Promise<listAnimeTypeList[]> {
+  static async listAnime(signal?: AbortSignal, streamingCallback?: (data: listAnimeTypeList[]) => void): Promise<listAnimeTypeList[]> {
     // const data = await fetch(
     //   this.base_url +
     //     'listAnime',
@@ -121,7 +121,7 @@ class AnimeAPI {
     //     }
     // ).then(a => a.json()) as listAnimeTypeList[];
     // return data;
-    return await Anime.listAnime(signal);
+    return await Anime.listAnime(signal, streamingCallback);
   }
 
   static async reqResolution(requestData: string, reqNonceAction: string, reqResolutionWithNonceAction: string, signal?: AbortSignal): Promise<string | undefined> {
