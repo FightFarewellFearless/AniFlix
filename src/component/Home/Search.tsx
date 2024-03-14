@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -112,7 +112,13 @@ function Search(props: Props) {
   const searchTextAnimationColor = useSharedValue(0);
 
   useEffect(() => {
-    AnimeAPI.listAnime().then(setListAnime).catch(() => {
+    AnimeAPI.listAnime(undefined, (data) => {
+      startTransition(() => {
+        setListAnime(data);
+      })
+    }).then(data => {
+      setListAnime(data);
+    }).catch(() => {
       setListAnime(null);
     });
   }, []);
@@ -270,39 +276,48 @@ function Search(props: Props) {
       </View>
 
       {data === null && listAnime !== null ? (
-        <FlashList
-          data={listAnime}
-          estimatedItemSize={40}
-          keyExtractor={item => item.title}
-          renderItem={({item}) => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  props.navigation.dispatch(
-                    StackActions.push('FromUrl', {
-                      link: item.streamingLink,
-                    }),
-                  );
+        <View style={{ flex: 1 }}>
+          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
+          <FlashList
+            data={listAnime}
+            estimatedItemSize={40}
+            keyExtractor={item => item.title}
+            renderItem={({ item }) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    props.navigation.dispatch(
+                      StackActions.push('FromUrl', {
+                        link: item.streamingLink,
+                      }),
+                    );
+                  }}
+                  style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 10 }}>
+                  <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+                </TouchableOpacity>
+              )
+            }}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{
+                  width: '100%',
+                  borderBottomWidth: 0.5,
+                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
                 }}
-                style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 10 }}>
-                <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
-              </TouchableOpacity>
-            )
-          }}
-          ItemSeparatorComponent={() => (
-            <View
-              style={{
-                width: '100%',
-                borderBottomWidth: 0.5,
-                borderColor: colorScheme === 'dark' ? 'white' : 'black',
-              }}
-            />
-          )}
-          ListEmptyComponent={() => <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} /> } />
+              />
+            )}
+            ListEmptyComponent={() => <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />} />
+        </View>
       ) : data === null ? (
         <TouchableOpacity onPress={() => {
           setListAnime([]);
-          AnimeAPI.listAnime().then(setListAnime).catch(() => {
+          AnimeAPI.listAnime(undefined, (data) => {
+            startTransition(() => {
+              setListAnime(data);
+            })
+          }).then(data => {
+            setListAnime(data);
+          }).catch(() => {
             setListAnime(null);
           });
         }}>
