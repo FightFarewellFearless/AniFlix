@@ -22,6 +22,7 @@
     "buffer": "^6.0.3",
     "cheerio": "^1.0.0-rc.12",
     "expo": ">=50.0.0-0 <51.0.0",
+    "expo-av": "~13.10.5",
     "gpti": "^2.0.6",
     "moment": "^2.29.4",
     "react": "18.2.0",
@@ -71,7 +72,11 @@
   },
   "expo": {
     "autolinking": {
-      "exclude": ["expo-keep-awake", "expo-file-system", "expo-font"]
+      "exclude": [
+        "expo-keep-awake",
+        "expo-file-system",
+        "expo-font"
+      ]
     }
   }
 }

@@ -20,6 +20,7 @@ import {
   NativeModules,
   EmitterSubscription,
   AppState,
+  Pressable,
 } from 'react-native';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -34,7 +35,7 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import RNVideo from 'react-native-video';
+import { Video as ExpoVideo, ResizeMode, VideoFullscreenUpdate } from 'expo-av';
 
 import globalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -45,7 +46,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
-import { OnProgressData, VideoRef } from 'react-native-video';
 import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
@@ -89,7 +89,8 @@ function Video(props: Props) {
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
-  const videoRef = useRef<VideoRef>(null);
+  const videoRef = useRef<ExpoVideo>(null);
+  const [videoShowControls, setVideoShowControls] = useState(true);
   const webviewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
 
@@ -111,13 +112,13 @@ function Video(props: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
     throttleFunction(
-      (progressData, stateData, settContext, dispatchContext) => {
-        if (Math.floor(progressData.currentTime) === 0) {
+      (currentTime: number, stateData, settContext, dispatchContext) => {
+        if (Math.floor(currentTime) === 0) {
           return;
         }
         const additionalData = {
           resolution: stateData.resolution,
-          lastDuration: progressData.currentTime,
+          lastDuration: currentTime,
         }
         setHistory(
           stateData,
@@ -308,6 +309,7 @@ function Video(props: Props) {
   };
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
+    // videoRef.current?.presentFullscreenPlayer();
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -329,6 +331,7 @@ function Video(props: Props) {
   }, []);
 
   const exitFullscreen = useCallback(() => {
+    // videoRef.current?.dismissFullscreenPlayer();
     StatusBar.setHidden(false);
     StatusBar.setTranslucent(false);
     Orientation.lockToPortrait();
@@ -374,9 +377,9 @@ function Video(props: Props) {
   }, []);
 
   const handleProgress = useCallback(
-    (progressData: OnProgressData) => {
+    (currentTime: number) => {
       updateHistoryThrottle(
-        progressData,
+        currentTime,
         data,
         history,
         dispatchSettings,
@@ -468,16 +471,24 @@ function Video(props: Props) {
     if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    // videoRef.current?.seek(historyData.current.lastDuration);
-    // ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
+    videoRef.current?.setPositionAsync(historyData.current.lastDuration * 1000);
+    ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
-    Alert.alert('Perhatian', `
-    Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
-    Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
-    `)
+    // Alert.alert('Perhatian', `
+    // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
+    // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
+    // `)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (isPaused) {
+      videoRef.current?.pauseAsync();
+    } else {
+      videoRef.current?.playAsync();
+    }
+  }, [isPaused]);
 
   return (
     <View style={{ flex: 2 }}>
@@ -489,35 +500,58 @@ function Video(props: Props) {
         {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
-            <RNVideo
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-              }}
-              backBufferDurationMs={40_000}
-              fullscreen={fullscreen}
-              key={data.streamingLink}
-              onEnd={onEnd}
-              onFullscreenPlayerDidPresent={enterFullscreen}
-              onFullscreenPlayerDidDismiss={exitFullscreen}
-              onLoad={handleVideoLoad}
-              onProgress={handleProgress}
-              preventsDisplaySleepDuringVideoPlayback={true}
-              paused={isPaused}
-              playInBackground={false}
-              repeat={false}
-              source={{
-                headers: {
-                  'User-Agent': deviceUserAgent,
-                },
-                uri: data.streamingLink,
-              }}
-              ref={videoRef}
-              controls={true}
-            />
+            <Pressable style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+            }} onPress={() => {
+              setVideoShowControls(val => !val);
+            }}>
+              <ExpoVideo
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                }}
+                key={data.streamingLink}
+                onPlaybackStatusUpdate={status => {
+                  if (status.isLoaded) {
+                    // onEnd
+                    if (status.didJustFinish) {
+                      onEnd();
+                    }
+                    // onProgress
+                    if (status.positionMillis) {
+                      handleProgress(status.positionMillis / 1000);
+                    }
+                  }
+                }}
+                resizeMode={ResizeMode.CONTAIN}
+                onFullscreenUpdate={status => {
+                  if(status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
+                    videoRef.current?.dismissFullscreenPlayer();
+                    if(fullscreen) {
+                      exitFullscreen()
+                    } else {
+                      enterFullscreen()
+                    }
+                  }
+                }}
+                onLoad={handleVideoLoad}
+                source={{
+                  headers: {
+                    'User-Agent': deviceUserAgent,
+                  },
+                  uri: data.streamingLink,
+                }}
+                ref={videoRef}
+                useNativeControls={videoShowControls}
+              />
+            </Pressable>
           ) : data.streamingType === 'embed' ? (
             <WebView
               key={webViewKey}
