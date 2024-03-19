@@ -21,6 +21,7 @@ import {
   EmitterSubscription,
   AppState,
   Pressable,
+  GestureResponderEvent,
 } from 'react-native';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -35,7 +36,8 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Video as ExpoVideo, ResizeMode, VideoFullscreenUpdate } from 'expo-av';
+import { AVPlaybackStatus, Video as ExpoVideo, ResizeMode, VideoFullscreenUpdate, VideoFullscreenUpdateEvent } from 'expo-av';
+import { useKeepAwake } from 'expo-keep-awake';
 
 import globalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -62,6 +64,7 @@ const TouchableOpacityAnimated =
 const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
 function Video(props: Props) {
+  useKeepAwake();
 
   const enableBatteryTimeInfo = useSelector(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
@@ -91,6 +94,7 @@ function Video(props: Props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
   const [videoShowControls, setVideoShowControls] = useState(true);
+  const videoPress = useRef<{ x: number; y: number; timeout: NodeJS.Timeout | undefined }>({ x: 0, y: 0, timeout: undefined });
   const webviewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
 
@@ -490,6 +494,54 @@ function Video(props: Props) {
     }
   }, [isPaused]);
 
+  const playbackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
+    if (status.isLoaded) {
+      // onEnd
+      if (status.didJustFinish) {
+        onEnd();
+      }
+      // onProgress
+      if (status.positionMillis) {
+        handleProgress(status.positionMillis / 1000);
+      }
+    }
+  }, [onEnd, handleProgress]);
+
+  const fullscreenUpdate = useCallback((status: VideoFullscreenUpdateEvent) => {
+    if(status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
+      videoRef.current?.dismissFullscreenPlayer();
+      if(fullscreen) {
+        exitFullscreen()
+      } else {
+        enterFullscreen()
+      }
+    }
+  }, [exitFullscreen, enterFullscreen, fullscreen]);
+
+  const onVideoPressOut = useCallback((event: GestureResponderEvent) => {
+    if(videoPress.current.x === event.nativeEvent.locationX && videoPress.current.y === event.nativeEvent.locationY) {
+      if(videoPress.current.timeout && videoShowControls) {
+        clearTimeout(videoPress.current.timeout);
+      }
+      setVideoShowControls(val => !val);
+      videoPress.current = {
+        x: 0,
+        y: 0,
+        timeout: setTimeout(() => {
+          setVideoShowControls(false);
+        }, 4000),
+      }
+    }
+  }, [videoShowControls]);
+
+  const onVideoPressIn = useCallback((event: GestureResponderEvent) => {
+    videoPress.current = {
+      x: event.nativeEvent.locationX,
+      y: event.nativeEvent.locationY,
+      timeout: undefined,
+    }
+  }, []);
+
   return (
     <View style={{ flex: 2 }}>
       {/* Loading modal */}
@@ -506,9 +558,7 @@ function Video(props: Props) {
               left: 0,
               bottom: 0,
               right: 0,
-            }} onPress={() => {
-              setVideoShowControls(val => !val);
-            }}>
+            }} onPressIn={onVideoPressIn} onPressOut={onVideoPressOut}>
               <ExpoVideo
                 style={{
                   position: 'absolute',
@@ -518,29 +568,9 @@ function Video(props: Props) {
                   right: 0,
                 }}
                 key={data.streamingLink}
-                onPlaybackStatusUpdate={status => {
-                  if (status.isLoaded) {
-                    // onEnd
-                    if (status.didJustFinish) {
-                      onEnd();
-                    }
-                    // onProgress
-                    if (status.positionMillis) {
-                      handleProgress(status.positionMillis / 1000);
-                    }
-                  }
-                }}
+                onPlaybackStatusUpdate={playbackStatusUpdate}
                 resizeMode={ResizeMode.CONTAIN}
-                onFullscreenUpdate={status => {
-                  if(status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
-                    videoRef.current?.dismissFullscreenPlayer();
-                    if(fullscreen) {
-                      exitFullscreen()
-                    } else {
-                      enterFullscreen()
-                    }
-                  }
-                }}
+                onFullscreenUpdate={fullscreenUpdate}
                 onLoad={handleVideoLoad}
                 source={{
                   headers: {

@@ -42,7 +42,6 @@
     "react-native-svg": "^14.0.0",
     "react-native-system-navigation-bar": "^2.6.3",
     "react-native-vector-icons": "^10.0.2",
-    "react-native-video": "^6.0.0-beta.5",
     "react-native-webview": "^13.6.3",
     "react-redux": "^8.1.0",
     "url": "^0.11.3"
@@ -73,7 +72,6 @@
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-keep-awake",
         "expo-file-system",
         "expo-font"
       ]
