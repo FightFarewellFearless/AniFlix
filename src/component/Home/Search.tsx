@@ -10,19 +10,19 @@ import {
   ActivityIndicator,
   Pressable,
   Keyboard,
+  useColorScheme,
 } from 'react-native';
 import {
   useFocusEffect,
   StackActions,
   CompositeScreenProps,
 } from '@react-navigation/native';
-import globalStyles, { lightText } from '../../assets/style';
+import useGlobalStyles, { lightText } from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
-import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 
 import Reanimated, {
@@ -59,6 +59,9 @@ type Props = CompositeScreenProps<
 const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
 
 function Search(props: Props) {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
@@ -454,6 +457,7 @@ function HistoryList({
   onChangeTextFunction: (text: string) => void;
   data: string[];
 }) {
+  const globalStyles = useGlobalStyles();
   const dispatch = useDispatch<AppDispatch>();
   return (
     <TouchableOpacity
@@ -486,99 +490,103 @@ function HistoryList({
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1,
-  },
-  nullDataText: {
-    color: globalStyles.text.color,
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-  loadingView: {
-    backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
-    borderRadius: 3,
-    borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
-    borderWidth: 1.3,
-  },
-  loadingText: {
-  },
-  searchInput: {
-    height: 38,
-    borderWidth: 0.8,
-    borderRadius: 5,
-    backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
-    marginLeft: 2,
-    color: globalStyles.text.color,
-    textAlign: 'center',
-  },
-  searchButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '12%',
-    backgroundColor: '#ffa43cff',
-  },
-  listContainer: {
-    flexDirection: 'row',
-    marginVertical: 5,
-    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
-    borderRadius: 16,
-    elevation: 5,
-  },
-  listImage: {
-    width: 120,
-    height: 200,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-    marginRight: 7,
-  },
-  listTitle: {
-    flexShrink: 1,
-    justifyContent: 'center',
-    flex: 1,
-  },
-  ratingInfo: {
-    position: 'absolute',
-    left: 0,
-  },
-  statusInfo: {
-    borderWidth: 1,
-    alignSelf: 'flex-start',
-  },
-  releaseInfo: {
-    position: 'absolute',
-    bottom: 0,
-    right: 5,
-    maxWidth: '85%',
-  },
-  searchHistoryContainer: {
-    position: 'absolute',
-    top: 37,
-    width: '100%',
-    zIndex: 2,
-  },
-  searchHistoryScrollBox: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#b8b6b6',
-  },
-  closeSearchResult: {
-    position: 'absolute',
-    backgroundColor: 'red',
-    borderRadius: 20,
-    padding: 10,
-    paddingHorizontal: 12,
-    bottom: 32,
-    right: 17,
-    zIndex: 1,
-  },
-});
+function useStyles() {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    center: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1,
+    },
+    nullDataText: {
+      color: globalStyles.text.color,
+      fontWeight: 'bold',
+      fontSize: 17,
+    },
+    loadingView: {
+      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 2,
+      borderRadius: 3,
+      borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
+      borderWidth: 1.3,
+    },
+    loadingText: {
+    },
+    searchInput: {
+      height: 38,
+      borderWidth: 0.8,
+      borderRadius: 5,
+      backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
+      marginLeft: 2,
+      color: globalStyles.text.color,
+      textAlign: 'center',
+    },
+    searchButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '12%',
+      backgroundColor: '#ffa43cff',
+    },
+    listContainer: {
+      flexDirection: 'row',
+      marginVertical: 5,
+      backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      borderRadius: 16,
+      elevation: 5,
+    },
+    listImage: {
+      width: 120,
+      height: 200,
+      borderTopLeftRadius: 16,
+      borderBottomLeftRadius: 16,
+      marginRight: 7,
+    },
+    listTitle: {
+      flexShrink: 1,
+      justifyContent: 'center',
+      flex: 1,
+    },
+    ratingInfo: {
+      position: 'absolute',
+      left: 0,
+    },
+    statusInfo: {
+      borderWidth: 1,
+      alignSelf: 'flex-start',
+    },
+    releaseInfo: {
+      position: 'absolute',
+      bottom: 0,
+      right: 5,
+      maxWidth: '85%',
+    },
+    searchHistoryContainer: {
+      position: 'absolute',
+      top: 37,
+      width: '100%',
+      zIndex: 2,
+    },
+    searchHistoryScrollBox: {
+      backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#b8b6b6',
+    },
+    closeSearchResult: {
+      position: 'absolute',
+      backgroundColor: 'red',
+      borderRadius: 20,
+      padding: 10,
+      paddingHorizontal: 12,
+      bottom: 32,
+      right: 17,
+      zIndex: 1,
+    },
+  });
+}
 
 export default Search;

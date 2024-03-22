@@ -1,13 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackNavigator } from "../types/navigation";
-import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity } from "react-native";
+import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme } from "react-native";
 import LinearGradient from 'react-native-linear-gradient';
 import { View } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
-import globalStyles, { darkText, lightText } from "../assets/style";
-import colorScheme from "../utils/colorScheme";
+import useGlobalStyles, { darkText, lightText } from "../assets/style";
 import { FlashList } from "@shopify/flash-list";
 import controlWatchLater from "../utils/watchLaterControl";
 import watchLaterJSON from "../types/watchLaterJSON";
@@ -16,6 +15,9 @@ import useSelectorIfFocused from "../hooks/useSelectorIfFocused";
 
 type Props = NativeStackScreenProps<RootStackNavigator, "AnimeDetail">;
 function AniDetail(props: Props) {
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
   const data = props.route.params.data;
 
   const watchLaterListsJson = useSelectorIfFocused(
@@ -118,48 +120,51 @@ function AniDetail(props: Props) {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centerChildren: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: globalStyles.text.color,
-    textAlign: 'center',
-    textShadowColor: 'black',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  imageContainerChild: {
-    flex: 1,
-  },
-  detailText: {
-    color: globalStyles.text.color,
-    textShadowColor: 'black',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  },
-  synopsys: {
-    
-  },
-  episodeButton: {
-    padding: 10,
-  },
-  episodeText: {
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  },
-});
+function useStyles() {
+  const globalStyles = useGlobalStyles();
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    centerChildren: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: globalStyles.text.color,
+      textAlign: 'center',
+      textShadowColor: 'black',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 1,
+    },
+    imageContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+    },
+    imageContainerChild: {
+      flex: 1,
+    },
+    detailText: {
+      color: globalStyles.text.color,
+      textShadowColor: 'black',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 1,
+    },
+    synopsys: {
+      
+    },
+    episodeButton: {
+      padding: 10,
+    },
+    episodeText: {
+      textAlign: 'center',
+      textDecorationLine: 'underline',
+    },
+  });
+}
 
 function complementHex(hex: string) {
 

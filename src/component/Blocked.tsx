@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
-import globalStyles from '../assets/style';
+import useGlobalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 
@@ -17,6 +17,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 type Props = NativeStackScreenProps<RootStackNavigator, 'Blocked'>;
 
 function Blocked(props: Props) {
+  const globalStyles = useGlobalStyles();
   const animatedScale = useRef(new Animated.Value(1)).current;
 
   const animated = useRef(

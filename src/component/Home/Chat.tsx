@@ -1,13 +1,12 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import gpti from 'gpti';
 import { ReactNode, startTransition, useCallback, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
-import globalStyles, { lightText } from "../../assets/style";
+import useGlobalStyles, { lightText } from "../../assets/style";
 import { HomeNavigator } from "../../types/navigation";
-import colorScheme from "../../utils/colorScheme";
 import { requestBingAI } from "../../utils/requestBingAI";
 import { ViewStyle, TextStyle } from "react-native";
 
@@ -29,12 +28,19 @@ export interface Message {
 
 class CustomRenderer extends Renderer implements RendererInterface {
   code(text: string, _language?: string | undefined, containerStyle?: ViewStyle | undefined, textStyle?: TextStyle | undefined): ReactNode {
-    return <Text style={[{ backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#d1d1d1', padding: 5 }, textStyle]}>{text}</Text>;
+    return <TextCode text={text} textStyle={textStyle} />;
   }
+}
+function TextCode(props: { text: string, textStyle?: TextStyle | undefined }) {
+  const colorScheme = useColorScheme();
+  return <Text style={[{ backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#d1d1d1', padding: 5 }, props.textStyle]}>{props.text}</Text>
 }
 const customRenderer = new CustomRenderer();
 
 function Chat(props: Props) {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
 
   const flashList = useRef<FlatList<Message>>();
 
@@ -140,6 +146,7 @@ function Chat(props: Props) {
 }
 
 function CustomMarkdown({ content }: { content: string }) {
+  const colorScheme = useColorScheme();
   const markdown = useMarkdown(content, {
     colorScheme,
     renderer: customRenderer,
@@ -147,39 +154,42 @@ function CustomMarkdown({ content }: { content: string }) {
   return markdown;
 }
 
-const styles = StyleSheet.create({
-  textInput: {
-    backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#e0e0e0',
-    padding: 10,
-    borderRadius: 8,
-    flex: 1,
-  },
-  button: {
-    backgroundColor: 'orange',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  assistantResponse: {
-    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
-  userResponse: {
-    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1,
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    textInput: {
+      backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#e0e0e0',
+      padding: 10,
+      borderRadius: 8,
+      flex: 1,
+    },
+    button: {
+      backgroundColor: 'orange',
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    assistantResponse: {
+      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+    },
+    userResponse: {
+      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      alignSelf: 'flex-end',
+    },
+    center: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1,
+    },
+  });
+}
 
 export default Chat;

@@ -7,7 +7,7 @@ import {
   ToastAndroid,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import globalStyles from '../../assets/style';
+import useGlobalStyles from '../../assets/style';
 import randomTipsArray from '../../assets/loadingTips.json';
 import setHistory from '../../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,6 +23,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
+  const globalStyles = useGlobalStyles();
   const [dots, setDots] = useState<string>('');
 
   const historyData = useSelector((state: RootState) => state.settings.history);

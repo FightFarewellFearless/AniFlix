@@ -1,12 +1,13 @@
 import React, { StyleSheet, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import globalStyles from '../assets/style';
+import useGlobalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Maintenance'>;
 
 function Manintenance(props: Props) {
+  const globalStyles = useGlobalStyles();
   return (
     <View style={styles.container}>
       <View style={styles.center}>

@@ -19,12 +19,13 @@ import {
   View,
   FlatList,
   PermissionsAndroid,
+  useColorScheme,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
-import globalStyles, { darkText } from '../../assets/style';
+import useGlobalStyles, { darkText } from '../../assets/style';
 import { HomeContext } from '../../misc/context';
 
 import { useDispatch } from 'react-redux';
@@ -36,7 +37,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HomeNavigator } from '../../types/navigation';
 import store, { AppDispatch, RootState } from '../../misc/reduxStore';
 import { HistoryJSON } from '../../types/historyJSON';
-import colorScheme from '../../utils/colorScheme';
 import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import { SetDatabaseTarget } from '../../types/redux';
@@ -57,6 +57,9 @@ interface SettingsData {
 type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
   const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
     true,
@@ -484,14 +487,15 @@ function Setting(_props: Props) {
       <FlatList
         data={settingsData}
         keyExtractor={keyExtractor}
-        renderItem={SettingList}
-        ItemSeparatorComponent={ItemSeparator}
+        renderItem={SettingListComponent}
+        ItemSeparatorComponent={() => <ItemSeparator />}
       />
     </Animated.View>
   );
 }
 
 function ItemSeparator() {
+  const colorScheme = useColorScheme();
   return (
     <View
       style={{
@@ -507,7 +511,13 @@ function keyExtractor(item: SettingsData) {
   return item.title;
 }
 
+function SettingListComponent(props: any) {
+  return <SettingList {...props} />;
+}
+
 function SettingList({ item }: { item: SettingsData }) {
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
   const icon = item.icon;
   const title = item.title;
   const description = item.description;
@@ -528,99 +538,103 @@ function SettingList({ item }: { item: SettingsData }) {
   );
 }
 
-const styles = StyleSheet.create({
-  settingListContainer: {
-    flex: 1,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignContent: 'center',
-  },
-  settingListIcon: {
-    padding: 5,
-    width: '10%',
-    maxWidth: 50,
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
-    marginRight: 5,
-  },
-  settingListText: {
-    flex: 1,
-    alignItems: 'center',
-    flexDirection: 'column',
-  },
-  settingListTextTitle: {
-    fontWeight: 'bold',
-  },
-  settingListTextDescription: {
-    textAlign: 'center',
-    color: 'gray',
-  },
-  settingListRightComponent: {
-    alignItems: 'flex-end',
-  },
-  waktuServer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0000008a',
-  },
-  modalContent: {
-    flex: 0.15,
-    backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
-    borderWidth: 1,
-    borderColor: '#525252',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalRestoreButtonText: {
-    fontWeight: 'bold',
-    color: darkText,
-  },
-  acceptRestoreModalButton: {
-    backgroundColor: '#005300',
-    padding: 7,
-    borderRadius: 3,
-  },
-  cancelRestoreModalButton: {
-    backgroundColor: '#b40000',
-    padding: 7,
-    marginRight: 2,
-    borderRadius: 3,
-  },
-  modalRestorePart: { flex: 1 },
-  modalRestoreText: {
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-  dropdownStyle: {
-    width: 100,
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-    padding: 5,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-  },
-  dropdownContainerStyle: {
-    width: 120,
-  },
-  dropdownItemTextStyle: {
-    color: globalStyles.text.color,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  dropdownItemContainerStyle: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
-  },
-  dropdownSelectedTextStyle: {
-    color: globalStyles.text.color,
-  },
-});
+function useStyles() {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    settingListContainer: {
+      flex: 1,
+      paddingVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignContent: 'center',
+    },
+    settingListIcon: {
+      padding: 5,
+      width: '10%',
+      maxWidth: 50,
+      alignItems: 'center',
+      borderRightWidth: 1,
+      borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
+      marginRight: 5,
+    },
+    settingListText: {
+      flex: 1,
+      alignItems: 'center',
+      flexDirection: 'column',
+    },
+    settingListTextTitle: {
+      fontWeight: 'bold',
+    },
+    settingListTextDescription: {
+      textAlign: 'center',
+      color: 'gray',
+    },
+    settingListRightComponent: {
+      alignItems: 'flex-end',
+    },
+    waktuServer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#0000008a',
+    },
+    modalContent: {
+      flex: 0.15,
+      backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
+      borderWidth: 1,
+      borderColor: '#525252',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalRestoreButtonText: {
+      fontWeight: 'bold',
+      color: darkText,
+    },
+    acceptRestoreModalButton: {
+      backgroundColor: '#005300',
+      padding: 7,
+      borderRadius: 3,
+    },
+    cancelRestoreModalButton: {
+      backgroundColor: '#b40000',
+      padding: 7,
+      marginRight: 2,
+      borderRadius: 3,
+    },
+    modalRestorePart: { flex: 1 },
+    modalRestoreText: {
+      fontWeight: 'bold',
+      fontSize: 17,
+    },
+    dropdownStyle: {
+      width: 100,
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
+      padding: 5,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: 'black',
+    },
+    dropdownContainerStyle: {
+      width: 120,
+    },
+    dropdownItemTextStyle: {
+      color: globalStyles.text.color,
+      fontSize: 15,
+      textAlign: 'center',
+    },
+    dropdownItemContainerStyle: {
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+    },
+    dropdownSelectedTextStyle: {
+      color: globalStyles.text.color,
+    },
+  });
+};
 
 export default Setting;

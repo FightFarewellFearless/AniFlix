@@ -1,5 +1,5 @@
 import React from 'react';
-import globalStyles, { darkText } from '../assets/style';
+import useGlobalStyles, { darkText } from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -9,14 +9,16 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  useColorScheme,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
-import colorScheme from '../utils/colorScheme';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
 function FailedToConnect(props: Props) {
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
   const openLink = async () => {
     const url = 'https://github.com/FightFarewellFearless/AniFlix/issues/new';
     if (await Linking.canOpenURL(url)) {
@@ -124,14 +126,18 @@ function FailedToConnect(props: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  bottomCredits: {
-    flexDirection: 'row',
-    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+
+  return StyleSheet.create({
+    bottomCredits: {
+      flexDirection: 'row',
+      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+  });
+}
 
 export default FailedToConnect;

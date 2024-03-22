@@ -20,17 +20,17 @@ import {
   ScrollView,
   ListRenderItemInfo,
   Linking,
+  useColorScheme,
 } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
-import globalStyles from '../../assets/style';
+import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeContext } from '../../misc/context';
 import runningText from '../../assets/runningText.json';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, HomeStackNavigator } from '../../types/navigation';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 import ImageLoading from '../ImageLoading';
 import SeeMore from './SeeMore';
@@ -70,6 +70,9 @@ function Home(_props: HomeProps) {
 }
 
 function HomeList(props: HomeListProps) {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
@@ -296,6 +299,8 @@ function AnnouncmentModal({
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   announcmentMessage: string | undefined;
 }): React.JSX.Element {
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
   if (announcmentMessage === undefined) {
     return <></>;
   }
@@ -362,6 +367,7 @@ function AnimeList(props: {
     | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
     | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
 }) {
+  const styles = useStyles();
   const z = props.newAnimeData;
   const navigation = props.navigationProp;
   return (
@@ -431,186 +437,189 @@ function splitAllLinks(texts: string): string[] {
   return texts.split(/(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi);
 }
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000000d0',
-  },
-  modalContent: {
-    flex: 0.15,
-    backgroundColor: colorScheme === 'dark' ? '#181818' : '#d1d1d1',
-    borderRadius: 9,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 100,
-    minWidth: 250,
-    elevation: 16,
-    shadowColor: '#202020',
-  },
-  modalPengumuman: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  pengumuman: {
-    fontSize: 19,
-    color: '#ff0000b6',
-    fontWeight: 'bold',
-  },
-  announcmentText: {
-    flex: 1,
-    flexGrow: 3,
-    minWidth: 120,
-    backgroundColor: colorScheme === 'dark' ? '#353535' : 'white',
-    paddingTop: 1,
-    borderTopWidth: 1,
-    borderTopColor: colorScheme === 'dark' ? 'white' : 'black',
-  },
-  announcmentMessage: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  announcmentOK: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-  },
-  announcmentOKButton: {
-    backgroundColor: '#264914',
-    width: 50,
-    padding: 5,
-    borderRadius: 3,
-  },
-  announcmentOKText: {
-    color: '#44a4ff',
-    textShadowColor: 'black',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  box: {
-    flex: 1,
-    height: 100,
-    margin: 10,
-  },
-  boxItem: {
-    flex: 1,
-    backgroundColor: colorScheme === 'dark' ? '#363636' : '#dbdbdb',
-    borderColor: 'gold',
-    borderWidth: 1.2,
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  boxAppName: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  boxAppVer: {
-    fontSize: 13,
-  },
-  boxTime: {
-    fontWeight: 'bold',
-    position: 'absolute',
-    top: -10,
-    left: 0,
-  },
-  boxBattery: {
-    fontWeight: 'bold',
-    position: 'absolute',
-    top: 0,
-    right: 0,
-  },
-  boxText: {
-    position: 'absolute',
-    bottom: 0,
-    color: '#ff2020',
-    fontWeight: 'bold',
-    textShadowColor: 'black',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  listContainer: {
-    position: 'relative',
-    backgroundColor: colorScheme === 'dark' ? '#272727' : '#e0e0e0',
-    paddingVertical: 10,
-    borderRadius: 10,
-    elevation: 5,
-  },
-  titleContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  titleText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-  },
-  seeMoreContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignContent: 'flex-end',
-  },
-  seeMoreText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#009107',
-  },
-  listBackground: {
-    overflow: 'hidden',
-    width: 120,
-    height: 200,
-    borderWidth: 1,
-    marginRight: 5,
-    marginVertical: 5,
-    flex: 2,
-    borderRadius: 7,
-  },
-  animeTitleContainer: {
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-  animeTitle: {
-    fontSize: 10,
-    color: 'black',
-    backgroundColor: 'orange',
-    opacity: 0.8,
-    textAlign: 'center',
-  },
-  animeEpisodeContainer: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    flexDirection: 'row',
-  },
-  animeEpisode: {
-    fontSize: 10,
-    color: '#000000',
-    backgroundColor: '#0099ff',
-    opacity: 0.8,
-    borderRadius: 2,
-    padding: 1,
-  },
-  animeRatingContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-  },
-  animeRating: {
-    fontSize: 10,
-    color: 'black',
-    backgroundColor: 'orange',
-    opacity: 0.8,
-    padding: 2,
-    borderRadius: 3,
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#000000d0',
+    },
+    modalContent: {
+      flex: 0.15,
+      backgroundColor: colorScheme === 'dark' ? '#181818' : '#d1d1d1',
+      borderRadius: 9,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 100,
+      minWidth: 250,
+      elevation: 16,
+      shadowColor: '#202020',
+    },
+    modalPengumuman: {
+      flex: 1,
+      justifyContent: 'flex-start',
+    },
+    pengumuman: {
+      fontSize: 19,
+      color: '#ff0000b6',
+      fontWeight: 'bold',
+    },
+    announcmentText: {
+      flex: 1,
+      flexGrow: 3,
+      minWidth: 120,
+      backgroundColor: colorScheme === 'dark' ? '#353535' : 'white',
+      paddingTop: 1,
+      borderTopWidth: 1,
+      borderTopColor: colorScheme === 'dark' ? 'white' : 'black',
+    },
+    announcmentMessage: {
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 14,
+    },
+    announcmentOK: {
+      flex: 1,
+      alignSelf: 'flex-end',
+      justifyContent: 'flex-end',
+    },
+    announcmentOKButton: {
+      backgroundColor: '#264914',
+      width: 50,
+      padding: 5,
+      borderRadius: 3,
+    },
+    announcmentOKText: {
+      color: '#44a4ff',
+      textShadowColor: 'black',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    box: {
+      flex: 1,
+      height: 100,
+      margin: 10,
+    },
+    boxItem: {
+      flex: 1,
+      backgroundColor: colorScheme === 'dark' ? '#363636' : '#dbdbdb',
+      borderColor: 'gold',
+      borderWidth: 1.2,
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    boxAppName: {
+      flexDirection: 'row',
+      alignSelf: 'center',
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    boxAppVer: {
+      fontSize: 13,
+    },
+    boxTime: {
+      fontWeight: 'bold',
+      position: 'absolute',
+      top: -10,
+      left: 0,
+    },
+    boxBattery: {
+      fontWeight: 'bold',
+      position: 'absolute',
+      top: 0,
+      right: 0,
+    },
+    boxText: {
+      position: 'absolute',
+      bottom: 0,
+      color: '#ff2020',
+      fontWeight: 'bold',
+      textShadowColor: 'black',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
+    },
+    listContainer: {
+      position: 'relative',
+      backgroundColor: colorScheme === 'dark' ? '#272727' : '#e0e0e0',
+      paddingVertical: 10,
+      borderRadius: 10,
+      elevation: 5,
+    },
+    titleContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      marginBottom: 10,
+    },
+    titleText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      alignSelf: 'center',
+    },
+    seeMoreContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignContent: 'flex-end',
+    },
+    seeMoreText: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      color: '#009107',
+    },
+    listBackground: {
+      overflow: 'hidden',
+      width: 120,
+      height: 200,
+      borderWidth: 1,
+      marginRight: 5,
+      marginVertical: 5,
+      flex: 2,
+      borderRadius: 7,
+    },
+    animeTitleContainer: {
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+    },
+    animeTitle: {
+      fontSize: 10,
+      color: 'black',
+      backgroundColor: 'orange',
+      opacity: 0.8,
+      textAlign: 'center',
+    },
+    animeEpisodeContainer: {
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      flexDirection: 'row',
+    },
+    animeEpisode: {
+      fontSize: 10,
+      color: '#000000',
+      backgroundColor: '#0099ff',
+      opacity: 0.8,
+      borderRadius: 2,
+      padding: 1,
+    },
+    animeRatingContainer: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+    },
+    animeRating: {
+      fontSize: 10,
+      color: 'black',
+      backgroundColor: 'orange',
+      opacity: 0.8,
+      padding: 2,
+      borderRadius: 3,
+    },
+  });
+}
 
 export default Home;
 export { AnimeList };

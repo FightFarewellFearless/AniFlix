@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { Provider } from 'react-redux';
 
 import Connecting from './src/component/Loading Screen/Connect';
@@ -15,17 +15,24 @@ import NeedUpdate from './src/component/NeedUpdate';
 import Maintenance from './src/component/Maintenance';
 import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
-import globalStyles from './src/assets/style';
-import colorScheme from './src/utils/colorScheme';
+import useGlobalStyles from './src/assets/style';
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 function App() {
+  const colorScheme = useColorScheme();
   useEffect(() => {
     StatusBar.setHidden(false);
   }, []);
+  const globalStyles = useGlobalStyles();
 
   return (
-    <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : undefined}>
+    <NavigationContainer theme={colorScheme === 'dark' ? {
+      ...DarkTheme,
+      colors: {
+        ...DarkTheme.colors,
+        background: '#0A0A0A',
+      }
+    } : undefined}>
       <Provider store={store}>
         <Stack.Navigator
           initialRouteName="connectToServer"

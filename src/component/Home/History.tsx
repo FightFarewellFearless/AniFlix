@@ -5,11 +5,12 @@ import {
   Alert,
   Animated as RNAnimated,
   StyleSheet,
+  useColorScheme,
 } from 'react-native';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import globalStyles from '../../assets/style';
+import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../../misc/reduxSlice';
@@ -17,7 +18,6 @@ import { AppDispatch } from '../../misc/reduxStore';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator } from '../../types/navigation';
 import { HistoryJSON } from '../../types/historyJSON';
-import colorScheme from '../../utils/colorScheme';
 import Animated, {
   FadeInRight,
   FadeOutLeft,
@@ -40,6 +40,8 @@ const TouchableOpacityAnimated =
 type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
 
 function History(props: Props) {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
   const data = useSelectorIfFocused(
     state => state.settings.history,
     true,
@@ -290,85 +292,88 @@ function formatTimeFromSeconds(seconds: number) {
   return formattedTime;
 }
 
-const styles = StyleSheet.create({
-  historyContainer: {
-    overflow: 'hidden',
-    flex: 1,
-  },
-  scrollToTopView: {
-    position: 'absolute',
-    bottom: 40,
-    right: 10,
-    zIndex: 1,
-  },
-  scrollToTop: {
-    height: 50,
-    width: 50,
-    borderRadius: 100,
-    backgroundColor: '#0060af',
-    elevation: 3,
-    shadowColor: 'white',
-  },
-  scrollToTopIcon: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContainerButton: {
-    flexDirection: 'row',
-    marginVertical: 5,
-    backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
-    borderRadius: 16,
-    elevation: 5,
-  },
-  listImage: {
-    width: 120,
-    height: 200,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-    marginRight: 7,
-  },
-  listInfoContainer: {
-    flexDirection: 'column',
-    flex: 1,
-  },
-  listTitle: {
-    flexShrink: 1,
-    justifyContent: 'center',
-    flex: 1,
-  },
-  listEpisodeAndPart: {
-    justifyContent: 'flex-end',
-  },
-  listEpisode: {
-    color: '#1eb1a9',
-    fontSize: 12,
-  },
-  listPart: {
-    fontSize: 12,
-    color: 'red',
-  },
-  lastDuration: { position: 'absolute', bottom: 1, right: 1 },
-  listWatchTime: {
-    position: 'absolute',
-    left: 0,
-    zIndex: 0,
-  },
-  deleteContainer: {
-    position: 'absolute',
-    right: 2,
-    top: 5,
-  },
-  deleteButton: {
-    backgroundColor: 'orange',
-    padding: 2,
-    borderRadius: 3,
-  },
-  noHistory: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    historyContainer: {
+      overflow: 'hidden',
+      flex: 1,
+    },
+    scrollToTopView: {
+      position: 'absolute',
+      bottom: 40,
+      right: 10,
+      zIndex: 1,
+    },
+    scrollToTop: {
+      height: 50,
+      width: 50,
+      borderRadius: 100,
+      backgroundColor: '#0060af',
+      elevation: 3,
+      shadowColor: 'white',
+    },
+    scrollToTopIcon: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    listContainerButton: {
+      flexDirection: 'row',
+      marginVertical: 5,
+      backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      borderRadius: 16,
+      elevation: 5,
+    },
+    listImage: {
+      width: 120,
+      height: 200,
+      borderTopLeftRadius: 16,
+      borderBottomLeftRadius: 16,
+      marginRight: 7,
+    },
+    listInfoContainer: {
+      flexDirection: 'column',
+      flex: 1,
+    },
+    listTitle: {
+      flexShrink: 1,
+      justifyContent: 'center',
+      flex: 1,
+    },
+    listEpisodeAndPart: {
+      justifyContent: 'flex-end',
+    },
+    listEpisode: {
+      color: '#1eb1a9',
+      fontSize: 12,
+    },
+    listPart: {
+      fontSize: 12,
+      color: 'red',
+    },
+    lastDuration: { position: 'absolute', bottom: 1, right: 1 },
+    listWatchTime: {
+      position: 'absolute',
+      left: 0,
+      zIndex: 0,
+    },
+    deleteContainer: {
+      position: 'absolute',
+      right: 2,
+      top: 5,
+    },
+    deleteButton: {
+      backgroundColor: 'orange',
+      padding: 2,
+      borderRadius: 3,
+    },
+    noHistory: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
+}
 
 export default History;

@@ -22,6 +22,7 @@ import {
   AppState,
   Pressable,
   GestureResponderEvent,
+  useColorScheme,
 } from 'react-native';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -39,7 +40,7 @@ import ReAnimated, {
 import { AVPlaybackStatus, Video as ExpoVideo, ResizeMode, VideoFullscreenUpdate, VideoFullscreenUpdateEvent } from 'expo-av';
 import { useKeepAwake } from 'expo-keep-awake';
 
-import globalStyles, { darkText, lightText } from '../assets/style';
+import useGlobalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
@@ -48,7 +49,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
-import colorScheme from '../utils/colorScheme';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
 import reqWithReferer from '../utils/reqWithReferer';
@@ -65,6 +65,11 @@ const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/57
 
 function Video(props: Props) {
   useKeepAwake();
+
+  const colorScheme = useColorScheme();
+
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
 
   const enableBatteryTimeInfo = useSelector(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
@@ -837,6 +842,8 @@ function LoadingModal({
   loading: boolean;
   cancelLoading: () => void;
 }) {
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
   return (
     <Modal visible={loading} transparent onRequestClose={cancelLoading}>
       <View style={styles.modalContainer}>
@@ -878,156 +885,162 @@ function TimeInfo() {
   return <Text style={{ color: '#dadada' }}>{time}</Text>;
 }
 
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0000008a',
-  },
-  modalContent: {
-    flex: 0.15,
-    minWidth: 300,
-    minHeight: 80,
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
-    borderColor: 'gold',
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  batteryInfo: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 3,
-    borderRadius: 7,
-    backgroundColor: '#00000085',
-  },
-  timeInfo: {
-    position: 'absolute',
-    left: 10,
-    top: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 3,
-    borderRadius: 7,
-    backgroundColor: '#00000085',
-  },
-  fullscreen: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  notFullscreen: {
-    position: 'relative',
-    flex: 0.44,
-  },
-  dlbtn: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  container: {
-    backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#d8d8d8',
-    elevation: colorScheme === 'light' ? 3 : undefined,
-    padding: 13,
-    overflow: 'hidden',
-  },
-  infoTitle: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 5,
-    fontFamily: '',
-  },
-  infoSinopsis: {
-    fontSize: 13.5,
-    color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
-  },
-  infoGenre: {
-    marginVertical: 5,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  genre: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    padding: 2,
-    margin: 2,
-    fontSize: 11,
-    textAlign: 'center',
-  },
-  infoData: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  status: {
-    borderRadius: 5,
-    padding: 3,
-  },
-  releaseYear: {
-    backgroundColor: '#4b4b4b',
-    borderRadius: 5,
-    padding: 3,
-    paddingHorizontal: 5,
-    textAlign: 'center',
-    alignSelf: 'center',
-  },
-  rating: {
-    backgroundColor: 'orange',
-    borderRadius: 5,
-    color: '#1f1f1f',
-    padding: 3,
-  },
-  episodeDataControl: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  episodeDataControlButton: {
-    padding: 5,
-  },
-  downloadButton: {
-    backgroundColor: '#0050ac',
-    borderRadius: 5,
-    marginTop: 40,
-    padding: 9,
-    width: '85%',
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-  dropdownStyle: {
-    width: 120,
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-    padding: 5,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-  },
-  dropdownContainerStyle: {
-    width: 120,
-  },
-  dropdownItemTextStyle: {
-    color: globalStyles.text.color,
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  dropdownItemContainerStyle: {
-    backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
-  },
-  dropdownSelectedTextStyle: {
-    color: globalStyles.text.color,
-  },
-  reloadPlayer: {
-    backgroundColor: '#0050ac',
-    borderRadius: 5,
-    marginTop: 6,
-    padding: 9,
-    width: '85%',
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-});
+function useStyles() {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#0000008a',
+    },
+    modalContent: {
+      flex: 0.15,
+      minWidth: 300,
+      minHeight: 80,
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+      borderColor: 'gold',
+      borderWidth: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    batteryInfo: {
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 3,
+      borderRadius: 7,
+      backgroundColor: '#00000085',
+    },
+    timeInfo: {
+      position: 'absolute',
+      left: 10,
+      top: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 3,
+      borderRadius: 7,
+      backgroundColor: '#00000085',
+    },
+    fullscreen: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+    notFullscreen: {
+      position: 'relative',
+      flex: 0.44,
+    },
+    dlbtn: {
+      flex: 1,
+      flexDirection: 'row',
+    },
+    container: {
+      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#d8d8d8',
+      elevation: colorScheme === 'light' ? 3 : undefined,
+      padding: 13,
+      overflow: 'hidden',
+    },
+    infoTitle: {
+      textAlign: 'center',
+      fontWeight: 'bold',
+      fontSize: 18,
+      marginBottom: 5,
+      fontFamily: '',
+    },
+    infoSinopsis: {
+      fontSize: 13.5,
+      color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
+    },
+    infoGenre: {
+      marginVertical: 5,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    genre: {
+      borderWidth: 1,
+      borderColor: 'gray',
+      padding: 2,
+      margin: 2,
+      fontSize: 11,
+      textAlign: 'center',
+    },
+    infoData: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    status: {
+      borderRadius: 5,
+      padding: 3,
+    },
+    releaseYear: {
+      backgroundColor: '#4b4b4b',
+      borderRadius: 5,
+      padding: 3,
+      paddingHorizontal: 5,
+      textAlign: 'center',
+      alignSelf: 'center',
+    },
+    rating: {
+      backgroundColor: 'orange',
+      borderRadius: 5,
+      color: '#1f1f1f',
+      padding: 3,
+    },
+    episodeDataControl: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+    },
+    episodeDataControlButton: {
+      padding: 5,
+    },
+    downloadButton: {
+      backgroundColor: '#0050ac',
+      borderRadius: 5,
+      marginTop: 40,
+      padding: 9,
+      width: '85%',
+      alignItems: 'center',
+      alignSelf: 'center',
+    },
+    dropdownStyle: {
+      width: 120,
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
+      padding: 5,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: 'black',
+    },
+    dropdownContainerStyle: {
+      width: 120,
+    },
+    dropdownItemTextStyle: {
+      color: globalStyles.text.color,
+      fontSize: 15,
+      textAlign: 'center',
+    },
+    dropdownItemContainerStyle: {
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+    },
+    dropdownSelectedTextStyle: {
+      color: globalStyles.text.color,
+    },
+    reloadPlayer: {
+      backgroundColor: '#0050ac',
+      borderRadius: 5,
+      marginTop: 6,
+      padding: 9,
+      width: '85%',
+      alignItems: 'center',
+      alignSelf: 'center',
+    },
+  });
+}
+
+
 export default Video;

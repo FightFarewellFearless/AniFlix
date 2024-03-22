@@ -13,15 +13,15 @@ import {
   ScrollView,
   ToastAndroid,
   Alert,
+  useColorScheme,
 } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { version as appVersion } from '../../package.json';
-import globalStyles from '../assets/style';
+import useGlobalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
-import colorScheme from '../utils/colorScheme';
 import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
   runOnJS,
@@ -36,6 +36,9 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 const MB = 1000;
 
 function NeedUpdate(props: Props) {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
   const markdownElement = useMarkdown(props.route.params.changelog, {
     colorScheme: colorScheme,
   });
@@ -82,7 +85,9 @@ function NeedUpdate(props: Props) {
       path: `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
     })
       .fetch('GET', props.route.params.download)
-      .progress((received, total) => {
+      .progress((receivedS, totalS) => {
+        const received = Number(receivedS);
+        const total = Number(totalS);
         downloadProgress.value = withTiming(
           Math.floor((received / total) * 100),
         );
@@ -203,79 +208,82 @@ function NeedUpdate(props: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  titleContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colorScheme === 'dark' ? '#5f5f5f' : '#cccccc',
-    flex: 0.3,
-  },
-  needUpdate: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#07b607',
-  },
-  desc: {
-    textAlign: 'center',
-  },
-  updateInfo: {
-    flex: 1,
-  },
-  versionInfo: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colorScheme === 'dark' ? 'white' : 'black',
-    borderRadius: 3,
-  },
-  version: {
-    fontSize: 22,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#960303',
-  },
-  latestVersion: {
-    fontSize: 22,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#089603',
-  },
-  download: {
-    flexDirection: 'row',
-    padding: 10,
-    backgroundColor: '#008b13',
-    borderRadius: 5,
-    justifyContent: 'center',
-  },
-  sliderContainer: {
-    width: '100%',
-    backgroundColor: 'gray',
-    height: 10,
-    borderRadius: 5,
-  },
-  slider: {
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#105494',
-  },
-  installOrRedownload: {
-    flexDirection: 'row',
-  },
-  netContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  netSpeed: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  netTotal: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    titleContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colorScheme === 'dark' ? '#5f5f5f' : '#cccccc',
+      flex: 0.3,
+    },
+    needUpdate: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#07b607',
+    },
+    desc: {
+      textAlign: 'center',
+    },
+    updateInfo: {
+      flex: 1,
+    },
+    versionInfo: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colorScheme === 'dark' ? 'white' : 'black',
+      borderRadius: 3,
+    },
+    version: {
+      fontSize: 22,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      color: '#960303',
+    },
+    latestVersion: {
+      fontSize: 22,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      color: '#089603',
+    },
+    download: {
+      flexDirection: 'row',
+      padding: 10,
+      backgroundColor: '#008b13',
+      borderRadius: 5,
+      justifyContent: 'center',
+    },
+    sliderContainer: {
+      width: '100%',
+      backgroundColor: 'gray',
+      height: 10,
+      borderRadius: 5,
+    },
+    slider: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: '#105494',
+    },
+    installOrRedownload: {
+      flexDirection: 'row',
+    },
+    netContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    netSpeed: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    netTotal: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+  });
+}
 
 export default NeedUpdate;

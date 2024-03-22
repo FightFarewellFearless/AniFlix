@@ -7,6 +7,7 @@ import {
   Linking,
   StyleSheet,
   ToastAndroid,
+  useColorScheme,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,7 +17,7 @@ import { useDispatch } from 'react-redux';
 
 import { AppDispatch } from '../../misc/reduxStore';
 import { setDatabase } from '../../misc/reduxSlice';
-import globalStyles from '../../assets/style';
+import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
 import { version as appVersion } from '../../../package.json';
 import deviceUserAgent from '../../utils/deviceUserAgent';
@@ -25,7 +26,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../../types/navigation';
 import { SetDatabaseTarget } from '../../types/redux';
 import { Home } from '../../types/anime';
-import colorScheme from '../../utils/colorScheme';
 import AnimeAPI from '../../utils/AnimeAPI';
 import RNFetchBlob from 'react-native-blob-util';
 
@@ -34,6 +34,8 @@ import animeLocalAPI from '../../utils/animeLocalAPI';
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
   useEffect(() => {
     Orientation.unlockAllOrientations(); // to prevent orientation locked during activity changes
     (async () => {
@@ -109,7 +111,7 @@ function Loading(props: Props) {
     }
   }, []);
 
-  const fetchDomain = useCallback(async() => {
+  const fetchDomain = useCallback(async () => {
     await animeLocalAPI.fetchLatestDomain().catch(() => {
       ToastAndroid.show('Gagal mendapatkan domain terbaru, menggunakan domain default', ToastAndroid.SHORT);
     });
@@ -125,7 +127,7 @@ function Loading(props: Props) {
       },
     )
       .then(d => d.json())
-      .catch(() => {});
+      .catch(() => { });
     if (data === undefined) {
       return null;
     } else if (data[0]?.tag_name === appVersion) {
@@ -227,14 +229,17 @@ function Loading(props: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  bottomCredits: {
-    flexDirection: 'row',
-    backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-});
+function useStyles() {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    bottomCredits: {
+      flexDirection: 'row',
+      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+      padding: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+  });
+}
 
 export default Loading;
