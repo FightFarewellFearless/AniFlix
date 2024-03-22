@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   loadingText: {
   },
   searchInput: {
-    height: 35,
+    height: 38,
     borderWidth: 0.8,
     borderRadius: 5,
     backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
