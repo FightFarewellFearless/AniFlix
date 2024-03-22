@@ -103,7 +103,7 @@ function Chat(props: Props) {
             <Text style={[globalStyles.text, { fontSize: 30 }]}>AniFlix</Text>
             <Icon name="comments" size={37} color="orange" />
             <Text style={[globalStyles.text, { fontSize: 30, fontWeight: 'bold' }]}>Chat (Beta) {useBingAI ? '(Bing)' : ''}</Text>
-            <Switch value={useBingAI} onValueChange={setUseBingAI} />
+            <Switch trackColor={{ false: '#767577', true: 'orange' }} thumbColor={colorScheme === 'dark' ? '#f5dd4b' : '#f4f3f4'} value={useBingAI} onValueChange={setUseBingAI} />
             <Text
               style={[globalStyles.text, {
                 fontSize: 19,
