@@ -24,6 +24,7 @@ type Props = BottomTabScreenProps<HomeNavigator, "Chat">
 export interface Message {
   content: string;
   role: 'user' | 'assistant';
+  source: 'Bing' | 'AniFlix' | 'Saya';
 }
 
 class CustomRenderer extends Renderer implements RendererInterface {
@@ -74,11 +75,11 @@ function Chat(props: Props) {
       flashList.current?.scrollToEnd({ animated: true });
     }, 50);
 
-    setMessagesHistroy(old => [...old, { content: prompt.current, role: 'user' }, { content: 'Mohon tunggu sebentar...', role: 'assistant' }]);
+    setMessagesHistroy(old => [...old, { content: prompt.current, role: 'user', source: 'Saya' }, { content: 'Mohon tunggu sebentar...', role: 'assistant', source: useBingAI ? 'Bing' : 'AniFlix' }]);  
     delayScrollToEnd();
     requestToGpt(prompt.current, (text, isBingStreaming, isDone) => {
       setMessagesHistroy(old => {
-        return [...old.slice(0, -1), { content: text ?? 'TERJADI ERROR: Pastikan kamu terhubung ke internet dan coba lagi', role: 'assistant' }]
+        return [...old.slice(0, -1), { content: text ?? 'TERJADI ERROR: Pastikan kamu terhubung ke internet dan coba lagi', role: 'assistant', source: useBingAI ? 'Bing' : 'AniFlix' }];
       });
       if (!isBingStreaming) delayScrollToEnd();
       if(isDone === true) setMessageLoading(false);
@@ -87,7 +88,7 @@ function Chat(props: Props) {
   }, [requestToGpt]);
 
   return (
-    <KeyboardAvoidingView behavior="height" style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#0A0A0A' : '#ded7fb' }}>
+    <KeyboardAvoidingView behavior="height" style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#0A0A0A' : '#eeedf1' }}>
       <FlatList
         // @ts-ignore
         ref={flashList}
@@ -119,8 +120,9 @@ function Chat(props: Props) {
         renderItem={({ item }) => {
           return (
             <Reanimated.View
-              style={[item.role === 'user' ? styles.userResponse : styles.assistantResponse, { marginVertical: 5, maxWidth: '80%' }]}
+              style={[item.role === 'user' ? styles.userResponse : styles.assistantResponse, { marginVertical: 5, maxWidth: '80%', minWidth: '40%', elevation: 3 }]}
               entering={ZoomIn}>
+              <Text style={{ color: colorScheme === 'dark' ? 'lightblue' : 'darkblue', alignSelf: 'flex-start' }}>{item.source}</Text>
               <CustomMarkdown content={item.content} />
             </Reanimated.View>
           )

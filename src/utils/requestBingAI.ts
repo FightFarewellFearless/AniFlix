@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Message } from "../component/Home/Chat";
-export function requestBingAI(messages: Message[], cb: (data: { gpt: string; original: null | string; status: boolean; code: number; done?: boolean }) => any) {
+export function requestBingAI(messages: Omit<Message, 'source'>[], cb: (data: { gpt: string; original: null | string; status: boolean; code: number; done?: boolean }) => any) {
   
     return fetch("https://nexra.aryahcr.cc/api/chat/complements", {
         //@ts-ignore
