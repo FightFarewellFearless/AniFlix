@@ -524,12 +524,16 @@ function Video(props: Props) {
         clearTimeout(videoPress.current.timeout);
       }
       setVideoShowControls(val => !val);
+      let timeout;
+      if(!videoShowControls) {
+        timeout = setTimeout(() => {
+          setVideoShowControls(false);
+        }, 4000);
+      }
       videoPress.current = {
         x: 0,
         y: 0,
-        timeout: setTimeout(() => {
-          setVideoShowControls(false);
-        }, 4000),
+        timeout,
       }
     }
   }, [videoShowControls]);
@@ -538,7 +542,7 @@ function Video(props: Props) {
     videoPress.current = {
       x: event.nativeEvent.locationX,
       y: event.nativeEvent.locationY,
-      timeout: undefined,
+      timeout: videoPress.current.timeout,
     }
   }, []);
 
