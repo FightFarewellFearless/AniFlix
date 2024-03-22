@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  View,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -17,7 +18,6 @@ import { NewAnimeList } from '../../types/anime';
 type Props = NativeStackScreenProps<HomeStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
-  const type = props.route.params.type;
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,56 +30,67 @@ function SeeMore(props: Props) {
     props.navigation.setOptions({
       headerTitle: 'Anime terbaru',
     });
+
+    // props.navigation.getParent()?.setOptions({
+    //   tabBarStyle: { display: 'none' },
+    // });
+
+    // return () => {
+    //   props.navigation.getParent()?.setOptions({
+    //     tabBarStyle: undefined,
+    //   });
+    // }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <>
-      {isLoading && <ActivityIndicator />}
+    <View style={{ flex: 0.99 }}>
       <FlashList
         data={
           data?.newAnime as NewAnimeList[]
         }
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
-            <AnimeList
-              newAnimeData={item as NewAnimeList}
-              navigationProp={props.navigation}
-            />
+          <AnimeList
+            newAnimeData={item as NewAnimeList}
+            navigationProp={props.navigation}
+          />
         }
         numColumns={numColumns}
         estimatedItemSize={205}
-        ListFooterComponent={() => (
-          <TouchableOpacity
-            style={styles.LihatLebih}
-            onPress={async () => {
-              if (isLoading) {
-                return;
-              }
-              setIsLoading(true);
-              try {
-                const newdata = await AnimeAPI.newAnime(
-                  page + 1,
-                );
-                setData?.(prev => ({
-                  ...prev,
-                  newAnime: [
-                    ...prev.newAnime,
-                    ...newdata,
-                  ],
-                }));
-              } finally {
-                setIsLoading(false);
-              }
-            }}>
-            <Text style={{ color: "#fafafa" }}>Lihat lebih banyak</Text>
-          </TouchableOpacity>
-        )}
-        ListFooterComponentStyle={{
-          alignItems: 'center',
-        }}
+        ListFooterComponent={
+          <>
+            {isLoading && <ActivityIndicator />}
+
+            <TouchableOpacity
+              style={styles.LihatLebih}
+              onPress={async () => {
+                if (isLoading) {
+                  return;
+                }
+                setIsLoading(true);
+                try {
+                  const newdata = await AnimeAPI.newAnime(
+                    page + 1,
+                  );
+                  setData?.(prev => ({
+                    ...prev,
+                    newAnime: [
+                      ...prev.newAnime,
+                      ...newdata,
+                    ],
+                  }));
+                } finally {
+                  setIsLoading(false);
+                }
+              }}>
+              <Text style={{ color: "#fafafa" }}>Lihat lebih banyak</Text>
+            </TouchableOpacity>
+          </>
+        }
       />
-    </>
+    </View>
   );
 }
 
