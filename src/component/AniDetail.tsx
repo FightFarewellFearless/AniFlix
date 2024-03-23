@@ -31,17 +31,17 @@ function AniDetail(props: Props) {
   const complementThumbnailColor = complementHex(thumbnailColor);
   useEffect(() => {
     getColors(data.thumbnailUrl).then(colors => {
-      if(colors.platform === 'android') {
-        setThumbnailColor(colors.vibrant);
+      if (colors.platform === 'android') {
+        setThumbnailColor(colors.dominant);
       }
     })
   }, []);
   return (
     <View style={styles.container}>
-      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor,'transparent']}>
+      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, 'transparent']}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={[styles.title, {color: complementThumbnailColor}]}>{data.title}</Text>
-          <Text style={[styles.title, {color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
+          <Text style={[styles.title, { color: complementThumbnailColor }]}>{data.title}</Text>
+          <Text style={[styles.title, { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
         </View>
         <View style={styles.imageContainer}>
           <View style={[styles.imageContainerChild]}>
@@ -82,35 +82,44 @@ function AniDetail(props: Props) {
             </Text>
           </View>
         </View>
-        <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
+      </LinearGradient>
+
+      <ImageBackground
+        source={{ uri: data.thumbnailUrl }}
+        blurRadius={5}
+        resizeMode="cover"
+        style={{ maxHeight: '20%', alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ backgroundColor: '#0000009d', position: 'absolute', width: '100%', height: '100%' }} />
+        <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
           <Icon name="quote-left" /> {data.genres.join(', ')}
         </Text>
         <ScrollView style={[styles.synopsys]}>
-          <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
+          <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
             {data.synopsys === '' ? 'Tidak ada sinopsis' : data.synopsys}
           </Text>
         </ScrollView>
-      </LinearGradient>
+      </ImageBackground>
+
       <View style={styles.container}>
         <FlashList
           estimatedItemSize={78}
           data={data.episodeList}
           renderItem={({ item }) => (
-          <TouchableOpacity style={styles.episodeButton} onPress={() => {
-            props.navigation.navigate('FromUrl', {
-              link: item.link,
-            })
-          }}>
-            <Text style={[globalStyles.text, styles.episodeText]}>
-              {item.title}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.episodeButton} onPress={() => {
+              props.navigation.navigate('FromUrl', {
+                link: item.link,
+              })
+            }}>
+              <Text style={[globalStyles.text, styles.episodeText]}>
+                {item.title}
+              </Text>
+            </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => (
             <View
               style={{
                 width: '100%',
-                borderBottomWidth: 0.5,
+                borderBottomWidth: .5,
                 borderColor: colorScheme === 'dark' ? 'white' : 'black',
               }}
             />
@@ -155,7 +164,7 @@ function useStyles() {
       textShadowRadius: 1,
     },
     synopsys: {
-      
+
     },
     episodeButton: {
       padding: 10,
