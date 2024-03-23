@@ -143,6 +143,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         headers: {
             "Accept-Encoding": "*",
             'User-Agent': deviceUserAgent,
+            'Cache-Control': 'no-cache',
         },
         signal,
     }).catch((e) => {
