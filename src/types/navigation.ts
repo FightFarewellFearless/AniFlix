@@ -2,7 +2,7 @@ import { Home, AniDetail, AniStreaming } from './anime';
 
 type HomeNavigator = {
   AnimeList: undefined;
-  Chat: undefined;
+  Utilitas: undefined;
   Search: undefined;
   History: undefined;
   WatchLater: undefined;
@@ -45,6 +45,12 @@ type RootStackNavigator = {
   };
 };
 
+type UtilsStackNavigator = {
+  ChooseScreen: undefined;
+  Chat: undefined;
+  SearchAnimeByImage: undefined;
+};
+
 type HomeStackNavigator = {
   SeeMore: {
     type: 'AnimeList' | 'MovieList';
@@ -52,4 +58,4 @@ type HomeStackNavigator = {
   HomeList: undefined;
 };
 
-export type { RootStackNavigator, HomeNavigator, HomeStackNavigator };
+export type { RootStackNavigator, HomeNavigator, HomeStackNavigator, UtilsStackNavigator };

@@ -1,14 +1,14 @@
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import gpti from 'gpti';
 import { ReactNode, startTransition, useCallback, useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
-import useGlobalStyles, { lightText } from "../../assets/style";
-import { HomeNavigator } from "../../types/navigation";
-import { requestBingAI } from "../../utils/requestBingAI";
+import useGlobalStyles, { lightText } from "../../../assets/style";
+import { UtilsStackNavigator } from "../../../types/navigation";
+import { requestBingAI } from "../../../utils/requestBingAI";
 import { ViewStyle, TextStyle } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 const defaultMessages = [{
   content: 'SISTEM: Kamu adalah AniFlix Chat, sebuah aplikasi yang dibuat oleh FightFarewellFearless (Pirles).',
@@ -18,7 +18,7 @@ const defaultMessages = [{
   role: 'assistant'
 }] as const;
 
-type Props = BottomTabScreenProps<HomeNavigator, "Chat">
+type Props = NativeStackScreenProps<UtilsStackNavigator, "Chat">
 
 export interface Message {
   content: string;
@@ -122,6 +122,7 @@ function Chat(props: Props) {
             <Text style={[globalStyles.text, { fontSize: 15, textAlign: 'center' }]}>Note: AI tidak terbatas pada informasi seputar anime. Kamu bisa menanyakan apa saja ke AI.</Text>
           </View>
         }
+        extraData={styles}
         data={messagesHistroy}
         renderItem={({ item }) => {
           return (
