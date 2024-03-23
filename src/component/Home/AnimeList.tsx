@@ -257,6 +257,7 @@ function HomeList(props: HomeListProps) {
           horizontal
           data={data?.newAnime.slice(0, 25)}
           renderItem={renderNewAnime}
+          extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
       </View>

@@ -105,7 +105,7 @@ function WatchLater(props: Props) {
         </TouchableOpacityAnimated>
       );
     },
-    [props.navigation],
+    [props.navigation, styles],
   );
 
   return (
@@ -117,6 +117,7 @@ function WatchLater(props: Props) {
       ) : (
         <FlashList
           data={watchLaterLists}
+          extraData={styles}
           estimatedItemSize={210}
           renderItem={renderItem}
           keyExtractor={extractKey}

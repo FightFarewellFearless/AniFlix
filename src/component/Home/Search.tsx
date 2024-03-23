@@ -285,6 +285,7 @@ function Search(props: Props) {
             data={listAnime}
             estimatedItemSize={40}
             keyExtractor={item => item.title}
+            extraData={styles}
             renderItem={({ item }) => {
               return (
                 <TouchableOpacity
@@ -340,6 +341,7 @@ function Search(props: Props) {
               estimatedItemSize={209}
               data={data.result}
               keyExtractor={(_, index) => index.toString()}
+              extraData={styles}
               renderItem={({ item: z }) => (
                 <TouchableOpacityAnimated
                   entering={FadeInRight}
@@ -411,6 +413,7 @@ function Search(props: Props) {
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
+              extraData={styles}
               renderItem={renderSearchHistory}
               estimatedItemSize={32}
               ItemSeparatorComponent={() => (

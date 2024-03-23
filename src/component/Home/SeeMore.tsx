@@ -50,6 +50,7 @@ function SeeMore(props: Props) {
         data={
           data?.newAnime as NewAnimeList[]
         }
+        extraData={styles}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
           <AnimeList

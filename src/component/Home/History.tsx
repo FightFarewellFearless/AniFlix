@@ -261,6 +261,7 @@ function History(props: Props) {
             ref={flatListRef}
             keyExtractor={keyExtractor}
             onScroll={scrollHandler}
+            extraData={styles}
             renderItem={renderFlatList}
           />
           <Animated.View style={[buttonTransformStyle, styles.scrollToTopView]}>

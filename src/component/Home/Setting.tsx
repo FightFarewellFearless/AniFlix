@@ -488,6 +488,7 @@ function Setting(_props: Props) {
         data={settingsData}
         keyExtractor={keyExtractor}
         renderItem={SettingListComponent}
+        extraData={styles}
         ItemSeparatorComponent={() => <ItemSeparator />}
       />
     </Animated.View>

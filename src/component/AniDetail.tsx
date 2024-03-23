@@ -114,7 +114,8 @@ function AniDetail(props: Props) {
                 borderColor: colorScheme === 'dark' ? 'white' : 'black',
               }}
             />
-          )} />
+          )}
+          extraData={styles} />
       </View>
     </View>
   )
