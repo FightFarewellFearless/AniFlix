@@ -1,52 +1,30 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator } from '../../types/navigation';
-import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
-import { StackActions, useFocusEffect } from '@react-navigation/native';
-import { useCallback, useRef } from 'react';
+import { SayaDrawerNavigator } from '../../../types/navigation';
+import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
+import { useCallback } from 'react';
 import React, {
-  Animated,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
 import Reanimated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import useGlobalStyles from '../../assets/style';
+import watchLaterJSON from '../../../types/watchLaterJSON';
+import useGlobalStyles from '../../../assets/style';
 import moment from 'moment';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import controlWatchLater from '../../utils/watchLaterControl';
-import ImageLoading from '../ImageLoading';
+import controlWatchLater from '../../../utils/watchLaterControl';
+import ImageLoading from '../../ImageLoading';
+import { DrawerScreenProps } from '@react-navigation/drawer';
 
-type Props = BottomTabScreenProps<HomeNavigator, 'WatchLater'>;
+type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 const TouchableOpacityAnimated =
   Reanimated.createAnimatedComponent(TouchableOpacity);
 
 function WatchLater(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  useFocusEffect(
-    useCallback(() => {
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        // speed: 18,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-      return () => {
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          // speed: 18,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
-  );
 
   const watchLaterLists = useSelectorIfFocused<watchLaterJSON[]>(
     state => state.settings.watchLater,
@@ -109,7 +87,7 @@ function WatchLater(props: Props) {
   );
 
   return (
-    <Animated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
+    <View style={{ flex: 1 }}>
       {watchLaterLists.length === 0 ? (
         <View style={styles.emptyList}>
           <Text style={[globalStyles.text]}>Belum ada daftar tonton nanti</Text>
@@ -123,7 +101,7 @@ function WatchLater(props: Props) {
           keyExtractor={extractKey}
         />
       )}
-    </Animated.View>
+    </View>
   );
 }
 

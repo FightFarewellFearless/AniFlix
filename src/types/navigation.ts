@@ -4,9 +4,7 @@ type HomeNavigator = {
   AnimeList: undefined;
   Utilitas: undefined;
   Search: undefined;
-  History: undefined;
-  WatchLater: undefined;
-  Setting: undefined;
+  Saya: undefined;
 };
 
 type RootStackNavigator = {
@@ -49,6 +47,7 @@ type UtilsStackNavigator = {
   ChooseScreen: undefined;
   Chat: undefined;
   SearchAnimeByImage: undefined;
+  Setting: undefined;
 };
 
 type HomeStackNavigator = {
@@ -58,4 +57,9 @@ type HomeStackNavigator = {
   HomeList: undefined;
 };
 
-export type { RootStackNavigator, HomeNavigator, HomeStackNavigator, UtilsStackNavigator };
+type SayaDrawerNavigator = {
+  History: undefined;
+  WatchLater: undefined;
+};
+
+export type { RootStackNavigator, HomeNavigator, HomeStackNavigator, UtilsStackNavigator, SayaDrawerNavigator };

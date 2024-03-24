@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import History from './History';
+import Icon5 from 'react-native-vector-icons/FontAwesome5';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './AnimeList';
-import Setting from './Setting';
 import Search from './Search';
 import { HomeContext } from '../../misc/context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Home as HomeType } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import WatchLater from './WatchLater';
 import { TouchableOpacity } from 'react-native';
 import Utils from './Utils';
+import Saya from './Saya';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createBottomTabNavigator<HomeNavigator>();
@@ -43,10 +41,6 @@ function BottomTabs(props: Props) {
           }}
         />
         <Tab.Screen
-          name='Utilitas'
-          component={Utils}
-          options={{ tabBarIcon: ({ color }) => <Icon name="gear" style={{ color }} size={20} /> }} />
-        <Tab.Screen
           name="Search"
           component={Search}
           options={{
@@ -57,36 +51,16 @@ function BottomTabs(props: Props) {
           }}
         />
         <Tab.Screen
-          name="History"
+          name="Saya"
           options={{
-            // unmountOnBlur: true,
-            tabBarIcon: ({ color }) => (
-              <Icon name="history" style={{ color }} size={20} />
-            ),
-            tabBarLabel: 'Histori'
+            tabBarIcon: ({ color }) => <Icon name="user" style={{ color }} size={20} />,
+            tabBarLabel: 'Saya',
           }}
-          component={History}
-        />
+          component={Saya} />
         <Tab.Screen
-          name="WatchLater"
-          options={{
-            tabBarLabel: 'Tonton nanti',
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons name="watch-later" style={{ color }} size={20} />
-            ),
-          }}
-          component={WatchLater}
-        />
-        <Tab.Screen
-          name="Setting"
-          options={{
-            tabBarIcon: ({ color }) => (
-              <Icon name="gears" style={{ color }} size={20} />
-            ),
-            tabBarLabel: 'Pengaturan',
-          }}
-          component={Setting}
-        />
+          name='Utilitas'
+          component={Utils}
+          options={{ tabBarIcon: ({ color }) => <Icon5 name="toolbox" style={{ color }} size={20} /> }} />
       </Tab.Navigator>
     </HomeContext.Provider>
   );

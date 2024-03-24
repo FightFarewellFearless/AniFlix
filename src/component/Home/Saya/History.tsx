@@ -2,22 +2,19 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Alert,
-  Animated as RNAnimated,
-  StyleSheet,
-  useColorScheme,
+  Alert, StyleSheet,
+  useColorScheme
 } from 'react-native';
-import { StackActions, useFocusEffect } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import useGlobalStyles from '../../assets/style';
+import useGlobalStyles from '../../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator } from '../../types/navigation';
-import { HistoryJSON } from '../../types/historyJSON';
+import { setDatabase } from '../../../misc/reduxSlice';
+import { AppDispatch } from '../../../misc/reduxStore';
+import { SayaDrawerNavigator } from '../../../types/navigation';
+import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
   FadeInRight,
   FadeOutLeft,
@@ -28,8 +25,9 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
-import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
-import ImageLoading from '../ImageLoading';
+import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
+import ImageLoading from '../../ImageLoading';
+import { DrawerScreenProps } from '@react-navigation/drawer';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as typeof FlashList<HistoryJSON>,
@@ -37,7 +35,7 @@ const AnimatedFlashList = Animated.createAnimatedComponent(
 const TouchableOpacityAnimated =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-type Props = BottomTabScreenProps<HomeNavigator, 'History'>;
+type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
 
 function History(props: Props) {
   const styles = useStyles();
@@ -48,13 +46,9 @@ function History(props: Props) {
     state => JSON.parse(state) as HistoryJSON[],
   );
 
-  const isFocus = useRef(true);
-
   const flatListRef = useAnimatedRef<FlashList<HistoryJSON>>();
 
   const dispatchSettings = useDispatch<AppDispatch>();
-
-  const scaleAnim = useRef(new RNAnimated.Value(1)).current;
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -71,6 +65,7 @@ function History(props: Props) {
   });
 
   const scrollHandler = useAnimatedScrollHandler(event => {
+    'worklet';
     const value = event.contentOffset.y;
     const velocity = event.velocity?.y;
     if (value <= 100) {
@@ -102,28 +97,6 @@ function History(props: Props) {
     }
     scrollLastValue.value = event.contentOffset.y;
   });
-
-  useFocusEffect(
-    useCallback(() => {
-      isFocus.current = true;
-      RNAnimated.timing(scaleAnim, {
-        toValue: 1,
-        // speed: 18,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-      return () => {
-        isFocus.current = false;
-        RNAnimated.timing(scaleAnim, {
-          toValue: 0.8,
-          // speed: 18,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
-  );
 
   const deleteHistory = useCallback(
     async (index: number) => {
@@ -236,7 +209,7 @@ function History(props: Props) {
         </TouchableOpacityAnimated>
       );
     },
-    [data, deleteHistory, props.navigation],
+    [data, deleteHistory, props.navigation, styles],
   );
 
   const scrollToTop = useCallback(() => {
@@ -248,7 +221,7 @@ function History(props: Props) {
   }, []);
 
   return (
-    <RNAnimated.View style={{ flex: 1, transform: [{ scale: scaleAnim }] }}>
+    <View style={{ flex: 1 }}>
       {data.length === 0 ? (
         <View style={styles.noHistory}>
           <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
@@ -277,7 +250,7 @@ function History(props: Props) {
           </Animated.View>
         </View>
       )}
-    </RNAnimated.View>
+    </View>
   );
 }
 

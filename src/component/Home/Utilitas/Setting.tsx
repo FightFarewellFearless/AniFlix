@@ -1,50 +1,45 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, {
-  useContext,
-  useState,
-  useCallback,
-  useRef,
   ReactElement,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
 } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Modal,
   Animated,
+  FlatList,
+  Modal,
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
-  FlatList,
-  PermissionsAndroid,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Clipboard from '@react-native-clipboard/clipboard';
-import { useFocusEffect } from '@react-navigation/native';
 import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
-import useGlobalStyles, { darkText } from '../../assets/style';
-import { HomeContext } from '../../misc/context';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import useGlobalStyles, { darkText } from '../../../assets/style';
+import { HomeContext } from '../../../misc/context';
 
 import { useDispatch } from 'react-redux';
 
-import { setDatabase } from '../../misc/reduxSlice';
-import Orientation from 'react-native-orientation-locker';
-import deviceUserAgent from '../../utils/deviceUserAgent';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HomeNavigator } from '../../types/navigation';
-import store, { AppDispatch, RootState } from '../../misc/reduxStore';
-import { HistoryJSON } from '../../types/historyJSON';
-import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import { SetDatabaseTarget } from '../../types/redux';
+import Orientation from 'react-native-orientation-locker';
+import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
+import { setDatabase } from '../../../misc/reduxSlice';
+import store, { AppDispatch, RootState } from '../../../misc/reduxStore';
+import { HistoryJSON } from '../../../types/historyJSON';
+import { UtilsStackNavigator } from '../../../types/navigation';
+import { SetDatabaseTarget } from '../../../types/redux';
+import watchLaterJSON from '../../../types/watchLaterJSON';
 
-import moment from 'moment';
-import RNFS from 'react-native-fs';
 import { Buffer } from 'buffer/';
+import moment from 'moment';
 import DocumentPicker, { types } from 'react-native-document-picker';
+import RNFS from 'react-native-fs';
 
 interface SettingsData {
   title: string;
@@ -54,7 +49,7 @@ interface SettingsData {
   handler: () => any;
 }
 
-type Props = NativeStackScreenProps<HomeNavigator, 'Setting'>;
+type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
   const globalStyles = useGlobalStyles();
