@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import controlWatchLater from '../../../utils/watchLaterControl';
 import ImageLoading from '../../ImageLoading';
 import { DrawerScreenProps } from '@react-navigation/drawer';
+import { StackActions } from '@react-navigation/native';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 const TouchableOpacityAnimated =
