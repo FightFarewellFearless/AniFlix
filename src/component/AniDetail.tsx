@@ -38,7 +38,7 @@ function AniDetail(props: Props) {
   }, []);
   return (
     <View style={styles.container}>
-      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, 'transparent']}>
+      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, thumbnailColor, 'transparent']}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={[styles.title, { color: complementThumbnailColor }]}>{data.title}</Text>
           <Text style={[styles.title, { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
@@ -46,7 +46,7 @@ function AniDetail(props: Props) {
         <View style={styles.imageContainer}>
           <View style={[styles.imageContainerChild]}>
             <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
-              <Icon name="star" color="yellow" /> {data.rating + '\n'}
+              <Icon name="star" color="yellow" /> {data.rating === '' ? '-' : data.rating}{'\n'}
               <Icon name="calendar" /> {data.releaseYear + '\n'}
               <Icon name="tags" /> {data.status + '\n'}
               <Icon name="building" /> {data.studio + '\n'}
@@ -160,8 +160,9 @@ function useStyles() {
     detailText: {
       color: globalStyles.text.color,
       textShadowColor: 'black',
-      textShadowOffset: { width: 1, height: 1 },
-      textShadowRadius: 1,
+      textShadowOffset: { width: .5, height: .5 },
+      textShadowRadius: .5,
+      fontWeight: 'bold',
     },
     synopsys: {
 
