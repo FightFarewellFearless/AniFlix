@@ -1,6 +1,6 @@
 import gpti from 'gpti';
 import { ReactNode, startTransition, useCallback, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import { FlatList, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -37,7 +37,7 @@ function TextCode(props: { text: string, textStyle?: TextStyle | undefined }) {
 }
 const customRenderer = new CustomRenderer();
 
-function Chat(props: Props) {
+function Chat(_props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
@@ -94,7 +94,7 @@ function Chat(props: Props) {
   }, [requestToGpt]);
 
   return (
-    <KeyboardAvoidingView behavior="height" style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#0A0A0A' : '#eeedf1' }}>
+    <View style={{ flex: 1, backgroundColor: colorScheme === 'dark' ? '#0A0A0A' : '#eeedf1' }}>
       <FlatList
         // @ts-ignore
         ref={flashList}
@@ -142,7 +142,7 @@ function Chat(props: Props) {
           <Text style={{ color: lightText }}>{messageLoading ? 'Loading...' : 'Kirim'}</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   )
 }
 
