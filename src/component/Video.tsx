@@ -94,6 +94,8 @@ function Video(props: Props) {
   const [data, setData] = useState(props.route.params.data);
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
 
+  const [isBuffering, setIsBuffering] = useState(false);
+
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
@@ -509,6 +511,11 @@ function Video(props: Props) {
       if (status.positionMillis) {
         handleProgress(status.positionMillis / 1000);
       }
+      if(status.isBuffering && !status.isPlaying && status.shouldPlay) {
+        setIsBuffering(true);
+      } else {
+        setIsBuffering(false);
+      }
     }
   }, [onEnd, handleProgress]);
 
@@ -590,6 +597,9 @@ function Video(props: Props) {
                 ref={videoRef}
                 useNativeControls={videoShowControls}
               />
+              {isBuffering && (
+                <ActivityIndicator size={'large'} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }} />
+              )}
             </Pressable>
           ) : data.streamingType === 'embed' ? (
             <WebView
