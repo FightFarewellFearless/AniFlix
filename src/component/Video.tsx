@@ -100,7 +100,7 @@ function Video(props: Props) {
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
-  const [videoShowControls, setVideoShowControls] = useState(true);
+  const [videoShowControls, setVideoShowControls] = useState(false);
   const videoPress = useRef<{ x: number; y: number; timeout: NodeJS.Timeout | undefined }>({ x: 0, y: 0, timeout: undefined });
   const webviewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
