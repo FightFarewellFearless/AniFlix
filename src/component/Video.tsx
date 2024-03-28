@@ -855,7 +855,7 @@ function LoadingModal({
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   return (
-    <Modal visible={loading} transparent onRequestClose={cancelLoading}>
+    <Modal statusBarTranslucent={true} visible={loading} transparent onRequestClose={cancelLoading}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <TouchableOpacity
