@@ -1,5 +1,5 @@
 import gpti from 'gpti';
-import { ReactNode, startTransition, useCallback, useRef, useState } from "react";
+import { ReactNode, startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
@@ -48,6 +48,13 @@ function Chat(_props: Props) {
   const [messageLoading, setMessageLoading] = useState(false);
 
   const [useBingAI, setUseBingAI] = useState(false);
+  const [bingAbortRequest] = useState(() => new AbortController());
+
+  useEffect(() => {
+    return () => {
+      bingAbortRequest.abort();
+    }
+  }, []);
 
   const requestToGpt = useCallback((prompt: string, callback: (text: string | undefined, isBingStreaming?: boolean, isDone?: boolean) => void) => {
     if (useBingAI) {
@@ -55,7 +62,10 @@ function Chat(_props: Props) {
         startTransition(() => {
           callback(data?.gpt, true, data.done);
         })
-      }).catch(() => {
+      }, bingAbortRequest.signal).catch((err) => {
+        if(err.name === 'AbortError') {
+          return;
+        }
         callback(undefined);
       })
     }

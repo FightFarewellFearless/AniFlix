@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { Message } from "../component/Home/Utilitas/Chat";
-export function requestBingAI(messages: Omit<Message, 'source'>[], cb: (data: { gpt: string; original: null | string; status: boolean; code: number; done?: boolean }) => any) {
+export function requestBingAI(messages: Omit<Message, 'source'>[], cb: (data: { gpt: string; original: null | string; status: boolean; code: number; done?: boolean }) => any, signal?: AbortSignal) {
   
     return fetch("https://nexra.aryahcr.cc/api/chat/complements", {
+        signal,
         //@ts-ignore
         reactNative: { textStreaming: true },
         method: "POST",
