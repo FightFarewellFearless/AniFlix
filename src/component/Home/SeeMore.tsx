@@ -45,11 +45,13 @@ function SeeMore(props: Props) {
   }, []);
 
   return (
-    <View style={{ flex: 0.99 }}>
+    <View style={{ flex: 1 }}>
       <FlashList
         data={
           data?.newAnime as NewAnimeList[]
         }
+        // TEMP: temporary fix for Fabric react-native-screens
+        contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager === 'Fabric' ? 45 : undefined }}
         extraData={styles}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
