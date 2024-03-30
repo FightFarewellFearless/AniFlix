@@ -51,7 +51,7 @@ function SeeMore(props: Props) {
           data?.newAnime as NewAnimeList[]
         }
         // TEMP: temporary fix for Fabric react-native-screens
-        contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager === 'Fabric' ? 45 : undefined }}
+        contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager !== undefined ? 45 : undefined }}
         extraData={styles}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>

@@ -23,7 +23,7 @@ function BottomTabs(props: Props) {
     <HomeContext.Provider value={{ paramsState, setParamsState }}>
       <Tab.Navigator
         // TEMP: temporary fix for crashed app on nested navigator
-        detachInactiveScreens={!((global as any).nativeFabricUIManager === 'Fabric')}
+        detachInactiveScreens={((global as any).nativeFabricUIManager === undefined)}
         screenOptions={{
           headerShown: false,
           tabBarStyle: { height: 40 },
