@@ -162,7 +162,7 @@ function CustomMarkdown({ content }: { content: string }) {
     colorScheme,
     renderer: customRenderer,
   });
-  return markdown;
+  return <>{markdown}</>;
 }
 
 function useStyles() {
