@@ -11,6 +11,7 @@ import {
   Pressable,
   Keyboard,
   useColorScheme,
+  InteractionManager,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -57,7 +58,6 @@ type Props = CompositeScreenProps<
 >;
 
 const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
-
 function Search(props: Props) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
@@ -110,15 +110,19 @@ function Search(props: Props) {
 
   const textInputRef = useRef<TextInput>(null);
 
-  const loadMoreLoading = useRef<boolean>(false);
-
   const searchTextAnimationColor = useSharedValue(0);
 
   useEffect(() => {
     AnimeAPI.listAnime(undefined, (data) => {
+    if((global as any).nativeFabricUIManager !== undefined) {
       startTransition(() => {
         setListAnime(data);
       })
+    } else {
+      InteractionManager.runAfterInteractions(() => {
+        setListAnime(data);
+      })
+    }
     }).then(data => {
       setListAnime(data);
     }).catch(() => {
