@@ -19,6 +19,7 @@ import { AppDispatch } from '../../misc/reduxStore';
 import { setDatabase } from '../../misc/reduxSlice';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
+import deletedDatabase from '../../misc/deletedDatabase.json';
 import { version as appVersion } from '../../../package.json';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
@@ -37,12 +38,7 @@ function Loading(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
   useEffect(() => {
-    Orientation.unlockAllOrientations(); // to prevent orientation locked during activity changes
-    (async () => {
-      if ((await AsyncStorage.getItem('lockScreenOrientation')) === 'true') {
-        Orientation.lockToPortrait();
-      }
-    })();
+    Orientation.lockToPortrait();
   }, []);
   const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
 
@@ -55,14 +51,6 @@ function Loading(props: Props) {
     if (jsondata === undefined) {
       return;
     }
-    // if (jsondata.maintenance === true) {
-    //   props.navigation.dispatch(
-    //     StackActions.replace('Maintenance', {
-    //       message: jsondata.message,
-    //     }),
-    //   );
-    //   return;
-    // }
     props.navigation.dispatch(
       StackActions.replace('Home', {
         data: jsondata,
@@ -72,6 +60,7 @@ function Loading(props: Props) {
 
   const prepareData = useCallback(async () => {
     const arrOfData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
+    const allKeys = await AsyncStorage.getAllKeys();
     for (const dataKey of arrOfData) {
       const data = await AsyncStorage.getItem(dataKey);
       if (data === null) {
@@ -89,6 +78,11 @@ function Loading(props: Props) {
           value: data,
         }),
       );
+    }
+    for (const dataKey of deletedDatabase) {
+      if(allKeys.includes(dataKey)) {
+        AsyncStorage.removeItem(dataKey);
+      }
     }
   }, [dispatchSettings]);
 

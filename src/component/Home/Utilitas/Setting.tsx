@@ -2,7 +2,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, {
   ReactElement,
   useCallback,
-  useContext,
   useRef,
   useState,
 } from 'react';
@@ -19,16 +18,14 @@ import {
   View,
   useColorScheme
 } from 'react-native';
-import { Dropdown, IDropdownRef } from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
-import { HomeContext } from '../../../misc/context';
 
 import { useDispatch } from 'react-redux';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Orientation from 'react-native-orientation-locker';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
+import deletedDatabase from '../../../misc/deletedDatabase.json';
 import { setDatabase } from '../../../misc/reduxSlice';
 import store, { AppDispatch, RootState } from '../../../misc/reduxStore';
 import { HistoryJSON } from '../../../types/historyJSON';
@@ -53,7 +50,6 @@ type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
   const globalStyles = useGlobalStyles();
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
@@ -62,7 +58,6 @@ function Setting(_props: Props) {
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
-  // const [batteryTimeInfoSwitch, setBatteryTimeInfoSwitch] = useState(false);
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const setBatteryTimeInfoSwitch = (value: string) => {
     dispatchSettings(
@@ -72,57 +67,10 @@ function Setting(_props: Props) {
       }),
     );
   };
-  // const [downloadFrom, setDownloadFrom] = useState('native');
-  const downloadFrom = useSelectorIfFocused(
-    (state: RootState) => state.settings.downloadFrom,
-  );
-  const setDownloadFrom = useCallback(
-    (value: string) => {
-      dispatchSettings(
-        setDatabase({
-          target: 'downloadFrom',
-          value,
-        }),
-      );
-    },
-    [dispatchSettings],
-  );
 
-  const lockScreenOrientation = useSelectorIfFocused(
-    (state: RootState) => state.settings.lockScreenOrientation,
-  );
-  const lockScreenOrientationSwitch = lockScreenOrientation === 'true';
-  const toggleScreenOrientation = useCallback(
-    (value?: string) => {
-      const newValue =
-        value === undefined
-          ? lockScreenOrientation !== 'true'
-          : value === 'true';
-
-      if (newValue === true) {
-        Orientation.lockToPortrait();
-      } else {
-        Orientation.unlockAllOrientations();
-      }
-
-      dispatchSettings(
-        setDatabase({
-          target: 'lockScreenOrientation',
-          value: String(newValue),
-        }),
-      );
-    },
-    [dispatchSettings, lockScreenOrientation],
-  );
-
+  
   const [modalVisible, setModalVisible] = useState(false);
-  const [restoreVisible, setRestoreVisible] = useState(false);
   const [modalText, setModalText] = useState('');
-  const [backupCode, setBackupCode] = useState('');
-
-  const { paramsState } = useContext(HomeContext);
-
-  const dropdownRef = useRef<IDropdownRef>(null);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
@@ -176,14 +124,12 @@ function Setting(_props: Props) {
         try {
             (
               Object.keys(backupDataJSON) as SetDatabaseTarget[]
-            ).forEach(value => {
+            ).filter(value => !deletedDatabase.includes(value)).forEach(value => {
               if (value === 'history' || value === 'watchLater') {
                 restoreHistoryOrWatchLater(
                   JSON.parse(backupDataJSON[value]),
                   value,
                 );
-              } else if (value === 'lockScreenOrientation') {
-                toggleScreenOrientation(backupDataJSON[value]);
               } else {
                 dispatchSettings(
                   setDatabase({
@@ -280,22 +226,13 @@ function Setting(_props: Props) {
     );
   };
 
-  const toggleDownloadFrom = useCallback(
-    async (value?: 'browser' | 'native') => {
-      const newDownloadFrom =
-        value ?? (downloadFrom === 'browser' ? 'native' : 'browser');
-      setDownloadFrom(newDownloadFrom);
-    },
-    [downloadFrom, setDownloadFrom],
-  );
-
   const iconSize = 18;
 
   const settingsData: SettingsData[] = [
     {
       title: 'Nyalakan informasi baterai dan waktu',
       description:
-        'Beri tahu saya persentase baterai dan waktu, saat sedang streaming fullscreen',
+        'Beri tahu saya persentase baterai dan waktu, saat sedang menonton dalam mode fullscreen',
       icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Switch
@@ -304,73 +241,6 @@ function Setting(_props: Props) {
         />
       ),
       handler: batteryTimeSwitchHandler,
-    },
-    {
-      title: 'Kunci orientasi',
-      description: 'Mengunci orientasi ke portrait',
-      icon: <Icon name="lock" style={globalStyles.text} size={iconSize} />,
-      rightComponent: (
-        <Switch
-          value={lockScreenOrientationSwitch}
-          onValueChange={() => {
-            toggleScreenOrientation();
-          }}
-        />
-      ),
-      handler: () => toggleScreenOrientation(),
-    },
-    {
-      title: 'Download anime melalui',
-      description:
-        'Download anime melalui browser atau download manager bawaan android',
-      icon: <Icon name="download" style={globalStyles.text} size={iconSize} />,
-      rightComponent: (
-        <Dropdown<{ value: 'browser' | 'native'; label: string }>
-          ref={dropdownRef}
-          data={[
-            { value: 'native', label: 'Native' },
-            { value: 'browser', label: 'Browser' },
-          ]}
-          value={downloadFrom}
-          mode="modal"
-          onConfirmSelectItem={value => {
-            dropdownRef.current?.close();
-            Alert.alert(
-              'Konfirmasi',
-              'Kamu yakin ingin mengubah mode download ke ' +
-              value.label +
-              '?' +
-              '\n\nPilih mode browser jika ingin mem-pause download ditengah-tengah dan memilih lokasi download.\nPilih mode native jika ingin memulai download dengan 1 klik.',
-              [
-                {
-                  text: 'Batal',
-                },
-                {
-                  text: 'Ya',
-                  onPress: () => {
-                    toggleDownloadFrom(value.value);
-                  },
-                },
-              ],
-            );
-          }}
-          onChange={value => {
-            toggleDownloadFrom(value.value);
-          }}
-          confirmSelectItem={true}
-          valueField={'value'}
-          labelField={'label'}
-          style={styles.dropdownStyle}
-          containerStyle={styles.dropdownContainerStyle}
-          itemTextStyle={styles.dropdownItemTextStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          activeColor="#16687c"
-          selectedTextStyle={styles.dropdownSelectedTextStyle}
-        />
-      ),
-      handler: () => {
-        dropdownRef.current?.open();
-      },
     },
     {
       title: 'Cadangkan data',
@@ -396,11 +266,6 @@ function Setting(_props: Props) {
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }], flex: 1 }}>
-      <View style={styles.waktuServer}>
-        <Text style={globalStyles.text}>Waktu server: </Text>
-        <Text style={globalStyles.text}>{paramsState?.waktuServer}</Text>
-      </View>
-      {/* Modal backup */}
       <Modal transparent visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -409,75 +274,6 @@ function Setting(_props: Props) {
           </View>
         </View>
       </Modal>
-      {/* Modal restore */}
-      {/* <Modal
-        transparent
-        visible={restoreVisible}
-        onRequestClose={() => setRestoreVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setRestoreVisible(false)}>
-          <View style={[styles.modalContainer]}>
-            <TouchableWithoutFeedback>
-              <View
-                style={[
-                  styles.modalContent,
-                  { minHeight: 100, minWidth: 250 },
-                ]}>
-                <View
-                  style={[
-                    styles.modalRestorePart,
-                    { justifyContent: 'center' },
-                  ]}>
-                  <Text style={[globalStyles.text, styles.modalRestoreText]}>
-                    Masukkan kode backup
-                  </Text>
-                </View>
-                <View style={styles.modalRestorePart}>
-                  <TextInput
-                    placeholderTextColor="#707070"
-                    placeholder="Kode"
-                    keyboardType="numeric"
-                    value={backupCode}
-                    onChangeText={text => setBackupCode(text)}
-                    onSubmitEditing={() => restoreData(backupCode)}
-                    style={[
-                      globalStyles.text,
-                      {
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#00af00',
-                        // backgroundColor: '#474747',
-                        height: 45,
-                        width: 100,
-                        textAlign: 'center',
-                        justifyContent: 'center',
-                      },
-                    ]}
-                  />
-                </View>
-                <View
-                  style={[
-                    styles.modalRestorePart,
-                    {
-                      alignSelf: 'flex-end',
-                      alignItems: 'flex-end',
-                      flexDirection: 'row',
-                    },
-                  ]}>
-                  <TouchableOpacity
-                    style={styles.cancelRestoreModalButton}
-                    onPress={() => setRestoreVisible(false)}>
-                    <Text style={[globalStyles.text, styles.modalRestoreButtonText]}>Batal</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.acceptRestoreModalButton}
-                    onPress={() => restoreData(backupCode)}>
-                    <Text style={[globalStyles.text, styles.modalRestoreButtonText]}>Restore</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal> */}
 
       <FlatList
         data={settingsData}

@@ -147,11 +147,6 @@ function HomeList(props: HomeListProps) {
 
     AnimeAPI.home()
       .then(async jsondata => {
-        // if (jsondata.maintenance) {
-        //   ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
-        //   setRefresh(false);
-        //   return;
-        // }
         setData?.(jsondata);
         setRefresh(false);
       })

@@ -58,14 +58,6 @@ function FromUrl(props: Props) {
           return;
         }
         try {
-          // if (result.blocked) {
-          //   props.navigation.dispatch(StackActions.replace('Blocked'));
-          // } else if (result.maintenance) {
-          //   props.navigation.dispatch(
-          //     StackActions.replace('Maintenance', {
-          //       message: result.message,
-          //     }),
-          //   );
           if (result.type === 'animeDetail') {
             props.navigation.dispatch(
               StackActions.replace('AnimeDetail', {

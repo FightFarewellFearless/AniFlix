@@ -1,14 +1,11 @@
 import {
-  Blocked,
   AniDetail,
-  FromUrlMaintenance,
   Home,
   NewAnimeList,
   SearchAnime,
   AniStreaming,
   listAnimeTypeList,
 } from '../types/anime';
-import deviceUserAgent from './deviceUserAgent';
 import Anime from './animeLocalAPI';
 
 class AnimeAPI {

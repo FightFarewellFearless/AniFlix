@@ -74,13 +74,7 @@ function Video(props: Props) {
   const enableBatteryTimeInfo = useSelector(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const downloadFrom = useSelector(
-    (state: RootState) => state.settings.downloadFrom,
-  );
   const history = useSelector((state: RootState) => state.settings.history);
-  const lockScreenOrientation = useSelector(
-    (state: RootState) => state.settings.lockScreenOrientation,
-  );
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -278,11 +272,7 @@ function Video(props: Props) {
 
   const willUnmountHandler = () => {
     Orientation.removeDeviceOrientationListener(orientationDidChange);
-    if (lockScreenOrientation === 'true') {
-      Orientation.lockToPortrait();
-    } else {
-      Orientation.unlockAllOrientations();
-    }
+    Orientation.lockToPortrait();
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
   };
@@ -438,16 +428,7 @@ function Video(props: Props) {
         setLoading(false);
         return;
       }
-      // if (result.maintenance) {
-      //   setLoading(false);
-      //   ToastAndroid.show('Server sedang maintenance!', ToastAndroid.SHORT);
-      //   return;
-      // }
-      // if (result.blocked) {
-      //   setLoading(false);
-      //   Alert.alert('Gagal mengganti episode', 'Karena data di blokir');
-      //   return;
-      // }
+      
       if (result.type !== 'animeStreaming') {
         setLoading(false);
         Alert.alert(
@@ -511,7 +492,7 @@ function Video(props: Props) {
       if (status.positionMillis) {
         handleProgress(status.positionMillis / 1000);
       }
-      if(status.isBuffering && !status.isPlaying && status.shouldPlay) {
+      if (status.isBuffering && !status.isPlaying && status.shouldPlay) {
         setIsBuffering(true);
       } else {
         setIsBuffering(false);
@@ -520,9 +501,9 @@ function Video(props: Props) {
   }, [onEnd, handleProgress]);
 
   const fullscreenUpdate = useCallback((status: VideoFullscreenUpdateEvent) => {
-    if(status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
+    if (status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
       videoRef.current?.dismissFullscreenPlayer();
-      if(fullscreen) {
+      if (fullscreen) {
         exitFullscreen()
       } else {
         enterFullscreen()
@@ -531,13 +512,13 @@ function Video(props: Props) {
   }, [exitFullscreen, enterFullscreen, fullscreen]);
 
   const onVideoPressOut = useCallback((event: GestureResponderEvent) => {
-    if(videoPress.current.x === event.nativeEvent.locationX && videoPress.current.y === event.nativeEvent.locationY) {
-      if(videoPress.current.timeout && videoShowControls) {
+    if (videoPress.current.x === event.nativeEvent.locationX && videoPress.current.y === event.nativeEvent.locationY) {
+      if (videoPress.current.timeout && videoShowControls) {
         clearTimeout(videoPress.current.timeout);
       }
       setVideoShowControls(val => !val);
       let timeout;
-      if(!videoShowControls) {
+      if (!videoShowControls) {
         timeout = setTimeout(() => {
           setVideoShowControls(false);
         }, 4000);

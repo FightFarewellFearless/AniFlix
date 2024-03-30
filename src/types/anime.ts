@@ -1,13 +1,8 @@
-interface Maintenance {
-  // maintenance: boolean;
-  // message?: string;
+interface FromUrl {
+
 }
 
-interface FromUrl extends Maintenance {
-  // blocked: boolean;
-}
-
-interface NewAnimeList extends Maintenance {
+interface NewAnimeList {
   title: string;
   episode: string;
   thumbnailUrl: string;
@@ -16,7 +11,7 @@ interface NewAnimeList extends Maintenance {
   releaseDay: string;
 }
 
-interface AnimeSchedule extends Maintenance {
+interface AnimeSchedule {
   title: string;
   link: string;
 }
@@ -36,16 +31,9 @@ interface SearchAnimeList {
 
 type SearchAnime = {
   result: SearchAnimeList[];
-} & Maintenance;
+};
 
 interface Blocked extends FromUrl {
-  // blocked: true;
-  // maintenance: false;
-}
-
-interface FromUrlMaintenance extends FromUrl {
-  // blocked: false;
-  // maintenance: true;
 }
 
 type AniDetailEpsList = {
@@ -102,7 +90,7 @@ interface AnnouncmentDisabled {
   enable: false;
 }
 
-interface Home extends Maintenance {
+interface Home {
   newAnime: NewAnimeList[];
   jadwalAnime: JadwalAnime;
   announcment: AnnouncmentEnabled | AnnouncmentDisabled;
@@ -123,8 +111,7 @@ export type {
   AniDetailEpsList,
   AniDetail,
   Blocked,
-  Maintenance,
-  FromUrlMaintenance,
+  FromUrl,
   AniStreaming,
   Home,
   listAnimeTypeList

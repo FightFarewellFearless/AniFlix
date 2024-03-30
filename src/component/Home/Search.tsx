@@ -154,13 +154,6 @@ function Search(props: Props) {
     textInputRef.current?.blur();
     AnimeAPI.search(searchText)
       .then(async result => {
-        // if ('maintenance' in result && result.maintenance === true) {
-        //   props.navigation.navigate('Maintenance', {
-        //     message: result.message,
-        //   });
-        //   setLoading(false);
-        //   return;
-        // }
         query.current = searchText;
         setData(result);
         setLoading(false);
