@@ -6,7 +6,7 @@ import { View } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
-import useGlobalStyles, { darkText, lightText } from "../assets/style";
+import useGlobalStyles, { lightText } from "../assets/style";
 import { FlashList } from "@shopify/flash-list";
 import controlWatchLater from "../utils/watchLaterControl";
 import watchLaterJSON from "../types/watchLaterJSON";
