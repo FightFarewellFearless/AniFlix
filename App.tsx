@@ -15,6 +15,7 @@ import NeedUpdate from './src/component/NeedUpdate';
 import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
 import useGlobalStyles from './src/assets/style';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 function App() {
@@ -25,36 +26,38 @@ function App() {
   const globalStyles = useGlobalStyles();
 
   return (
-    <NavigationContainer theme={colorScheme === 'dark' ? {
-      ...DarkTheme,
-      colors: {
-        ...DarkTheme.colors,
-        background: '#0A0A0A',
-      }
-    } : undefined}>
-      <Provider store={store}>
-        <Stack.Navigator
-          initialRouteName="connectToServer"
-          screenOptions={{
-            headerShown: false,
-            animation: 'fade_from_bottom',
-          }}>
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="AnimeDetail" component={AniDetail} />
-          <Stack.Screen name="FromUrl" component={FromUrl} />
-          <Stack.Screen name="Video" component={Video} />
-          <Stack.Screen name="connectToServer" component={Connecting} />
-          <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
-          <Stack.Screen name="Blocked" component={Blocked} />
-          <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
-        </Stack.Navigator>
-      </Provider>
-      {__DEV__ && (
-        <View style={styles.Dev} pointerEvents="none">
-          <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-        </View>
-      )}
-    </NavigationContainer>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <NavigationContainer theme={colorScheme === 'dark' ? {
+        ...DarkTheme,
+        colors: {
+          ...DarkTheme.colors,
+          background: '#0A0A0A',
+        }
+      } : undefined}>
+        <Provider store={store}>
+          <Stack.Navigator
+            initialRouteName="connectToServer"
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade_from_bottom',
+            }}>
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="AnimeDetail" component={AniDetail} />
+            <Stack.Screen name="FromUrl" component={FromUrl} />
+            <Stack.Screen name="Video" component={Video} />
+            <Stack.Screen name="connectToServer" component={Connecting} />
+            <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
+            <Stack.Screen name="Blocked" component={Blocked} />
+            <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
+          </Stack.Navigator>
+        </Provider>
+        {__DEV__ && (
+          <View style={styles.Dev} pointerEvents="none">
+            <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+          </View>
+        )}
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 

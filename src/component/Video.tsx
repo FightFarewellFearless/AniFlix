@@ -54,7 +54,7 @@ import WebView from 'react-native-webview';
 import reqWithReferer from '../utils/reqWithReferer';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail } from '../types/anime';
-import moment from 'moment';
+import VideoPlayer from './VideoPlayer';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -428,7 +428,7 @@ function Video(props: Props) {
         setLoading(false);
         return;
       }
-      
+
       if (result.type !== 'animeStreaming') {
         setLoading(false);
         Alert.alert(
@@ -500,42 +500,11 @@ function Video(props: Props) {
     }
   }, [onEnd, handleProgress]);
 
-  const fullscreenUpdate = useCallback((status: VideoFullscreenUpdateEvent) => {
-    if (status.fullscreenUpdate === VideoFullscreenUpdate.PLAYER_WILL_PRESENT) {
-      videoRef.current?.dismissFullscreenPlayer();
-      if (fullscreen) {
-        exitFullscreen()
-      } else {
-        enterFullscreen()
-      }
-    }
-  }, [exitFullscreen, enterFullscreen, fullscreen]);
-
-  const onVideoPressOut = useCallback((event: GestureResponderEvent) => {
-    if (videoPress.current.x === event.nativeEvent.locationX && videoPress.current.y === event.nativeEvent.locationY) {
-      if (videoPress.current.timeout && videoShowControls) {
-        clearTimeout(videoPress.current.timeout);
-      }
-      setVideoShowControls(val => !val);
-      let timeout;
-      if (!videoShowControls) {
-        timeout = setTimeout(() => {
-          setVideoShowControls(false);
-        }, 4000);
-      }
-      videoPress.current = {
-        x: 0,
-        y: 0,
-        timeout,
-      }
-    }
-  }, [videoShowControls]);
-
-  const onVideoPressIn = useCallback((event: GestureResponderEvent) => {
-    videoPress.current = {
-      x: event.nativeEvent.locationX,
-      y: event.nativeEvent.locationY,
-      timeout: videoPress.current.timeout,
+  const fullscreenUpdate = useCallback((isFullscreen: boolean) => {
+    if (isFullscreen) {
+      exitFullscreen()
+    } else {
+      enterFullscreen()
     }
   }, []);
 
@@ -549,39 +518,15 @@ function Video(props: Props) {
         {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
-            <Pressable style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-            }} onPressIn={onVideoPressIn} onPressOut={onVideoPressOut}>
-              <ExpoVideo
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                }}
-                key={data.streamingLink}
-                onPlaybackStatusUpdate={playbackStatusUpdate}
-                resizeMode={ResizeMode.CONTAIN}
-                onFullscreenUpdate={fullscreenUpdate}
-                onLoad={handleVideoLoad}
-                source={{
-                  headers: {
-                    'User-Agent': deviceUserAgent,
-                  },
-                  uri: data.streamingLink,
-                }}
-                ref={videoRef}
-                useNativeControls={videoShowControls}
-              />
-              {isBuffering && (
-                <ActivityIndicator size={'large'} style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }} />
-              )}
-            </Pressable>
+            <VideoPlayer
+              title={data.title}
+              streamingURL={data.streamingLink}
+              style={{ flex: 1 }}
+              videoRef={videoRef}
+              fullscreen={fullscreen}
+              onFullscreenUpdate={fullscreenUpdate}
+              onDurationChange={handleProgress}
+              onLoad={handleVideoLoad} />
           ) : data.streamingType === 'embed' ? (
             <WebView
               key={webViewKey}
