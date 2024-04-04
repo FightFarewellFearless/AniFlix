@@ -98,7 +98,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
     const onFullScreenButtonPressed = useCallback(() => {
         onFullscreenUpdate?.(isFullscreen)
         setIsFullscreen(a => !a)
-    }, [onFullscreenUpdate]);
+    }, [onFullscreenUpdate, isFullscreen]);
     return (
         <View style={[style]}>
             <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
