@@ -28,9 +28,10 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
     const seekBarProgress = useSharedValue(0);
     const seekBarProgressDisabled = useSharedValue(false);
 
-    const pressableShowControlsLocation = useRef<{x: number, y: number}>({x: 0, y: 0});
+    const pressableShowControlsLocation = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
 
     const [isBuffering, setIsBuffering] = useState(true);
+    const [isError, setIsError] = useState(false);
 
     const [paused, setPaused] = useState(isPaused ?? false);
     useEffect(() => {
@@ -61,6 +62,8 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
             onDurationChange?.(status.positionMillis / 1000);
 
             setPaused(!status.shouldPlay);
+        } else {
+            setIsError(!!status.error);
         }
     }, []);
     const setPositionAsync = (duration: number) => {
@@ -73,7 +76,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
         }
     }, []);
     const onPressOut = useCallback((e: GestureResponderEvent) => {
-        if(
+        if (
             e.nativeEvent.locationX === pressableShowControlsLocation.current.x
             && e.nativeEvent.locationY === pressableShowControlsLocation.current.y
         ) {
@@ -81,7 +84,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
         }
     }, []);
     const onVideoLoad = useCallback((e: AVPlaybackStatus) => {
-        if(e.isLoaded) {
+        if (e.isLoaded) {
             totalDurationSecond.value = ((e.durationMillis ?? 0) / 1000);
             currentDurationSecond.value = 0;
         }
@@ -123,6 +126,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
                     style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }}
                     ref={videoRef}
                 />
+                
                 <View pointerEvents="box-none" style={{ flex: 1, display: showControls ? 'flex' : 'none' }}>
                     <Top title={title} />
                     <CenterControl
@@ -144,6 +148,10 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
                             runOnJS(setPositionAsync)?.(e * totalDurationSecond.value);
                         }} seekBarProgress={seekBarProgress} />
                 </View>
+                
+                <Icons style={{
+                    position: 'absolute', top: '50%', alignSelf: 'center', display: isError ? 'flex' : 'none',
+                }} name="error" size={50} color="red" />
             </Pressable>
         </View>
     )
