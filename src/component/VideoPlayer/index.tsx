@@ -1,11 +1,17 @@
-import { View, ViewStyle, Text, TouchableOpacity, Pressable, ActivityIndicator, GestureResponderEvent } from "react-native";
-import SeekBar from "./SeekBar";
+import { AVPlaybackStatus, Audio, InterruptionModeAndroid, ResizeMode, Video } from "expo-av";
+import { useKeepAwake } from 'expo-keep-awake';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, GestureResponderEvent, Pressable, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import { SharedValue, runOnJS, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import Icons from 'react-native-vector-icons/MaterialIcons';
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AVPlaybackStatus, ResizeMode, Video } from "expo-av";
 import deviceUserAgent from "../../utils/deviceUserAgent";
 import ReText from "../misc/ReText";
+import SeekBar from "./SeekBar";
+
+Audio.setAudioModeAsync({
+    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+});
+
 type VideoPlayerProps = {
     title: string;
     streamingURL: string;
@@ -18,6 +24,7 @@ type VideoPlayerProps = {
     onDurationChange?: (positionSecond: number) => void;
 }
 export default function VideoPlayer({ title, streamingURL, style, videoRef, onFullscreenUpdate, fullscreen, onLoad, isPaused, onDurationChange }: VideoPlayerProps) {
+    useKeepAwake();
     const seekBarProgress = useSharedValue(0);
     const seekBarProgressDisabled = useSharedValue(false);
 

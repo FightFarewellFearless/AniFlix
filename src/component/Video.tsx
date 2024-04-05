@@ -20,8 +20,6 @@ import {
   NativeModules,
   EmitterSubscription,
   AppState,
-  Pressable,
-  GestureResponderEvent,
   useColorScheme,
 } from 'react-native';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -37,8 +35,7 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { AVPlaybackStatus, Video as ExpoVideo, ResizeMode, VideoFullscreenUpdate, VideoFullscreenUpdateEvent } from 'expo-av';
-import { useKeepAwake } from 'expo-keep-awake';
+import { Video as ExpoVideo } from 'expo-av';
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -64,8 +61,6 @@ const TouchableOpacityAnimated =
 const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
 function Video(props: Props) {
-  useKeepAwake();
-
   const colorScheme = useColorScheme();
 
   const globalStyles = useGlobalStyles();
@@ -88,14 +83,10 @@ function Video(props: Props) {
   const [data, setData] = useState(props.route.params.data);
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
 
-  const [isBuffering, setIsBuffering] = useState(false);
-
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
-  const [videoShowControls, setVideoShowControls] = useState(false);
-  const videoPress = useRef<{ x: number; y: number; timeout: NodeJS.Timeout | undefined }>({ x: 0, y: 0, timeout: undefined });
   const webviewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
 
@@ -373,9 +364,6 @@ function Video(props: Props) {
     );
   }, [data, downloadAnimeFunction]);
 
-  const onEnd = useCallback(() => {
-    setIsPaused(true);
-  }, []);
 
   const handleProgress = useCallback(
     (currentTime: number) => {
@@ -482,23 +470,6 @@ function Video(props: Props) {
     }
   }, [isPaused]);
 
-  const playbackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      // onEnd
-      if (status.didJustFinish) {
-        onEnd();
-      }
-      // onProgress
-      if (status.positionMillis) {
-        handleProgress(status.positionMillis / 1000);
-      }
-      if (status.isBuffering && !status.isPlaying && status.shouldPlay) {
-        setIsBuffering(true);
-      } else {
-        setIsBuffering(false);
-      }
-    }
-  }, [onEnd, handleProgress]);
 
   const fullscreenUpdate = useCallback((isFullscreen: boolean) => {
     if (isFullscreen) {
