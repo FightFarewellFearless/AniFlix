@@ -65,7 +65,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
         } else {
             setIsError(!!status.error);
         }
-    }, []);
+    }, [onDurationChange]);
     const setPositionAsync = (duration: number) => {
         videoRef?.current?.setPositionAsync(duration * 1000);
     };
