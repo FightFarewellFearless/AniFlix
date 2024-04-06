@@ -36,7 +36,7 @@ import watchLaterJSON from '../../../types/watchLaterJSON';
 import { Buffer } from 'buffer/';
 import moment from 'moment';
 import DocumentPicker, { types } from 'react-native-document-picker';
-import RNFS from 'react-native-fs';
+import RNFetchBlob from 'react-native-blob-util';
 
 interface SettingsData {
   title: string;
@@ -101,7 +101,7 @@ function Setting(_props: Props) {
 
   const backupData = useCallback(async () => {
     const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-    await RNFS.writeFile(RNFS.ExternalStorageDirectoryPath + '/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
+    await RNFetchBlob.fs.writeFile('/storage/emulated/0/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
     Alert.alert('Backup selesai', `Backup data telah disimpan di ${'Penyimpanan internal/Download/' + fileuri}`);
   }, []);
 
@@ -118,9 +118,9 @@ function Setting(_props: Props) {
           return;
         }
         // RNFS.readFile(doc.fileCopyUri).then(console.log);
-        const data = await RNFS.readFile(doc.fileCopyUri!);
+        const data = await RNFetchBlob.fs.readFile(doc.fileCopyUri!, 'base64');
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
-        await RNFS.unlink(doc.fileCopyUri!);
+        await RNFetchBlob.fs.unlink(doc.fileCopyUri!);
         try {
             (
               Object.keys(backupDataJSON) as SetDatabaseTarget[]

@@ -47,7 +47,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import AnimeAPI from '../utils/AnimeAPI';
-import WebView from 'react-native-webview';
 import reqWithReferer from '../utils/reqWithReferer';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail } from '../types/anime';
@@ -87,8 +86,7 @@ function Video(props: Props) {
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
-  const webviewRef = useRef<WebView>(null);
-  const [webViewKey, setWebViewKey] = useState(0);
+  // const [webViewKey, setWebViewKey] = useState(0);
 
   const [animeDetail, setAnimeDetail] = useState<Omit<AniDetail, 'episodeList'> | undefined>();
 
@@ -498,28 +496,30 @@ function Video(props: Props) {
               onFullscreenUpdate={fullscreenUpdate}
               onDurationChange={handleProgress}
               onLoad={handleVideoLoad} />
-          ) : data.streamingType === 'embed' ? (
-            <WebView
-              key={webViewKey}
-              setSupportMultipleWindows={false}
-              onShouldStartLoadWithRequest={navigator => {
-                const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
-                if (!res) {
-                  webviewRef.current?.stopLoading();
-                }
-                return res;
-              }}
-              source={{ ...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
-              userAgent={deviceUserAgent}
-              originWhitelist={['*']}
-              allowsFullscreenVideo={true}
-              injectedJavaScript={`
-                window.alert = function() {}; // Disable alerts
-                window.confirm = function() {}; // Disable confirms
-                window.prompt = function() {}; // Disable prompts
-                window.open = function() {}; // Disable opening new windows
-              `} />
-          ) : (
+          ) :
+          // ) : data.streamingType === 'embed' ? (
+          //   <WebView
+          //     key={webViewKey}
+          //     setSupportMultipleWindows={false}
+          //     onShouldStartLoadWithRequest={navigator => {
+          //       const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
+          //       if (!res) {
+          //         webviewRef.current?.stopLoading();
+          //       }
+          //       return res;
+          //     }}
+          //     source={{ ...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
+          //     userAgent={deviceUserAgent}
+          //     originWhitelist={['*']}
+          //     allowsFullscreenVideo={true}
+          //     injectedJavaScript={`
+          //       window.alert = function() {}; // Disable alerts
+          //       window.confirm = function() {}; // Disable confirms
+          //       window.prompt = function() {}; // Disable prompts
+          //       window.open = function() {}; // Disable opening new windows
+          //     `} />
+          // ) : 
+          (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
           )
         }
@@ -557,7 +557,7 @@ function Video(props: Props) {
         !fullscreen && (
           <ScrollView style={{ flex: 1 }}>
             {/* embed player information */}
-            {data.streamingType === 'embed' && (
+            {/* {data.streamingType === 'embed' && (
               <View>
                 <View style={{
                   backgroundColor: '#c9c900'
@@ -583,7 +583,7 @@ function Video(props: Props) {
                   <Text style={{ color: darkText }}>Reload video player</Text>
                 </TouchableOpacity>
               </View>
-            )}
+            )} */}
             <TouchableOpacityAnimated
               style={[styles.container, infoContainerStyle]}
               onLayout={e => {
