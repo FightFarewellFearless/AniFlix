@@ -35,7 +35,7 @@ import watchLaterJSON from '../../../types/watchLaterJSON';
 
 import { Buffer } from 'buffer/';
 import moment from 'moment';
-import DocumentPicker, { types } from 'react-native-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import RNFetchBlob from 'react-native-blob-util';
 
 interface SettingsData {
@@ -109,18 +109,20 @@ function Setting(_props: Props) {
     async () => {
 
       try {
-        const doc = await DocumentPicker.pickSingle({
-          type: types.plainText,
-          copyTo: 'cachesDirectory',
+        console.log('DocumentPicker: pickSingle');
+        const doc = await DocumentPicker.getDocumentAsync({
+          type: 'text/plain',
+          copyToCacheDirectory: true,
         });
-        if(!doc.name?.endsWith('.aniflix.txt')){
+        console.log('DONW')
+        if(!doc.assets?.[0].name?.endsWith('.aniflix.txt')){
           Alert.alert('File harus .aniflix.txt', 'Format file harus .aniflix.txt');
           return;
         }
         // RNFS.readFile(doc.fileCopyUri).then(console.log);
-        const data = await RNFetchBlob.fs.readFile(doc.fileCopyUri!, 'base64');
+        const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'base64');
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
-        await RNFetchBlob.fs.unlink(doc.fileCopyUri!);
+        await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
         try {
             (
               Object.keys(backupDataJSON) as SetDatabaseTarget[]

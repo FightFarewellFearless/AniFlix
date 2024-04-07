@@ -1,7 +1,7 @@
 import { View, Text, TouchableNativeFeedback, Image, ScrollView, StyleSheet, useColorScheme, ToastAndroid, ActivityIndicator } from "react-native";
 import useGlobalStyles from "../../../assets/style";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { pick } from "react-native-document-picker";
+import * as DocumentPicker from 'expo-document-picker';
 import { useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import moment from "moment";
@@ -68,12 +68,12 @@ export default function SearchAnimeByImage() {
     return (
         <View style={styles.container}>
             <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple('white', false)} onPress={() => {
-                pick({
+                DocumentPicker.getDocumentAsync({
                     type: ['image/*'],
                 }).then((result) => {
-                    setChoosenImage(result[0].uri);
+                    setChoosenImage(result.assets?.[0].uri);
                     const formData = new FormData();
-                    formData.append("image", result[0]);
+                    formData.append("image", result.assets?.[0]);
                     setIsLoading(true);
                     fetch("https://api.trace.moe/search?anilistInfo", {
                         method: "POST",

@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackNavigator } from "../types/navigation";
 import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme } from "react-native";
-import LinearGradient from 'react-native-linear-gradient';
+import {LinearGradient} from 'expo-linear-gradient';
 import { View } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useEffect, useState } from "react";
