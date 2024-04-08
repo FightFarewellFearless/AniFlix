@@ -1,3 +1,15 @@
+# v0.6.1
+
+Perbaikan masalah streaming untuk anime yang baru rilis.
+
+# Perbaikan
+- Memperbaiki masalah ketika streaming anime yang baru rilis
+- Memperbaiki masalah WebView
+
+## Perubahan lain
+- Upgrade versi react-native ke 0.74-rc.6
+- Dan beberapa perubahan kecil lain...
+
 # v0.6.0
 
 Versi ini mengandung banyak perubahan kode yang akan sangat berguna untuk perubahan di masa mendatang. Versi ini juga mengandung perubahan yang meningkatkan performa, penyederhanaan layout, perbaikan bug, perubahan video player, perubahan fitur chat(sekarang menggunakan bing), dan lain-lain.
