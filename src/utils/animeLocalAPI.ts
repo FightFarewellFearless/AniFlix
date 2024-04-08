@@ -222,7 +222,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
     } else {
 
         const title = aniDetail.find('h1.posttl').text().trim();
-        const streamingLink = await getStreamLink(aniDetail.find('div.responsive-embed-stream > iframe').attr('src')!, signal);
+        let streamingLink = await getStreamLink(aniDetail.find('div.responsive-embed-stream > iframe').attr('src')!, signal);
         const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
 
         const thumbnailUrl = aniDetail.find('div.cukder > img').attr('src')!;
@@ -257,6 +257,10 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
             '480p': m480p,
             '720p': m720p,
         };
+
+        if(streamingLink === undefined && m480p !== undefined) {
+            streamingLink = await fetchStreamingResolution(m480p, reqNonceAction, reqResolutionWithNonceAction);
+        }
 
         const returnObj: AniStreaming = {
             type: 'animeStreaming',

@@ -47,7 +47,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import AnimeAPI from '../utils/AnimeAPI';
-import reqWithReferer from '../utils/reqWithReferer';
+import WebView from 'react-native-webview';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
@@ -86,7 +86,8 @@ function Video(props: Props) {
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
-  // const [webViewKey, setWebViewKey] = useState(0);
+  const webviewRef = useRef<WebView>(null);
+  const [webViewKey, setWebViewKey] = useState(0);
 
   const [animeDetail, setAnimeDetail] = useState<Omit<AniDetail, 'episodeList'> | undefined>();
 
@@ -98,8 +99,6 @@ function Video(props: Props) {
       }
     })
   }, []);
-
-  const [streamingEmbedLink, setStreamingEmbedLink] = useState<{ uri: string } | { html: string }>({ uri: defaultLoadingGif });
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
@@ -166,15 +165,6 @@ function Video(props: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // EMBED PLAYER
-  useEffect(() => {
-    if (data.streamingType === 'embed') {
-      reqWithReferer(data.streamingLink).then(res => {
-        setStreamingEmbedLink({ html: res });
-      });
-    }
-  }, [data.streamingLink]);
 
   // Battery level
   useEffect(() => {
@@ -246,9 +236,16 @@ function Video(props: Props) {
       if (resultData === undefined) {
         return;
       }
+      const isWebviewNeeded = await fetch(resultData, {
+        method: 'HEAD',
+      }).catch(() => {})
+        .then(res => {
+          return !res?.headers.get('content-type')?.includes('video');
+        })
       setData(old => {
         return {
           ...old,
+          streamingType: isWebviewNeeded ? 'embed' : 'raw',
           streamingLink: resultData,
           resolution,
         };
@@ -496,30 +493,29 @@ function Video(props: Props) {
               onFullscreenUpdate={fullscreenUpdate}
               onDurationChange={handleProgress}
               onLoad={handleVideoLoad} />
-          ) :
-          // ) : data.streamingType === 'embed' ? (
-          //   <WebView
-          //     key={webViewKey}
-          //     setSupportMultipleWindows={false}
-          //     onShouldStartLoadWithRequest={navigator => {
-          //       const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
-          //       if (!res) {
-          //         webviewRef.current?.stopLoading();
-          //       }
-          //       return res;
-          //     }}
-          //     source={{ ...streamingEmbedLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
-          //     userAgent={deviceUserAgent}
-          //     originWhitelist={['*']}
-          //     allowsFullscreenVideo={true}
-          //     injectedJavaScript={`
-          //       window.alert = function() {}; // Disable alerts
-          //       window.confirm = function() {}; // Disable confirms
-          //       window.prompt = function() {}; // Disable prompts
-          //       window.open = function() {}; // Disable opening new windows
-          //     `} />
-          // ) : 
-          (
+          ) : data.streamingType === 'embed' ? (
+            <WebView
+              key={data.streamingLink}
+              setSupportMultipleWindows={false}
+              onShouldStartLoadWithRequest={(navigator: Request) => {
+                const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
+                if (!res) {
+                  webviewRef.current?.stopLoading();
+                }
+                return res;
+              }}
+              source={{ uri: data.streamingLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
+              userAgent={deviceUserAgent}
+              originWhitelist={['*']}
+              allowsFullscreenVideo={true}
+              injectedJavaScript={`
+                window.alert = function() {}; // Disable alerts
+                window.confirm = function() {}; // Disable confirms
+                window.prompt = function() {}; // Disable prompts
+                window.open = function() {}; // Disable opening new windows
+              `} 
+              />
+          ) : (
             <Text style={globalStyles.text}>Video tidak tersedia</Text>
           )
         }
@@ -557,7 +553,7 @@ function Video(props: Props) {
         !fullscreen && (
           <ScrollView style={{ flex: 1 }}>
             {/* embed player information */}
-            {/* {data.streamingType === 'embed' && (
+            {data.streamingType === 'embed' && (
               <View>
                 <View style={{
                   backgroundColor: '#c9c900'
@@ -583,7 +579,7 @@ function Video(props: Props) {
                   <Text style={{ color: darkText }}>Reload video player</Text>
                 </TouchableOpacity>
               </View>
-            )} */}
+            )}
             <TouchableOpacityAnimated
               style={[styles.container, infoContainerStyle]}
               onLayout={e => {
