@@ -6,6 +6,9 @@ Perbaikan masalah streaming untuk anime yang baru rilis.
 - Memperbaiki masalah ketika streaming anime yang baru rilis
 - Memperbaiki masalah WebView
 
+## Perubahan penting
+- Mulai sekarang, Minimum versi Android untuk menggunakan aplikasi ini adalah android 6
+
 ## Perubahan lain
 - Upgrade versi react-native ke 0.74-rc.6
 - Dan beberapa perubahan kecil lain...

@@ -35,7 +35,7 @@ Kode aplikasi tersedia dan dapat kamu gunakan dengan mengikuti aturan yang sudah
 
 # Minimum android
 
-Untuk menggunakan aplikasi ini, minimal dibutuhkan android lolipop (5.0) atau lebih baru.
+Untuk menggunakan aplikasi ini, minimal dibutuhkan android marshmallow (6.0) atau lebih baru.
 
 # Cara Download
 
