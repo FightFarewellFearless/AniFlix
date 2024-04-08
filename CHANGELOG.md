@@ -2,7 +2,7 @@
 
 Perbaikan masalah streaming untuk anime yang baru rilis.
 
-# Perbaikan
+## Perbaikan
 - Memperbaiki masalah ketika streaming anime yang baru rilis
 - Memperbaiki masalah WebView
 
