@@ -4522,6 +4522,11 @@ escape-string-regexp@^4.0.0:
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
 
+escape-string-regexp@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz"
+  integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
+
 eslint-config-prettier@^8.5.0:
   version "8.10.0"
   resolved "https://registry.npmjs.org/eslint-config-prettier/-/eslint-config-prettier-8.10.0.tgz"
@@ -4807,6 +4812,11 @@ expo-constants@0.0.1-canary-20240406-a4950c7:
   dependencies:
     "@expo/config" "0.0.1-canary-20240406-a4950c7"
 
+expo-document-picker@^0.0.1-canary-20240406-a4950c7:
+  version "0.0.1-canary-20240406-a4950c7"
+  resolved "https://registry.npmjs.org/expo-document-picker/-/expo-document-picker-0.0.1-canary-20240406-a4950c7.tgz"
+  integrity sha512-1Ypa+clVnG0BNNQ8giHAeBD1AsknNP9IbGdvarikUGYzWrex3CPnI53w1y9aur0jBeyfj3DLmZ0jZlmTXC756Q==
+
 expo-file-system@0.0.1-canary-20240406-a4950c7:
   version "0.0.1-canary-20240406-a4950c7"
   resolved "https://registry.npmjs.org/expo-file-system/-/expo-file-system-0.0.1-canary-20240406-a4950c7.tgz"
@@ -4823,6 +4833,11 @@ expo-keep-awake@0.0.1-canary-20240406-a4950c7:
   version "0.0.1-canary-20240406-a4950c7"
   resolved "https://registry.npmjs.org/expo-keep-awake/-/expo-keep-awake-0.0.1-canary-20240406-a4950c7.tgz"
   integrity sha512-xkMEdjTTlFl/C1/jFEfvvVaayeosoRnuHNuQ0fjtaBtyLWSuwtK4mXcm4drCeQnZoMhr+pnoZi8g2VdfOencAQ==
+
+expo-linear-gradient@^0.0.1-canary-20240406-a4950c7:
+  version "0.0.1-canary-20240406-a4950c7"
+  resolved "https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-0.0.1-canary-20240406-a4950c7.tgz"
+  integrity sha512-0v18EZU+VI8pmYtfqg61OWLl1RWhHRL9HOAQBbYWwd2vaISitLr+hSRVCTDHywAg+r72ZsRa2N31s5StHIL/hw==
 
 expo-modules-autolinking@0.0.1-canary-20240406-a4950c7:
   version "0.0.1-canary-20240406-a4950c7"
@@ -5643,7 +5658,7 @@ internal-slot@^1.0.5:
     hasown "^2.0.0"
     side-channel "^1.0.4"
 
-invariant@^2.2.4:
+invariant@^2.2.4, invariant@2.2.4:
   version "2.2.4"
   resolved "https://registry.npmjs.org/invariant/-/invariant-2.2.4.tgz"
   integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
@@ -8070,13 +8085,6 @@ react-native-device-info@^10.12.0:
   resolved "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-10.12.0.tgz"
   integrity sha512-gnBkjyZNEqRd+5BNrdzuvmlraHTCH/to2x0Gp9rtDt0O9xWWW1MTYohUVWX9A0Ad2HVYcGanDCIvjWp4ngMZFg==
 
-react-native-document-picker@^9.1.0:
-  version "9.1.0"
-  resolved "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-9.1.0.tgz"
-  integrity sha512-SRKPIAzUtcPDUstLRhQeebVVM+x+1I24iSvoy5mFp1KAD+6+UyDEle0SoD96k7MxVH5o46wPifWCYOA3FuQOyw==
-  dependencies:
-    invariant "^2.2.4"
-
 react-native-drawer-layout@^4.0.0-alpha.9:
   version "4.0.0-alpha.9"
   resolved "https://registry.npmjs.org/react-native-drawer-layout/-/react-native-drawer-layout-4.0.0-alpha.9.tgz"
@@ -8115,11 +8123,6 @@ react-native-image-colors@^2.4.0:
   integrity sha512-qlC31+UNVthByNLVuYSEQeZghOXn3uy1GLF6lHKlvT1HM1GGFH/LXNhU8iXAoQvUyzNa1bEAOTo09Hwinvp/rA==
   dependencies:
     node-vibrant "3.1.6"
-
-react-native-linear-gradient@^3.0.0-alpha.1:
-  version "3.0.0-alpha.1"
-  resolved "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-3.0.0-alpha.1.tgz"
-  integrity sha512-vo9ks7m2VTLtbdAIMqwk944SB65+rc0U1a2R1CAQetT282DnH4rI3GKenaa+Gj2gPngF1l7Mc3Jxk9+6IZDraA==
 
 react-native-marked@^6.0.4:
   version "6.0.4"
@@ -8196,6 +8199,14 @@ react-native-vector-icons@^10.0.2:
   dependencies:
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-webview@^13.8.4:
+  version "13.8.4"
+  resolved "https://registry.npmjs.org/react-native-webview/-/react-native-webview-13.8.4.tgz"
+  integrity sha512-dFoM9EfkAb++ZzycZyKRnjZtNUn85cf6bWp1iBlkgyNml7ULzR1gfaPT3qESoA3K1RfTmf5Xhw0M2In2A3a3wg==
+  dependencies:
+    escape-string-regexp "2.0.0"
+    invariant "2.2.4"
 
 react-native@^0.74.0-rc.6:
   version "0.74.0-rc.6"
