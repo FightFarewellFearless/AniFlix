@@ -70,10 +70,15 @@ export default function SearchAnimeByImage() {
             <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple('white', false)} onPress={() => {
                 DocumentPicker.getDocumentAsync({
                     type: ['image/*'],
+                    copyToCacheDirectory: false,
                 }).then((result) => {
                     setChoosenImage(result.assets?.[0].uri);
                     const formData = new FormData();
-                    formData.append("image", result.assets?.[0]);
+                    formData.append("image", {
+                        uri: result.assets?.[0].uri,
+                        name: 'image.png',
+                        type: 'image/png',
+                    });
                     setIsLoading(true);
                     fetch("https://api.trace.moe/search?anilistInfo", {
                         method: "POST",
