@@ -109,18 +109,16 @@ function Setting(_props: Props) {
     async () => {
 
       try {
-        console.log('DocumentPicker: pickSingle');
         const doc = await DocumentPicker.getDocumentAsync({
           type: 'text/plain',
           copyToCacheDirectory: true,
         });
-        console.log('DONW')
         if(!doc.assets?.[0].name?.endsWith('.aniflix.txt')){
           Alert.alert('File harus .aniflix.txt', 'Format file harus .aniflix.txt');
           return;
         }
         // RNFS.readFile(doc.fileCopyUri).then(console.log);
-        const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'base64');
+        const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
         await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
         try {
