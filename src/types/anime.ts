@@ -65,12 +65,11 @@ type AniStreaming = FromUrl & {
   streamingLink: string;
   streamingType: 'raw' | 'embed';
   downloadLink: string;
-  resolution: string;
+  resolution: string | undefined;
   resolutionRaw: {
-    "360p"?: string;
-    "480p"?: string;
-    "720p"?: string;
-  };
+    resolution: string;
+    dataContent: string;
+  }[];
   thumbnailUrl: string;
   episodeData: {
     previous?: string;

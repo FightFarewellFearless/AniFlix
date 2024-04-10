@@ -350,7 +350,7 @@ function Video(props: Props) {
       source,
       downloadSource.current,
       data.title,
-      resolution,
+      resolution ?? '',
       undefined,
       () => {
         downloadSource.current = [...downloadSource.current, source];
@@ -702,16 +702,17 @@ function Video(props: Props) {
                   </TouchableOpacity>
                 </View>
               )}
-              <View style={{ width: 120 }}>
+              <View style={{ maxWidth: '50%' }}>
                 <Dropdown
-                  value={data.resolutionRaw?.[data.resolution as '360p' | '480p' | '720p'] ?? '480p'}
+                  value={data.resolution === undefined ? undefined : {label: data.resolution, value: data.resolutionRaw?.[data.resolutionRaw.findIndex(e => e.resolution === data.resolution)]}}
+                  placeholder='Pilih resolusi'
                   data={Object.entries(data.resolutionRaw).filter(z => z[1] !== undefined).map(z => {
-                    return { label: z[0], value: z[1] };
+                    return { label: z[1].resolution, value: z[1] };
                   })}
                   valueField="value"
                   labelField="label"
                   onChange={val => {
-                    setResolution(val.value, val.label);
+                    setResolution(val.value.dataContent, val.label);
                   }}
                   style={styles.dropdownStyle}
                   containerStyle={styles.dropdownContainerStyle}
@@ -912,7 +913,7 @@ function useStyles() {
       alignSelf: 'center',
     },
     dropdownStyle: {
-      width: 120,
+      width: '100%',
       backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
       padding: 5,
       borderRadius: 4,
@@ -920,7 +921,7 @@ function useStyles() {
       borderColor: 'black',
     },
     dropdownContainerStyle: {
-      width: 120,
+      maxWidth: '50%',
     },
     dropdownItemTextStyle: {
       color: globalStyles.text.color,

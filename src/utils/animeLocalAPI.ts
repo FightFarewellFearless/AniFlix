@@ -227,8 +227,6 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
 
         const thumbnailUrl = aniDetail.find('div.cukder > img').attr('src')!;
 
-        const resolution = '480p';
-
         const episode = aniDetail.find('div.flir a');
         const episodeData: { previous?: string, animeDetail: string, next?: string } = {
             animeDetail: episode.filter((i, el) => $(el).text().trim() === 'See All Episodes').attr('href')!,
@@ -248,18 +246,29 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         const reqResolutionWithNonceAction = changeResScript.split('processData:!0,cache:!0,data:{...e,nonce:window.__x__nonce,action:"')[1].split('"')[0];
 
         const mirrorStream = aniDetail.find('div.mirrorstream ul');
-        const m360p = mirrorStream.filter((i, el) => $(el).hasClass('m360p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
-        const m480p = mirrorStream.filter((i, el) => $(el).hasClass('m480p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
-        const m720p = mirrorStream.filter((i, el) => $(el).hasClass('m720p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu')).attr('data-content');
+        const m360p = mirrorStream.filter((i, el) => $(el).hasClass('m360p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'));
+        const m480p = mirrorStream.filter((i, el) => $(el).hasClass('m480p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'));
+        const m720p = mirrorStream.filter((i, el) => $(el).hasClass('m720p')).find('a').filter((i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'));
 
-        const resolutionRaw = {
-            '360p': m360p,
-            '480p': m480p,
-            '720p': m720p,
-        };
-
-        if(streamingLink === undefined && m480p !== undefined) {
-            streamingLink = await fetchStreamingResolution(m480p, reqNonceAction, reqResolutionWithNonceAction);
+        const resolutionRaw: AniStreaming['resolutionRaw'] = [
+            ...m360p.toArray().map(el => ({
+                resolution: '360p ' + $(el).text(),
+                dataContent: $(el).attr('data-content')!,
+            })),
+            ...m480p.toArray().map(el => ({
+                resolution: '480p ' + $(el).text(),
+                dataContent: $(el).attr('data-content')!,
+            })),
+            ...m720p.toArray().map(el => ({
+                resolution: '720p ' + $(el).text(),
+                dataContent: $(el).attr('data-content')!,
+            })),
+        ];
+        let resolution: string | undefined;
+        
+        if (streamingLink === undefined) {
+            streamingLink = await fetchStreamingResolution(resolutionRaw[0].dataContent, reqNonceAction, reqResolutionWithNonceAction);
+            resolution = resolutionRaw[0].resolution;
         }
 
         const returnObj: AniStreaming = {
@@ -335,7 +344,7 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
             'worklet';
             function removeHtmlTags(str: string) {
                 return str.replace(/<[^>]*>?/gm, '');
-              }
+            }
             const listAnimeData: listAnimeTypeList[] = [];
             // Match the opening div tag with class "jdlbar" and capture until the closing div tag
             const divRegex = /<div class="jdlbar">(.*?)<\/div>/g;
@@ -355,7 +364,7 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
                         title: removeHtmlTags(title),
                         streamingLink: href
                     });
-                    if(streamingCallback !== undefined && listAnimeData.length % 93 === 0) // call every 93
+                    if (streamingCallback !== undefined && listAnimeData.length % 93 === 0) // call every 93
                         runOnJS(streamingCallback)(listAnimeData);
                 }
             }
