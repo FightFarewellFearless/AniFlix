@@ -1,3 +1,11 @@
+# v0.6.2
+
+## Penambahan
+- Menambahkan `Catatan Rilis` ke bagian utilitas
+
+## Perbaikan & Perubahan
+- Beberapa anime lawas banyak yang eror, oleh karena itu, kamu sekarang dapat memilih secara manual server yang akan digunakan berikut bersama dengan resolusi nya.
+
 # v0.6.1
 
 Perbaikan masalah streaming untuk anime yang baru rilis.
