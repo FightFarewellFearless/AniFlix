@@ -5,6 +5,7 @@ import { Text, View, useColorScheme, TouchableNativeFeedback, StyleSheet, useWin
 import Icon from "react-native-vector-icons/FontAwesome";
 import SearchAnimeByImage from "./Utilitas/SearchAnimeByImage";
 import Setting from "./Utilitas/Setting";
+import Changelog from "./Utilitas/Changelog";
 
 const Stack = createNativeStackNavigator<UtilsStackNavigator>();
 
@@ -14,6 +15,7 @@ export default function Utils() {
       <Stack.Screen name="ChooseScreen" component={ChooseScreen} options={{ title: 'Pilih utilitas' }} />
       <Stack.Screen name="Chat" component={Chat} />
       <Stack.Screen name="SearchAnimeByImage" component={SearchAnimeByImage} options={{ title: 'Cari Anime dari Gambar' }} />
+      <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
       <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
     </Stack.Navigator>
   )
@@ -42,6 +44,16 @@ function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'Choose
             <Icon name="image" size={40} color={{ color: 'black' }.color} />
             <Text style={[styles.titleText, { color: 'black' }]}>Cari anime berdasarkan gambar</Text>
             <Text style={[styles.descText, { color: 'black' }]}>Cari judul anime dari gambar screenshot.</Text>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback onPress={() => {
+          props.navigation.navigate('Changelog')
+        }} background={TouchableNativeFeedback.Ripple('white', false)}>
+          <View style={[styles.buttonContainer, { backgroundColor: '#2c6d26' }]}>
+            <Icon name="history" size={40} color={{ color: '#dbdbdb' }.color} />
+            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Catatan update</Text>
+            <Text style={[styles.descText, { color: '#dbdbdb' }]}>Perubahan setiap update mulai dari versi 0.6.0</Text>
           </View>
         </TouchableNativeFeedback>
 

@@ -47,6 +47,7 @@ type UtilsStackNavigator = {
   ChooseScreen: undefined;
   Chat: undefined;
   SearchAnimeByImage: undefined;
+  Changelog: undefined;
   Setting: undefined;
 };
 
