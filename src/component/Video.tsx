@@ -237,6 +237,9 @@ function Video(props: Props) {
         return;
       }
       const isWebviewNeeded = await fetch(resultData, {
+        headers: {
+          'User-Agent': deviceUserAgent,
+        },
         method: 'HEAD',
       }).catch(() => {})
         .then(res => {
