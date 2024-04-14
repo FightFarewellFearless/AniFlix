@@ -1,3 +1,10 @@
+# v0.6.3
+
+## Perbaikan
+- Memperbaiki masalah error pada hampir semua anime/episode
+- Memperbaiki masalah changelog yang tidak tampil
+- Memperbaiki masalah pada saat mengganti resolusi/server
+
 # v0.6.2
 
 ## Penambahan
