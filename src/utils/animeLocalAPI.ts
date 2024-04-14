@@ -314,10 +314,24 @@ const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<st
             throw errorObj;
         }
         const data = response!.data;
-        return data.split("sources: [{'file':'")[1].split("',")[0];
+        const odstream = data.split("sources: [{'file':'")[1];
+        if (odstream === undefined) {
+            //ondesu
+            const iframe = data.split("iframe.setAttribute('src', '")[1].split("'")[0];
+            return await getBloggerVideo(iframe);
+        }
+        return odstream.split("',")[0];
     }
 }
 
+async function getBloggerVideo(url: string) {
+    const data = await axios.get(url, {
+        headers: {
+            'User-Agent': deviceUserAgent,
+        }
+    });
+    return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+}
 
 const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAnimeTypeList[]) => void): Promise<listAnimeTypeList[]> => {
     const url = BASE.url + '/anime-list/';
