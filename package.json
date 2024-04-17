@@ -9,7 +9,8 @@
     "start": "react-native start",
     "release": "cd android && ./gradlew assembleRelease",
     "clean": "cd android && ./gradlew clean",
-    "test": "jest"
+    "test": "jest",
+    "rename": "mv android/app/build/outputs/apk/release/anime-release.apk android/app/build/outputs/apk/release/aniflix.apk"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.22.3",
