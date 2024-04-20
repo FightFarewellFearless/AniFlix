@@ -32,6 +32,16 @@ class MainActivity : ReactActivity() {
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
    * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
    */
-    override fun createReactActivityDelegate(): ReactActivityDelegate =
-      ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED, DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled))
+
+    override fun createReactActivityDelegate(): ReactActivityDelegate {
+      return ReactActivityDelegateWrapper(
+        this,
+        BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+        object : DefaultReactActivityDelegate(
+          this,
+          mainComponentName,
+          fabricEnabled
+        ) {}
+      )
+    } 
 }
