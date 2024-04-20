@@ -28,6 +28,7 @@
     "expo-av": "^14.0.1",
     "expo-document-picker": "^12.0.0",
     "expo-linear-gradient": "^13.0.0",
+    "expo-splash-screen": "^0.27.0",
     "gpti": "^2.0.6",
     "moment": "^2.29.4",
     "react": "18.2.0",
