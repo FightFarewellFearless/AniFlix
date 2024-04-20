@@ -23,6 +23,10 @@ function App() {
   useEffect(() => {
     StatusBar.setHidden(false);
   }, []);
+  useEffect(() => {
+    StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+    StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
+  }, [colorScheme]);
   const globalStyles = useGlobalStyles();
 
   return (
