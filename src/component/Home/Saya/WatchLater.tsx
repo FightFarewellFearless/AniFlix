@@ -77,7 +77,7 @@ function WatchLater(props: Props) {
                   controlWatchLater('delete', index);
                 }}
                 style={styles.listDeleteContainer}>
-                <Icon name="trash" size={20} color="red" />
+                <Icon name="trash" size={20} color="#17e2af" />
               </TouchableOpacity>
             </View>
           </View>
@@ -168,7 +168,7 @@ function useStyles() {
     },
     listDeleteContainer: {
       justifyContent: 'flex-end',
-      backgroundColor: 'orange',
+      backgroundColor: '#af461c',
       borderRadius: 5,
       padding: 3,
       marginHorizontal: 2,

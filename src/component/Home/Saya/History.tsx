@@ -8,7 +8,7 @@ import {
 import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import useGlobalStyles from '../../../assets/style';
+import useGlobalStyles, { darkText } from '../../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../../../misc/reduxSlice';
@@ -202,7 +202,7 @@ function History(props: Props) {
                     ],
                   );
                 }}>
-                <Icon name="trash" size={22} style={{ color: '#cc2525' }} />
+                <Icon name="trash" size={22} style={{ color: '#17e2af' }} />
               </TouchableOpacity>
             </View>
           </View>
@@ -242,7 +242,7 @@ function History(props: Props) {
               <View style={styles.scrollToTopIcon}>
                 <Icon
                   name="arrow-up"
-                  color={globalStyles.text.color}
+                  color={darkText}
                   size={15}
                 />
               </View>
@@ -338,7 +338,7 @@ function useStyles() {
       top: 5,
     },
     deleteButton: {
-      backgroundColor: 'orange',
+      backgroundColor: '#af461c',
       padding: 2,
       borderRadius: 3,
     },

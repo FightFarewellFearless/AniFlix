@@ -12,6 +12,7 @@ import {
   Keyboard,
   useColorScheme,
   InteractionManager,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {
   useFocusEffect,
@@ -51,6 +52,8 @@ import { AppDispatch } from '../../misc/reduxStore';
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
   Reanimated.createAnimatedComponent(TouchableOpacity);
+
+const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
@@ -114,15 +117,15 @@ function Search(props: Props) {
 
   useEffect(() => {
     AnimeAPI.listAnime(undefined, (data) => {
-    if((global as any).nativeFabricUIManager !== undefined) {
-      startTransition(() => {
-        setListAnime(data);
-      })
-    } else {
-      InteractionManager.runAfterInteractions(() => {
-        setListAnime(data);
-      })
-    }
+      if ((global as any).nativeFabricUIManager !== undefined) {
+        startTransition(() => {
+          setListAnime(data);
+        })
+      } else {
+        InteractionManager.runAfterInteractions(() => {
+          setListAnime(data);
+        })
+      }
     }).then(data => {
       setListAnime(data);
     }).catch(() => {
@@ -214,11 +217,11 @@ function Search(props: Props) {
       [0, 1],
       [
         colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
-        'rgb(0, 128, 0)',
+        'rgb(0, 124, 128)',
       ],
     );
     return {
-      width: interpolate(searchButtonAnimation.value, [0, 100], [87, 98]) + '%',
+      width: interpolate(searchButtonAnimation.value, [0, 100], [87, 100]) + '%',
       borderTopColor: borderColor,
       borderBottomColor: borderColor,
     };
@@ -356,28 +359,32 @@ function Search(props: Props) {
                     style={styles.listImage}
                   />
                   <View style={{ flex: 1 }}>
+
+                    <View style={{ flexDirection: 'row', flex: 1, }}>
+                      <View style={styles.ratingInfo}>
+                        <Text style={globalStyles.text}>
+                          <Icon name="star" style={{ color: 'gold' }} />{' '}
+                          {z.rating}
+                        </Text>
+                      </View>
+                      <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
+                        <View
+                          style={[
+                            styles.statusInfo,
+                            {
+                              borderColor:
+                                z.status === 'Ongoing' ? '#cf0000' : '#22b422',
+                            },
+                          ]}>
+                          <Text style={globalStyles.text}>{z.status}</Text>
+                        </View>
+                      </View>
+                    </View>
+
                     <View style={styles.listTitle}>
                       <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
                         {z.title}
                       </Text>
-                    </View>
-
-                    <View style={styles.ratingInfo}>
-                      <Text style={globalStyles.text}>
-                        <Icon name="star" style={{ color: 'gold' }} />{' '}
-                        {z.rating}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={[
-                        styles.statusInfo,
-                        {
-                          borderColor:
-                            z.status === 'Ongoing' ? '#cf0000' : '#22b422',
-                        },
-                      ]}>
-                      <Text style={globalStyles.text}>{z.status}</Text>
                     </View>
 
                     <View style={styles.releaseInfo}>
@@ -401,11 +408,11 @@ function Search(props: Props) {
       )}
       {/* SEARCH HISTORY VIEW */}
       {searchHistoryDisplay && (
-        <Reanimated.View
+        <Reanimated_KeyboardAvoidingView
           entering={FadeInUp.duration(700)}
           exiting={FadeOutDown}
-          style={[styles.searchHistoryContainer]}>
-          <View style={{ height: 160 }}>
+          style={[styles.searchHistoryContainer, { height: '90%' }]}>
+          <View style={{ height: '100%' }}>
             <FlashList
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.searchHistoryScrollBox}
@@ -424,7 +431,7 @@ function Search(props: Props) {
               )}
             />
           </View>
-        </Reanimated.View>
+        </Reanimated_KeyboardAvoidingView>
       )}
       {data !== null && (
         <TouchableOpacityAnimated
@@ -465,11 +472,12 @@ function HistoryList({
         padding: 6,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        height: 40,
       }}
       onPress={() => {
         onChangeTextFunction(item);
       }}>
-      <View style={{ alignItems: 'center', flex: 1 }}>
+      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
         <Text style={globalStyles.text}>{item}</Text>
       </View>
       <TouchableOpacity
@@ -484,7 +492,7 @@ function HistoryList({
             }),
           );
         }}>
-        <Icon name="close" size={20} style={{ color: '#ff0f0f' }} />
+        <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -554,22 +562,19 @@ function useStyles() {
       flex: 1,
     },
     ratingInfo: {
-      position: 'absolute',
-      left: 0,
+      flex: 1,
     },
     statusInfo: {
       borderWidth: 1,
-      alignSelf: 'flex-start',
     },
     releaseInfo: {
-      position: 'absolute',
-      bottom: 0,
-      right: 5,
-      maxWidth: '85%',
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      flex: 1,
     },
     searchHistoryContainer: {
       position: 'absolute',
-      top: 37,
+      top: 40,
       width: '100%',
       zIndex: 2,
     },

@@ -483,14 +483,14 @@ function Video(props: Props) {
       <LoadingModal loading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
-
+        <View style={{ width: '100%', height: '100%', backgroundColor: 'black', zIndex: 0, position: 'absolute' }} />
         {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <VideoPlayer
               title={data.title}
               streamingURL={data.streamingLink}
-              style={{ flex: 1 }}
+              style={{ flex: 1, zIndex: 1, }}
               videoRef={videoRef}
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}
@@ -498,6 +498,7 @@ function Video(props: Props) {
               onLoad={handleVideoLoad} />
           ) : data.streamingType === 'embed' ? (
             <WebView
+              style={{ flex: 1, zIndex: 1, }}
               key={data.streamingLink}
               setSupportMultipleWindows={false}
               onShouldStartLoadWithRequest={(navigator: Request) => {
@@ -519,7 +520,7 @@ function Video(props: Props) {
               `} 
               />
           ) : (
-            <Text style={globalStyles.text}>Video tidak tersedia</Text>
+            <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
         }
 
@@ -647,8 +648,8 @@ function Video(props: Props) {
                   ]}>
                   {animeDetail?.status}
                 </Text>
-                <Text style={[{ color: darkText }, styles.releaseYear]}>
-                  <Icon name="calendar" color={darkText} /> {animeDetail?.releaseYear}
+                <Text style={[{ color: lightText }, styles.releaseYear]}>
+                  <Icon name="calendar" color={lightText} /> {animeDetail?.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
                   <Icon name="star" color="black" /> {animeDetail?.rating}
@@ -884,20 +885,26 @@ function useStyles() {
     status: {
       borderRadius: 5,
       padding: 3,
+      fontWeight: 'bold',
+      elevation: 4,
     },
     releaseYear: {
-      backgroundColor: '#4b4b4b',
+      backgroundColor: '#15d8b7',
       borderRadius: 5,
       padding: 3,
       paddingHorizontal: 5,
       textAlign: 'center',
       alignSelf: 'center',
+      fontWeight: 'bold',
+      elevation: 4,
     },
     rating: {
       backgroundColor: 'orange',
       borderRadius: 5,
       color: '#1f1f1f',
       padding: 3,
+      fontWeight: 'bold',
+      elevation: 4,
     },
     episodeDataControl: {
       flexDirection: 'row',

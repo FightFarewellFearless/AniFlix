@@ -40,7 +40,7 @@ function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'Choose
         <TouchableNativeFeedback onPress={() => {
           props.navigation.navigate('SearchAnimeByImage')
         }} background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: 'lightblue' }]}>
+          <View style={[styles.buttonContainer, { backgroundColor: '#3a8fac' }]}>
             <Icon name="image" size={40} color={{ color: 'black' }.color} />
             <Text style={[styles.titleText, { color: 'black' }]}>Cari anime berdasarkan gambar</Text>
             <Text style={[styles.descText, { color: 'black' }]}>Cari judul anime dari gambar screenshot.</Text>
@@ -50,7 +50,7 @@ function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'Choose
         <TouchableNativeFeedback onPress={() => {
           props.navigation.navigate('Changelog')
         }} background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#2c6d26' }]}>
+          <View style={[styles.buttonContainer, { backgroundColor: '#417e3b' }]}>
             <Icon name="history" size={40} color={{ color: '#dbdbdb' }.color} />
             <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Catatan update</Text>
             <Text style={[styles.descText, { color: '#dbdbdb' }]}>Perubahan setiap update mulai dari versi 0.6.0</Text>
