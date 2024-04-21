@@ -313,19 +313,14 @@ function Video(props: Props) {
         default:
           Orientation.lockToLandscape();
       }
-    }
-    StatusBar.setHidden(true);
-    StatusBar.setTranslucent(true);
-    SystemNavigationBar.navigationHide();
+    };
+    SystemNavigationBar.fullScreen(true);
     setFullscreen(true);
   }, []);
 
   const exitFullscreen = useCallback(() => {
-    // videoRef.current?.dismissFullscreenPlayer();
-    StatusBar.setHidden(false);
-    StatusBar.setTranslucent(false);
+    SystemNavigationBar.fullScreen(false);
     Orientation.lockToPortrait();
-    SystemNavigationBar.navigationShow();
     setFullscreen(false);
   }, []);
 
