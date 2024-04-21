@@ -315,11 +315,15 @@ function Video(props: Props) {
       }
     };
     SystemNavigationBar.fullScreen(true);
+    StatusBar.setHidden(true);
+    SystemNavigationBar.navigationHide();
     setFullscreen(true);
   }, []);
 
   const exitFullscreen = useCallback(() => {
     SystemNavigationBar.fullScreen(false);
+    StatusBar.setHidden(false);
+    SystemNavigationBar.navigationShow();
     Orientation.lockToPortrait();
     setFullscreen(false);
   }, []);
