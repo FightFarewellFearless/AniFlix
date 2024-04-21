@@ -389,7 +389,7 @@ function Search(props: Props) {
 
                     <View style={styles.releaseInfo}>
                       <Text style={globalStyles.text} numberOfLines={1}>
-                        <Icon name="quote-left" /> {z.genres.join(', ')}
+                        <Icon name="tags" /> {z.genres.join(', ')}
                       </Text>
                     </View>
                   </View>
@@ -531,7 +531,7 @@ function useStyles() {
       height: 38,
       borderWidth: 0.8,
       borderRadius: 5,
-      backgroundColor: colorScheme === 'dark' ? '#202020' : '#c9c9c9',
+      backgroundColor: colorScheme === 'dark' ? '#202020' : '#f7f7f7',
       marginLeft: 2,
       color: globalStyles.text.color,
       textAlign: 'center',
@@ -569,7 +569,6 @@ function useStyles() {
     },
     releaseInfo: {
       justifyContent: 'flex-end',
-      alignItems: 'flex-end',
       flex: 1,
     },
     searchHistoryContainer: {
@@ -579,7 +578,7 @@ function useStyles() {
       zIndex: 2,
     },
     searchHistoryScrollBox: {
-      backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#b8b6b6',
+      backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#e0e0e0',
     },
     closeSearchResult: {
       position: 'absolute',
