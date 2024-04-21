@@ -30,7 +30,7 @@ function App() {
   const globalStyles = useGlobalStyles();
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer theme={colorScheme === 'dark' ? {
         ...DarkTheme,
         colors: {

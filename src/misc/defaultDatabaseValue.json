@@ -2,5 +2,6 @@
     "history": "[]",
     "enableBatteryTimeInfo": "false",
     "watchLater": "[]",
-    "searchHistory": "[]"
+    "searchHistory": "[]",
+    "watchLaterCopilotFirstTime": "true"
 }
