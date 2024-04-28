@@ -500,7 +500,7 @@ function Video(props: Props) {
               style={{ flex: 1, zIndex: 1, }}
               key={data.streamingLink}
               setSupportMultipleWindows={false}
-              onShouldStartLoadWithRequest={(navigator: Request) => {
+              onShouldStartLoadWithRequest={navigator => {
                 const res = navigator.url.includes(url.parse(data.streamingLink).host as string) || navigator.url.includes(defaultLoadingGif);
                 if (!res) {
                   webviewRef.current?.stopLoading();
