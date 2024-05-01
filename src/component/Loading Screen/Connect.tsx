@@ -112,9 +112,12 @@ function Loading(props: Props) {
   }, []);
 
   const checkVersion = useCallback(async () => {
+    const abort = new AbortController();
+    const timoeut = setTimeout(() => abort.abort(), 5000);
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
       {
+        signal: abort.signal,
         headers: {
           'User-Agent': deviceUserAgent,
         },
@@ -122,8 +125,10 @@ function Loading(props: Props) {
     )
       .then(d => d.json())
       .catch(() => { });
+    clearTimeout(timoeut);
     if (data === undefined) {
-      return null;
+      ToastAndroid.show('Eror saat mengecek versi', ToastAndroid.SHORT);
+      return true;
     } else if (data[0]?.tag_name === appVersion) {
       return true;
     }
