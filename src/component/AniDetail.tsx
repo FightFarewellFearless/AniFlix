@@ -1,9 +1,9 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCallback, useEffect, useState } from "react";
-import { ImageBackground, ScrollView, StyleProp, StyleSheet, Text, TextProps, TextStyle, ToastAndroid, TouchableOpacity, View, ViewStyle, useColorScheme } from "react-native";
-import { CopilotProvider, CopilotStep, TooltipProps, useCopilot, walkthroughable } from "react-native-copilot";
+import { useEffect, useRef, useState } from "react";
+import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View, useColorScheme } from "react-native";
+import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { getColors } from "react-native-image-colors";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { lightText } from "../assets/style";
@@ -167,13 +167,15 @@ function AniDetail(props: Props) {
     }}
     backdropColor="rgba(0, 0, 0, 0.692)"
     tooltipStyle={{
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#f8f8f8',
+      backgroundColor: (global as any).nativeFabricUIManager === undefined ?
+        colorScheme === 'dark' ? '#2b2b2b' : '#f8f8f8'
+        : undefined,
     }}>
     <AniDetailCopilot {...props} />
   </CopilotProvider>
 }
 function AniDetailCopilot(props: Props) {
-  const copilot = useCopilot();
+  const { start, copilotEvents } = useCopilot();
 
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -195,18 +197,27 @@ function AniDetailCopilot(props: Props) {
       if (colors.platform === 'android') {
         setThumbnailColor(colors.dominant);
       }
-    })
+    });
   }, []);
+
+  const isCopilotAlreadyStopped = useRef(false);
+  const copilotTimeout = useRef<NodeJS.Timeout>();
+  useEffect(() => {
+    copilotEvents.off('stop');
+    copilotEvents.on('stop', () => {
+      isCopilotAlreadyStopped.current = true;
+    })
+    clearTimeout(copilotTimeout.current);
+    copilotTimeout.current = setTimeout(async () => {
+      if (isCopilotAlreadyStopped.current === false && await AsyncStorage.getItem('copilot.watchLater_firstTime') === 'true' && !isInList) {
+        start();
+        await AsyncStorage.setItem('copilot.watchLater_firstTime', 'false');
+      }
+    }, 500);
+  }, [start, copilotEvents]);
+
   return (
-    <View style={styles.container} onLayout={() => {
-      (async () => {
-        const isFirstTime = await AsyncStorage.getItem('watchLaterCopilotFirstTime');
-        if (isFirstTime === 'true') {
-          copilot.start();
-          await AsyncStorage.setItem('watchLaterCopilotFirstTime', 'false');
-        }
-      })();
-    }}>
+    <View style={styles.container}>
       <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, thumbnailColor, 'transparent']}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={[styles.title, { color: complementThumbnailColor }]}>{data.title}</Text>
