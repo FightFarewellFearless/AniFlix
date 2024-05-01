@@ -22,7 +22,7 @@ import {
   Linking,
   useColorScheme,
 } from 'react-native';
-import { useSharedValue } from 'react-native-reanimated';
+import Reanimated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -41,7 +41,7 @@ import {
 } from '@react-navigation/native-stack';
 import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
-import {version} from '../../../package.json'
+import { version } from '../../../package.json'
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -76,18 +76,16 @@ function HomeList(props: HomeListProps) {
   const { paramsState: data, setParamsState: setData } =
     useContext(HomeContext);
   const [refresh, setRefresh] = useState(false);
-  const [textLayoutWidth, setTextLayoutWidth] = useState<undefined | number>(
-    undefined,
-  );
+
   const [animationText, setAnimationText] = useState(runningText[0]);
   const [announcmentVisible, setAnnouncmentVisible] = useState(false);
 
   const windowSize = useWindowDimensions();
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const boxTextAnim = useRef(new Animated.Value(0)).current;
-  const boxTextLayout = useRef(0);
-
+  const boxTextAnim = useSharedValue(0);
+  const boxTextLayout = useSharedValue(0);
+  const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
 
@@ -100,24 +98,13 @@ function HomeList(props: HomeListProps) {
 
   useFocusEffect(
     useCallback(() => {
-      const textAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(boxTextAnim, {
-            toValue: 1,
-            duration: 15000,
-            useNativeDriver: true,
-            delay: 1000,
-          }),
-          Animated.timing(boxTextAnim, {
-            toValue: 0,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-        ]),
-      );
-      textAnimation.start();
+      boxTextAnim.value = withRepeat(withSequence(
+        withDelay(1000, withTiming(1, { duration: 15000, easing: Easing.linear })),
+        withTiming(0, { duration: 0 }),
+      ), 0)
+
       const interval = setInterval(() => {
-        setTextLayoutWidth(undefined);
+        textLayoutWidth.value = 0;
         setAnimationText(
           runningText[Math.floor(Math.random() * runningText.length)],
         );
@@ -135,7 +122,7 @@ function HomeList(props: HomeListProps) {
           duration: 250,
           useNativeDriver: true,
         }).start();
-        textAnimation.reset();
+        boxTextAnim.value = 0;
         clearInterval(interval);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -167,7 +154,16 @@ function HomeList(props: HomeListProps) {
     ),
     [props.navigation],
   );
-  
+
+  const AnimationTextStyle = useAnimatedStyle(() => {
+    return {
+      width: textLayoutWidth.value === 0 ? 'auto' : textLayoutWidth.value,
+      transform: [{
+        translateX: interpolate(boxTextAnim.value, [0, 1], [windowSize.width, -boxTextLayout.value])
+      }]
+    };
+  })
+
   return (
     <Animated.ScrollView
       style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
@@ -194,9 +190,9 @@ function HomeList(props: HomeListProps) {
           <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
           <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}</Text></Text>
           {/* running text animation */}
-          <Animated.Text
+          <Reanimated.Text
             onLayout={nativeEvent =>
-              (boxTextLayout.current = nativeEvent.nativeEvent.layout.width)
+              (boxTextLayout.value = nativeEvent.nativeEvent.layout.width)
             }
             onTextLayout={layout => {
               const width = Math.round(
@@ -204,24 +200,14 @@ function HomeList(props: HomeListProps) {
                   return a + b.width;
                 }, 0),
               );
-              setTextLayoutWidth(width + 10);
+              textLayoutWidth.value = width + 10;
             }}
             style={[
               styles.boxText,
-              { width: textLayoutWidth || 'auto' },
-              {
-                transform: [
-                  {
-                    translateX: boxTextAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [windowSize.width, -boxTextLayout.current],
-                    }),
-                  },
-                ],
-              },
+              AnimationTextStyle,
             ]}>
             {animationText}
-          </Animated.Text>
+          </Reanimated.Text>
         </View>
       </View>
       <View style={styles.listContainer}>
@@ -259,27 +245,27 @@ function HomeList(props: HomeListProps) {
 
       {Object.keys(data?.jadwalAnime ?? {}).map((key) => {
         return (
-        <View key={key} style={[styles.listContainer, { marginTop: 15 }]}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>{key}</Text>
-          {data?.jadwalAnime[key]!.map((item, index) => (
-            <TouchableOpacity
-            style={{
-              backgroundColor: index % 2 === 0 ? colorScheme === 'dark' ? '#292929' : '#fff' : colorScheme === 'dark' ? '#212121' : '#f5f5f5',
-            }}
-            key={item.title}
-            onPress={() => {
-              props.navigation.dispatch(
-                StackActions.push('FromUrl', {
-                  link: item.link,
-                }),
-              );
-            }}>
-              <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>)
+          <View key={key} style={[styles.listContainer, { marginTop: 15 }]}>
+            <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>{key}</Text>
+            {data?.jadwalAnime[key]!.map((item, index) => (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: index % 2 === 0 ? colorScheme === 'dark' ? '#292929' : '#fff' : colorScheme === 'dark' ? '#212121' : '#f5f5f5',
+                }}
+                key={item.title}
+                onPress={() => {
+                  props.navigation.dispatch(
+                    StackActions.push('FromUrl', {
+                      link: item.link,
+                    }),
+                  );
+                }}>
+                <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>)
       })}
-      
+
     </Animated.ScrollView>
   );
 }
@@ -360,8 +346,8 @@ function AnnouncmentModal({
 function AnimeList(props: {
   newAnimeData: NewAnimeList;
   navigationProp:
-    | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-    | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
+  | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+  | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
 }) {
   const styles = useStyles();
   const z = props.newAnimeData;
@@ -381,7 +367,7 @@ function AnimeList(props: {
         source={{ uri: z.thumbnailUrl }}
         style={[
           styles.listBackground,
-          { borderColor: 'orange'},
+          { borderColor: 'orange' },
         ]}>
         <View style={styles.animeTitleContainer}>
           <Text numberOfLines={2} style={styles.animeTitle}>
