@@ -19,7 +19,6 @@ import { AppDispatch } from '../../misc/reduxStore';
 import { setDatabase } from '../../misc/reduxSlice';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import deletedDatabase from '../../misc/deletedDatabase.json';
 import { version as appVersion } from '../../../package.json';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
@@ -59,9 +58,9 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
-    const arrOfData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
+    const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
     const allKeys = await AsyncStorage.getAllKeys();
-    for (const dataKey of arrOfData) {
+    for (const dataKey of arrOfDefaultData) {
       const data = await AsyncStorage.getItem(dataKey);
       if (data === null) {
         dispatchSettings(
@@ -79,8 +78,11 @@ function Loading(props: Props) {
         }),
       );
     }
-    for (const dataKey of deletedDatabase) {
-      if(allKeys.includes(dataKey)) {
+    const isInDatabase = (value: string) : value is SetDatabaseTarget => {
+      return (arrOfDefaultData as readonly string[]).includes(value);
+    }
+    for (const dataKey of allKeys) {
+      if (!isInDatabase(dataKey)) {
         AsyncStorage.removeItem(dataKey);
       }
     }

@@ -25,7 +25,7 @@ import { useDispatch } from 'react-redux';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import deletedDatabase from '../../../misc/deletedDatabase.json';
+import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
 import { setDatabase } from '../../../misc/reduxSlice';
 import store, { AppDispatch, RootState } from '../../../misc/reduxStore';
 import { HistoryJSON } from '../../../types/historyJSON';
@@ -37,6 +37,8 @@ import { Buffer } from 'buffer/';
 import moment from 'moment';
 import * as DocumentPicker from 'expo-document-picker';
 import RNFetchBlob from 'react-native-blob-util';
+
+const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 
 interface SettingsData {
   title: string;
@@ -124,7 +126,7 @@ function Setting(_props: Props) {
         try {
             (
               Object.keys(backupDataJSON) as SetDatabaseTarget[]
-            ).filter(value => !deletedDatabase.includes(value)).forEach(value => {
+            ).filter(value => defaultDatabaseValueKeys.includes(value)).forEach(value => {
               if (value === 'history' || value === 'watchLater') {
                 restoreHistoryOrWatchLater(
                   JSON.parse(backupDataJSON[value]),
