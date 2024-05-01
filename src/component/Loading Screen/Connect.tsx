@@ -70,7 +70,7 @@ function Loading(props: Props) {
             value: defaultDatabase[dataKey],
           }),
         );
-        return;
+        continue;
       }
       dispatchSettings(
         setDatabase({
