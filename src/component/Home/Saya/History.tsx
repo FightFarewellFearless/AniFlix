@@ -3,7 +3,9 @@ import {
   View,
   TouchableOpacity,
   Alert, StyleSheet,
-  useColorScheme
+  useColorScheme,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
@@ -18,8 +20,8 @@ import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
   FadeInRight,
   FadeOutLeft,
+  runOnUI,
   useAnimatedRef,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -64,39 +66,37 @@ function History(props: Props) {
     };
   });
 
-  const scrollHandler = useAnimatedScrollHandler(event => {
-    'worklet';
-    const value = event.contentOffset.y;
-    const velocity = event.velocity?.y;
-    if (value <= 100) {
-      if (scrollToTopButtonState.value === 'show') {
+  const scrollHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    runOnUI((NE: NativeScrollEvent) => {
+      'worklet';
+      const value = NE.contentOffset.y;
+      if (value <= 100) {
+        if (scrollToTopButtonState.value === 'show') {
+          scrollToTopButtonY.value = withSpring(150, {
+            damping: 12,
+          });
+        }
+        scrollToTopButtonState.value = 'hide';
+      } else if (
+        value < scrollLastValue.value &&
+        scrollToTopButtonState.value === 'hide'
+      ) {
+        scrollToTopButtonY.value = withSpring(0, {
+          damping: 12,
+        });
+        scrollToTopButtonState.value = 'show';
+      } else if (
+        value > scrollLastValue.value &&
+        scrollToTopButtonState.value === 'show'
+      ) {
         scrollToTopButtonY.value = withSpring(150, {
           damping: 12,
-          velocity,
         });
+        scrollToTopButtonState.value = 'hide';
       }
-      scrollToTopButtonState.value = 'hide';
-    } else if (
-      value < scrollLastValue.value &&
-      scrollToTopButtonState.value === 'hide'
-    ) {
-      scrollToTopButtonY.value = withSpring(0, {
-        damping: 12,
-        velocity,
-      });
-      scrollToTopButtonState.value = 'show';
-    } else if (
-      value > scrollLastValue.value &&
-      scrollToTopButtonState.value === 'show'
-    ) {
-      scrollToTopButtonY.value = withSpring(150, {
-        damping: 12,
-        velocity,
-      });
-      scrollToTopButtonState.value = 'hide';
-    }
-    scrollLastValue.value = event.contentOffset.y;
-  });
+      scrollLastValue.value = value;
+    })(event.nativeEvent);
+  }
 
   const deleteHistory = useCallback(
     async (index: number) => {
@@ -184,8 +184,8 @@ function History(props: Props) {
                   Alert.alert(
                     'Yakin?',
                     'Yakin kamu ingin menghapus "' +
-                      item.title.trim() +
-                      '" dari histori?',
+                    item.title.trim() +
+                    '" dari histori?',
                     [
                       {
                         text: 'Tidak',
@@ -237,7 +237,7 @@ function History(props: Props) {
             extraData={styles}
             renderItem={renderFlatList}
           />
-          <Animated.View style={[buttonTransformStyle, styles.scrollToTopView]}>
+          <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
             <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
               <View style={styles.scrollToTopIcon}>
                 <Icon
