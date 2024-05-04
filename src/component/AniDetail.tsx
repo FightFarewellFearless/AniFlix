@@ -169,7 +169,7 @@ function AniDetail(props: Props) {
     tooltipStyle={{
       backgroundColor: (global as any).nativeFabricUIManager === undefined ?
         colorScheme === 'dark' ? '#2b2b2b' : '#f8f8f8'
-        : undefined,
+        : 'white',
     }}>
     <AniDetailCopilot {...props} />
   </CopilotProvider>
