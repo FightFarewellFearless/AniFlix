@@ -1,5 +1,5 @@
 import gpti from 'gpti';
-import { ReactNode, startTransition, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useTransition, useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
@@ -38,6 +38,8 @@ function TextCode(props: { text: string, textStyle?: TextStyle | undefined }) {
 const customRenderer = new CustomRenderer();
 
 function Chat(_props: Props) {
+  const [isPending, startTransition] = useTransition();
+
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
@@ -70,7 +72,7 @@ function Chat(_props: Props) {
       })
     }
     else {
-      gpti.gpt({
+      gpti.gpt.v1({
         messages: [...defaultMessages, ...messagesHistroy],
         markdown: false,
         model: 'gpt-4',

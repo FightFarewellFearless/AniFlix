@@ -1,4 +1,4 @@
-import React, { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useTransition, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -62,6 +62,8 @@ type Props = CompositeScreenProps<
 
 const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
 function Search(props: Props) {
+  const [isPending, startTransition] = useTransition();
+
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -127,7 +129,15 @@ function Search(props: Props) {
         })
       }
     }).then(data => {
-      setListAnime(data);
+      if ((global as any).nativeFabricUIManager !== undefined) {
+        startTransition(() => {
+          setListAnime(data);
+        })
+      } else {
+        InteractionManager.runAfterInteractions(() => {
+          setListAnime(data);
+        })
+      }
     }).catch(() => {
       setListAnime(null);
     });
@@ -281,6 +291,9 @@ function Search(props: Props) {
       {data === null && listAnime !== null ? (
         <View style={{ flex: 1 }}>
           <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
+          {listAnime.length === 0 || isPending && (
+            <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
+          )}
           <FlashList
             data={listAnime}
             estimatedItemSize={40}
@@ -309,8 +322,7 @@ function Search(props: Props) {
                   borderColor: colorScheme === 'dark' ? 'white' : 'black',
                 }}
               />
-            )}
-            ListEmptyComponent={() => <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />} />
+            )} />
         </View>
       ) : data === null ? (
         <TouchableOpacity onPress={() => {
