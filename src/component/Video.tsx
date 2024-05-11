@@ -52,6 +52,15 @@ import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
 
+
+function useBackHandler(handler: () => boolean) {
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handler)
+
+    return () => BackHandler.removeEventListener('hardwareBackPress', handler)
+  }, [handler])
+}
+
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const TouchableOpacityAnimated =
@@ -477,9 +486,9 @@ function Video(props: Props) {
   }, []);
 
   return (
-    <View style={{ flex: 2 }}>
+    <View style={{ flex: 1 }}>
       {/* Loading modal */}
-      <LoadingModal loading={loading} cancelLoading={cancelLoading} />
+      <LoadingModal isLoading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
         <View style={{ width: '100%', height: '100%', backgroundColor: 'black', zIndex: 0, position: 'absolute' }} />
@@ -743,16 +752,21 @@ function Video(props: Props) {
 }
 
 function LoadingModal({
-  loading,
+  isLoading,
   cancelLoading,
 }: {
-  loading: boolean;
+  isLoading: boolean;
   cancelLoading: () => void;
 }) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
-  return (
-    <Modal statusBarTranslucent={true} visible={loading} transparent onRequestClose={cancelLoading}>
+  useBackHandler(() => {
+    if (isLoading) {
+      cancelLoading();
+    }
+    return isLoading;
+  })
+  return isLoading && (
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <TouchableOpacity
@@ -764,7 +778,6 @@ function LoadingModal({
           <Text style={globalStyles.text}>Loading...</Text>
         </View>
       </View>
-    </Modal>
   );
 }
 
@@ -797,10 +810,13 @@ function useStyles() {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     modalContainer: {
-      flex: 1,
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      zIndex: 100,
+      backgroundColor: '#0000008a',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#0000008a',
     },
     modalContent: {
       flex: 0.15,
@@ -809,6 +825,8 @@ function useStyles() {
       backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
       borderColor: 'gold',
       borderWidth: 1,
+      alignContent: 'center',
+      alignSelf: 'center',
       justifyContent: 'center',
       alignItems: 'center',
     },
