@@ -28,7 +28,6 @@ function BottomTabs(props: Props) {
           headerShown: false,
           tabBarStyle: { height: 40 },
           tabBarHideOnKeyboard: true,
-          tabBarButton: Bprops => <TouchableOpacity {...Bprops} />,
         }}>
         <Tab.Screen
           name="AnimeList"
