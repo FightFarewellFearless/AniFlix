@@ -188,10 +188,11 @@ function Top({ title }: { title: string }) {
 
 function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onRewind }: { isBuffering: boolean; onPlayPausePressed: () => void, paused: boolean, onForward: () => void, onRewind: () => void }) {
   return (
-    <Pressable style={{
+    <View pointerEvents='box-none' onStartShouldSetResponder={() => true} style={{
       position: 'absolute', top: '50%', alignSelf: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 10,
     }}>
+      {/* Im wrapping the TouchableOpacity in "View" with onStartShouldSetResponder because RNGH's Touchables still execute the parent "Pressable" pressIn/Out */}
       <TouchableOpacity onPress={onRewind} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
         <Icons name="replay-5" size={40} color={'white'} />
       </TouchableOpacity>
@@ -205,7 +206,7 @@ function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onR
       <TouchableOpacity onPress={onForward} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
         <Icons name="forward-10" size={40} color={'white'} />
       </TouchableOpacity>
-    </Pressable>
+    </View>
   )
 }
 
