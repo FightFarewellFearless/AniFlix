@@ -14,13 +14,13 @@ import {
   BackHandler,
   ActivityIndicator,
   ToastAndroid,
-  Modal,
   NativeEventEmitter,
   NativeModules,
   EmitterSubscription,
   AppState,
   useColorScheme,
   Pressable,
+  LayoutChangeEvent,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -32,6 +32,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import url from 'url';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import ReAnimated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -150,11 +151,13 @@ function Video(props: Props) {
   const isInfoPressed = useRef(false);
   const [synopsysTextLength, setSynopsysTextLength] = useState(0);
   const synopsysHeight = useRef(0);
-  const infoContainerStyle = useAnimatedStyle(() => ({
-    opacity: infoContainerOpacity.value,
-    height:
-      infoContainerHeight.value === 0 ? 'auto' : infoContainerHeight.value,
-  }));
+  const infoContainerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: infoContainerOpacity.value,
+      height:
+        infoContainerHeight.value === 0 ? 'auto' : infoContainerHeight.value,
+    }
+  });
 
   // didMount and willUnmount
   useEffect(() => {
@@ -487,6 +490,41 @@ function Video(props: Props) {
     }
   }, []);
 
+  const onSynopsisLayout = useCallback((e: LayoutChangeEvent) => {
+    if (isInfoPressed.current === false) {
+      // infoContainerHeight.value = e.nativeEvent.layout.height;
+      initialInfoContainerHeight.current =
+        e.nativeEvent.layout.height;
+    }
+  }, []);
+
+  const onSynopsisPress = useCallback(() => {
+    if (!isInfoPressed.current) {
+      infoContainerHeight.value = initialInfoContainerHeight.current!;
+    }
+    isInfoPressed.current = true;
+    if (showSynopsys) {
+      infoContainerHeight.value = withTiming(
+        initialInfoContainerHeight.current as number, undefined, () => {
+          runOnJS(setShowSynopsys)(false);
+        });
+    } else {
+      setShowSynopsys(true);
+      infoContainerHeight.value = withTiming(
+        (initialInfoContainerHeight.current as number) +
+        synopsysHeight.current
+      );
+    }
+  }, [showSynopsys]);
+
+  const onSynopsisPressIn = useCallback(() => {
+    infoContainerOpacity.value = withTiming(0.4, { duration: 100 });
+  }, []);
+
+  const onSynopsisPressOut = useCallback(() => {
+    infoContainerOpacity.value = withTiming(1, { duration: 100 });
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -608,37 +646,10 @@ function Video(props: Props) {
             )}
             <PressableAnimated
               style={[styles.container, infoContainerStyle]}
-              onPressIn={() => {
-                infoContainerOpacity.value = withTiming(0.4, { duration: 100 });
-              }}
-              onPressOut={() => {
-                infoContainerOpacity.value = withTiming(1, { duration: 100 });
-              }}
-              onLayout={e => {
-                if (isInfoPressed.current === false) {
-                  // infoContainerHeight.value = e.nativeEvent.layout.height;
-                  initialInfoContainerHeight.current =
-                    e.nativeEvent.layout.height;
-                }
-              }}
-              onPress={() => {
-                if (!isInfoPressed.current) {
-                  infoContainerHeight.value = initialInfoContainerHeight.current!;
-                }
-                isInfoPressed.current = true;
-                if (showSynopsys) {
-                  setTimeout(setShowSynopsys, 100, false);
-                  infoContainerHeight.value = withTiming(
-                    initialInfoContainerHeight.current as number,
-                  );
-                } else {
-                  setTimeout(setShowSynopsys, 100, true);
-                  infoContainerHeight.value = withTiming(
-                    (initialInfoContainerHeight.current as number) +
-                    synopsysHeight.current,
-                  );
-                }
-              }}
+              onPressIn={onSynopsisPressIn}
+              onPressOut={onSynopsisPressOut}
+              onLayout={onSynopsisLayout}
+              onPress={onSynopsisPress}
               disabled={synopsysTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>
                 {data.title}
