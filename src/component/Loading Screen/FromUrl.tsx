@@ -115,7 +115,7 @@ function FromUrl(props: Props) {
         const errMessage =
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.message;
+            : 'Error tidak diketahui: ' + err.stack;
         Alert.alert('Error', errMessage);
         props.navigation.goBack();
       });
