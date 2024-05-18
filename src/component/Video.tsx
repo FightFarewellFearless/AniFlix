@@ -528,7 +528,7 @@ function Video(props: Props) {
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
-      <LoadingModal isLoading={loading} cancelLoading={cancelLoading} />
+      <LoadingModal setIsPaused={setIsPaused} isLoading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
         <View style={{ width: '100%', height: '100%', backgroundColor: 'black', zIndex: 0, position: 'absolute' }} />
@@ -785,9 +785,11 @@ function Video(props: Props) {
 function LoadingModal({
   isLoading,
   cancelLoading,
+  setIsPaused,
 }: {
   isLoading: boolean;
   cancelLoading: () => void;
+  setIsPaused: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
@@ -796,7 +798,16 @@ function LoadingModal({
       cancelLoading();
     }
     return isLoading;
-  })
+  });
+
+  useEffect(() => {
+    if(isLoading) {
+      setIsPaused(true);
+    } else {
+      setIsPaused(false);
+    }
+  }, [isLoading]);
+
   return isLoading && (
     <View style={styles.modalContainer}>
       <View style={styles.modalContent}>
