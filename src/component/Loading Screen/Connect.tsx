@@ -39,7 +39,12 @@ function Loading(props: Props) {
   useEffect(() => {
     Orientation.lockToPortrait();
   }, []);
-  const [loadStatus, setLoadStatus] = useState('Menyiapkan data');
+  const [loadStatus, setLoadStatus] = useState({
+    'Menyiapkan database': false,
+    'Mengecek versi aplikasi': false,
+    'Mendapatkan domain terbaru': false,
+    'Menghubungkan ke server': false,
+  });
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -78,7 +83,7 @@ function Loading(props: Props) {
         }),
       );
     }
-    const isInDatabase = (value: string) : value is SetDatabaseTarget => {
+    const isInDatabase = (value: string): value is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(value);
     }
     for (const dataKey of allKeys) {
@@ -129,7 +134,7 @@ function Loading(props: Props) {
       .catch(() => { });
     clearTimeout(timoeut);
     if (data === undefined) {
-      ToastAndroid.show('Eror saat mengecek versi', ToastAndroid.SHORT);
+      ToastAndroid.show('Error saat mengecek versi', ToastAndroid.SHORT);
       return true;
     } else if (data[0]?.tag_name === appVersion) {
       return true;
@@ -145,15 +150,30 @@ function Loading(props: Props) {
     (async () => {
       await prepareData();
       await deleteUnnecessaryUpdate();
-      setLoadStatus('Mengecek versi aplikasi');
+      setLoadStatus(old => {
+        return {
+          ...old,
+          'Menyiapkan database': true,
+        }
+      });
       const version = await checkVersion();
       if (version === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       } else if (version === true || __DEV__) {
         // skip update when app is in dev mode
-        setLoadStatus('Mendapatkan domain');
+        setLoadStatus(old => {
+          return {
+            ...old,
+            'Mengecek versi aplikasi': true,
+          }
+        });
         await fetchDomain();
-        setLoadStatus('Menghubungkan ke server');
+        setLoadStatus(old => {
+          return {
+            ...old,
+            'Mendapatkan domain terbaru': true,
+          }
+        });
         await connectToServer();
       } else {
         const latestVersion = version.tag_name;
@@ -184,8 +204,15 @@ function Loading(props: Props) {
         alignItems: 'center',
         flex: 1,
       }}>
-      <ActivityIndicator size="large" />
-      <Text style={globalStyles.text}>{loadStatus}, mohon tunggu...</Text>
+      <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>Tunggu sebentar ya.. lagi loading</Text>
+      {Object.entries(loadStatus).map(([key, value]) => (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }} key={key}>
+          {!value ? <ActivityIndicator size="small" /> : <Icon name="check" color={'green'} />}
+          <Text style={globalStyles.text}>
+            {' ' + key}
+          </Text>
+        </View>
+      ))}
       <View
         style={{
           position: 'absolute',
