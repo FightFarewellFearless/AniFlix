@@ -1,3 +1,26 @@
+# v0.6.4
+
+Dari segi pengembangan dan program, versi ini kemungkin adalah versi terakhir yang menggunakan react-native `old architecture`, kemungkinan besar di versi selanjutnya akan menggunakan `new architecture (fabric)`!
+
+## Penambahan
+- Menambahkan splash screen ke dalam aplikasi
+- Menambahkan copilot (tutorial) ke bagian tonton nanti, dikarenakan banyak yang belum tahu cara menambahkan anime ke daftar tonton nanti
+- Menambahkan animasi ke dalam video control
+
+## Perbaikan/Perubahan
+- Sedikit perubahan pada layar "Menghubungkan ke server"
+- Memperbaiki status bar yang tidak berubah warna sesuai dengan tema sistem.
+- Merubah beberapa pewarnaan komponen
+- Memperbaiki tampilan fullscreen yang tidak sepenuhnya "full" atau penuh
+- Merubah beberapa ikon di dalam aplikasi
+- Memperbaiki status bar yang tidak kembali di sembunyikan setelah muncul
+- Memperbaiki masalah animasi pada teks berjalan di bagian beranda
+- Memperbaiki masalah database pada pengguna baru
+- Memperbaiki masalah pengecekan versi
+- Memperbaiki error di beberapa anime/movie
+- Memperbaiki error/crash di bagian pencarian
+- Memperbaiki reload video player/webview tidak bekerja
+
 # v0.6.3
 
 ## Perbaikan
