@@ -296,7 +296,7 @@ function Search(props: Props) {
           <FlashList
             data={listAnime}
             estimatedItemSize={40}
-            keyExtractor={item => item.title}
+            keyExtractor={item => item?.title}
             extraData={styles}
             renderItem={({ item }) => {
               return (
@@ -309,7 +309,7 @@ function Search(props: Props) {
                     );
                   }}
                   style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 10 }}>
-                  <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+                  <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item?.title}</Text>
                 </TouchableOpacity>
               )
             }}
@@ -351,7 +351,7 @@ function Search(props: Props) {
             <FlashList
               estimatedItemSize={209}
               data={data.result}
-              keyExtractor={(_, index) => index.toString()}
+              keyExtractor={(_, index) => index?.toString()}
               extraData={styles}
               renderItem={({ item: z }) => (
                 <TouchableOpacityAnimated
@@ -394,7 +394,7 @@ function Search(props: Props) {
 
                     <View style={styles.listTitle}>
                       <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
-                        {z.title}
+                        {z?.title}
                       </Text>
                     </View>
 
