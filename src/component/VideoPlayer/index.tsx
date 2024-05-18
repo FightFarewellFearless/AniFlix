@@ -80,8 +80,8 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   }, []);
   const onPressOut = useCallback((e: GestureResponderEvent) => {
     if (
-      e.nativeEvent.locationX === pressableShowControlsLocation.current.x
-      && e.nativeEvent.locationY === pressableShowControlsLocation.current.y
+      Math.abs(e.nativeEvent.locationX - pressableShowControlsLocation.current.x) < 10
+      && Math.abs(e.nativeEvent.locationY - pressableShowControlsLocation.current.y) < 10
     ) {
       setShowControls(a => !a);
     }
