@@ -624,7 +624,7 @@ function Video(props: Props) {
                   <MaterialCommunityIcons name="screen-rotation" color={lightText} size={26} style={{ alignSelf: 'center' }} />
                   <Text style={{ color: lightText }}>Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape</Text>
                 </View>
-                <TouchableOpacity style={styles.reloadPlayer} onPress={() => {
+                <TouchableOpacity style={styles.reloadPlayer} onPress={async () => {
                   const streamingLink = data.streamingLink;
                   setData((datas) => {
                     return {
@@ -632,6 +632,7 @@ function Video(props: Props) {
                       streamingLink: ''
                     }
                   });
+                  await new Promise(res => setTimeout(res, 500));
                   setData((datas) => {
                     return {
                       ...datas,
