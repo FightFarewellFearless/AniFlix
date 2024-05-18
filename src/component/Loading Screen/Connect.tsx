@@ -3,12 +3,12 @@ import {
   View,
   ActivityIndicator,
   Text,
-  TouchableOpacity,
   Linking,
   StyleSheet,
   ToastAndroid,
   useColorScheme,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';

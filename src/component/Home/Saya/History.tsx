@@ -1,12 +1,12 @@
 import {
   Text,
   View,
-  TouchableOpacity,
   Alert, StyleSheet,
   useColorScheme,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';

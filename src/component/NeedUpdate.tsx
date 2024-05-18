@@ -9,12 +9,12 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
   ScrollView,
   ToastAndroid,
   Alert,
   useColorScheme,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 

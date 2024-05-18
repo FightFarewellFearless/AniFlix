@@ -1,7 +1,8 @@
 import { AVPlaybackStatus, Audio, InterruptionModeAndroid, ResizeMode, Video } from "expo-av";
 import { useKeepAwake } from 'expo-keep-awake';
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, GestureResponderEvent, Pressable, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { ActivityIndicator, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import Reanimated, { SharedValue, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import deviceUserAgent from "../../utils/deviceUserAgent";
@@ -187,7 +188,7 @@ function Top({ title }: { title: string }) {
 
 function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onRewind }: { isBuffering: boolean; onPlayPausePressed: () => void, paused: boolean, onForward: () => void, onRewind: () => void }) {
   return (
-    <View style={{
+    <Pressable style={{
       position: 'absolute', top: '50%', alignSelf: 'center',
       flexDirection: 'row', alignItems: 'center', gap: 10,
     }}>
@@ -204,7 +205,7 @@ function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onR
       <TouchableOpacity onPress={onForward} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
         <Icons name="forward-10" size={40} color={'white'} />
       </TouchableOpacity>
-    </View>
+    </Pressable>
   )
 }
 
@@ -243,7 +244,7 @@ function BottomControl({
           <ReText style={{ color: 'white', zIndex: 1 }} text={totalSecond} />
         </View>
       </View>
-      <TouchableOpacity style={{ justifyContent: 'center' }} onPress={onFullScreenButtonPressed}>
+      <TouchableOpacity containerStyle={{ justifyContent: 'center' }} onPress={onFullScreenButtonPressed}>
         <Icons name={isFullscreen ? "fullscreen-exit" : "fullscreen"} size={24} color={'white'} />
       </TouchableOpacity>
     </Pressable>

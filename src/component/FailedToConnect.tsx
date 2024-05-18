@@ -6,11 +6,11 @@ import {
   Linking,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   View,
   StyleSheet,
   useColorScheme,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 

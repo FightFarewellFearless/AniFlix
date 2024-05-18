@@ -4,10 +4,10 @@ import { useCallback } from 'react';
 import React, {
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   useColorScheme
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Reanimated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';

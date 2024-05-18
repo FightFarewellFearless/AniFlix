@@ -2,9 +2,7 @@ import React, { useTransition, useCallback, useEffect, useRef, useState } from '
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  TextInput,
   Animated,
   Alert,
   ActivityIndicator,
@@ -14,6 +12,7 @@ import {
   InteractionManager,
   KeyboardAvoidingView,
 } from 'react-native';
+import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import {
   useFocusEffect,
   StackActions,
@@ -291,7 +290,7 @@ function Search(props: Props) {
       {data === null && listAnime !== null ? (
         <View style={{ flex: 1 }}>
           <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
-          {listAnime.length === 0 || isPending && (
+          {(listAnime.length === 0 || isPending) && (
             <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
           )}
           <FlashList
@@ -447,7 +446,7 @@ function Search(props: Props) {
       )}
       {data !== null && (
         <TouchableOpacityAnimated
-          style={styles.closeSearchResult}
+          containerStyle={styles.closeSearchResult}
           onPress={() => {
             setData(null);
           }}
@@ -479,34 +478,37 @@ function HistoryList({
   const globalStyles = useGlobalStyles();
   const dispatch = useDispatch<AppDispatch>();
   return (
-    <TouchableOpacity
-      style={{
-        padding: 6,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        height: 40,
-      }}
-      onPress={() => {
-        onChangeTextFunction(item);
-      }}>
-      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-        <Text style={globalStyles.text}>{item}</Text>
-      </View>
+    <View pointerEvents='box-none' onStartShouldSetResponder={() => true}>
+      {/* I wrap the component with "View" because somehow "keyboardShouldPersistTaps" ignores the RNGH's Touchables */}
       <TouchableOpacity
-        hitSlop={14}
+        style={{
+          padding: 6,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          height: 40,
+        }}
         onPress={() => {
-          dispatch(
-            setDatabase({
-              target: 'searchHistory',
-              value: JSON.stringify(
-                searchHistory.filter((_, i) => i !== index),
-              ),
-            }),
-          );
+          onChangeTextFunction(item);
         }}>
-        <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />
+        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+          <Text style={globalStyles.text}>{item}</Text>
+        </View>
+        <TouchableOpacity
+          hitSlop={14}
+          onPress={() => {
+            dispatch(
+              setDatabase({
+                target: 'searchHistory',
+                value: JSON.stringify(
+                  searchHistory.filter((_, i) => i !== index),
+                ),
+              }),
+            );
+          }}>
+          <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 }
 

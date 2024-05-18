@@ -1,4 +1,5 @@
-import { View, Text, TouchableNativeFeedback, Image, ScrollView, StyleSheet, useColorScheme, ToastAndroid, ActivityIndicator } from "react-native";
+import { View, Text, Image, ScrollView, StyleSheet, useColorScheme, ToastAndroid, ActivityIndicator } from "react-native";
+import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import useGlobalStyles from "../../../assets/style";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as DocumentPicker from 'expo-document-picker';

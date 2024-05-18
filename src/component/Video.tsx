@@ -11,7 +11,6 @@ import {
   ScrollView,
   Text,
   StyleSheet,
-  TouchableOpacity,
   BackHandler,
   ActivityIndicator,
   ToastAndroid,
@@ -21,7 +20,9 @@ import {
   EmitterSubscription,
   AppState,
   useColorScheme,
+  Pressable,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -63,8 +64,8 @@ function useBackHandler(handler: () => boolean) {
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
-const TouchableOpacityAnimated =
-  ReAnimated.createAnimatedComponent(TouchableOpacity);
+const PressableAnimated =
+  ReAnimated.createAnimatedComponent(Pressable);
 
 const defaultLoadingGif = 'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
@@ -96,7 +97,6 @@ function Video(props: Props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
   const webviewRef = useRef<WebView>(null);
-  const [webViewKey, setWebViewKey] = useState(0);
 
   const [animeDetail, setAnimeDetail] = useState<Omit<AniDetail, 'episodeList'> | undefined>();
 
@@ -145,11 +145,13 @@ function Video(props: Props) {
   const [isPaused, setIsPaused] = useState(false);
 
   const infoContainerHeight = useSharedValue(0);
+  const infoContainerOpacity = useSharedValue(1);
   const initialInfoContainerHeight = useRef<number>();
   const isInfoPressed = useRef(false);
   const [synopsysTextLength, setSynopsysTextLength] = useState(0);
   const synopsysHeight = useRef(0);
   const infoContainerStyle = useAnimatedStyle(() => ({
+    opacity: infoContainerOpacity.value,
     height:
       infoContainerHeight.value === 0 ? 'auto' : infoContainerHeight.value,
   }));
@@ -585,15 +587,33 @@ function Video(props: Props) {
                   <Text style={{ color: lightText }}>Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape</Text>
                 </View>
                 <TouchableOpacity style={styles.reloadPlayer} onPress={() => {
-                  setWebViewKey(prev => prev + 1);
+                  const streamingLink = data.streamingLink;
+                  setData((datas) => {
+                    return {
+                      ...datas,
+                      streamingLink: '' 
+                    }
+                  });
+                  setData((datas) => {
+                    return {
+                      ...datas,
+                      streamingLink,
+                    }
+                  })
                 }}>
                   <Icon name="refresh" color={darkText} size={15} style={{ alignSelf: 'center' }} />
                   <Text style={{ color: darkText }}>Reload video player</Text>
                 </TouchableOpacity>
               </View>
             )}
-            <TouchableOpacityAnimated
+            <PressableAnimated
               style={[styles.container, infoContainerStyle]}
+              onPressIn={() => {
+                infoContainerOpacity.value = withTiming(0.4, { duration: 100 });
+              }}
+              onPressOut={() => {
+                infoContainerOpacity.value = withTiming(1, { duration: 100 });
+              }}
               onLayout={e => {
                 if (isInfoPressed.current === false) {
                   // infoContainerHeight.value = e.nativeEvent.layout.height;
@@ -673,7 +693,7 @@ function Video(props: Props) {
                   )}
                 </View>
               )}
-            </TouchableOpacityAnimated>
+            </PressableAnimated>
 
             <View style={[styles.container, { marginTop: 10 }]}>
               {data.episodeData && (
@@ -771,7 +791,7 @@ function LoadingModal({
         <View style={styles.modalContent}>
           <TouchableOpacity
             onPress={cancelLoading}
-            style={{ position: 'absolute', top: 5, right: 5 }}>
+            containerStyle={{ position: 'absolute', top: 5, right: 5 }}>
             <Icon name="close" size={28} style={{ color: 'red' }} />
           </TouchableOpacity>
           <ActivityIndicator size={'large'} />

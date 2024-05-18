@@ -2,7 +2,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View, useColorScheme } from "react-native";
+import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { getColors } from "react-native-image-colors";
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -13,7 +14,7 @@ import watchLaterJSON from "../types/watchLaterJSON";
 import controlWatchLater from "../utils/watchLaterControl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const TouchableOpacityCopilot = walkthroughable(TouchableOpacity);
+const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
 // const TooltipComponent = ({ labels }: TooltipProps) => {
 //   const { goToNext, goToPrev, stop, currentStep, isFirstStep, isLastStep } =

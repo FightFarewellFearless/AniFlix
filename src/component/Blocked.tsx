@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import {
   Text,
-  TouchableOpacity,
   View,
   Animated,
   Vibration,
   StyleSheet,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Entypo';
 import useGlobalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

@@ -1,6 +1,7 @@
 import gpti from 'gpti';
 import { ReactNode, useTransition, useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import { FlatList, StyleSheet, Switch, Text, TextInput, View, useColorScheme } from "react-native";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";

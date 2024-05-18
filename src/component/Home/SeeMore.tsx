@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Text,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   View,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { FlashList } from '@shopify/flash-list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useWindowDimensions } from 'react-native';
@@ -87,7 +87,7 @@ function SeeMore(props: Props) {
                 } finally {
                   setIsLoading(false);
                 }
-              }}>
+              }} disabled={isLoading}>
               <Text style={{ color: "#fafafa" }}>Lihat lebih banyak</Text>
             </TouchableOpacity>
           </>

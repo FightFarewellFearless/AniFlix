@@ -8,7 +8,6 @@ import { HomeContext } from '../../misc/context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Home as HomeType } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { TouchableOpacity } from 'react-native';
 import Utils from './Utils';
 import Saya from './Saya';
 
