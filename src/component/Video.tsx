@@ -252,7 +252,7 @@ function Video(props: Props) {
           'User-Agent': deviceUserAgent,
         },
         method: 'HEAD',
-      }).catch(() => {})
+      }).catch(() => { })
         .then(res => {
           return !res?.headers.get('content-type')?.includes('video');
         })
@@ -527,8 +527,8 @@ function Video(props: Props) {
                 window.confirm = function() {}; // Disable confirms
                 window.prompt = function() {}; // Disable prompts
                 window.open = function() {}; // Disable opening new windows
-              `} 
-              />
+              `}
+            />
           ) : (
             <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
@@ -591,7 +591,7 @@ function Video(props: Props) {
                   setData((datas) => {
                     return {
                       ...datas,
-                      streamingLink: '' 
+                      streamingLink: ''
                     }
                   });
                   setData((datas) => {
@@ -736,7 +736,7 @@ function Video(props: Props) {
               )}
               <View style={{ maxWidth: '50%' }}>
                 <Dropdown
-                  value={data.resolution === undefined ? undefined : {label: data.resolution, value: data.resolutionRaw?.[data.resolutionRaw.findIndex(e => e.resolution === data.resolution)]}}
+                  value={data.resolution === undefined ? undefined : { label: data.resolution, value: data.resolutionRaw?.[data.resolutionRaw.findIndex(e => e.resolution === data.resolution)] }}
                   placeholder='Pilih resolusi'
                   data={Object.entries(data.resolutionRaw).filter(z => z[1] !== undefined).map(z => {
                     return { label: z[1].resolution, value: z[1] };
@@ -787,17 +787,17 @@ function LoadingModal({
     return isLoading;
   })
   return isLoading && (
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <TouchableOpacity
-            onPress={cancelLoading}
-            containerStyle={{ position: 'absolute', top: 5, right: 5 }}>
-            <Icon name="close" size={28} style={{ color: 'red' }} />
-          </TouchableOpacity>
-          <ActivityIndicator size={'large'} />
-          <Text style={globalStyles.text}>Loading...</Text>
-        </View>
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <TouchableOpacity
+          onPress={cancelLoading}
+          containerStyle={{ position: 'absolute', top: 5, right: 5 }}>
+          <Icon name="close" size={28} style={{ color: 'red' }} />
+        </TouchableOpacity>
+        <ActivityIndicator size={'large'} />
+        <Text style={globalStyles.text}>Loading...</Text>
       </View>
+    </View>
   );
 }
 
