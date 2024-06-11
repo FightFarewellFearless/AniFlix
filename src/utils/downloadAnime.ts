@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import deviceUserAgent from './deviceUserAgent';
 
@@ -46,30 +46,40 @@ function useDownloadAnime() {
         Title += ' (' + sourceLength + ')';
       }
 
-      RNFetchBlob.config({
-        addAndroidDownloads: {
-          useDownloadManager: true,
-          path:
-            '/storage/emulated/0/Download' +
-            '/' +
-            Title +
-            ' ' +
-            resolution +
-            '.mp4',
-          notification: true,
-          mime: 'video/mp4',
-          title: Title + ' ' + resolution + '.mp4',
-        },
-      })
-        .fetch('GET', source, {
-          'User-Agent': deviceUserAgent,
+      const isGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+      if(isGranted || Number(Platform.Version) >= 33) {
+        download();
+      } else {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          download();
+        } else {
+          Alert.alert('Akses ditolak', 'Gagal mendownload karena akses ke penyimpanan di tolak');
+        }
+      }
+
+      async function download() {
+        RNFetchBlob.config({
+          addAndroidDownloads: {
+            useDownloadManager: true,
+            notification: true,
+            mime: 'video/mp4',
+            title: Title + ' ' + resolution + '.mp4',
+            path: RNFetchBlob.fs.dirs.LegacySDCardDir + '/Download/' + `${Title} ${resolution}.mp4`
+          },
         })
-        // .then(resp => {
-        //   // the path of downloaded file
-        //   // resp.path();
-        // })
-        .catch(() => { });
-      callback?.();
+          .fetch('GET', source, {
+            'User-Agent': deviceUserAgent,
+          })
+          // .then(resp => {
+          //   // the path of downloaded file
+          //   console.log(resp.path());
+          // })
+          .catch(() => { });
+        callback?.();
+      }
     },
     [],
   );

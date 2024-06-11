@@ -11,6 +11,8 @@ import {
   Animated,
   FlatList,
   Modal,
+  PermissionsAndroid,
+  Platform,
   StyleSheet,
   Switch,
   Text,
@@ -70,7 +72,7 @@ function Setting(_props: Props) {
     );
   };
 
-  
+
   const [modalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState('');
 
@@ -102,9 +104,27 @@ function Setting(_props: Props) {
   };
 
   const backupData = useCallback(async () => {
-    const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-    await RNFetchBlob.fs.writeFile('/storage/emulated/0/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
-    Alert.alert('Backup selesai', `Backup data telah disimpan di ${'Penyimpanan internal/Download/' + fileuri}`);
+    try {
+      const isGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+      if (isGranted || Number(Platform.Version) >= 33) {
+        backup();
+      } else {
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          backup();
+        } else {
+          Alert.alert('Akses ditolak', 'Gagal mencadangkan data dikarenakan akses ke penyimpanan di tolak');
+        }
+      }
+      async function backup() {
+        const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
+        await RNFetchBlob.fs.writeFile('/storage/emulated/0/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
+        await RNFetchBlob.fs.scanFile([{ path: '/storage/emulated/0/Download/' + fileuri, mime: 'text/plain' }]);
+        Alert.alert('Backup selesai', `Backup data telah disimpan di ${'Penyimpanan internal/Download/' + fileuri}`);
+      }
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
   }, []);
 
   const restoreData = useCallback(
@@ -115,7 +135,7 @@ function Setting(_props: Props) {
           type: 'text/plain',
           copyToCacheDirectory: true,
         });
-        if(!doc.assets?.[0].name?.endsWith('.aniflix.txt')){
+        if (!doc.assets?.[0].name?.endsWith('.aniflix.txt')) {
           Alert.alert('File harus .aniflix.txt', 'Format file harus .aniflix.txt');
           return;
         }
@@ -124,23 +144,23 @@ function Setting(_props: Props) {
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
         await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
         try {
-            (
-              Object.keys(backupDataJSON) as SetDatabaseTarget[]
-            ).filter(value => defaultDatabaseValueKeys.includes(value)).forEach(value => {
-              if (value === 'history' || value === 'watchLater') {
-                restoreHistoryOrWatchLater(
-                  JSON.parse(backupDataJSON[value]),
-                  value,
-                );
-              } else {
-                dispatchSettings(
-                  setDatabase({
-                    target: value,
-                    value: backupDataJSON[value],
-                  }),
-                );
-              }
-            });
+          (
+            Object.keys(backupDataJSON) as SetDatabaseTarget[]
+          ).filter(value => defaultDatabaseValueKeys.includes(value)).forEach(value => {
+            if (value === 'history' || value === 'watchLater') {
+              restoreHistoryOrWatchLater(
+                JSON.parse(backupDataJSON[value]),
+                value,
+              );
+            } else {
+              dispatchSettings(
+                setDatabase({
+                  target: value,
+                  value: backupDataJSON[value],
+                }),
+              );
+            }
+          });
           Alert.alert(
             'Restore berhasil!',
             'Kamu berhasil kembali ke backup sebelumnya!',
