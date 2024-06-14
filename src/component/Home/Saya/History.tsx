@@ -145,24 +145,26 @@ function History(props: Props) {
               </Text>
             </View>
 
-            <View style={styles.listEpisodeAndPart}>
-              <Text style={styles.listEpisode}>
-                {item.episode}
-                {/* {item.part !== undefined && (
+            <View style={{ flexDirection: 'row' }}>
+              <View style={styles.listEpisodeAndPart}>
+                <Text style={styles.listEpisode}>
+                  {item.episode}
+                  {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
                     {' Part ' + (item.part + 1)}
                   </Text>
                 )} */}
-              </Text>
-            </View>
-
-            {item.lastDuration !== undefined && (
-              <View style={styles.lastDuration}>
-                <Text style={globalStyles.text}>
-                  {formatTimeFromSeconds(item.lastDuration)}
                 </Text>
               </View>
-            )}
+
+              {item.lastDuration !== undefined && (
+                <View style={styles.lastDuration}>
+                  <Text style={globalStyles.text}>
+                    {formatTimeFromSeconds(item.lastDuration)}
+                  </Text>
+                </View>
+              )}
+            </View>
 
             <View style={styles.listWatchTime}>
               <Text style={globalStyles.text}>
@@ -316,7 +318,8 @@ function useStyles() {
       flex: 1,
     },
     listEpisodeAndPart: {
-      justifyContent: 'flex-end',
+      justifyContent: 'flex-start',
+      flex: 1,
     },
     listEpisode: {
       color: '#1eb1a9',
@@ -326,7 +329,9 @@ function useStyles() {
       fontSize: 12,
       color: 'red',
     },
-    lastDuration: { position: 'absolute', bottom: 1, right: 1 },
+    lastDuration: {
+      justifyContent: 'flex-end'
+    },
     listWatchTime: {
       position: 'absolute',
       left: 0,

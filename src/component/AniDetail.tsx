@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN } from "react-native";
+import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { getColors } from "react-native-image-colors";
@@ -221,11 +221,11 @@ function AniDetailCopilot(props: Props) {
     <View style={styles.container}>
       <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, thumbnailColor, 'transparent']}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={[styles.title, { color: complementThumbnailColor }]}>{data.title}</Text>
+          <Text style={[styles.title, { color: complementThumbnailColor }]} numberOfLines={2}>{data.title}</Text>
           <Text style={[styles.title, { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
         </View>
         <View style={styles.imageContainer}>
-          <View style={[styles.imageContainerChild]}>
+          <View style={[styles.imageContainerChild, { alignItems: 'flex-start' }]}>
             <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
               <Icon name="star" color="yellow" /> {data.rating === '' ? '-' : data.rating}{'\n'}
               <Icon name="calendar" /> {data.releaseYear + '\n'}
@@ -234,7 +234,8 @@ function AniDetailCopilot(props: Props) {
             </Text>
           </View>
 
-          <ImageBackground source={{ uri: data.thumbnailUrl }} style={[{ height: 200, width: 135 }, styles.imageContainerChild]} resizeMode="contain">
+          <View style={[{ width: 135, height: 'auto', maxHeight: 200, marginVertical: 12 }, styles.imageContainerChild]}>
+          <Image source={{ uri: data.thumbnailUrl }} style={[{ flex: 1 }]} resizeMode="contain" />
             <CopilotStep text="Kamu bisa klik bagian ini untuk menambahkan anime ini ke daftar tonton nanti" order={1} name="watch-later">
               <TouchableOpacityCopilot disabled={isInList} style={{ position: 'absolute', bottom: 10, right: 0 }} onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
@@ -255,7 +256,8 @@ function AniDetailCopilot(props: Props) {
                 </View>
               </TouchableOpacityCopilot>
             </CopilotStep>
-          </ImageBackground>
+          </View>
+          
 
           <View style={[styles.imageContainerChild, { alignItems: 'flex-end' }]}>
             <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
@@ -333,6 +335,7 @@ function useStyles() {
       textShadowRadius: 1,
     },
     imageContainer: {
+      flex: 1,
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',

@@ -147,11 +147,11 @@ function Chat(_props: Props) {
             </Reanimated.View>
           )
         }} />
-      <View style={{ flexDirection: 'row' }}>
-        <TextInput placeholder="Ketik sesuatu..." style={styles.textInput} multiline onChangeText={t => {
+      <View style={{ flexDirection: 'row', maxHeight: '30%' }}>
+        <TextInput placeholder="Ketik sesuatu..." style={[styles.textInput, {borderWidth: 1, borderColor: '#0099ff'}]} multiline onChangeText={t => {
           prompt.current = t;
         }} />
-        <TouchableOpacity style={styles.button} disabled={messageLoading} onPress={tanya}>
+        <TouchableOpacity containerStyle={styles.button} disabled={messageLoading} onPress={tanya}>
           <Text style={{ color: lightText }}>{messageLoading ? 'Loading...' : 'Kirim'}</Text>
         </TouchableOpacity>
       </View>
@@ -172,7 +172,7 @@ function useStyles() {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     textInput: {
-      backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#e0e0e0',
+      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#f5f5f5',
       padding: 10,
       borderRadius: 8,
       flex: 1,

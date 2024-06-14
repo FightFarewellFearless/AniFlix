@@ -422,6 +422,9 @@ function splitAllLinks(texts: string): string[] {
 
 function useStyles() {
   const colorScheme = useColorScheme();
+  const dimensions = useWindowDimensions();
+  const LIST_BACKGROUND_HEIGHT = dimensions.height * 120/200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = dimensions.width * 120/200 / 1.9;
   return StyleSheet.create({
     modalContainer: {
       flex: 1,
@@ -555,8 +558,8 @@ function useStyles() {
     },
     listBackground: {
       overflow: 'hidden',
-      width: 120,
-      height: 200,
+      width: LIST_BACKGROUND_WIDTH,
+      height: LIST_BACKGROUND_HEIGHT,
       borderWidth: 1,
       marginRight: 5,
       marginVertical: 5,

@@ -22,9 +22,9 @@ function SeeMore(props: Props) {
     useContext(HomeContext);
   const [isLoading, setIsLoading] = useState(false);
   const page = (data?.newAnime.length ?? 0) / 25;
-  const windowWidth = useWindowDimensions().width;
-  const columnWidth = 120;
-  const numColumns = Math.floor(windowWidth / columnWidth);
+  const dimensions = useWindowDimensions();
+  const columnWidth = dimensions.width * 120/200 / 1.9;
+  const numColumns = Math.floor(dimensions.width / columnWidth);
 
   useEffect(() => {
     props.navigation.setOptions({

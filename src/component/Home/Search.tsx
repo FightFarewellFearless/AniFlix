@@ -11,6 +11,7 @@ import {
   useColorScheme,
   InteractionManager,
   KeyboardAvoidingView,
+  useWindowDimensions,
 } from 'react-native';
 import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import {
@@ -18,7 +19,7 @@ import {
   StackActions,
   CompositeScreenProps,
 } from '@react-navigation/native';
-import useGlobalStyles, { lightText } from '../../assets/style';
+import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -34,12 +35,13 @@ import Reanimated, {
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
   ZoomIn,
   ZoomOut,
   SlideInDown,
   SlideOutDown,
+  useAnimatedRef,
+  measure,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import ImageLoading from '../ImageLoading';
@@ -66,6 +68,7 @@ function Search(props: Props) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const dimensions = useWindowDimensions();
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
@@ -102,6 +105,7 @@ function Search(props: Props) {
     useState<boolean>(false);
   const query = useRef<undefined | string>();
   const searchButtonAnimation = useSharedValue(100);
+  const searchButtonRef = useAnimatedRef();
   const searchButtonOpacity = useSharedValue(1);
   const searchButtonMounted = useRef(false);
 
@@ -144,11 +148,9 @@ function Search(props: Props) {
 
   useEffect(() => {
     if (searchText !== '' && searchButtonMounted.current === false) {
-      searchButtonAnimation.value = withSpring(0, {
-        damping: 12,
-      });
+      searchButtonAnimation.value = withTiming(0);
     } else if (searchButtonMounted.current === true && searchText === '') {
-      searchButtonAnimation.value = withSpring(100);
+      searchButtonAnimation.value = withTiming(100);
     }
     if (searchText === '') {
       searchButtonMounted.current = false;
@@ -229,8 +231,12 @@ function Search(props: Props) {
         'rgb(0, 124, 128)',
       ],
     );
+    let measurementWidth: number | undefined = undefined;
+    if (_WORKLET) {
+      measurementWidth = measure(searchButtonRef)?.width;
+    }
     return {
-      width: interpolate(searchButtonAnimation.value, [0, 100], [87, 100]) + '%',
+      width: dimensions.width - interpolate(searchButtonAnimation.value, [0, 100], [measurementWidth ?? 75, 0]),
       borderTopColor: borderColor,
       borderBottomColor: borderColor,
     };
@@ -256,8 +262,12 @@ function Search(props: Props) {
   }
 
   return (
-    <Animated.View style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
-      <View style={{ flexDirection: 'row' }}>
+    <Animated.View
+      collapsable={false}
+      style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
+      <View
+        collapsable={false}
+        style={{ flexDirection: 'row' }}>
         {/* {data !== null && (
           <TouchableOpacity>
             <Icon name="close" />
@@ -276,11 +286,14 @@ function Search(props: Props) {
           style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
+          collapsable={false}
+          // @ts-ignore
+          ref={searchButtonRef}
           onPress={submit}
           onPressIn={onPressIn}
           onPressOut={onPressOut}
           style={[styles.searchButton, pressableAnimationStyle]}>
-          <Text style={{ color: '#272727' }}>
+          <Text allowFontScaling={false} style={{ color: '#272727', paddingHorizontal: 12 }}>
             <Icon name="search" style={{ color: '#413939' }} size={17} />
             Cari
           </Text>
@@ -553,7 +566,6 @@ function useStyles() {
     searchButton: {
       justifyContent: 'center',
       alignItems: 'center',
-      width: '12%',
       backgroundColor: '#ffa43cff',
     },
     listContainer: {
