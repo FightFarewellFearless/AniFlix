@@ -27,7 +27,7 @@ type RootStackNavigator = {
     data: AniStreaming;
     link: string;
     historyData?: {
-      resolution: string;
+      resolution: string | undefined;
       lastDuration: number;
     };
   };

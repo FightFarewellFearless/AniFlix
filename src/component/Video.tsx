@@ -51,7 +51,7 @@ import { AppDispatch, RootState } from '../misc/reduxStore';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
 import deviceUserAgent from '../utils/deviceUserAgent';
-import { AniDetail } from '../types/anime';
+import { AniDetail, AniStreaming } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
 
 
@@ -115,7 +115,7 @@ function Video(props: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
     throttleFunction(
-      (currentTime: number, stateData, settContext, dispatchContext) => {
+      (currentTime: number, stateData: AniStreaming, settContext: string, dispatchContext: typeof dispatchSettings) => {
         if (Math.floor(currentTime) === 0) {
           return;
         }

@@ -1,7 +1,7 @@
-function throttle(func: (...args: any[]) => any, delay: number) {
+function throttle<F extends (...args: any[]) => any>(func: F, delay: number): (...args: Parameters<F>) => void {
   let prevDelay = 0;
 
-  return (...args: any[]) => {
+  return (...args: Parameters<F>) => {
     const now = Date.now();
     if (now - prevDelay > delay) {
       prevDelay = now;
@@ -10,3 +10,4 @@ function throttle(func: (...args: any[]) => any, delay: number) {
   };
 }
 export default throttle;
+
