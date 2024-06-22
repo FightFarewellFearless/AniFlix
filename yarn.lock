@@ -4469,7 +4469,7 @@ __metadata:
     eslint: ^8.19.0
     expo: ^51.0.8
     expo-av: ^14.0.5
-    expo-document-picker: ^12.0.1
+    expo-document-picker: ^12.0.2
     expo-linear-gradient: ^13.0.2
     expo-splash-screen: ^0.27.4
     gpti: ^2.0.6
@@ -7057,12 +7057,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-document-picker@npm:^12.0.1":
-  version: 12.0.1
-  resolution: "expo-document-picker@npm:12.0.1"
+"expo-document-picker@npm:^12.0.2":
+  version: 12.0.2
+  resolution: "expo-document-picker@npm:12.0.2"
   peerDependencies:
     expo: "*"
-  checksum: 9de79a793c7ea4e0bb91354be6bc99cf3a2f5dde8fa8a44aeaf34fc80d4d40b35f523f8fb985cdc1afd69a3fe7255593b10a9958394bbcd6bf181cfdbb81deb9
+  checksum: fe358e535e7b3a5466817b55178981fc8d6632c91bef07c9292538e83a6724879cd2a03f059f4d376445545e98296aaea7daffe6129ccd84a4f7dd98a8d18c6e
   languageName: node
   linkType: hard
 
