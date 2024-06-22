@@ -161,21 +161,11 @@ function Video(props: Props) {
 
   // didMount and willUnmount
   useEffect(() => {
-    AppState.currentState === 'background' && setIsPaused(true);
-    const appStateBlur = AppState.addEventListener('blur', () => {
-      setIsPaused(true);
-    });
-    const appStateFocus = AppState.addEventListener('focus', () => {
-      setIsPaused(false);
-    });
-
     Orientation.addDeviceOrientationListener(orientationDidChange);
 
     return () => {
       willUnmountHandler();
       abortController.current?.abort();
-      appStateBlur.remove();
-      appStateFocus.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -536,6 +526,7 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <VideoPlayer
+              key={data.streamingLink}
               title={data.title}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1, }}
@@ -803,9 +794,9 @@ function LoadingModal({
 
   useEffect(() => {
     if(isLoading) {
-      setIsPaused(true);
+      setIsPaused(() => true);
     } else {
-      setIsPaused(false);
+      setIsPaused(() => false);
     }
   }, [isLoading]);
 
