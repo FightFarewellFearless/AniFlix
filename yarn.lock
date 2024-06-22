@@ -2166,7 +2166,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/config-plugins@npm:8.0.5":
+"@expo/config-plugins@npm:8.0.5, @expo/config-plugins@npm:~8.0.0":
   version: 8.0.5
   resolution: "@expo/config-plugins@npm:8.0.5"
   dependencies:
@@ -2235,6 +2235,25 @@ __metadata:
     slugify: ^1.3.4
     sucrase: 3.34.0
   checksum: 2afb247657cdab069e55326decc04892b7d9ff7bf198c0bbaa1eb5a6a9b664c5758bcd22f5f6206ef38682b8b66b8855233d08dc101f9c8da712782a903719db
+  languageName: node
+  linkType: hard
+
+"@expo/config@npm:~9.0.0":
+  version: 9.0.2
+  resolution: "@expo/config@npm:9.0.2"
+  dependencies:
+    "@babel/code-frame": ~7.10.4
+    "@expo/config-plugins": ~8.0.0
+    "@expo/config-types": ^51.0.0-unreleased
+    "@expo/json-file": ^8.3.0
+    getenv: ^1.0.0
+    glob: 7.1.6
+    require-from-string: ^2.0.2
+    resolve-from: ^5.0.0
+    semver: ^7.6.0
+    slugify: ^1.3.4
+    sucrase: 3.34.0
+  checksum: 3f452fc4f1970e21bab2f4473e389c4c6cebf5b2b0a0ec884219c17422f12442945727cbef861951fe06909006348a445370c1cfa5d2b11027c44b626d3d9a39
   languageName: node
   linkType: hard
 
