@@ -11,7 +11,7 @@ import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import moment from 'moment';
 import { setDatabase } from '../../../misc/reduxSlice';
 import { AppDispatch } from '../../../misc/reduxStore';
@@ -139,6 +139,49 @@ function History(props: Props) {
           />
 
           <View style={styles.listInfoContainer}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={styles.listWatchTime}>
+                <Text style={[globalStyles.text, styles.listDateText]}>
+                  {moment
+                    .duration(
+                      moment(Date.now()).diff(item.date, 'seconds'),
+                      'seconds',
+                    )
+                    .humanize() + ' '}
+                  yang lalu pukul {moment(item.date).format('HH:mm')}
+                </Text>
+              </View>
+
+              <View style={styles.deleteContainer}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  hitSlop={10}
+                  onPress={() => {
+                    Alert.alert(
+                      'Yakin?',
+                      'Yakin kamu ingin menghapus "' +
+                      item.title.trim() +
+                      '" dari histori?',
+                      [
+                        {
+                          text: 'Tidak',
+                          onPress: () => null,
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'Ya',
+                          onPress: () =>
+                            deleteHistory(
+                              data.findIndex(val => val.title === item.title),
+                            ),
+                        },
+                      ],
+                    );
+                  }}>
+                  <Icon name="delete-forever" size={28} style={{ color: 'red' }} />
+                </TouchableOpacity>
+              </View>
+            </View>
             <View style={styles.listTitle}>
               <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
                 {item.title}
@@ -159,53 +202,11 @@ function History(props: Props) {
 
               {item.lastDuration !== undefined && (
                 <View style={styles.lastDuration}>
-                  <Text style={globalStyles.text}>
+                  <Text style={[globalStyles.text, styles.lastDurationText]}>
                     {formatTimeFromSeconds(item.lastDuration)}
                   </Text>
                 </View>
               )}
-            </View>
-
-            <View style={styles.listWatchTime}>
-              <Text style={globalStyles.text}>
-                {moment
-                  .duration(
-                    moment(Date.now()).diff(item.date, 'seconds'),
-                    'seconds',
-                  )
-                  .humanize() + ' '}
-                yang lalu pukul {moment(item.date).format('HH:mm')}
-              </Text>
-            </View>
-
-            <View style={styles.deleteContainer}>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                hitSlop={10}
-                onPress={() => {
-                  Alert.alert(
-                    'Yakin?',
-                    'Yakin kamu ingin menghapus "' +
-                    item.title.trim() +
-                    '" dari histori?',
-                    [
-                      {
-                        text: 'Tidak',
-                        onPress: () => null,
-                        style: 'cancel',
-                      },
-                      {
-                        text: 'Ya',
-                        onPress: () =>
-                          deleteHistory(
-                            data.findIndex(val => val.title === item.title),
-                          ),
-                      },
-                    ],
-                  );
-                }}>
-                <Icon name="trash" size={22} style={{ color: '#17e2af' }} />
-              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacityAnimated>
@@ -232,7 +233,7 @@ function History(props: Props) {
         <View style={styles.historyContainer}>
           <AnimatedFlashList
             data={data}
-            estimatedItemSize={210}
+            estimatedItemSize={160}
             ref={flatListRef}
             keyExtractor={keyExtractor}
             onScroll={scrollHandler}
@@ -245,7 +246,7 @@ function History(props: Props) {
                 <Icon
                   name="arrow-up"
                   color={darkText}
-                  size={15}
+                  size={25}
                 />
               </View>
             </TouchableOpacity>
@@ -297,13 +298,13 @@ function useStyles() {
     listContainerButton: {
       flexDirection: 'row',
       marginVertical: 5,
-      backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
       borderRadius: 16,
       elevation: 5,
     },
     listImage: {
-      width: 120,
-      height: 200,
+      width: 90,
+      height: 150,
       borderTopLeftRadius: 16,
       borderBottomLeftRadius: 16,
       marginRight: 7,
@@ -332,20 +333,23 @@ function useStyles() {
     lastDuration: {
       justifyContent: 'flex-end'
     },
+    lastDurationText: {
+      fontSize: 13,
+      fontStyle: 'italic',
+    },
     listWatchTime: {
-      position: 'absolute',
-      left: 0,
-      zIndex: 0,
+
+    },
+    listDateText: {
+      color: 'gray',
+      fontSize: 12,
+      fontWeight: '500',
     },
     deleteContainer: {
-      position: 'absolute',
-      right: 2,
-      top: 5,
+      flex: 1,
+      alignItems: 'flex-end'
     },
     deleteButton: {
-      backgroundColor: '#af461c',
-      padding: 2,
-      borderRadius: 3,
     },
     noHistory: {
       flex: 1,

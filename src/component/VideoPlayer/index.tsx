@@ -235,7 +235,7 @@ function BottomControl({
     return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   })
   return (
-    <Pressable style={{ flexDirection: 'row', backgroundColor: '#00000069', position: 'absolute', bottom: 0, alignSelf: 'center', width: '100%', padding: 5 }}>
+    <Pressable style={{ flexDirection: 'row', backgroundColor: '#00000069', position: 'absolute', bottom: 0, alignSelf: 'center', width: '100%', paddingHorizontal: 5 }}>
 
       <View style={{ width: '95%', flexDirection: 'row', flex: 1 }}>
 

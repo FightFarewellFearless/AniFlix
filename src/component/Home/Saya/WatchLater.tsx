@@ -13,7 +13,7 @@ import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 import useGlobalStyles from '../../../assets/style';
 import moment from 'moment';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import controlWatchLater from '../../../utils/watchLaterControl';
 import ImageLoading from '../../ImageLoading';
 import { DrawerScreenProps } from '@react-navigation/drawer';
@@ -57,8 +57,8 @@ function WatchLater(props: Props) {
             </Text>
           </View>
           <View style={styles.listInfoContainer}>
-            <Text style={[globalStyles.text]}>
-              {moment(item.date).format('dddd DD-MM-YYYY [Pukul] HH:mm:ss')}
+            <Text style={[globalStyles.text, styles.listDateText]}>
+              {moment(item.date).format('dddd DD-MM-YYYY [Pukul] HH:mm')}
             </Text>
 
             <View style={styles.titleContainer}>
@@ -77,7 +77,7 @@ function WatchLater(props: Props) {
                   controlWatchLater('delete', index);
                 }}
                 style={styles.listDeleteContainer}>
-                <Icon name="trash" size={20} color="#17e2af" />
+                <Icon name="delete-forever" size={20} color="#17e2af" />
               </TouchableOpacity>
             </View>
           </View>
@@ -114,7 +114,7 @@ function useStyles() {
     listContainer: {
       flexDirection: 'row',
       marginVertical: 5,
-      backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
       borderRadius: 16,
       elevation: 5,
       height: 200,
@@ -165,6 +165,11 @@ function useStyles() {
     listGenreContainer: {
       justifyContent: 'flex-start',
       flex: 1,
+    },
+    listDateText: {
+      color: 'gray',
+      fontSize: 12,
+      fontWeight: '500',
     },
     listDeleteContainer: {
       justifyContent: 'flex-end',

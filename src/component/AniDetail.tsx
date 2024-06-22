@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
@@ -194,7 +194,7 @@ function AniDetailCopilot(props: Props) {
   const complementThumbnailColor = thumbnailColor === '#00000000' ?
     globalStyles.text.color : complementHex(thumbnailColor);
   useEffect(() => {
-    getColors(data.thumbnailUrl).then(colors => {
+    getColors(data.thumbnailUrl, {pixelSpacing: 2}).then(colors => {
       if (colors.platform === 'android') {
         setThumbnailColor(colors.dominant);
       }
@@ -217,9 +217,11 @@ function AniDetailCopilot(props: Props) {
     }, 500);
   }, [start, copilotEvents]);
 
+  const endThumbnailColor = useMemo(() => darkenHexColor(thumbnailColor, 50), [thumbnailColor]);
+
   return (
     <View style={styles.container}>
-      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, thumbnailColor, 'transparent']}>
+      <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, endThumbnailColor]}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={[styles.title, { color: complementThumbnailColor }]} numberOfLines={2}>{data.title}</Text>
           <Text style={[styles.title, { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
@@ -285,7 +287,7 @@ function AniDetailCopilot(props: Props) {
         </ScrollView>
       </ImageBackground>
 
-      <View style={styles.container}>
+      <LinearGradient colors={[endThumbnailColor, thumbnailColor]} style={[styles.container]}>
         <FlashList
           estimatedItemSize={78}
           data={data.episodeList}
@@ -295,7 +297,7 @@ function AniDetailCopilot(props: Props) {
                 link: item.link,
               })
             }}>
-              <Text style={[globalStyles.text, styles.episodeText]}>
+              <Text style={[globalStyles.text, styles.episodeText, { color: complementThumbnailColor }]}>
                 {item.title}
               </Text>
             </TouchableOpacity>
@@ -305,12 +307,12 @@ function AniDetailCopilot(props: Props) {
               style={{
                 width: '100%',
                 borderBottomWidth: .5,
-                borderColor: colorScheme === 'dark' ? 'white' : 'black',
+                borderColor: complementThumbnailColor,
               }}
             />
           )}
           extraData={styles} />
-      </View>
+      </LinearGradient >
     </View>
   )
 }
@@ -357,8 +359,13 @@ function useStyles() {
       padding: 10,
     },
     episodeText: {
+      fontStyle: 'italic',
+      fontWeight: 'bold',
       textAlign: 'center',
       textDecorationLine: 'underline',
+      textShadowColor: 'black',
+      textShadowOffset: { width: .5, height: .5 },
+      textShadowRadius: .5,
     },
   });
 }
@@ -378,7 +385,25 @@ function complementHex(hex: string) {
   const bComplement = (255 - b).toString(16).padStart(2, '0');
 
 
-  return `#${rComplement}${gComplement}${bComplement}`;
+  return darkenHexColor(`#${rComplement}${gComplement}${bComplement}`, 10);
+}
+
+function darkenHexColor(hex: string, amount: number) {
+  hex = hex.replace('#', '');
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  const darkR = Math.max(0, r - amount);
+  const darkG = Math.max(0, g - amount);
+  const darkB = Math.max(0, b - amount);
+
+  const darkRHex = darkR.toString(16).padStart(2, '0');
+  const darkGHex = darkG.toString(16).padStart(2, '0');
+  const darkBHex = darkB.toString(16).padStart(2, '0');
+
+  return `#${darkRHex}${darkGHex}${darkBHex}`;
 }
 
 export default AniDetail;
