@@ -178,7 +178,6 @@ function AniDetail(props: Props) {
 function AniDetailCopilot(props: Props) {
   const { start, copilotEvents } = useCopilot();
 
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
   const data = props.route.params.data;
