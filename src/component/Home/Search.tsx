@@ -12,6 +12,7 @@ import {
   InteractionManager,
   KeyboardAvoidingView,
   useWindowDimensions,
+  LayoutChangeEvent,
 } from 'react-native';
 import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import {
@@ -95,7 +96,7 @@ function Search(props: Props) {
     }, []),
   );
 
-  const [searchText, setSearchText] = useState<string>('');
+  const searchText = useRef<string>('');
   const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [loading, setLoading] = useState(false);
@@ -144,39 +145,35 @@ function Search(props: Props) {
     });
   }, []);
 
-  useEffect(() => {
-    if (searchText !== '' && searchButtonMounted.current === false) {
+  const onChangeText = useCallback((text: string) => {
+    searchText.current = text;
+    if (searchText.current !== '' && searchButtonMounted.current === false) {
       searchButtonAnimation.value = withTiming(0);
-    } else if (searchButtonMounted.current === true && searchText === '') {
+    } else if (searchButtonMounted.current === true && searchText.current === '') {
       searchButtonAnimation.value = withTiming(100);
     }
-    if (searchText === '') {
+    if (searchText.current === '') {
       searchButtonMounted.current = false;
     } else {
       searchButtonMounted.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
-
-  const onChangeText = useCallback((text: string) => {
-    setSearchText(text);
   }, []);
 
   const submit = useCallback(() => {
-    if (searchText === '') {
+    if (searchText.current === '') {
       return;
     }
     setLoading(true);
     textInputRef.current?.blur();
-    AnimeAPI.search(searchText)
+    AnimeAPI.search(searchText.current)
       .then(async result => {
-        query.current = searchText;
+        query.current = searchText.current;
         setData(result);
         setLoading(false);
-        if (searchHistory.includes(searchText)) {
-          searchHistory.splice(searchHistory.indexOf(searchText), 1);
+        if (searchHistory.includes(searchText.current)) {
+          searchHistory.splice(searchHistory.indexOf(searchText.current), 1);
         }
-        searchHistory.unshift(searchText);
+        searchHistory.unshift(searchText.current);
         dispatchSettings(
           setDatabase({
             target: 'searchHistory',
@@ -195,7 +192,7 @@ function Search(props: Props) {
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [dispatchSettings, props.navigation, searchHistory, searchText]);
+  }, [dispatchSettings, props.navigation, searchHistory]);
 
   const onPressIn = useCallback(() => {
     searchButtonOpacity.value = withTiming(0.4, { duration: 100 });
@@ -256,6 +253,10 @@ function Search(props: Props) {
     );
   }
 
+  const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
+    searchButtonWidth.value = layout.nativeEvent.layout.width;
+  }, [])
+
   return (
     <Animated.View
       style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
@@ -278,9 +279,7 @@ function Search(props: Props) {
           style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
-          onLayout={layout => {
-            searchButtonWidth.value = layout.nativeEvent.layout.width;
-          }}
+          onLayout={onPressableLayoutChange}
           onPress={submit}
           onPressIn={onPressIn}
           onPressOut={onPressOut}
