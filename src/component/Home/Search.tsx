@@ -40,8 +40,6 @@ import Reanimated, {
   ZoomOut,
   SlideInDown,
   SlideOutDown,
-  useAnimatedRef,
-  measure,
 } from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import ImageLoading from '../ImageLoading';
@@ -105,7 +103,7 @@ function Search(props: Props) {
     useState<boolean>(false);
   const query = useRef<undefined | string>();
   const searchButtonAnimation = useSharedValue(100);
-  const searchButtonRef = useAnimatedRef();
+  const searchButtonWidth = useSharedValue<undefined | number>(undefined);
   const searchButtonOpacity = useSharedValue(1);
   const searchButtonMounted = useRef(false);
 
@@ -231,12 +229,9 @@ function Search(props: Props) {
         'rgb(0, 124, 128)',
       ],
     );
-    let measurementWidth: number | undefined = undefined;
-    if (_WORKLET) {
-      measurementWidth = measure(searchButtonRef)?.width;
-    }
+    
     return {
-      width: dimensions.width - interpolate(searchButtonAnimation.value, [0, 100], [measurementWidth ?? 75, 0]),
+      width: dimensions.width - interpolate(searchButtonAnimation.value, [0, 100], [searchButtonWidth.value ?? 75, 0]),
       borderTopColor: borderColor,
       borderBottomColor: borderColor,
     };
@@ -263,10 +258,8 @@ function Search(props: Props) {
 
   return (
     <Animated.View
-      collapsable={false}
       style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
       <View
-        collapsable={false}
         style={{ flexDirection: 'row' }}>
         {/* {data !== null && (
           <TouchableOpacity>
@@ -274,7 +267,6 @@ function Search(props: Props) {
           </TouchableOpacity>
         )} */}
         <TextInputAnimation
-          value={searchText}
           onSubmitEditing={submit}
           onChangeText={onChangeText}
           placeholder="Ketik anime disini"
@@ -286,9 +278,9 @@ function Search(props: Props) {
           style={[styles.searchInput, textInputAnimation]}
         />
         <PressableAnimation
-          collapsable={false}
-          // @ts-ignore
-          ref={searchButtonRef}
+          onLayout={layout => {
+            searchButtonWidth.value = layout.nativeEvent.layout.width;
+          }}
           onPress={submit}
           onPressIn={onPressIn}
           onPressOut={onPressOut}
