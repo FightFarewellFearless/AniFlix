@@ -243,12 +243,16 @@ function Search(props: Props) {
   }));
 
   function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
+    const onChangeTextFunction = (text: string) => {
+      onChangeText(text);
+      textInputRef.current?.setNativeProps({ text });
+    };
     return (
       <HistoryList
         index={index}
         item={item}
         data={searchHistory}
-        onChangeTextFunction={onChangeText}
+        onChangeTextFunction={onChangeTextFunction}
       />
     );
   }
