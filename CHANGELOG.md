@@ -1,3 +1,21 @@
+# v0.6.5
+
+Versi ini berisi beberapa perbaikan penting untuk aplikasi.
+Note: aplikasi sendiri masih berjalan di old architecture karena masalah kestabilan
+
+## Perbaikan
+- Memperbaiki masalah server streaming `odstream` error
+- Memperbaiki masalah izin pada android < 13:
+  - Memperbaiki crash saat mendownload anime
+  - Memperbaiki masalah tidak bisa backup data
+- Mengatasi masalah desain tampilan pada layar ponsel yang kecil
+- Memperbaiki masalah status bar yang disembunyikan ketika membuka menu (modal) seperti ketika mengganti resolusi
+
+## Perubahan lain
+- Memperbaiki dan merubah sedikit tampilan agar lebih baik
+- Perubahan kecil di bagian kode (tidak terlihat pada pengguna)
+- Sekarang, video player tidak akan pause saat kamu melihat / membuka status bar (notifikasi, persentase baterai, dll...)
+
 # v0.6.4
 
 Dari segi pengembangan dan program, versi ini kemungkin adalah versi terakhir yang menggunakan react-native `old architecture`, kemungkinan besar di versi selanjutnya akan menggunakan `new architecture (fabric)`!
