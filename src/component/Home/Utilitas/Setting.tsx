@@ -39,6 +39,7 @@ import { Buffer } from 'buffer/';
 import moment from 'moment';
 import * as DocumentPicker from 'expo-document-picker';
 import RNFetchBlob from 'react-native-blob-util';
+import { createDocument } from 'react-native-saf-x';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 
@@ -118,9 +119,11 @@ function Setting(_props: Props) {
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        await RNFetchBlob.fs.writeFile('/storage/emulated/0/Download/' + fileuri, Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64'));
-        await RNFetchBlob.fs.scanFile([{ path: '/storage/emulated/0/Download/' + fileuri, mime: 'text/plain' }]);
-        Alert.alert('Backup selesai', `Backup data telah disimpan di ${'Penyimpanan internal/Download/' + fileuri}`);
+        const data = Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64');
+        const backupData = await createDocument(data, { initialName: fileuri, mimeType: 'text/plain' });
+        if( backupData ) {
+          Alert.alert('Berhasil', `Data berhasil di backup!`);
+        }
       }
     } catch (e: any) {
       Alert.alert('Error', e.message);
@@ -135,10 +138,9 @@ function Setting(_props: Props) {
           type: 'text/plain',
           copyToCacheDirectory: true,
         });
-        if (!doc.assets?.[0].name?.endsWith('.aniflix.txt')) {
-          Alert.alert('File harus .aniflix.txt', 'Format file harus .aniflix.txt');
-          return;
-        }
+
+        if(!doc.assets) return;
+
         // RNFS.readFile(doc.fileCopyUri).then(console.log);
         const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
         const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
