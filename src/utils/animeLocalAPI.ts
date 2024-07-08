@@ -428,7 +428,7 @@ async function fetchStreamingResolution(requestData: string | Object, reqNonceAc
         throw errorObj;
     }
     const data = response.data;
-    return await getStreamLink(cheerio.load(Buffer.from(data, 'base64').toString('utf8'))('div > iframe').attr('src')!);
+    return await getStreamLink(cheerio.load(Buffer.from(data, 'base64').toString('utf8'))('div > iframe').attr('src')!, signal);
 }
 
 async function jadwalAnime(signal?: AbortSignal) {
