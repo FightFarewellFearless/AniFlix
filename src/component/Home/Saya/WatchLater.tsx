@@ -1,6 +1,6 @@
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import React, {
   StyleSheet,
   Text,
@@ -8,7 +8,7 @@ import React, {
   useColorScheme
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import Reanimated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import Reanimated, { FadeInRight, FadeOutLeft, LinearTransition } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 import useGlobalStyles from '../../../assets/style';
@@ -33,12 +33,15 @@ function WatchLater(props: Props) {
     result => JSON.parse(result) as watchLaterJSON[],
   );
 
+  const flashlistRef = useRef<FlashList<watchLaterJSON>>();
+
   const renderItem = useCallback<ListRenderItem<watchLaterJSON>>(
     ({ item, index }) => {
       return (
         <TouchableOpacityAnimated
           entering={FadeInRight}
           exiting={FadeOutLeft}
+          layout={LinearTransition}
           style={styles.listContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -74,6 +77,7 @@ function WatchLater(props: Props) {
               <TouchableOpacity
                 hitSlop={4}
                 onPress={() => {
+                  flashlistRef.current?.prepareForLayoutAnimationRender();
                   controlWatchLater('delete', index);
                 }}
                 style={styles.listDeleteContainer}>
@@ -95,6 +99,8 @@ function WatchLater(props: Props) {
         </View>
       ) : (
         <FlashList
+          // @ts-ignore
+          ref={flashlistRef}
           data={watchLaterLists}
           extraData={styles}
           estimatedItemSize={210}

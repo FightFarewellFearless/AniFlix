@@ -20,6 +20,7 @@ import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
   FadeInRight,
   FadeOutLeft,
+  LinearTransition,
   runOnUI,
   useAnimatedRef,
   useAnimatedStyle,
@@ -105,6 +106,7 @@ function History(props: Props) {
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
       // console.log(Date.now() - time);
+      flatListRef.current?.prepareForLayoutAnimationRender();
       dispatchSettings(
         setDatabase({
           target: 'history',
@@ -123,6 +125,7 @@ function History(props: Props) {
         <TouchableOpacityAnimated
           entering={FadeInRight}
           exiting={FadeOutLeft}
+          layout={LinearTransition}
           style={styles.listContainerButton}
           onPress={() => {
             props.navigation.dispatch(

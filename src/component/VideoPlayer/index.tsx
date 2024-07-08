@@ -50,6 +50,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   useEffect(() => {
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
+
   const playbackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       if (status.isBuffering && !status.isPlaying && status.shouldPlay) {

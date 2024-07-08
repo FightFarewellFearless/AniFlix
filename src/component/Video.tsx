@@ -17,7 +17,6 @@ import {
   NativeEventEmitter,
   NativeModules,
   EmitterSubscription,
-  AppState,
   useColorScheme,
   Pressable,
   LayoutChangeEvent,
@@ -32,6 +31,8 @@ import { Dropdown } from 'react-native-element-dropdown';
 import url from 'url';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import ReAnimated, {
+  BounceIn,
+  BounceOut,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -793,16 +794,19 @@ function LoadingModal({
   });
 
   useEffect(() => {
-    if(isLoading) {
+    if (isLoading) {
       setIsPaused(() => true);
     } else {
       setIsPaused(() => false);
     }
   }, [isLoading]);
 
+  const entering = useMemo(() => BounceIn.duration(300), []);
+  const exiting = useMemo(() => BounceOut.duration(300), []);
+
   return isLoading && (
     <View style={styles.modalContainer}>
-      <View style={styles.modalContent}>
+      <ReAnimated.View entering={entering} exiting={exiting} style={styles.modalContent}>
         <TouchableOpacity
           onPress={cancelLoading}
           containerStyle={{ position: 'absolute', top: 5, right: 5 }}>
@@ -810,7 +814,7 @@ function LoadingModal({
         </TouchableOpacity>
         <ActivityIndicator size={'large'} />
         <Text style={globalStyles.text}>Loading...</Text>
-      </View>
+      </ReAnimated.View>
     </View>
   );
 }
@@ -920,6 +924,7 @@ function useStyles() {
       marginVertical: 5,
       flexDirection: 'row',
       flexWrap: 'wrap',
+      alignContent: 'stretch',
     },
     genre: {
       borderWidth: 1,
