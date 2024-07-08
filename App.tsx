@@ -16,6 +16,9 @@ import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
 import useGlobalStyles from './src/assets/style';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens((global as any).nativeFabricUIManager === undefined); // TEMP: temporary fix for crashed app on new architecture
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 function App() {
