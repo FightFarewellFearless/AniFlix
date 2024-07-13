@@ -30,7 +30,7 @@
     "expo-document-picker": "^12.0.2",
     "expo-linear-gradient": "^13.0.2",
     "expo-splash-screen": "^0.27.5",
-    "gpti": "^2.0.6",
+    "gpti": "^2.1.7",
     "moment": "^2.29.4",
     "react": "18.2.0",
     "react-native": "^0.74.3",
