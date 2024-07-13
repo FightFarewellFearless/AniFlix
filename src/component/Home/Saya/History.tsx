@@ -6,7 +6,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import { StackActions } from '@react-navigation/native';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';

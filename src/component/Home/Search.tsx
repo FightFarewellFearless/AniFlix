@@ -14,7 +14,7 @@ import {
   useWindowDimensions,
   LayoutChangeEvent,
 } from 'react-native';
-import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
+import { TouchableOpacity, TextInput } from 'react-native';//rngh
 import {
   useFocusEffect,
   StackActions,
@@ -454,7 +454,7 @@ function Search(props: Props) {
       )}
       {data !== null && (
         <TouchableOpacityAnimated
-          containerStyle={styles.closeSearchResult}
+          style={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
           }}

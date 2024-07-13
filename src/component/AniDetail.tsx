@@ -3,7 +3,7 @@ import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native"; //rngh
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { getColors } from "react-native-image-colors";
 import Icon from 'react-native-vector-icons/FontAwesome';

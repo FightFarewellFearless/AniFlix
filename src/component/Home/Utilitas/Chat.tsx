@@ -1,7 +1,7 @@
 import gpti from 'gpti';
 import { ReactNode, useTransition, useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, Switch, Text, TextInput, View, useColorScheme } from "react-native";
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
 import Reanimated, { ZoomIn } from 'react-native-reanimated';
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -151,7 +151,7 @@ function Chat(_props: Props) {
         <TextInput placeholder="Ketik sesuatu..." style={[styles.textInput, {borderWidth: 1, borderColor: '#0099ff'}]} multiline onChangeText={t => {
           prompt.current = t;
         }} />
-        <TouchableOpacity containerStyle={styles.button} disabled={messageLoading} onPress={tanya}>
+        <TouchableOpacity style={styles.button} /* //rngh - containerStyle */ disabled={messageLoading} onPress={tanya}>
           <Text style={{ color: lightText }}>{messageLoading ? 'Loading...' : 'Kirim'}</Text>
         </TouchableOpacity>
       </View>

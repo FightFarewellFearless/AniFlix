@@ -10,7 +10,7 @@ import {
   StyleSheet,
   useColorScheme,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../types/navigation';
 

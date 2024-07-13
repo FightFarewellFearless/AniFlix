@@ -7,7 +7,7 @@ import React, {
   View,
   useColorScheme
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import Reanimated, { FadeInRight, FadeOutLeft, LinearTransition } from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';

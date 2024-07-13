@@ -14,7 +14,7 @@ import {
   Alert,
   useColorScheme,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
@@ -170,14 +170,14 @@ function NeedUpdate(props: Props) {
         ) : isProgress100 === true ? (
           <View style={styles.installOrRedownload}>
             <TouchableOpacity
-              containerStyle={{ flex: 1 }}
+              // containerStyle={{ flex: 1 }}
               style={[styles.download, { backgroundColor: '#1d1d66' }]}
               onPress={installUpdate}>
               <Icon name="download" color={globalStyles.text.color} size={20} />
               <Text style={globalStyles.text}>Instal update</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              containerStyle={{ flex: 1 }}
+              // containerStyle={{ flex: 1 }}
               style={[styles.download]}
               onPress={downloadUpdate}>
               <Icon

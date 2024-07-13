@@ -6,7 +6,7 @@ import {
   Vibration,
   StyleSheet,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import Icon from 'react-native-vector-icons/Entypo';
 import useGlobalStyles from '../assets/style';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

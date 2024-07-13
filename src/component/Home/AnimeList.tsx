@@ -21,7 +21,7 @@ import {
   Linking,
   useColorScheme,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import Reanimated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
@@ -216,7 +216,7 @@ function HomeList(props: HomeListProps) {
             Episode terbaru:{' '}
           </Text>
           <TouchableOpacity
-            containerStyle={{ flex: 1 }}
+            // containerStyle={{ flex: 1 }}
             style={styles.seeMoreContainer}
             onPress={() => {
               props.navigation.dispatch(

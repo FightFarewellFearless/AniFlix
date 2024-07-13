@@ -2,7 +2,7 @@ import { AVPlaybackStatus, Audio, InterruptionModeAndroid, ResizeMode, Video } f
 import { useKeepAwake } from 'expo-keep-awake';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native"; //rngh
 import Reanimated, { SharedValue, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import deviceUserAgent from "../../utils/deviceUserAgent";
@@ -246,7 +246,7 @@ function BottomControl({
           <ReText style={{ color: 'white', zIndex: 1 }} text={totalSecond} />
         </View>
       </View>
-      <TouchableOpacity containerStyle={{ justifyContent: 'center' }} onPress={onFullScreenButtonPressed}>
+      <TouchableOpacity style={{ justifyContent: 'center' }} /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed} hitSlop={5}>
         <Icons name={isFullscreen ? "fullscreen-exit" : "fullscreen"} size={24} color={'white'} />
       </TouchableOpacity>
     </Pressable>

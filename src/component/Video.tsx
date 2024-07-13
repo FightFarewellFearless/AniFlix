@@ -22,7 +22,7 @@ import {
   Pressable,
   LayoutChangeEvent,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; //rngh
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -810,7 +810,8 @@ function LoadingModal({
       <ReAnimated.View entering={entering} exiting={exiting} style={styles.modalContent}>
         <TouchableOpacity
           onPress={cancelLoading}
-          containerStyle={{ position: 'absolute', top: 5, right: 5 }}>
+          style={{ position: 'absolute', top: 5, right: 5 }} //rngh
+          >
           <Icon name="close" size={28} style={{ color: 'red' }} />
         </TouchableOpacity>
         <ActivityIndicator size={'large'} />
