@@ -9,7 +9,7 @@ const defaultConfig = getDefaultConfig(__dirname);
  */
 const config = {
     resolver: {
-        sourceExts: [...defaultConfig.resolver.sourceExts, 'md']
+        sourceExts: [...defaultConfig.resolver.sourceExts, 'md', 'cjs']
     }
 };
 
