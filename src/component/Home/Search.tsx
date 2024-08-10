@@ -295,18 +295,22 @@ function Search(props: Props) {
         </PressableAnimation>
       </View>
 
-      {data === null && listAnime !== null ? (
-        <View style={{ flex: 1 }}>
-          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
-          {(listAnime.length === 0 || isPending) && (
+      {(listAnime?.length === 0 || isPending) && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
-          )}
+            <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
+          </View>
+      )}
+
+      {data === null && listAnime !== null ? (
+        <View style={{ flex: listAnime?.length === 0 || isPending ? 0 : 1 }}>
+          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
           <FlashList
             data={listAnime}
             estimatedItemSize={40}
             keyExtractor={item => item?.title}
             extraData={styles}
-            renderItem={({ item }) => {
+            renderItem={({ item, index }) => {
               return (
                 <TouchableOpacity
                   onPress={() => {
@@ -316,8 +320,9 @@ function Search(props: Props) {
                       }),
                     );
                   }}
-                  style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 10 }}>
-                  <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item?.title}</Text>
+                  style={{ justifyContent: 'center', paddingVertical: 10, flexDirection: 'row' }}>
+                  <Text style={[globalStyles.text, { textAlign: 'left', fontWeight: 'bold', fontSize: 12 }]}>{index + 1}.</Text>
+                  <Text style={[globalStyles.text, { textAlign: 'center', flex: 1 }]}>{item?.title}</Text>
                 </TouchableOpacity>
               )
             }}
@@ -343,12 +348,13 @@ function Search(props: Props) {
           }).catch(() => {
             setListAnime(null);
           });
-        }}>
+        }}
+        style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 16 }]}>Gagal memuat list, tekan disini untuk mencoba lagi</Text>
           <Icon
             name="exclamation-circle"
             size={30}
-            style={{ alignSelf: 'center' }}
-            color={colorScheme === 'dark' ? '#dadada' : '#0f0f0f'} />
+            color={'red'} />
         </TouchableOpacity>
       ) : (
         <>
@@ -599,7 +605,7 @@ function useStyles() {
       zIndex: 2,
     },
     searchHistoryScrollBox: {
-      backgroundColor: colorScheme === 'dark' ? '#2c2929' : '#e0e0e0',
+      backgroundColor: colorScheme === 'dark' ? '#181818' : '#e0e0e0',
     },
     closeSearchResult: {
       position: 'absolute',
