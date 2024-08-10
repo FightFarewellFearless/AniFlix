@@ -171,14 +171,14 @@ function NeedUpdate(props: Props) {
           <View style={styles.installOrRedownload}>
             <TouchableOpacity
               // containerStyle={{ flex: 1 }}
-              style={[styles.download, { backgroundColor: '#1d1d66' }]}
+              style={[styles.download, { backgroundColor: '#1d1d66' }, { flex: 1 }]}
               onPress={installUpdate}>
               <Icon name="download" color={globalStyles.text.color} size={20} />
               <Text style={globalStyles.text}>Instal update</Text>
             </TouchableOpacity>
             <TouchableOpacity
               // containerStyle={{ flex: 1 }}
-              style={[styles.download]}
+              style={[styles.download, { flex: 1 }]}
               onPress={downloadUpdate}>
               <Icon
                 name="file-download"
