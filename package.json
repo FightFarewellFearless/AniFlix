@@ -1,6 +1,7 @@
 {
   "name": "aniflix",
   "version": "v0.6.5",
+  "OTAJSVersion": "0",
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
@@ -35,6 +36,7 @@
     "react": "18.2.0",
     "react-native": "^0.74.3",
     "react-native-blob-util": "^0.19.11",
+    "react-native-code-push": "^8.3.1",
     "react-native-copilot": "^3.3.2",
     "react-native-device-info": "^11.1.0",
     "react-native-element-dropdown": "^2.12.1",

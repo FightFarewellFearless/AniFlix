@@ -19,7 +19,7 @@ import { AppDispatch } from '../../misc/reduxStore';
 import { setDatabase } from '../../misc/reduxSlice';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { version as appVersion } from '../../../package.json';
+import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -30,6 +30,8 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import RNFetchBlob from 'react-native-blob-util';
 
 import animeLocalAPI from '../../utils/animeLocalAPI';
+
+import codePush from 'react-native-code-push';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
@@ -118,7 +120,7 @@ function Loading(props: Props) {
     });
   }, []);
 
-  const checkVersion = useCallback(async () => {
+  const checkNativeAppVersion = useCallback(async () => {
     const abort = new AbortController();
     const timoeut = setTimeout(() => abort.abort(), 5000);
     const data = await fetch(
@@ -156,11 +158,26 @@ function Loading(props: Props) {
           'Menyiapkan database': true,
         }
       });
-      const version = await checkVersion();
-      if (version === null) {
+      const nativeAppVersion = await checkNativeAppVersion();
+      if (nativeAppVersion === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      } else if (version === true || __DEV__) {
-        // skip update when app is in dev mode
+      } else if (nativeAppVersion === true ||
+        __DEV__ // skip update when app is in dev mode
+      ) {
+
+        const OTAUpdate = await codePush.checkForUpdate().catch();
+        
+        if (OTAUpdate) {
+          props.navigation.dispatch(
+            StackActions.replace('NeedUpdate', {
+              changelog: OTAUpdate.description,
+              size: OTAUpdate.packageSize,
+              nativeUpdate: false,
+            }),
+          );
+          return;
+        };
+
         setLoadStatus(old => {
           return {
             ...old,
@@ -176,15 +193,16 @@ function Loading(props: Props) {
         });
         await connectToServer();
       } else {
-        const latestVersion = version.tag_name;
-        const changelog = version.body;
-        const download = version.assets[0].browser_download_url;
+        const latestVersion = nativeAppVersion.tag_name;
+        const changelog = nativeAppVersion.body;
+        const download = nativeAppVersion.assets[0].browser_download_url;
 
         props.navigation.dispatch(
           StackActions.replace('NeedUpdate', {
             latestVersion,
             changelog,
             download,
+            nativeUpdate: true,
           }),
         );
       }
@@ -192,7 +210,7 @@ function Loading(props: Props) {
   }, [
     connectToServer,
     prepareData,
-    checkVersion,
+    checkNativeAppVersion,
     props.navigation,
     deleteUnnecessaryUpdate,
   ]);
@@ -251,7 +269,7 @@ function Loading(props: Props) {
           globalStyles.text,
           { position: 'absolute', bottom: 0, left: 0 },
         ]}>
-        {appVersion}
+        {appVersion}-JS_{OTAJSVersion}
       </Text>
     </View>
   );

@@ -32,9 +32,14 @@ type RootStackNavigator = {
     };
   };
   NeedUpdate: {
+    nativeUpdate: true;
     latestVersion: string;
     changelog: string;
     download: string;
+  } | {
+    nativeUpdate: false;
+    changelog: string;
+    size: number;
   };
   Blocked: undefined;
   FailedToConnect: undefined;

@@ -41,7 +41,7 @@ import {
 } from '@react-navigation/native-stack';
 import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
-import { version } from '../../../package.json'
+import { version, OTAJSVersion } from '../../../package.json'
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -188,7 +188,7 @@ function HomeList(props: HomeListProps) {
         <View style={styles.boxItem}>
           <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
           <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
-          <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}</Text></Text>
+          <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}-JS_{OTAJSVersion}</Text></Text>
           {/* running text animation */}
           <Reanimated.Text
             onLayout={nativeEvent =>

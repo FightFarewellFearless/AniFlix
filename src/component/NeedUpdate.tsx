@@ -30,6 +30,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import CodePush from 'react-native-code-push';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
@@ -64,69 +65,120 @@ function NeedUpdate(props: Props) {
   );
 
   useEffect(() => {
-    RNFetchBlob.fs
-      .exists(
-        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-      )
-      .then(value => {
-        setIsDownloadStart(value);
-        downloadProgress.value = value ? 100 : 0;
-      });
-  }, [downloadProgress, props.route.params.latestVersion]);
+    if (props.route.params.nativeUpdate) {
+      RNFetchBlob.fs
+        .exists(
+          `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
+        )
+        .then(value => {
+          setIsDownloadStart(value);
+          downloadProgress.value = value ? 100 : 0;
+        });
+    }
+  }, [downloadProgress]);
 
   const downloadUpdate = useCallback(() => {
     setIsDownloadStart(true);
+    if (props.route.params.nativeUpdate) {
+      RNFetchBlob.config({
+        path: `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
+      })
+        .fetch('GET', props.route.params.download)
+        .progress((receivedS, totalS) => {
+          const received = Number(receivedS);
+          const total = Number(totalS);
+          downloadProgress.value = withTiming(
+            Math.floor((received / total) * 100),
+          );
+          setNetSpeed(
+            `${(
+              (received - lastMB.current) /
+              MB /
+              MB /
+              ((Date.now() - lastMS.current) / 1000)
+            ).toFixed(2)} MB/s`,
+          );
+          lastMB.current = received;
+          lastMS.current = Date.now();
+          totalMB.current = total;
+        })
+        .then(async res => {
+          setIsDownloadStart(true);
+          downloadProgress.value = 100;
+          await RNFetchBlob.android.actionViewIntent(
+            res.path(),
+            'application/vnd.android.package-archive',
+          );
+        })
+        .catch(() => {
+          setIsDownloadStart(false);
+          ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+        });
+    } else {
+      CodePush.sync({
+        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+      }, status => {
+        switch (status) {
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            setIsDownloadStart(true);
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            setIsDownloadStart(true);
+            downloadProgress.value = 100;
+            break;
+          default:
+            setIsDownloadStart(false);
+            break;
+        }
+      }, ({ receivedBytes, totalBytes }) => {
+        setNetSpeed(
+          `${(
+            (receivedBytes - lastMB.current) /
+            MB /
+            MB /
+            ((Date.now() - lastMS.current) / 1000)
+          ).toFixed(2)} MB/s`,
+        )
+        lastMB.current = receivedBytes;
+        lastMS.current = Date.now();
+        totalMB.current = totalBytes;
+        downloadProgress.value = Math.floor(
+          (receivedBytes / totalBytes) * 100,
+        );
+      }).then(() => {
+        setIsDownloadStart(true);
+        downloadProgress.value = 100;
+        Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
+          [
+            { text: "Restart", onPress: () => {
+              CodePush.restartApp();
+            } },
+          ]
+        );
+      }).catch(() => {
+        setIsDownloadStart(false);
+        ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+      });
+    };
     ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
     Alert.alert(
       'Perhatian',
       'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
     );
-    RNFetchBlob.config({
-      path: `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-    })
-      .fetch('GET', props.route.params.download)
-      .progress((receivedS, totalS) => {
-        const received = Number(receivedS);
-        const total = Number(totalS);
-        downloadProgress.value = withTiming(
-          Math.floor((received / total) * 100),
-        );
-        setNetSpeed(
-          `${(
-            (received - lastMB.current) /
-            MB /
-            MB /
-            ((Date.now() - lastMS.current) / 1000)
-          ).toFixed(2)} MB/s`,
-        );
-        lastMB.current = received;
-        lastMS.current = Date.now();
-        totalMB.current = total;
-      })
-      .then(async res => {
-        setIsDownloadStart(true);
-        downloadProgress.value = 100;
-        await RNFetchBlob.android.actionViewIntent(
-          res.path(),
-          'application/vnd.android.package-archive',
-        );
-      })
-      .catch(() => {
-        setIsDownloadStart(false);
-        ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-      });
   }, [
     downloadProgress,
-    props.route.params.download,
-    props.route.params.latestVersion,
   ]);
 
   const installUpdate = useCallback(() => {
-    RNFetchBlob.android.actionViewIntent(
-      `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-      'application/vnd.android.package-archive',
-    );
-  }, [props.route.params.latestVersion]);
+    if(props.route.params.nativeUpdate) {
+      RNFetchBlob.android.actionViewIntent(
+        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
+        'application/vnd.android.package-archive',
+      );
+    } else {
+      CodePush.restartApp();
+    };
+  }, []);
 
   const downloadProgressAnimaton = useAnimatedStyle(() => {
     return {
@@ -150,7 +202,7 @@ function NeedUpdate(props: Props) {
           <Text style={[globalStyles.text, styles.version]}>{appVersion}</Text>
           <Text style={[globalStyles.text, { fontSize: 20 }]}>{'->'}</Text>
           <Text style={[globalStyles.text, styles.latestVersion]}>
-            {props.route.params.latestVersion}
+            {props.route.params.nativeUpdate ? props.route.params.latestVersion : "OTA Update"}
           </Text>
         </View>
         <ScrollView>

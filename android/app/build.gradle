@@ -1,6 +1,9 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+
+apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+
 // apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
@@ -107,6 +110,11 @@ android {
         debug {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
+            resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
+        }
+        releaseStaging {
+            resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
+            matchingFallbacks = ['release']
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -116,6 +124,7 @@ android {
             shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             archivesBaseName = "anime"
+            resValue "string", "CodePushDeploymentKey", '"2dG5lg7zBly5UF41q1hBkZUj3K31GL5nrIiQD"'
         }
     }
 }
