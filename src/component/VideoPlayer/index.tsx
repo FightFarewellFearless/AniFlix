@@ -247,7 +247,7 @@ function BottomControl({
         </View>
       </View>
       <TouchableOpacity style={{ justifyContent: 'center' }} /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed} hitSlop={5}>
-        <Icons name={isFullscreen ? "fullscreen-exit" : "fullscreen"} size={24} color={'white'} />
+        <Icons name={isFullscreen ? "fullscreen-exit" : "fullscreen"} size={28} color={'white'} />
       </TouchableOpacity>
     </Pressable>
 
