@@ -23,7 +23,6 @@ function BottomTabs(props: Props) {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
-          tabBarStyle: { height: 40 },
           tabBarHideOnKeyboard: true,
         }}>
         <Tab.Screen

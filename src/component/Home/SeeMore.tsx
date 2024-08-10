@@ -26,6 +26,8 @@ function SeeMore(props: Props) {
   const columnWidth = dimensions.width * 120/200 / 1.9;
   const numColumns = Math.floor(dimensions.width / columnWidth);
 
+  const LIST_HEIGHT = dimensions.height * 120/200 / 2.2;
+
   useEffect(() => {
     props.navigation.setOptions({
       headerTitle: 'Anime terbaru',
@@ -61,7 +63,7 @@ function SeeMore(props: Props) {
           />
         }
         numColumns={numColumns}
-        estimatedItemSize={205}
+        estimatedItemSize={LIST_HEIGHT}
         ListFooterComponent={
           <>
             {isLoading && <ActivityIndicator />}

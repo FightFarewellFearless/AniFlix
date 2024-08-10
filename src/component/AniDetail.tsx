@@ -347,8 +347,8 @@ function useStyles() {
     detailText: {
       color: globalStyles.text.color,
       textShadowColor: 'black',
-      textShadowOffset: { width: .5, height: .5 },
-      textShadowRadius: .5,
+      textShadowOffset: { width: .8, height: .8 },
+      textShadowRadius: .8,
       fontWeight: 'bold',
     },
     synopsys: {
@@ -358,13 +358,14 @@ function useStyles() {
       padding: 10,
     },
     episodeText: {
+      fontSize: 15,
       fontStyle: 'italic',
       fontWeight: 'bold',
       textAlign: 'center',
       textDecorationLine: 'underline',
       textShadowColor: 'black',
-      textShadowOffset: { width: .5, height: .5 },
-      textShadowRadius: .5,
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 1,
     },
   });
 }
