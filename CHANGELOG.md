@@ -1,3 +1,27 @@
+# v0.7.0 (10-Agustus-2024)
+
+Versi ini memperkenalkan OTA update agar update aplikasi menjadi lebih ringan, mudah, dan cepat untuk pengguna dan developer.
+
+## Penambahan
+- Menambahkan OTA update ke aplikasi:
+  > Menggunakan CodePush
+
+  > Mulai versi 0.7.0 dan seterusnya, update penting aplikasi yang tidak memerlukan download ulang aplikasi akan di rilis melalui CodePush dan dapat diinstal oleh pengguna secara langsung dari aplikasi.
+
+## Perubahan
+
+- Sedikit menambah detail pada bagian pencarian
+- Mengganti metode pencadangan database
+  > Menggunakan SAF (Storage Access Framework) agar pengguna bisa memilih lokasi, dan nama file yang akan di backup.
+
+## Perbaikan
+
+- Memperbaiki masalah saat membatalkan pergantian resolusi atau episode
+- Memperbaiki beberapa masalah styling
+- Memperbaiki kebanyakan tombol terkadang tidak berfungsi (tidak merespon)
+
+Dan banyak lagi perubahan kecil lain...
+
 # v0.6.5
 
 Versi ini berisi beberapa perbaikan penting untuk aplikasi.
