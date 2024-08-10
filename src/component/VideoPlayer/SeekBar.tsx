@@ -19,6 +19,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
   const gesture = useMemo(() =>
     Gesture.Pan()
       .onBegin((e) => {
+        'worklet';
         if (e.x > parentWidth.value) {
           onProgressChange(clampNumber(parentWidth.value / parentWidth.value, 0, 1));
         }
@@ -28,6 +29,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
         circleScale.value = withTiming(1.3);
       })
       .onUpdate((e) => {
+        'worklet';
         if (e.x > parentWidth.value) {
           onProgressChange(clampNumber(parentWidth.value / parentWidth.value, 0, 1));
         }
@@ -36,6 +38,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
         }
       })
       .onFinalize((e) => {
+        'worklet';
         onProgressChangeEnd(clampNumber(e.x / parentWidth.value, 0, 1));
         circleScale.value = withTiming(1);
       }), []);
