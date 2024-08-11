@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, useColorScheme, ToastAndroid, ActivityIndicator } from "react-native";
+import { View, Text, Image, StyleSheet, useColorScheme, ToastAndroid, ActivityIndicator, TouchableOpacity, Modal } from "react-native";
 import { TouchableNativeFeedback } from 'react-native'; //rngh
 import useGlobalStyles from "../../../assets/style";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -6,6 +6,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import moment from "moment";
+import { ResizeMode, Video } from "expo-av";
 moment.locale('en');
 interface SearchResult {
     frameCount: number;
@@ -58,6 +59,7 @@ const exampleResultArray: Result[] = new Array(3).fill(exampleResult);
 
 export default function SearchAnimeByImage() {
     const globalStyles = useGlobalStyles();
+    const [videoModal, setVideoModal] = useState<{ open: boolean, link: string }>({ open: false, link: '' });
     const [searchResult, setSearchResult] = useState<SearchResult>({
         frameCount: 0,
         error: '',
@@ -68,6 +70,18 @@ export default function SearchAnimeByImage() {
     const styles = useStyles();
     return (
         <View style={styles.container}>
+            <Modal visible={videoModal.open} transparent animationType="slide" onRequestClose={() => setVideoModal({ open: false, link: '' })}>
+                <View style={{ flex: 1 }}>
+                    <View style={styles.videoModalContainer}>
+                        <TouchableOpacity
+                            onPress={() => setVideoModal({ open: false, link: '' })}
+                            style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
+                            <Icon name="times" color="white" size={40} />
+                        </TouchableOpacity>
+                        <Video source={{ uri: videoModal.link }} useNativeControls resizeMode={ResizeMode.CONTAIN} isMuted isLooping shouldPlay style={{ width: '100%', flex: 1, alignSelf: 'center' }} />
+                    </View>
+                </View>
+            </Modal>
             <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple('white', false)} onPress={() => {
                 DocumentPicker.getDocumentAsync({
                     type: ['image/*'],
@@ -116,7 +130,9 @@ export default function SearchAnimeByImage() {
                 renderItem={({ item }) => (
                     <View style={styles.searchResultContainer}>
                         {!isLoading ? (
-                            <>
+                            <TouchableOpacity style={styles.searchResultContainer} onPress={() => {
+                                setVideoModal({ open: true, link: item.video });
+                            }} disabled={!item.video}>
                                 {item.image === '' ? (
                                     <View style={{ width: 300, height: 100, justifyContent: 'center', alignItems: 'center' }}>
                                         <Icon name="image" size={40} color={globalStyles.text.color} style={{ textAlign: 'center' }} />
@@ -129,7 +145,7 @@ export default function SearchAnimeByImage() {
                                 <Text style={globalStyles.text}>Episode {item.episode ?? '-'}</Text>
                                 <Text style={globalStyles.text}>{moment.unix(item.from).utc(false).format('HH:mm:ss')} - {moment.unix(item.to).utc(false).format('HH:mm:ss')}</Text>
                                 <Text style={globalStyles.text}>{((item.similarity || 0) * 100).toFixed(2)}% Kemiripan</Text>
-                            </>
+                            </TouchableOpacity>
 
                         ) : (
                             <>
@@ -184,5 +200,11 @@ function useStyles() {
             marginBottom: 10,
             elevation: 5,
         },
+        videoModalContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        }
     })
 }
