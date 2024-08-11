@@ -7,7 +7,7 @@ import { useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import moment from "moment";
 import { ResizeMode, Video } from "expo-av";
-moment.locale('en');
+
 interface SearchResult {
     frameCount: number;
     error: string;
