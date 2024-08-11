@@ -1,3 +1,13 @@
+# v0.7.0-JS_1 (11-Agustus-2024)
+
+## Penambahan
+
+- [Cari anime berdasarkan gambar]: Memungkinkan kamu untuk melihat potongan adegan dengan menekan pada bagian anime yang ingin kamu lihat
+
+## Perbaikan
+
+- Memperbaiki masalah bahasa pada bagian `histori` dan `tonton nanti` yang muncul pada kasus tertentu
+
 # v0.7.0 (10-Agustus-2024)
 
 Versi ini memperkenalkan OTA update agar update aplikasi menjadi lebih ringan, mudah, dan cepat untuk pengguna dan developer.
