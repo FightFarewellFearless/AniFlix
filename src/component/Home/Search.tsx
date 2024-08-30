@@ -125,18 +125,10 @@ function Search(props: Props) {
         startTransition(() => {
           setListAnime(data);
         })
-      } else {
-        InteractionManager.runAfterInteractions(() => {
-          setListAnime(data);
-        })
       }
     }).then(data => {
       if ((global as any).nativeFabricUIManager !== undefined) {
         startTransition(() => {
-          setListAnime(data);
-        })
-      } else {
-        InteractionManager.runAfterInteractions(() => {
           setListAnime(data);
         })
       }

@@ -376,8 +376,12 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
                         title: removeHtmlTags(title),
                         streamingLink: href
                     });
-                    if (streamingCallback !== undefined && listAnimeData.length % 93 === 0) // call every 93
+                    if (streamingCallback !== undefined && listAnimeData.length % 93 === 0) { // call every 93 
+                        if ((global as any).nativeFabricUIManager === undefined) {
+                            continue;
+                        }
                         runOnJS(streamingCallback)(listAnimeData);
+                    }
                 }
             }
             // Assuming `runOnJS` is a function that you've defined elsewhere:
