@@ -296,7 +296,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
 }
 
 const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<string | undefined> => {
-    if (downLink.includes('desustream')) {
+    if (downLink.includes('desustream') || downLink.includes('desudrive')) {
         let err = false;
         let errorObj: Error | null = null;
         const response = await axios.get(downLink, {
