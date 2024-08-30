@@ -230,7 +230,7 @@ function Video(props: Props) {
         abortController.current?.signal,
       ).catch(err => {
         if (err.message === 'canceled') {
-          return;
+          return {canceled: true};
         }
         const errMessage =
           err.message === 'Network Error'
@@ -238,8 +238,14 @@ function Video(props: Props) {
             : 'Error tidak diketahui: ' + err.stack;
         Alert.alert('Error', errMessage);
         setLoading(false);
+        return {error: true};
       });
       if (resultData === undefined) {
+        setLoading(false);
+        Alert.alert('Ganti resolusi gagal', 'Gagal mengganti resolusi karena data kosong!');
+        return;
+      }
+      if (typeof resultData !== 'string' && ("canceled" in resultData || "error" in resultData)) {
         return;
       }
       const isWebviewNeeded = await fetch(resultData, {
