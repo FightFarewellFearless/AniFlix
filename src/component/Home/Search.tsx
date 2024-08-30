@@ -127,11 +127,7 @@ function Search(props: Props) {
         })
       }
     }).then(data => {
-      if ((global as any).nativeFabricUIManager !== undefined) {
-        startTransition(() => {
-          setListAnime(data);
-        })
-      }
+        setListAnime(data);
     }).catch(() => {
       setListAnime(null);
     });
