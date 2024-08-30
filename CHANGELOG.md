@@ -1,3 +1,16 @@
+# v0.7.1 (30-Agustus-2024)
+
+## Perubahan
+
+- Upgrade React-Native ke versi 0.75
+
+## Perbaikan
+
+- Memperbaiki masalah streaming anime
+- Memperbaiki masalah pergantian resolusi
+
+*Catatan: Fitur dan perubahan lain akan di update secara terpisah melalui OTA update.*
+
 # v0.7.0-JS_1 (11-Agustus-2024)
 
 ## Penambahan
