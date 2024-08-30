@@ -1,3 +1,9 @@
+# v0.7.1-JS_1 (30-Agustus-2024)
+
+## Perbaikan
+
+- Memperbaiki loading "Infinite Loading" pada menu pencarian
+
 # v0.7.1 (30-Agustus-2024)
 
 ## Perubahan
