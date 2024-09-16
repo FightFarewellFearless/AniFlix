@@ -1,3 +1,13 @@
+# v0.7.1-JS_2 (16-September-2024)
+
+## Perubahan
+
+- Memblokir anime dengan genre `Ecchi` dan sejenisnya.
+  > Ini bertujuan untuk menjaga aplikasi agar tetap aman untuk semua umur
+
+
+  > Jika kamu merasa anime yang diblokir ternyata aman untuk semua umur, kamu bisa coba meminta untuk anime nya di Whitelist dengan cara menekan tombol `Request Whitelist` dan tunggu pengumuman di server discord.
+
 # v0.7.1-JS_1 (30-Agustus-2024)
 
 ## Perbaikan
