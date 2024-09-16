@@ -4560,7 +4560,7 @@ __metadata:
     cheerio: 1.0.0-rc.12
     depcheck: ^1.4.7
     eslint: ^8.19.0
-    expo: 51.0.31
+    expo: ^51.0.31
     expo-av: ^14.0.7
     expo-document-picker: ^12.0.2
     expo-linear-gradient: ^13.0.2
@@ -4572,29 +4572,29 @@ __metadata:
     react: 18.3.1
     react-native: ^0.75.1
     react-native-blob-util: ^0.19.11
-    react-native-code-push: 8.3.1
+    react-native-code-push: ^8.3.1
     react-native-copilot: ^3.3.2
-    react-native-device-info: 11.1.0
+    react-native-device-info: ^11.1.0
     react-native-dotenv: ^3.4.11
     react-native-element-dropdown: ^2.12.1
     react-native-fetch-api: ^3.0.0
-    react-native-gesture-handler: 2.18.1
+    react-native-gesture-handler: ^2.18.1
     react-native-image-colors: ^2.4.0
     react-native-marked: ^6.0.4
     react-native-orientation-locker: ^1.7.0
     react-native-polyfill-globals: ^3.1.0
-    react-native-reanimated: 3.15.0
+    react-native-reanimated: ^3.15.0
     react-native-saf-x: ^2.2.3
-    react-native-safe-area-context: 4.10.9
+    react-native-safe-area-context: ^4.10.9
     react-native-screens: ^3.34.0
     react-native-svg: ^15.6.0
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.1.0
-    react-native-webview: 13.12.0
+    react-native-webview: ^13.12.0
     react-redux: ^9.1.2
     react-test-renderer: 18.3.1
     text-encoding: ^0.7.0
-    typescript: 5.0.4
+    typescript: 5.6.2
     url: ^0.11.3
     web-streams-polyfill: ^3.3.3
   languageName: unknown
@@ -7228,7 +7228,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-font@npm:~12.0.9":
+"expo-font@npm:~12.0.10":
   version: 12.0.10
   resolution: "expo-font@npm:12.0.10"
   dependencies:
@@ -7274,12 +7274,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-modules-core@npm:1.12.23":
-  version: 1.12.23
-  resolution: "expo-modules-core@npm:1.12.23"
+"expo-modules-core@npm:1.12.24":
+  version: 1.12.24
+  resolution: "expo-modules-core@npm:1.12.24"
   dependencies:
     invariant: ^2.2.4
-  checksum: 80fb59db4505d381be41c67da0fae4e2b6e3baf143fc613cbfe97bc31de9def668c5d7fee648b17f453e8f65dddf4c2fbfd115a696cb9b6611225feb9047576a
+  checksum: 0bd35e9967b5aebb7ccdbd95d3a806fe009af4ec22f53d6856c121ff0390545b1bc15f65a943fc4707bd300c29f0eb7d66d0ddc2ecc177f22d3dbe8ae305d207
   languageName: node
   linkType: hard
 
@@ -7294,9 +7294,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:51.0.31":
-  version: 51.0.31
-  resolution: "expo@npm:51.0.31"
+"expo@npm:^51.0.31":
+  version: 51.0.32
+  resolution: "expo@npm:51.0.32"
   dependencies:
     "@babel/runtime": ^7.20.0
     "@expo/cli": 0.18.29
@@ -7307,15 +7307,15 @@ __metadata:
     babel-preset-expo: ~11.0.14
     expo-asset: ~10.0.10
     expo-file-system: ~17.0.1
-    expo-font: ~12.0.9
+    expo-font: ~12.0.10
     expo-keep-awake: ~13.0.2
     expo-modules-autolinking: 1.11.2
-    expo-modules-core: 1.12.23
+    expo-modules-core: 1.12.24
     fbemitter: ^3.0.0
     whatwg-url-without-unicode: 8.0.0-3
   bin:
     expo: bin/cli
-  checksum: 5fbdeca01309bbb56e030ddf3b2fdef7052e44be3dff68b2e286b7f4004420705c73e573bd1581e4e68c6fdb3d46b4792d7f4cc3e59bb51341e28a89f153bccd
+  checksum: 5d15ab5b8d4f29484183bfa7c6e20e8be0725ca5e0a9ab20c0a6ce40b3a05f86a7bb7230c83c86528522241b83de73f2b4a7219a4daa363564f9860a26501454
   languageName: node
   linkType: hard
 
@@ -12008,7 +12008,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-code-push@npm:8.3.1":
+"react-native-code-push@npm:^8.3.1":
   version: 8.3.1
   resolution: "react-native-code-push@npm:8.3.1"
   dependencies:
@@ -12038,7 +12038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-device-info@npm:11.1.0":
+"react-native-device-info@npm:^11.1.0":
   version: 11.1.0
   resolution: "react-native-device-info@npm:11.1.0"
   peerDependencies:
@@ -12093,9 +12093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.18.1":
-  version: 2.18.1
-  resolution: "react-native-gesture-handler@npm:2.18.1"
+"react-native-gesture-handler@npm:^2.18.1":
+  version: 2.19.0
+  resolution: "react-native-gesture-handler@npm:2.19.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -12104,7 +12104,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 49b5b9a232fc60ddc38124a804410150070af5b20efbba1550831221560d71df704b7a7edfa2fb70d84fde32faf8675ad6118aea8b40f50c2a9d80eb7a08eb1c
+  checksum: ce9b9fc6537debf962e6b8d84f1c4cf18fe00f39bd86498e84a203ebb26bf3543c2642ed247d974537840407b7ddb602939fd8c817c00a3416e87bddc8f2088f
   languageName: node
   linkType: hard
 
@@ -12168,9 +12168,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:3.15.0":
-  version: 3.15.0
-  resolution: "react-native-reanimated@npm:3.15.0"
+"react-native-reanimated@npm:^3.15.0":
+  version: 3.15.2
+  resolution: "react-native-reanimated@npm:3.15.2"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -12187,7 +12187,7 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: fad4f54d7f005f4fb3d90d983bedcf1ec7de936259b8e286feb35edaa9d1ac16d8b927fcd59eeea7f91446310432b342fd9785301a304955844785fef52a3e31
+  checksum: 3bba2d27f67760796dd6093e227ba095010e3cdb3b8be54a2f78fd2842bab33e0fce9c8778ebc811935a949b9cf2a764e80eee6a50f5ecb895e199378bdd4c68
   languageName: node
   linkType: hard
 
@@ -12201,13 +12201,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:4.10.9":
-  version: 4.10.9
-  resolution: "react-native-safe-area-context@npm:4.10.9"
+"react-native-safe-area-context@npm:^4.10.9":
+  version: 4.11.0
+  resolution: "react-native-safe-area-context@npm:4.11.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 150bf4fa7607e8de565cce0c45d321048a3c982f4c82cc2a49eb342def968559f538d4554c30c20fa8b2e6dc716c24846745b129dc25396e083d98c2a29962a2
+  checksum: 6d6af265ecf1b9cb45e042a335f2c5da472ad41eb5d4fda8e31a1607b344726f0f4f9501ef3a3a731cec3784ba93485b44cbdafbf5f13055caa130c703bbd307
   languageName: node
   linkType: hard
 
@@ -12283,16 +12283,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.12.0":
-  version: 13.12.0
-  resolution: "react-native-webview@npm:13.12.0"
+"react-native-webview@npm:^13.12.0":
+  version: 13.12.2
+  resolution: "react-native-webview@npm:13.12.2"
   dependencies:
     escape-string-regexp: ^4.0.0
     invariant: 2.2.4
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: a7e4b9658908ef8662dc69ae6206e68ebd31b8cc10251f5d226d6d1d2756ae3c77a95f656fbf237f54e6f13e95ab0f2bbb72a0ebf5e22f3e62690d1591850219
+  checksum: d84b2e2e75dc484eb40f8e285607b9686693f2d31e95802e2b358dc0820bcc294b438a77174eba157c31d95675c962c61c94885629af999416ad1355e9618fe0
   languageName: node
   linkType: hard
 
@@ -14126,23 +14126,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.0.4":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
+"typescript@npm:5.6.2":
+  version: 5.6.2
+  resolution: "typescript@npm:5.6.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 82b94da3f4604a8946da585f7d6c3025fff8410779e5bde2855ab130d05e4fd08938b9e593b6ebed165bda6ad9292b230984f10952cf82f0a0ca07bbeaa08172
+  checksum: 48777e1dabd9044519f56cd012b0296e3b72bafe12b7e8e34222751d45c67e0eba5387ecdaa6c14a53871a29361127798df6dc8d1d35643a0a47cb0b1c65a33a
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.0.4#~builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"
+"typescript@patch:typescript@5.6.2#~builtin<compat/typescript>":
+  version: 5.6.2
+  resolution: "typescript@patch:typescript@npm%3A5.6.2#~builtin<compat/typescript>::version=5.6.2&hash=b45daf"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: d26b6ba97b6d163c55dbdffd9bbb4c211667ebebc743accfeb2c8c0154aace7afd097b51165a72a5bad2cf65a4612259344ff60f8e642362aa1695c760d303ac
+  checksum: c084ee1ab865f108c787e6233a5f63c126c482c0c8e87ec998ac5288a2ad54b603e1ea8b8b272355823b833eb31b9fabb99e8c6152283e1cb47e3a76bd6faf6c
   languageName: node
   linkType: hard
 
