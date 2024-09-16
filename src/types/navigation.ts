@@ -41,7 +41,11 @@ type RootStackNavigator = {
     changelog: string;
     size: number;
   };
-  Blocked: undefined;
+  Blocked: {
+    title: string;
+    url: string;
+    data: AniDetail;
+  };
   FailedToConnect: undefined;
   Maintenance: {
     message?: string;

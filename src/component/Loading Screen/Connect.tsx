@@ -33,6 +33,23 @@ import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import codePush from 'react-native-code-push';
 
+export const JoinDiscord = () => {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
+  return <TouchableOpacity
+    onPress={() => {
+      Linking.openURL('https://discord.gg/sbTwxHb9NM');
+    }}
+    style={styles.bottomCredits}>
+    {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
+    <MaterialIcon name="discord" size={43} color={'#7289d9'} />
+    <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
+      {' '}
+      Join discord
+    </Text>
+  </TouchableOpacity>
+}
+
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
@@ -166,7 +183,7 @@ function Loading(props: Props) {
       ) {
 
         const OTAUpdate = await codePush.checkForUpdate().catch();
-        
+
         if (OTAUpdate) {
           props.navigation.dispatch(
             StackActions.replace('NeedUpdate', {
@@ -245,24 +262,14 @@ function Loading(props: Props) {
           style={[styles.bottomCredits, { marginRight: 8 }]}>
           {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
           <Icon name="github" size={43} color={globalStyles.text.color} />
-          <Text style={[globalStyles.text, { fontSize: 12 }]}>
+          <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
             {' '}
             Open-Sourced on github
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => {
-            Linking.openURL('https://discord.gg/sbTwxHb9NM');
-          }}
-          style={styles.bottomCredits}>
-          {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-          <MaterialIcon name="discord" size={43} color={'#7289d9'} />
-          <Text style={[globalStyles.text, { fontSize: 12 }]}>
-            {' '}
-            Join discord
-          </Text>
-        </TouchableOpacity>
+        <JoinDiscord />
+
       </View>
       <Text
         style={[
@@ -280,10 +287,11 @@ function useStyles() {
   return StyleSheet.create({
     bottomCredits: {
       flexDirection: 'row',
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#d8d8d8',
       padding: 10,
       borderRadius: 8,
       alignItems: 'center',
+      elevation: 4,
     },
   });
 }

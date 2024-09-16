@@ -17,6 +17,7 @@ import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import controlWatchLater from '../../utils/watchLaterControl';
 import AnimeAPI from '../../utils/AnimeAPI';
+import Anime_Whitelist from '../../utils/Anime_Whitelist';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
@@ -59,6 +60,17 @@ function FromUrl(props: Props) {
         }
         try {
           if (result.type === 'animeDetail') {
+            if(result.genres.includes('') && !Anime_Whitelist.list.includes(props.route.params.link)) {
+              // Ecchi
+              props.navigation.dispatch(
+                StackActions.replace('Blocked', {
+                  title: result.title,
+                  url: props.route.params.link,
+                  data: result,
+                })
+              )
+              return;
+            }
             props.navigation.dispatch(
               StackActions.replace('AnimeDetail', {
                 data: result,

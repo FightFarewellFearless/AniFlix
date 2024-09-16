@@ -55,6 +55,8 @@ import WebView from 'react-native-webview';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import { AniDetail, AniStreaming } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
+import { StackActions } from '@react-navigation/native';
+import Anime_Whitelist from '../utils/Anime_Whitelist';
 
 
 function useBackHandler(handler: () => boolean) {
@@ -107,6 +109,16 @@ function Video(props: Props) {
     AnimeAPI.fromUrl(data.episodeData.animeDetail).then(detail => {
       if (detail === 'Unsupported') return;
       if (detail.type === 'animeDetail') {
+        if(detail.genres.includes('') && !Anime_Whitelist.list.includes(data.episodeData.animeDetail)) {
+          props.navigation.dispatch(
+            StackActions.replace('Blocked', {
+              title: detail.title,
+              url: data.episodeData.animeDetail,
+              data: detail,
+            })
+          )
+          return;
+        }
         setAnimeDetail(detail);
       }
     })
