@@ -1,3 +1,9 @@
+# v0.7.1-JS_3 (06-Oktober-2024)
+
+## Perbaikan
+
+- Menambah sistem bypass cloudflare
+
 # v0.7.1-JS_2 (16-September-2024)
 
 ## Perubahan
