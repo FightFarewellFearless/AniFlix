@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
@@ -17,11 +17,18 @@ import { RootStackNavigator } from './src/types/navigation';
 import useGlobalStyles from './src/assets/style';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
+import { CFBypassIsOpen, CFBypassWebView, setWebViewOpen } from './src/utils/CFBypass';
 
 enableScreens((global as any).nativeFabricUIManager === undefined); // TEMP: temporary fix for crashed app on new architecture
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [cfUrl, setCfUrl] = useState('');
+  setWebViewOpen.openWebViewCF = (isOpen: boolean, url: string) => {
+    setIsOpen(isOpen);
+    setCfUrl(url);
+  };
   const colorScheme = useColorScheme();
   useEffect(() => {
     StatusBar.setHidden(false);
@@ -58,6 +65,9 @@ function App() {
             <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
           </Stack.Navigator>
         </Provider>
+        <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
+          <CFBypassWebView />
+        </CFBypassIsOpen.Provider>
         {__DEV__ && (
           <View style={styles.Dev} pointerEvents="none">
             <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>

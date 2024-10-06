@@ -416,6 +416,10 @@ function Video(props: Props) {
         undefined,
         abortController.current?.signal,
       ).catch(err => {
+        if(err.message === 'Silahkan selesaikan captcha') {
+          setLoading(false);
+          return;
+        }
         if (err.message === 'canceled') {
           return;
         }

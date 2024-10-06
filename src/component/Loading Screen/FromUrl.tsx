@@ -121,6 +121,10 @@ function FromUrl(props: Props) {
         }
       })
       .catch(err => {
+        if(err.message === 'Silahkan selesaikan captcha') {
+          props.navigation.goBack();
+          return;
+        }
         if (err.message === 'canceled') {
           return;
         }

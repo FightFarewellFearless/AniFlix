@@ -1,3 +1,4 @@
+import { ToastAndroid } from 'react-native';
 import {
   AniDetail,
   Home,
@@ -7,6 +8,8 @@ import {
   listAnimeTypeList,
 } from '../types/anime';
 import Anime from './animeLocalAPI';
+import { setWebViewOpen } from './CFBypass';
+import deviceUserAgent from './deviceUserAgent';
 
 class AnimeAPI {
   private static base_url = 'https://aniflix.pirles.ix.tc/v5/';
@@ -95,11 +98,29 @@ class AnimeAPI {
     // const dataJson: fromUrlJSON = JSON.parse(dataString);
     // return dataJson;
     try {
+      const statusCode = await fetch(link, {
+        headers: {
+          "User-Agent": deviceUserAgent
+        },
+        method: 'GET'
+      });
+      const html = await statusCode.text();
+      const regex = /<title>(.*?)<\/title>/;
+      const title = html.match(regex)?.[1];
+      if(statusCode.status === 403 && title === 'Just a moment...') {
+        setWebViewOpen.openWebViewCF(true, link);
+        throw new Error('Silahkan selesaikan captcha');
+      }
       return await Anime.fromUrl(link, resolution, skipAutoRes, detailOnly, signal) as fromUrlJSON;
     } catch (e) {
       // console.error(e.message)
       // @ts-expect-error
-      if(e.message !== 'Network Error' || e.message !== 'AbortError' || e.message !== 'canceled') {
+      if(e.message === 'Silahkan selesaikan captcha') {
+        ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
+        throw e;
+      }
+      // @ts-expect-error
+      else if(e.message !== 'Network Error' || e.message !== 'AbortError' || e.message !== 'canceled') {
         throw e;
       }
       return 'Unsupported';
