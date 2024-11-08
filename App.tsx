@@ -58,7 +58,9 @@ function App() {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="AnimeDetail" component={AniDetail} />
             <Stack.Screen name="FromUrl" component={FromUrl} />
-            <Stack.Screen name="Video" component={Video} />
+            <Stack.Screen name="Video" component={Video} options={{
+              headerShown: true,
+            }} />
             <Stack.Screen name="connectToServer" component={Connecting} />
             <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
             <Stack.Screen name="Blocked" component={Blocked} />

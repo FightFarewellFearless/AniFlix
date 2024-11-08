@@ -184,6 +184,14 @@ function Video(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // set header title
+  useEffect(() => {
+    props.navigation.setOptions({
+      headerTitle: data.title,
+      headerShown: !fullscreen,
+    })
+  }, [data, fullscreen]);
+
   // Battery level
   useEffect(() => {
     let _batteryEvent: EmitterSubscription | null;
