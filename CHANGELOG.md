@@ -1,3 +1,13 @@
+# v0.7.2 (08-November-2024)
+
+## Penambahan
+
+- Menambahkan header di bagian video (streaming)
+
+## Perubahan lain
+
+- Upgrade dependencies ke versi terbaru untuk persiapan react-native 0.76
+
 # v0.7.1-JS_3 (06-Oktober-2024)
 
 ## Perbaikan
