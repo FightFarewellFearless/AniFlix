@@ -34,7 +34,7 @@ const ReText = (props: TextProps) => {
     <AnimatedTextInput
       underlineColorAndroid="transparent"
       editable={false}
-      value={text.value}
+      value={text.get()}
       style={[styles.baseStyle, style]}
       {...{ animatedProps }}
     />
