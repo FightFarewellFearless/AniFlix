@@ -116,7 +116,7 @@ function FromUrl(props: Props) {
             }
           }
         } catch (e: any) {
-          Alert.alert('Error', e.stack);
+          Alert.alert('Error', e.message);
           props.navigation.goBack();
         }
       })
@@ -131,7 +131,7 @@ function FromUrl(props: Props) {
         const errMessage =
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.stack;
+            : 'Error tidak diketahui: ' + err.message;
         Alert.alert('Error', errMessage);
         props.navigation.goBack();
       });

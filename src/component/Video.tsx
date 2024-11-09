@@ -255,7 +255,7 @@ function Video(props: Props) {
         const errMessage =
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.stack;
+            : 'Error tidak diketahui: ' + err.message;
         Alert.alert('Error', errMessage);
         setLoading(false);
         return {error: true};
