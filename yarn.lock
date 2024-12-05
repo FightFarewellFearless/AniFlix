@@ -4362,13 +4362,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.6":
+"@types/react@npm:*":
   version: 18.3.12
   resolution: "@types/react@npm:18.3.12"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
   checksum: 4ab1577a8c2105a5e316536f724117c90eee5f4bd5c137fc82a2253d8c1fd299dedaa07e8dfc95d6e2f04a4be3cb8b0e1b06098c6233ebd55c508d88099395b7
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.0.0":
+  version: 19.0.0
+  resolution: "@types/react@npm:19.0.0"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: dd7d7388b28fdf78cdf28c88490fe99413a0e1fab33e92afdf862620edc77dfe605ffe48dd3aeffb1de29107ea958a12f6d667236b2ead1affdf609db7152fad
   languageName: node
   linkType: hard
 
@@ -4826,7 +4835,7 @@ __metadata:
     "@rnx-kit/align-deps": ^2.5.0
     "@shopify/flash-list": ^1.7.1
     "@types/metro-config": ^0.76.3
-    "@types/react": ^18.2.6
+    "@types/react": ^19.0.0
     "@types/react-native-vector-icons": ^6.4.13
     "@types/react-test-renderer": ^18.0.0
     axios: ^1.6.2
@@ -4845,7 +4854,7 @@ __metadata:
     jest: ^29.6.3
     moment: ^2.29.4
     prettier: 2.8.8
-    react: 18.3.1
+    react: 19.0.0
     react-native: 0.75.1
     react-native-blob-util: ^0.19.11
     react-native-code-push: ^8.3.1
@@ -12956,12 +12965,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.3.1":
-  version: 18.3.1
-  resolution: "react@npm:18.3.1"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: a27bcfa8ff7c15a1e50244ad0d0c1cb2ad4375eeffefd266a64889beea6f6b64c4966c9b37d14ee32d6c9fcd5aa6ba183b6988167ab4d127d13e7cb5b386a376
+"react@npm:19.0.0":
+  version: 19.0.0
+  resolution: "react@npm:19.0.0"
+  checksum: 86de15d85b2465feb40297a90319c325cb07cf27191a361d47bcfe8c6126c973d660125aa67b8f4cbbe39f15a2f32efd0c814e98196d8e5b68c567ba40a399c6
   languageName: node
   linkType: hard
 
