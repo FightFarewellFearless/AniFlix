@@ -14,6 +14,8 @@ import watchLaterJSON from "../types/watchLaterJSON";
 import controlWatchLater from "../utils/watchLaterControl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { complementHex, darkenHexColor } from "../utils/hexColors";
+
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
 // const TooltipComponent = ({ labels }: TooltipProps) => {
@@ -216,7 +218,9 @@ function AniDetailCopilot(props: Props) {
     }, 500);
   }, [start, copilotEvents]);
 
-  const endThumbnailColor = useMemo(() => darkenHexColor(thumbnailColor, 50), [thumbnailColor]);
+  const colorScheme = useColorScheme();
+
+  const endThumbnailColor = useMemo(() => darkenHexColor(thumbnailColor, 50 * (colorScheme === 'dark' ? 1 : -1)), [thumbnailColor]);
 
   return (
     <View style={styles.container}>
@@ -286,7 +290,7 @@ function AniDetailCopilot(props: Props) {
         </ScrollView>
       </ImageBackground>
 
-      <LinearGradient colors={[endThumbnailColor, thumbnailColor]} style={[styles.container]}>
+      <View style={[styles.container, {backgroundColor: thumbnailColor}]}>
         <FlashList
           estimatedItemSize={78}
           data={data.episodeList}
@@ -311,7 +315,7 @@ function AniDetailCopilot(props: Props) {
             />
           )}
           extraData={styles} />
-      </LinearGradient >
+      </View >
     </View>
   )
 }
@@ -368,42 +372,6 @@ function useStyles() {
       textShadowRadius: 1,
     },
   });
-}
-
-function complementHex(hex: string) {
-
-  hex = hex.replace('#', '');
-
-
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-
-  const rComplement = (255 - r).toString(16).padStart(2, '0');
-  const gComplement = (255 - g).toString(16).padStart(2, '0');
-  const bComplement = (255 - b).toString(16).padStart(2, '0');
-
-
-  return darkenHexColor(`#${rComplement}${gComplement}${bComplement}`, 10);
-}
-
-function darkenHexColor(hex: string, amount: number) {
-  hex = hex.replace('#', '');
-
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-  const darkR = Math.max(0, r - amount);
-  const darkG = Math.max(0, g - amount);
-  const darkB = Math.max(0, b - amount);
-
-  const darkRHex = darkR.toString(16).padStart(2, '0');
-  const darkGHex = darkG.toString(16).padStart(2, '0');
-  const darkBHex = darkB.toString(16).padStart(2, '0');
-
-  return `#${darkRHex}${darkGHex}${darkBHex}`;
 }
 
 export default AniDetail;
