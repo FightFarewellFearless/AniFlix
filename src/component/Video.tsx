@@ -91,7 +91,7 @@ function Video(props: Props) {
 
   const [batteryLevel, setBatteryLevel] = useState(0);
   // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
-  const [showSynopsys, setShowSynopsys] = useState(false);
+  const [showSynopsis, setShowSynopsis] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
@@ -163,8 +163,8 @@ function Video(props: Props) {
   const infoContainerOpacity = useSharedValue(1);
   const initialInfoContainerHeight = useRef<number>();
   const isInfoPressed = useRef(false);
-  const [synopsysTextLength, setSynopsysTextLength] = useState(0);
-  const synopsysHeight = useRef(0);
+  const [synopsisTextLength, setSynopsisTextLength] = useState(0);
+  const synopsisHeight = useRef(0);
   const infoContainerStyle = useAnimatedStyle(() => {
     return {
       opacity: infoContainerOpacity.value,
@@ -525,19 +525,19 @@ function Video(props: Props) {
       infoContainerHeight.value = initialInfoContainerHeight.current!;
     }
     isInfoPressed.current = true;
-    if (showSynopsys) {
+    if (showSynopsis) {
       infoContainerHeight.value = withTiming(
         initialInfoContainerHeight.current as number, undefined, () => {
-          runOnJS(setShowSynopsys)(false);
+          runOnJS(setShowSynopsis)(false);
         });
     } else {
-      setShowSynopsys(true);
+      setShowSynopsis(true);
       infoContainerHeight.value = withTiming(
         (initialInfoContainerHeight.current as number) +
-        synopsysHeight.current
+        synopsisHeight.current
       );
     }
-  }, [showSynopsys]);
+  }, [showSynopsis]);
 
   const onSynopsisPressIn = useCallback(() => {
     infoContainerOpacity.value = withTiming(0.4, { duration: 100 });
@@ -674,21 +674,21 @@ function Video(props: Props) {
               onPressOut={onSynopsisPressOut}
               onLayout={onSynopsisLayout}
               onPress={onSynopsisPress}
-              disabled={synopsysTextLength <= 2}>
+              disabled={synopsisTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>
                 {data.title}
               </Text>
 
               <Text
                 style={[globalStyles.text, styles.infoSinopsis]}
-                numberOfLines={!showSynopsys ? 2 : undefined}
+                numberOfLines={!showSynopsis ? 2 : undefined}
                 onTextLayout={e => {
-                  setSynopsysTextLength(e.nativeEvent.lines.length);
-                  synopsysHeight.current = e.nativeEvent.lines
+                  setSynopsisTextLength(e.nativeEvent.lines.length);
+                  synopsisHeight.current = e.nativeEvent.lines
                     .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
-                {animeDetail?.synopsys || 'Tidak ada sinopsis'}
+                {animeDetail?.synopsis || 'Tidak ada sinopsis'}
               </Text>
 
               <View style={[styles.infoGenre]}>
@@ -719,9 +719,9 @@ function Video(props: Props) {
                 </Text>
               </View>
 
-              {synopsysTextLength > 2 && (
+              {synopsisTextLength > 2 && (
                 <View style={{ alignItems: 'center', marginTop: 3 }}>
-                  {showSynopsys ? (
+                  {showSynopsis ? (
                     <Icon name="chevron-up" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />
                   ) : (
                     <Icon name="chevron-down" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />

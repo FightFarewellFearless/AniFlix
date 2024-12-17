@@ -283,9 +283,9 @@ function AniDetailCopilot(props: Props) {
         <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
           <Icon name="tags" /> {data.genres.join(', ')}
         </Text>
-        <ScrollView style={[styles.synopsys]}>
+        <ScrollView style={[styles.synopsis]}>
           <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
-            {data.synopsys === '' ? 'Tidak ada sinopsis' : data.synopsys}
+            {data.synopsis === '' ? 'Tidak ada sinopsis' : data.synopsis}
           </Text>
         </ScrollView>
       </ImageBackground>
@@ -355,7 +355,7 @@ function useStyles() {
       textShadowRadius: .8,
       fontWeight: 'bold',
     },
-    synopsys: {
+    synopsis: {
 
     },
     episodeButton: {

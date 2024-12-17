@@ -45,7 +45,7 @@ interface AniDetail extends FromUrl {
   type: 'animeDetail';
   title: string;
   genres: string[];
-  synopsys: string;
+  synopsis: string;
   detailOnly: boolean;
   episodeList: AniDetailEpsList[];
   epsTotal: string;

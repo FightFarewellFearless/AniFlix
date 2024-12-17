@@ -169,9 +169,9 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
 
         const filmStats = aniDetail.find('div.infozin > div.infozingle');
         const title = aniDetail.find('div.jdlrx').text().trim();
-        const sinopsys: string[] = [];
+        const synopsis: string[] = [];
         aniDetail.find('div.sinopc').find('p').each((i, el) => {
-            sinopsys.push($(el).text().trim());
+            synopsis.push($(el).text().trim());
         });
         const epsTotal = getSecondTwoDots(filmStats.find('p').eq(6).text()).trim();
         const minutesPerEp = getSecondTwoDots(filmStats.find('p').eq(7).text()).trim();
@@ -206,7 +206,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
             type: 'animeDetail',
             title,
             genres,
-            synopsys: sinopsys.join('\n'),
+            synopsis: synopsis.join('\n'),
             detailOnly,
             episodeList,
             epsTotal,
@@ -279,7 +279,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
             downloadLink,
             resolution,
             resolutionRaw,
-            // synopsys: sinopsys,
+            // synopsis: synopsis,
             thumbnailUrl,
             // releaseYear: aniStats.find('span.item').eq(1).text().trim(),
             // status: aniStats.find('span.item').eq(0).text().trim(),
