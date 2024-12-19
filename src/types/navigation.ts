@@ -1,4 +1,5 @@
-import { Home, AniDetail, AniStreaming } from './anime';
+import { getStreamingDetail, MovieDetail } from '../utils/animeMovie';
+import { EpisodeBaruHome, AniDetail, AniStreaming } from './anime';
 
 type HomeNavigator = {
   AnimeList: undefined;
@@ -10,26 +11,32 @@ type HomeNavigator = {
 type RootStackNavigator = {
   connectToServer: undefined;
   Home: {
-    data: Home;
+    data: EpisodeBaruHome;
   };
   AnimeDetail: {
     data: AniDetail;
     link: string;
   };
+  MovieDetail: {
+    data: MovieDetail;
+    link: string;
+  };
   FromUrl: {
     link: string;
+    isMovie?: boolean;
     historyData?: {
       resolution: string;
       lastDuration: number;
     };
   };
   Video: {
-    data: AniStreaming;
+    data: AniStreaming | Awaited<ReturnType<typeof getStreamingDetail>>;
     link: string;
     historyData?: {
       resolution: string | undefined;
       lastDuration: number;
     };
+    isMovie?: boolean;
   };
   NeedUpdate: {
     nativeUpdate: true;

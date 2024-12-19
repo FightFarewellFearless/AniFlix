@@ -1,7 +1,7 @@
 import { ToastAndroid } from 'react-native';
 import {
   AniDetail,
-  Home,
+  EpisodeBaruHome,
   NewAnimeList,
   SearchAnime,
   AniStreaming,
@@ -14,14 +14,14 @@ import deviceUserAgent from './deviceUserAgent';
 class AnimeAPI {
   private static base_url = 'https://aniflix.pirles.ix.tc/v5/';
 
-  static async home(signal?: AbortSignal): Promise<Home> {
+  static async home(signal?: AbortSignal): Promise<EpisodeBaruHome> {
     // const data = await fetch(this.base_url + 'home', {
     //   signal,
     //   headers: {
     //     'User-Agent': deviceUserAgent,
     //   },
     // });
-    // return await (data.json() as Promise<Home>);
+    // return await (data.json() as Promise<EpisodeBaruHome>);
 
     const [newAnime, jadwalAnime] = await Promise.all([Anime.newAnime(undefined, signal), Anime.jadwalAnime(signal)]);
 
@@ -102,8 +102,14 @@ class AnimeAPI {
         headers: {
           "User-Agent": deviceUserAgent
         },
-        method: 'GET'
+        method: 'GET',
+        signal
+      }).catch(err => {
+        throw new Error('canceled')
       });
+      // if(statusCode instanceof Error) {
+      //   throw statusCode;
+      // }
       const html = await statusCode.text();
       const regex = /<title>(.*?)<\/title>/;
       const title = html.match(regex)?.[1];

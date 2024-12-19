@@ -132,6 +132,7 @@ function History(props: Props) {
               StackActions.push('FromUrl', {
                 link: item.link,
                 historyData: item,
+                isMovie: item.isMovie,
               }),
             );
           }}>
@@ -193,8 +194,8 @@ function History(props: Props) {
 
             <View style={{ flexDirection: 'row' }}>
               <View style={styles.listEpisodeAndPart}>
-                <Text style={styles.listEpisode}>
-                  {item.episode}
+                <Text style={[styles.listEpisode, item.isMovie ? { color: '#ff7300', fontWeight: 'bold', fontSize: 16 } : undefined]}>
+                  {item.isMovie ? 'Movie' : item.episode}
                   {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
                     {' Part ' + (item.part + 1)}

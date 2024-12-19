@@ -1,6 +1,6 @@
 import { AVPlaybackStatus, Audio, InterruptionModeAndroid, ResizeMode, Video } from "expo-av";
 import { useKeepAwake } from 'expo-keep-awake';
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native"; //rngh
 import Reanimated, { SharedValue, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
@@ -23,8 +23,10 @@ type VideoPlayerProps = {
   onLoad?: () => void;
   isPaused?: boolean;
   onDurationChange?: (positionSecond: number) => void;
+  headers?: Record<string, string>;
+  batteryAndClock?: React.JSX.Element;
 }
-export default function VideoPlayer({ title, streamingURL, style, videoRef, onFullscreenUpdate, fullscreen, onLoad, isPaused, onDurationChange }: VideoPlayerProps) {
+export default function VideoPlayer({ title, streamingURL, style, videoRef, onFullscreenUpdate, fullscreen, onLoad, isPaused, onDurationChange, headers, batteryAndClock }: VideoPlayerProps) {
   useKeepAwake();
   const seekBarProgress = useSharedValue(0);
   const seekBarProgressDisabled = useSharedValue(false);
@@ -134,6 +136,7 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   return (
     <View style={[style]}>
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
+        {batteryAndClock}
         <Video
           key={streamingURL}
           onLoad={onVideoLoad}
@@ -141,15 +144,16 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
           source={{
             uri: streamingURL, headers: {
               'User-Agent': deviceUserAgent,
+              ...headers,
             }
           }}
           resizeMode={ResizeMode.CONTAIN}
           useNativeControls={false}
-          style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }}
+          style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0, }}
           ref={videoRef}
         />
 
-        <Reanimated.View pointerEvents="box-none" style={[{flex: 1}, showControlsStyle]}>
+        <Reanimated.View pointerEvents="box-none" style={[{flex: 1, zIndex: 999}, showControlsStyle]}>
           <Top title={title} />
           <CenterControl
             isBuffering={isBuffering}
@@ -223,17 +227,25 @@ function BottomControl({
   seekBarProgress: SharedValue<number>; onProgressChange: (value: number) => void, onProgressChangeEnd: (lastValue: number) => void; onFullScreenButtonPressed: () => void; isFullscreen: boolean;
   currentDurationSecond: SharedValue<number>; totalDurationSecond: SharedValue<number>;
 }) {
-  const currentSecond = useDerivedValue(() => {
-    'worklet';
-    const sec = Math.floor(currentDurationSecond.value % 60);
-    const min = Math.floor(currentDurationSecond.value / 60);
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  })
   const totalSecond = useDerivedValue(() => {
     'worklet';
     const sec = Math.floor(totalDurationSecond.value % 60);
     const min = Math.floor(totalDurationSecond.value / 60);
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    const hour = Math.floor(min / 60);
+    const minStr = (min % 60).toString().padStart(2, '0');
+    const secStr = sec.toString().padStart(2, '0');
+    return `${hour > 0 ? `${hour.toString().padStart(2, '0')}:` : ''}${minStr}:${secStr}`;
+  })
+  const currentSecond = useDerivedValue(() => {
+    'worklet';
+    const totalSecStr = totalSecond.value;
+    const hasHour = totalSecStr.split(':').length === 3;
+    const sec = Math.floor(currentDurationSecond.value % 60);
+    const min = Math.floor(currentDurationSecond.value / 60);
+    const hour = Math.floor(min / 60);
+    const minStr = (min % 60).toString().padStart(2, '0');
+    const secStr = sec.toString().padStart(2, '0');
+    return hasHour ? `${hour.toString().padStart(2, '0')}:${minStr}:${secStr}` : `${minStr}:${secStr}`;
   })
   return (
     <Pressable style={{ flexDirection: 'row', backgroundColor: '#00000069', position: 'absolute', bottom: 0, alignSelf: 'center', width: '100%', paddingHorizontal: 5 }}>

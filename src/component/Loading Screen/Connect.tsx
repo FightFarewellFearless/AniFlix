@@ -25,13 +25,15 @@ import Orientation from 'react-native-orientation-locker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackNavigator } from '../../types/navigation';
 import { SetDatabaseTarget } from '../../types/redux';
-import { Home } from '../../types/anime';
+import { EpisodeBaruHome } from '../../types/anime';
 import AnimeAPI from '../../utils/AnimeAPI';
 import RNFetchBlob from 'react-native-blob-util';
 
 import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import codePush from 'react-native-code-push';
+
+import { AnimeMovieWebView } from '../../utils/animeMovie';
 
 export const JoinDiscord = () => {
   const styles = useStyles();
@@ -58,17 +60,21 @@ function Loading(props: Props) {
   useEffect(() => {
     Orientation.lockToPortrait();
   }, []);
+
   const [loadStatus, setLoadStatus] = useState({
     'Menyiapkan database': false,
     'Mengecek versi aplikasi': false,
     'Mendapatkan domain terbaru': false,
+    'Mempersiapkan data anime movie': false,
     'Menghubungkan ke server': false,
   });
+
+  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
   const connectToServer = useCallback(async () => {
-    const jsondata: Home | void = await AnimeAPI.home().catch(() => {
+    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
       props.navigation.dispatch(StackActions.replace('FailedToConnect'));
     });
     if (jsondata === undefined) {
@@ -182,7 +188,7 @@ function Loading(props: Props) {
         __DEV__ // skip update when app is in dev mode
       ) {
 
-        const OTAUpdate = await codePush.checkForUpdate().catch();
+        const OTAUpdate = await codePush.checkForUpdate();
 
         if (OTAUpdate) {
           props.navigation.dispatch(
@@ -208,7 +214,7 @@ function Loading(props: Props) {
             'Mendapatkan domain terbaru': true,
           }
         });
-        await connectToServer();
+        setIsAnimeMovieWebViewOpen(true);
       } else {
         const latestVersion = nativeAppVersion.tag_name;
         const changelog = nativeAppVersion.body;
@@ -232,6 +238,17 @@ function Loading(props: Props) {
     deleteUnnecessaryUpdate,
   ]);
 
+  const onAnimeMovieReady = useCallback(() => {
+    setLoadStatus(old => {
+      return {
+        ...old,
+        'Mempersiapkan data anime movie': true,
+      }
+    });
+    setIsAnimeMovieWebViewOpen(false);
+    connectToServer();
+  }, []);
+
   return (
     <View
       style={{
@@ -239,6 +256,7 @@ function Loading(props: Props) {
         alignItems: 'center',
         flex: 1,
       }}>
+      <AnimeMovieWebView isWebViewShown={isAnimeMovieWebViewOpen} setIsWebViewShown={setIsAnimeMovieWebViewOpen} onAnimeMovieReady={onAnimeMovieReady} />
       <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>Tunggu sebentar ya.. lagi loading</Text>
       {Object.entries(loadStatus).map(([key, value]) => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }} key={key}>

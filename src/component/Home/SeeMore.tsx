@@ -4,24 +4,28 @@ import {
   StyleSheet,
   ActivityIndicator,
   View,
+  ToastAndroid,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { FlashList } from '@shopify/flash-list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useWindowDimensions } from 'react-native';
-import { HomeContext } from '../../misc/context';
+import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { HomeStackNavigator } from '../../types/navigation';
 import { AnimeList } from './AnimeList';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { NewAnimeList } from '../../types/anime';
+import { getLatestMovie, Movies } from '../../utils/animeMovie';
 
 type Props = NativeStackScreenProps<HomeStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
-  const { paramsState: data, setParamsState: setData } =
-    useContext(HomeContext);
+  const { paramsState: animeData, setParamsState: setAnimeData } =
+    useContext(EpisodeBaruHomeContext);
+  const { paramsState: movieData, setParamsState: setMovieData } =
+    useContext(MovieListHomeContext);
   const [isLoading, setIsLoading] = useState(false);
-  const page = (data?.newAnime.length ?? 0) / 25;
+  const page = props.route.params.type === 'AnimeList' ? (animeData?.newAnime.length ?? 0) / 25 : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
   const columnWidth = dimensions.width * 120/200 / 1.9;
   const numColumns = Math.floor(dimensions.width / columnWidth);
@@ -30,7 +34,7 @@ function SeeMore(props: Props) {
 
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: 'Anime terbaru',
+      headerTitle: props.route.params.type === 'MovieList' ? 'Movie terbaru' : 'Anime terbaru',
     });
 
     // props.navigation.getParent()?.setOptions({
@@ -50,17 +54,26 @@ function SeeMore(props: Props) {
     <View style={{ flex: 1 }}>
       <FlashList
         data={
-          data?.newAnime as NewAnimeList[]
+          (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (NewAnimeList | Movies)[]
         }
         // TEMP: temporary fix for Fabric react-native-screens
         contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager !== undefined ? 49 : undefined }}
         extraData={styles}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
-          <AnimeList
-            newAnimeData={item as NewAnimeList}
-            navigationProp={props.navigation}
-          />
+          props.route.params.type === 'MovieList' ? (
+            <AnimeList
+              isMovie={true}
+              newAnimeData={item as Movies}
+              navigationProp={props.navigation}
+            />
+          ) : (
+            <AnimeList
+              isMovie={false}
+              newAnimeData={item as NewAnimeList}
+              navigationProp={props.navigation}
+            />
+          )
         }
         numColumns={numColumns}
         estimatedItemSize={LIST_HEIGHT}
@@ -76,10 +89,19 @@ function SeeMore(props: Props) {
                 }
                 setIsLoading(true);
                 try {
+                  if(props.route.params.type === 'MovieList') {
+                    const newdata = await getLatestMovie(undefined, page + 1);
+                    if("isError" in newdata) {
+                      ToastAndroid.show("Error", ToastAndroid.SHORT);
+                      return;
+                    }
+                    setMovieData?.(prev => ([ ...prev, ...newdata ]));
+                    return;
+                  }
                   const newdata = await AnimeAPI.newAnime(
                     page + 1,
                   );
-                  setData?.(prev => ({
+                  setAnimeData?.(prev => ({
                     ...prev,
                     newAnime: [
                       ...prev.newAnime,

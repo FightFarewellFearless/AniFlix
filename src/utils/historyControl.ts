@@ -1,15 +1,16 @@
 import { setDatabase } from '../misc/reduxSlice';
-import { AniStreaming } from '../types/anime';
 import { AppDispatch } from '../misc/reduxStore';
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
+import { RootStackNavigator } from '../types/navigation';
 
 function setHistory(
-  targetData: AniStreaming,
+  targetData: RootStackNavigator['Video']['data'],
   link: string,
   skipUpdateDate = false,
   additionalData: Partial<HistoryAdditionalData> | {} = {},
   historyData: string,
   dispatchSettings: AppDispatch,
+  isMovie?: boolean
 ) {
   const data: HistoryJSON[] = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
@@ -33,6 +34,7 @@ function setHistory(
     link,
     thumbnailUrl: targetData.thumbnailUrl,
     date: skipUpdateDate ? date : Date.now(),
+    isMovie,
   });
   dispatchSettings(
     setDatabase({

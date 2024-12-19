@@ -20,16 +20,17 @@ import {
   ListRenderItemInfo,
   Linking,
   useColorScheme,
+  ActivityIndicator,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import Reanimated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
-import { StackActions, useFocusEffect } from '@react-navigation/native';
+import { NavigationProp, StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { HomeContext } from '../../misc/context';
+import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import runningText from '../../assets/runningText.json';
 import { NewAnimeList } from '../../types/anime';
-import { HomeNavigator, HomeStackNavigator } from '../../types/navigation';
+import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import AnimeAPI from '../../utils/AnimeAPI';
 import ImageLoading from '../ImageLoading';
@@ -42,6 +43,8 @@ import {
 import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
 import { version, OTAJSVersion } from '../../../package.json'
+import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
+import { getLatestMovie, Movies } from '../../utils/animeMovie';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -74,11 +77,13 @@ function HomeList(props: HomeListProps) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } =
-    useContext(HomeContext);
+    useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
 
+  const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0)
+
   const [animationText, setAnimationText] = useState(runningText[0]);
-  const [announcmentVisible, setAnnouncmentVisible] = useState(false);
+  // const [announcmentVisible, setAnnouncmentVisible] = useState(false);
 
   const windowSize = useWindowDimensions();
 
@@ -89,12 +94,12 @@ function HomeList(props: HomeListProps) {
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
 
-  useEffect(() => {
-    if (data?.announcment.enable === true) {
-      setAnnouncmentVisible(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   if (data?.announcment.enable === true) {
+  //     setAnnouncmentVisible(true);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,6 +137,8 @@ function HomeList(props: HomeListProps) {
   const refreshing = useCallback(() => {
     setRefresh(true);
 
+    setAnimeMovieRefreshingKey(val => val + 1);
+
     AnimeAPI.home()
       .then(async jsondata => {
         setData?.(jsondata);
@@ -143,17 +150,6 @@ function HomeList(props: HomeListProps) {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const renderNewAnime = useCallback(
-    ({ item }: ListRenderItemInfo<NewAnimeList>) => (
-      <AnimeList
-        newAnimeData={item}
-        key={'btn' + item.title + item.episode}
-        navigationProp={props.navigation}
-      />
-    ),
-    [props.navigation],
-  );
 
   const AnimationTextStyle = useAnimatedStyle(() => {
     return {
@@ -175,7 +171,7 @@ function HomeList(props: HomeListProps) {
           colors={['#00a2ff', 'red']}
         />
       }>
-      <AnnouncmentModalMemo
+      {/* <AnnouncmentModalMemo
         visible={announcmentVisible}
         announcmentMessage={
           data?.announcment.enable === true
@@ -183,7 +179,7 @@ function HomeList(props: HomeListProps) {
             : undefined
         }
         setVisible={setAnnouncmentVisible}
-      />
+      /> */}
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
@@ -210,39 +206,9 @@ function HomeList(props: HomeListProps) {
           </Reanimated.Text>
         </View>
       </View>
-      <View style={styles.listContainer}>
-        <View style={styles.titleContainer}>
-          <Text style={[styles.titleText, globalStyles.text]}>
-            Episode terbaru:{' '}
-          </Text>
-          <TouchableOpacity
-            // containerStyle={{ flex: 1 }}
-            style={styles.seeMoreContainer}
-            onPress={() => {
-              props.navigation.dispatch(
-                StackActions.push('SeeMore', {
-                  type: 'AnimeList',
-                }),
-              );
-            }}>
-            <Text style={[globalStyles.text, styles.seeMoreText]}>
-              Lihat semua{' '}
-            </Text>
-            <Icon
-              name="long-arrow-right"
-              color={globalStyles.text.color}
-              size={20}
-            />
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          horizontal
-          data={data?.newAnime.slice(0, 25)}
-          renderItem={renderNewAnime}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
+
+      <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
+      <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
       {Object.keys(data?.jadwalAnime ?? {}).map((key) => {
         return (
@@ -269,6 +235,145 @@ function HomeList(props: HomeListProps) {
 
     </Animated.ScrollView>
   );
+}
+
+function EpisodeBaru({ styles, globalStyles, data, props, }:
+  {
+    data: EpisodeBaruType | undefined, props: HomeListProps,
+    styles: any, globalStyles: any
+  }
+) {
+
+  const renderNewAnime = useCallback(
+    ({ item }: ListRenderItemInfo<NewAnimeList>) => (
+      <AnimeList
+        newAnimeData={item}
+        key={'btn' + item.title + item.episode}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  return (
+
+    <View style={styles.listContainer}>
+      <View style={styles.titleContainer}>
+        <Text style={[styles.titleText, globalStyles.text]}>
+          Episode terbaru:{' '}
+        </Text>
+        <TouchableOpacity
+          // containerStyle={{ flex: 1 }}
+          style={styles.seeMoreContainer}
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('SeeMore', {
+                type: 'AnimeList',
+              }),
+            );
+          }}>
+          <Text style={[globalStyles.text, styles.seeMoreText]}>
+            Lihat semua{' '}
+          </Text>
+          <Icon
+            name="long-arrow-right"
+            color={globalStyles.text.color}
+            size={20}
+          />
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        horizontal
+        data={data?.newAnime.slice(0, 25)}
+        renderItem={renderNewAnime}
+        extraData={styles}
+        showsHorizontalScrollIndicator={false}
+      />
+    </View>
+  )
+}
+
+function MovieList({ props }: { props: HomeListProps }) {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
+
+  const renderMovie = useCallback(
+    ({ item }: ListRenderItemInfo<Movies>) => (
+      <AnimeList
+        newAnimeData={item}
+        isMovie={true}
+        key={'btn' + item.title}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    getLatestMovie().then(data => {
+      if('isError' in data) {
+        setIsError(true);
+      } else {
+        setData?.(data);
+      }
+    }).catch(() => {
+      setIsError(true);
+    })
+  }, [])
+
+  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
+
+  return (
+    <View style={[styles.listContainer, { marginTop: 15 }]}>
+      <View style={styles.titleContainer}>
+        <Text style={[styles.titleText, globalStyles.text]}>
+          Movie terbaru:{' '}
+        </Text>
+        <TouchableOpacity
+          // containerStyle={{ flex: 1 }}
+          style={styles.seeMoreContainer}
+          disabled={data?.length === 0}
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('SeeMore', {
+                type: 'MovieList',
+              }),
+            );
+          }}>
+          <Text style={[globalStyles.text, styles.seeMoreText]}>
+            Lihat semua{' '}
+          </Text>
+          <Icon
+            name="long-arrow-right"
+            color={globalStyles.text.color}
+            size={20}
+          />
+        </TouchableOpacity>
+      </View>
+      {isError && (
+        <Text onPress={() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'connectToServer' }],
+          });
+        }} style={[globalStyles.text, { textAlign: 'center', color: '#d80000' }]}>Error mendapatkan data awal yang dibutuhkan, ketuk disini untuk mencoba ulang dari loading screen</Text>
+      )}
+      {data?.length !== 0 ? (
+        <FlatList
+          horizontal
+          data={data?.slice(0, 25)}
+          renderItem={renderMovie}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        <ActivityIndicator size="large" style={{ flex: 1, display: isError ? 'none' : 'flex' }} />
+      )}
+    </View>
+  )
 }
 
 const AnnouncmentModalMemo = memo(AnnouncmentModal);
@@ -344,8 +449,10 @@ function AnnouncmentModal({
   );
 }
 
-function AnimeList(props: {
+function AnimeList(props: ({
   newAnimeData: NewAnimeList;
+  isMovie?: false
+} | { newAnimeData: Movies; isMovie: true }) & {
   navigationProp:
   | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
   | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
@@ -358,13 +465,14 @@ function AnimeList(props: {
       onPress={() => {
         navigation.dispatch(
           StackActions.push('FromUrl', {
-            link: z.streamingLink,
+            link: props.isMovie ? props.newAnimeData.url : props.newAnimeData.streamingLink,
+            isMovie: props.isMovie,
           }),
         );
       }}>
       <ImageLoading
         resizeMode="stretch"
-        key={z.title + z.episode}
+        key={z.thumbnailUrl}
         source={{ uri: z.thumbnailUrl }}
         style={[
           styles.listBackground,
@@ -378,12 +486,12 @@ function AnimeList(props: {
 
         <View style={styles.animeEpisodeContainer}>
           <Text style={styles.animeEpisode}>
-            {z.episode}
+            {props.isMovie ? 'Movie' : props.newAnimeData.episode}
           </Text>
         </View>
         <View style={styles.animeRatingContainer}>
           <Text style={styles.animeRating}>
-            <Icon name="calendar" /> {z.releaseDay}
+            <Icon name={props.isMovie ? "check" : "calendar"} /> {props.isMovie ? "Sub Indo" : props.newAnimeData.releaseDay}
           </Text>
         </View>
       </ImageLoading>
@@ -423,8 +531,8 @@ function splitAllLinks(texts: string): string[] {
 function useStyles() {
   const colorScheme = useColorScheme();
   const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = dimensions.height * 120/200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = dimensions.width * 120/200 / 1.9;
+  const LIST_BACKGROUND_HEIGHT = dimensions.height * 120 / 200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = dimensions.width * 120 / 200 / 1.9;
   return StyleSheet.create({
     modalContainer: {
       flex: 1,
@@ -492,7 +600,7 @@ function useStyles() {
     },
     boxItem: {
       flex: 1,
-      backgroundColor: colorScheme === 'dark' ? '#363636' : '#dbdbdb',
+      backgroundColor: colorScheme === 'dark' ? '#363636' : '#eeeeee',
       borderColor: 'gold',
       borderWidth: 1.2,
       justifyContent: 'center',
@@ -530,7 +638,7 @@ function useStyles() {
     },
     listContainer: {
       position: 'relative',
-      backgroundColor: colorScheme === 'dark' ? '#272727' : '#e0e0e0',
+      backgroundColor: colorScheme === 'dark' ? '#272727' : '#ebebeb',
       paddingVertical: 10,
       borderRadius: 10,
       elevation: 5,
@@ -571,11 +679,12 @@ function useStyles() {
       alignItems: 'center',
     },
     animeTitle: {
-      fontSize: 10,
+      fontSize: 11,
       color: 'black',
       backgroundColor: 'orange',
       opacity: 0.8,
       textAlign: 'center',
+      fontWeight: 'bold',
     },
     animeEpisodeContainer: {
       position: 'absolute',

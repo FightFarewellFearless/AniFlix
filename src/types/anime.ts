@@ -89,7 +89,7 @@ interface AnnouncmentDisabled {
   enable: false;
 }
 
-interface Home {
+interface EpisodeBaruHome {
   newAnime: NewAnimeList[];
   jadwalAnime: JadwalAnime;
   announcment: AnnouncmentEnabled | AnnouncmentDisabled;
@@ -112,6 +112,6 @@ export type {
   Blocked,
   FromUrl,
   AniStreaming,
-  Home,
+  EpisodeBaruHome,
   listAnimeTypeList
 };

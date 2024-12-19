@@ -18,6 +18,7 @@ import useGlobalStyles from './src/assets/style';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { enableScreens } from 'react-native-screens';
 import { CFBypassIsOpen, CFBypassWebView, setWebViewOpen } from './src/utils/CFBypass';
+import MovieDetail from './src/component/MovieDetail';
 
 // enableScreens((global as any).nativeFabricUIManager === undefined); // TEMP: temporary fix for crashed app on new architecture
 
@@ -57,6 +58,7 @@ function App() {
             }}>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="AnimeDetail" component={AniDetail} />
+            <Stack.Screen name="MovieDetail" component={MovieDetail} />
             <Stack.Screen name="FromUrl" component={FromUrl} />
             <Stack.Screen name="Video" component={Video} options={{
               headerShown: true,

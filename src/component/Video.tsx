@@ -57,7 +57,10 @@ import { AniDetail, AniStreaming } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
 import { StackActions } from '@react-navigation/native';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
+import { getMovieDetail, getRawDataIfAvailable } from '../utils/animeMovie';
 
+import { Buffer } from 'buffer/';
+import cheerio from 'cheerio';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -103,13 +106,24 @@ function Video(props: Props) {
   const videoRef = useRef<ExpoVideo>(null);
   const webviewRef = useRef<WebView>(null);
 
-  const [animeDetail, setAnimeDetail] = useState<Omit<AniDetail, 'episodeList'> | undefined>();
+  const [animeDetail, setAnimeDetail] = useState<((Awaited<ReturnType<typeof getMovieDetail>> & { status: 'Movie'; releaseYear: string; }) | Omit<AniDetail, 'episodeList'>) | undefined>();
 
   useEffect(() => {
-    AnimeAPI.fromUrl(data.episodeData.animeDetail).then(detail => {
+    if (props.route.params.isMovie) {
+      getMovieDetail(data.episodeData.animeDetail).then(detail => {
+        setAnimeDetail({
+          ...detail,
+          rating: detail.rating,
+          releaseYear: detail.updateDate,
+          status: 'Movie',
+        });
+      })
+      return;
+    }
+    AnimeAPI.fromUrl(data.episodeData.animeDetail, undefined, undefined, true).then(detail => {
       if (detail === 'Unsupported') return;
       if (detail.type === 'animeDetail') {
-        if(detail.genres.includes('') && !Anime_Whitelist.list.includes(data.episodeData.animeDetail)) {
+        if (detail.genres.includes('') && !Anime_Whitelist.list.includes(data.episodeData.animeDetail)) {
           props.navigation.dispatch(
             StackActions.replace('Blocked', {
               title: detail.title,
@@ -129,7 +143,7 @@ function Video(props: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateHistoryThrottle = useCallback(
     throttleFunction(
-      (currentTime: number, stateData: AniStreaming, settContext: string, dispatchContext: typeof dispatchSettings) => {
+      (currentTime: number, stateData: RootStackNavigator['Video']['data'], settContext: string, dispatchContext: typeof dispatchSettings, isMovie?: boolean) => {
         if (Math.floor(currentTime) === 0) {
           return;
         }
@@ -144,6 +158,7 @@ function Video(props: Props) {
           additionalData,
           settContext,
           dispatchContext,
+          isMovie,
         );
         historyData.current = additionalData;
       },
@@ -243,23 +258,41 @@ function Video(props: Props) {
         return;
       }
       setLoading(true);
-      const resultData = await AnimeAPI.reqResolution(
-        res,
-        data.reqNonceAction,
-        data.reqResolutionWithNonceAction,
-        abortController.current?.signal,
-      ).catch(err => {
-        if (err.message === 'canceled') {
-          return {canceled: true};
+      let resultData: string | undefined | { canceled: boolean } | { error: boolean };
+      if ("type" in data) {
+        resultData = await AnimeAPI.reqResolution(
+          res,
+          data.reqNonceAction,
+          data.reqResolutionWithNonceAction,
+          abortController.current?.signal,
+        ).catch(err => {
+          if (err.message === 'canceled') {
+            return { canceled: true };
+          }
+          const errMessage =
+            err.message === 'Network Error'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + err.message;
+          Alert.alert('Error', errMessage);
+          setLoading(false);
+          return { error: true };
+        });
+      } else {
+        const rawData = await getRawDataIfAvailable({ title: resolution, url: res }, abortController.current?.signal).catch(err => {
+          if (err.message === 'canceled') {
+            return { canceled: true };
+          }
+          else {
+            throw err;
+          }
+        });
+        if (rawData === false) {
+          resultData = cheerio.load(Buffer.from(res, 'base64').toString('utf8'))('iframe').attr('src')!;
+        } else {
+          resultData = rawData;
         }
-        const errMessage =
-          err.message === 'Network Error'
-            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.message;
-        Alert.alert('Error', errMessage);
-        setLoading(false);
-        return {error: true};
-      });
+
+      }
       if (resultData === undefined) {
         setLoading(false);
         Alert.alert('Ganti resolusi gagal', 'Gagal mengganti resolusi karena data kosong!');
@@ -271,11 +304,12 @@ function Video(props: Props) {
       const isWebviewNeeded = await fetch(resultData, {
         headers: {
           'User-Agent': deviceUserAgent,
+          ...(resultData.includes('mp4upload') ? { 'Referer': 'https://www.mp4upload.com/' } : {}),
         },
         method: 'HEAD',
       }).catch(() => { })
         .then(res => {
-          return !res?.headers.get('content-type')?.includes('video');
+          return !(res?.headers.get('content-type')?.includes('video') || res?.headers.get('content-type')?.includes('octet-stream'));
         })
       setData(old => {
         return {
@@ -401,6 +435,7 @@ function Video(props: Props) {
         data,
         history,
         dispatchSettings,
+        props.route.params.isMovie,
       );
     },
     [
@@ -424,7 +459,7 @@ function Video(props: Props) {
         undefined,
         abortController.current?.signal,
       ).catch(err => {
-        if(err.message === 'Silahkan selesaikan captcha') {
+        if (err.message === 'Silahkan selesaikan captcha') {
           setLoading(false);
           return;
         }
@@ -547,6 +582,36 @@ function Video(props: Props) {
     infoContainerOpacity.value = withTiming(1, { duration: 100 });
   }, []);
 
+  const batteryAndClock = (
+    <>
+      {/* info baterai */}
+      {fullscreen && batteryTimeEnable && (
+        <View
+          style={[
+            styles.batteryInfo,
+          ]}
+          pointerEvents="none">
+          {getBatteryIconComponent()}
+          <Text style={{ color: darkText }}>
+            {' '}
+            {Math.round(batteryLevel * 100)}%
+          </Text>
+        </View>
+      )}
+
+      {/* info waktu/jam */}
+      {fullscreen && batteryTimeEnable && (
+        <View
+          style={[
+            styles.timeInfo,
+          ]}
+          pointerEvents="none">
+          <TimeInfo />
+        </View>
+      )}
+    </>
+  )
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -566,7 +631,14 @@ function Video(props: Props) {
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}
               onDurationChange={handleProgress}
-              onLoad={handleVideoLoad} />
+              onLoad={handleVideoLoad}
+              headers={
+                props.route.params.isMovie && data.streamingLink.includes('mp4upload')
+                  ? { 'Referer': 'https://www.mp4upload.com/' }
+                  : undefined
+              }
+              batteryAndClock={batteryAndClock}
+            />
           ) : data.streamingType === 'embed' ? (
             <WebView
               style={{ flex: 1, zIndex: 1, }}
@@ -594,32 +666,7 @@ function Video(props: Props) {
             <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
         }
-
-        {/* info baterai */}
-        {fullscreen && batteryTimeEnable && (
-          <View
-            style={[
-              styles.batteryInfo,
-            ]}
-            pointerEvents="none">
-            {getBatteryIconComponent()}
-            <Text style={{ color: darkText }}>
-              {' '}
-              {Math.round(batteryLevel * 100)}%
-            </Text>
-          </View>
-        )}
-
-        {/* info waktu/jam */}
-        {fullscreen && batteryTimeEnable && (
-          <View
-            style={[
-              styles.timeInfo,
-            ]}
-            pointerEvents="none">
-            <TimeInfo />
-          </View>
-        )}
+        {data.streamingType === 'embed' && batteryAndClock}
       </View>
       {/* END OF VIDEO ELEMENT */}
       {
@@ -627,6 +674,14 @@ function Video(props: Props) {
         // jika ya, maka hanya menampilkan video saja
         !fullscreen && (
           <ScrollView style={{ flex: 1 }}>
+            {/* movie information */}
+            {props.route.params.isMovie && (
+              <View style={{ backgroundColor: '#fde24b' }}>
+                <Icon name="film" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+                <Text style={{ color: lightText, textAlign: 'center', fontSize: 14, fontWeight: 'bold' }}>Perhatian!</Text>
+                <Text style={{ color: lightText }}>Tipe data movie masih dalam tahap pengembangan dan eksperimental, jika kamu mengalami masalah menonton, silahkan ganti resolusi/server</Text>
+              </View>
+            )}
             {/* embed player information */}
             {data.streamingType === 'embed' && (
               <View>
@@ -706,7 +761,7 @@ function Video(props: Props) {
                     styles.status,
                     {
                       backgroundColor:
-                        animeDetail?.status === 'Completed' ? 'green' : 'red',
+                        animeDetail?.status === 'Completed' || animeDetail?.status === 'Movie' ? 'green' : 'red',
                     },
                   ]}>
                   {animeDetail?.status}
@@ -748,7 +803,9 @@ function Video(props: Props) {
                     onPress={() => {
                       episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
                     }}>
-                    <Icon name="arrow-left" size={18} color="black" />
+                    <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
+                      <Icon name="arrow-left" size={18} color="black" /> Episode sebelumnya
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -765,7 +822,9 @@ function Video(props: Props) {
                     onPress={() => {
                       episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
                     }}>
-                    <Icon name="arrow-right" size={18} color="black" />
+                    <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
+                      Episode selanjutnya <Icon name="arrow-right" size={18} color="black" />
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -792,6 +851,18 @@ function Video(props: Props) {
                 />
               </View>
             </View>
+
+            {data.resolution?.includes('pogo') && (
+              <Text
+                style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}
+              >
+                Kamu menggunkan server pogo!, sangat tidak disarankan untuk
+                skip/seek/menggeser menit dikarenakan akan menyebabkan loading
+                yang sangat lama dan kemungkinan akan menghabiskan kuota data
+                kamu. Disarankan untuk mengunduh/download video ini
+                lewat tombol dibawah dan menontonnya saat proses download sudah selesai secara offline!
+              </Text>
+            )}
 
             <TouchableOpacity
               style={styles.downloadButton}
@@ -843,11 +914,11 @@ function LoadingModal({
         <TouchableOpacity
           onPress={cancelLoading}
           style={{ position: 'absolute', top: 5, right: 5 }} //rngh
-          >
+        >
           <Icon name="close" size={28} style={{ color: 'red' }} />
         </TouchableOpacity>
         <ActivityIndicator size={'large'} />
-        <Text style={globalStyles.text}>Loading...</Text>
+        <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
       </ReAnimated.View>
     </View>
   );
@@ -894,7 +965,7 @@ function useStyles() {
       flex: 0.15,
       minWidth: 300,
       minHeight: 80,
-      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#9b9b9b',
+      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#f0f0f0',
       borderColor: 'gold',
       borderWidth: 1,
       alignContent: 'center',
@@ -911,6 +982,7 @@ function useStyles() {
       padding: 3,
       borderRadius: 7,
       backgroundColor: '#00000085',
+      zIndex: 1,
     },
     timeInfo: {
       position: 'absolute',
@@ -921,6 +993,7 @@ function useStyles() {
       padding: 3,
       borderRadius: 7,
       backgroundColor: '#00000085',
+      zIndex: 1,
     },
     fullscreen: {
       position: 'absolute',
@@ -938,7 +1011,7 @@ function useStyles() {
       flexDirection: 'row',
     },
     container: {
-      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#d8d8d8',
+      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#ebebeb',
       elevation: colorScheme === 'light' ? 3 : undefined,
       padding: 13,
       overflow: 'hidden',
@@ -998,6 +1071,7 @@ function useStyles() {
     },
     episodeDataControl: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       justifyContent: 'center',
     },
     episodeDataControlButton: {
