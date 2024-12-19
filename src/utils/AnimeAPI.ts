@@ -28,9 +28,6 @@ class AnimeAPI {
     return {
       newAnime,
       jadwalAnime,
-      announcment: { enable: false },
-      uptime: 0,
-      waktuServer: 'Unavailable',
     }
 
   }

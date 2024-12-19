@@ -92,9 +92,6 @@ interface AnnouncmentDisabled {
 interface EpisodeBaruHome {
   newAnime: NewAnimeList[];
   jadwalAnime: JadwalAnime;
-  announcment: AnnouncmentEnabled | AnnouncmentDisabled;
-  uptime: number;
-  waktuServer: string;
 }
 
 interface listAnimeTypeList {
