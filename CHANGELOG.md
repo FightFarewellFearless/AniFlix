@@ -1,3 +1,31 @@
+# v0.7.2-JS_1 (19-Desember-2024)
+
+MOVIE BETA TAHAP 1.
+Ini adalah update yang cukup besar yang sudah di kerjakan developer selama kurang lebih 1 bulan!!
+Update kali ini menambahkan dukungan movie ke dalam aplikasi, karena ini tahap pertama, kamu mungkin menemukan fitur yang kurang, tidak bekerja dengan benar, bugs, error dan lain-lain... harap nantikan hingga data movie stabil yang kemungkinan akan ada di versi selanjutnya.
+
+Di tahap pertama ini kamu belum bisa mencari judul anime movie, dan menyimpan movie di tonton nanti. Namun untuk update selanjutnya diperkirakan fitur-fitur ini sudah lengkap kembali dengan berbagai macam perbaikan dan penyempurnaan.
+
+Saya selaku developer mengucapkan terima kasih karena sudah setia menggunakan aplikasi ini, jika ada keluhan atau saran bisa disampaikan lewat server discord (join dengan cara menekan tombol Join Discord di Loading Screen awal aplikasi).
+
+## Penambahan
+
+- Menambahkan dukungan anime movie!
+  > Untuk saat ini kamu hanya bisa menonton movie terbaru, belum bisa mencari judul movie, dan belum bisa menyimpan movie ke daftar tonton nanti.
+
+## Perubahan
+
+- Saat terjadi error, sekarang hanya akan memunculkan pesan singkat alih-alih pesan yang sangat amat panjang dan ternyata tidak terlalu berguna
+- Linear color gradient di bagian episode anime sekarang gelap/terang tergantung dark mode di HP kamu
+- UI yang diperbagus
+  - Menyocokkan beberapa warna dengan light mode
+  - Banyak perubahan lain...
+- Perubahan lain di dalam di kode aplikasi (tidak begitu terlihat pada pengguna)
+
+## Perbaikan
+
+- Memperbaiki masalah mengganti resolusi di server desudrive
+
 # v0.7.2 (08-November-2024)
 
 ## Penambahan
