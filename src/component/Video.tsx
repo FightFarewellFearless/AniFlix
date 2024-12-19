@@ -787,6 +787,8 @@ function Video(props: Props) {
                   itemContainerStyle={styles.dropdownItemContainerStyle}
                   activeColor="#16687c"
                   selectedTextStyle={styles.dropdownSelectedTextStyle}
+                  autoScroll={false}
+                  dropdownPosition='top'
                 />
               </View>
             </View>
