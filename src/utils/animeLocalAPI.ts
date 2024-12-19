@@ -313,6 +313,12 @@ const getStreamLink = async (downLink: string, signal?: AbortSignal): Promise<st
             throw errorObj;
         }
         const data = response!.data;
+
+        // desudrive patch ~19-dec-2024
+        if(data.includes(`otakudesu('{"file":"`)) {
+            return data.split(`otakudesu('{"file":"`)[1].split('"')[0];
+        }
+
         const ondesuORupdesu = data.split("sources: [{'file':'")[1];
         if (ondesuORupdesu === undefined) {
             //odstream
