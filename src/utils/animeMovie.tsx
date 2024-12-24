@@ -320,7 +320,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
       {isWebViewShown && (
         <WebView
           ref={webviewRef}
-          source={{ uri: 'https://154.26.137.28/' }}
+          source={{ uri: 'https://154.26.137.28/movie-terbaru' }}
           setSupportMultipleWindows={false}
           onError={() => {
             isError = true;
@@ -332,6 +332,11 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
             if (event.title.includes('AnimeSail')) {
               setIsWebViewShown(false);
               onAnimeMovieReady();
+            } else if (event.title.toLowerCase().includes('error')) {
+              isError = true;
+              setIsWebViewShown(false);
+              onAnimeMovieReady();
+              ToastAndroid.show('Error saat mempersiapkan data, coba lagi nanti', ToastAndroid.SHORT);
             }
           }}
         />
