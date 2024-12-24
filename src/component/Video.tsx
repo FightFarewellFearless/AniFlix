@@ -856,7 +856,7 @@ function Video(props: Props) {
               <Text
                 style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}
               >
-                Kamu menggunkan server pogo!, sangat tidak disarankan untuk
+                Kamu menggunakan server pogo!, sangat tidak disarankan untuk
                 skip/seek/menggeser menit dikarenakan akan menyebabkan loading
                 yang sangat lama dan kemungkinan akan menghabiskan kuota data
                 kamu. Disarankan untuk mengunduh/download video ini
