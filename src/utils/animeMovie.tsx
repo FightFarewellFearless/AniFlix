@@ -374,7 +374,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
       {isWebViewShown && (
         <WebView
           ref={webviewRef}
-          source={{ uri: 'https://154.26.137.28/movie-terbaru' }}
+          source={{ uri: 'https://154.26.137.28/' }}
           setSupportMultipleWindows={false}
           onError={() => {
             isError = true;
