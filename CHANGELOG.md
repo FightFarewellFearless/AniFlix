@@ -1,3 +1,23 @@
+# 0.7.2-JS_2 (25-Desember-2024)
+
+MOVIE BETA TAHAP 2.
+Ini adalah update ke 2 dalam pengembangan tipe data movie, update kali ini hanya merupakan penambahan beberapa fitur kecil dan beberapa perbaikan masalah. Update ini memberikan pengalaman menggunakan aplikasi yang lebih stabil.
+
+## Penambahan
+
+- Menambahkan berbagai macam peringatan dan informasi terkait server dari movie.
+- Menambahkan 1 server cadangan baru (lokal) untuk movie.
+  > Perlu di ingat server ini tidak mendukung pemutaran melalui aplikasi dan akan menggunakan WebView untuk memutar video melalui server ini, jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu menggunakan server "lokal". Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
+- Menambahkan tombol "close" informasi tambahan ketika memutar melalui server pihak ketiga (melalui WebView)
+- Otomatis scroll ke resolusi yang saat ini dipilih saat membuka Dropdown pemilihan resolusi (revert ke update sebelumnya)
+
+## Perbaikan
+
+- Memperbaiki masalah stuck di loading screen pada bagian mengambil data movie yang cukup acak terjadi.
+  > Perlu diingat jika error saat mengambil data movie terjadi, cobalah untuk mematikan VPN/proxy, menghidupkan dan mematikan ulang mode pesawat, mematikan DNS pribadi.
+- Memperbaiki (kayaknya sih udah bener hehehe) masalah yang terjadi dengan server AceFile ketika mengambil data yang seharusnya ada.
+- Dan beberapa perbaikan kecil lainnya...
+
 # v0.7.2-JS_1 (19-Desember-2024)
 
 MOVIE BETA TAHAP 1.
