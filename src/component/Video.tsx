@@ -896,9 +896,10 @@ function Video(props: Props) {
               <Text
                 style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}
               >
-                Kamu menggunakan server "lokal". Namun server ini tidak mendukung pemutaran secara native,
-                dan akan menggunakan WebView untuk pemutaran.
-                Jadi, server "lokal" tidak akan mendukung fitur "download" dan "melanjutkan dari history"
+                Kamu menggunakan server "lokal". Perlu di ingat server ini tidak mendukung pemutaran melalui aplikasi
+                dan akan menggunakan WebView untuk memutar video melalui server ini,
+                jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu menggunakan server "lokal".{'\n'}
+                Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
               </Text>
             )}
 
