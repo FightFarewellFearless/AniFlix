@@ -652,7 +652,14 @@ function Video(props: Props) {
                 }
                 return res;
               }}
-              source={{ uri: data.streamingLink, baseUrl: 'https://' + url.parse(data.streamingLink).host }}
+              source={{
+                ...(
+                  data.resolution?.includes('lokal') ?
+                    { html: `<iframe src="${data.streamingLink}" style="width: 100vw; height: 100vh;" allowFullScreen>` } :
+                    { uri: data.streamingLink }
+                ),
+                baseUrl: `https://${url.parse(data.streamingLink).host}`,
+              }}
               userAgent={deviceUserAgent}
               originWhitelist={['*']}
               allowsFullscreenVideo={true}
@@ -867,6 +874,16 @@ function Video(props: Props) {
                 yang sangat lama dan kemungkinan akan menghabiskan kuota data
                 kamu. Disarankan untuk mengunduh/download video ini
                 lewat tombol dibawah dan menontonnya saat proses download sudah selesai secara offline!
+              </Text>
+            )}
+
+            {data.resolution?.includes('lokal') && (
+              <Text
+                style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}
+              >
+                Kamu menggunakan server "lokal". Namun server ini tidak mendukung pemutaran secara native,
+                dan akan menggunakan WebView untuk pemutaran.
+                Jadi, server "lokal" tidak akan mendukung fitur "download" dan "melanjutkan dari history"
               </Text>
             )}
 

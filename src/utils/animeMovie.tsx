@@ -176,6 +176,19 @@ export async function getStreamingDetail(url: string, signal?: AbortSignal) {
       })
     }
   })
+
+  // lokalLinks has no raw supported at the moment because of complex anti-bot system
+  const lokalLinks: LinksType = [];
+  mirror.each((i, el) => {
+    const title = $(el).text().trim();
+    if (title.toLowerCase().includes('lokal')) {
+      lokalLinks.push({
+        title,
+        url: $(el).attr('data-em')!
+      })
+    }
+  });
+
   let isRawAvailable = true;
   let supportedRawLinks = [...pompomLinks, ...pixelLinks, ...mp4UploadLinks, ...acefileLinks, ...pogoLinks];
   if (supportedRawLinks.length === 0) {
@@ -187,6 +200,8 @@ export async function getStreamingDetail(url: string, signal?: AbortSignal) {
         url: $(el).attr('data-em')!
       })
     });
+  } else {
+    supportedRawLinks = [...supportedRawLinks, ...lokalLinks];
   };
 
   supportedRawLinks = supportedRawLinks.filter((v, i, a) => a.findIndex(t => (t.url === v.url)) === i);
