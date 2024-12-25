@@ -684,17 +684,28 @@ function Video(props: Props) {
           <ScrollView style={{ flex: 1 }}>
             {/* movie information */}
             {props.route.params.isMovie && (
-              <View style={{ backgroundColor: '#fde24b' }}>
+              <View style={{ backgroundColor: '#fde24b', marginVertical: 5 }}>
                 <Icon name="film" color={lightText} size={26} style={{ alignSelf: 'center' }} />
                 <Text style={{ color: lightText, textAlign: 'center', fontSize: 14, fontWeight: 'bold' }}>Perhatian!</Text>
                 <Text style={{ color: lightText }}>Tipe data movie masih dalam tahap pengembangan dan eksperimental, jika kamu mengalami masalah menonton, silahkan ganti resolusi/server</Text>
+              </View>
+            )}
+            {/* acefile embed information */}
+            {(data.resolution?.includes('acefile') || data.resolution?.includes('video')) && data.streamingType === 'embed' && (
+              <View style={{ backgroundColor: '#74fd4b', marginVertical: 5 }}>
+                <Icon name="server" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+                <Text style={{ color: lightText, textAlign: 'center', fontSize: 14, fontWeight: 'bold' }}>AceFile</Text>
+                <Text style={{ color: lightText }}>Tampaknya server AceFile untuk resolusi ini mengalami masalah.
+                  Terkadang server membutuhkan beberapa waktu untuk memproses data, silahkan coba lagi.
+                  Jika masalah berlanjut silahkan ganti server atau resolusi lain.</Text>
               </View>
             )}
             {/* embed player information */}
             {data.streamingType === 'embed' && (
               <View ref={embedInformationRef}>
                 <View style={{
-                  backgroundColor: '#c9c900'
+                  backgroundColor: '#c9c900',
+                  marginVertical: 5,
                 }}>
                   <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => {
                     embedInformationRef.current?.setNativeProps({ display: 'none' })
@@ -715,26 +726,30 @@ function Video(props: Props) {
                   <MaterialCommunityIcons name="screen-rotation" color={lightText} size={26} style={{ alignSelf: 'center' }} />
                   <Text style={{ color: lightText }}>Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape</Text>
                 </View>
-                <TouchableOpacity style={styles.reloadPlayer} onPress={async () => {
-                  const streamingLink = data.streamingLink;
-                  setData((datas) => {
-                    return {
-                      ...datas,
-                      streamingLink: ''
-                    }
-                  });
-                  await new Promise(res => setTimeout(res, 500));
-                  setData((datas) => {
-                    return {
-                      ...datas,
-                      streamingLink,
-                    }
-                  })
-                }}>
-                  <Icon name="refresh" color={darkText} size={15} style={{ alignSelf: 'center' }} />
-                  <Text style={{ color: darkText }}>Reload video player</Text>
-                </TouchableOpacity>
               </View>
+            )}
+            {/* embed reload button */}
+            {data.streamingType === 'embed' && (
+              <TouchableOpacity style={styles.reloadPlayer} onPress={async () => {
+                if(data.streamingLink === '') return;
+                const streamingLink = data.streamingLink;
+                setData((datas) => {
+                  return {
+                    ...datas,
+                    streamingLink: ''
+                  }
+                });
+                await new Promise(res => setTimeout(res, 500));
+                setData((datas) => {
+                  return {
+                    ...datas,
+                    streamingLink,
+                  }
+                })
+              }}>
+                <Icon name="refresh" color={darkText} size={15} style={{ alignSelf: 'center' }} />
+                <Text style={{ color: darkText }}>Reload video player</Text>
+              </TouchableOpacity>
             )}
             <PressableAnimated
               style={[styles.container, infoContainerStyle]}
@@ -888,7 +903,7 @@ function Video(props: Props) {
             )}
 
             <TouchableOpacity
-              style={styles.downloadButton}
+              style={[styles.downloadButton]}
               onPress={downloadAnime}>
               <Icon name="download" size={23} color={darkText} />
               <Text style={{ color: darkText }}>

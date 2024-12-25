@@ -158,7 +158,7 @@ export async function getStreamingDetail(url: string, signal?: AbortSignal) {
   const acefileLinks: LinksType = [];
   mirror.each((i, el) => {
     const title = $(el).text().trim();
-    if (title.toLowerCase().includes('acefile')) {
+    if (title.toLowerCase().includes('acefile') || title.toLowerCase().includes('video')) {
       acefileLinks.push({
         title,
         url: $(el).attr('data-em')!
@@ -216,7 +216,7 @@ export async function getStreamingDetail(url: string, signal?: AbortSignal) {
     return v;
   });
 
-  const streamingLink = await getRawDataIfAvailable((supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0]), signal);  
+  const streamingLink = await getRawDataIfAvailable((supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0]), signal);
   if(streamingLink === false) {
     isRawAvailable = false;
   }
@@ -254,8 +254,19 @@ export async function getRawDataIfAvailable(data: LinksType[number], signal?: Ab
     } else if (data.title.toLowerCase().includes('pompom')
       || data.title.toLowerCase().includes('pixel')) {
       return await getPixelOrPompomRawData(data.url, signal);
-    } else if (data.title.toLowerCase().includes('acefile')) {
-      return await getAceRawData(data.url, signal);
+    } else if (data.title.toLowerCase().includes('acefile') || data.title.toLowerCase().includes('video')) {
+      try {
+        const res = await getAceRawData(data.url, signal);
+        return res;
+      } catch (e: any) {
+        if(e.name === 'AbortError' || signal?.aborted) throw new Error('canceled');
+        
+        // Try again in 2 seconds (sometimes the data is not ready yet, so we need to try again [only in acefile])
+        ToastAndroid.show('AceFile error, mencoba lagi otomatis dalam 2.5 detik...', ToastAndroid.SHORT);
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        const res = await getAceRawData(data.url, signal);
+        return res;
+      }
     } else if (data.title.toLowerCase().includes('pogo')) {
       return await getPogoRawData(data.url, signal);
     }
@@ -282,14 +293,41 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
   });
   const text = await response.text();
   const $ = cheerio.load(text);
-  const iframe = $('iframe').attr('src')!;
-  const responseAce = await fetch(iframe.startsWith('https') ? iframe : 'https:' + iframe, {
+  let responseAce: Response;
+  let aceLink : string;
+  if($('title').text().trim() === 'AceFile') {
+    aceLink = url;
+    responseAce = response;
+  } else {
+    const iframe = $('iframe').attr('src')!;
+    aceLink = iframe;
+    responseAce = await fetch(iframe.startsWith('https') ? iframe : 'https:' + iframe, {
+      signal,
+    });
+  }
+  const videoId = aceLink.split('/').at(-1)!;
+  await fetch('https://acefile.co/service/get_mirrors/' + videoId, {
     signal,
-  });
+  }).catch(() => {});
   const ace = await responseAce.text();
   const $ace = cheerio.load(ace);
   const script = unpack($ace('script').text().trim());
-  if(script.includes('var DUAR=false')) return false;
+  if(script.includes('var DUAR=false')) {
+    const service = script.split('var service=')[1].split(';')[0].replace(/['"\\]/g, '');
+    const link = script.split('$.getJSON("https://"+service+"')[1].split('"')[0];
+    
+    const response = await fetch(`https://${service}${link}`, {
+      signal,
+    });
+    const text = await response.text();
+    const d = JSON.parse(text);
+    
+    if(d.data && "embed" in d) {
+      return d.data;
+    } else {
+      return false;
+    }
+  };
   const nfck = script.split('var nfck="')[1].split('"')[0];
   const id = script.split('var DUAR=[{"id":"')[1].split('"')[0];
 
