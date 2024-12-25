@@ -266,7 +266,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         ];
         let resolution: string | undefined;
         if (streamingLink === undefined && resolutionRaw[0] !== undefined) {
-            streamingLink = await fetchStreamingResolution(resolutionRaw[0].dataContent, reqNonceAction, reqResolutionWithNonceAction);
+            streamingLink = await fetchStreamingResolution(resolutionRaw[0].dataContent, reqNonceAction, reqResolutionWithNonceAction, undefined, signal);
             resolution = resolutionRaw[0].resolution;
         }
 
