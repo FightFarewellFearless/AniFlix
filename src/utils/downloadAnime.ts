@@ -61,7 +61,11 @@ function useDownloadAnime() {
       }
 
       async function download() {
+        if(source.includes('mp4upload')) {
+          Alert.alert('Perhatian', 'Download movie dari mp4upload mungkin akan gagal!');
+        }
         RNFetchBlob.config({
+          trusty: true,
           addAndroidDownloads: {
             useDownloadManager: true,
             notification: true,
@@ -72,6 +76,9 @@ function useDownloadAnime() {
         })
           .fetch('GET', source, {
             'User-Agent': deviceUserAgent,
+            ...(source.includes('mp4upload') ? {
+              'Referer': 'https://www.mp4upload.com/',
+            }: {})
           })
           // .then(resp => {
           //   // the path of downloaded file
