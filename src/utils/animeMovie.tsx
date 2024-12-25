@@ -295,7 +295,8 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
   const $ = cheerio.load(text);
   let responseAce: Response;
   let aceLink : string;
-  if($('title').text().trim() === 'AceFile') {
+  const isAlreadyAceFile = $('title').text().trim() === 'AceFile';
+  if(isAlreadyAceFile) {
     aceLink = url;
     responseAce = response;
   } else {
@@ -309,7 +310,7 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
   await fetch('https://acefile.co/service/get_mirrors/' + videoId, {
     signal,
   }).catch(() => {});
-  const ace = await responseAce.text();
+  const ace = isAlreadyAceFile ? text : (await responseAce.text());
   const $ace = cheerio.load(ace);
   const script = unpack($ace('script').text().trim());
   if(script.includes('var DUAR=false')) {
