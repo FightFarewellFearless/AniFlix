@@ -105,6 +105,7 @@ function Video(props: Props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<ExpoVideo>(null);
   const webviewRef = useRef<WebView>(null);
+  const embedInformationRef = useRef<View>(null);
 
   const [animeDetail, setAnimeDetail] = useState<((Awaited<ReturnType<typeof getMovieDetail>> & { status: 'Movie'; releaseYear: string; }) | Omit<AniDetail, 'episodeList'>) | undefined>();
 
@@ -684,10 +685,15 @@ function Video(props: Props) {
             )}
             {/* embed player information */}
             {data.streamingType === 'embed' && (
-              <View>
+              <View ref={embedInformationRef}>
                 <View style={{
                   backgroundColor: '#c9c900'
                 }}>
+                  <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => {
+                    embedInformationRef.current?.setNativeProps({ display: 'none' })
+                  }}>
+                    <Icon name="close" color={lightText} size={26} />
+                  </TouchableOpacity>
                   <Icon name="lightbulb-o" color={lightText} size={26} style={{ alignSelf: 'center' }} />
                   <Text style={{ color: lightText }}>Kamu saat ini menggunakan video player pihak ketiga dikarenakan data
                     dengan format yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
