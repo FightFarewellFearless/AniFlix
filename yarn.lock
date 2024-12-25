@@ -4841,7 +4841,7 @@ __metadata:
     expo-document-picker: 12.0.2
     expo-linear-gradient: 13.0.2
     expo-splash-screen: 0.27.5
-    gpti: ^2.0.6
+    gpti: ^2.1.8
     jest: ^29.6.3
     moment: ^2.29.4
     prettier: 2.8.8
@@ -8368,12 +8368,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gpti@npm:^2.0.6":
-  version: 2.1.7
-  resolution: "gpti@npm:2.1.7"
+"gpti@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "gpti@npm:2.1.8"
   dependencies:
     axios: ^1.7.2
-  checksum: 5d9513ca16189febd5f0c6aaca8e4fccd767411b21953bffdde414316983d9d108916b75a5271b49b195416adc51d1cb948ba8032cc21bfaa8412e11fc45400a
+  checksum: ee9e342e93cf79c9f04800f6885d500fdfa1b379c6e308f875887bf6c3ac08582ca449a494ddc63a8e9ed1f7cc4f030e261141fb9da1a309de367f6ee3cc3bae
   languageName: node
   linkType: hard
 
