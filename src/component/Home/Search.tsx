@@ -9,10 +9,10 @@ import {
   Pressable,
   Keyboard,
   useColorScheme,
-  InteractionManager,
   KeyboardAvoidingView,
   useWindowDimensions,
   LayoutChangeEvent,
+  ImageBackground,
 } from 'react-native';
 import { TouchableOpacity, TextInput } from 'react-native';//rngh
 import {
@@ -48,6 +48,9 @@ import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import { useDispatch } from 'react-redux';
 import { setDatabase } from '../../misc/reduxSlice';
 import { AppDispatch } from '../../misc/reduxStore';
+import ImageColors from 'react-native-image-colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import DarkOverlay from '../misc/DarkOverlay';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -308,9 +311,9 @@ function Search(props: Props) {
                       }),
                     );
                   }}
-                  style={{ justifyContent: 'center', paddingVertical: 10, flexDirection: 'row' }}>
-                  <Text style={[globalStyles.text, { textAlign: 'left', fontWeight: 'bold', fontSize: 12 }]}>{index + 1}.</Text>
-                  <Text style={[globalStyles.text, { textAlign: 'center', flex: 1 }]}>{item?.title}</Text>
+                  style={styles.animeList}>
+                  <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
+                  <Text style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>{item?.title}</Text>
                 </TouchableOpacity>
               )
             }}
@@ -346,7 +349,7 @@ function Search(props: Props) {
         </TouchableOpacity>
       ) : (
         <>
-          <Text style={globalStyles.text}>
+          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 13, marginVertical: 2, textAlign: 'center' }]}>
             Hasil pencarian untuk: {query.current}
           </Text>
           {data.result.length > 0 ? (
@@ -557,24 +560,43 @@ function useStyles() {
       alignItems: 'center',
       backgroundColor: '#ffa43cff',
     },
+    animeList: {
+      justifyContent: 'center',
+      paddingVertical: 10,
+      flexDirection: 'row',
+      backgroundColor: colorScheme === 'dark' ? '#005f4b' : '#009ece',
+      margin: 2,
+      borderRadius: 7,
+    },
+    animeListIndex: {
+      textAlign: 'left',
+      fontWeight: 'bold',
+      fontSize: 12,
+      color: colorScheme === 'light' ? '#000769' : '#00bb00'
+    },
+    animeSearchListDetailText: {
+      fontWeight: 'bold',
+      color: 'white',
+    },
     listContainer: {
       flexDirection: 'row',
       marginVertical: 5,
-      backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      // backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
+      backgroundColor: '#3b3939',
       borderRadius: 16,
       elevation: 5,
     },
     listImage: {
-      width: 120,
-      height: 200,
+      width: 110,
+      height: 180,
       borderTopLeftRadius: 16,
       borderBottomLeftRadius: 16,
-      marginRight: 7,
     },
     listTitle: {
       flexShrink: 1,
       justifyContent: 'center',
       flex: 1,
+      marginLeft: 5,
     },
     ratingInfo: {
       flex: 1,
@@ -586,6 +608,16 @@ function useStyles() {
       justifyContent: 'flex-end',
       flex: 1,
     },
+    searchHistoryHeader: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 4,
+      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+      borderRadius: 7,
+      textAlign: 'center',
+      fontWeight: 'bold',
+    },
     searchHistoryContainer: {
       position: 'absolute',
       top: 40,
@@ -593,7 +625,12 @@ function useStyles() {
       zIndex: 2,
     },
     searchHistoryScrollBox: {
-      backgroundColor: colorScheme === 'dark' ? '#181818' : '#e0e0e0',
+      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+    },
+    searchHistoryItemContainer: {
+      backgroundColor: colorScheme === 'light' ? '#00c0c7' : '#007c7c',
+      borderRadius: 9,
+      marginVertical: 3,
     },
     closeSearchResult: {
       position: 'absolute',
