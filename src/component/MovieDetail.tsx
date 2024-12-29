@@ -1,29 +1,25 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackNavigator } from "../types/navigation";
 import useGlobalStyles from "../assets/style";
-import { Image, ImageBackground, ScrollView, StyleProp, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme, useWindowDimensions, View, ViewStyle } from "react-native";
-import { FunctionComponent, useEffect, useState } from "react";
+import { Image, ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme, useWindowDimensions, View, ViewStyle } from "react-native";
+import { useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
-import { complementHex, darkenHexColor } from "../utils/hexColors";
-import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome";
+import DarkOverlay from "./misc/DarkOverlay";
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
   const window = useWindowDimensions();
   const globalStyles = useGlobalStyles();
-  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   const [imageColors, setImageColors] = useState<string>('#000000');
-  const [complementHexColor, setComplementHex] = useState<string>();
 
   useEffect(() => {
     getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 2 }).then(colors => {
       if (colors.platform === 'android') {
         const color = colors.dominant;
         setImageColors(color);
-        setComplementHex(complementHex(color));
       }
     })
   }, []);
