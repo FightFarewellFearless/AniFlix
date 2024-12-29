@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { StackActions } from '@react-navigation/native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -52,9 +52,9 @@ function History(props: Props) {
 
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  const filteredData = data.filter(item => 
+  const filteredData = useMemo(() => data.filter(item => 
     item.title.toLowerCase().includes(searchKeyword.toLowerCase())
-  );
+  ), [searchKeyword, data]);
 
   const flatListRef = useAnimatedRef<FlashList<HistoryJSON>>();
 
