@@ -51,6 +51,7 @@ import { AppDispatch } from '../../misc/reduxStore';
 import ImageColors from 'react-native-image-colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import DarkOverlay from '../misc/DarkOverlay';
+import { Movies, searchMovie } from '../../utils/animeMovie';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -102,6 +103,7 @@ function Search(props: Props) {
   const searchText = useRef<string>('');
   const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
   const [data, setData] = useState<null | SearchAnime>(null);
+  const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [loading, setLoading] = useState(false);
   const [searchHistoryDisplay, setSearchHistoryDisplay] =
     useState<boolean>(false);
@@ -130,7 +132,7 @@ function Search(props: Props) {
         })
       }
     }).then(data => {
-        setListAnime(data);
+      setListAnime(data);
     }).catch(() => {
       setListAnime(null);
     });
@@ -156,10 +158,14 @@ function Search(props: Props) {
     }
     setLoading(true);
     textInputRef.current?.blur();
-    AnimeAPI.search(searchText.current)
-      .then(async result => {
+    Promise.all([
+      AnimeAPI.search(searchText.current),
+      searchMovie(searchText.current)
+    ])
+      .then(([animeResult, movieResult]) => {
         query.current = searchText.current;
-        setData(result);
+        setMovieData(movieResult);
+        setData(animeResult);
         setLoading(false);
         if (searchHistory.includes(searchText.current)) {
           searchHistory.splice(searchHistory.indexOf(searchText.current), 1);
@@ -173,9 +179,6 @@ function Search(props: Props) {
         );
       })
       .catch(err => {
-        // if (err.message === 'canceled') {
-        //   return;
-        // }
         const errMessage =
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
@@ -217,7 +220,7 @@ function Search(props: Props) {
         'rgb(0, 124, 128)',
       ],
     );
-    
+
     return {
       width: dimensions.width - interpolate(searchButtonAnimation.value, [0, 100], [searchButtonWidth.value ?? 75, 0]),
       borderTopColor: borderColor,
@@ -265,7 +268,7 @@ function Search(props: Props) {
         <TextInputAnimation
           onSubmitEditing={submit}
           onChangeText={onChangeText}
-          placeholder="Ketik anime disini"
+          placeholder="Cari anime/movie disini"
           placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
           onFocus={onSearchTextFocus}
           onBlur={onSearchTextBlur}
@@ -288,14 +291,16 @@ function Search(props: Props) {
 
       {(listAnime?.length === 0 || isPending) && (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
-            <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
-          </View>
+          <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
+          <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
+        </View>
       )}
 
-      {data === null && listAnime !== null ? (
+      {data === null && movieData === null && listAnime !== null ? (
         <View style={{ flex: listAnime?.length === 0 || isPending ? 0 : 1 }}>
-          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>Total anime: {listAnime.length}</Text>
+          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
+            Total anime: {listAnime.length} (belum termasuk movie)
+          </Text>
           <FlashList
             data={listAnime}
             estimatedItemSize={40}
@@ -340,7 +345,7 @@ function Search(props: Props) {
             setListAnime(null);
           });
         }}
-        style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+          style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
           <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 16 }]}>Gagal memuat list, tekan disini untuk mencoba lagi</Text>
           <Icon
             name="exclamation-circle"
@@ -351,69 +356,20 @@ function Search(props: Props) {
         <>
           <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 13, marginVertical: 2, textAlign: 'center' }]}>
             Hasil pencarian untuk: {query.current}
+            {movieData && movieData.length > 0 && data.result.length > 0 && "\n(Movie di tempatkan di urutan atas)"}
           </Text>
-          {data.result.length > 0 ? (
+          {data.result.length > 0 || (movieData && movieData.length > 0) ? (
             <FlashList
               estimatedItemSize={209}
-              data={data.result}
+              data={[...(movieData ?? []), ...data.result]}
               keyExtractor={(_, index) => index?.toString()}
               extraData={styles}
               renderItem={({ item: z }) => (
-                <TouchableOpacityAnimated
-                  entering={FadeInRight}
-                  style={styles.listContainer}
-                  onPress={() => {
-                    props.navigation.dispatch(
-                      StackActions.push('FromUrl', {
-                        link: z.animeUrl,
-                      }),
-                    );
-                  }}>
-                  <ImageLoading
-                    resizeMode="stretch"
-                    source={{ uri: z.thumbnailUrl }}
-                    style={styles.listImage}
-                  />
-                  <View style={{ flex: 1 }}>
-
-                    <View style={{ flexDirection: 'row', flex: 1, }}>
-                      <View style={styles.ratingInfo}>
-                        <Text style={globalStyles.text}>
-                          <Icon name="star" style={{ color: 'gold' }} />{' '}
-                          {z.rating}
-                        </Text>
-                      </View>
-                      <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
-                        <View
-                          style={[
-                            styles.statusInfo,
-                            {
-                              borderColor:
-                                z.status === 'Ongoing' ? '#cf0000' : '#22b422',
-                            },
-                          ]}>
-                          <Text style={globalStyles.text}>{z.status}</Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    <View style={styles.listTitle}>
-                      <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
-                        {z?.title}
-                      </Text>
-                    </View>
-
-                    <View style={styles.releaseInfo}>
-                      <Text style={globalStyles.text} numberOfLines={1}>
-                        <Icon name="tags" /> {z.genres.join(', ')}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacityAnimated>
+                <SearchList item={z} parentProps={props} />
               )}
             />
           ) : (
-            <Text style={globalStyles.text}>Tidak ada hasil!</Text>
+            <Text style={globalStyles.text}>Tidak ada hasil untuk pencarian anime maupun movie!</Text>
           )}
         </>
       )}
@@ -445,6 +401,7 @@ function Search(props: Props) {
                   }}
                 />
               )}
+              ListHeaderComponent={() => <Text style={styles.searchHistoryHeader}>Riwayat Pencarian: {searchHistory.length}</Text>}
             />
           </View>
         </Reanimated_KeyboardAvoidingView>
@@ -454,6 +411,7 @@ function Search(props: Props) {
           style={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
+            setMovieData(null);
           }}
           entering={ZoomIn}
           exiting={ZoomOut}>
@@ -482,21 +440,22 @@ function HistoryList({
 }) {
   const globalStyles = useGlobalStyles();
   const dispatch = useDispatch<AppDispatch>();
+  const styles = useStyles();
   return (
-    <View pointerEvents='box-none' onStartShouldSetResponder={() => true}>
+    <View style={styles.searchHistoryItemContainer} pointerEvents='box-none' onStartShouldSetResponder={() => true}>
       {/* I wrap the component with "View" because somehow "keyboardShouldPersistTaps" ignores the RNGH's Touchables */}
       <TouchableOpacity
-        style={{
+        style={[{
           padding: 6,
           flexDirection: 'row',
           justifyContent: 'space-between',
           height: 40,
-        }}
+        }]}
         onPress={() => {
           onChangeTextFunction(item);
         }}>
         <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Text style={globalStyles.text}>{item}</Text>
+          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>{item}</Text>
         </View>
         <TouchableOpacity
           hitSlop={14}
@@ -515,6 +474,99 @@ function HistoryList({
       </TouchableOpacity>
     </View>
   );
+}
+
+type SearchAnimeResult = SearchAnime["result"][number];
+
+function SearchList({ item: z, parentProps: props }:
+  { item: Movies | SearchAnimeResult; parentProps: Props; }) {
+  const isMovie = (z: Movies | SearchAnimeResult): z is Movies => {
+    return !("animeUrl" in z);
+  }
+  const globalStyles = useGlobalStyles();
+  const styles = useStyles();
+  return (
+    <TouchableOpacityAnimated
+      entering={FadeInRight}
+      style={styles.listContainer}
+      onPress={() => {
+        props.navigation.dispatch(
+          StackActions.push('FromUrl', {
+            link: isMovie(z) ? z.url : z.animeUrl,
+            isMovie: isMovie(z),
+          }),
+        );
+      }}>
+      <ImageLoading
+        resizeMode="stretch"
+        source={{ uri: z.thumbnailUrl }}
+        style={styles.listImage}
+      />
+      <ImageColorShadow url={z.thumbnailUrl} />
+
+      <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>
+        <DarkOverlay transparent={0.7} />
+        <View style={{ flexDirection: 'row', flex: 1, }}>
+          <View style={styles.ratingInfo}>
+            {!isMovie(z) && <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+              <Icon name="star" style={{ color: 'gold' }} />{' '}
+              {z.rating}
+            </Text>}
+          </View>
+          <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
+            <View
+              style={[
+                styles.statusInfo,
+                {
+                  borderColor:
+                    !isMovie(z) && z.status === 'Ongoing' ? '#cf0000' : isMovie(z) ? 'orange' : '#22b422',
+                },
+              ]}>
+              <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>{isMovie(z) ? "Movie" : z.status}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.listTitle}>
+          <Text style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
+            {z?.title}
+          </Text>
+        </View>
+
+        <View style={styles.releaseInfo}>
+          {!isMovie(z) && <Text style={[globalStyles.text, styles.animeSearchListDetailText]} numberOfLines={1}>
+            <Icon name="tags" /> {z.genres.join(', ')}
+          </Text>}
+        </View>
+      </ImageBackground>
+    </TouchableOpacityAnimated>
+  )
+}
+
+function ImageColorShadow({ url }: { url: string }) {
+  const [color, setColor] = useState({ r: 0, g: 0, b: 0 });
+  useEffect(() => {
+    ImageColors.getColors(url, { pixelSpacing: 3, cache: true, key: url }).then(colors => {
+      if (colors.platform === 'android') {
+        const hex = colors.dominant;
+        const r = parseInt(hex.substring(1, 3), 16);
+        const g = parseInt(hex.substring(3, 5), 16);
+        const b = parseInt(hex.substring(5, 7), 16);
+        setColor({ r, g, b });
+      }
+    })
+  }, [url]);
+  return (
+    <LinearGradient
+      colors={[
+        `rgba(${color.r}, ${color.g}, ${color.b}, 0.7)`,
+        `rgba(${color.r}, ${color.g}, ${color.b}, 0.1)`,
+      ]}
+      locations={[0, 0.9]}
+      start={[0, 0]}
+      end={[1, 0]}
+      style={{ width: 13, marginRight: 4 }} />
+  )
 }
 
 function useStyles() {

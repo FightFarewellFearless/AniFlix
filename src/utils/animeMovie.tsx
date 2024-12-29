@@ -364,6 +364,26 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
   return cheerio.load(await response.text())('source').attr('src')!;
 }
 
+export async function searchMovie(query: string, signal?: AbortSignal) {
+  const response = await fetch('https://154.26.137.28/?s=' + encodeURIComponent(query), {
+    signal,
+  });
+  const data = await response.text();
+  const $ = cheerio.load(data);
+  const list = $('div.listupd article');
+  const movies: Movies[] = [];
+  list.filter((i, el) => {
+    return $(el).find('div > a > .tt > span').text().trim().toLowerCase().startsWith('movie');
+  }).each((i, el) => {
+    movies.push({
+      title: $(el).find('div > a > .tt > h2').text().trim(),
+      url: $(el).find('div > a').attr('href')!,
+      thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!
+    })
+  });
+  return movies;
+}
+
 export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
   const webviewRef = useRef<WebView>(null);
   useEffect(() => {
