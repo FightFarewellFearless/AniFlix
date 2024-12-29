@@ -106,6 +106,16 @@ function WatchLater(props: Props) {
           estimatedItemSize={210}
           renderItem={renderItem}
           keyExtractor={extractKey}
+          ListHeaderComponent={() => (
+            <View>
+              <Text style={[globalStyles.text, { margin: 10 }]}>
+                  Jumlah daftar tonton nanti kamu: <Text style={{ fontWeight: 'bold' }}>{watchLaterLists.length}</Text>{'\n'}
+                  <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                    Sejak {moment(watchLaterLists.at(-1)!.date).format('DD MMMM YYYY')}
+                  </Text>
+                </Text>
+            </View>
+          )}
         />
       )}
     </View>

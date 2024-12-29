@@ -243,6 +243,16 @@ function History(props: Props) {
             onScroll={scrollHandler}
             extraData={styles}
             renderItem={renderFlatList}
+            ListHeaderComponent={() => (
+              <View>
+                <Text style={[globalStyles.text, { margin: 10 }]}>
+                  Jumlah histori tontonan kamu: <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>{'\n'}
+                  <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                    Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
+                  </Text>
+                </Text>
+              </View>
+            )}
           />
           <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
             <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
