@@ -5,10 +5,11 @@ import {
   useColorScheme,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  TextInput,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { StackActions } from '@react-navigation/native';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -47,6 +48,12 @@ function History(props: Props) {
     state => state.settings.history,
     true,
     state => JSON.parse(state) as HistoryJSON[],
+  );
+
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const filteredData = data.filter(item => 
+    item.title.toLowerCase().includes(searchKeyword.toLowerCase())
   );
 
   const flatListRef = useAnimatedRef<FlashList<HistoryJSON>>();
@@ -229,14 +236,21 @@ function History(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      {data.length === 0 ? (
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Cari judul anime..."
+        placeholderTextColor={globalStyles.text.color}
+        value={searchKeyword}
+        onChangeText={setSearchKeyword}
+      />
+      {filteredData.length === 0 ? (
         <View style={styles.noHistory}>
           <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
         </View>
       ) : (
         <View style={styles.historyContainer}>
           <AnimatedFlashList
-            data={data}
+            data={filteredData}
             estimatedItemSize={160}
             ref={flatListRef}
             keyExtractor={keyExtractor}
@@ -369,6 +383,14 @@ function useStyles() {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    searchInput: {
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 1,
+      borderRadius: 8,
+      margin: 10,
+      paddingHorizontal: 10,
     },
   });
 }
