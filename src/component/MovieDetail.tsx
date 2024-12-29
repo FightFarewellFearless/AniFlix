@@ -113,20 +113,6 @@ function Section(props: { children?: React.ReactNode, style?: ViewStyle }) {
   )
 }
 
-function DarkOverlay() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: '#00000073',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-      }}
-    />
-  );
-}
-
 function useStyles() {
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
