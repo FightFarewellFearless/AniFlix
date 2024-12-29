@@ -1,3 +1,15 @@
+# 0.7.2-JS_3 (29-Desember-2024) 
+
+MOVIE BETA TAHAP 3.
+Update kali ini menambahkan fitur pencarian untuk anime movie, serta menambahkan pencarian untuk history, dan peningkatan UI design pada bagian pencarian anime.
+
+## Penambahan & Peningkatan
+- Peningkatan UI
+- Menambahkan pencarian untuk movie
+- Menambahkan fitur mencari judul anime yang sudah ditonton pada bagian Histori
+  > Ini mempermudahkan kamu untuk mencari anime yang sudah ditonton secara cepat, terutama pada daftar history yang jumlah nya banyak
+- Menambahkan text jumlah history/tonton nanti.
+
 # 0.7.2-JS_2 (25-Desember-2024)
 
 MOVIE BETA TAHAP 2.
