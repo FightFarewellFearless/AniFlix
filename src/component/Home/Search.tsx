@@ -401,7 +401,7 @@ function Search(props: Props) {
                   }}
                 />
               )}
-              ListHeaderComponent={() => <Text style={styles.searchHistoryHeader}>Riwayat Pencarian: {searchHistory.length}</Text>}
+              ListHeaderComponent={() => <Text style={[globalStyles.text, styles.searchHistoryHeader]}>Riwayat Pencarian: {searchHistory.length}</Text>}
             />
           </View>
         </Reanimated_KeyboardAvoidingView>
