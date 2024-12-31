@@ -57,7 +57,7 @@ function SeeMore(props: Props) {
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (NewAnimeList | Movies)[]
         }
         // TEMP: temporary fix for Fabric react-native-screens
-        contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager !== undefined ? 49 : undefined }}
+        // contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager !== undefined ? 49 : undefined }}
         extraData={styles}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
