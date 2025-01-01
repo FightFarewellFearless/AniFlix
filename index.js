@@ -2,7 +2,7 @@
  * @format
  */
 import 'react-native-gesture-handler';
-import { AppRegistry } from 'react-native';
+import { AppRegistry, Text } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
@@ -22,4 +22,7 @@ polyfillEncoding();
 polyfillReadableStream();
 polyfillFetch();
 
-AppRegistry.registerComponent(appName, () => codePush({ checkFrequency: codePush.CheckFrequency.MANUAL })(App));
+Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps.allowFontScaling = false;
+
+AppRegistry.registerComponent(appName, () => App);
