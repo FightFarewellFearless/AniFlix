@@ -1,4 +1,5 @@
-import { AVPlaybackStatus, Audio, InterruptionModeAndroid, ResizeMode, Video } from "expo-av";
+import { StatusChangeEventPayload, useVideoPlayer, VideoPlayer as ExpoVideoPlayer, VideoView } from "expo-video"
+
 import { useKeepAwake } from 'expo-keep-awake';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
@@ -8,16 +9,13 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import deviceUserAgent from "../../utils/deviceUserAgent";
 import ReText from "../misc/ReText";
 import SeekBar from "./SeekBar";
-
-Audio.setAudioModeAsync({
-  interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-});
+import { useEventListener } from "expo";
 
 type VideoPlayerProps = {
   title: string;
   streamingURL: string;
   style?: ViewStyle;
-  videoRef: React.RefObject<Video>;
+  videoRef: React.RefObject<VideoView>;
   onFullscreenUpdate?: (isFullscreen: boolean) => void;
   fullscreen?: boolean;
   onLoad?: () => void;
@@ -28,6 +26,21 @@ type VideoPlayerProps = {
 }
 export default function VideoPlayer({ title, streamingURL, style, videoRef, onFullscreenUpdate, fullscreen, onLoad, isPaused, onDurationChange, headers, batteryAndClock }: VideoPlayerProps) {
   useKeepAwake();
+
+  const currentDurationSecond = useSharedValue(0);
+  const totalDurationSecond = useSharedValue(0);
+
+  const player = useVideoPlayer({
+    uri: streamingURL,
+    headers: {
+      'User-Agent': deviceUserAgent,
+      ...headers,
+    }
+  }, player => {
+    player.audioMixingMode = 'doNotMix';
+    player.timeUpdateEventInterval = 1;
+  })
+
   const seekBarProgress = useSharedValue(0);
   const seekBarProgressDisabled = useSharedValue(false);
 
@@ -46,34 +59,43 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   const [showControls, setShowControls] = useState(true);
   const showControlsOpacity = useSharedValue(1);
 
-  const currentDurationSecond = useSharedValue(0);
-  const totalDurationSecond = useSharedValue(0);
-
   useEffect(() => {
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
 
-  const playbackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      if (status.isBuffering && !status.isPlaying && status.shouldPlay) {
-        setIsBuffering(true);
-      } else {
-        setIsBuffering(false);
-      }
-      totalDurationSecond.value = ((status.durationMillis ?? 0) / 1000);
-      if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (status.positionMillis / 1000);
+  const playbackStatusUpdate = useCallback(({ status, error }: StatusChangeEventPayload) => {
+    if (status === 'readyToPlay') {
+      setIsError(false);
+      setIsBuffering(false);
+      totalDurationSecond.value = ((player.duration ?? 0));
+      if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (player.currentTime);
 
-      if (seekBarProgressDisabled.value === false) seekBarProgress.value = status.positionMillis / (status.durationMillis ?? 1);
+      if (seekBarProgressDisabled.value === false) seekBarProgress.value = player.currentTime / (player.duration ?? 1);
 
-      onDurationChange?.(status.positionMillis / 1000);
-
-      setPaused(!status.shouldPlay);
-    } else {
-      setIsError(!!status.error);
+      currentDurationSecond.get() < 1 && onLoad?.();
+      onDurationChange?.(player.currentTime);
     }
-  }, [onDurationChange]);
+    else if (status === 'loading') {
+      setIsBuffering(true);
+    }
+    else if (status === 'error') {
+      setIsError(true);
+      setIsBuffering(false);
+    }
+  }, [onDurationChange, player, onLoad]);
+
+  useEventListener(player, 'statusChange', playbackStatusUpdate);
+  useEventListener(player, 'playingChange', (e) => {
+    setPaused(!e.isPlaying);
+  })
+  useEventListener(player, 'timeUpdate', (e) => {
+    if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (e.currentTime);
+    if (seekBarProgressDisabled.value === false) seekBarProgress.value = e.currentTime / (player.duration ?? 1);
+    onDurationChange?.(e.currentTime);
+  })
+
   const setPositionAsync = (duration: number) => {
-    videoRef?.current?.setPositionAsync(duration * 1000);
+    player.currentTime = (duration);
   };
   const onPressIn = useCallback((e: GestureResponderEvent) => {
     pressableShowControlsLocation.current = {
@@ -89,25 +111,20 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
       setShowControls(a => !a);
     }
   }, []);
-  const onVideoLoad = useCallback((e: AVPlaybackStatus) => {
-    if (e.isLoaded) {
-      totalDurationSecond.value = ((e.durationMillis ?? 0) / 1000);
-      currentDurationSecond.value = 0;
-    }
-    onLoad?.();
-  }, [onLoad]);
 
   const onRewind = useCallback(() => {
-    videoRef.current?.setPositionAsync((currentDurationSecond.value - 5) * 1000);
+    player.currentTime = ((currentDurationSecond.value - 5));
   }, []);
   const onForward = useCallback(() => {
-    videoRef.current?.setPositionAsync((currentDurationSecond.value + 10) * 1000);
+    player.currentTime = ((currentDurationSecond.value + 10));
   }, []);
   const onPlayPausePressed = useCallback(() => {
     if (!paused) {
-      videoRef?.current?.pauseAsync();
+      player.pause();
+      setPaused(true);
     } else {
-      videoRef?.current?.playAsync();
+      player.play();
+      setPaused(false);
     }
   }, [paused]);
 
@@ -115,11 +132,11 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
     onFullscreenUpdate?.(isFullscreen)
     setIsFullscreen(a => !a)
   }, [onFullscreenUpdate, isFullscreen]);
-  
+
   // fix: video is paused when changing streaming url
-  useEffect(() => {
-    videoRef.current?.playAsync();
-  }, [streamingURL]);
+  // useEffect(() => {
+  //   player.play();
+  // }, [streamingURL]);
 
   useEffect(() => {
     showControlsOpacity.value = withTiming(showControls ? 1 : 0, {
@@ -135,31 +152,30 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   });
   return (
     <View style={[style]}>
+      <VideoView
+        pointerEvents="none"
+        player={player}
+        key={streamingURL}
+        contentFit="contain"
+        nativeControls={false}
+        style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0, }}
+        ref={videoRef}
+      />
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
         {batteryAndClock}
-        <Video
-          key={streamingURL}
-          onLoad={onVideoLoad}
-          onPlaybackStatusUpdate={playbackStatusUpdate}
-          source={{
-            uri: streamingURL, headers: {
-              'User-Agent': deviceUserAgent,
-              ...headers,
-            }
-          }}
-          resizeMode={ResizeMode.CONTAIN}
-          useNativeControls={false}
-          style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0, }}
-          ref={videoRef}
-        />
 
-        <Reanimated.View pointerEvents="box-none" style={[{flex: 1, zIndex: 999}, showControlsStyle]}>
+        <Reanimated.View pointerEvents="box-none" style={[{ flex: 1, zIndex: 999 }, showControlsStyle]}>
           <Top title={title} />
           <CenterControl
             isBuffering={isBuffering}
+            isError={isError}
             onRewind={onRewind}
             onForward={onForward}
-            onPlayPausePressed={onPlayPausePressed} paused={paused} />
+            onPlayPausePressed={onPlayPausePressed} paused={paused} player={player}
+            streamingURL={streamingURL}
+            headers={headers}
+            lastTimeError={currentDurationSecond}
+            onLoad={onLoad} />
           <BottomControl
             currentDurationSecond={currentDurationSecond} totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen} onFullScreenButtonPressed={onFullScreenButtonPressed} onProgressChange={(e) => {
@@ -191,7 +207,15 @@ function Top({ title }: { title: string }) {
   )
 }
 
-function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onRewind }: { isBuffering: boolean; onPlayPausePressed: () => void, paused: boolean, onForward: () => void, onRewind: () => void }) {
+function CenterControl({ 
+  isBuffering, isError, onPlayPausePressed, paused,
+  onForward, onRewind, player, headers, streamingURL, lastTimeError, onLoad
+}: 
+  {
+    isBuffering: boolean; isError: boolean; onPlayPausePressed: () => void, paused: boolean,
+    onForward: () => void, onRewind: () => void; player: ExpoVideoPlayer; lastTimeError: SharedValue<number>;
+  } & Pick<VideoPlayerProps, 'streamingURL' | 'headers' | 'onLoad'>
+) {
   return (
     <View pointerEvents='box-none' onStartShouldSetResponder={() => true} style={{
       position: 'absolute', top: '50%', alignSelf: 'center',
@@ -203,9 +227,25 @@ function CenterControl({ isBuffering, onPlayPausePressed, paused, onForward, onR
       </TouchableOpacity>
       {isBuffering ? (
         <ActivityIndicator size={'large'} />
-      ) : (
+      ) : !isError ? (
         <TouchableOpacity onPress={onPlayPausePressed} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
           <Icons name={!paused ? "pause" : "play-arrow"} size={40} color={'white'} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={() => {
+          player.replace('');
+          player.replace({
+            uri: streamingURL,
+            headers: {
+              'User-Agent': deviceUserAgent,
+              ...headers,
+            }
+          });
+          const lastTime = lastTimeError.get();
+          if(lastTime > 0) player.currentTime = lastTime;
+          else onLoad?.();
+        }} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
+          <Icons name="refresh" size={40} color={'white'} />
         </TouchableOpacity>
       )}
       <TouchableOpacity onPress={onForward} style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>

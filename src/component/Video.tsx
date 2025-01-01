@@ -39,7 +39,6 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { Video as ExpoVideo } from 'expo-av';
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
@@ -53,7 +52,7 @@ import { AppDispatch, RootState } from '../misc/reduxStore';
 import AnimeAPI from '../utils/AnimeAPI';
 import WebView from 'react-native-webview';
 import deviceUserAgent from '../utils/deviceUserAgent';
-import { AniDetail, AniStreaming } from '../types/anime';
+import { AniDetail } from '../types/anime';
 import VideoPlayer from './VideoPlayer';
 import { StackActions } from '@react-navigation/native';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
@@ -61,6 +60,7 @@ import { getMovieDetail, getRawDataIfAvailable } from '../utils/animeMovie';
 
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
+import { VideoView } from 'expo-video';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -103,7 +103,7 @@ function Video(props: Props) {
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
-  const videoRef = useRef<ExpoVideo>(null);
+  const videoRef = useRef<VideoView>(null);
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
 
@@ -520,7 +520,9 @@ function Video(props: Props) {
     if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    videoRef.current?.setPositionAsync(historyData.current.lastDuration * 1000);
+    if (videoRef.current && videoRef.current.props.player) {
+      videoRef.current.props.player.currentTime = historyData.current.lastDuration;
+    }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
     // Alert.alert('Perhatian', `
@@ -533,9 +535,9 @@ function Video(props: Props) {
 
   useEffect(() => {
     if (isPaused) {
-      videoRef.current?.pauseAsync();
+      videoRef.current?.props.player.pause();
     } else {
-      videoRef.current?.playAsync();
+      videoRef.current?.props.player.play();
     }
   }, [isPaused]);
 
@@ -874,6 +876,7 @@ function Video(props: Props) {
                   itemContainerStyle={styles.dropdownItemContainerStyle}
                   activeColor="#16687c"
                   selectedTextStyle={styles.dropdownSelectedTextStyle}
+                  placeholderStyle={{ color: globalStyles.text.color }}
                   autoScroll
                   dropdownPosition='top'
                 />
