@@ -6,7 +6,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import moment from "moment";
-import { ResizeMode, Video } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
+import React from "react";
 
 interface SearchResult {
     frameCount: number;
@@ -65,6 +66,11 @@ export default function SearchAnimeByImage() {
         error: '',
         result: exampleResultArray,
     });
+    const player = useVideoPlayer(videoModal.link, p => {
+        p.muted = true;
+        p.loop = true;
+        p.play();
+    });
     const [choosenImage, setChoosenImage] = useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(false);
     const styles = useStyles();
@@ -78,7 +84,7 @@ export default function SearchAnimeByImage() {
                             style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}>
                             <Icon name="times" color="white" size={40} />
                         </TouchableOpacity>
-                        <Video source={{ uri: videoModal.link }} useNativeControls resizeMode={ResizeMode.CONTAIN} isMuted isLooping shouldPlay style={{ width: '100%', flex: 1, alignSelf: 'center' }} />
+                        <VideoView player={player} nativeControls={false} contentFit="contain" style={{ width: '100%', flex: 1, alignSelf: 'center' }} />
                     </View>
                 </View>
             </Modal>
