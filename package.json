@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
-    "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "expo start -d",
     "release": "cd android && ./gradlew assembleRelease",
@@ -15,11 +14,13 @@
     "rename": "mv android/app/build/outputs/apk/release/anime-release.apk android/app/build/outputs/apk/release/aniflix.apk"
   },
   "dependencies": {
+    "@domir/react-native-measure-text": "^0.1.8",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/drawer": "^7.1.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
+    "@react-navigation/stack": "^7.1.1",
     "@reduxjs/toolkit": "^2.2.5",
     "@shopify/flash-list": "^1.7.2",
     "axios": "^1.6.2",
