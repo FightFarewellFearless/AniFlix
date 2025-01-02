@@ -80,3 +80,6 @@ mykeystore.txt
 
 # env
 .env
+
+# expo dist
+dist
