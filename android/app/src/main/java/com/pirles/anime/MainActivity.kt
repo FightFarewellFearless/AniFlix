@@ -9,6 +9,8 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 import android.content.Intent
 import android.content.res.Configuration
 
+import expo.modules.splashscreen.SplashScreenManager
+
 class MainActivity : ReactActivity() {
 
   /**
@@ -18,6 +20,7 @@ class MainActivity : ReactActivity() {
   override fun getMainComponentName(): String = "AniFlix"
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    SplashScreenManager.registerOnActivity(this)
     super.onCreate(null)
   }
 

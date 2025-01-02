@@ -20,6 +20,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { CFBypassIsOpen, CFBypassWebView, setWebViewOpen } from './src/utils/CFBypass';
 import MovieDetail from './src/component/MovieDetail';
 
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
+
 // enableScreens((global as any).nativeFabricUIManager === undefined); // TEMP: temporary fix for crashed app on new architecture
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
@@ -33,6 +36,7 @@ function App() {
   const colorScheme = useColorScheme();
   useEffect(() => {
     StatusBar.setHidden(false);
+    SplashScreen.hideAsync();
   }, []);
   useEffect(() => {
     StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
