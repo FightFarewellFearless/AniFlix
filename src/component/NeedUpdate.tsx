@@ -30,7 +30,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import CodePush from 'react-native-code-push';
+import * as Updates from 'expo-updates';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
@@ -115,50 +115,64 @@ function NeedUpdate(props: Props) {
           ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
         });
     } else {
-      CodePush.sync({
-        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-      }, status => {
-        switch (status) {
-          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            setIsDownloadStart(true);
-            break;
-          case CodePush.SyncStatus.UPDATE_INSTALLED:
-            setIsDownloadStart(true);
-            downloadProgress.value = 100;
-            break;
-          default:
-            setIsDownloadStart(false);
-            break;
-        }
-      }, ({ receivedBytes, totalBytes }) => {
-        setNetSpeed(
-          `${(
-            (receivedBytes - lastMB.current) /
-            MB /
-            MB /
-            ((Date.now() - lastMS.current) / 1000)
-          ).toFixed(2)} MB/s`,
-        )
-        lastMB.current = receivedBytes;
-        lastMS.current = Date.now();
-        totalMB.current = totalBytes;
-        downloadProgress.value = Math.floor(
-          (receivedBytes / totalBytes) * 100,
-        );
-      }).then(() => {
-        setIsDownloadStart(true);
+      // CodePush.sync({
+      //   installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+      // }, status => {
+      //   switch (status) {
+      //     case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+      //       setIsDownloadStart(true);
+      //       break;
+      //     case CodePush.SyncStatus.UPDATE_INSTALLED:
+      //       setIsDownloadStart(true);
+      //       downloadProgress.value = 100;
+      //       break;
+      //     default:
+      //       setIsDownloadStart(false);
+      //       break;
+      //   }
+      // }, ({ receivedBytes, totalBytes }) => {
+      //   setNetSpeed(
+      //     `${(
+      //       (receivedBytes - lastMB.current) /
+      //       MB /
+      //       MB /
+      //       ((Date.now() - lastMS.current) / 1000)
+      //     ).toFixed(2)} MB/s`,
+      //   )
+      //   lastMB.current = receivedBytes;
+      //   lastMS.current = Date.now();
+      //   totalMB.current = totalBytes;
+      //   downloadProgress.value = Math.floor(
+      //     (receivedBytes / totalBytes) * 100,
+      //   );
+      // }).then(() => {
+      //   setIsDownloadStart(true);
+      //   downloadProgress.value = 100;
+      //   Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
+      //     [
+      //       { text: "Restart", onPress: () => {
+      //         CodePush.restartApp();
+      //       } },
+      //     ]
+      //   );
+      // }).catch(() => {
+      //   setIsDownloadStart(false);
+      //   ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+      // });
+      setIsDownloadStart(true);
+      Updates.fetchUpdateAsync().then(update => {
         downloadProgress.value = 100;
         Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
           [
             { text: "Restart", onPress: () => {
-              CodePush.restartApp();
+              Updates.reloadAsync();
             } },
           ]
         );
       }).catch(() => {
         setIsDownloadStart(false);
         ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-      });
+      })
     };
     ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
     Alert.alert(
@@ -176,7 +190,8 @@ function NeedUpdate(props: Props) {
         'application/vnd.android.package-archive',
       );
     } else {
-      CodePush.restartApp();
+      // CodePush.restartApp();
+      Updates.reloadAsync();
     };
   }, []);
 

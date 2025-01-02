@@ -14,19 +14,18 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
 
-import com.microsoft.codepush.react.CodePush
-
 import org.wonday.orientation.OrientationActivityLifecycle
 
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
       ReactNativeHostWrapper(this, object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
-            }
+        override fun getPackages(): List<ReactPackage> {
+          val packages = PackageList(this).packages;
+          // Packages that cannot be autolinked yet can be added manually here, for example:
+          // packages.add(new MyReactNativePackage());
+          return packages
+        }
 
         override fun getJSMainModuleName(): String = "index"
 
@@ -34,10 +33,6 @@ class MainApplication : Application(), ReactApplication {
         
         override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
         override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-
-        override fun getJSBundleFile(): String {
-            return CodePush.getJSBundleFile() 
-        }
       })
 
   override val reactHost: ReactHost

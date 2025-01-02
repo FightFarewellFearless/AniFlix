@@ -7,7 +7,7 @@
     "android": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "start": "react-native start",
+    "start": "expo start -d",
     "release": "cd android && ./gradlew assembleRelease",
     "installapk": "yarn rename && adb install android/app/build/outputs/apk/release/aniflix.apk",
     "clean": "cd android && ./gradlew clean",
@@ -29,13 +29,13 @@
     "expo-document-picker": "13.0.1",
     "expo-linear-gradient": "14.0.1",
     "expo-splash-screen": "0.29.18",
+    "expo-updates": "~0.26.10",
     "expo-video": "~2.0.3",
     "gpti": "^2.0.6",
     "moment": "^2.29.4",
     "react": "18.3.1",
     "react-native": "0.76.5",
     "react-native-blob-util": "^0.21.2",
-    "react-native-code-push": "^8.3.1",
     "react-native-copilot": "^3.3.3",
     "react-native-device-info": "^14.0.2",
     "react-native-element-dropdown": "^2.12.2",
@@ -89,11 +89,7 @@
   "packageManager": "yarn@3.8.2",
   "expo": {
     "autolinking": {
-      "exclude": [
-        "expo-font",
-        "expo-asset",
-        "expo-file-system"
-      ]
+      "exclude": []
     }
   }
 }

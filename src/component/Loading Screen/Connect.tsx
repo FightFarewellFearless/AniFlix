@@ -31,8 +31,7 @@ import RNFetchBlob from 'react-native-blob-util';
 
 import animeLocalAPI from '../../utils/animeLocalAPI';
 
-import codePush from 'react-native-code-push';
-
+import * as Updates from 'expo-updates';
 import { AnimeMovieWebView } from '../../utils/animeMovie';
 
 export const JoinDiscord = () => {
@@ -188,13 +187,23 @@ function Loading(props: Props) {
         __DEV__ // skip update when app is in dev mode
       ) {
 
-        const OTAUpdate = await codePush.checkForUpdate();
+        const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => { 
+          ToastAndroid.show('Gagal mengecek update', ToastAndroid.SHORT);
+          return null;
+         });
 
-        if (OTAUpdate) {
+        if (OTAUpdate !== null && OTAUpdate.isAvailable) {
+          const changelog = await fetch('https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md', {
+            headers: {
+              'User-Agent': deviceUserAgent,
+              'Cache-Control': 'no-cache',
+            },
+          }).then(d => d.text()).catch(() => 'Gagal mendapatkan changelog');
           props.navigation.dispatch(
             StackActions.replace('NeedUpdate', {
-              changelog: OTAUpdate.description,
-              size: OTAUpdate.packageSize,
+              changelog,
+              // size: "OTAUpdate.packageSize",
+              size: 0,
               nativeUpdate: false,
             }),
           );
