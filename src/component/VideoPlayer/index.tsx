@@ -2,7 +2,7 @@ import { StatusChangeEventPayload, useVideoPlayer, VideoPlayer as ExpoVideoPlaye
 
 import { useKeepAwake } from 'expo-keep-awake';
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
+import { ActivityIndicator, AppState, GestureResponderEvent, Pressable, Text, View, ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native"; //rngh
 import Reanimated, { SharedValue, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -74,6 +74,12 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
 
       currentDurationSecond.get() < 1 && onLoad?.();
       onDurationChange?.(player.currentTime);
+
+      // Fix: video is playing when app is in background
+      if(AppState.currentState === 'background') {
+        setPaused(true);
+        player.pause();
+      }
     }
     else if (status === 'loading') {
       setIsBuffering(true);
@@ -87,11 +93,17 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   useEventListener(player, 'statusChange', playbackStatusUpdate);
   useEventListener(player, 'playingChange', (e) => {
     setPaused(!e.isPlaying);
+    if(!e.isPlaying) {
+      setShowControls(true);
+    }
   })
   useEventListener(player, 'timeUpdate', (e) => {
     if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (e.currentTime);
     if (seekBarProgressDisabled.value === false) seekBarProgress.value = e.currentTime / (player.duration ?? 1);
     onDurationChange?.(e.currentTime);
+  })
+  useEventListener(player, 'playToEnd', () => {
+    setShowControls(true);
   })
 
   const setPositionAsync = (duration: number) => {
@@ -113,10 +125,16 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   }, []);
 
   const onRewind = useCallback(() => {
-    player.currentTime = ((currentDurationSecond.value - 5));
+    const rewind = Math.max(0, currentDurationSecond.get() - 5);
+    player.currentTime = (rewind);
+    currentDurationSecond.set(rewind);
+    seekBarProgress.set(rewind / totalDurationSecond.get());
   }, []);
   const onForward = useCallback(() => {
-    player.currentTime = ((currentDurationSecond.value + 10));
+    const forward = Math.min(totalDurationSecond.get(), currentDurationSecond.get() + 10);
+    player.currentTime = (forward);
+    currentDurationSecond.set(forward);
+    seekBarProgress.set(forward / totalDurationSecond.get());
   }, []);
   const onPlayPausePressed = useCallback(() => {
     if (!paused) {
