@@ -382,10 +382,7 @@ const listAnime = async (signal?: AbortSignal, streamingCallback?: (data: listAn
                         title: removeHtmlTags(title),
                         streamingLink: href
                     });
-                    if (streamingCallback !== undefined && listAnimeData.length % 93 === 0) { // call every 93 
-                        if ((global as any).nativeFabricUIManager === undefined) {
-                            continue;
-                        }
+                    if (streamingCallback !== undefined && listAnimeData.length % 43 === 0) { // call every 93 
                         runOnJS(streamingCallback)(listAnimeData);
                     }
                 }

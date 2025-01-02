@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { ViewStyle, View, StyleSheet, LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, { useSharedValue, useAnimatedStyle, withTiming, SharedValue } from "react-native-reanimated";
@@ -12,6 +12,9 @@ type SeekBarProps = {
 export default function SeekBar({ progress, onProgressChange, onProgressChangeEnd, style }: SeekBarProps) {
   const parentWidth = useSharedValue(0);
   const circleScale = useSharedValue(1);
+  
+  const viewRef = useRef<View>(null);
+
   const clampNumber = (num: number, a: number, b: number) => {
     'worklet';
     return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
@@ -45,7 +48,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
   const coveredAreaStyles = useAnimatedStyle(() => ({
     width: (progress.value * parentWidth.value)
   }));
-  const lastCoveredStyles = useAnimatedStyle(() => ({
+  const circleStyle = useAnimatedStyle(() => ({
     transform: [{
       translateX: clampNumber((progress.value * parentWidth.value) - 5, 0, parentWidth.value - 12),
     }, {
@@ -53,17 +56,23 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
     }]
   }));
   const onLayout = useCallback((e: LayoutChangeEvent) => {
-    parentWidth.value = e.nativeEvent.layout.width;
+    parentWidth.set(e.nativeEvent.layout.width);
   }, [])
+
+  useLayoutEffect(() => {
+    viewRef.current?.measure((x, y, width, height) => {
+      parentWidth.set(width);
+    })
+  }, []);
+
   return (
-    <View style={[style]}
-      onLayout={onLayout}>
+    <View style={[style]} onLayout={onLayout} ref={viewRef}>
 
       <GestureDetector gesture={gesture}>
         <View style={[styles.gestureContainer]}>
           <Reanimated.View style={[coveredAreaStyles, styles.coveredArea]} />
           <Reanimated.View
-            style={[styles.lastCovered, lastCoveredStyles]}
+            style={[styles.circle, circleStyle]}
           />
           <View
             style={[styles.availableArea]}
@@ -89,7 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     zIndex: 2,
   },
-  lastCovered: {
+  circle: {
     position: 'absolute',
     height: 12,
     width: 12,

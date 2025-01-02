@@ -126,11 +126,9 @@ function Search(props: Props) {
 
   useEffect(() => {
     AnimeAPI.listAnime(undefined, (data) => {
-      if ((global as any).nativeFabricUIManager !== undefined) {
-        startTransition(() => {
-          setListAnime(data);
-        })
-      }
+      startTransition(() => {
+        setListAnime(data);
+      })
     }).then(data => {
       setListAnime(data);
     }).catch(() => {
@@ -289,7 +287,7 @@ function Search(props: Props) {
         </PressableAnimation>
       </View>
 
-      {(listAnime?.length === 0 || isPending) && (
+      {(listAnime?.length === 0) && (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
           <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
@@ -297,15 +295,15 @@ function Search(props: Props) {
       )}
 
       {data === null && movieData === null && listAnime !== null ? (
-        <View style={{ flex: listAnime?.length === 0 || isPending ? 0 : 1 }}>
+        <View style={{ flex: listAnime?.length === 0 ? 0 : 1 }}>
           <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
+          {isPending && <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />}
           <FlashList
             data={listAnime}
             estimatedItemSize={40}
             keyExtractor={item => item?.title}
-            extraData={styles}
             renderItem={({ item, index }) => {
               return (
                 <TouchableOpacity
@@ -363,7 +361,6 @@ function Search(props: Props) {
               estimatedItemSize={209}
               data={[...(movieData ?? []), ...data.result]}
               keyExtractor={(_, index) => index?.toString()}
-              extraData={styles}
               renderItem={({ item: z }) => (
                 <SearchList item={z} parentProps={props} />
               )}

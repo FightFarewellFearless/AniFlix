@@ -56,7 +56,7 @@ function History(props: Props) {
     item.title.toLowerCase().includes(searchKeyword.toLowerCase())
   ), [searchKeyword, data]);
 
-  const flatListRef = useAnimatedRef<FlashList<HistoryJSON>>();
+  const flatListRef = useRef<FlashList<HistoryJSON>>();
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -252,6 +252,7 @@ function History(props: Props) {
           <AnimatedFlashList
             data={filteredData}
             estimatedItemSize={160}
+            // @ts-ignore
             ref={flatListRef}
             keyExtractor={keyExtractor}
             onScroll={scrollHandler}
@@ -299,6 +300,7 @@ function formatTimeFromSeconds(seconds: number) {
 
 function useStyles() {
   const colorScheme = useColorScheme();
+  const globalStyles = useGlobalStyles();
   return StyleSheet.create({
     historyContainer: {
       overflow: 'hidden',
@@ -391,6 +393,7 @@ function useStyles() {
       borderRadius: 8,
       margin: 10,
       paddingHorizontal: 10,
+      color: globalStyles.text.color,
     },
   });
 }

@@ -12,7 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useWindowDimensions } from 'react-native';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { HomeStackNavigator } from '../../types/navigation';
-import { AnimeList } from './AnimeList';
+import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { NewAnimeList } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
@@ -62,13 +62,13 @@ function SeeMore(props: Props) {
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
           props.route.params.type === 'MovieList' ? (
-            <AnimeList
+            <ListAnimeComponent
               isMovie={true}
               newAnimeData={item as Movies}
               navigationProp={props.navigation}
             />
           ) : (
-            <AnimeList
+            <ListAnimeComponent
               isMovie={false}
               newAnimeData={item as NewAnimeList}
               navigationProp={props.navigation}

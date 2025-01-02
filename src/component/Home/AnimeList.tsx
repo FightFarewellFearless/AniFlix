@@ -22,8 +22,8 @@ import {
   useColorScheme,
   ActivityIndicator,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
-import Reanimated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import { TouchableOpacity } from 'react-native-gesture-handler'; //rngh
+import Reanimated, { cancelAnimation, Easing, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { NavigationProp, StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -33,18 +33,20 @@ import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import AnimeAPI from '../../utils/AnimeAPI';
-import ImageLoading from '../ImageLoading';
 import SeeMore from './SeeMore';
 import {
-  NativeStackNavigationProp,
   NativeStackScreenProps,
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
+
+import * as MeasureText from '@domir/react-native-measure-text';
+
 import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
 import { version, OTAJSVersion } from '../../../package.json'
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
+import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -82,18 +84,28 @@ function HomeList(props: HomeListProps) {
 
   const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0)
 
-  const [animationText, setAnimationText] = useState(runningText[0]);
   // const [announcmentVisible, setAnnouncmentVisible] = useState(false);
-
+  
   const windowSize = useWindowDimensions();
-
+  
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const boxTextAnim = useSharedValue(0);
   const boxTextLayout = useSharedValue(0);
   const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
+  
+  const [animationText, setAnimationText] = useState(() => {
+    const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
+    const quote =  `"${randomQuote.quote}" - ${randomQuote.by}`;
+    textLayoutWidth.set(MeasureText.measureWidth(quote, {
+      fontWeight: 'bold',
+      fontSize: 17,
+    }));
+    return quote;
+  });
 
+  
   // useEffect(() => {
   //   if (data?.announcment.enable === true) {
   //     setAnnouncmentVisible(true);
@@ -103,17 +115,36 @@ function HomeList(props: HomeListProps) {
 
   useFocusEffect(
     useCallback(() => {
-      boxTextAnim.value = withRepeat(withSequence(
-        withDelay(1000, withTiming(1, { duration: 15000, easing: Easing.linear })),
-        withTiming(0, { duration: 0 }),
-      ), 0)
+      const setLayoutWidth = (quote: string) => {
+        textLayoutWidth.set(MeasureText.measureWidth(quote, {
+          fontWeight: 'bold',
+          fontSize: 17,
+        }));
+      }
+      function callback(finished?: boolean) {
+        if(finished) {
+          textLayoutWidth.value = 0;
+          const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
+          const quote = `"${randomQuote.quote}" - ${randomQuote.by}`
+          runOnJS(setAnimationText)(
+            quote,
+          );
+          runOnJS(setLayoutWidth)(quote);
+        }
+        boxTextAnim.value = 0;
+        if(finished === false) return;
+        boxTextAnim.value = withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
+      }
 
-      const interval = setInterval(() => {
-        textLayoutWidth.value = 0;
-        setAnimationText(
-          runningText[Math.floor(Math.random() * runningText.length)],
-        );
-      }, 16500);
+      // const interval = setInterval(() => {
+      //   textLayoutWidth.value = 0;
+      //   setAnimationText(
+      //     runningText[Math.floor(Math.random() * runningText.length)],
+      //   );
+      // }, 15500);
+
+      boxTextAnim.value = withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
+
       Animated.timing(scaleAnim, {
         toValue: 1,
         // speed: 18,
@@ -127,8 +158,9 @@ function HomeList(props: HomeListProps) {
           duration: 250,
           useNativeDriver: true,
         }).start();
-        boxTextAnim.value = 0;
-        clearInterval(interval);
+        cancelAnimation(boxTextAnim);
+        // boxTextAnim.value = 0;
+        // clearInterval(interval);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
@@ -190,14 +222,6 @@ function HomeList(props: HomeListProps) {
             onLayout={nativeEvent =>
               (boxTextLayout.value = nativeEvent.nativeEvent.layout.width)
             }
-            onTextLayout={layout => {
-              const width = Math.round(
-                layout.nativeEvent.lines.reduce((a, b) => {
-                  return a + b.width;
-                }, 0),
-              );
-              textLayoutWidth.value = width + 10;
-            }}
             style={[
               styles.boxText,
               AnimationTextStyle,
@@ -246,7 +270,7 @@ function EpisodeBaru({ styles, globalStyles, data, props, }:
 
   const renderNewAnime = useCallback(
     ({ item }: ListRenderItemInfo<NewAnimeList>) => (
-      <AnimeList
+      <ListAnimeComponent
         newAnimeData={item}
         key={'btn' + item.title + item.episode}
         navigationProp={props.navigation}
@@ -263,7 +287,7 @@ function EpisodeBaru({ styles, globalStyles, data, props, }:
           Episode terbaru:{' '}
         </Text>
         <TouchableOpacity
-          // containerStyle={{ flex: 1 }}
+          containerStyle={{ flex: 1 }}
           style={styles.seeMoreContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -299,7 +323,7 @@ function MovieList({ props }: { props: HomeListProps }) {
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<Movies>) => (
-      <AnimeList
+      <ListAnimeComponent
         newAnimeData={item}
         isMovie={true}
         key={'btn' + item.title}
@@ -333,7 +357,7 @@ function MovieList({ props }: { props: HomeListProps }) {
           Movie terbaru:{' '}
         </Text>
         <TouchableOpacity
-          // containerStyle={{ flex: 1 }}
+          containerStyle={{ flex: 1 }}
           style={styles.seeMoreContainer}
           disabled={data?.length === 0}
           onPress={() => {
@@ -446,56 +470,6 @@ function AnnouncmentModal({
         </View>
       </View>
     </Modal>
-  );
-}
-
-function AnimeList(props: ({
-  newAnimeData: NewAnimeList;
-  isMovie?: false
-} | { newAnimeData: Movies; isMovie: true }) & {
-  navigationProp:
-  | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-  | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
-}) {
-  const styles = useStyles();
-  const z = props.newAnimeData;
-  const navigation = props.navigationProp;
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        navigation.dispatch(
-          StackActions.push('FromUrl', {
-            link: props.isMovie ? props.newAnimeData.url : props.newAnimeData.streamingLink,
-            isMovie: props.isMovie,
-          }),
-        );
-      }}>
-      <ImageLoading
-        resizeMode="stretch"
-        key={z.thumbnailUrl}
-        source={{ uri: z.thumbnailUrl }}
-        style={[
-          styles.listBackground,
-          { borderColor: 'orange' },
-        ]}>
-        <View style={styles.animeTitleContainer}>
-          <Text numberOfLines={2} style={styles.animeTitle}>
-            {z.title}
-          </Text>
-        </View>
-
-        <View style={styles.animeEpisodeContainer}>
-          <Text style={styles.animeEpisode}>
-            {props.isMovie ? 'Movie' : props.newAnimeData.episode}
-          </Text>
-        </View>
-        <View style={styles.animeRatingContainer}>
-          <Text style={styles.animeRating}>
-            <Icon name={props.isMovie ? "check" : "calendar"} /> {props.isMovie ? "Sub Indo" : props.newAnimeData.releaseDay}
-          </Text>
-        </View>
-      </ImageLoading>
-    </TouchableOpacity>
   );
 }
 
@@ -630,8 +604,9 @@ function useStyles() {
     boxText: {
       position: 'absolute',
       bottom: 0,
-      color: '#ff2020',
+      color: '#2093ff',
       fontWeight: 'bold',
+      // fontSize: 14,
       textShadowColor: 'black',
       textShadowOffset: { width: 1, height: 1 },
       textShadowRadius: 2,
@@ -717,4 +692,3 @@ function useStyles() {
 }
 
 export default Home;
-export { AnimeList };
