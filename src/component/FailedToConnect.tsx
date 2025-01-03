@@ -11,10 +11,10 @@ import {
   useColorScheme,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
+type Props = StackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
 function FailedToConnect(props: Props) {
   const globalStyles = useGlobalStyles();

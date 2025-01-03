@@ -9,7 +9,8 @@ import useGlobalStyles, { lightText } from "../../../assets/style";
 import { UtilsStackNavigator } from "../../../types/navigation";
 import { requestBingAI } from "../../../utils/requestBingAI";
 import { ViewStyle, TextStyle } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackScreenProps } from "@react-navigation/stack";
+import React from 'react';
 
 const defaultMessages = [{
   content: 'SISTEM: Kamu adalah AniFlix Chat, sebuah aplikasi yang dibuat oleh FightFarewellFearless (Pirles).',
@@ -19,7 +20,7 @@ const defaultMessages = [{
   role: 'assistant'
 }] as const;
 
-type Props = NativeStackScreenProps<UtilsStackNavigator, "Chat">
+type Props = StackScreenProps<UtilsStackNavigator, "Chat">
 
 export interface Message {
   content: string;

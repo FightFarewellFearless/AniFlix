@@ -5,14 +5,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import EpisodeBaruHome from './AnimeList';
 import Search from './Search';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { EpisodeBaruHome as HomeType } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import Utils from './Utils';
 import Saya from './Saya';
 import { Movies } from '../../utils/animeMovie';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
+type Props = StackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createBottomTabNavigator<HomeNavigator>();
 
 function BottomTabs(props: Props) {

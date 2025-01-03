@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { FlashList } from '@shopify/flash-list';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { useWindowDimensions } from 'react-native';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { HomeStackNavigator } from '../../types/navigation';
@@ -17,7 +17,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import { NewAnimeList } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 
-type Props = NativeStackScreenProps<HomeStackNavigator, 'SeeMore'>;
+type Props = StackScreenProps<HomeStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
   const { paramsState: animeData, setParamsState: setAnimeData } =

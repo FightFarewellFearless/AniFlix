@@ -1,4 +1,4 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackScreenProps } from "@react-navigation/stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -158,7 +158,7 @@ const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
 // };
 
-type Props = NativeStackScreenProps<RootStackNavigator, "AnimeDetail">;
+type Props = StackScreenProps<RootStackNavigator, "AnimeDetail">;
 function AniDetail(props: Props) {
   const colorScheme = useColorScheme();
   return <CopilotProvider

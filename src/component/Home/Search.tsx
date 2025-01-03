@@ -24,7 +24,7 @@ import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import AnimeAPI from '../../utils/AnimeAPI';
 
@@ -61,7 +61,7 @@ const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(Keybo
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
-  NativeStackScreenProps<RootStackNavigator>
+  StackScreenProps<RootStackNavigator>
 >;
 
 const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);

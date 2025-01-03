@@ -22,7 +22,7 @@ import defaultDatabase from '../../misc/defaultDatabaseValue.json';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import Orientation from 'react-native-orientation-locker';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../../types/navigation';
 import { SetDatabaseTarget } from '../../types/redux';
 import { EpisodeBaruHome } from '../../types/anime';
@@ -51,7 +51,7 @@ export const JoinDiscord = () => {
   </TouchableOpacity>
 }
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
+type Props = StackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
   const styles = useStyles();

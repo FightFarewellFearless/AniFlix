@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { Provider } from 'react-redux';
 
@@ -23,9 +23,9 @@ import MovieDetail from './src/component/MovieDetail';
 import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
-// enableScreens((global as any).nativeFabricUIManager === undefined); // TEMP: temporary fix for crashed app on new architecture
+// enableScreens(false);
 
-const Stack = createNativeStackNavigator<RootStackNavigator>();
+const Stack = createStackNavigator<RootStackNavigator>();
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
@@ -58,7 +58,7 @@ function App() {
             initialRouteName="connectToServer"
             screenOptions={{
               headerShown: false,
-              animation: 'fade_from_bottom',
+              // animation: 'fade_from_bottom',
             }}>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="AnimeDetail" component={AniDetail} />

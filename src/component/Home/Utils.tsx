@@ -1,4 +1,4 @@
-import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack"
+import { StackScreenProps, createStackNavigator } from "@react-navigation/stack"
 import { UtilsStackNavigator } from "../../types/navigation";
 import Chat from "./Utilitas/Chat";
 import { Text, View, useColorScheme, TouchableNativeFeedback, StyleSheet, useWindowDimensions, ScrollView } from "react-native";
@@ -7,7 +7,7 @@ import SearchAnimeByImage from "./Utilitas/SearchAnimeByImage";
 import Setting from "./Utilitas/Setting";
 import Changelog from "./Utilitas/Changelog";
 
-const Stack = createNativeStackNavigator<UtilsStackNavigator>();
+const Stack = createStackNavigator<UtilsStackNavigator>();
 
 export default function Utils() {
   return (
@@ -21,7 +21,7 @@ export default function Utils() {
   )
 }
 
-function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
+function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();
   return (
     <ScrollView>

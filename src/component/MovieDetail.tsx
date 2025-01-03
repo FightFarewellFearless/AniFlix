@@ -1,4 +1,4 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackNavigator } from "../types/navigation";
 import useGlobalStyles from "../assets/style";
 import { Image, ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme, useWindowDimensions, View, ViewStyle } from "react-native";
@@ -7,7 +7,7 @@ import { getColors } from "react-native-image-colors";
 import Icon from "react-native-vector-icons/FontAwesome";
 import DarkOverlay from "./misc/DarkOverlay";
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
+type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
   const window = useWindowDimensions();
   const globalStyles = useGlobalStyles();

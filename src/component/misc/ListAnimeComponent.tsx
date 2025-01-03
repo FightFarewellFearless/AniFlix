@@ -1,17 +1,20 @@
 import { StackActions } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { TouchableOpacity, View, Text, StyleSheet, useColorScheme, useWindowDimensions } from "react-native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { TouchableOpacity, View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NewAnimeList } from "../../types/anime";
 import { HomeStackNavigator } from "../../types/navigation";
 import { Movies } from "../../utils/animeMovie";
 import ImageLoading from "../ImageLoading";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export function ListAnimeComponent(props: ({
   newAnimeData: NewAnimeList;
   isMovie?: false
 } | { newAnimeData: Movies; isMovie: true }) & {
   navigationProp:
+  | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+  | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>
   | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
   | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
 }) {

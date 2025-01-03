@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { version as appVersion } from '../../package.json';
 import useGlobalStyles from '../assets/style';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
 import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
@@ -32,7 +32,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Updates from 'expo-updates';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
+type Props = StackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
 const MB = 1000;
 

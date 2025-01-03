@@ -11,7 +11,7 @@ import useGlobalStyles from '../../assets/style';
 import randomTipsArray from '../../assets/loadingTips.json';
 import setHistory from '../../utils/historyControl';
 import { useDispatch, useSelector } from 'react-redux';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import store, { AppDispatch, RootState } from '../../misc/reduxStore';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
@@ -24,7 +24,7 @@ import URL from 'url';
 
 // import { setDatabase } from '../misc/reduxSlice';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
+type Props = StackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();

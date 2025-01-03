@@ -46,7 +46,7 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
 import { AppDispatch, RootState } from '../misc/reduxStore';
 import AnimeAPI from '../utils/AnimeAPI';
@@ -70,7 +70,7 @@ function useBackHandler(handler: () => boolean) {
   }, [handler])
 }
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
+type Props = StackScreenProps<RootStackNavigator, 'Video'>;
 
 const PressableAnimated =
   ReAnimated.createAnimatedComponent(Pressable);

@@ -13,7 +13,7 @@ import {
 import { TouchableOpacity } from 'react-native'; //rngh
 import Icon from 'react-native-vector-icons/Entypo';
 import useGlobalStyles from '../assets/style';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
 import { JoinDiscord } from './Loading Screen/Connect';
 import { TextInput } from 'react-native';
@@ -21,7 +21,7 @@ import { WEBHOOK_URL } from '@env';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'Blocked'>;
+type Props = StackScreenProps<RootStackNavigator, 'Blocked'>;
 
 function Blocked(props: Props) {
   const globalStyles = useGlobalStyles();

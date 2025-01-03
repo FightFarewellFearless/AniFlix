@@ -25,7 +25,7 @@ import useGlobalStyles, { darkText } from '../../../assets/style';
 
 import { useDispatch } from 'react-redux';
 
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackScreenProps } from '@react-navigation/stack';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
 import { setDatabase } from '../../../misc/reduxSlice';
@@ -51,7 +51,7 @@ interface SettingsData {
   handler: () => any;
 }
 
-type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
+type Props = StackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
   const globalStyles = useGlobalStyles();
