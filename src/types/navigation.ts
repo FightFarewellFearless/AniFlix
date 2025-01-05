@@ -65,6 +65,7 @@ type UtilsStackNavigator = {
   SearchAnimeByImage: undefined;
   Changelog: undefined;
   Setting: undefined;
+  About: undefined;
 };
 
 type HomeStackNavigator = {
