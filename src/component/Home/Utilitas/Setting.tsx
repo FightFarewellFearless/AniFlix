@@ -1,14 +1,11 @@
-import { useFocusEffect } from '@react-navigation/native';
 import React, {
   ReactElement,
   useCallback,
-  useRef,
   useState,
 } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   FlatList,
   Modal,
   PermissionsAndroid,
@@ -76,28 +73,6 @@ function Setting(_props: Props) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState('');
-
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-
-  useFocusEffect(
-    useCallback(() => {
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        // speed: 18,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-      return () => {
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          // speed: 18,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
-  );
 
   const batteryTimeSwitchHandler = () => {
     const newValue = String(!batteryTimeInfoSwitch);
@@ -289,7 +264,7 @@ function Setting(_props: Props) {
   ];
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }], flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <Modal transparent visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -306,7 +281,7 @@ function Setting(_props: Props) {
         extraData={styles}
         ItemSeparatorComponent={() => <ItemSeparator />}
       />
-    </Animated.View>
+    </View>
   );
 }
 

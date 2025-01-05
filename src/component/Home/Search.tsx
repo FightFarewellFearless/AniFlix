@@ -3,8 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Animated,
-  Alert,
+    Alert,
   ActivityIndicator,
   Pressable,
   Keyboard,
@@ -76,24 +75,12 @@ function Search(props: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        // speed: 18,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
       const keyboardEvent = Keyboard.addListener('keyboardDidHide', () => {
         if (textInputRef.current) {
           textInputRef.current.blur();
         }
       });
       return () => {
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          // speed: 18,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
         keyboardEvent.remove();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,8 +241,8 @@ function Search(props: Props) {
   }, [])
 
   return (
-    <Animated.View
-      style={[{ flex: 1 }, { transform: [{ scale: scaleAnim }] }]}>
+    <View
+      style={[{ flex: 1 }]}>
       <View
         style={{ flexDirection: 'row' }}>
         {/* {data !== null && (
@@ -420,7 +407,7 @@ function Search(props: Props) {
           />
         </TouchableOpacityAnimated>
       )}
-    </Animated.View>
+    </View>
   );
 }
 

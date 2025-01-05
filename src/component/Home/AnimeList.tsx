@@ -88,7 +88,6 @@ function HomeList(props: HomeListProps) {
   
   const windowSize = useWindowDimensions();
   
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const boxTextAnim = useSharedValue(0);
   const boxTextLayout = useSharedValue(0);
   const textLayoutWidth = useSharedValue(0);
@@ -145,19 +144,7 @@ function HomeList(props: HomeListProps) {
 
       boxTextAnim.value = withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
 
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        // speed: 18,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
       return () => {
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          // speed: 18,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
         cancelAnimation(boxTextAnim);
         // boxTextAnim.value = 0;
         // clearInterval(interval);
@@ -194,7 +181,7 @@ function HomeList(props: HomeListProps) {
 
   return (
     <Animated.ScrollView
-      style={{ transform: [{ scale: scaleAnim }], flex: 1 }}
+      style={{ flex: 1 }}
       refreshControl={
         <RefreshControl
           refreshing={refresh}
