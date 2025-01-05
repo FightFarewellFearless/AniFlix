@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-    Alert,
+  Alert,
   ActivityIndicator,
   Pressable,
   Keyboard,
@@ -51,6 +51,9 @@ import ImageColors from 'react-native-image-colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import DarkOverlay from '../misc/DarkOverlay';
 import { Movies, searchMovie } from '../../utils/animeMovie';
+
+import { TouchableOpacity as TouchableOpacityRNGH, FlatList } from 'react-native-gesture-handler';
+
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
@@ -344,8 +347,8 @@ function Search(props: Props) {
             {movieData && movieData.length > 0 && data.result.length > 0 && "\n(Movie di tempatkan di urutan atas)"}
           </Text>
           {data.result.length > 0 || (movieData && movieData.length > 0) ? (
-            <FlashList
-              estimatedItemSize={209}
+            <FlatList
+              // estimatedItemSize={209}
               data={[...(movieData ?? []), ...data.result]}
               keyExtractor={(_, index) => index?.toString()}
               renderItem={({ item: z }) => (
@@ -392,7 +395,7 @@ function Search(props: Props) {
       )}
       {data !== null && (
         <TouchableOpacityAnimated
-          style={styles.closeSearchResult} //rngh - containerStyle
+          containerStyle={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
             setMovieData(null);
