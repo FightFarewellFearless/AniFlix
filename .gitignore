@@ -83,3 +83,6 @@ mykeystore.txt
 
 # expo dist
 dist
+
+# etc
+.git*
