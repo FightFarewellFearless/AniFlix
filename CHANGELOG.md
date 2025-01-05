@@ -1,3 +1,34 @@
+# v0.8.0 (05-Januari-2025)
+
+**New Architecture is finally here!**
+Update kali ini merupakan migrasi aplikasi ke react-native New Architecture.
+Ini merupakan salah satu update terbesar yang dilakukan developer di balik layar, karena menstabilkan aplikasi di new architecture butuh effort yang cukup besar.
+Update kali ini mungkin tidak memberikan banyak perubahan kepada pengguna, namun dari segi renderer aplikasi, ini merupakan perubahan besar.
+
+> NB: Kamu mungkin mengalami masalah performa ketika menggulir list, terutama bagian History, ini adalah masalah dari library FlashList yang memang belum optimal di new architecture.
+
+## Penambahan
+
+- Menambahkan `Tentang aplikasi` pada bagian Utilitas
+- Menambahkan Pemberitahuan jika pengguna hendak menonton anime yang telah di `Whitelist` oleh developer
+- Menambahkan quotes inspiratif pada bagian Home screen menggantikan pemberitahuan lawas aplikasi
+- Dan lain-lain...
+
+## Pengahpusan
+
+- Menghapus animasi pindah layar pada bagian home
+
+## Perubahan
+
+- Mengganti library OTA update dari `react-native-codepush` ke `expo-updates` untuk menjamin kompatibilitas dengan new-architecture
+- Migrasi video player dari `expo-av` ke `expo-video`
+- Disable text font scaling karena aplikasi tidak di desain untuk mendukung aksesbilitas tersebut
+- Beberapa peningkatan video player
+  - Mendukung refresh saat terjadi error
+  - Otomatis memperlihatkan control saat terjadi error, background, dan berakhirnya video
+- Dan masih banyak lagi...
+
+
 # 0.7.2-JS_3 (29-Desember-2024) 
 
 MOVIE BETA TAHAP 3.

@@ -1,7 +1,7 @@
 {
   "name": "aniflix",
-  "version": "v0.7.2",
-  "OTAJSVersion": "3",
+  "version": "v0.8.0",
+  "OTAJSVersion": "0",
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
