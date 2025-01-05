@@ -1,3 +1,9 @@
+# v0.8.0-JS_1 (05-Januari-2025)
+
+## Perbaikan
+
+- Memperbaiki masalah seek bar pada video player
+
 # v0.8.0 (05-Januari-2025)
 
 **New Architecture is finally here!**
