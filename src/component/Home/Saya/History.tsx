@@ -19,11 +19,12 @@ import { AppDispatch } from '../../../misc/reduxStore';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
+  createWorkletRuntime,
   FadeInRight,
   FadeOutLeft,
   LinearTransition,
-  runOnUI,
-  useAnimatedRef,
+  runOnJS,
+  runOnRuntime,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -33,13 +34,15 @@ import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import ImageLoading from '../../ImageLoading';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 
-const AnimatedFlashList = Animated.createAnimatedComponent(
-  FlashList as typeof FlashList<HistoryJSON>,
-);
+// const AnimatedFlashList = Animated.createAnimatedComponent(
+//   FlashList as typeof FlashList<HistoryJSON>,
+// );
 const TouchableOpacityAnimated =
   Animated.createAnimatedComponent(TouchableOpacity);
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
+
+const historyRuntime = createWorkletRuntime('historyRuntime');
 
 function History(props: Props) {
   const styles = useStyles();
@@ -52,7 +55,7 @@ function History(props: Props) {
 
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  const filteredData = useMemo(() => data.filter(item => 
+  const filteredData = useMemo(() => data.filter(item =>
     item.title.toLowerCase().includes(searchKeyword.toLowerCase())
   ), [searchKeyword, data]);
 
@@ -62,49 +65,54 @@ function History(props: Props) {
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
-  const scrollToTopButtonY = useSharedValue(150);
+  const scrollToTopButtonScale = useSharedValue(0);
 
   const buttonTransformStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateY: scrollToTopButtonY.value,
+          scale: scrollToTopButtonScale.value,
         },
       ],
     };
   });
 
-  const scrollHandler = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    runOnUI((NE: NativeScrollEvent) => {
+  const showScrollToTopButton = () => {
+    scrollToTopButtonScale.value = withSpring(1, {
+      damping: 12,
+    });
+  }
+  const hideScrollToTopButton = () => {
+    scrollToTopButtonScale.value = withSpring(0, {
+      damping: 12,
+    });
+  }
+
+  const scrollHandler = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    runOnRuntime(historyRuntime, (value: number) => {
       'worklet';
-      const value = NE.contentOffset.y;
       if (value <= 100) {
         if (scrollToTopButtonState.value === 'show') {
-          scrollToTopButtonY.value = withSpring(150, {
-            damping: 12,
-          });
+          runOnJS(hideScrollToTopButton)();
         }
         scrollToTopButtonState.value = 'hide';
       } else if (
         value < scrollLastValue.value &&
         scrollToTopButtonState.value === 'hide'
       ) {
-        scrollToTopButtonY.value = withSpring(0, {
-          damping: 12,
-        });
+        runOnJS(showScrollToTopButton)();
         scrollToTopButtonState.value = 'show';
       } else if (
         value > scrollLastValue.value &&
         scrollToTopButtonState.value === 'show'
       ) {
-        scrollToTopButtonY.value = withSpring(150, {
-          damping: 12,
-        });
+        runOnJS(hideScrollToTopButton)();
         scrollToTopButtonState.value = 'hide';
       }
       scrollLastValue.value = value;
-    })(event.nativeEvent);
-  }
+    })(event.nativeEvent.contentOffset.y);
+
+  }, []);
 
   const deleteHistory = useCallback(
     async (index: number) => {
@@ -243,45 +251,45 @@ function History(props: Props) {
         value={searchKeyword}
         onChangeText={setSearchKeyword}
       />
-      {filteredData.length === 0 ? (
-        <View style={styles.noHistory}>
-          <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
-        </View>
-      ) : (
-        <View style={styles.historyContainer}>
-          <AnimatedFlashList
-            data={filteredData}
-            estimatedItemSize={160}
-            // @ts-ignore
-            ref={flatListRef}
-            keyExtractor={keyExtractor}
-            onScroll={scrollHandler}
-            extraData={styles}
-            renderItem={renderFlatList}
-            ListHeaderComponent={() => (
-              <View>
-                <Text style={[globalStyles.text, { margin: 10 }]}>
-                  Jumlah histori tontonan kamu: <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>{'\n'}
-                  <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
-                    Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
-                  </Text>
+      <View style={styles.historyContainer}>
+        <FlashList
+          data={filteredData}
+          estimatedItemSize={160}
+          // @ts-ignore
+          ref={flatListRef}
+          keyExtractor={keyExtractor}
+          onScroll={scrollHandler}
+          extraData={styles}
+          renderItem={renderFlatList}
+          ListHeaderComponent={() => (
+            data.length > 0 &&
+            <View>
+              <Text style={[globalStyles.text, { margin: 10 }]}>
+                Jumlah histori tontonan kamu: <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>{'\n'}
+                <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                  Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
                 </Text>
-              </View>
-            )}
-          />
-          <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
-            <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
-              <View style={styles.scrollToTopIcon}>
-                <Icon
-                  name="arrow-up"
-                  color={darkText}
-                  size={25}
-                />
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      )}
+              </Text>
+            </View>
+          )}
+          ListEmptyComponent={() => (
+            <View style={styles.noHistory}>
+              <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
+            </View>
+          )}
+        />
+        <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
+          <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
+            <View style={styles.scrollToTopIcon}>
+              <Icon
+                name="arrow-up"
+                color={darkText}
+                size={25}
+              />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
     </View>
   );
 }
