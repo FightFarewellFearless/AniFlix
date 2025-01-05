@@ -63,6 +63,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
 
   useLayoutEffect(() => {
     viewRef.current?.measureInWindow((x, y, width, height) => {
+      if(width < 1) return;
       parentWidth.set(width);
     })
   }, [width]);

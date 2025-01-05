@@ -6,6 +6,8 @@ import { darkText } from "../../../assets/style";
 import { useMemo } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+const tokyo = require('../../../assets/tokyo.jpg');
+
 export default function About() {
   const globalStyles = useMemo(() => ({
     text: {
@@ -14,7 +16,7 @@ export default function About() {
   }), []);
   const styles = useStyles();
   return (
-    <ImageBackground source={require('../../../assets/tokyo.jpg')} resizeMode="cover" style={{ flex: 1 }}>
+    <ImageBackground source={tokyo} resizeMode="cover" style={{ flex: 1 }}>
       <DarkOverlay transparent={0.75} />
     <ScrollView style={styles.container}>
       <Text style={styles.header}>
