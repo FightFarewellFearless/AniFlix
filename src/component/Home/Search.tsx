@@ -1,4 +1,4 @@
-import React, { useTransition, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -54,10 +54,11 @@ import { Movies, searchMovie } from '../../utils/animeMovie';
 
 import { TouchableOpacity as TouchableOpacityRNGH, FlatList } from 'react-native-gesture-handler';
 
+import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview';
 
 const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
 const TouchableOpacityAnimated =
-  Reanimated.createAnimatedComponent(TouchableOpacity);
+  Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
@@ -74,7 +75,6 @@ function Search(props: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const dimensions = useWindowDimensions();
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -227,6 +227,7 @@ function Search(props: Props) {
   function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
+      textInputRef.current?.setNativeProps({ text: '' });
       textInputRef.current?.setNativeProps({ text });
     };
     return (
@@ -242,6 +243,28 @@ function Search(props: Props) {
   const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
     searchButtonWidth.value = layout.nativeEvent.layout.width;
   }, [])
+
+  const listAnimeDataProvider = useMemo(() => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []), [listAnime]);
+  const listAnimeLayoutProvider = useMemo(() => new LayoutProvider(() => 'NORMAL', (_, dim) => {
+    dim.height = 45;
+    dim.width = dimensions.width;
+  }), [dimensions.width]);
+  const listAnimeRenderer = useCallback((type: string | number, data: listAnimeTypeList, index: number) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          props.navigation.dispatch(
+            StackActions.push('FromUrl', {
+              link: data.streamingLink,
+            }),
+          );
+        }}
+        style={styles.animeList}>
+        <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
+        <Text numberOfLines={1} style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>{data?.title}</Text>
+      </TouchableOpacity>
+    )
+  }, [globalStyles.text, props.navigation, styles]);
 
   return (
     <View
@@ -290,7 +313,7 @@ function Search(props: Props) {
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
           {isPending && <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />}
-          <FlashList
+          {/* <FlashList
             data={listAnime}
             estimatedItemSize={40}
             keyExtractor={item => item?.title}
@@ -318,7 +341,14 @@ function Search(props: Props) {
                   borderColor: colorScheme === 'dark' ? 'white' : 'black',
                 }}
               />
-            )} />
+            )} /> */}
+          {listAnime.length > 0 && (
+            <RecyclerListView
+              dataProvider={listAnimeDataProvider}
+              layoutProvider={listAnimeLayoutProvider}
+              rowRenderer={listAnimeRenderer}
+            />
+          )}
         </View>
       ) : data === null ? (
         <TouchableOpacity onPress={() => {
@@ -373,7 +403,7 @@ function Search(props: Props) {
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
             <FlashList
-              keyboardShouldPersistTaps="handled"
+              keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
               extraData={styles}
@@ -381,6 +411,7 @@ function Search(props: Props) {
               estimatedItemSize={32}
               ItemSeparatorComponent={() => (
                 <View
+                  pointerEvents='none'
                   style={{
                     borderBottomWidth: 0.5,
                     borderColor: colorScheme === 'dark' ? 'gray' : 'black',
