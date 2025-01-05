@@ -226,7 +226,7 @@ function AniDetailCopilot(props: Props) {
     <View style={styles.container}>
       <LinearGradient style={[styles.container, styles.centerChildren]} colors={[thumbnailColor, endThumbnailColor]}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={[styles.title, { color: complementThumbnailColor }]} numberOfLines={2}>{data.title}</Text>
+          <Text style={[styles.title, { color: complementThumbnailColor }]}>{data.title.split('(Episode')[0]}</Text>
           <Text style={[styles.title, { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 }]}>{data.alternativeTitle}</Text>
         </View>
         <View style={styles.imageContainer}>
