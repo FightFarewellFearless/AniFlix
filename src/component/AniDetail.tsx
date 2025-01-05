@@ -1,5 +1,4 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image, FlatList } from "react-native";
