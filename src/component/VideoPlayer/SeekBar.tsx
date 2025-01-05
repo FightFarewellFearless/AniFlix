@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
-import { ViewStyle, View, StyleSheet, LayoutChangeEvent } from "react-native";
+import { ViewStyle, View, StyleSheet, LayoutChangeEvent, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, { useSharedValue, useAnimatedStyle, withTiming, SharedValue } from "react-native-reanimated";
 
@@ -12,7 +12,7 @@ type SeekBarProps = {
 export default function SeekBar({ progress, onProgressChange, onProgressChangeEnd, style }: SeekBarProps) {
   const parentWidth = useSharedValue(0);
   const circleScale = useSharedValue(1);
-  
+
   const viewRef = useRef<View>(null);
 
   const clampNumber = (num: number, a: number, b: number) => {
@@ -59,14 +59,18 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
     parentWidth.set(e.nativeEvent.layout.width);
   }, [])
 
+  const { width } = useWindowDimensions();
+
   useLayoutEffect(() => {
-    viewRef.current?.measure((x, y, width, height) => {
+    viewRef.current?.measureInWindow((x, y, width, height) => {
       parentWidth.set(width);
     })
-  }, []);
+  }, [width]);
 
   return (
-    <View style={[style]} onLayout={onLayout} ref={viewRef}>
+    <View style={[style]}
+      onLayout={onLayout}
+      ref={viewRef}>
 
       <GestureDetector gesture={gesture}>
         <View style={[styles.gestureContainer]}>
