@@ -130,6 +130,9 @@ function FromUrl(props: Props) {
                 )
                 return;
               }
+              if (Anime_Whitelist.list.includes(props.route.params.link)) {
+                Alert.alert('Perhatian!', 'Anime ini mungkin mengandung konten dewasa seperti ecchi. Namun telah di whitelist dan diizinkan tayang. Mohon bijak dalam menonton.');
+              }
               if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
               props.navigation.dispatch(
                 StackActions.replace('AnimeDetail', {
