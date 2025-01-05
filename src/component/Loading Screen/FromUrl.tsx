@@ -30,6 +30,7 @@ function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
   const [dots, setDots] = useState<string>('');
 
+
   const historyData = useSelector((state: RootState) => state.settings.history);
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -48,6 +49,7 @@ function FromUrl(props: Props) {
     if (props.route.params.isMovie) {
       if (URL.parse(props.route.params.link)?.pathname?.split('/')[1] === 'anime') {
         getMovieDetail(props.route.params.link, abort.signal).then(result => {
+          if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
           props.navigation.dispatch(
             StackActions.replace('MovieDetail', {
               data: result,
@@ -57,6 +59,7 @@ function FromUrl(props: Props) {
         }).catch(handleError);
       } else {
         getStreamingDetail(props.route.params.link, abort.signal).then(result => {
+          if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
           props.navigation.dispatch(
             StackActions.replace('Video', {
               data: result,
@@ -117,6 +120,7 @@ function FromUrl(props: Props) {
             if (result.type === 'animeDetail') {
               if (result.genres.includes('') && !Anime_Whitelist.list.includes(props.route.params.link)) {
                 // Ecchi
+                if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
                 props.navigation.dispatch(
                   StackActions.replace('Blocked', {
                     title: result.title,
@@ -126,6 +130,7 @@ function FromUrl(props: Props) {
                 )
                 return;
               }
+              if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
               props.navigation.dispatch(
                 StackActions.replace('AnimeDetail', {
                   data: result,
@@ -133,6 +138,7 @@ function FromUrl(props: Props) {
                 }),
               );
             } else if (result.type === 'animeStreaming') {
+              if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
               props.navigation.dispatch(
                 StackActions.replace('Video', {
                   data: result,
