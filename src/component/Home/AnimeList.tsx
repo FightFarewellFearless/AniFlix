@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  Animated,
   View,
   RefreshControl,
   Text,
@@ -16,13 +15,12 @@ import {
   FlatList,
   useWindowDimensions,
   Modal,
-  ScrollView,
   ListRenderItemInfo,
   Linking,
   useColorScheme,
   ActivityIndicator,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler'; //rngh
+import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler'; //rngh
 import Reanimated, { cancelAnimation, Easing, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { NavigationProp, StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
@@ -85,18 +83,18 @@ function HomeList(props: HomeListProps) {
   const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0)
 
   // const [announcmentVisible, setAnnouncmentVisible] = useState(false);
-  
+
   const windowSize = useWindowDimensions();
-  
+
   const boxTextAnim = useSharedValue(0);
   const boxTextLayout = useSharedValue(0);
   const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
-  
+
   const [animationText, setAnimationText] = useState(() => {
     const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
-    const quote =  `"${randomQuote.quote}" - ${randomQuote.by}`;
+    const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
     textLayoutWidth.set(MeasureText.measureWidth(quote, {
       fontWeight: 'bold',
       fontSize: 17,
@@ -104,7 +102,7 @@ function HomeList(props: HomeListProps) {
     return quote;
   });
 
-  
+
   // useEffect(() => {
   //   if (data?.announcment.enable === true) {
   //     setAnnouncmentVisible(true);
@@ -121,7 +119,7 @@ function HomeList(props: HomeListProps) {
         }));
       }
       function callback(finished?: boolean) {
-        if(finished) {
+        if (finished) {
           textLayoutWidth.value = 0;
           const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
           const quote = `"${randomQuote.quote}" - ${randomQuote.by}`
@@ -131,7 +129,7 @@ function HomeList(props: HomeListProps) {
           runOnJS(setLayoutWidth)(quote);
         }
         boxTextAnim.value = 0;
-        if(finished === false) return;
+        if (finished === false) return;
         boxTextAnim.value = withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
       }
 
@@ -180,7 +178,7 @@ function HomeList(props: HomeListProps) {
   })
 
   return (
-    <Animated.ScrollView
+    <ScrollView
       style={{ flex: 1 }}
       refreshControl={
         <RefreshControl
@@ -201,8 +199,11 @@ function HomeList(props: HomeListProps) {
       /> */}
       <View style={styles.box}>
         <View style={styles.boxItem}>
-          <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
-          <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
+          <View style={styles.boxHeader}>
+            <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
+            <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
+            <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
+          </View>
           <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}-JS_{OTAJSVersion}</Text></Text>
           {/* running text animation */}
           <Reanimated.Text
@@ -244,7 +245,7 @@ function HomeList(props: HomeListProps) {
           </View>)
       })}
 
-    </Animated.ScrollView>
+    </ScrollView>
   );
 }
 
@@ -325,7 +326,7 @@ function MovieList({ props }: { props: HomeListProps }) {
 
   useEffect(() => {
     getLatestMovie().then(data => {
-      if('isError' in data) {
+      if ('isError' in data) {
         setIsError(true);
       } else {
         setData?.(data);
@@ -576,11 +577,27 @@ function useStyles() {
     boxAppVer: {
       fontSize: 13,
     },
+    boxHeader: {
+      position: 'absolute',
+      top: 0,
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      padding: 5,
+    },
     boxTime: {
       fontWeight: 'bold',
       position: 'absolute',
       top: -10,
       left: 0,
+    },
+    boxRefreshData: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#910000',
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+      borderRadius: 5,
     },
     boxBattery: {
       fontWeight: 'bold',
