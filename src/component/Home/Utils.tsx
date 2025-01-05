@@ -6,6 +6,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import SearchAnimeByImage from "./Utilitas/SearchAnimeByImage";
 import Setting from "./Utilitas/Setting";
 import Changelog from "./Utilitas/Changelog";
+import About from "./Utilitas/About";
 
 const Stack = createStackNavigator<UtilsStackNavigator>();
 
@@ -17,6 +18,7 @@ export default function Utils() {
       <Stack.Screen name="SearchAnimeByImage" component={SearchAnimeByImage} options={{ title: 'Cari Anime dari Gambar' }} />
       <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
       <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
+      <Stack.Screen name="About" component={About} options={{ title: 'Tentang' }} />
     </Stack.Navigator>
   )
 }
@@ -64,6 +66,18 @@ function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen
             <Icon name="cog" size={40} color={{ color: '#dbdbdb' }.color} />
             <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Pengaturan</Text>
             <Text style={[styles.descText, { color: '#dbdbdb' }]}>Atur aplikasi AniFlix kamu</Text>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback onPress={() => {
+          props.navigation.navigate('About')
+        }} background={TouchableNativeFeedback.Ripple('white', false)}>
+          <View style={[styles.buttonContainer, { backgroundColor: '#166db4' }]}>
+            <Icon name="info-circle" size={40} color={{ color: '#dbdbdb' }.color} />
+            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Tentang aplikasi</Text>
+            <Text style={[styles.descText, { color: '#dbdbdb' }]}>
+              Tentang aplikasi AniFlix dan pengembangnya
+            </Text>
           </View>
         </TouchableNativeFeedback>
       </View>
