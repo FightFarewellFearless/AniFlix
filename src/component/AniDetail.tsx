@@ -2,7 +2,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { FlashList } from "@shopify/flash-list";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image } from "react-native";
+import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image, FlatList } from "react-native";
 import { TouchableOpacity } from "react-native"; //rngh
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
 import { getColors } from "react-native-image-colors";
@@ -291,8 +291,9 @@ function AniDetailCopilot(props: Props) {
       </ImageBackground>
 
       <View style={[styles.container, {backgroundColor: thumbnailColor}]}>
-        <FlashList
-          estimatedItemSize={78}
+        <FlatList
+          // estimatedItemSize={78}
+          maxToRenderPerBatch={40}
           data={data.episodeList}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.episodeButton} onPress={() => {
