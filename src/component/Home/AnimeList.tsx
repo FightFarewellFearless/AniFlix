@@ -201,7 +201,6 @@ function HomeList(props: HomeListProps) {
         <View style={styles.boxItem}>
           <View style={styles.boxHeader}>
             <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
-            <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
             <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
           </View>
           <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}-JS_{OTAJSVersion}</Text></Text>
@@ -219,6 +218,7 @@ function HomeList(props: HomeListProps) {
         </View>
       </View>
 
+      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
@@ -592,6 +592,7 @@ function useStyles() {
       left: 0,
     },
     boxRefreshData: {
+      marginBottom: 4,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#910000',
