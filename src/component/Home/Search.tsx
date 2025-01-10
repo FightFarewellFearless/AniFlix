@@ -312,7 +312,7 @@ function Search(props: Props) {
           <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
-          {isPending && <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />}
+          {isPending && <ActivityIndicator style={{ position: 'absolute' }} color={colorScheme === 'dark' ? 'white' : 'black'} />}
           {/* <FlashList
             data={listAnime}
             estimatedItemSize={40}
