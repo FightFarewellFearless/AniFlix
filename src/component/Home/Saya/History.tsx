@@ -6,13 +6,15 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { StackActions } from '@react-navigation/native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import moment from 'moment';
 import { setDatabase } from '../../../misc/reduxSlice';
 import { AppDispatch } from '../../../misc/reduxStore';
@@ -54,10 +56,11 @@ function History(props: Props) {
   );
 
   const [searchKeyword, setSearchKeyword] = useState('');
+  const searchKeywordDeferred = useDeferredValue(searchKeyword);
 
   const filteredData = useMemo(() => data.filter(item =>
-    item.title.toLowerCase().includes(searchKeyword.toLowerCase())
-  ), [searchKeyword, data]);
+    item.title.toLowerCase().includes(searchKeywordDeferred.toLowerCase())
+  ), [searchKeywordDeferred, data]);
 
   const flatListRef = useRef<FlashList<HistoryJSON>>();
 
@@ -244,13 +247,23 @@ function History(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Cari judul anime..."
-        placeholderTextColor={globalStyles.text.color}
-        value={searchKeyword}
-        onChangeText={setSearchKeyword}
-      />
+      <View style={styles.searchInputView}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Cari judul anime..."
+          placeholderTextColor={globalStyles.text.color}
+          value={searchKeyword}
+          onChangeText={setSearchKeyword}
+        />
+        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => {
+          setSearchKeyword('');
+        }}>
+          <FontAwesomeIcon name="times" size={20} color={globalStyles.text.color} />
+        </TouchableOpacity>
+        {searchKeyword !== searchKeywordDeferred && (
+          <ActivityIndicator color={globalStyles.text.color} />
+        )}
+      </View>
       <View style={styles.historyContainer}>
         <FlashList
           data={filteredData}
@@ -264,6 +277,11 @@ function History(props: Props) {
           ListHeaderComponent={() => (
             data.length > 0 &&
             <View>
+              {searchKeywordDeferred !== '' && (
+                <Text style={[globalStyles.text, styles.searchKeywordText]}>
+                  Menampilkan hasil untuk : {searchKeywordDeferred} ({filteredData.length})
+                </Text>
+              )}
               <Text style={[globalStyles.text, { margin: 10 }]}>
                 Jumlah histori tontonan kamu: <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>{'\n'}
                 <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
@@ -394,14 +412,25 @@ function useStyles() {
       justifyContent: 'center',
       alignItems: 'center',
     },
-    searchInput: {
+    searchInputView: {
       height: 40,
       borderColor: 'gray',
       borderWidth: 1,
       borderRadius: 8,
       margin: 10,
       paddingHorizontal: 10,
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    searchInput: {
       color: globalStyles.text.color,
+      flex: 1,
+    },
+    searchKeywordText: { 
+      opacity: 0.8,
+      fontStyle: 'italic',
+      textDecorationLine: 'underline',
+      textDecorationColor: globalStyles.text.color,
     },
   });
 }
