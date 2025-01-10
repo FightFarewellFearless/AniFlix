@@ -1,3 +1,14 @@
+# v0.8.0-JS_2 (10-Januari-2025)
+
+## Penambahan dan pengoptimalan
+
+- Menambahkan tombol untuk menghapus input pencarian pada menu Histori
+- Mengoptimalkan performa ketika mencari judul histori dengan menggunakan deferred value untuk mencegah terlalu banyak render ulang ketika sedang mengetik
+
+## Perbaikan
+
+- Memperbaiki loading indicator menyebabkan list berubah posisi pada menu Search->List anime
+
 # v0.8.0-JS_1 (05-Januari-2025)
 
 ## Perbaikan
