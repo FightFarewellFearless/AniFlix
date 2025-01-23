@@ -1,3 +1,9 @@
+# v0.8.1 (23-Januari-2025)
+
+## Perbaikan
+
+- Memperbaiki masalah pewarnaan saat mengaktifkan dark mode di beberapa perangkat Xiaomi
+
 # v0.8.0-JS_2 (10-Januari-2025)
 
 ## Penambahan dan pengoptimalan
