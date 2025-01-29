@@ -7,7 +7,7 @@
   <img src="./android/app/src/main/res/playstore-icon.png" width="250" height="250" alt="logo aplikasi">
 </p>
 
-[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.76-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
+[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.77-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
 
 
 

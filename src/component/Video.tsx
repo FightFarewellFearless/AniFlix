@@ -64,9 +64,11 @@ import { VideoView } from 'expo-video';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', handler)
+    const event = BackHandler.addEventListener('hardwareBackPress', handler)
 
-    return () => BackHandler.removeEventListener('hardwareBackPress', handler)
+    return () => {
+      event.remove();
+    }
   }, [handler])
 }
 
