@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -16,8 +16,6 @@ function ImageLoading(props: ImageBackgroundProps) {
     imageSourceUri = withoutDomain.protocol + '//' + AnimeLocal.BASE.domain + withoutDomain.pathname;
   }
 
-  const lastLink = useRef(props.source);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -34,12 +32,11 @@ function ImageLoading(props: ImageBackgroundProps) {
     setLoading(false);
   }, []);
 
-  if (lastLink.current !== props.source) {
+  useEffect(() => {
     // reset the state. useful on recycledView
-    lastLink.current = props.source;
     setLoading(false);
     setError(false);
-  }
+  }, [props.source]);
 
   return (
     <ImageBackground
