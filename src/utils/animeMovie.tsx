@@ -256,6 +256,7 @@ export async function getRawDataIfAvailable(data: LinksType[number], signal?: Ab
       return await getPixelOrPompomRawData(data.url, signal);
     } else if (data.title.toLowerCase().includes('acefile') || data.title.toLowerCase().includes('video')) {
       try {
+        await getAceRawData(data.url, signal);
         const res = await getAceRawData(data.url, signal);
         return res;
       } catch (e: any) {
