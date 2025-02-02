@@ -22,9 +22,6 @@ import { SayaDrawerNavigator } from '../../../types/navigation';
 import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
   createWorkletRuntime,
-  FadeInRight,
-  FadeOutLeft,
-  LinearTransition,
   runOnJS,
   runOnRuntime,
   useAnimatedStyle,
@@ -39,8 +36,6 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,
 // );
-const TouchableOpacityAnimated =
-  Animated.createAnimatedComponent(TouchableOpacity);
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
 
@@ -140,10 +135,10 @@ function History(props: Props) {
   const renderFlatList = useCallback<ListRenderItem<HistoryJSON>>(
     ({ item }) => {
       return (
-        <TouchableOpacityAnimated
-          entering={FadeInRight}
-          exiting={FadeOutLeft}
-          layout={LinearTransition}
+        <TouchableOpacity
+          // entering={FadeInRight}
+          // exiting={FadeOutLeft}
+          // layout={LinearTransition}
           style={styles.listContainerButton}
           onPress={() => {
             props.navigation.dispatch(
@@ -231,7 +226,7 @@ function History(props: Props) {
               )}
             </View>
           </View>
-        </TouchableOpacityAnimated>
+        </TouchableOpacity>
       );
     },
     [data, deleteHistory, props.navigation, styles],

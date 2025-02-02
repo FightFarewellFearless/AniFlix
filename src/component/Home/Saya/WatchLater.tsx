@@ -8,7 +8,7 @@ import React, {
   useColorScheme
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
-import Reanimated, { FadeInRight, FadeOutLeft, LinearTransition } from 'react-native-reanimated';
+import Reanimated from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 import useGlobalStyles from '../../../assets/style';
@@ -20,8 +20,6 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
-const TouchableOpacityAnimated =
-  Reanimated.createAnimatedComponent(TouchableOpacity);
 
 function WatchLater(props: Props) {
   const styles = useStyles();
@@ -38,10 +36,10 @@ function WatchLater(props: Props) {
   const renderItem = useCallback<ListRenderItem<watchLaterJSON>>(
     ({ item, index }) => {
       return (
-        <TouchableOpacityAnimated
-          entering={FadeInRight}
-          exiting={FadeOutLeft}
-          layout={LinearTransition}
+        <TouchableOpacity
+          // entering={FadeInRight}
+          // exiting={FadeOutLeft}
+          // layout={LinearTransition}
           style={styles.listContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -85,7 +83,7 @@ function WatchLater(props: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableOpacityAnimated>
+        </TouchableOpacity>
       );
     },
     [props.navigation, styles],
