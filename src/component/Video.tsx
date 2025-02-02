@@ -4,6 +4,7 @@ import React, {
   useRef,
   useCallback,
   useMemo,
+  useLayoutEffect,
 } from 'react';
 import {
   StatusBar,
@@ -108,6 +109,8 @@ function Video(props: Props) {
   const videoRef = useRef<VideoView>(null);
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
+
+  const animeInfoPressableRef = useRef<View>(null);
 
   const [animeDetail, setAnimeDetail] = useState<((Awaited<ReturnType<typeof getMovieDetail>> & { status: 'Movie'; releaseYear: string; }) | Omit<AniDetail, 'episodeList'>) | undefined>();
 
@@ -552,13 +555,18 @@ function Video(props: Props) {
     }
   }, []);
 
-  const onSynopsisLayout = useCallback((e: LayoutChangeEvent) => {
-    if (isInfoPressed.current === false) {
-      // infoContainerHeight.value = e.nativeEvent.layout.height;
-      initialInfoContainerHeight.current =
-        e.nativeEvent.layout.height;
-    }
-  }, []);
+  // const onSynopsisLayout = useCallback((e: LayoutChangeEvent) => {
+  //   if (isInfoPressed.current === false) {
+  //     // infoContainerHeight.value = e.nativeEvent.layout.height;
+  //     initialInfoContainerHeight.current =
+  //       e.nativeEvent.layout.height;
+  //   }
+  // }, []);
+  useLayoutEffect(() => {
+    animeInfoPressableRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      initialInfoContainerHeight.current = height;
+    });
+  }, [animeDetail, synopsisTextLength]);
 
   const onSynopsisPress = useCallback(() => {
     if (!isInfoPressed.current) {
@@ -572,10 +580,12 @@ function Video(props: Props) {
         });
     } else {
       setShowSynopsis(true);
-      infoContainerHeight.value = withTiming(
-        (initialInfoContainerHeight.current as number) +
-        synopsisHeight.current
-      );
+      requestAnimationFrame(() => {
+        infoContainerHeight.value = withTiming(
+          (initialInfoContainerHeight.current as number) +
+          synopsisHeight.current
+        );
+      })
     }
   }, [showSynopsis]);
 
@@ -759,8 +769,9 @@ function Video(props: Props) {
               style={[styles.container, infoContainerStyle]}
               onPressIn={onSynopsisPressIn}
               onPressOut={onSynopsisPressOut}
-              onLayout={onSynopsisLayout}
+              // onLayout={onSynopsisLayout}
               onPress={onSynopsisPress}
+              ref={animeInfoPressableRef}
               disabled={synopsisTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>
                 {data.title}
