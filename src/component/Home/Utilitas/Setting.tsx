@@ -277,7 +277,9 @@ function Setting(_props: Props) {
       <FlatList
         data={settingsData}
         keyExtractor={keyExtractor}
-        renderItem={SettingListComponent}
+        renderItem={({item}) => {
+          return <SettingList item={item} />;
+        }}
         extraData={styles}
         ItemSeparatorComponent={() => <ItemSeparator />}
       />
@@ -300,10 +302,6 @@ function ItemSeparator() {
 
 function keyExtractor(item: SettingsData) {
   return item.title;
-}
-
-function SettingListComponent(props: any) {
-  return <SettingList {...props} />;
 }
 
 function SettingList({ item }: { item: SettingsData }) {
