@@ -84,10 +84,10 @@ export async function getMovieDetail(url: string, signal?: AbortSignal): Promise
       content: $(el).find('td').text().trim()
     }
   })
-  const rating = tableContents.find((el) => el.title === 'Skor Anime:')!?.content;
-  const genres = tableContents.find((el) => el.title === 'Genre:')!?.content.split(', ');
-  const studio = tableContents.find((el) => el.title === 'Studio:')!?.content;
-  const releaseDate = tableContents.find((el) => el.title === 'Dirilis:')!?.content;
+  const rating = tableContents.find((el) => el.title === 'Skor Anime:')?.content ?? 'Data Tidak Tersedia';
+  const genres = tableContents.find((el) => el.title === 'Genre:')?.content.split(', ') ?? ["Data Tidak Tersedia"];
+  const studio = tableContents.find((el) => el.title === 'Studio:')?.content ?? 'Data Tidak Tersedia';
+  const releaseDate = tableContents.find((el) => el.title === 'Dirilis:')?.content ?? 'Data Tidak Tersedia';
   const updateDate = $('header > div > span.updated').text().trim();
 
 
