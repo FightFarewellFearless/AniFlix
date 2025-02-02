@@ -9,16 +9,16 @@ type SeekBarProps = {
   onProgressChangeEnd: (lastValue: number) => void;
   style?: Omit<ViewStyle, 'margin' | 'marginHorizontal' | 'marginVertical' | 'marginBottom' | 'marginEnd' | 'marginLeft' | 'marginRight' | 'marginStart' | 'marginTop'>
 }
+function clampNumber (num: number, a: number, b: number) {
+  'worklet';
+  return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
+}
 export default function SeekBar({ progress, onProgressChange, onProgressChangeEnd, style }: SeekBarProps) {
   const parentWidth = useSharedValue(0);
   const circleScale = useSharedValue(1);
 
   const viewRef = useRef<View>(null);
 
-  const clampNumber = (num: number, a: number, b: number) => {
-    'worklet';
-    return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
-  }
   const gesture = useMemo(() =>
     Gesture.Pan()
       .onBegin((e) => {
@@ -62,7 +62,7 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
   const { width } = useWindowDimensions();
 
   useLayoutEffect(() => {
-    viewRef.current?.measureInWindow((x, y, width, height) => {
+    viewRef.current?.measure((x, y, width, height) => {
       if(width < 1) return;
       parentWidth.set(width);
     })
