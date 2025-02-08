@@ -8,7 +8,6 @@ import React, {
   useColorScheme
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
-import Reanimated from 'react-native-reanimated';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 import useGlobalStyles from '../../../assets/style';
@@ -31,7 +30,7 @@ function WatchLater(props: Props) {
     result => JSON.parse(result) as watchLaterJSON[],
   );
 
-  const flashlistRef = useRef<FlashList<watchLaterJSON>>();
+  const flashlistRef = useRef<FlashList<watchLaterJSON>>(null);
 
   const renderItem = useCallback<ListRenderItem<watchLaterJSON>>(
     ({ item, index }) => {
@@ -97,7 +96,6 @@ function WatchLater(props: Props) {
         </View>
       ) : (
         <FlashList
-          // @ts-ignore
           ref={flashlistRef}
           data={watchLaterLists}
           extraData={styles}
