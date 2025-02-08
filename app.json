@@ -15,5 +15,8 @@
   },
   "plugins": [
     "expo-video"
-  ]
+  ],
+  "experiments": {
+    "reactCompiler": false
+  }
 }
