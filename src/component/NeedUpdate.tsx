@@ -37,6 +37,7 @@ type Props = StackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 const MB = 1000;
 
 function NeedUpdate(props: Props) {
+  "use no memo";
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -54,7 +55,7 @@ function NeedUpdate(props: Props) {
   const [netSpeed, setNetSpeed] = useState('0 MB/s');
 
   useAnimatedReaction(
-    () => downloadProgress.value,
+    () => downloadProgress.get(),
     value => {
       if (value === 100) {
         runOnJS(setIsProgress100)(true);
@@ -72,7 +73,7 @@ function NeedUpdate(props: Props) {
         )
         .then(value => {
           setIsDownloadStart(value);
-          downloadProgress.value = value ? 100 : 0;
+          downloadProgress.set(value ? 100 : 0);
         });
     }
   }, [downloadProgress]);
@@ -87,9 +88,9 @@ function NeedUpdate(props: Props) {
         .progress((receivedS, totalS) => {
           const received = Number(receivedS);
           const total = Number(totalS);
-          downloadProgress.value = withTiming(
+          downloadProgress.set(withTiming(
             Math.floor((received / total) * 100),
-          );
+          ));
           setNetSpeed(
             `${(
               (received - lastMB.current) /
@@ -104,7 +105,7 @@ function NeedUpdate(props: Props) {
         })
         .then(async res => {
           setIsDownloadStart(true);
-          downloadProgress.value = 100;
+          downloadProgress.set(100);
           await RNFetchBlob.android.actionViewIntent(
             res.path(),
             'application/vnd.android.package-archive',
@@ -161,7 +162,7 @@ function NeedUpdate(props: Props) {
       // });
       setIsDownloadStart(true);
       Updates.fetchUpdateAsync().then(update => {
-        downloadProgress.value = 100;
+        downloadProgress.set(100);
         Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
           [
             { text: "Restart", onPress: () => {
@@ -197,7 +198,7 @@ function NeedUpdate(props: Props) {
 
   const downloadProgressAnimaton = useAnimatedStyle(() => {
     return {
-      width: `${downloadProgress.value}%`,
+      width: `${downloadProgress.get()}%`,
     };
   });
 

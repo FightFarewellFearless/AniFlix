@@ -25,7 +25,7 @@ const ReText = (props: TextProps) => {
   const { text, style } = { style: {}, ...props };
   const animatedProps = useAnimatedProps(() => {
     return {
-      text: text.value,
+      text: text.get(),
       // Here we use any because the text prop is not available in the type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;

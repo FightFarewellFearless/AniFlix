@@ -23,36 +23,36 @@ export default function SeekBar({ progress, onProgressChange, onProgressChangeEn
     Gesture.Pan()
       .onBegin((e) => {
         'worklet';
-        if (e.x > parentWidth.value) {
-          onProgressChange(clampNumber(parentWidth.value / parentWidth.value, 0, 1));
+        if (e.x > parentWidth.get()) {
+          onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
         }
         else {
-          onProgressChange(clampNumber(e.x / parentWidth.value, 0, 1));
+          onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
         }
-        circleScale.value = withTiming(1.3);
+        circleScale.set(withTiming(1.3));
       })
       .onUpdate((e) => {
         'worklet';
-        if (e.x > parentWidth.value) {
-          onProgressChange(clampNumber(parentWidth.value / parentWidth.value, 0, 1));
+        if (e.x > parentWidth.get()) {
+          onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
         }
         else {
-          onProgressChange(clampNumber(e.x / parentWidth.value, 0, 1));
+          onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
         }
       })
       .onFinalize((e) => {
         'worklet';
-        onProgressChangeEnd(clampNumber(e.x / parentWidth.value, 0, 1));
-        circleScale.value = withTiming(1);
+        onProgressChangeEnd(clampNumber(e.x / parentWidth.get(), 0, 1));
+        circleScale.set(withTiming(1));
       }), []);
   const coveredAreaStyles = useAnimatedStyle(() => ({
-    width: (progress.value * parentWidth.value)
+    width: (progress.get() * parentWidth.get())
   }));
   const circleStyle = useAnimatedStyle(() => ({
     transform: [{
-      translateX: clampNumber((progress.value * parentWidth.value) - 5, 0, parentWidth.value - 12),
+      translateX: clampNumber((progress.get() * parentWidth.get()) - 5, 0, parentWidth.get() - 12),
     }, {
-      scale: circleScale.value,
+      scale: circleScale.get(),
     }]
   }));
   const onLayout = useCallback((e: LayoutChangeEvent) => {

@@ -7,10 +7,11 @@ import SearchAnimeByImage from "./Utilitas/SearchAnimeByImage";
 import Setting from "./Utilitas/Setting";
 import Changelog from "./Utilitas/Changelog";
 import About from "./Utilitas/About";
+import { memo } from "react";
 
 const Stack = createStackNavigator<UtilsStackNavigator>();
 
-export default function Utils() {
+function Utils() {
   return (
     <Stack.Navigator initialRouteName="ChooseScreen">
       <Stack.Screen name="ChooseScreen" component={ChooseScreen} options={{ title: 'Pilih utilitas' }} />
@@ -22,6 +23,8 @@ export default function Utils() {
     </Stack.Navigator>
   )
 }
+
+export default memo(Utils);
 
 function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();

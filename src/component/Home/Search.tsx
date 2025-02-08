@@ -1,4 +1,4 @@
-import React, { useTransition, useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useTransition, useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -129,9 +129,9 @@ function Search(props: Props) {
   const onChangeText = useCallback((text: string) => {
     searchText.current = text;
     if (searchText.current !== '' && searchButtonMounted.current === false) {
-      searchButtonAnimation.value = withTiming(0);
+      searchButtonAnimation.set(withTiming(0));
     } else if (searchButtonMounted.current === true && searchText.current === '') {
-      searchButtonAnimation.value = withTiming(100);
+      searchButtonAnimation.set(withTiming(100));
     }
     if (searchText.current === '') {
       searchButtonMounted.current = false;
@@ -177,23 +177,23 @@ function Search(props: Props) {
   }, [dispatchSettings, props.navigation, searchHistory]);
 
   const onPressIn = useCallback(() => {
-    searchButtonOpacity.value = withTiming(0.4, { duration: 100 });
+    searchButtonOpacity.set(withTiming(0.4, { duration: 100 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onPressOut = useCallback(() => {
-    searchButtonOpacity.value = withTiming(1, { duration: 100 });
+    searchButtonOpacity.set(withTiming(1, { duration: 100 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextFocus = useCallback(() => {
-    searchTextAnimationColor.value = withTiming(1, { duration: 400 });
+    searchTextAnimationColor.set(withTiming(1, { duration: 400 }));
     setSearchHistoryDisplay(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextBlur = useCallback(() => {
-    searchTextAnimationColor.value = withTiming(0, { duration: 400 });
+    searchTextAnimationColor.set(withTiming(0, { duration: 400 }));
     setSearchHistoryDisplay(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -201,7 +201,7 @@ function Search(props: Props) {
   // @ts-ignore
   const textInputAnimation = useAnimatedStyle(() => {
     const borderColor = interpolateColor(
-      searchTextAnimationColor.value,
+      searchTextAnimationColor.get(),
       [0, 1],
       [
         colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
@@ -210,16 +210,16 @@ function Search(props: Props) {
     );
 
     return {
-      width: dimensions.width - interpolate(searchButtonAnimation.value, [0, 100], [searchButtonWidth.value ?? 75, 0]),
+      width: dimensions.width - interpolate(searchButtonAnimation.get(), [0, 100], [searchButtonWidth.get() ?? 75, 0]),
       borderTopColor: borderColor,
       borderBottomColor: borderColor,
     };
   });
   const pressableAnimationStyle = useAnimatedStyle(() => ({
-    opacity: searchButtonOpacity.value,
+    opacity: searchButtonOpacity.get(),
     transform: [
       {
-        translateX: searchButtonAnimation.value,
+        translateX: searchButtonAnimation.get(),
       },
     ],
   }));
@@ -241,7 +241,7 @@ function Search(props: Props) {
   }
 
   const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
-    searchButtonWidth.value = layout.nativeEvent.layout.width;
+    searchButtonWidth.set(layout.nativeEvent.layout.width);
   }, [])
 
   const listAnimeDataProvider = useMemo(() => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []), [listAnime]);
@@ -715,4 +715,4 @@ function useStyles() {
   });
 }
 
-export default Search;
+export default memo(Search);

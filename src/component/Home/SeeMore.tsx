@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   Text,
   StyleSheet,
@@ -137,4 +137,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SeeMore;
+export default memo(SeeMore);

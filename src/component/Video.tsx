@@ -188,9 +188,9 @@ function Video(props: Props) {
   const synopsisHeight = useRef(0);
   const infoContainerStyle = useAnimatedStyle(() => {
     return {
-      opacity: infoContainerOpacity.value,
+      opacity: infoContainerOpacity.get(),
       height:
-        infoContainerHeight.value === 0 ? 'auto' : infoContainerHeight.value,
+        infoContainerHeight.get() === 0 ? 'auto' : infoContainerHeight.get(),
     }
   });
 
@@ -570,31 +570,31 @@ function Video(props: Props) {
 
   const onSynopsisPress = useCallback(() => {
     if (!isInfoPressed.current) {
-      infoContainerHeight.value = initialInfoContainerHeight.current!;
+      infoContainerHeight.set(initialInfoContainerHeight.current!);
     }
     isInfoPressed.current = true;
     if (showSynopsis) {
-      infoContainerHeight.value = withTiming(
+      infoContainerHeight.set(withTiming(
         initialInfoContainerHeight.current as number, undefined, () => {
           runOnJS(setShowSynopsis)(false);
-        });
+        }));
     } else {
       setShowSynopsis(true);
       requestAnimationFrame(() => {
-        infoContainerHeight.value = withTiming(
+        infoContainerHeight.set(withTiming(
           (initialInfoContainerHeight.current as number) +
           synopsisHeight.current
-        );
+        ));
       })
     }
   }, [showSynopsis]);
 
   const onSynopsisPressIn = useCallback(() => {
-    infoContainerOpacity.value = withTiming(0.4, { duration: 100 });
+    infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
   }, []);
 
   const onSynopsisPressOut = useCallback(() => {
-    infoContainerOpacity.value = withTiming(1, { duration: 100 });
+    infoContainerOpacity.set(withTiming(1, { duration: 100 }));
   }, []);
 
   const batteryAndClock = (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon5 from 'react-native-vector-icons/FontAwesome5';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -65,4 +65,4 @@ function BottomTabs(props: Props) {
   );
 }
 
-export default BottomTabs;
+export default memo(BottomTabs);

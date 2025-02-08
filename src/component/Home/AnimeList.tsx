@@ -120,7 +120,7 @@ function HomeList(props: HomeListProps) {
       }
       function callback(finished?: boolean) {
         if (finished) {
-          textLayoutWidth.value = 0;
+          textLayoutWidth.set(0);
           const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
           const quote = `"${randomQuote.quote}" - ${randomQuote.by}`
           runOnJS(setAnimationText)(
@@ -128,9 +128,9 @@ function HomeList(props: HomeListProps) {
           );
           runOnJS(setLayoutWidth)(quote);
         }
-        boxTextAnim.value = 0;
+        boxTextAnim.set(0);
         if (finished === false) return;
-        boxTextAnim.value = withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
+        boxTextAnim.set(withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)));
       }
 
       // const interval = setInterval(() => {
@@ -140,7 +140,7 @@ function HomeList(props: HomeListProps) {
       //   );
       // }, 15500);
 
-      boxTextAnim.value = withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback));
+      boxTextAnim.set(withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)));
 
       return () => {
         cancelAnimation(boxTextAnim);
@@ -170,9 +170,9 @@ function HomeList(props: HomeListProps) {
 
   const AnimationTextStyle = useAnimatedStyle(() => {
     return {
-      width: textLayoutWidth.value === 0 ? 'auto' : textLayoutWidth.value,
+      width: textLayoutWidth.get() === 0 ? 'auto' : textLayoutWidth.get(),
       transform: [{
-        translateX: interpolate(boxTextAnim.value, [0, 1], [windowSize.width, -boxTextLayout.value])
+        translateX: interpolate(boxTextAnim.get(), [0, 1], [windowSize.width, -boxTextLayout.get()])
       }]
     };
   })
@@ -207,7 +207,7 @@ function HomeList(props: HomeListProps) {
           {/* running text animation */}
           <Reanimated.Text
             onLayout={nativeEvent =>
-              (boxTextLayout.value = nativeEvent.nativeEvent.layout.width)
+              (boxTextLayout.set(nativeEvent.nativeEvent.layout.width))
             }
             style={[
               styles.boxText,
@@ -466,11 +466,11 @@ function useLocalTime() {
   const currTime = useRef<string>();
   useFocusEffect(
     useCallback(() => {
-      time.value = new Date().toLocaleTimeString();
+      time.set(new Date().toLocaleTimeString());
       const interval = setInterval(() => {
         const string = new Date().toLocaleTimeString();
         if (currTime.current !== string) {
-          time.value = string;
+          time.set(string);
           currTime.current = string;
         }
       }, 100);
@@ -696,4 +696,4 @@ function useStyles() {
   });
 }
 
-export default Home;
+export default memo(Home);

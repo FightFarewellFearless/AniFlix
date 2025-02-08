@@ -69,45 +69,45 @@ function History(props: Props) {
     return {
       transform: [
         {
-          scale: scrollToTopButtonScale.value,
+          scale: scrollToTopButtonScale.get(),
         },
       ],
     };
   });
 
   const showScrollToTopButton = () => {
-    scrollToTopButtonScale.value = withSpring(1, {
+    scrollToTopButtonScale.set(withSpring(1, {
       damping: 12,
-    });
+    }));
   }
   const hideScrollToTopButton = () => {
-    scrollToTopButtonScale.value = withSpring(0, {
+    scrollToTopButtonScale.set(withSpring(0, {
       damping: 12,
-    });
+    }));
   }
 
   const scrollHandler = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     runOnRuntime(historyRuntime, (value: number) => {
       'worklet';
       if (value <= 100) {
-        if (scrollToTopButtonState.value === 'show') {
+        if (scrollToTopButtonState.get() === 'show') {
           runOnJS(hideScrollToTopButton)();
         }
-        scrollToTopButtonState.value = 'hide';
+        scrollToTopButtonState.set('hide');
       } else if (
-        value < scrollLastValue.value &&
-        scrollToTopButtonState.value === 'hide'
+        value < scrollLastValue.get() &&
+        scrollToTopButtonState.get() === 'hide'
       ) {
         runOnJS(showScrollToTopButton)();
-        scrollToTopButtonState.value = 'show';
+        scrollToTopButtonState.set('show');
       } else if (
-        value > scrollLastValue.value &&
-        scrollToTopButtonState.value === 'show'
+        value > scrollLastValue.get() &&
+        scrollToTopButtonState.get() === 'show'
       ) {
         runOnJS(hideScrollToTopButton)();
-        scrollToTopButtonState.value = 'hide';
+        scrollToTopButtonState.set('hide');
       }
-      scrollLastValue.value = value;
+      scrollLastValue.set(value);
     })(event.nativeEvent.contentOffset.y);
 
   }, []);

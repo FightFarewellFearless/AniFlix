@@ -5,10 +5,11 @@ import WatchLater from './Saya/WatchLater';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { SayaDrawerNavigator } from '../../types/navigation';
 import useGlobalStyles from '../../assets/style';
+import { memo } from 'react';
 
 const Drawer = createDrawerNavigator<SayaDrawerNavigator>();
 
-export default function Saya() {
+function Saya() {
     const globalStyles = useGlobalStyles();
     return (
         <Drawer.Navigator screenOptions={{
@@ -28,3 +29,5 @@ export default function Saya() {
         </Drawer.Navigator>
     )
 }
+
+export default memo(Saya);

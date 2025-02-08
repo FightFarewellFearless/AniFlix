@@ -67,10 +67,10 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
     if (status === 'readyToPlay') {
       setIsError(false);
       setIsBuffering(false);
-      totalDurationSecond.value = ((player.duration ?? 0));
-      if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (player.currentTime);
+      totalDurationSecond.set(((player.duration ?? 0)));
+      if (seekBarProgressDisabled.get() === false) currentDurationSecond.set((player.currentTime));
 
-      if (seekBarProgressDisabled.value === false) seekBarProgress.value = player.currentTime / (player.duration ?? 1);
+      if (seekBarProgressDisabled.get() === false) seekBarProgress.set(player.currentTime / (player.duration ?? 1));
 
       currentDurationSecond.get() < 1 && onLoad?.();
       onDurationChange?.(player.currentTime);
@@ -98,8 +98,8 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
     }
   })
   useEventListener(player, 'timeUpdate', (e) => {
-    if (seekBarProgressDisabled.value === false) currentDurationSecond.value = (e.currentTime);
-    if (seekBarProgressDisabled.value === false) seekBarProgress.value = e.currentTime / (player.duration ?? 1);
+    if (seekBarProgressDisabled.get() === false) currentDurationSecond.set((e.currentTime));
+    if (seekBarProgressDisabled.get() === false) seekBarProgress.set(e.currentTime / (player.duration ?? 1));
     onDurationChange?.(e.currentTime);
   })
   useEventListener(player, 'playToEnd', () => {
@@ -157,15 +157,15 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
   // }, [streamingURL]);
 
   useEffect(() => {
-    showControlsOpacity.value = withTiming(showControls ? 1 : 0, {
+    showControlsOpacity.set(withTiming(showControls ? 1 : 0, {
       duration: 150,
-    });
+    }));
   }, [showControls]);
 
   const showControlsStyle = useAnimatedStyle(() => {
     return {
-      opacity: showControlsOpacity.value,
-      display: showControlsOpacity.value === 0 ? 'none' : 'flex',
+      opacity: showControlsOpacity.get(),
+      display: showControlsOpacity.get() === 0 ? 'none' : 'flex',
     }
   });
   return (
@@ -198,14 +198,14 @@ export default function VideoPlayer({ title, streamingURL, style, videoRef, onFu
             currentDurationSecond={currentDurationSecond} totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen} onFullScreenButtonPressed={onFullScreenButtonPressed} onProgressChange={(e) => {
               'worklet';
-              seekBarProgress.value = e;
-              seekBarProgressDisabled.value = true;
-              currentDurationSecond.value = (e * totalDurationSecond.value);
+              seekBarProgress.set(e);
+              seekBarProgressDisabled.set(true);
+              currentDurationSecond.set((e * totalDurationSecond.get()));
             }} onProgressChangeEnd={(e) => {
               'worklet';
-              seekBarProgress.value = e;
-              seekBarProgressDisabled.value = false;
-              runOnJS(setPositionAsync)?.(e * totalDurationSecond.value);
+              seekBarProgress.set(e);
+              seekBarProgressDisabled.set(false);
+              runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
             }} seekBarProgress={seekBarProgress} />
         </Reanimated.View>
 
@@ -287,8 +287,8 @@ function BottomControl({
 }) {
   const totalSecond = useDerivedValue(() => {
     'worklet';
-    const sec = Math.floor(totalDurationSecond.value % 60);
-    const min = Math.floor(totalDurationSecond.value / 60);
+    const sec = Math.floor(totalDurationSecond.get() % 60);
+    const min = Math.floor(totalDurationSecond.get() / 60);
     const hour = Math.floor(min / 60);
     const minStr = (min % 60).toString().padStart(2, '0');
     const secStr = sec.toString().padStart(2, '0');
@@ -296,10 +296,10 @@ function BottomControl({
   })
   const currentSecond = useDerivedValue(() => {
     'worklet';
-    const totalSecStr = totalSecond.value;
+    const totalSecStr = totalSecond.get();
     const hasHour = totalSecStr.split(':').length === 3;
-    const sec = Math.floor(currentDurationSecond.value % 60);
-    const min = Math.floor(currentDurationSecond.value / 60);
+    const sec = Math.floor(currentDurationSecond.get() % 60);
+    const min = Math.floor(currentDurationSecond.get() / 60);
     const hour = Math.floor(min / 60);
     const minStr = (min % 60).toString().padStart(2, '0');
     const secStr = sec.toString().padStart(2, '0');
