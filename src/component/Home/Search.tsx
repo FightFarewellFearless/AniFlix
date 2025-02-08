@@ -210,7 +210,7 @@ function Search(props: Props) {
     );
 
     return {
-      width: dimensions.width - interpolate(searchButtonAnimation.get(), [0, 100], [searchButtonWidth.get() ?? 75, 0]),
+      width: dimensions.width - interpolate(searchButtonAnimation.get(), [0, 100], [(searchButtonWidth.get() ?? 75), 10]),
       borderTopColor: borderColor,
       borderBottomColor: borderColor,
     };
@@ -246,7 +246,7 @@ function Search(props: Props) {
 
   const listAnimeDataProvider = useMemo(() => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []), [listAnime]);
   const listAnimeLayoutProvider = useMemo(() => new LayoutProvider(() => 'NORMAL', (_, dim) => {
-    dim.height = 45;
+    dim.height = 60;
     dim.width = dimensions.width;
   }), [dimensions.width]);
   const listAnimeRenderer = useCallback((type: string | number, data: listAnimeTypeList, index: number) => {
@@ -617,26 +617,48 @@ function useStyles() {
     loadingText: {
     },
     searchInput: {
-      height: 38,
-      borderWidth: 0.8,
-      borderRadius: 5,
-      backgroundColor: colorScheme === 'dark' ? '#202020' : '#f7f7f7',
-      marginLeft: 2,
+      height: 42,
+      borderWidth: 1,
+      borderColor: colorScheme === 'dark' ? '#444' : '#ddd',
+      borderRadius: 8,
+      backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#fff',
+      marginHorizontal: 5,
+      paddingHorizontal: 14,
+      textAlign: 'left',
       color: globalStyles.text.color,
-      textAlign: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 2,
     },
     searchButton: {
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#ffa43cff',
+      backgroundColor: '#ff8c00',
+      borderRadius: 8,
+      marginRight: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
     },
     animeList: {
       justifyContent: 'center',
-      paddingVertical: 10,
+      paddingVertical: 12,
       flexDirection: 'row',
-      backgroundColor: colorScheme === 'dark' ? '#005f4b' : '#009ece',
-      margin: 2,
-      borderRadius: 7,
+      backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f5f5f5',
+      marginHorizontal: 16,
+      marginVertical: 6,
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 2,
     },
     animeListIndex: {
       textAlign: 'left',
@@ -650,11 +672,14 @@ function useStyles() {
     },
     listContainer: {
       flexDirection: 'row',
-      marginVertical: 5,
-      // backgroundColor: colorScheme === 'dark' ? '#3b3939' : '#ffffff',
-      backgroundColor: '#3b3939',
+      marginVertical: 8,
+      backgroundColor: colorScheme === 'dark' ? '#333' : '#fff',
       borderRadius: 16,
-      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+      elevation: 4,
     },
     listImage: {
       width: 110,
@@ -682,20 +707,30 @@ function useStyles() {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 4,
-      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+      padding: 6,
+      backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#f0f0f0',
       borderRadius: 7,
-      textAlign: 'center',
       fontWeight: 'bold',
     },
     searchHistoryContainer: {
       position: 'absolute',
-      top: 40,
-      width: '100%',
-      zIndex: 2,
+      top: '10%',
+      left: 12,
+      right: 12,
+      height: '80%',
+      zIndex: 10,
+      backgroundColor: colorScheme === 'dark' ? '#222' : '#fff',
+      borderRadius: 12,
+      padding: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
     },
     searchHistoryScrollBox: {
-      backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+      backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#f8f8f8',
+      padding: 4,
     },
     searchHistoryItemContainer: {
       backgroundColor: colorScheme === 'light' ? '#00c0c7' : '#007c7c',

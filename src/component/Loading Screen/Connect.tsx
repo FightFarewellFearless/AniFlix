@@ -259,62 +259,87 @@ function Loading(props: Props) {
   }, []);
 
   return (
-    <View
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        flex: 1,
-      }}>
-      <AnimeMovieWebView isWebViewShown={isAnimeMovieWebViewOpen} setIsWebViewShown={setIsAnimeMovieWebViewOpen} onAnimeMovieReady={onAnimeMovieReady} />
-      <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>Tunggu sebentar ya.. lagi loading</Text>
-      {Object.entries(loadStatus).map(([key, value]) => (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }} key={key}>
-          {!value ? <ActivityIndicator size="small" /> : <Icon name="check" color={'green'} />}
-          <Text style={globalStyles.text}>
-            {' ' + key}
-          </Text>
-        </View>
-      ))}
-      <View
-        style={{
-          position: 'absolute',
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-          bottom: 45,
-        }}>
-        <TouchableOpacity
-          onPress={() => {
-            Linking.openURL('https://github.com/FightFarewellFearless/AniFlix');
-          }}
-          style={[styles.bottomCredits, { marginRight: 8 }]}>
-          {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-          <Icon name="github" size={43} color={globalStyles.text.color} />
-          <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
-            {' '}
-            Open-Sourced on github
-          </Text>
-        </TouchableOpacity>
-
-        <JoinDiscord />
-
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <AnimeMovieWebView
+          isWebViewShown={isAnimeMovieWebViewOpen}
+          setIsWebViewShown={setIsAnimeMovieWebViewOpen}
+          onAnimeMovieReady={onAnimeMovieReady}
+        />
+        <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>
+          Tunggu sebentar ya.. lagi loading
+        </Text>
+        {Object.entries(loadStatus).map(([key, value]) => (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }} key={key}>
+            {!value ? (
+              <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
+            ) : (
+              <Icon name="check" size={14} color="green" />
+            )}
+            <Text style={globalStyles.text}>{' ' + key}</Text>
+          </View>
+        ))}
       </View>
-      <Text
-        style={[
-          globalStyles.text,
-          { position: 'absolute', bottom: 0, left: 0 },
-        ]}>
-        {appVersion}-JS_{OTAJSVersion}
-      </Text>
+      <View style={styles.footer}>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
+            style={[styles.bottomCredits, { marginRight: 8 }]}
+          >
+            <Icon name="github" size={43} color={globalStyles.text.color} />
+            <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
+              {' '}
+              Open-Sourced on github
+            </Text>
+          </TouchableOpacity>
+          <JoinDiscord />
+        </View>
+        <Text style={styles.versionText}>
+          {appVersion}-JS_{OTAJSVersion}
+        </Text>
+      </View>
     </View>
   );
 }
 
 function useStyles() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   return StyleSheet.create({
+    loadingIndicator: {
+      color: isDark ? '#BB86FC' : '#6200EE',
+    },
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#141414' : '#ffffff',
+      padding: 20,
+      justifyContent: 'space-between',
+    },
+    content: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    footer: {
+      alignItems: 'center',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: '100%',
+      marginBottom: 10,
+    },
+    versionText: {
+      fontSize: 12,
+      color: isDark ? '#aaa' : '#888',
+    },
     bottomCredits: {
       flexDirection: 'row',
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#d8d8d8',
+      backgroundColor: isDark ? '#2b2b2b' : '#d8d8d8',
       padding: 10,
       borderRadius: 8,
       alignItems: 'center',

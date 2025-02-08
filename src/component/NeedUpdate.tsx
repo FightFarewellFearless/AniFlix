@@ -53,6 +53,7 @@ function NeedUpdate(props: Props) {
   const lastMS = useRef(0);
   const totalMB = useRef(0);
   const [netSpeed, setNetSpeed] = useState('0 MB/s');
+  const [progressPercent, setProgressPercent] = useState(0); // new state
 
   useAnimatedReaction(
     () => downloadProgress.get(),
@@ -88,9 +89,9 @@ function NeedUpdate(props: Props) {
         .progress((receivedS, totalS) => {
           const received = Number(receivedS);
           const total = Number(totalS);
-          downloadProgress.set(withTiming(
-            Math.floor((received / total) * 100),
-          ));
+          const percent = Math.floor((received / total) * 100);
+          downloadProgress.set(withTiming(percent));
+          setProgressPercent(percent); // update progress percentage
           setNetSpeed(
             `${(
               (received - lastMB.current) /
@@ -116,50 +117,6 @@ function NeedUpdate(props: Props) {
           ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
         });
     } else {
-      // CodePush.sync({
-      //   installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-      // }, status => {
-      //   switch (status) {
-      //     case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-      //       setIsDownloadStart(true);
-      //       break;
-      //     case CodePush.SyncStatus.UPDATE_INSTALLED:
-      //       setIsDownloadStart(true);
-      //       downloadProgress.value = 100;
-      //       break;
-      //     default:
-      //       setIsDownloadStart(false);
-      //       break;
-      //   }
-      // }, ({ receivedBytes, totalBytes }) => {
-      //   setNetSpeed(
-      //     `${(
-      //       (receivedBytes - lastMB.current) /
-      //       MB /
-      //       MB /
-      //       ((Date.now() - lastMS.current) / 1000)
-      //     ).toFixed(2)} MB/s`,
-      //   )
-      //   lastMB.current = receivedBytes;
-      //   lastMS.current = Date.now();
-      //   totalMB.current = totalBytes;
-      //   downloadProgress.value = Math.floor(
-      //     (receivedBytes / totalBytes) * 100,
-      //   );
-      // }).then(() => {
-      //   setIsDownloadStart(true);
-      //   downloadProgress.value = 100;
-      //   Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
-      //     [
-      //       { text: "Restart", onPress: () => {
-      //         CodePush.restartApp();
-      //       } },
-      //     ]
-      //   );
-      // }).catch(() => {
-      //   setIsDownloadStart(false);
-      //   ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-      // });
       setIsDownloadStart(true);
       Updates.fetchUpdateAsync().then(update => {
         downloadProgress.set(100);
@@ -191,7 +148,6 @@ function NeedUpdate(props: Props) {
         'application/vnd.android.package-archive',
       );
     } else {
-      // CodePush.restartApp();
       Updates.reloadAsync();
     };
   }, []);
@@ -230,30 +186,28 @@ function NeedUpdate(props: Props) {
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
             <Icon
               name="file-download"
-              color={globalStyles.text.color}
+              color={styles.buttonText.color}
               size={20}
             />
-            <Text style={globalStyles.text}>Download update</Text>
+            <Text style={[globalStyles.text, styles.buttonText]}>Download update</Text>
           </TouchableOpacity>
         ) : isProgress100 === true ? (
           <View style={styles.installOrRedownload}>
             <TouchableOpacity
-              // containerStyle={{ flex: 1 }}
               style={[styles.download, { backgroundColor: '#1d1d66' }, { flex: 1 }]}
               onPress={installUpdate}>
-              <Icon name="download" color={globalStyles.text.color} size={20} />
-              <Text style={globalStyles.text}>Instal update</Text>
+              <Icon name="download" color={styles.buttonText.color} size={20} />
+              <Text style={[globalStyles.text, styles.buttonText]}>Instal update</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              // containerStyle={{ flex: 1 }}
               style={[styles.download, { flex: 1 }]}
               onPress={downloadUpdate}>
               <Icon
                 name="file-download"
-                color={globalStyles.text.color}
+                color={styles.buttonText.color}
                 size={20}
               />
-              <Text style={globalStyles.text}>Download ulang update</Text>
+              <Text style={[globalStyles.text, styles.buttonText, { textAlign: 'center' }]}>Download ulang update</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -262,6 +216,7 @@ function NeedUpdate(props: Props) {
               <Animated.View
                 style={[styles.slider, downloadProgressAnimaton]}
               />
+              <Text style={styles.progressText}>{progressPercent}%</Text>
             </View>
             <View style={styles.netContainer}>
               <Text style={[globalStyles.text, styles.netSpeed]}>
@@ -283,75 +238,127 @@ function useStyles() {
   return StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: colorScheme === 'dark' ? '#141414' : '#F5F5F5',
+      padding: 20,
     },
     titleContainer: {
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: colorScheme === 'dark' ? '#5f5f5f' : '#cccccc',
-      flex: 0.3,
+      backgroundColor: colorScheme === 'dark' ? '#1F1F1F' : '#ffffff',
+      paddingVertical: 22,
+      borderBottomWidth: 1,
+      borderBottomColor: colorScheme === 'dark' ? '#2A2A2A' : '#e0e0e0',
+      shadowColor: '#000',
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
+      elevation: 4,
+      marginBottom: 20,
+      borderRadius: 10,
     },
     needUpdate: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: '#07b607',
+      fontSize: 26,
+      fontWeight: '700',
+      color: '#76c7c0',
+      marginBottom: 8,
     },
     desc: {
+      fontSize: 16,
+      color: colorScheme === 'dark' ? '#B0B0B0' : '#6e6e6e',
       textAlign: 'center',
+      paddingHorizontal: 20,
     },
     updateInfo: {
       flex: 1,
+      backgroundColor: colorScheme === 'dark' ? '#1C1C1C' : '#ffffff',
+      borderRadius: 12,
+      padding: 20,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 3,
     },
     versionInfo: {
       flexDirection: 'row',
       justifyContent: 'center',
+      alignItems: 'center',
       borderWidth: 1,
-      borderColor: colorScheme === 'dark' ? 'white' : 'black',
-      borderRadius: 3,
+      borderColor: colorScheme === 'dark' ? '#3D3D3D' : '#e0e0e0',
+      borderRadius: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+      backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#fafafa',
     },
     version: {
-      fontSize: 22,
-      textAlign: 'center',
-      fontWeight: 'bold',
-      color: '#960303',
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#D9534F',
+      marginRight: 8,
     },
     latestVersion: {
-      fontSize: 22,
-      textAlign: 'center',
-      fontWeight: 'bold',
-      color: '#089603',
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#5CB85C',
+      marginLeft: 8,
     },
     download: {
       flexDirection: 'row',
-      padding: 10,
-      backgroundColor: '#008b13',
-      borderRadius: 5,
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      backgroundColor: '#5CB85C',
+      borderRadius: 30,
       justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 14,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 5,
+      elevation: 3,
     },
     sliderContainer: {
       width: '100%',
-      backgroundColor: 'gray',
-      height: 10,
-      borderRadius: 5,
+      backgroundColor: '#ddd',
+      height: 18,
+      borderRadius: 9,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 14,
     },
     slider: {
-      height: 10,
-      borderRadius: 5,
-      backgroundColor: '#105494',
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: '#5c96b8',
+    },
+    progressText: {
+      position: 'absolute',
+      color: '#fff',
+      fontWeight: '600',
+      fontSize: 14,
     },
     installOrRedownload: {
       flexDirection: 'row',
+      justifyContent: 'space-between',
     },
     netContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      marginTop: 8,
     },
     netSpeed: {
+      flex: 1,
       fontSize: 14,
-      fontWeight: 'bold',
+      fontWeight: '500',
+      color: colorScheme === 'dark' ? '#ebebeb' : '#555555',
     },
     netTotal: {
       fontSize: 14,
-      fontWeight: 'bold',
+      fontWeight: '500',
+      color: colorScheme === 'dark' ? '#ebebeb' : '#555555',
+    },
+    buttonText: {
+      color: '#fff', // button text color for better readability
+      fontWeight: '600',
     },
   });
 }
