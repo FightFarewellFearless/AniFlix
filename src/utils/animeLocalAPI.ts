@@ -225,7 +225,7 @@ const fromUrl = async (url: string, selectedRes: RegExp | string = /480p|360p/, 
         let streamingLink = await getStreamLink(aniDetail.find('div.responsive-embed-stream > iframe').attr('src')!, signal);
         const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
 
-        const thumbnailUrl = aniDetail.find('div.cukder > img').attr('src')!;
+        const thumbnailUrl = $('div.cukder > img').attr('src')!;
 
         const episode = aniDetail.find('div.flir a');
         const episodeData: { previous?: string, animeDetail: string, next?: string } = {
