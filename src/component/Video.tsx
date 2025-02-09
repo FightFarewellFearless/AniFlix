@@ -566,7 +566,7 @@ function Video(props: Props) {
     animeInfoPressableRef.current?.measure((x, y, width, height, pageX, pageY) => {
       initialInfoContainerHeight.current = height;
     });
-  }, [animeDetail, synopsisTextLength]);
+  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextLength]);
 
   const onSynopsisPress = useCallback(() => {
     if (!isInfoPressed.current) {
