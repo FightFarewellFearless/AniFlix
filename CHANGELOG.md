@@ -1,3 +1,27 @@
+# v0.8.2 (09-Februari-2025)
+
+Rilis ini berisi peningkatan performa scrolling list (dan mungkin performa animasi) dan peningkatan desain UI pada beberapa bagian (Update, Search, dan layar loading awal). Juga perbaikan untuk crash pada beberapa anime movie.
+
+Perubahan lainnya meliputi tapi tidak terbatas pada: Upgrade library yang digunakan termasuk react-native 0.77 yang mungkin akan memperbaiki beberapa masalah lain termasuk masalah text yang terpotong pada beberapa device (Berdasarkan RN 0.77 Changelog)
+
+## Peningkatan
+
+- Memperbagus tampilan/UI pada bagian:
+   - Update
+   - Search (anime list)
+   - Tampilan layar awal loading
+- Peningkatan performa scrolling dan mungkin juga performa animasi
+
+## Perbaikan
+
+- Memperbaiki crash pada beberapa tipe anime movie
+- Memperbaiki gambar cover/thumbnail yang tersimpan di history
+
+## Penghapusan
+
+- Menghapus animasi pada list history
+  > Dengan alasan performa
+
 # v0.8.1 (23-Januari-2025)
 
 ## Perbaikan

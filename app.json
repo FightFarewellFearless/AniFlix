@@ -11,7 +11,7 @@
     "url": "https://u.expo.dev/ccdabe85-93a9-4297-936c-074a7cf27a4a"
   },
   "android": {
-    "runtimeVersion": "0.8.1"
+    "runtimeVersion": "0.8.2"
   },
   "plugins": [
     "expo-video"
