@@ -1,3 +1,9 @@
+# v0.8.2-JS_4 (16-Februari-2025)
+
+## Perbaikan
+
+- Memperbaiki masalah performa ketika menghapus search history
+
 # v0.8.2-JS_3 (16-Februari-2025)
 
 ## Peningkatan
