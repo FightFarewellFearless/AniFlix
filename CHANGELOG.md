@@ -1,3 +1,17 @@
+# v0.8.2-JS_1 (16-Februari-2025)
+
+## Penambahan
+
+- Menambahkan quotes pada loading screen awal aplikasi
+
+## Peningkatan
+
+- Meningkatkan pengalaman scrolling dengan mengurangi blank space dan menambah render ahead offset.
+
+## Perbaikan
+
+- Memperbaiki masalah styling pada tombol tutup di bagian Search ketika tidak ada anime yang ditemukan
+
 # v0.8.2 (09-Februari-2025)
 
 Rilis ini berisi peningkatan performa scrolling list (dan mungkin performa animasi) dan peningkatan desain UI pada beberapa bagian (Update, Search, dan layar loading awal). Juga perbaikan untuk crash pada beberapa anime movie.
