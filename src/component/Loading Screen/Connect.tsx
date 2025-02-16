@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -33,6 +33,7 @@ import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import * as Updates from 'expo-updates';
 import { AnimeMovieWebView } from '../../utils/animeMovie';
+import runningText from '../../assets/runningText.json';
 
 export const JoinDiscord = () => {
   const styles = useStyles();
@@ -68,7 +69,7 @@ function Loading(props: Props) {
     'Menghubungkan ke server': false,
   });
 
-  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
+  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -187,10 +188,10 @@ function Loading(props: Props) {
         __DEV__ // skip update when app is in dev mode
       ) {
 
-        const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => { 
+        const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => {
           ToastAndroid.show('Gagal mengecek update', ToastAndroid.SHORT);
           return null;
-         });
+        });
 
         if (OTAUpdate !== null && OTAUpdate.isAvailable) {
           const changelog = await fetch('https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md', {
@@ -258,6 +259,8 @@ function Loading(props: Props) {
     connectToServer();
   }, []);
 
+  const quotes = useMemo(() => runningText[~~(runningText.length * Math.random())], []);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -266,6 +269,14 @@ function Loading(props: Props) {
           setIsWebViewShown={setIsAnimeMovieWebViewOpen}
           onAnimeMovieReady={onAnimeMovieReady}
         />
+        <View style={styles.quotesBox}>
+          <Text style={[globalStyles.text, { fontSize: 16, fontStyle: 'italic', textAlign: 'center', fontFamily: 'serif' }]}>
+            "{quotes.quote}"{'\n'}
+            <Text style={[globalStyles.text, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginTop: 10 }]}>
+              - {quotes.by}
+            </Text>
+          </Text>
+        </View>
         <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>
           Tunggu sebentar ya.. lagi loading
         </Text>
@@ -306,6 +317,16 @@ function useStyles() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   return StyleSheet.create({
+    quotesBox: {
+      position: 'absolute',
+      top: 10,
+      padding: 20,
+      marginVertical: 20,
+      borderRadius: 10,
+      borderColor: isDark ? '#444' : '#ccc',
+      borderWidth: 1,
+      elevation: 2,
+    },
     loadingIndicator: {
       color: isDark ? '#BB86FC' : '#6200EE',
     },
