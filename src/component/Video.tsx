@@ -265,12 +265,13 @@ function Video(props: Props) {
       }
       setLoading(true);
       let resultData: string | undefined | { canceled: boolean } | { error: boolean };
+      const signal = abortController.current?.signal;
       if ("type" in data) {
         resultData = await AnimeAPI.reqResolution(
           res,
           data.reqNonceAction,
           data.reqResolutionWithNonceAction,
-          abortController.current?.signal,
+          signal,
         ).catch(err => {
           if (err.message === 'canceled') {
             return { canceled: true };
@@ -284,7 +285,7 @@ function Video(props: Props) {
           return { error: true };
         });
       } else {
-        const rawData = await getRawDataIfAvailable({ title: resolution, url: res }, abortController.current?.signal).catch(err => {
+        const rawData = await getRawDataIfAvailable({ title: resolution, url: res }, signal).catch(err => {
           if (err.message === 'canceled') {
             return { canceled: true };
           }
@@ -313,10 +314,12 @@ function Video(props: Props) {
           ...(resultData.includes('mp4upload') ? { 'Referer': 'https://www.mp4upload.com/' } : {}),
         },
         method: 'HEAD',
+        signal,
       }).catch(() => { })
         .then(res => {
           return !(res?.headers.get('content-type')?.includes('video') || res?.headers.get('content-type')?.includes('octet-stream'));
         })
+      if(signal?.aborted) return;
       setData(old => {
         return {
           ...old,
