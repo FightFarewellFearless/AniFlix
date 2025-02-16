@@ -69,7 +69,7 @@ function Loading(props: Props) {
     'Menghubungkan ke server': false,
   });
 
-  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
+  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
