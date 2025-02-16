@@ -261,6 +261,7 @@ function History(props: Props) {
       </View>
       <View style={styles.historyContainer}>
         <FlashList
+          renderAheadOffset={1500}
           data={filteredData}
           estimatedItemSize={160}
           // @ts-ignore
