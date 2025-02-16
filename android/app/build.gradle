@@ -117,6 +117,7 @@ android {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
             resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
+            archivesBaseName = "anime"
         }
         releaseStaging {
             resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
