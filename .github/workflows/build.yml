@@ -29,6 +29,7 @@ jobs:
     - name: Build Android APK
       run: |
         cd android
+        chmod +x gradlew
         ./gradlew assembleRelease -Pandroid.injected.signing.store.file=my-release-key.jks \
                                   -Pandroid.injected.signing.store.password=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
                                   -Pandroid.injected.signing.key.alias=${{ secrets.ANDROID_KEY_ALIAS }} \
