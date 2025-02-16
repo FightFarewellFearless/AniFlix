@@ -1,3 +1,9 @@
+# v0.8.2-JS_3 (16-Februari-2025)
+
+## Peningkatan
+
+- Meningkatkan pengalaman scrolling pada hampir semua list di aplikasi
+
 # v0.8.2-JS_2 (16-Februari-2025)
 
 (Update ini sama seperti versi JS 1 namun berisi sedikit perbaikan pada kesalahan penulisan kode paga bagian peningkatan pengalaman scrolling di list history)
