@@ -1,3 +1,7 @@
+# v0.8.2-JS_2 (16-Februari-2025)
+
+(Update ini sama seperti versi JS 1 namun berisi sedikit perbaikan pada kesalahan penulisan kode paga bagian peningkatan pengalaman scrolling di list history)
+
 # v0.8.2-JS_1 (16-Februari-2025)
 
 ## Penambahan
