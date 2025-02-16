@@ -404,7 +404,7 @@ function Search(props: Props) {
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
             <FlashList
-              drawDistance={1500}
+              drawDistance={750}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
