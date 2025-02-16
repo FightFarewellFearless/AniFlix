@@ -292,6 +292,7 @@ function AniDetailCopilot(props: Props) {
 
       <View style={[styles.container, {backgroundColor: thumbnailColor}]}>
         <FlashList
+          drawDistance={1500}
           estimatedItemSize={41}
           data={data.episodeList}
           renderItem={({ item }) => (

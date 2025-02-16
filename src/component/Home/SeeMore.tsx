@@ -53,6 +53,7 @@ function SeeMore(props: Props) {
   return (
     <View style={{ flex: 1 }}>
       <FlashList
+        drawDistance={1500}
         data={
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (NewAnimeList | Movies)[]
         }
