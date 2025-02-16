@@ -1,3 +1,9 @@
+# v0.8.2-JS_5 (16-Februari-2025)
+
+## Perbaikan
+
+- Memperbaiki pengambilan data resolusi tetap terjadi meski pengguna sudah membatalkan permintaan
+
 # v0.8.2-JS_4 (16-Februari-2025)
 
 ## Perbaikan
