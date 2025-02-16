@@ -427,7 +427,7 @@ function Search(props: Props) {
       )}
       {data !== null && (
         <TouchableOpacityAnimated
-          style={styles.closeSearchResult} //rngh - containerStyle
+          containerStyle={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
             setMovieData(null);
