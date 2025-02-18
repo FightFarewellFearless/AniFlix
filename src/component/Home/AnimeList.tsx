@@ -217,13 +217,15 @@ function HomeList(props: HomeListProps) {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing} disabled={refresh}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing} disabled={refresh}>
+        <Text style={[{color: '#ffffff', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text>
+      </TouchableOpacity>
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
       {Object.keys(data?.jadwalAnime ?? {}).map((key) => {
         return (
-          <View key={key} style={[styles.listContainer, { marginTop: 15 }]}>
+          <View key={key} style={[styles.listContainer, { marginTop: 15, marginHorizontal: 12 }]}>
             <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>{key}</Text>
             {data?.jadwalAnime[key]!.map((item, index) => (
               <TouchableOpacity
@@ -251,7 +253,7 @@ function HomeList(props: HomeListProps) {
 function EpisodeBaru({ styles, globalStyles, data, props, }:
   {
     data: EpisodeBaruType | undefined, props: HomeListProps,
-    styles: any, globalStyles: any
+    styles: ReturnType<typeof useStyles>, globalStyles: ReturnType<typeof useGlobalStyles>
   }
 ) {
 
@@ -562,8 +564,9 @@ function useStyles() {
     boxItem: {
       flex: 1,
       backgroundColor: colorScheme === 'dark' ? '#363636' : '#eeeeee',
-      borderColor: 'gold',
-      borderWidth: 1.2,
+      borderColor: '#ff9100ff',
+      borderWidth: 2,
+      padding: 4,
       justifyContent: 'center',
       overflow: 'hidden',
     },
@@ -594,7 +597,7 @@ function useStyles() {
       marginBottom: 4,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#910000',
+      backgroundColor: '#0aafcc',
       paddingHorizontal: 5,
       paddingVertical: 2,
       borderRadius: 5,
@@ -611,7 +614,7 @@ function useStyles() {
       color: '#2093ff',
       fontWeight: 'bold',
       // fontSize: 14,
-      textShadowColor: 'black',
+      textShadowColor: colorScheme === 'dark' ? 'black' : '#cfcfcf',
       textShadowOffset: { width: 1, height: 1 },
       textShadowRadius: 2,
     },
@@ -641,7 +644,7 @@ function useStyles() {
     seeMoreText: {
       fontSize: 14,
       fontWeight: 'bold',
-      color: '#009107',
+      color: '#007db8',
     },
     listBackground: {
       overflow: 'hidden',
