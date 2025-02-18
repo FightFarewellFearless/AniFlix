@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import {
   View,
-  RefreshControl,
   Text,
   ToastAndroid,
   StyleSheet,
@@ -20,7 +19,7 @@ import {
   useColorScheme,
   ActivityIndicator,
 } from 'react-native';
-import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler'; //rngh
+import { TouchableOpacity, ScrollView, RefreshControl } from 'react-native-gesture-handler'; //rngh
 import Reanimated, { cancelAnimation, Easing, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { NavigationProp, StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
@@ -218,7 +217,7 @@ function HomeList(props: HomeListProps) {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing} disabled={refresh}><Text style={[{color: 'white', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text></TouchableOpacity>
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
