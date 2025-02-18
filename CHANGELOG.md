@@ -1,3 +1,13 @@
+# v0.8.2-JS_6 (18-Februari-2025)
+
+## Perbaikan
+
+- Memperbaiki pull-to-refresh tidak bekerja pada Beranda
+
+## Peningkatan
+
+- Sedikit mengubah tampilan beranda
+
 # v0.8.2-JS_5 (16-Februari-2025)
 
 ## Perbaikan
