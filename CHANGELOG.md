@@ -1,6 +1,6 @@
 # v0.8.2-JS_7 (20-Februari-2025)
 
-Mencegah komponen di render ulang menggukan react-freeze
+Mencegah komponen di render ulang menggunakan react-freeze
 
 # v0.8.2-JS_6 (18-Februari-2025)
 
