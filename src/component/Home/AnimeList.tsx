@@ -61,7 +61,7 @@ function Home(_props: HomeProps) {
       screenOptions={{
         headerShown: false,
       }}>
-      <SeeMoreStack.Screen name="HomeList" component={HomeList} />
+      <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
       <SeeMoreStack.Screen
         name="SeeMore"
         component={SeeMore}
@@ -70,6 +70,8 @@ function Home(_props: HomeProps) {
     </SeeMoreStack.Navigator>
   );
 }
+
+const HomeListMemo = memo(HomeList);
 
 function HomeList(props: HomeListProps) {
   const globalStyles = useGlobalStyles();
