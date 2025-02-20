@@ -583,7 +583,7 @@ function Video(props: Props) {
         }));
     } else {
       setShowSynopsis(true);
-      requestAnimationFrame(() => {
+      queueMicrotask(() => {
         infoContainerHeight.set(withTiming(
           (initialInfoContainerHeight.current as number) +
           synopsisHeight.current
