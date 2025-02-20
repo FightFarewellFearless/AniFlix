@@ -1,3 +1,8 @@
+# v0.8.2-JS_10 (20-Februari-2025)
+
+## Perbaikan
+- Memperbaiki masalah tombol "Cari" tidak muncul setelah navigasi ke layar lain (kemungkinan masalah di react-freeze atau react-native-reanimated, diperbaiki dengan menggunakan component Animated bawaan react-native)
+
 # v0.8.2-JS_9 (20-Februari-2025)
 
 Perubahan kecil di kode dengan harapan peningkatan performa
