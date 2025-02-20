@@ -344,7 +344,7 @@ function Search(props: Props) {
             )} /> */}
           {listAnime.length > 0 && (
             <RecyclerListView
-              renderAheadOffset={750}
+              renderAheadOffset={500}
               dataProvider={listAnimeDataProvider}
               layoutProvider={listAnimeLayoutProvider}
               rowRenderer={listAnimeRenderer}
@@ -404,7 +404,7 @@ function Search(props: Props) {
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
             <FlashList
-              drawDistance={750}
+              drawDistance={500}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
