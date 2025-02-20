@@ -1,3 +1,7 @@
+# v0.8.2-JS_11 (20-Februari-2025)
+
+Perubahan kode untuk menambahkan memoization di Beranda agar performa navigasi lebih baik
+
 # v0.8.2-JS_10 (20-Februari-2025)
 
 ## Perbaikan
