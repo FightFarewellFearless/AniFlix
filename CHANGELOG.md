@@ -1,3 +1,14 @@
+# v0.8.2-JS_8 (20-Februari-2025)
+
+## Penambahan
+
+- Memperlihatkan versi JS di menu update aplikasi
+
+## Perubahan
+
+- Drawer animation diubah dari 'slide' ke 'front' untuk bagian "Saya" (history dan tonton nanti)
+- Mengurangi draw distance di list untuk menghindari lag saat render ulang
+
 # v0.8.2-JS_7 (20-Februari-2025)
 
 Mencegah komponen di render ulang menggunakan react-freeze
