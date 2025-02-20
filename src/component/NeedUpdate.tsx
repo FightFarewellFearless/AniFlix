@@ -18,7 +18,7 @@ import { TouchableOpacity } from 'react-native'; //rngh
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
-import { version as appVersion } from '../../package.json';
+import { version as appVersion, OTAJSVersion } from '../../package.json';
 import useGlobalStyles from '../assets/style';
 import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
@@ -171,7 +171,7 @@ function NeedUpdate(props: Props) {
 
       <View style={styles.updateInfo}>
         <View style={styles.versionInfo}>
-          <Text style={[globalStyles.text, styles.version]}>{appVersion}</Text>
+          <Text style={[globalStyles.text, styles.version]}>{appVersion}-JS_{OTAJSVersion}</Text>
           <Text style={[globalStyles.text, { fontSize: 20 }]}>{'->'}</Text>
           <Text style={[globalStyles.text, styles.latestVersion]}>
             {props.route.params.nativeUpdate ? props.route.params.latestVersion : "OTA Update"}
