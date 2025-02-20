@@ -96,7 +96,7 @@ function WatchLater(props: Props) {
         </View>
       ) : (
         <FlashList
-          drawDistance={1500}
+          drawDistance={750}
           ref={flashlistRef}
           data={watchLaterLists}
           extraData={styles}

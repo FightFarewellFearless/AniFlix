@@ -261,7 +261,7 @@ function History(props: Props) {
       </View>
       <View style={styles.historyContainer}>
         <FlashList
-          drawDistance={1500}
+          drawDistance={750}
           data={filteredData}
           estimatedItemSize={160}
           // @ts-ignore

@@ -344,7 +344,7 @@ function Search(props: Props) {
             )} /> */}
           {listAnime.length > 0 && (
             <RecyclerListView
-              renderAheadOffset={1500}
+              renderAheadOffset={750}
               dataProvider={listAnimeDataProvider}
               layoutProvider={listAnimeLayoutProvider}
               rowRenderer={listAnimeRenderer}
