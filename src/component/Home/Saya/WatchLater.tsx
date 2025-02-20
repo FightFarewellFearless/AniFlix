@@ -1,7 +1,7 @@
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import { useCallback, useRef } from 'react';
-import React, {
+import { useCallback, useRef, memo } from 'react';
+import {
   StyleSheet,
   Text,
   View,
@@ -194,4 +194,4 @@ function useStyles() {
   });
 }
 
-export default WatchLater;
+export default memo(WatchLater);

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, memo } from 'react';
 import {
   Text,
   View,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   useColorScheme,
   Modal,
-  ScrollView,
   Alert,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
@@ -236,4 +235,4 @@ function useStyles() {
   });
 }
 
-export default Blocked;
+export default memo(Blocked);

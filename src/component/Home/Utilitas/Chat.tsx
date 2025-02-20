@@ -1,5 +1,5 @@
 import gpti from 'gpti';
-import { ReactNode, useTransition, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useTransition, useCallback, useEffect, useRef, useState, memo } from "react";
 import { FlatList, StyleSheet, Switch, Text, TextInput, View, useColorScheme } from "react-native";
 import { TouchableOpacity } from 'react-native'; //rngh
 import { Renderer, RendererInterface, useMarkdown } from "react-native-marked";
@@ -207,4 +207,4 @@ function useStyles() {
   });
 }
 
-export default Chat;
+export default memo(Chat);

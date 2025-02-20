@@ -1,4 +1,5 @@
 import React, {
+  memo,
   ReactElement,
   useCallback,
   useState,
@@ -426,4 +427,4 @@ function useStyles() {
   });
 };
 
-export default Setting;
+export default memo(Setting);

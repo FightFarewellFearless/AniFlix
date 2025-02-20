@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, memo } from "react";
 import { ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, View, useColorScheme, TouchableOpacity as TouchableOpacityRN, Image } from "react-native";
 import { TouchableOpacity } from "react-native"; //rngh
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from "react-native-copilot";
@@ -375,4 +375,4 @@ function useStyles() {
   });
 }
 
-export default AniDetail;
+export default memo(AniDetail);

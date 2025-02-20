@@ -2,7 +2,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackNavigator } from "../types/navigation";
 import useGlobalStyles from "../assets/style";
 import { Image, ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme, useWindowDimensions, View, ViewStyle } from "react-native";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { getColors } from "react-native-image-colors";
 import Icon from "react-native-vector-icons/FontAwesome";
 import DarkOverlay from "./misc/DarkOverlay";
@@ -150,4 +150,4 @@ function useStyles() {
   })
 }
 
-export default MovieDetail;
+export default memo(MovieDetail);

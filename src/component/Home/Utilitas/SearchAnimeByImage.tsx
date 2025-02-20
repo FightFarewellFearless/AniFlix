@@ -3,7 +3,7 @@ import { TouchableNativeFeedback } from 'react-native'; //rngh
 import useGlobalStyles from "../../../assets/style";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as DocumentPicker from 'expo-document-picker';
-import { useState } from "react";
+import { memo, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import moment from "moment";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -58,7 +58,7 @@ const exampleResult: Result = {
 }
 const exampleResultArray: Result[] = new Array(3).fill(exampleResult);
 
-export default function SearchAnimeByImage() {
+function SearchAnimeByImage() {
     const globalStyles = useGlobalStyles();
     const [videoModal, setVideoModal] = useState<{ open: boolean, link: string }>({ open: false, link: '' });
     const [searchResult, setSearchResult] = useState<SearchResult>({
@@ -215,3 +215,5 @@ function useStyles() {
         }
     })
 }
+
+export default memo(SearchAnimeByImage);

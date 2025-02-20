@@ -140,4 +140,4 @@ function useStyles() {
   });
 }
 
-export default FailedToConnect;
+export default React.memo(FailedToConnect);

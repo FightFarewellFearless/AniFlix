@@ -1,5 +1,6 @@
 import React, {
   Fragment,
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -362,5 +363,4 @@ function useStyles() {
     },
   });
 }
-
-export default NeedUpdate;
+export default memo(NeedUpdate);

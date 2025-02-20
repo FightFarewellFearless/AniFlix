@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
   useLayoutEffect,
+  memo,
 } from 'react';
 import {
   StatusBar,
@@ -1179,4 +1180,4 @@ function useStyles() {
 }
 
 
-export default Video;
+export default memo(Video);

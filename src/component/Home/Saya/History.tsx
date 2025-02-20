@@ -431,4 +431,4 @@ function useStyles() {
   });
 }
 
-export default History;
+export default React.memo(History);
