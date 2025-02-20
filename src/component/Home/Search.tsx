@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
   LayoutChangeEvent,
   ImageBackground,
+  Animated,
 } from 'react-native';
 import { TouchableOpacity, TextInput } from 'react-native';//rngh
 import {
@@ -56,7 +57,13 @@ import { TouchableOpacity as TouchableOpacityRNGH, FlatList } from 'react-native
 
 import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview';
 
-const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
+// Remove reanimated animated component creation for TextInput and Pressable
+// Replace:
+// const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
+// const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 const TouchableOpacityAnimated =
   Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
@@ -98,9 +105,12 @@ function Search(props: Props) {
   const [searchHistoryDisplay, setSearchHistoryDisplay] =
     useState<boolean>(false);
   const query = useRef<undefined | string>();
-  const searchButtonAnimation = useSharedValue(100);
-  const searchButtonWidth = useSharedValue<undefined | number>(undefined);
-  const searchButtonOpacity = useSharedValue(1);
+  // Remove useSharedValue; instead initialize Animated.Values
+  const searchButtonAnimation = useRef(new Animated.Value(100)).current;
+  const searchButtonOpacity = useRef(new Animated.Value(1)).current;
+  const searchTextAnimationColor = useRef(new Animated.Value(0)).current;
+  // Replace shared value for button width with state.
+  const [searchButtonWidth, setSearchButtonWidth] = useState(75);
   const searchButtonMounted = useRef(false);
 
   const searchHistory = useSelectorIfFocused(
@@ -111,8 +121,6 @@ function Search(props: Props) {
   const dispatchSettings = useDispatch<AppDispatch>();
 
   const textInputRef = useRef<TextInput>(null);
-
-  const searchTextAnimationColor = useSharedValue(0);
 
   useEffect(() => {
     AnimeAPI.listAnime(undefined, (data) => {
@@ -129,15 +137,11 @@ function Search(props: Props) {
   const onChangeText = useCallback((text: string) => {
     searchText.current = text;
     if (searchText.current !== '' && searchButtonMounted.current === false) {
-      searchButtonAnimation.set(withTiming(0));
+      Animated.timing(searchButtonAnimation, { toValue: 0, duration: 250, useNativeDriver: false }).start();
     } else if (searchButtonMounted.current === true && searchText.current === '') {
-      searchButtonAnimation.set(withTiming(100));
+      Animated.timing(searchButtonAnimation, { toValue: 100, duration: 250, useNativeDriver: false }).start();
     }
-    if (searchText.current === '') {
-      searchButtonMounted.current = false;
-    } else {
-      searchButtonMounted.current = true;
-    }
+    searchButtonMounted.current = searchText.current !== '';
   }, []);
 
   const submit = useCallback(() => {
@@ -177,52 +181,47 @@ function Search(props: Props) {
   }, [dispatchSettings, props.navigation, searchHistory]);
 
   const onPressIn = useCallback(() => {
-    searchButtonOpacity.set(withTiming(0.4, { duration: 100 }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Animated.timing(searchButtonOpacity, { toValue: 0.4, duration: 100, useNativeDriver: false }).start();
   }, []);
 
   const onPressOut = useCallback(() => {
-    searchButtonOpacity.set(withTiming(1, { duration: 100 }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    Animated.timing(searchButtonOpacity, { toValue: 1, duration: 100, useNativeDriver: false }).start();
   }, []);
 
   const onSearchTextFocus = useCallback(() => {
-    searchTextAnimationColor.set(withTiming(1, { duration: 400 }));
+    Animated.timing(searchTextAnimationColor, { toValue: 1, duration: 400, useNativeDriver: false }).start();
     setSearchHistoryDisplay(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchTextBlur = useCallback(() => {
-    searchTextAnimationColor.set(withTiming(0, { duration: 400 }));
+    Animated.timing(searchTextAnimationColor, { toValue: 0, duration: 400, useNativeDriver: false }).start();
     setSearchHistoryDisplay(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // @ts-ignore
-  const textInputAnimation = useAnimatedStyle(() => {
-    const borderColor = interpolateColor(
-      searchTextAnimationColor.get(),
-      [0, 1],
-      [
-        colorScheme === 'dark' ? 'rgb(197, 197, 197)' : 'rgb(0, 0, 0)',
-        'rgb(0, 124, 128)',
-      ],
-    );
-
-    return {
-      width: dimensions.width - interpolate(searchButtonAnimation.get(), [0, 100], [(searchButtonWidth.get() ?? 75), 10]),
-      borderTopColor: borderColor,
-      borderBottomColor: borderColor,
-    };
+  // Compute animated styles using default Animated.interpolate
+  const animatedInputWidth = searchButtonAnimation.interpolate({
+    inputRange: [0, 100],
+    outputRange: [dimensions.width - searchButtonWidth, dimensions.width - 10],
   });
-  const pressableAnimationStyle = useAnimatedStyle(() => ({
-    opacity: searchButtonOpacity.get(),
-    transform: [
-      {
-        translateX: searchButtonAnimation.get(),
-      },
-    ],
-  }));
+  const borderColor = searchTextAnimationColor.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colorScheme === 'dark' ? 'rgb(197,197,197)' : 'rgb(0,0,0)', 'rgb(0,124,128)'],
+  });
+  const textInputAnimationStyle = {
+    width: animatedInputWidth,
+    borderTopColor: borderColor,
+    borderBottomColor: borderColor,
+  };
+  const pressableAnimationStyle = {
+    opacity: searchButtonOpacity,
+    transform: [{
+      translateX: searchButtonAnimation,
+    }],
+  };
+
+  const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
+    setSearchButtonWidth(layout.nativeEvent.layout.width);
+  }, []);
 
   function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
     const onChangeTextFunction = (text: string) => {
@@ -239,10 +238,6 @@ function Search(props: Props) {
       />
     );
   }
-
-  const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
-    searchButtonWidth.set(layout.nativeEvent.layout.width);
-  }, [])
 
   const listAnimeDataProvider = useMemo(() => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []), [listAnime]);
   const listAnimeLayoutProvider = useMemo(() => new LayoutProvider(() => 'NORMAL', (_, dim) => {
@@ -276,7 +271,8 @@ function Search(props: Props) {
             <Icon name="close" />
           </TouchableOpacity>
         )} */}
-        <TextInputAnimation
+        {/* Replace animated components: */}
+        <AnimatedTextInput
           onSubmitEditing={submit}
           onChangeText={onChangeText}
           placeholder="Cari anime/movie disini"
@@ -285,9 +281,9 @@ function Search(props: Props) {
           onBlur={onSearchTextBlur}
           autoCorrect={false}
           ref={textInputRef}
-          style={[styles.searchInput, textInputAnimation]}
+          style={[styles.searchInput, textInputAnimationStyle]}
         />
-        <PressableAnimation
+        <AnimatedPressable
           onLayout={onPressableLayoutChange}
           onPress={submit}
           onPressIn={onPressIn}
@@ -297,7 +293,7 @@ function Search(props: Props) {
             <Icon name="search" style={{ color: '#413939' }} size={17} />
             Cari
           </Text>
-        </PressableAnimation>
+        </AnimatedPressable>
       </View>
 
       {(listAnime?.length === 0) && (
