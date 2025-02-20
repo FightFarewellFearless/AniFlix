@@ -14,7 +14,7 @@ function Saya() {
     return (
         <Drawer.Navigator screenOptions={{
             headerTintColor: globalStyles.text.color,
-            drawerType: 'slide',
+            drawerType: 'front',
         }}>
             <Drawer.Screen name="History" component={History}
                 options={{
