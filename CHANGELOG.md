@@ -1,3 +1,7 @@
+# v0.8.2-JS_9 (20-Februari-2025)
+
+Perubahan kecil di kode dengan harapan peningkatan performa
+
 # v0.8.2-JS_8 (20-Februari-2025)
 
 ## Penambahan
