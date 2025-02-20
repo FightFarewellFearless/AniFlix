@@ -17,12 +17,14 @@ import { RootStackNavigator } from './src/types/navigation';
 import useGlobalStyles from './src/assets/style';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { enableScreens } from 'react-native-screens';
+import { enableFreeze } from 'react-native-screens';
 import { CFBypassIsOpen, CFBypassWebView, setWebViewOpen } from './src/utils/CFBypass';
 import MovieDetail from './src/component/MovieDetail';
 
 import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
+enableFreeze(true);
 // enableScreens(false);
 
 const Stack = createStackNavigator<RootStackNavigator>();
