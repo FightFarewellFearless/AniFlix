@@ -76,8 +76,6 @@ function HomeList(props: HomeListProps) {
 
   const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0);
 
-  // const [announcmentVisible, setAnnouncmentVisible] = useState(false);
-
   const windowSize = useWindowDimensions();
 
   const boxTextAnim = useSharedValue(0);
@@ -185,6 +183,42 @@ function HomeList(props: HomeListProps) {
     };
   });
 
+  const jadwalAnimeComponent = useMemo(() => {
+    return Object.keys(data?.jadwalAnime ?? {}).map(key => {
+      return (
+        <View key={key} style={[styles.listContainer, { marginTop: 15, marginHorizontal: 12 }]}>
+          <Text
+            style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>
+            {key}
+          </Text>
+          {data?.jadwalAnime[key]!.map((item, index) => (
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  index % 2 === 0
+                    ? colorScheme === 'dark'
+                      ? '#292929'
+                      : '#fff'
+                    : colorScheme === 'dark'
+                      ? '#212121'
+                      : '#f5f5f5',
+              }}
+              key={item.title}
+              onPress={() => {
+                props.navigation.dispatch(
+                  StackActions.push('FromUrl', {
+                    link: item.link,
+                  }),
+                );
+              }}>
+              <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    });
+  }, [colorScheme, data?.jadwalAnime, globalStyles.text, props.navigation, styles.listContainer]);
+
   return (
     <ScrollView
       style={{ flex: 1 }}
@@ -196,15 +230,6 @@ function HomeList(props: HomeListProps) {
           colors={['#00a2ff', 'red']}
         />
       }>
-      {/* <AnnouncmentModalMemo
-        visible={announcmentVisible}
-        announcmentMessage={
-          data?.announcment.enable === true
-            ? data?.announcment.message
-            : undefined
-        }
-        setVisible={setAnnouncmentVisible}
-      /> */}
       <View style={styles.box}>
         <View style={styles.boxItem}>
           <View style={styles.boxHeader}>
@@ -236,47 +261,16 @@ function HomeList(props: HomeListProps) {
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
-      {Object.keys(data?.jadwalAnime ?? {}).map(key => {
-        return (
-          <View key={key} style={[styles.listContainer, { marginTop: 15, marginHorizontal: 12 }]}>
-            <Text
-              style={[
-                globalStyles.text,
-                { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' },
-              ]}>
-              {key}
-            </Text>
-            {data?.jadwalAnime[key]!.map((item, index) => (
-              <TouchableOpacity
-                style={{
-                  backgroundColor:
-                    index % 2 === 0
-                      ? colorScheme === 'dark'
-                        ? '#292929'
-                        : '#fff'
-                      : colorScheme === 'dark'
-                        ? '#212121'
-                        : '#f5f5f5',
-                }}
-                key={item.title}
-                onPress={() => {
-                  props.navigation.dispatch(
-                    StackActions.push('FromUrl', {
-                      link: item.link,
-                    }),
-                  );
-                }}>
-                <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        );
-      })}
+      {jadwalAnimeComponent}
     </ScrollView>
   );
 }
 
-function EpisodeBaru({
+const EpisodeBaru = memo(EpisodeBaruUNMEMO, (prev, next) => {
+  return prev.data?.newAnime[0].title === next.data?.newAnime[0].title;
+});
+
+function EpisodeBaruUNMEMO({
   styles,
   globalStyles,
   data,
@@ -327,7 +321,8 @@ function EpisodeBaru({
   );
 }
 
-function MovieList({ props }: { props: HomeListProps }) {
+const MovieList = memo(MovieListUNMEMO);
+function MovieListUNMEMO({ props }: { props: HomeListProps }) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
 
@@ -421,7 +416,7 @@ function useLocalTime() {
           time.set(string);
           currTime.current = string;
         }
-      }, 100);
+      }, 500);
       return () => {
         clearInterval(interval);
       };
