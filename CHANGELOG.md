@@ -1,3 +1,15 @@
+# v0.8.2-JS_12 (23-Februari-2025)
+
+Berisi banyak perubahan kode (Bukan fix bug ataupun fitur, hanya perubahan pada format penulisan kode).
+Di update ini juga terdapat peningkatan untuk privasi, dengan menambahkan user-agent tetap, seperti yang dilakukan chrome-based browser.
+
+## Peningkatan
+
+- Potensi peningkatan performa
+- Meningkatkan keterbacaan kode dengan ESLint
+- Meningkatkan privasi dengan mengubah user-agent menjadi static
+  > Ini artinya, mulai versi ini, model hp dan informasi lainnya yang terdapat pada user-agent tidak lagi dikirim pada setiap permintaan ke server
+
 # v0.8.2-JS_11 (20-Februari-2025)
 
 Perubahan kode untuk menambahkan memoization di Beranda agar performa navigasi lebih baik
