@@ -242,54 +242,58 @@ function AniDetailCopilot(props: Props) {
 
 function useStyles() {
   const globalStyles = useGlobalStyles();
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    centerChildren: {
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: globalStyles.text.color,
-      textAlign: 'center',
-      textShadowColor: 'black',
-      textShadowOffset: { width: 1, height: 1 },
-      textShadowRadius: 1,
-    },
-    imageContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-    },
-    imageContainerChild: {
-      flex: 1,
-    },
-    detailText: {
-      color: globalStyles.text.color,
-      textShadowColor: 'black',
-      textShadowOffset: { width: 0.8, height: 0.8 },
-      textShadowRadius: 0.8,
-      fontWeight: 'bold',
-    },
-    synopsis: {},
-    episodeButton: {
-      padding: 10,
-    },
-    episodeText: {
-      fontSize: 15,
-      fontStyle: 'italic',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      textDecorationLine: 'underline',
-      textShadowColor: 'black',
-      textShadowOffset: { width: 1, height: 1 },
-      textShadowRadius: 1,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+        },
+        centerChildren: {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        title: {
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: globalStyles.text.color,
+          textAlign: 'center',
+          textShadowColor: 'black',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 1,
+        },
+        imageContainer: {
+          flex: 1,
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+        },
+        imageContainerChild: {
+          flex: 1,
+        },
+        detailText: {
+          color: globalStyles.text.color,
+          textShadowColor: 'black',
+          textShadowOffset: { width: 0.8, height: 0.8 },
+          textShadowRadius: 0.8,
+          fontWeight: 'bold',
+        },
+        synopsis: {},
+        episodeButton: {
+          padding: 10,
+        },
+        episodeText: {
+          fontSize: 15,
+          fontStyle: 'italic',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          textDecorationLine: 'underline',
+          textShadowColor: 'black',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 1,
+        },
+      }),
+    [globalStyles.text.color],
+  );
 }
 
 export default memo(AniDetail);

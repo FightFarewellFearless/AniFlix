@@ -13,7 +13,7 @@ import { TouchableNativeFeedback } from 'react-native'; //rngh
 import useGlobalStyles from '../../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import * as DocumentPicker from 'expo-document-picker';
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import moment from 'moment';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -240,42 +240,46 @@ function SearchAnimeByImage() {
 
 function useStyles() {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      gap: 5,
-    },
-    addImage: {
-      backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#e0e0e0',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      elevation: 5,
-    },
-    choosenImage: {
-      justifyContent: 'center',
-      alignSelf: 'center',
-      width: '90%',
-      height: 220,
-      resizeMode: 'contain',
-      backgroundColor: colorScheme === 'dark' ? '#222222' : '#fcfcfc',
-    },
-    searchResultContainer: {
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginBottom: 10,
-      elevation: 5,
-    },
-    videoModalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          gap: 5,
+        },
+        addImage: {
+          backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#e0e0e0',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+          elevation: 5,
+        },
+        choosenImage: {
+          justifyContent: 'center',
+          alignSelf: 'center',
+          width: '90%',
+          height: 220,
+          resizeMode: 'contain',
+          backgroundColor: colorScheme === 'dark' ? '#222222' : '#fcfcfc',
+        },
+        searchResultContainer: {
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          marginBottom: 10,
+          elevation: 5,
+        },
+        videoModalContainer: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        },
+      }),
+    [colorScheme],
+  );
 }
 
 export default memo(SearchAnimeByImage);

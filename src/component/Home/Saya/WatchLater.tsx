@@ -1,6 +1,6 @@
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import { useCallback, useRef, memo } from 'react';
+import { useCallback, useRef, memo, useMemo } from 'react';
 import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
@@ -131,75 +131,79 @@ const extractKey = (item: watchLaterJSON) => item.date.toString();
 
 function useStyles() {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    listContainer: {
-      flexDirection: 'row',
-      marginVertical: 5,
-      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
-      borderRadius: 16,
-      elevation: 5,
-      height: 200,
-      overflow: 'hidden',
-    },
-    listInfoContainer: {
-      flex: 1,
-      flexDirection: 'column',
-    },
-    thumbnail: {
-      height: 200,
-      width: 120,
-      borderTopLeftRadius: 16,
-      borderBottomLeftRadius: 16,
-      marginRight: 7,
-    },
-    ratingContainer: {
-      position: 'absolute',
-      left: 3,
-      top: 0,
-    },
-    listRatingText: {
-      backgroundColor: 'orange',
-      color: 'black',
-      padding: 3,
-      borderTopLeftRadius: 16,
-      borderBottomLeftRadius: 16,
-      borderBottomRightRadius: 16,
-      borderTopRightRadius: 16,
-      fontWeight: '600',
-    },
-    titleContainer: {
-      justifyContent: 'center',
-      flex: 1,
-    },
-    listGenreText: {
-      color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
-      fontWeight: 'bold',
-    },
-    emptyList: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    listBottom: {
-      flexDirection: 'row',
-    },
-    listGenreContainer: {
-      justifyContent: 'flex-start',
-      flex: 1,
-    },
-    listDateText: {
-      color: 'gray',
-      fontSize: 12,
-      fontWeight: '500',
-    },
-    listDeleteContainer: {
-      justifyContent: 'flex-end',
-      backgroundColor: '#af461c',
-      borderRadius: 5,
-      padding: 3,
-      marginHorizontal: 2,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        listContainer: {
+          flexDirection: 'row',
+          marginVertical: 5,
+          backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
+          borderRadius: 16,
+          elevation: 5,
+          height: 200,
+          overflow: 'hidden',
+        },
+        listInfoContainer: {
+          flex: 1,
+          flexDirection: 'column',
+        },
+        thumbnail: {
+          height: 200,
+          width: 120,
+          borderTopLeftRadius: 16,
+          borderBottomLeftRadius: 16,
+          marginRight: 7,
+        },
+        ratingContainer: {
+          position: 'absolute',
+          left: 3,
+          top: 0,
+        },
+        listRatingText: {
+          backgroundColor: 'orange',
+          color: 'black',
+          padding: 3,
+          borderTopLeftRadius: 16,
+          borderBottomLeftRadius: 16,
+          borderBottomRightRadius: 16,
+          borderTopRightRadius: 16,
+          fontWeight: '600',
+        },
+        titleContainer: {
+          justifyContent: 'center',
+          flex: 1,
+        },
+        listGenreText: {
+          color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
+          fontWeight: 'bold',
+        },
+        emptyList: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        listBottom: {
+          flexDirection: 'row',
+        },
+        listGenreContainer: {
+          justifyContent: 'flex-start',
+          flex: 1,
+        },
+        listDateText: {
+          color: 'gray',
+          fontSize: 12,
+          fontWeight: '500',
+        },
+        listDeleteContainer: {
+          justifyContent: 'flex-end',
+          backgroundColor: '#af461c',
+          borderRadius: 5,
+          padding: 3,
+          marginHorizontal: 2,
+        },
+      }),
+    [colorScheme],
+  );
 }
 
 export default memo(WatchLater);

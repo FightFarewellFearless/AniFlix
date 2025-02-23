@@ -1,5 +1,14 @@
 import gpti from 'gpti';
-import { ReactNode, useTransition, useCallback, useEffect, useRef, useState, memo } from 'react';
+import {
+  ReactNode,
+  useTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  memo,
+  useMemo,
+} from 'react';
 import { FlatList, StyleSheet, Switch, Text, TextInput, View, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { Renderer, RendererInterface, useMarkdown } from 'react-native-marked';
@@ -253,40 +262,44 @@ function CustomMarkdown({ content }: { content: string }) {
 
 function useStyles() {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    textInput: {
-      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#f5f5f5',
-      padding: 10,
-      borderRadius: 8,
-      flex: 1,
-    },
-    button: {
-      backgroundColor: 'orange',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    assistantResponse: {
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-    },
-    userResponse: {
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      alignSelf: 'flex-end',
-    },
-    center: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      flex: 1,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        textInput: {
+          backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#f5f5f5',
+          padding: 10,
+          borderRadius: 8,
+          flex: 1,
+        },
+        button: {
+          backgroundColor: 'orange',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        assistantResponse: {
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          alignSelf: 'flex-start',
+        },
+        userResponse: {
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          alignSelf: 'flex-end',
+        },
+        center: {
+          justifyContent: 'center',
+          alignItems: 'center',
+          flex: 1,
+        },
+      }),
+    [colorScheme],
+  );
 }
 
 export default memo(Chat);

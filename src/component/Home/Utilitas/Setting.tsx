@@ -1,4 +1,4 @@
-import { memo, ReactElement, useCallback, useState } from 'react';
+import { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -314,100 +314,104 @@ function SettingList({ item }: { item: SettingsData }) {
 function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    settingListContainer: {
-      flex: 1,
-      paddingVertical: 10,
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignContent: 'center',
-    },
-    settingListIcon: {
-      padding: 5,
-      width: '10%',
-      maxWidth: 50,
-      alignItems: 'center',
-      borderRightWidth: 1,
-      borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
-      marginRight: 5,
-    },
-    settingListText: {
-      flex: 1,
-      alignItems: 'center',
-      flexDirection: 'column',
-    },
-    settingListTextTitle: {
-      fontWeight: 'bold',
-    },
-    settingListTextDescription: {
-      textAlign: 'center',
-      color: 'gray',
-    },
-    settingListRightComponent: {
-      alignItems: 'flex-end',
-    },
-    waktuServer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#0000008a',
-    },
-    modalContent: {
-      flex: 0.15,
-      backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
-      borderWidth: 1,
-      borderColor: '#525252',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalRestoreButtonText: {
-      fontWeight: 'bold',
-      color: darkText,
-    },
-    acceptRestoreModalButton: {
-      backgroundColor: '#005300',
-      padding: 7,
-      borderRadius: 3,
-    },
-    cancelRestoreModalButton: {
-      backgroundColor: '#b40000',
-      padding: 7,
-      marginRight: 2,
-      borderRadius: 3,
-    },
-    modalRestorePart: { flex: 1 },
-    modalRestoreText: {
-      fontWeight: 'bold',
-      fontSize: 17,
-    },
-    dropdownStyle: {
-      width: 100,
-      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-      padding: 5,
-      borderRadius: 4,
-      borderWidth: 1,
-      borderColor: 'black',
-    },
-    dropdownContainerStyle: {
-      width: 120,
-    },
-    dropdownItemTextStyle: {
-      color: globalStyles.text.color,
-      fontSize: 15,
-      textAlign: 'center',
-    },
-    dropdownItemContainerStyle: {
-      backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
-    },
-    dropdownSelectedTextStyle: {
-      color: globalStyles.text.color,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        settingListContainer: {
+          flex: 1,
+          paddingVertical: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignContent: 'center',
+        },
+        settingListIcon: {
+          padding: 5,
+          width: '10%',
+          maxWidth: 50,
+          alignItems: 'center',
+          borderRightWidth: 1,
+          borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
+          marginRight: 5,
+        },
+        settingListText: {
+          flex: 1,
+          alignItems: 'center',
+          flexDirection: 'column',
+        },
+        settingListTextTitle: {
+          fontWeight: 'bold',
+        },
+        settingListTextDescription: {
+          textAlign: 'center',
+          color: 'gray',
+        },
+        settingListRightComponent: {
+          alignItems: 'flex-end',
+        },
+        waktuServer: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
+        },
+        modalContainer: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#0000008a',
+        },
+        modalContent: {
+          flex: 0.15,
+          backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
+          borderWidth: 1,
+          borderColor: '#525252',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        modalRestoreButtonText: {
+          fontWeight: 'bold',
+          color: darkText,
+        },
+        acceptRestoreModalButton: {
+          backgroundColor: '#005300',
+          padding: 7,
+          borderRadius: 3,
+        },
+        cancelRestoreModalButton: {
+          backgroundColor: '#b40000',
+          padding: 7,
+          marginRight: 2,
+          borderRadius: 3,
+        },
+        modalRestorePart: { flex: 1 },
+        modalRestoreText: {
+          fontWeight: 'bold',
+          fontSize: 17,
+        },
+        dropdownStyle: {
+          width: 100,
+          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
+          padding: 5,
+          borderRadius: 4,
+          borderWidth: 1,
+          borderColor: 'black',
+        },
+        dropdownContainerStyle: {
+          width: 120,
+        },
+        dropdownItemTextStyle: {
+          color: globalStyles.text.color,
+          fontSize: 15,
+          textAlign: 'center',
+        },
+        dropdownItemContainerStyle: {
+          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+        },
+        dropdownSelectedTextStyle: {
+          color: globalStyles.text.color,
+        },
+      }),
+    [colorScheme, globalStyles.text.color],
+  );
 }
 
 export default memo(Setting);

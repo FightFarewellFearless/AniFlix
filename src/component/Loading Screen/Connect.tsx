@@ -326,57 +326,61 @@ function Loading(props: Props) {
 function useStyles() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  return StyleSheet.create({
-    quotesBox: {
-      position: 'absolute',
-      top: 10,
-      padding: 20,
-      marginVertical: 20,
-      borderRadius: 10,
-      borderColor: isDark ? '#444' : '#ccc',
-      borderWidth: 1,
-      elevation: 2,
-    },
-    loadingIndicator: {
-      color: isDark ? '#BB86FC' : '#6200EE',
-    },
-    container: {
-      flex: 1,
-      backgroundColor: isDark ? '#141414' : '#ffffff',
-      padding: 20,
-      justifyContent: 'space-between',
-    },
-    content: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    footer: {
-      alignItems: 'center',
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-    buttonRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      width: '100%',
-      marginBottom: 10,
-    },
-    versionText: {
-      fontSize: 12,
-      color: isDark ? '#aaa' : '#888',
-    },
-    bottomCredits: {
-      flexDirection: 'row',
-      backgroundColor: isDark ? '#2b2b2b' : '#d8d8d8',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      elevation: 4,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        quotesBox: {
+          position: 'absolute',
+          top: 10,
+          padding: 20,
+          marginVertical: 20,
+          borderRadius: 10,
+          borderColor: isDark ? '#444' : '#ccc',
+          borderWidth: 1,
+          elevation: 2,
+        },
+        loadingIndicator: {
+          color: isDark ? '#BB86FC' : '#6200EE',
+        },
+        container: {
+          flex: 1,
+          backgroundColor: isDark ? '#141414' : '#ffffff',
+          padding: 20,
+          justifyContent: 'space-between',
+        },
+        content: {
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        footer: {
+          alignItems: 'center',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        },
+        buttonRow: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          width: '100%',
+          marginBottom: 10,
+        },
+        versionText: {
+          fontSize: 12,
+          color: isDark ? '#aaa' : '#888',
+        },
+        bottomCredits: {
+          flexDirection: 'row',
+          backgroundColor: isDark ? '#2b2b2b' : '#d8d8d8',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+          elevation: 4,
+        },
+      }),
+    [isDark],
+  );
 }
 
 export default Loading;

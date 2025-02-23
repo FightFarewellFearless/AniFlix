@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import useGlobalStyles, { darkText } from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -114,15 +114,19 @@ function FailedToConnect(props: Props) {
 function useStyles() {
   const colorScheme = useColorScheme();
 
-  return StyleSheet.create({
-    bottomCredits: {
-      flexDirection: 'row',
-      backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-      padding: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        bottomCredits: {
+          flexDirection: 'row',
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
+          padding: 10,
+          borderRadius: 8,
+          alignItems: 'center',
+        },
+      }),
+    [colorScheme],
+  );
 }
 
 export default React.memo(FailedToConnect);

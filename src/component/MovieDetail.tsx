@@ -14,7 +14,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { getColors } from 'react-native-image-colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DarkOverlay from './misc/DarkOverlay';
@@ -130,36 +130,40 @@ function Section(props: { children?: React.ReactNode; style?: ViewStyle }) {
 }
 
 function useStyles() {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    posterContainer: {
-      borderRadius: 10,
-    },
-    titleText: {
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 18,
-      textAlign: 'center',
-      textShadowColor: 'black',
-      textShadowOffset: { width: 1.4, height: 1.4 },
-      textShadowRadius: 1,
-    },
-    button: {
-      padding: 8,
-      borderRadius: 5,
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'row',
-      columnGap: 4,
-      elevation: 5,
-    },
-    buttonText: {
-      color: 'black',
-      fontWeight: 'bold',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+        },
+        posterContainer: {
+          borderRadius: 10,
+        },
+        titleText: {
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: 18,
+          textAlign: 'center',
+          textShadowColor: 'black',
+          textShadowOffset: { width: 1.4, height: 1.4 },
+          textShadowRadius: 1,
+        },
+        button: {
+          padding: 8,
+          borderRadius: 5,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+          columnGap: 4,
+          elevation: 5,
+        },
+        buttonText: {
+          color: 'black',
+          fontWeight: 'bold',
+        },
+      }),
+    [],
+  );
 }
 
 export default memo(MovieDetail);

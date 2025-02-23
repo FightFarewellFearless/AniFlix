@@ -108,34 +108,38 @@ function Button({ title, onPress, icon }: { title: string; onPress: () => void; 
 }
 
 function useStyles() {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    header: {
-      fontSize: 24,
-      textAlign: 'center',
-      marginVertical: 10,
-      color: darkText,
-    },
-    applicationInfo: {
-      fontSize: 16,
-      marginHorizontal: 10,
-    },
-    button: {
-      gap: 4,
-      backgroundColor: '#0084ff',
-      flexDirection: 'row',
-      padding: 10,
-      margin: 2,
-      borderRadius: 5,
-    },
-    buttonText: {
-      fontWeight: 'bold',
-      fontSize: 17,
-      color: 'black',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+        },
+        header: {
+          fontSize: 24,
+          textAlign: 'center',
+          marginVertical: 10,
+          color: darkText,
+        },
+        applicationInfo: {
+          fontSize: 16,
+          marginHorizontal: 10,
+        },
+        button: {
+          gap: 4,
+          backgroundColor: '#0084ff',
+          flexDirection: 'row',
+          padding: 10,
+          margin: 2,
+          borderRadius: 5,
+        },
+        buttonText: {
+          fontWeight: 'bold',
+          fontSize: 17,
+          color: 'black',
+        },
+      }),
+    [],
+  );
 }
 
 export default memo(About);

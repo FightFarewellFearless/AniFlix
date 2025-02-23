@@ -341,109 +341,113 @@ function formatTimeFromSeconds(seconds: number) {
 function useStyles() {
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
-  return StyleSheet.create({
-    historyContainer: {
-      overflow: 'hidden',
-      flex: 1,
-    },
-    scrollToTopView: {
-      position: 'absolute',
-      bottom: 40,
-      right: 10,
-      zIndex: 1,
-    },
-    scrollToTop: {
-      height: 50,
-      width: 50,
-      borderRadius: 100,
-      backgroundColor: '#0060af',
-      elevation: 3,
-      shadowColor: 'white',
-    },
-    scrollToTopIcon: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    listContainerButton: {
-      flexDirection: 'row',
-      marginVertical: 5,
-      backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
-      borderRadius: 16,
-      elevation: 5,
-    },
-    listImage: {
-      width: 90,
-      height: 150,
-      borderTopLeftRadius: 16,
-      borderBottomLeftRadius: 16,
-      marginRight: 7,
-    },
-    listInfoContainer: {
-      flexDirection: 'column',
-      flex: 1,
-    },
-    listTitle: {
-      flexShrink: 1,
-      justifyContent: 'center',
-      flex: 1,
-    },
-    listEpisodeAndPart: {
-      justifyContent: 'flex-start',
-      flex: 1,
-    },
-    listEpisode: {
-      color: '#1eb1a9',
-      fontSize: 12,
-    },
-    listPart: {
-      fontSize: 12,
-      color: 'red',
-    },
-    lastDuration: {
-      justifyContent: 'flex-end',
-    },
-    lastDurationText: {
-      fontSize: 13,
-      fontStyle: 'italic',
-    },
-    listWatchTime: {},
-    listDateText: {
-      color: 'gray',
-      fontSize: 12,
-      fontWeight: '500',
-    },
-    deleteContainer: {
-      flex: 1,
-      alignItems: 'flex-end',
-    },
-    deleteButton: {},
-    noHistory: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    searchInputView: {
-      height: 40,
-      borderColor: 'gray',
-      borderWidth: 1,
-      borderRadius: 8,
-      margin: 10,
-      paddingHorizontal: 10,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    searchInput: {
-      color: globalStyles.text.color,
-      flex: 1,
-    },
-    searchKeywordText: {
-      opacity: 0.8,
-      fontStyle: 'italic',
-      textDecorationLine: 'underline',
-      textDecorationColor: globalStyles.text.color,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        historyContainer: {
+          overflow: 'hidden',
+          flex: 1,
+        },
+        scrollToTopView: {
+          position: 'absolute',
+          bottom: 40,
+          right: 10,
+          zIndex: 1,
+        },
+        scrollToTop: {
+          height: 50,
+          width: 50,
+          borderRadius: 100,
+          backgroundColor: '#0060af',
+          elevation: 3,
+          shadowColor: 'white',
+        },
+        scrollToTopIcon: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        listContainerButton: {
+          flexDirection: 'row',
+          marginVertical: 5,
+          backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
+          borderRadius: 16,
+          elevation: 5,
+        },
+        listImage: {
+          width: 90,
+          height: 150,
+          borderTopLeftRadius: 16,
+          borderBottomLeftRadius: 16,
+          marginRight: 7,
+        },
+        listInfoContainer: {
+          flexDirection: 'column',
+          flex: 1,
+        },
+        listTitle: {
+          flexShrink: 1,
+          justifyContent: 'center',
+          flex: 1,
+        },
+        listEpisodeAndPart: {
+          justifyContent: 'flex-start',
+          flex: 1,
+        },
+        listEpisode: {
+          color: '#1eb1a9',
+          fontSize: 12,
+        },
+        listPart: {
+          fontSize: 12,
+          color: 'red',
+        },
+        lastDuration: {
+          justifyContent: 'flex-end',
+        },
+        lastDurationText: {
+          fontSize: 13,
+          fontStyle: 'italic',
+        },
+        listWatchTime: {},
+        listDateText: {
+          color: 'gray',
+          fontSize: 12,
+          fontWeight: '500',
+        },
+        deleteContainer: {
+          flex: 1,
+          alignItems: 'flex-end',
+        },
+        deleteButton: {},
+        noHistory: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        searchInputView: {
+          height: 40,
+          borderColor: 'gray',
+          borderWidth: 1,
+          borderRadius: 8,
+          margin: 10,
+          paddingHorizontal: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        searchInput: {
+          color: globalStyles.text.color,
+          flex: 1,
+        },
+        searchKeywordText: {
+          opacity: 0.8,
+          fontStyle: 'italic',
+          textDecorationLine: 'underline',
+          textDecorationColor: globalStyles.text.color,
+        },
+      }),
+    [colorScheme, globalStyles.text.color],
+  );
 }
 
 export default React.memo(History);

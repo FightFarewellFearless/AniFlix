@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, memo } from 'react';
+import React, { useCallback, useEffect, useRef, useState, memo, useMemo } from 'react';
 import {
   Text,
   View,
@@ -190,64 +190,68 @@ function Blocked(props: Props) {
 
 function useStyles() {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    animatedIcon: {
-      color: '#ff0000',
-      alignSelf: 'center',
-      justifyContent: 'center',
-    },
-    button: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 6,
-      padding: 3,
-      margin: 5,
-      backgroundColor: 'lightblue',
-    },
-    devDescText: {
-      textAlign: 'center',
-      color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
-    },
-    requestTitleText: {
-      textAlign: 'center',
-      fontWeight: 'bold',
-      fontSize: 17,
-    },
-    requestDescriptionTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    requestInput: {
-      backgroundColor: '#4e4e4e',
-      padding: 10,
-      margin: 10,
-      borderRadius: 6,
-      color: '#c5c5c5',
-    },
-    modalContentContainer: {
-      width: '100%',
-      padding: 8,
-      gap: 7,
-      backgroundColor: colorScheme === 'dark' ? '#383838' : 'white',
-      justifyContent: 'center',
-    },
-    modalAccButton: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 6,
-      padding: 3,
-      margin: 5,
-      alignSelf: 'center',
-      backgroundColor: 'lightgreen',
-    },
-    modalAccButtonText: {
-      color: 'black',
-      fontSize: 15,
-      fontWeight: 'bold',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        animatedIcon: {
+          color: '#ff0000',
+          alignSelf: 'center',
+          justifyContent: 'center',
+        },
+        button: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: 6,
+          padding: 3,
+          margin: 5,
+          backgroundColor: 'lightblue',
+        },
+        devDescText: {
+          textAlign: 'center',
+          color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
+        },
+        requestTitleText: {
+          textAlign: 'center',
+          fontWeight: 'bold',
+          fontSize: 17,
+        },
+        requestDescriptionTitle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+        },
+        requestInput: {
+          backgroundColor: '#4e4e4e',
+          padding: 10,
+          margin: 10,
+          borderRadius: 6,
+          color: '#c5c5c5',
+        },
+        modalContentContainer: {
+          width: '100%',
+          padding: 8,
+          gap: 7,
+          backgroundColor: colorScheme === 'dark' ? '#383838' : 'white',
+          justifyContent: 'center',
+        },
+        modalAccButton: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: 6,
+          padding: 3,
+          margin: 5,
+          alignSelf: 'center',
+          backgroundColor: 'lightgreen',
+        },
+        modalAccButtonText: {
+          color: 'black',
+          fontSize: 15,
+          fontWeight: 'bold',
+        },
+      }),
+    [colorScheme],
+  );
 }
 
 export default memo(Blocked);

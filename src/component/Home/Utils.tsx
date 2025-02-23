@@ -15,7 +15,7 @@ import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';
 import Setting from './Utilitas/Setting';
 import Changelog from './Utilitas/Changelog';
 import About from './Utilitas/About';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 const Stack = createStackNavigator<UtilsStackNavigator>();
 
@@ -121,27 +121,30 @@ function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen
 
 function useStyles() {
   const dimensions = useWindowDimensions();
-
   const colorScheme = useColorScheme();
   const GAP = 2;
   const devidedWidth = (dimensions.width - GAP) / 2;
-  return StyleSheet.create({
-    buttonContainer: {
-      backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#d1d1d1',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 10,
-      elevation: 5,
-      width: devidedWidth < 150 ? '100%' : devidedWidth,
-      minWidth: 150,
-    },
-    titleText: {
-      textAlign: 'center',
-      fontWeight: 'bold',
-      fontSize: 17,
-    },
-    descText: {
-      textAlign: 'center',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        buttonContainer: {
+          backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#d1d1d1',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 10,
+          elevation: 5,
+          width: devidedWidth < 150 ? '100%' : devidedWidth,
+          minWidth: 150,
+        },
+        titleText: {
+          textAlign: 'center',
+          fontWeight: 'bold',
+          fontSize: 17,
+        },
+        descText: {
+          textAlign: 'center',
+        },
+      }),
+    [colorScheme, devidedWidth],
+  );
 }
