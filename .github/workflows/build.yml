@@ -2,6 +2,15 @@ name: Android CI
 
 on:
   workflow_dispatch:
+    inputs:
+      type:
+        description: 'Build Type'
+        required: true
+        default: 'Release'
+        options:
+          - Release
+          - Debug
+        type: 'choice'
 
 jobs:
   build:
@@ -30,7 +39,7 @@ jobs:
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleRelease
+        ./gradlew assemble${{inputs.type}}
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
