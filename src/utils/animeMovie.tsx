@@ -3,6 +3,7 @@ import { ToastAndroid } from 'react-native';
 import { View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+import deviceUserAgent from './deviceUserAgent';
 import { Buffer } from 'buffer/';
 
 import cheerio from 'cheerio';
@@ -42,6 +43,7 @@ export async function getLatestMovie(signal?: AbortSignal, page?: number) {
     `https://154.26.137.28/movie-terbaru/${page ? `page/${page}/` : ''}`,
     {
       signal,
+      headers: { 'User-Agent': deviceUserAgent },
     },
   );
   const data = await response.text();
@@ -61,6 +63,7 @@ export async function getMovieDetail(url: string, signal?: AbortSignal): Promise
   let err;
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   }).catch(erro => {
     err = erro;
   });
@@ -119,6 +122,7 @@ type LinksType = { title: string; url: string }[];
 export async function getStreamingDetail(url: string, signal?: AbortSignal) {
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   const data = await response.text();
   const $ = cheerio.load(data);
@@ -318,6 +322,7 @@ async function getPogoRawData(pogodata: string, signal?: AbortSignal) {
   const url = cheerio.load(Buffer.from(pogodata, 'base64').toString('utf8'))('iframe').attr('src')!;
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   const text = await response.text();
   return text.split("src: '")[1].split("'")[0];
@@ -327,6 +332,7 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
   const url = cheerio.load(Buffer.from(acedata, 'base64').toString('utf8'))('iframe').attr('src')!;
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   const text = await response.text();
   const $ = cheerio.load(text);
@@ -341,11 +347,13 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
     aceLink = iframe;
     responseAce = await fetch(iframe.startsWith('https') ? iframe : 'https:' + iframe, {
       signal,
+      headers: { 'User-Agent': deviceUserAgent },
     });
   }
   const videoId = aceLink.split('/').at(-1)!;
   await fetch('https://acefile.co/service/get_mirrors/' + videoId, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   }).catch(() => {});
   const ace = isAlreadyAceFile ? text : await responseAce.text();
   const $ace = cheerio.load(ace);
@@ -359,6 +367,7 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
 
     const serviceResponse = await fetch(`https://${service}${link}`, {
       signal,
+      headers: { 'User-Agent': deviceUserAgent },
     });
     const serviceText = await serviceResponse.text();
     const d = JSON.parse(serviceText);
@@ -375,6 +384,7 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
   const acefileVideoServer = 'https://acefile.co/local/' + id + '?key=' + nfck;
   const responseAcefile = await fetch(acefileVideoServer, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
 
   const resAceFileText = await responseAcefile.text();
@@ -391,6 +401,7 @@ async function getMP4rawData(mp4data: string, signal?: AbortSignal) {
   const url = cheerio.load(Buffer.from(mp4data, 'base64').toString('utf8'))('iframe').attr('src')!;
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   return (await response.text()).split('src: "')[1].split('"')[0];
 }
@@ -400,6 +411,7 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
     .attr('src')!;
   const response = await fetch(url, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   return cheerio
     .load(await response.text())('source')
@@ -409,6 +421,7 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
 export async function searchMovie(query: string, signal?: AbortSignal) {
   const response = await fetch('https://154.26.137.28/?s=' + encodeURIComponent(query), {
     signal,
+    headers: { 'User-Agent': deviceUserAgent },
   });
   const data = await response.text();
   const $ = cheerio.load(data);
@@ -438,6 +451,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
       {isWebViewShown && (
         <WebView
           ref={webviewRef}
+          userAgent={deviceUserAgent}
           source={{ uri: 'https://154.26.137.28/' }}
           setSupportMultipleWindows={false}
           onError={() => {
