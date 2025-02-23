@@ -44,5 +44,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release
-        path: android/app/build/outputs/apk/release/anime-release.apk
+        name: ${{inputs.type == 'Release' && 'app-release' || 'app-debug'
+        path: android/app/build/outputs/apk/${{inputs.type == 'Release' && 'release' || 'debug'}}/anime-${{inputs.type == 'Release' && 'release' || 'debug'}}.apk
