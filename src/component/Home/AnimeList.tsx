@@ -267,7 +267,9 @@ function HomeList(props: HomeListProps) {
 }
 
 const EpisodeBaru = memo(EpisodeBaruUNMEMO, (prev, next) => {
-  return prev.data?.newAnime[0].title === next.data?.newAnime[0].title;
+  return (
+    prev.data?.newAnime[0].title === next.data?.newAnime[0].title && prev.styles === next.styles
+  );
 });
 
 function EpisodeBaruUNMEMO({

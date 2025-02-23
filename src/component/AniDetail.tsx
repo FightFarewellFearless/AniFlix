@@ -233,7 +233,7 @@ function AniDetailCopilot(props: Props) {
               }}
             />
           )}
-          extraData={styles}
+          extraData={colorScheme + complementThumbnailColor}
         />
       </View>
     </View>
