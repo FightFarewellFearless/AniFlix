@@ -33,16 +33,6 @@ function SeeMore(props: Props) {
       headerTitle: props.route.params.type === 'MovieList' ? 'Movie terbaru' : 'Anime terbaru',
     });
 
-    // props.navigation.getParent()?.setOptions({
-    //   tabBarStyle: { display: 'none' },
-    // });
-
-    // return () => {
-    //   props.navigation.getParent()?.setOptions({
-    //     tabBarStyle: undefined,
-    //   });
-    // }
-
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
