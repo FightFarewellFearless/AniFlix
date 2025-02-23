@@ -38,16 +38,18 @@ type RootStackNavigator = {
     };
     isMovie?: boolean;
   };
-  NeedUpdate: {
-    nativeUpdate: true;
-    latestVersion: string;
-    changelog: string;
-    download: string;
-  } | {
-    nativeUpdate: false;
-    changelog: string;
-    size: number;
-  };
+  NeedUpdate:
+    | {
+        nativeUpdate: true;
+        latestVersion: string;
+        changelog: string;
+        download: string;
+      }
+    | {
+        nativeUpdate: false;
+        changelog: string;
+        size: number;
+      };
   Blocked: {
     title: string;
     url: string;
@@ -80,4 +82,10 @@ type SayaDrawerNavigator = {
   WatchLater: undefined;
 };
 
-export type { RootStackNavigator, HomeNavigator, HomeStackNavigator, UtilsStackNavigator, SayaDrawerNavigator };
+export type {
+  RootStackNavigator,
+  HomeNavigator,
+  HomeStackNavigator,
+  UtilsStackNavigator,
+  SayaDrawerNavigator,
+};

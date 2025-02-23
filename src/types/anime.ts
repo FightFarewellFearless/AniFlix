@@ -1,6 +1,4 @@
-interface FromUrl {
-
-}
+interface FromUrl {}
 
 interface NewAnimeList {
   title: string;
@@ -33,14 +31,13 @@ type SearchAnime = {
   result: SearchAnimeList[];
 };
 
-interface Blocked extends FromUrl {
-}
+interface Blocked extends FromUrl {}
 
 type AniDetailEpsList = {
   title: string;
   link: string;
   releaseDate: string;
-}
+};
 interface AniDetail extends FromUrl {
   type: 'animeDetail';
   title: string;
@@ -80,15 +77,6 @@ type AniStreaming = FromUrl & {
   reqResolutionWithNonceAction: string;
 };
 
-interface AnnouncmentEnabled {
-  enable: true;
-  message: string;
-}
-
-interface AnnouncmentDisabled {
-  enable: false;
-}
-
 interface EpisodeBaruHome {
   newAnime: NewAnimeList[];
   jadwalAnime: JadwalAnime;
@@ -110,5 +98,5 @@ export type {
   FromUrl,
   AniStreaming,
   EpisodeBaruHome,
-  listAnimeTypeList
+  listAnimeTypeList,
 };

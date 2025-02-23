@@ -1,11 +1,4 @@
-import React, {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -13,15 +6,27 @@ import {
   StyleSheet,
   FlatList,
   useWindowDimensions,
-  Modal,
   ListRenderItemInfo,
-  Linking,
   useColorScheme,
   ActivityIndicator,
 } from 'react-native';
 import { TouchableOpacity, ScrollView, RefreshControl } from 'react-native-gesture-handler'; //rngh
-import Reanimated, { cancelAnimation, Easing, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
-import { NavigationProp, StackActions, useFocusEffect, useNavigation } from '@react-navigation/native';
+import Reanimated, {
+  cancelAnimation,
+  Easing,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import {
+  NavigationProp,
+  StackActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
@@ -31,26 +36,19 @@ import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../typ
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import AnimeAPI from '../../utils/AnimeAPI';
 import SeeMore from './SeeMore';
-import {
-  NativeStackScreenProps,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
 import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
-import { version, OTAJSVersion } from '../../../package.json'
+import { version, OTAJSVersion } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
-
-interface CustomArraySplice<T> extends Array<T> {
-  splice(start: number, deleteCount?: number, ...items: T[]): T[];
-}
 
 const SeeMoreStack = createNativeStackNavigator<HomeStackNavigator>();
 
@@ -62,11 +60,7 @@ function Home(_props: HomeProps) {
         headerShown: false,
       }}>
       <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
-      <SeeMoreStack.Screen
-        name="SeeMore"
-        component={SeeMore}
-        options={{ headerShown: true }}
-      />
+      <SeeMoreStack.Screen name="SeeMore" component={SeeMore} options={{ headerShown: true }} />
     </SeeMoreStack.Navigator>
   );
 }
@@ -77,11 +71,10 @@ function HomeList(props: HomeListProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const { paramsState: data, setParamsState: setData } =
-    useContext(EpisodeBaruHomeContext);
+  const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
 
-  const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0)
+  const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0);
 
   // const [announcmentVisible, setAnnouncmentVisible] = useState(false);
 
@@ -96,42 +89,46 @@ function HomeList(props: HomeListProps) {
   const [animationText, setAnimationText] = useState(() => {
     const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
     const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
-    textLayoutWidth.set(MeasureText.measureWidth(quote, {
-      fontWeight: 'bold',
-      fontSize: 17,
-    }));
+    textLayoutWidth.set(
+      MeasureText.measureWidth(quote, {
+        fontWeight: 'bold',
+        fontSize: 17,
+      }),
+    );
     return quote;
   });
-
 
   // useEffect(() => {
   //   if (data?.announcment.enable === true) {
   //     setAnnouncmentVisible(true);
   //   }
+  // eslint-disable-next-line react-compiler/react-compiler
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
 
   useFocusEffect(
     useCallback(() => {
       const setLayoutWidth = (quote: string) => {
-        textLayoutWidth.set(MeasureText.measureWidth(quote, {
-          fontWeight: 'bold',
-          fontSize: 17,
-        }));
-      }
+        textLayoutWidth.set(
+          MeasureText.measureWidth(quote, {
+            fontWeight: 'bold',
+            fontSize: 17,
+          }),
+        );
+      };
       function callback(finished?: boolean) {
         if (finished) {
           textLayoutWidth.set(0);
           const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
-          const quote = `"${randomQuote.quote}" - ${randomQuote.by}`
-          runOnJS(setAnimationText)(
-            quote,
-          );
+          const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
+          runOnJS(setAnimationText)(quote);
           runOnJS(setLayoutWidth)(quote);
         }
         boxTextAnim.set(0);
         if (finished === false) return;
-        boxTextAnim.set(withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)));
+        boxTextAnim.set(
+          withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+        );
       }
 
       // const interval = setInterval(() => {
@@ -141,13 +138,16 @@ function HomeList(props: HomeListProps) {
       //   );
       // }, 15500);
 
-      boxTextAnim.set(withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)));
+      boxTextAnim.set(
+        withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+      );
 
       return () => {
         cancelAnimation(boxTextAnim);
         // boxTextAnim.value = 0;
         // clearInterval(interval);
       };
+      // eslint-disable-next-line react-compiler/react-compiler
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
@@ -166,17 +166,24 @@ function HomeList(props: HomeListProps) {
         ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
         setRefresh(false);
       });
+    // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const AnimationTextStyle = useAnimatedStyle(() => {
     return {
       width: textLayoutWidth.get() === 0 ? 'auto' : textLayoutWidth.get(),
-      transform: [{
-        translateX: interpolate(boxTextAnim.get(), [0, 1], [windowSize.width, -boxTextLayout.get()])
-      }]
+      transform: [
+        {
+          translateX: interpolate(
+            boxTextAnim.get(),
+            [0, 1],
+            [windowSize.width, -boxTextLayout.get()],
+          ),
+        },
+      ],
     };
-  })
+  });
 
   return (
     <ScrollView
@@ -202,37 +209,54 @@ function HomeList(props: HomeListProps) {
         <View style={styles.boxItem}>
           <View style={styles.boxHeader}>
             <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
-            <Text style={[globalStyles.text, styles.boxBattery]}>{Math.round((battery ?? 0) * 100)}%</Text>
+            <Text style={[globalStyles.text, styles.boxBattery]}>
+              {Math.round((battery ?? 0) * 100)}%
+            </Text>
           </View>
-          <Text style={[globalStyles.text, styles.boxAppName]}>AniFlix <Text style={styles.boxAppVer}>{version}-JS_{OTAJSVersion}</Text></Text>
+          <Text style={[globalStyles.text, styles.boxAppName]}>
+            AniFlix{' '}
+            <Text style={styles.boxAppVer}>
+              {version}-JS_{OTAJSVersion}
+            </Text>
+          </Text>
           {/* running text animation */}
           <Reanimated.Text
-            onLayout={nativeEvent =>
-              (boxTextLayout.set(nativeEvent.nativeEvent.layout.width))
-            }
-            style={[
-              styles.boxText,
-              AnimationTextStyle,
-            ]}>
+            onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
+            style={[styles.boxText, AnimationTextStyle]}>
             {animationText}
           </Reanimated.Text>
         </View>
       </View>
 
       <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing} disabled={refresh}>
-        <Text style={[{color: '#ffffff', fontWeight: 'bold'}]}><Icon name="refresh" /> Refresh data</Text>
+        <Text style={[{ color: '#ffffff', fontWeight: 'bold' }]}>
+          <Icon name="refresh" /> Refresh data
+        </Text>
       </TouchableOpacity>
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
-      {Object.keys(data?.jadwalAnime ?? {}).map((key) => {
+      {Object.keys(data?.jadwalAnime ?? {}).map(key => {
         return (
           <View key={key} style={[styles.listContainer, { marginTop: 15, marginHorizontal: 12 }]}>
-            <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>{key}</Text>
+            <Text
+              style={[
+                globalStyles.text,
+                { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' },
+              ]}>
+              {key}
+            </Text>
             {data?.jadwalAnime[key]!.map((item, index) => (
               <TouchableOpacity
                 style={{
-                  backgroundColor: index % 2 === 0 ? colorScheme === 'dark' ? '#292929' : '#fff' : colorScheme === 'dark' ? '#212121' : '#f5f5f5',
+                  backgroundColor:
+                    index % 2 === 0
+                      ? colorScheme === 'dark'
+                        ? '#292929'
+                        : '#fff'
+                      : colorScheme === 'dark'
+                        ? '#212121'
+                        : '#f5f5f5',
                 }}
                 key={item.title}
                 onPress={() => {
@@ -245,20 +269,24 @@ function HomeList(props: HomeListProps) {
                 <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
               </TouchableOpacity>
             ))}
-          </View>)
+          </View>
+        );
       })}
-
     </ScrollView>
   );
 }
 
-function EpisodeBaru({ styles, globalStyles, data, props, }:
-  {
-    data: EpisodeBaruType | undefined, props: HomeListProps,
-    styles: ReturnType<typeof useStyles>, globalStyles: ReturnType<typeof useGlobalStyles>
-  }
-) {
-
+function EpisodeBaru({
+  styles,
+  globalStyles,
+  data,
+  props,
+}: {
+  data: EpisodeBaruType | undefined;
+  props: HomeListProps;
+  styles: ReturnType<typeof useStyles>;
+  globalStyles: ReturnType<typeof useGlobalStyles>;
+}) {
   const renderNewAnime = useCallback(
     ({ item }: ListRenderItemInfo<NewAnimeList>) => (
       <ListAnimeComponent
@@ -271,12 +299,9 @@ function EpisodeBaru({ styles, globalStyles, data, props, }:
   );
 
   return (
-
     <View style={styles.listContainer}>
       <View style={styles.titleContainer}>
-        <Text style={[styles.titleText, globalStyles.text]}>
-          Episode terbaru:{' '}
-        </Text>
+        <Text style={[styles.titleText, globalStyles.text]}>Episode terbaru: </Text>
         <TouchableOpacity
           containerStyle={{ flex: 1 }}
           style={styles.seeMoreContainer}
@@ -287,14 +312,8 @@ function EpisodeBaru({ styles, globalStyles, data, props, }:
               }),
             );
           }}>
-          <Text style={[globalStyles.text, styles.seeMoreText]}>
-            Lihat semua{' '}
-          </Text>
-          <Icon
-            name="long-arrow-right"
-            color={globalStyles.text.color}
-            size={20}
-          />
+          <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
+          <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
         </TouchableOpacity>
       </View>
       <FlatList
@@ -305,7 +324,7 @@ function EpisodeBaru({ styles, globalStyles, data, props, }:
         showsHorizontalScrollIndicator={false}
       />
     </View>
-  )
+  );
 }
 
 function MovieList({ props }: { props: HomeListProps }) {
@@ -328,25 +347,25 @@ function MovieList({ props }: { props: HomeListProps }) {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    getLatestMovie().then(data => {
-      if ('isError' in data) {
+    getLatestMovie()
+      .then(movieData => {
+        if ('isError' in movieData) {
+          setIsError(true);
+        } else {
+          setData?.(movieData);
+        }
+      })
+      .catch(() => {
         setIsError(true);
-      } else {
-        setData?.(data);
-      }
-    }).catch(() => {
-      setIsError(true);
-    })
-  }, [])
+      });
+  }, [setData]);
 
   const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   return (
     <View style={[styles.listContainer, { marginTop: 15 }]}>
       <View style={styles.titleContainer}>
-        <Text style={[styles.titleText, globalStyles.text]}>
-          Movie terbaru:{' '}
-        </Text>
+        <Text style={[styles.titleText, globalStyles.text]}>Movie terbaru: </Text>
         <TouchableOpacity
           containerStyle={{ flex: 1 }}
           style={styles.seeMoreContainer}
@@ -358,23 +377,22 @@ function MovieList({ props }: { props: HomeListProps }) {
               }),
             );
           }}>
-          <Text style={[globalStyles.text, styles.seeMoreText]}>
-            Lihat semua{' '}
-          </Text>
-          <Icon
-            name="long-arrow-right"
-            color={globalStyles.text.color}
-            size={20}
-          />
+          <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
+          <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
         </TouchableOpacity>
       </View>
       {isError && (
-        <Text onPress={() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'connectToServer' }],
-          });
-        }} style={[globalStyles.text, { textAlign: 'center', color: '#d80000' }]}>Error mendapatkan data awal yang dibutuhkan, ketuk disini untuk mencoba ulang dari loading screen</Text>
+        <Text
+          onPress={() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'connectToServer' }],
+            });
+          }}
+          style={[globalStyles.text, { textAlign: 'center', color: '#d80000' }]}>
+          Error mendapatkan data awal yang dibutuhkan, ketuk disini untuk mencoba ulang dari loading
+          screen
+        </Text>
       )}
       {data?.length !== 0 ? (
         <FlatList
@@ -388,79 +406,6 @@ function MovieList({ props }: { props: HomeListProps }) {
         <ActivityIndicator size="large" style={{ flex: 1, display: isError ? 'none' : 'flex' }} />
       )}
     </View>
-  )
-}
-
-const AnnouncmentModalMemo = memo(AnnouncmentModal);
-
-function AnnouncmentModal({
-  visible,
-  setVisible,
-  announcmentMessage,
-}: {
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  announcmentMessage: string | undefined;
-}): React.JSX.Element {
-  const globalStyles = useGlobalStyles();
-  const styles = useStyles();
-  if (announcmentMessage === undefined) {
-    return <></>;
-  }
-  const linksInAnnouncment = findAllLinks(announcmentMessage as string);
-  let announcment: string | (string | JSX.Element)[] | undefined;
-  if (linksInAnnouncment === null) {
-    announcment = announcmentMessage;
-  } else {
-    const splittedLinks: CustomArraySplice<string | JSX.Element> =
-      splitAllLinks(announcmentMessage as string);
-    let loopLength = 0;
-    linksInAnnouncment.forEach((link, index) => {
-      splittedLinks.splice(
-        index + 1 + loopLength,
-        0,
-        <Text
-          onPress={() => {
-            Linking.openURL(link);
-          }}
-          key={index + 1 + loopLength}
-          style={{ color: '#0066ff' }}>
-          {link}
-        </Text>,
-      );
-      loopLength += 1;
-    });
-    announcment = splittedLinks;
-  }
-  return (
-    <Modal transparent visible={visible}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalPengumuman}>
-            <Text style={[globalStyles.text, styles.pengumuman]}>
-              Pengumuman!
-            </Text>
-          </View>
-          <View style={styles.announcmentText}>
-            <ScrollView>
-              <Text style={[globalStyles.text, styles.announcmentMessage]}>
-                {announcment}
-              </Text>
-            </ScrollView>
-          </View>
-          <View style={styles.announcmentOK}>
-            <TouchableOpacity
-              hitSlop={7}
-              onPress={() => setVisible(false)}
-              style={styles.announcmentOKButton}>
-              <Text style={[globalStyles.text, styles.announcmentOKText]}>
-                Tutup
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
   );
 }
 
@@ -480,24 +425,16 @@ function useLocalTime() {
       return () => {
         clearInterval(interval);
       };
-    }, []),
+    }, [time]),
   );
   return time;
-}
-
-function findAllLinks(texts: string): RegExpMatchArray | null {
-  return texts.match(/(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi);
-}
-
-function splitAllLinks(texts: string): string[] {
-  return texts.split(/(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi);
 }
 
 function useStyles() {
   const colorScheme = useColorScheme();
   const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = dimensions.height * 120 / 200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = dimensions.width * 120 / 200 / 1.9;
+  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
   return StyleSheet.create({
     modalContainer: {
       flex: 1,

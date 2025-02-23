@@ -1,4 +1,12 @@
-import React, { useTransition, useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
+import React, {
+  useTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  memo,
+} from 'react';
 import {
   View,
   Text,
@@ -14,12 +22,8 @@ import {
   ImageBackground,
   Animated,
 } from 'react-native';
-import { TouchableOpacity, TextInput } from 'react-native';//rngh
-import {
-  useFocusEffect,
-  StackActions,
-  CompositeScreenProps,
-} from '@react-navigation/native';
+import { TouchableOpacity, TextInput } from 'react-native'; //rngh
+import { useFocusEffect, StackActions, CompositeScreenProps } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -32,11 +36,6 @@ import Reanimated, {
   FadeOutDown,
   FadeInRight,
   FadeInUp,
-  interpolate,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
   ZoomIn,
   ZoomOut,
   SlideInDown,
@@ -64,8 +63,7 @@ import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const TouchableOpacityAnimated =
-  Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
+const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
@@ -74,7 +72,6 @@ type Props = CompositeScreenProps<
   StackScreenProps<RootStackNavigator>
 >;
 
-const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
 function Search(props: Props) {
   const [isPending, startTransition] = useTransition();
 
@@ -93,7 +90,6 @@ function Search(props: Props) {
       return () => {
         keyboardEvent.remove();
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 
@@ -102,13 +98,12 @@ function Search(props: Props) {
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [loading, setLoading] = useState(false);
-  const [searchHistoryDisplay, setSearchHistoryDisplay] =
-    useState<boolean>(false);
-  const query = useRef<undefined | string>();
+  const [searchHistoryDisplay, setSearchHistoryDisplay] = useState<boolean>(false);
+  const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
   // Remove useSharedValue; instead initialize Animated.Values
-  const searchButtonAnimation = useRef(new Animated.Value(100)).current;
-  const searchButtonOpacity = useRef(new Animated.Value(1)).current;
-  const searchTextAnimationColor = useRef(new Animated.Value(0)).current;
+  const [searchButtonAnimation] = useState(() => new Animated.Value(100));
+  const [searchButtonOpacity] = useState(() => new Animated.Value(1));
+  const [searchTextAnimationColor] = useState(() => new Animated.Value(0));
   // Replace shared value for button width with state.
   const [searchButtonWidth, setSearchButtonWidth] = useState(75);
   const searchButtonMounted = useRef(false);
@@ -123,26 +118,39 @@ function Search(props: Props) {
   const textInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    AnimeAPI.listAnime(undefined, (data) => {
+    AnimeAPI.listAnime(undefined, animeData => {
       startTransition(() => {
-        setListAnime(data);
+        setListAnime(animeData);
+      });
+    })
+      .then(animeData => {
+        setListAnime(animeData);
       })
-    }).then(data => {
-      setListAnime(data);
-    }).catch(() => {
-      setListAnime(null);
-    });
+      .catch(() => {
+        setListAnime(null);
+      });
   }, []);
 
-  const onChangeText = useCallback((text: string) => {
-    searchText.current = text;
-    if (searchText.current !== '' && searchButtonMounted.current === false) {
-      Animated.timing(searchButtonAnimation, { toValue: 0, duration: 250, useNativeDriver: false }).start();
-    } else if (searchButtonMounted.current === true && searchText.current === '') {
-      Animated.timing(searchButtonAnimation, { toValue: 100, duration: 250, useNativeDriver: false }).start();
-    }
-    searchButtonMounted.current = searchText.current !== '';
-  }, []);
+  const onChangeText = useCallback(
+    (text: string) => {
+      searchText.current = text;
+      if (searchText.current !== '' && searchButtonMounted.current === false) {
+        Animated.timing(searchButtonAnimation, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+      } else if (searchButtonMounted.current === true && searchText.current === '') {
+        Animated.timing(searchButtonAnimation, {
+          toValue: 100,
+          duration: 250,
+          useNativeDriver: false,
+        }).start();
+      }
+      searchButtonMounted.current = searchText.current !== '';
+    },
+    [searchButtonAnimation],
+  );
 
   const submit = useCallback(() => {
     if (searchText.current === '') {
@@ -150,12 +158,9 @@ function Search(props: Props) {
     }
     setLoading(true);
     textInputRef.current?.blur();
-    Promise.all([
-      AnimeAPI.search(searchText.current),
-      searchMovie(searchText.current)
-    ])
+    Promise.all([AnimeAPI.search(searchText.current), searchMovie(searchText.current)])
       .then(([animeResult, movieResult]) => {
-        query.current = searchText.current;
+        setCurrentSearchQuery(searchText.current);
         setMovieData(movieResult);
         setData(animeResult);
         setLoading(false);
@@ -178,25 +183,41 @@ function Search(props: Props) {
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [dispatchSettings, props.navigation, searchHistory]);
+  }, [dispatchSettings, searchHistory]);
 
   const onPressIn = useCallback(() => {
-    Animated.timing(searchButtonOpacity, { toValue: 0.4, duration: 100, useNativeDriver: false }).start();
-  }, []);
+    Animated.timing(searchButtonOpacity, {
+      toValue: 0.4,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
+  }, [searchButtonOpacity]);
 
   const onPressOut = useCallback(() => {
-    Animated.timing(searchButtonOpacity, { toValue: 1, duration: 100, useNativeDriver: false }).start();
-  }, []);
+    Animated.timing(searchButtonOpacity, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
+  }, [searchButtonOpacity]);
 
   const onSearchTextFocus = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, { toValue: 1, duration: 400, useNativeDriver: false }).start();
+    Animated.timing(searchTextAnimationColor, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
     setSearchHistoryDisplay(true);
-  }, []);
+  }, [searchTextAnimationColor]);
 
   const onSearchTextBlur = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, { toValue: 0, duration: 400, useNativeDriver: false }).start();
+    Animated.timing(searchTextAnimationColor, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
     setSearchHistoryDisplay(false);
-  }, []);
+  }, [searchTextAnimationColor]);
 
   // Compute animated styles using default Animated.interpolate
   const animatedInputWidth = searchButtonAnimation.interpolate({
@@ -214,9 +235,11 @@ function Search(props: Props) {
   };
   const pressableAnimationStyle = {
     opacity: searchButtonOpacity,
-    transform: [{
-      translateX: searchButtonAnimation,
-    }],
+    transform: [
+      {
+        translateX: searchButtonAnimation,
+      },
+    ],
   };
 
   const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
@@ -239,33 +262,48 @@ function Search(props: Props) {
     );
   }
 
-  const listAnimeDataProvider = useMemo(() => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []), [listAnime]);
-  const listAnimeLayoutProvider = useMemo(() => new LayoutProvider(() => 'NORMAL', (_, dim) => {
-    dim.height = 60;
-    dim.width = dimensions.width;
-  }), [dimensions.width]);
-  const listAnimeRenderer = useCallback((type: string | number, data: listAnimeTypeList, index: number) => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          props.navigation.dispatch(
-            StackActions.push('FromUrl', {
-              link: data.streamingLink,
-            }),
-          );
-        }}
-        style={styles.animeList}>
-        <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
-        <Text numberOfLines={1} style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>{data?.title}</Text>
-      </TouchableOpacity>
-    )
-  }, [globalStyles.text, props.navigation, styles]);
+  const listAnimeDataProvider = useMemo(
+    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []),
+    [listAnime],
+  );
+  const listAnimeLayoutProvider = useMemo(
+    () =>
+      new LayoutProvider(
+        () => 'NORMAL',
+        (_, dim) => {
+          dim.height = 60;
+          dim.width = dimensions.width;
+        },
+      ),
+    [dimensions.width],
+  );
+  const listAnimeRenderer = useCallback(
+    (type: string | number, animeData: listAnimeTypeList, index: number) => {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('FromUrl', {
+                link: animeData.streamingLink,
+              }),
+            );
+          }}
+          style={styles.animeList}>
+          <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
+          <Text
+            numberOfLines={1}
+            style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
+            {animeData?.title}
+          </Text>
+        </TouchableOpacity>
+      );
+    },
+    [globalStyles.text, props.navigation, styles],
+  );
 
   return (
-    <View
-      style={[{ flex: 1 }]}>
-      <View
-        style={{ flexDirection: 'row' }}>
+    <View style={[{ flex: 1 }]}>
+      <View style={{ flexDirection: 'row' }}>
         {/* {data !== null && (
           <TouchableOpacity>
             <Icon name="close" />
@@ -296,7 +334,7 @@ function Search(props: Props) {
         </AnimatedPressable>
       </View>
 
-      {(listAnime?.length === 0) && (
+      {listAnime?.length === 0 && (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
           <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
@@ -305,10 +343,16 @@ function Search(props: Props) {
 
       {data === null && movieData === null && listAnime !== null ? (
         <View style={{ flex: listAnime?.length === 0 ? 0 : 1 }}>
-          <Text style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
+          <Text
+            style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
-          {isPending && <ActivityIndicator style={{ position: 'absolute' }} color={colorScheme === 'dark' ? 'white' : 'black'} />}
+          {isPending && (
+            <ActivityIndicator
+              style={{ position: 'absolute' }}
+              color={colorScheme === 'dark' ? 'white' : 'black'}
+            />
+          )}
           {/* <FlashList
             data={listAnime}
             estimatedItemSize={40}
@@ -348,42 +392,51 @@ function Search(props: Props) {
           )}
         </View>
       ) : data === null ? (
-        <TouchableOpacity onPress={() => {
-          setListAnime([]);
-          AnimeAPI.listAnime(undefined, (data) => {
-            startTransition(() => {
-              setListAnime(data);
+        <TouchableOpacity
+          onPress={() => {
+            setListAnime([]);
+            AnimeAPI.listAnime(undefined, animeData => {
+              startTransition(() => {
+                setListAnime(animeData);
+              });
             })
-          }).then(data => {
-            setListAnime(data);
-          }).catch(() => {
-            setListAnime(null);
-          });
-        }}
+              .then(animeData => {
+                setListAnime(animeData);
+              })
+              .catch(() => {
+                setListAnime(null);
+              });
+          }}
           style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 16 }]}>Gagal memuat list, tekan disini untuk mencoba lagi</Text>
-          <Icon
-            name="exclamation-circle"
-            size={30}
-            color={'red'} />
+          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 16 }]}>
+            Gagal memuat list, tekan disini untuk mencoba lagi
+          </Text>
+          <Icon name="exclamation-circle" size={30} color={'red'} />
         </TouchableOpacity>
       ) : (
         <>
-          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 13, marginVertical: 2, textAlign: 'center' }]}>
-            Hasil pencarian untuk: {query.current}
-            {movieData && movieData.length > 0 && data.result.length > 0 && "\n(Movie di tempatkan di urutan atas)"}
+          <Text
+            style={[
+              globalStyles.text,
+              { fontWeight: 'bold', fontSize: 13, marginVertical: 2, textAlign: 'center' },
+            ]}>
+            Hasil pencarian untuk: {currentSearchQuery}
+            {movieData &&
+              movieData.length > 0 &&
+              data.result.length > 0 &&
+              '\n(Movie di tempatkan di urutan atas)'}
           </Text>
           {data.result.length > 0 || (movieData && movieData.length > 0) ? (
             <FlatList
               // estimatedItemSize={209}
               data={[...(movieData ?? []), ...data.result]}
               keyExtractor={(_, index) => index?.toString()}
-              renderItem={({ item: z }) => (
-                <SearchList item={z} parentProps={props} />
-              )}
+              renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
             />
           ) : (
-            <Text style={globalStyles.text}>Tidak ada hasil untuk pencarian anime maupun movie!</Text>
+            <Text style={globalStyles.text}>
+              Tidak ada hasil untuk pencarian anime maupun movie!
+            </Text>
           )}
         </>
       )}
@@ -409,7 +462,7 @@ function Search(props: Props) {
               estimatedItemSize={32}
               ItemSeparatorComponent={() => (
                 <View
-                  pointerEvents='none'
+                  pointerEvents="none"
                   style={{
                     borderBottomWidth: 0.5,
                     borderColor: colorScheme === 'dark' ? 'gray' : 'black',
@@ -417,7 +470,11 @@ function Search(props: Props) {
                   }}
                 />
               )}
-              ListHeaderComponent={() => <Text style={[globalStyles.text, styles.searchHistoryHeader]}>Riwayat Pencarian: {searchHistory.length}</Text>}
+              ListHeaderComponent={() => (
+                <Text style={[globalStyles.text, styles.searchHistoryHeader]}>
+                  Riwayat Pencarian: {searchHistory.length}
+                </Text>
+              )}
             />
           </View>
         </Reanimated_KeyboardAvoidingView>
@@ -431,12 +488,7 @@ function Search(props: Props) {
           }}
           entering={ZoomIn}
           exiting={ZoomOut}>
-          <Icon
-            name="times"
-            size={30}
-            style={{ alignSelf: 'center' }}
-            color="#dadada"
-          />
+          <Icon name="times" size={30} style={{ alignSelf: 'center' }} color="#dadada" />
         </TouchableOpacityAnimated>
       )}
     </View>
@@ -458,15 +510,20 @@ function HistoryList({
   const dispatch = useDispatch<AppDispatch>();
   const styles = useStyles();
   return (
-    <View style={styles.searchHistoryItemContainer} pointerEvents='box-none' onStartShouldSetResponder={() => true}>
+    <View
+      style={styles.searchHistoryItemContainer}
+      pointerEvents="box-none"
+      onStartShouldSetResponder={() => true}>
       {/* I wrap the component with "View" because somehow "keyboardShouldPersistTaps" ignores the RNGH's Touchables */}
       <TouchableOpacity
-        style={[{
-          padding: 6,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          height: 40,
-        }]}
+        style={[
+          {
+            padding: 6,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            height: 40,
+          },
+        ]}
         onPress={() => {
           onChangeTextFunction(item);
         }}>
@@ -479,9 +536,7 @@ function HistoryList({
             dispatch(
               setDatabase({
                 target: 'searchHistory',
-                value: JSON.stringify(
-                  searchHistory.filter((_, i) => i !== index),
-                ),
+                value: JSON.stringify(searchHistory.filter((_, i) => i !== index)),
               }),
             );
           }}>
@@ -492,13 +547,18 @@ function HistoryList({
   );
 }
 
-type SearchAnimeResult = SearchAnime["result"][number];
+type SearchAnimeResult = SearchAnime['result'][number];
 
-function SearchList({ item: z, parentProps: props }:
-  { item: Movies | SearchAnimeResult; parentProps: Props; }) {
-  const isMovie = (z: Movies | SearchAnimeResult): z is Movies => {
-    return !("animeUrl" in z);
-  }
+function SearchList({
+  item: z,
+  parentProps: props,
+}: {
+  item: Movies | SearchAnimeResult;
+  parentProps: Props;
+}) {
+  const isMovie = (data: Movies | SearchAnimeResult): data is Movies => {
+    return !('animeUrl' in data);
+  };
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   return (
@@ -522,12 +582,13 @@ function SearchList({ item: z, parentProps: props }:
 
       <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>
         <DarkOverlay transparent={0.7} />
-        <View style={{ flexDirection: 'row', flex: 1, }}>
+        <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
-            {!isMovie(z) && <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-              <Icon name="star" style={{ color: 'gold' }} />{' '}
-              {z.rating}
-            </Text>}
+            {!isMovie(z) && (
+              <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+                <Icon name="star" style={{ color: 'gold' }} /> {z.rating}
+              </Text>
+            )}
           </View>
           <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
             <View
@@ -535,10 +596,16 @@ function SearchList({ item: z, parentProps: props }:
                 styles.statusInfo,
                 {
                   borderColor:
-                    !isMovie(z) && z.status === 'Ongoing' ? '#cf0000' : isMovie(z) ? 'orange' : '#22b422',
+                    !isMovie(z) && z.status === 'Ongoing'
+                      ? '#cf0000'
+                      : isMovie(z)
+                        ? 'orange'
+                        : '#22b422',
                 },
               ]}>
-              <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>{isMovie(z) ? "Movie" : z.status}</Text>
+              <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+                {isMovie(z) ? 'Movie' : z.status}
+              </Text>
             </View>
           </View>
         </View>
@@ -550,13 +617,15 @@ function SearchList({ item: z, parentProps: props }:
         </View>
 
         <View style={styles.releaseInfo}>
-          {!isMovie(z) && <Text style={[globalStyles.text, styles.animeSearchListDetailText]} numberOfLines={1}>
-            <Icon name="tags" /> {z.genres.join(', ')}
-          </Text>}
+          {!isMovie(z) && (
+            <Text style={[globalStyles.text, styles.animeSearchListDetailText]} numberOfLines={1}>
+              <Icon name="tags" /> {z.genres.join(', ')}
+            </Text>
+          )}
         </View>
       </ImageBackground>
     </TouchableOpacityAnimated>
-  )
+  );
 }
 
 function ImageColorShadow({ url }: { url: string }) {
@@ -570,7 +639,7 @@ function ImageColorShadow({ url }: { url: string }) {
         const b = parseInt(hex.substring(5, 7), 16);
         setColor({ r, g, b });
       }
-    })
+    });
   }, [url]);
   return (
     <LinearGradient
@@ -581,8 +650,9 @@ function ImageColorShadow({ url }: { url: string }) {
       locations={[0, 0.9]}
       start={[0, 0]}
       end={[1, 0]}
-      style={{ width: 13, marginRight: 4 }} />
-  )
+      style={{ width: 13, marginRight: 4 }}
+    />
+  );
 }
 
 function useStyles() {
@@ -612,8 +682,7 @@ function useStyles() {
       borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
       borderWidth: 1.3,
     },
-    loadingText: {
-    },
+    loadingText: {},
     searchInput: {
       height: 42,
       borderWidth: 1,
@@ -662,7 +731,7 @@ function useStyles() {
       textAlign: 'left',
       fontWeight: 'bold',
       fontSize: 12,
-      color: colorScheme === 'light' ? '#000769' : '#00bb00'
+      color: colorScheme === 'light' ? '#000769' : '#00bb00',
     },
     animeSearchListDetailText: {
       fontWeight: 'bold',

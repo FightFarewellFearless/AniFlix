@@ -1,4 +1,7 @@
-function throttle<F extends (...args: any[]) => any>(func: F, delay: number): (...args: Parameters<F>) => void {
+function throttle<F extends (...args: any[]) => any>(
+  func: F,
+  delay: number,
+): (...args: Parameters<F>) => void {
   let prevDelay = 0;
 
   return (...args: Parameters<F>) => {
@@ -10,4 +13,3 @@ function throttle<F extends (...args: any[]) => any>(func: F, delay: number): (.
   };
 }
 export default throttle;
-

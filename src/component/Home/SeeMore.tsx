@@ -1,11 +1,5 @@
 import React, { memo, useContext, useEffect, useState } from 'react';
-import {
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  View,
-  ToastAndroid,
-} from 'react-native';
+import { Text, StyleSheet, ActivityIndicator, View, ToastAndroid } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { FlashList } from '@shopify/flash-list';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -22,15 +16,17 @@ type Props = StackScreenProps<HomeStackNavigator, 'SeeMore'>;
 function SeeMore(props: Props) {
   const { paramsState: animeData, setParamsState: setAnimeData } =
     useContext(EpisodeBaruHomeContext);
-  const { paramsState: movieData, setParamsState: setMovieData } =
-    useContext(MovieListHomeContext);
+  const { paramsState: movieData, setParamsState: setMovieData } = useContext(MovieListHomeContext);
   const [isLoading, setIsLoading] = useState(false);
-  const page = props.route.params.type === 'AnimeList' ? (animeData?.newAnime.length ?? 0) / 25 : (movieData?.length ?? 0) / 20;
+  const page =
+    props.route.params.type === 'AnimeList'
+      ? (animeData?.newAnime.length ?? 0) / 25
+      : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
-  const columnWidth = dimensions.width * 120/200 / 1.9;
+  const columnWidth = (dimensions.width * 120) / 200 / 1.9;
   const numColumns = Math.floor(dimensions.width / columnWidth);
 
-  const LIST_HEIGHT = dimensions.height * 120/200 / 2.2;
+  const LIST_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -47,6 +43,7 @@ function SeeMore(props: Props) {
     //   });
     // }
 
+    // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -55,7 +52,10 @@ function SeeMore(props: Props) {
       <FlashList
         drawDistance={500}
         data={
-          (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (NewAnimeList | Movies)[]
+          (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (
+            | NewAnimeList
+            | Movies
+          )[]
         }
         // TEMP: temporary fix for Fabric react-native-screens
         // contentContainerStyle={{ paddingBottom: (global as any).nativeFabricUIManager !== undefined ? 49 : undefined }}
@@ -90,30 +90,26 @@ function SeeMore(props: Props) {
                 }
                 setIsLoading(true);
                 try {
-                  if(props.route.params.type === 'MovieList') {
+                  if (props.route.params.type === 'MovieList') {
                     const newdata = await getLatestMovie(undefined, page + 1);
-                    if("isError" in newdata) {
-                      ToastAndroid.show("Error", ToastAndroid.SHORT);
+                    if ('isError' in newdata) {
+                      ToastAndroid.show('Error', ToastAndroid.SHORT);
                       return;
                     }
-                    setMovieData?.(prev => ([ ...prev, ...newdata ]));
+                    setMovieData?.(prev => [...prev, ...newdata]);
                     return;
                   }
-                  const newdata = await AnimeAPI.newAnime(
-                    page + 1,
-                  );
+                  const newdata = await AnimeAPI.newAnime(page + 1);
                   setAnimeData?.(prev => ({
                     ...prev,
-                    newAnime: [
-                      ...prev.newAnime,
-                      ...newdata,
-                    ],
+                    newAnime: [...prev.newAnime, ...newdata],
                   }));
                 } finally {
                   setIsLoading(false);
                 }
-              }} disabled={isLoading}>
-              <Text style={{ color: "#fafafa" }}>Lihat lebih banyak</Text>
+              }}
+              disabled={isLoading}>
+              <Text style={{ color: '#fafafa' }}>Lihat lebih banyak</Text>
             </TouchableOpacity>
           </>
         }

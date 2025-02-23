@@ -16,13 +16,12 @@ type Props = StackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createBottomTabNavigator<HomeNavigator>();
 
 function BottomTabs(props: Props) {
-  const [paramsState, setParamsState] = useState<HomeType>(
-    props.route.params.data,
-  );
+  const [paramsState, setParamsState] = useState<HomeType>(props.route.params.data);
   const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
   return (
     <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
-      <MovieListHomeContext.Provider value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
+      <MovieListHomeContext.Provider
+        value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
@@ -32,9 +31,7 @@ function BottomTabs(props: Props) {
             name="AnimeList"
             component={EpisodeBaruHome}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Icon name="home" style={{ color }} size={20} />
-              ),
+              tabBarIcon: ({ color }) => <Icon name="home" style={{ color }} size={20} />,
               tabBarLabel: 'Beranda',
             }}
           />
@@ -42,9 +39,7 @@ function BottomTabs(props: Props) {
             name="Search"
             component={Search}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Icon name="search" style={{ color }} size={20} />
-              ),
+              tabBarIcon: ({ color }) => <Icon name="search" style={{ color }} size={20} />,
               tabBarLabel: 'Cari',
             }}
           />
@@ -54,11 +49,15 @@ function BottomTabs(props: Props) {
               tabBarIcon: ({ color }) => <Icon name="user" style={{ color }} size={20} />,
               tabBarLabel: 'Saya',
             }}
-            component={Saya} />
+            component={Saya}
+          />
           <Tab.Screen
-            name='Utilitas'
+            name="Utilitas"
             component={Utils}
-            options={{ tabBarIcon: ({ color }) => <Icon5 name="toolbox" style={{ color }} size={20} /> }} />
+            options={{
+              tabBarIcon: ({ color }) => <Icon5 name="toolbox" style={{ color }} size={20} />,
+            }}
+          />
         </Tab.Navigator>
       </MovieListHomeContext.Provider>
     </EpisodeBaruHomeContext.Provider>

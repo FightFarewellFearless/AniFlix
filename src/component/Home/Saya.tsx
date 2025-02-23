@@ -10,24 +10,31 @@ import { memo } from 'react';
 const Drawer = createDrawerNavigator<SayaDrawerNavigator>();
 
 function Saya() {
-    const globalStyles = useGlobalStyles();
-    return (
-        <Drawer.Navigator screenOptions={{
-            headerTintColor: globalStyles.text.color,
-            drawerType: 'front',
-        }}>
-            <Drawer.Screen name="History" component={History}
-                options={{
-                    title: 'Riwayat',
-                    drawerIcon: ({ color }) => <MaterialIcons name="history" size={20} color={color} />
-                }} />
-            <Drawer.Screen name="WatchLater" component={WatchLater}
-                options={{
-                    title: 'Tonton Nanti',
-                    drawerIcon: ({ color }) => <Icon name="clock-o" size={20} color={color} />
-                }} />
-        </Drawer.Navigator>
-    )
+  const globalStyles = useGlobalStyles();
+  return (
+    <Drawer.Navigator
+      screenOptions={{
+        headerTintColor: globalStyles.text.color,
+        drawerType: 'front',
+      }}>
+      <Drawer.Screen
+        name="History"
+        component={History}
+        options={{
+          title: 'Riwayat',
+          drawerIcon: ({ color }) => <MaterialIcons name="history" size={20} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="WatchLater"
+        component={WatchLater}
+        options={{
+          title: 'Tonton Nanti',
+          drawerIcon: ({ color }) => <Icon name="clock-o" size={20} color={color} />,
+        }}
+      />
+    </Drawer.Navigator>
+  );
 }
 
 export default memo(Saya);

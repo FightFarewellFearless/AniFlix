@@ -1,19 +1,22 @@
 import React, { useState, memo, useCallback, useEffect } from 'react';
-import {
-  View,
-  ActivityIndicator,
-  ImageBackground,
-  ImageBackgroundProps,
-} from 'react-native';
+import { View, ActivityIndicator, ImageBackground, ImageBackgroundProps } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
 
 function ImageLoading(props: ImageBackgroundProps) {
-  let imageSourceUri = typeof props.source === 'object' && !Array.isArray(props.source) ? props.source.uri : props.source;
-  if (typeof props.source === 'object' && !Array.isArray(props.source) && props.source.uri?.includes('otakudesu')) {
+  let imageSourceUri =
+    typeof props.source === 'object' && !Array.isArray(props.source)
+      ? props.source.uri
+      : props.source;
+  if (
+    typeof props.source === 'object' &&
+    !Array.isArray(props.source) &&
+    props.source.uri?.includes('otakudesu')
+  ) {
     const withoutDomain = URL.parse(props.source.uri);
-    imageSourceUri = withoutDomain.protocol + '//' + AnimeLocal.BASE.domain + withoutDomain.pathname;
+    imageSourceUri =
+      withoutDomain.protocol + '//' + AnimeLocal.BASE.domain + withoutDomain.pathname;
   }
 
   const [loading, setLoading] = useState(false);
@@ -41,7 +44,13 @@ function ImageLoading(props: ImageBackgroundProps) {
   return (
     <ImageBackground
       {...props}
-      source={(typeof props.source === 'object' && 'uri' in props.source && typeof imageSourceUri === 'string') ? { ...props.source, uri: imageSourceUri } : props.source}
+      source={
+        typeof props.source === 'object' &&
+        'uri' in props.source &&
+        typeof imageSourceUri === 'string'
+          ? { ...props.source, uri: imageSourceUri }
+          : props.source
+      }
       style={[props.style, { overflow: 'hidden' }]}
       onLoadStart={onLoadStart}
       onLoadEnd={onLoadEnd}

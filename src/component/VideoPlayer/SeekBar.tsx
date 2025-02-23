@@ -1,92 +1,112 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
-import { ViewStyle, View, StyleSheet, LayoutChangeEvent, useWindowDimensions } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Reanimated, { useSharedValue, useAnimatedStyle, withTiming, SharedValue } from "react-native-reanimated";
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { ViewStyle, View, StyleSheet, LayoutChangeEvent, useWindowDimensions } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Reanimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  SharedValue,
+} from 'react-native-reanimated';
 
 type SeekBarProps = {
   progress: SharedValue<number>;
-  onProgressChange: (value: number) => void,
+  onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
-  style?: Omit<ViewStyle, 'margin' | 'marginHorizontal' | 'marginVertical' | 'marginBottom' | 'marginEnd' | 'marginLeft' | 'marginRight' | 'marginStart' | 'marginTop'>
-}
-function clampNumber (num: number, a: number, b: number) {
+  style?: Omit<
+    ViewStyle,
+    | 'margin'
+    | 'marginHorizontal'
+    | 'marginVertical'
+    | 'marginBottom'
+    | 'marginEnd'
+    | 'marginLeft'
+    | 'marginRight'
+    | 'marginStart'
+    | 'marginTop'
+  >;
+};
+function clampNumber(num: number, a: number, b: number) {
   'worklet';
   return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 }
-export default function SeekBar({ progress, onProgressChange, onProgressChangeEnd, style }: SeekBarProps) {
+export default function SeekBar({
+  progress,
+  onProgressChange,
+  onProgressChangeEnd,
+  style,
+}: SeekBarProps) {
   const parentWidth = useSharedValue(0);
   const circleScale = useSharedValue(1);
 
   const viewRef = useRef<View>(null);
 
-  const gesture = useMemo(() =>
-    Gesture.Pan()
-      .onBegin((e) => {
-        'worklet';
-        if (e.x > parentWidth.get()) {
-          onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
-        }
-        else {
-          onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
-        }
-        circleScale.set(withTiming(1.3));
-      })
-      .onUpdate((e) => {
-        'worklet';
-        if (e.x > parentWidth.get()) {
-          onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
-        }
-        else {
-          onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
-        }
-      })
-      .onFinalize((e) => {
-        'worklet';
-        onProgressChangeEnd(clampNumber(e.x / parentWidth.get(), 0, 1));
-        circleScale.set(withTiming(1));
-      }), []);
+  const gesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .onBegin(e => {
+          'worklet';
+          if (e.x > parentWidth.get()) {
+            onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
+          } else {
+            onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
+          }
+          circleScale.set(withTiming(1.3));
+        })
+        .onUpdate(e => {
+          'worklet';
+          if (e.x > parentWidth.get()) {
+            onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
+          } else {
+            onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
+          }
+        })
+        .onFinalize(e => {
+          'worklet';
+          onProgressChangeEnd(clampNumber(e.x / parentWidth.get(), 0, 1));
+          circleScale.set(withTiming(1));
+        }),
+    [circleScale, onProgressChange, onProgressChangeEnd, parentWidth],
+  );
   const coveredAreaStyles = useAnimatedStyle(() => ({
-    width: (progress.get() * parentWidth.get())
+    width: progress.get() * parentWidth.get(),
   }));
   const circleStyle = useAnimatedStyle(() => ({
-    transform: [{
-      translateX: clampNumber((progress.get() * parentWidth.get()) - 5, 0, parentWidth.get() - 12),
-    }, {
-      scale: circleScale.get(),
-    }]
+    transform: [
+      {
+        translateX: clampNumber(progress.get() * parentWidth.get() - 5, 0, parentWidth.get() - 12),
+      },
+      {
+        scale: circleScale.get(),
+      },
+    ],
   }));
-  const onLayout = useCallback((e: LayoutChangeEvent) => {
-    parentWidth.set(e.nativeEvent.layout.width);
-  }, [])
+  const onLayout = useCallback(
+    (e: LayoutChangeEvent) => {
+      parentWidth.set(e.nativeEvent.layout.width);
+    },
+    [parentWidth],
+  );
 
   const { width } = useWindowDimensions();
 
   useLayoutEffect(() => {
-    viewRef.current?.measure((x, y, width, height) => {
-      if(width < 1) return;
-      parentWidth.set(width);
-    })
-  }, [width]);
+    viewRef.current?.measure((x, y, viewWidth) => {
+      if (viewWidth < 1) return;
+      parentWidth.set(viewWidth);
+    });
+  }, [parentWidth, width]);
 
   return (
-    <View style={[style]}
-      onLayout={onLayout}
-      ref={viewRef}>
-
+    <View style={[style]} onLayout={onLayout} ref={viewRef}>
       <GestureDetector gesture={gesture}>
         <View style={[styles.gestureContainer]}>
           <Reanimated.View style={[coveredAreaStyles, styles.coveredArea]} />
-          <Reanimated.View
-            style={[styles.circle, circleStyle]}
-          />
-          <View
-            style={[styles.availableArea]}
-          />
+          <Reanimated.View style={[styles.circle, circleStyle]} />
+          <View style={[styles.availableArea]} />
         </View>
       </GestureDetector>
     </View>
-
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -120,4 +140,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     zIndex: 1,
   },
-})
+});

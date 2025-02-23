@@ -23,13 +23,15 @@ class AnimeAPI {
     // });
     // return await (data.json() as Promise<EpisodeBaruHome>);
 
-    const [newAnime, jadwalAnime] = await Promise.all([Anime.newAnime(undefined, signal), Anime.jadwalAnime(signal)]);
+    const [newAnime, jadwalAnime] = await Promise.all([
+      Anime.newAnime(undefined, signal),
+      Anime.jadwalAnime(signal),
+    ]);
 
     return {
       newAnime,
       jadwalAnime,
-    }
-
+    };
   }
 
   static async newAnime(
@@ -45,13 +47,9 @@ class AnimeAPI {
     // return await (data.json() as Promise<NewAnimeList[]>);
 
     return await Anime.newAnime(page, signal);
-
   }
 
-  static async search(
-    query: string,
-    signal?: AbortSignal,
-  ): Promise<SearchAnime> {
+  static async search(query: string, signal?: AbortSignal): Promise<SearchAnime> {
     // const data = await fetch(
     //   this.base_url +
     //     `search?q=${query}`,
@@ -65,7 +63,7 @@ class AnimeAPI {
     // return await (data.json() as Promise<SearchAnime>);
 
     return {
-      result: await Anime.searchAnime(query, signal)
+      result: await Anime.searchAnime(query, signal),
     };
   }
 
@@ -97,12 +95,12 @@ class AnimeAPI {
     try {
       const statusCode = await fetch(link, {
         headers: {
-          "User-Agent": deviceUserAgent
+          'User-Agent': deviceUserAgent,
         },
         method: 'GET',
-        signal
-      }).catch(err => {
-        throw new Error('canceled')
+        signal,
+      }).catch(() => {
+        throw new Error('canceled');
       });
       // if(statusCode instanceof Error) {
       //   throw statusCode;
@@ -110,27 +108,37 @@ class AnimeAPI {
       const html = await statusCode.text();
       const regex = /<title>(.*?)<\/title>/;
       const title = html.match(regex)?.[1];
-      if(statusCode.status === 403 && title === 'Just a moment...') {
+      if (statusCode.status === 403 && title === 'Just a moment...') {
         setWebViewOpen.openWebViewCF(true, link);
         throw new Error('Silahkan selesaikan captcha');
       }
-      return await Anime.fromUrl(link, resolution, skipAutoRes, detailOnly, signal) as fromUrlJSON;
-    } catch (e) {
+      return (await Anime.fromUrl(
+        link,
+        resolution,
+        skipAutoRes,
+        detailOnly,
+        signal,
+      )) as fromUrlJSON;
+    } catch (e: any) {
       // console.error(e.message)
-      // @ts-expect-error
-      if(e.message === 'Silahkan selesaikan captcha') {
+      if (e.message === 'Silahkan selesaikan captcha') {
         ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
         throw e;
-      }
-      // @ts-expect-error
-      else if(e.message !== 'Network Error' || e.message !== 'AbortError' || e.message !== 'canceled') {
+      } else if (
+        e.message !== 'Network Error' ||
+        e.message !== 'AbortError' ||
+        e.message !== 'canceled'
+      ) {
         throw e;
       }
       return 'Unsupported';
     }
   }
-  
-  static async listAnime(signal?: AbortSignal, streamingCallback?: (data: listAnimeTypeList[]) => void): Promise<listAnimeTypeList[]> {
+
+  static async listAnime(
+    signal?: AbortSignal,
+    streamingCallback?: (data: listAnimeTypeList[]) => void,
+  ): Promise<listAnimeTypeList[]> {
     // const data = await fetch(
     //   this.base_url +
     //     'listAnime',
@@ -145,7 +153,12 @@ class AnimeAPI {
     return await Anime.listAnime(signal, streamingCallback);
   }
 
-  static async reqResolution(requestData: string, reqNonceAction: string, reqResolutionWithNonceAction: string, signal?: AbortSignal): Promise<string | undefined> {
+  static async reqResolution(
+    requestData: string,
+    reqNonceAction: string,
+    reqResolutionWithNonceAction: string,
+    signal?: AbortSignal,
+  ): Promise<string | undefined> {
     // const data = await fetch(
     //   this.base_url +
     //     `reqResolution?requestData=${requestData}&reqNonceAction=${reqNonceAction}&reqResolutionWithNonceAction=${reqResolutionWithNonceAction}`,
@@ -158,7 +171,13 @@ class AnimeAPI {
     // ).then(a => a.text()) as string;
     // return data;
 
-    return await Anime.fetchStreamingResolution(requestData, reqNonceAction, reqResolutionWithNonceAction, undefined, signal);
+    return await Anime.fetchStreamingResolution(
+      requestData,
+      reqNonceAction,
+      reqResolutionWithNonceAction,
+      undefined,
+      signal,
+    );
   }
 }
 

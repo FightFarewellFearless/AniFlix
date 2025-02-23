@@ -25,13 +25,13 @@ type Props = StackScreenProps<RootStackNavigator, 'Blocked'>;
 function Blocked(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
-  const animatedScale = useRef(new Animated.Value(1)).current;
+  const [animatedScale] = useState(() => new Animated.Value(1));
 
-  const { title, url, data } = props.route.params
+  const { title, url, data } = props.route.params;
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
-  const [animated] = useState(
+  const [animated] = useState(() =>
     Animated.loop(
       Animated.sequence([
         Animated.timing(animatedScale, {
@@ -58,8 +58,7 @@ function Blocked(props: Props) {
     return () => {
       animated.stop();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [animated]);
 
   const textInputDescription = useRef<string>('');
   const sendRequest = useCallback(() => {
@@ -70,40 +69,54 @@ function Blocked(props: Props) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        embeds: [{
-          color: 0x7289d9,
-          title: 'Whitelist Request',
-          thumbnail: {
-            url: data.thumbnailUrl
+        embeds: [
+          {
+            color: 0x7289d9,
+            title: 'Whitelist Request',
+            thumbnail: {
+              url: data.thumbnailUrl,
+            },
+            fields: [
+              {
+                name: 'Judul',
+                value: title,
+              },
+              {
+                name: 'URL',
+                value: url,
+              },
+              {
+                name: 'Genres',
+                value: data.genres.join(', '),
+              },
+              {
+                name: 'Deskripsi lanjut oleh user',
+                value: textInputDescription.current || 'Tidak ada deskripsi',
+              },
+            ],
           },
-          fields: [{
-            name: 'Judul',
-            value: title,
-          }, {
-            name: 'URL',
-            value: url,
-          }, {
-            name: 'Genres',
-            value: data.genres.join(', '),
-          }, {
-            name: 'Deskripsi lanjut oleh user',
-            value: textInputDescription.current || 'Tidak ada deskripsi',
-          }]
-        }]
-      })
-    }).then(() => {
-      Alert.alert('Sukses', 'Permintaan kamu berhasil dikirim!');
-    }).catch(() => {
-      Alert.alert('Gagal', 'Permintaan kamu gagal dikirim!');
+        ],
+      }),
     })
-    
+      .then(() => {
+        Alert.alert('Sukses', 'Permintaan kamu berhasil dikirim!');
+      })
+      .catch(() => {
+        Alert.alert('Gagal', 'Permintaan kamu gagal dikirim!');
+      });
+
     textInputDescription.current = '';
-  }, []);
+  }, [data.genres, data.thumbnailUrl, title, url]);
 
   return (
     <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-      <Modal visible={isRequestModalOpen} transparent animationType='slide' onRequestClose={() => setIsRequestModalOpen(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.658)', justifyContent: 'center' }}>
+      <Modal
+        visible={isRequestModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setIsRequestModalOpen(false)}>
+        <View
+          style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.658)', justifyContent: 'center' }}>
           <View style={styles.modalContentContainer}>
             <TouchableOpacity
               style={{ alignItems: 'flex-end' }}
@@ -111,22 +124,26 @@ function Blocked(props: Props) {
               <Icon name="cross" size={43} color={'red'} />
             </TouchableOpacity>
             <Text style={[globalStyles.text, styles.requestTitleText]}>
-              Kamu akan meminta anime {' '}
+              Kamu akan meminta anime{' '}
               <Text style={{ color: '#7289d9' }}>{props.route.params.title} </Text>
               untuk di whitelist
             </Text>
 
-            <Text style={[globalStyles.text, ]}>Developer akan melihat terlebih dahulu apakah anime ini aman untuk ditonton semua umur,
-              dan jika benar, developer akan menambahkan anime ini ke daftar whitelist
+            <Text style={[globalStyles.text]}>
+              Developer akan melihat terlebih dahulu apakah anime ini aman untuk ditonton semua
+              umur, dan jika benar, developer akan menambahkan anime ini ke daftar whitelist
             </Text>
 
-
-            <Text style={[globalStyles.text, styles.requestDescriptionTitle]}>Tulis deskripsi (opsional)</Text>
+            <Text style={[globalStyles.text, styles.requestDescriptionTitle]}>
+              Tulis deskripsi (opsional)
+            </Text>
             <TextInput
-              onChangeText={(e) => textInputDescription.current = e}
-              placeholder='Tuliskan alasanmu disini (opsional)'
+              onChangeText={e => (textInputDescription.current = e)}
+              placeholder="Tuliskan alasanmu disini (opsional)"
               placeholderTextColor={'#c5c5c5'}
-              multiline style={styles.requestInput} />
+              multiline
+              style={styles.requestInput}
+            />
 
             <TouchableOpacity style={styles.modalAccButton} onPress={sendRequest}>
               <Icon name="check" size={25} color={'#7289d9'} />
@@ -139,34 +156,29 @@ function Blocked(props: Props) {
         <AnimatedIcon
           name="warning"
           size={45}
-          style={[
-            styles.animatedIcon,
-            { transform: [{ scale: animatedScale }] },
-          ]}
+          style={[styles.animatedIcon, { transform: [{ scale: animatedScale }] }]}
         />
       </View>
-      <Text
-        style={[
-          { fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
-          globalStyles.text,
-        ]}>
+      <Text style={[{ fontSize: 18, fontWeight: 'bold', textAlign: 'center' }, globalStyles.text]}>
         Eitss!!! Tunggu dulu, anime yang ingin kamu tonton mengandung genre yang di blacklist
       </Text>
-      <Text style={[globalStyles.text, { textAlign: 'center' }]}>Jika ingin menonton anime ini kamu bisa request ke developer untuk whitelist anime ini
+      <Text style={[globalStyles.text, { textAlign: 'center' }]}>
+        Jika ingin menonton anime ini kamu bisa request ke developer untuk whitelist anime ini
         menggunakan tombol dibawah ini.
       </Text>
-      <Text style={[globalStyles.text, styles.devDescText]}>Developer akan me-review terlebih dahulu anime ini, kemudian
-        jika dirasa aman, maka permintaan whitelist akan disetujui dan kamu bisa menontonnya.{'\n'}
+      <Text style={[globalStyles.text, styles.devDescText]}>
+        Developer akan me-review terlebih dahulu anime ini, kemudian jika dirasa aman, maka
+        permintaan whitelist akan disetujui dan kamu bisa menontonnya.{'\n'}
         Pengumuman akan diumumkan di server discord
       </Text>
       <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => props.navigation.goBack()}>
+        <TouchableOpacity style={styles.button} onPress={() => props.navigation.goBack()}>
           <Icon name="back" size={15} style={{ color: 'black' }} />
           <Text style={{ color: 'black', fontSize: 15 }}> Kembali</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsRequestModalOpen(true)} style={[styles.button, { backgroundColor: 'lightgreen' }]}>
+        <TouchableOpacity
+          onPress={() => setIsRequestModalOpen(true)}
+          style={[styles.button, { backgroundColor: 'lightgreen' }]}>
           <Icon name="message" size={15} style={{ color: 'black' }} />
           <Text style={{ color: 'black', fontSize: 15 }}> Request Whitelist</Text>
         </TouchableOpacity>
@@ -193,7 +205,10 @@ function useStyles() {
       margin: 5,
       backgroundColor: 'lightblue',
     },
-    devDescText: { textAlign: 'center', color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen' },
+    devDescText: {
+      textAlign: 'center',
+      color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
+    },
     requestTitleText: {
       textAlign: 'center',
       fontWeight: 'bold',
@@ -208,14 +223,14 @@ function useStyles() {
       padding: 10,
       margin: 10,
       borderRadius: 6,
-      color: '#c5c5c5'
+      color: '#c5c5c5',
     },
     modalContentContainer: {
       width: '100%',
       padding: 8,
       gap: 7,
       backgroundColor: colorScheme === 'dark' ? '#383838' : 'white',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     modalAccButton: {
       flexDirection: 'row',
@@ -231,7 +246,7 @@ function useStyles() {
       color: 'black',
       fontSize: 15,
       fontWeight: 'bold',
-    }
+    },
   });
 }
 

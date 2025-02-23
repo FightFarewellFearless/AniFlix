@@ -1,12 +1,7 @@
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import { useCallback, useRef, memo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  useColorScheme
-} from 'react-native';
+import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import watchLaterJSON from '../../../types/watchLaterJSON';
@@ -47,10 +42,7 @@ function WatchLater(props: Props) {
               }),
             );
           }}>
-          <ImageLoading
-            source={{ uri: item.thumbnailUrl }}
-            style={styles.thumbnail}
-          />
+          <ImageLoading source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
           <View style={styles.ratingContainer}>
             <Text style={[globalStyles.text, styles.listRatingText]}>
               <Icon name="star" /> {item.rating}
@@ -85,7 +77,21 @@ function WatchLater(props: Props) {
         </TouchableOpacity>
       );
     },
-    [props.navigation, styles],
+    [
+      globalStyles.text,
+      props.navigation,
+      styles.listBottom,
+      styles.listContainer,
+      styles.listDateText,
+      styles.listDeleteContainer,
+      styles.listGenreContainer,
+      styles.listGenreText,
+      styles.listInfoContainer,
+      styles.listRatingText,
+      styles.ratingContainer,
+      styles.thumbnail,
+      styles.titleContainer,
+    ],
   );
 
   return (
@@ -106,11 +112,13 @@ function WatchLater(props: Props) {
           ListHeaderComponent={() => (
             <View>
               <Text style={[globalStyles.text, { margin: 10 }]}>
-                  Jumlah daftar tonton nanti kamu: <Text style={{ fontWeight: 'bold' }}>{watchLaterLists.length}</Text>{'\n'}
-                  <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
-                    Sejak {moment(watchLaterLists.at(-1)!.date).format('DD MMMM YYYY')}
-                  </Text>
+                Jumlah daftar tonton nanti kamu:{' '}
+                <Text style={{ fontWeight: 'bold' }}>{watchLaterLists.length}</Text>
+                {'\n'}
+                <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                  Sejak {moment(watchLaterLists.at(-1)!.date).format('DD MMMM YYYY')}
                 </Text>
+              </Text>
             </View>
           )}
         />

@@ -10,16 +10,12 @@ function setHistory(
   additionalData: Partial<HistoryAdditionalData> | {} = {},
   historyData: string,
   dispatchSettings: AppDispatch,
-  isMovie?: boolean
+  isMovie?: boolean,
 ) {
   const data: HistoryJSON[] = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
-  const title =
-    episodeIndex >= 0
-      ? targetData.title.slice(0, episodeIndex)
-      : targetData.title;
-  const episode =
-    episodeIndex < 0 ? null : targetData.title.slice(episodeIndex);
+  const title = episodeIndex >= 0 ? targetData.title.slice(0, episodeIndex) : targetData.title;
+  const episode = episodeIndex < 0 ? null : targetData.title.slice(episodeIndex);
   const dataINDEX = data.findIndex(val => val.title === title);
 
   const date = data[dataINDEX]?.date;

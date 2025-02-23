@@ -1,6 +1,6 @@
-import { View } from "react-native";
+import { View } from 'react-native';
 
-export default function DarkOverlay({ transparent = 0.451 } : { transparent?: number }) {
+export default function DarkOverlay({ transparent = 0.451 }: { transparent?: number }) {
   return (
     <View
       style={{

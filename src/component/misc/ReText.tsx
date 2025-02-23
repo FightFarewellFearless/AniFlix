@@ -1,22 +1,20 @@
 /*
 This code is from react-native-redash
 */
-
-import React from "react";
-import type { TextProps as RNTextProps } from "react-native";
-import { StyleSheet, TextInput } from "react-native";
-import Animated, { useAnimatedProps } from "react-native-reanimated";
+import type { TextProps as RNTextProps } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
+import Animated, { useAnimatedProps } from 'react-native-reanimated';
 
 const styles = StyleSheet.create({
   baseStyle: {
-    color: "black",
+    color: 'black',
   },
 });
 Animated.addWhitelistedNativeProps({ text: true });
 
 interface TextProps {
   text: Animated.SharedValue<string>;
-  style?: Animated.AnimateProps<RNTextProps>["style"];
+  style?: Animated.AnimateProps<RNTextProps>['style'];
 }
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -27,7 +25,6 @@ const ReText = (props: TextProps) => {
     return {
       text: text.get(),
       // Here we use any because the text prop is not available in the type
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   });
   return (

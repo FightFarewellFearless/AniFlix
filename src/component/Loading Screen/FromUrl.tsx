@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  View,
-  ActivityIndicator,
-  Text,
-  Alert,
-  ToastAndroid,
-} from 'react-native';
+import { View, ActivityIndicator, Text, Alert, ToastAndroid } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
 import randomTipsArray from '../../assets/loadingTips.json';
@@ -30,7 +24,6 @@ function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
   const [dots, setDots] = useState<string>('');
 
-
   const historyData = useSelector((state: RootState) => state.settings.history);
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -43,70 +36,61 @@ function FromUrl(props: Props) {
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
     if (props.route.params.link.includes('nanimex')) {
       props.navigation.goBack();
-      Alert.alert('Perhatian!', 'Dikarenakan data yang digunakan berbeda, history lama tidak didukung, sehingga sebagai solusi, kamu harus mencari anime ini secara manual di menu pencarian dan pilih episode yang sesuai.')
+      Alert.alert(
+        'Perhatian!',
+        'Dikarenakan data yang digunakan berbeda, history lama tidak didukung, sehingga sebagai solusi, kamu harus mencari anime ini secara manual di menu pencarian dan pilih episode yang sesuai.',
+      );
       return;
     }
     if (props.route.params.isMovie) {
       if (URL.parse(props.route.params.link)?.pathname?.split('/')[1] === 'anime') {
-        getMovieDetail(props.route.params.link, abort.signal).then(result => {
-          if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
-          props.navigation.dispatch(
-            StackActions.replace('MovieDetail', {
-              data: result,
-              link: props.route.params.link
-            })
-          )
-        }).catch(handleError);
-      } else {
-        getStreamingDetail(props.route.params.link, abort.signal).then(result => {
-          if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
-          props.navigation.dispatch(
-            StackActions.replace('Video', {
-              data: result,
-              link: props.route.params.link,
-              historyData: props.route.params.historyData,
-              isMovie: true,
-            })
-          )
-          // History
-          setHistory(
-            result,
-            props.route.params.link,
-            false,
-            props.route.params.historyData,
-            historyData,
-            dispatchSettings,
-            props.route.params.isMovie,
-          );
-
-          const episodeIndex = result.title.toLowerCase().indexOf(' episode');
-          const title =
-            episodeIndex >= 0
-              ? result.title.slice(0, episodeIndex)
-              : result.title;
-          const watchLater: watchLaterJSON[] = JSON.parse(
-            store.getState().settings.watchLater,
-          );
-          const watchLaterIndex = watchLater.findIndex(
-            z => z.title.trim() === title.trim(),
-          );
-          if (watchLaterIndex >= 0) {
-            controlWatchLater('delete', watchLaterIndex);
-            ToastAndroid.show(
-              `${title} dihapus dari daftar tonton nanti`,
-              ToastAndroid.SHORT,
+        getMovieDetail(props.route.params.link, abort.signal)
+          .then(result => {
+            if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            props.navigation.dispatch(
+              StackActions.replace('MovieDetail', {
+                data: result,
+                link: props.route.params.link,
+              }),
             );
-          }
-        }).catch(handleError);
+          })
+          .catch(handleError);
+      } else {
+        getStreamingDetail(props.route.params.link, abort.signal)
+          .then(result => {
+            if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            props.navigation.dispatch(
+              StackActions.replace('Video', {
+                data: result,
+                link: props.route.params.link,
+                historyData: props.route.params.historyData,
+                isMovie: true,
+              }),
+            );
+            // History
+            setHistory(
+              result,
+              props.route.params.link,
+              false,
+              props.route.params.historyData,
+              historyData,
+              dispatchSettings,
+              props.route.params.isMovie,
+            );
+
+            const episodeIndex = result.title.toLowerCase().indexOf(' episode');
+            const title = episodeIndex >= 0 ? result.title.slice(0, episodeIndex) : result.title;
+            const watchLater: watchLaterJSON[] = JSON.parse(store.getState().settings.watchLater);
+            const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
+            if (watchLaterIndex >= 0) {
+              controlWatchLater('delete', watchLaterIndex);
+              ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+            }
+          })
+          .catch(handleError);
       }
     } else {
-      AnimeAPI.fromUrl(
-        props.route.params.link,
-        resolution,
-        !!resolution,
-        undefined,
-        abort.signal,
-      )
+      AnimeAPI.fromUrl(props.route.params.link, resolution, !!resolution, undefined, abort.signal)
         .then(async result => {
           if (result === 'Unsupported') {
             Alert.alert(
@@ -118,7 +102,10 @@ function FromUrl(props: Props) {
           }
           try {
             if (result.type === 'animeDetail') {
-              if (result.genres.includes('') && !Anime_Whitelist.list.includes(props.route.params.link)) {
+              if (
+                result.genres.includes('') &&
+                !Anime_Whitelist.list.includes(props.route.params.link)
+              ) {
                 // Ecchi
                 if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
                 props.navigation.dispatch(
@@ -126,12 +113,15 @@ function FromUrl(props: Props) {
                     title: result.title,
                     url: props.route.params.link,
                     data: result,
-                  })
-                )
+                  }),
+                );
                 return;
               }
               if (Anime_Whitelist.list.includes(props.route.params.link)) {
-                Alert.alert('Perhatian!', 'Anime ini mungkin mengandung konten dewasa seperti ecchi. Namun telah di whitelist dan diizinkan tayang. Mohon bijak dalam menonton.');
+                Alert.alert(
+                  'Perhatian!',
+                  'Anime ini mungkin mengandung konten dewasa seperti ecchi. Namun telah di whitelist dan diizinkan tayang. Mohon bijak dalam menonton.',
+                );
               }
               if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
               props.navigation.dispatch(
@@ -161,22 +151,12 @@ function FromUrl(props: Props) {
               );
 
               const episodeIndex = result.title.toLowerCase().indexOf(' episode');
-              const title =
-                episodeIndex >= 0
-                  ? result.title.slice(0, episodeIndex)
-                  : result.title;
-              const watchLater: watchLaterJSON[] = JSON.parse(
-                store.getState().settings.watchLater,
-              );
-              const watchLaterIndex = watchLater.findIndex(
-                z => z.title.trim() === title.trim(),
-              );
+              const title = episodeIndex >= 0 ? result.title.slice(0, episodeIndex) : result.title;
+              const watchLater: watchLaterJSON[] = JSON.parse(store.getState().settings.watchLater);
+              const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
-                ToastAndroid.show(
-                  `${title} dihapus dari daftar tonton nanti`,
-                  ToastAndroid.SHORT,
-                );
+                ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
               }
             }
           } catch (e: any) {
@@ -189,24 +169,28 @@ function FromUrl(props: Props) {
     return () => {
       abort.abort();
     };
+    // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleError = useCallback((err: Error) => {
-    if (err.message === 'Silahkan selesaikan captcha') {
+  const handleError = useCallback(
+    (err: Error) => {
+      if (err.message === 'Silahkan selesaikan captcha') {
+        props.navigation.goBack();
+        return;
+      }
+      if (err.message === 'canceled' || err.message === 'Aborted') {
+        return;
+      }
+      const errMessage =
+        err.message === 'Network Error'
+          ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+          : 'Error tidak diketahui: ' + err.message;
+      Alert.alert('Error', errMessage);
       props.navigation.goBack();
-      return;
-    }
-    if (err.message === 'canceled' || err.message === 'Aborted') {
-      return;
-    }
-    const errMessage =
-      err.message === 'Network Error'
-        ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-        : 'Error tidak diketahui: ' + err.message;
-    Alert.alert('Error', errMessage);
-    props.navigation.goBack();
-  }, [props]);
+    },
+    [props],
+  );
 
   useEffect(() => {
     const dotsInterval = setInterval(() => {
@@ -235,9 +219,7 @@ function FromUrl(props: Props) {
       {/* tips */}
       <View style={{ alignItems: 'center' }}>
         <View style={{ position: 'absolute', bottom: 10 }}>
-          <Text style={[{ textAlign: 'center' }, globalStyles.text]}>
-            {randomTips}
-          </Text>
+          <Text style={[{ textAlign: 'center' }, globalStyles.text]}>{randomTips}</Text>
         </View>
       </View>
     </View>

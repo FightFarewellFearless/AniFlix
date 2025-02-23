@@ -14,8 +14,8 @@ import { configureReanimatedLogger } from 'react-native-reanimated';
 require('moment/locale/id');
 
 configureReanimatedLogger({
-    strict: false,
-})
+  strict: false,
+});
 
 polyfillEncoding();
 polyfillReadableStream();

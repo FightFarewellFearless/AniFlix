@@ -1,9 +1,4 @@
-import React, {
-  memo,
-  ReactElement,
-  useCallback,
-  useState,
-} from 'react';
+import { memo, ReactElement, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,7 +10,7 @@ import {
   Switch,
   Text,
   View,
-  useColorScheme
+  useColorScheme,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -71,7 +66,6 @@ function Setting(_props: Props) {
     );
   };
 
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState('');
 
@@ -82,22 +76,34 @@ function Setting(_props: Props) {
 
   const backupData = useCallback(async () => {
     try {
-      const isGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+      const isGranted = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      );
       if (isGranted || Number(Platform.Version) >= 33) {
         backup();
       } else {
-        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        );
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           backup();
         } else {
-          Alert.alert('Akses ditolak', 'Gagal mencadangkan data dikarenakan akses ke penyimpanan di tolak');
+          Alert.alert(
+            'Akses ditolak',
+            'Gagal mencadangkan data dikarenakan akses ke penyimpanan di tolak',
+          );
         }
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        const data = Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString('base64');
-        const backupData = await createDocument(data, { initialName: fileuri, mimeType: 'text/plain' });
-        if( backupData ) {
+        const data = Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString(
+          'base64',
+        );
+        const backupFile = await createDocument(data, {
+          initialName: fileuri,
+          mimeType: 'text/plain',
+        });
+        if (backupFile) {
           Alert.alert('Berhasil', `Data berhasil di backup!`);
         }
       }
@@ -106,30 +112,53 @@ function Setting(_props: Props) {
     }
   }, []);
 
-  const restoreData = useCallback(
-    async () => {
+  const restoreHistoryOrWatchLater = useCallback(
+    (restoreDataFromBackup: (HistoryJSON | watchLaterJSON)[], target: 'history' | 'watchLater') => {
+      const currentData: typeof restoreDataFromBackup = JSON.parse(
+        store.getState().settings[target],
+      );
 
+      for (const result of restoreDataFromBackup) {
+        const dataINDEX = currentData.findIndex(val => val.title === result.title);
+
+        if (dataINDEX >= 0) {
+          if (currentData[dataINDEX].date > result.date) {
+            continue;
+          }
+          currentData.splice(dataINDEX, 1);
+        }
+        currentData.push(result);
+      }
+      currentData.sort((a, b) => b.date - a.date);
+      dispatchSettings(
+        setDatabase({
+          target,
+          value: JSON.stringify(currentData),
+        }),
+      );
+    },
+    [dispatchSettings],
+  );
+
+  const restoreData = useCallback(async () => {
+    try {
+      const doc = await DocumentPicker.getDocumentAsync({
+        type: 'text/plain',
+        copyToCacheDirectory: true,
+      });
+
+      if (!doc.assets) return;
+
+      // RNFS.readFile(doc.fileCopyUri).then(console.log);
+      const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
+      const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+      await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
       try {
-        const doc = await DocumentPicker.getDocumentAsync({
-          type: 'text/plain',
-          copyToCacheDirectory: true,
-        });
-
-        if(!doc.assets) return;
-
-        // RNFS.readFile(doc.fileCopyUri).then(console.log);
-        const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
-        const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
-        await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
-        try {
-          (
-            Object.keys(backupDataJSON) as SetDatabaseTarget[]
-          ).filter(value => defaultDatabaseValueKeys.includes(value)).forEach(value => {
+        (Object.keys(backupDataJSON) as SetDatabaseTarget[])
+          .filter(value => defaultDatabaseValueKeys.includes(value))
+          .forEach(value => {
             if (value === 'history' || value === 'watchLater') {
-              restoreHistoryOrWatchLater(
-                JSON.parse(backupDataJSON[value]),
-                value,
-              );
+              restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
             } else {
               dispatchSettings(
                 setDatabase({
@@ -139,26 +168,20 @@ function Setting(_props: Props) {
               );
             }
           });
-          Alert.alert(
-            'Restore berhasil!',
-            'Kamu berhasil kembali ke backup sebelumnya!',
-          );
-        } catch (e: any) {
-          Alert.alert('Restore gagal!', e.message);
-        }
+        Alert.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
       } catch (e: any) {
-        const errMessage =
-          e.message === 'Network Error'
-            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + e.message;
-        Alert.alert('Restore gagal!', errMessage);
-      } finally {
-        setModalVisible(false);
+        Alert.alert('Restore gagal!', e.message);
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+    } catch (e: any) {
+      const errMessage =
+        e.message === 'Network Error'
+          ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+          : 'Error tidak diketahui: ' + e.message;
+      Alert.alert('Restore gagal!', errMessage);
+    } finally {
+      setModalVisible(false);
+    }
+  }, [dispatchSettings, restoreHistoryOrWatchLater]);
 
   const deleteHistory = useCallback(() => {
     Alert.alert(
@@ -181,10 +204,7 @@ function Setting(_props: Props) {
                   value: '[]',
                 }),
               );
-              Alert.alert(
-                'Histori dihapus',
-                'Histori tontonan kamu sudah di hapus',
-              );
+              Alert.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
             } catch (e: any) {
               Alert.alert('Gagal menghapus histori!', e.message);
             } finally {
@@ -196,36 +216,6 @@ function Setting(_props: Props) {
     );
   }, [dispatchSettings]);
 
-  const restoreHistoryOrWatchLater = (
-    restoreDataFromBackup: (HistoryJSON | watchLaterJSON)[],
-    target: 'history' | 'watchLater',
-  ) => {
-    const currentData: typeof restoreDataFromBackup = JSON.parse(
-      store.getState().settings[target],
-    );
-
-    for (const result of restoreDataFromBackup) {
-      const dataINDEX = currentData.findIndex(
-        val => val.title === result.title,
-      );
-
-      if (dataINDEX >= 0) {
-        if (currentData[dataINDEX].date > result.date) {
-          continue;
-        }
-        currentData.splice(dataINDEX, 1);
-      }
-      currentData.push(result);
-    }
-    currentData.sort((a, b) => b.date - a.date);
-    dispatchSettings(
-      setDatabase({
-        target,
-        value: JSON.stringify(currentData),
-      }),
-    );
-  };
-
   const iconSize = 18;
 
   const settingsData: SettingsData[] = [
@@ -235,19 +225,14 @@ function Setting(_props: Props) {
         'Beri tahu saya persentase baterai dan waktu, saat sedang menonton dalam mode fullscreen',
       icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
-        <Switch
-          value={batteryTimeInfoSwitch}
-          onValueChange={batteryTimeSwitchHandler}
-        />
+        <Switch value={batteryTimeInfoSwitch} onValueChange={batteryTimeSwitchHandler} />
       ),
       handler: batteryTimeSwitchHandler,
     },
     {
       title: 'Cadangkan data',
       description: 'Cadangkan seluruh data aplikasi',
-      icon: (
-        <Icon name="cloud-upload" style={globalStyles.text} size={iconSize} />
-      ),
+      icon: <Icon name="cloud-upload" style={globalStyles.text} size={iconSize} />,
       handler: backupData,
     },
     {
@@ -278,7 +263,7 @@ function Setting(_props: Props) {
       <FlatList
         data={settingsData}
         keyExtractor={keyExtractor}
-        renderItem={({item}) => {
+        renderItem={({ item }) => {
           return <SettingList item={item} />;
         }}
         extraData={styles}
@@ -318,9 +303,7 @@ function SettingList({ item }: { item: SettingsData }) {
     <TouchableOpacity style={styles.settingListContainer} onPress={handler}>
       <View style={styles.settingListIcon}>{icon}</View>
       <View style={styles.settingListText}>
-        <Text style={[globalStyles.text, styles.settingListTextTitle]}>
-          {title}
-        </Text>
+        <Text style={[globalStyles.text, styles.settingListTextTitle]}>{title}</Text>
         <Text style={styles.settingListTextDescription}>{description}</Text>
       </View>
       <View style={styles.settingListRightComponent}>{rightComponent}</View>
@@ -425,6 +408,6 @@ function useStyles() {
       color: globalStyles.text.color,
     },
   });
-};
+}
 
 export default memo(Setting);

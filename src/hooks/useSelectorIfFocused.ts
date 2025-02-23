@@ -18,9 +18,7 @@ function useSelectorIfFocused<T = string>(
 ) {
   const lastValue = useRef<string>();
   const [data, setData] = useState<T | string>(
-    modifierFunc
-      ? modifierFunc(selector(store.getState()))
-      : selector(store.getState()),
+    modifierFunc ? modifierFunc(selector(store.getState())) : selector(store.getState()),
   );
   const fetchData = () => {
     const stateNow = selector(store.getState());
@@ -44,6 +42,7 @@ function useSelectorIfFocused<T = string>(
       return () => {
         unsubscribe();
       };
+      // eslint-disable-next-line react-compiler/react-compiler
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );

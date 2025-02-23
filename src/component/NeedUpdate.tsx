@@ -1,11 +1,4 @@
-import React, {
-  Fragment,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -38,7 +31,6 @@ type Props = StackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 const MB = 1000;
 
 function NeedUpdate(props: Props) {
-  "use no memo";
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -52,7 +44,7 @@ function NeedUpdate(props: Props) {
 
   const lastMB = useRef(0);
   const lastMS = useRef(0);
-  const totalMB = useRef(0);
+  const [totalMB, setTotalMB] = useState(0);
   const [netSpeed, setNetSpeed] = useState('0 MB/s');
   const [progressPercent, setProgressPercent] = useState(0); // new state
 
@@ -78,7 +70,7 @@ function NeedUpdate(props: Props) {
           downloadProgress.set(value ? 100 : 0);
         });
     }
-  }, [downloadProgress]);
+  }, [downloadProgress, props.route.params]);
 
   const downloadUpdate = useCallback(() => {
     setIsDownloadStart(true);
@@ -103,7 +95,7 @@ function NeedUpdate(props: Props) {
           );
           lastMB.current = received;
           lastMS.current = Date.now();
-          totalMB.current = total;
+          setTotalMB(total);
         })
         .then(async res => {
           setIsDownloadStart(true);
@@ -119,39 +111,40 @@ function NeedUpdate(props: Props) {
         });
     } else {
       setIsDownloadStart(true);
-      Updates.fetchUpdateAsync().then(update => {
-        downloadProgress.set(100);
-        Alert.alert("Download selesai", "Restart aplikasi untuk melakukan update", 
-          [
-            { text: "Restart", onPress: () => {
-              Updates.reloadAsync();
-            } },
-          ]
-        );
-      }).catch(() => {
-        setIsDownloadStart(false);
-        ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-      })
-    };
+      Updates.fetchUpdateAsync()
+        .then(() => {
+          downloadProgress.set(100);
+          Alert.alert('Download selesai', 'Restart aplikasi untuk melakukan update', [
+            {
+              text: 'Restart',
+              onPress: () => {
+                Updates.reloadAsync();
+              },
+            },
+          ]);
+        })
+        .catch(() => {
+          setIsDownloadStart(false);
+          ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+        });
+    }
     ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
     Alert.alert(
       'Perhatian',
       'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
     );
-  }, [
-    downloadProgress,
-  ]);
+  }, [downloadProgress, props.route.params]);
 
   const installUpdate = useCallback(() => {
-    if(props.route.params.nativeUpdate) {
+    if (props.route.params.nativeUpdate) {
       RNFetchBlob.android.actionViewIntent(
         `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
         'application/vnd.android.package-archive',
       );
     } else {
       Updates.reloadAsync();
-    };
-  }, []);
+    }
+  }, [props.route.params]);
 
   const downloadProgressAnimaton = useAnimatedStyle(() => {
     return {
@@ -162,9 +155,7 @@ function NeedUpdate(props: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={[globalStyles.text, styles.needUpdate]}>
-          Update baru tersedia!
-        </Text>
+        <Text style={[globalStyles.text, styles.needUpdate]}>Update baru tersedia!</Text>
         <Text style={[globalStyles.text, styles.desc]}>
           Untuk melanjutkan penggunaan aplikasi harap lakukan update.
         </Text>
@@ -172,10 +163,12 @@ function NeedUpdate(props: Props) {
 
       <View style={styles.updateInfo}>
         <View style={styles.versionInfo}>
-          <Text style={[globalStyles.text, styles.version]}>{appVersion}-JS_{OTAJSVersion}</Text>
+          <Text style={[globalStyles.text, styles.version]}>
+            {appVersion}-JS_{OTAJSVersion}
+          </Text>
           <Text style={[globalStyles.text, { fontSize: 20 }]}>{'->'}</Text>
           <Text style={[globalStyles.text, styles.latestVersion]}>
-            {props.route.params.nativeUpdate ? props.route.params.latestVersion : "OTA Update"}
+            {props.route.params.nativeUpdate ? props.route.params.latestVersion : 'OTA Update'}
           </Text>
         </View>
         <ScrollView>
@@ -185,11 +178,7 @@ function NeedUpdate(props: Props) {
         </ScrollView>
         {!isDownloadStart ? (
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
-            <Icon
-              name="file-download"
-              color={styles.buttonText.color}
-              size={20}
-            />
+            <Icon name="file-download" color={styles.buttonText.color} size={20} />
             <Text style={[globalStyles.text, styles.buttonText]}>Download update</Text>
           </TouchableOpacity>
         ) : isProgress100 === true ? (
@@ -200,31 +189,23 @@ function NeedUpdate(props: Props) {
               <Icon name="download" color={styles.buttonText.color} size={20} />
               <Text style={[globalStyles.text, styles.buttonText]}>Instal update</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.download, { flex: 1 }]}
-              onPress={downloadUpdate}>
-              <Icon
-                name="file-download"
-                color={styles.buttonText.color}
-                size={20}
-              />
-              <Text style={[globalStyles.text, styles.buttonText, { textAlign: 'center' }]}>Download ulang update</Text>
+            <TouchableOpacity style={[styles.download, { flex: 1 }]} onPress={downloadUpdate}>
+              <Icon name="file-download" color={styles.buttonText.color} size={20} />
+              <Text style={[globalStyles.text, styles.buttonText, { textAlign: 'center' }]}>
+                Download ulang update
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={[styles.download, { flexDirection: 'column' }]}>
             <View style={styles.sliderContainer}>
-              <Animated.View
-                style={[styles.slider, downloadProgressAnimaton]}
-              />
+              <Animated.View style={[styles.slider, downloadProgressAnimaton]} />
               <Text style={styles.progressText}>{progressPercent}%</Text>
             </View>
             <View style={styles.netContainer}>
-              <Text style={[globalStyles.text, styles.netSpeed]}>
-                {netSpeed}
-              </Text>
+              <Text style={[globalStyles.text, styles.netSpeed]}>{netSpeed}</Text>
               <Text style={[globalStyles.text, styles.netTotal]}>
-                {(totalMB.current / MB / MB).toFixed(2)} MB
+                {(totalMB / MB / MB).toFixed(2)} MB
               </Text>
             </View>
           </View>

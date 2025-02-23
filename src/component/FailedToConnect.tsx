@@ -2,14 +2,7 @@ import React from 'react';
 import useGlobalStyles, { darkText } from '../assets/style';
 import { StackActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {
-  Linking,
-  Text,
-  ToastAndroid,
-  View,
-  StyleSheet,
-  useColorScheme,
-} from 'react-native';
+import { Linking, Text, ToastAndroid, View, StyleSheet, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
@@ -52,11 +45,7 @@ function FailedToConnect(props: Props) {
           ]}
           size={40}
         />
-        <Text
-          style={[
-            { textAlign: 'center', fontWeight: '400' },
-            globalStyles.text,
-          ]}>
+        <Text style={[{ textAlign: 'center', fontWeight: '400' }, globalStyles.text]}>
           Gagal terhubung ke server{'\n'}
           Pastikan kamu terhubung ke internet dan coba lagi.{'\n'}
           Jika masalah berlanjut, silahkan laporkan ke github issue: {'\n'}{' '}
@@ -65,8 +54,13 @@ function FailedToConnect(props: Props) {
           </Text>
           {'\n'} Atau join discord dengan klik tombol "Join discord" dibawah
         </Text>
-        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>Jika kamu menggunakan DNS pastikan untuk tidak menggunakan versi "security" DNS tersebut (jika ada).</Text>
-        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>Direkomendasikan menggunakan DNS 1.1.1.1 atau 8.8.8.8</Text>
+        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
+          Jika kamu menggunakan DNS pastikan untuk tidak menggunakan versi "security" DNS tersebut{' '}
+          (jika ada).
+        </Text>
+        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
+          Direkomendasikan menggunakan DNS 1.1.1.1 atau 8.8.8.8
+        </Text>
         <TouchableOpacity
           style={{
             backgroundColor: '#008a83',
@@ -78,8 +72,7 @@ function FailedToConnect(props: Props) {
             shadowColor: 'white',
           }}
           onPress={tryagain}>
-          <Text
-            style={[{ fontSize: 17, fontWeight: 'bold' }, { color: darkText }]}>
+          <Text style={[{ fontSize: 17, fontWeight: 'bold' }, { color: darkText }]}>
             <Icon name="refresh" size={17} /> Coba lagi
           </Text>
         </TouchableOpacity>
@@ -92,17 +85,12 @@ function FailedToConnect(props: Props) {
           }}>
           <TouchableOpacity
             onPress={() => {
-              Linking.openURL(
-                'https://github.com/FightFarewellFearless/AniFlix',
-              );
+              Linking.openURL('https://github.com/FightFarewellFearless/AniFlix');
             }}
             style={[styles.bottomCredits, { marginRight: 8 }]}>
             {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
             <Icon name="github" size={43} color={globalStyles.text.color} />
-            <Text style={[globalStyles.text, { fontSize: 12 }]}>
-              {' '}
-              Open-Sourced on github
-            </Text>
+            <Text style={[globalStyles.text, { fontSize: 12 }]}> Open-Sourced on github</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -112,10 +100,7 @@ function FailedToConnect(props: Props) {
             style={styles.bottomCredits}>
             {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
             <Icon name="discord" size={43} color={'#7289d9'} />
-            <Text style={[globalStyles.text, { fontSize: 12 }]}>
-              {' '}
-              Join discord
-            </Text>
+            <Text style={[globalStyles.text, { fontSize: 12 }]}> Join discord</Text>
           </TouchableOpacity>
         </View>
       </View>

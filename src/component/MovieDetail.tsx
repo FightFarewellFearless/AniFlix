@@ -1,11 +1,23 @@
-import { StackScreenProps } from "@react-navigation/stack";
-import { RootStackNavigator } from "../types/navigation";
-import useGlobalStyles from "../assets/style";
-import { Image, ImageBackground, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, useColorScheme, useWindowDimensions, View, ViewStyle } from "react-native";
-import { memo, useEffect, useState } from "react";
-import { getColors } from "react-native-image-colors";
-import Icon from "react-native-vector-icons/FontAwesome";
-import DarkOverlay from "./misc/DarkOverlay";
+import { StackScreenProps } from '@react-navigation/stack';
+import { RootStackNavigator } from '../types/navigation';
+import useGlobalStyles from '../assets/style';
+import {
+  Image,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  useColorScheme,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { memo, useEffect, useState } from 'react';
+import { getColors } from 'react-native-image-colors';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import DarkOverlay from './misc/DarkOverlay';
 
 type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
@@ -21,26 +33,33 @@ function MovieDetail(props: Props) {
         const color = colors.dominant;
         setImageColors(color);
       }
-    })
-  }, []);
+    });
+  }, [props.route.params.data.thumbnailUrl]);
   return (
     <ScrollView style={[styles.container, { backgroundColor: imageColors }]}>
       <ImageBackground
         source={{ uri: props.route.params.data.thumbnailUrl }}
         blurRadius={3}
-        style={[styles.posterContainer, { height: window.height * 40 / 100 }]}>
+        style={[styles.posterContainer, { height: (window.height * 40) / 100 }]}>
         <DarkOverlay />
         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', rowGap: 6 }]}>
           <Text style={styles.titleText}>{props.route.params.data.title}</Text>
           <Image
             source={{ uri: props.route.params.data.thumbnailUrl }}
             resizeMode="center"
-            style={[{ width: '70%', flex: 1 }]} />
-          <View style={{ flexDirection: 'row', columnGap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+            style={[{ width: '70%', flex: 1 }]}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              columnGap: 4,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: '#0ff5c3' }]}
               onPress={() => {
-                ToastAndroid.show("Coming soon...", ToastAndroid.SHORT);
+                ToastAndroid.show('Coming soon...', ToastAndroid.SHORT);
               }}>
               <Icon name="plus" size={15} color="#fff" />
               <Text style={styles.buttonText}>Tambahkan ke tonton nanti</Text>
@@ -51,7 +70,7 @@ function MovieDetail(props: Props) {
                 props.navigation.navigate('FromUrl', {
                   isMovie: true,
                   link: props.route.params.data.streamingUrl,
-                })
+                });
               }}>
               <Icon name="play" size={15} color="#fff" />
               <Text style={styles.buttonText}>Tonton sekarang</Text>
@@ -62,39 +81,37 @@ function MovieDetail(props: Props) {
       <Section style={{ flexDirection: 'row' }}>
         <View style={styles.container}>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="star" size={15} color="#ffbb00" />{' '}
-            {props.route.params.data.rating}
+            <Icon name="star" size={15} color="#ffbb00" /> {props.route.params.data.rating}
           </Text>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="calendar" size={15} color="#ffbb00" />{' '}
-            {props.route.params.data.releaseDate}
+            <Icon name="calendar" size={15} color="#ffbb00" /> {props.route.params.data.releaseDate}
           </Text>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="refresh" size={15} color="#ffbb00" />{' '}
-            {props.route.params.data.updateDate}
+            <Icon name="refresh" size={15} color="#ffbb00" /> {props.route.params.data.updateDate}
           </Text>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="users" size={15} color="#ffbb00" />{' '}
-            {props.route.params.data.studio}
+            <Icon name="users" size={15} color="#ffbb00" /> {props.route.params.data.studio}
           </Text>
         </View>
 
         <View style={styles.container}>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="tags" size={15} color="#ffbb00" /> Genre: {props.route.params.data.genres.join(', ')}
+            <Icon name="tags" size={15} color="#ffbb00" /> Genre:{' '}
+            {props.route.params.data.genres.join(', ')}
           </Text>
         </View>
       </Section>
       <Section>
         <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 17 }]}>Sinopsis</Text>
-        <Text style={[globalStyles.text, { textAlign: 'justify' }]}>{props.route.params.data.synopsis}</Text>
+        <Text style={[globalStyles.text, { textAlign: 'justify' }]}>
+          {props.route.params.data.synopsis}
+        </Text>
       </Section>
     </ScrollView>
-  )
+  );
 }
 
-function Section(props: { children?: React.ReactNode, style?: ViewStyle }) {
-  const globalStyles = useGlobalStyles();
+function Section(props: { children?: React.ReactNode; style?: ViewStyle }) {
   const colorScheme = useColorScheme();
   return (
     <View
@@ -106,17 +123,13 @@ function Section(props: { children?: React.ReactNode, style?: ViewStyle }) {
         marginVertical: 2,
         marginHorizontal: 1,
         borderRadius: 8,
-      }}
-    >
+      }}>
       {props.children}
     </View>
-  )
+  );
 }
 
 function useStyles() {
-  const colorScheme = useColorScheme();
-  const globalStyles = useGlobalStyles();
-
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -145,9 +158,8 @@ function useStyles() {
     buttonText: {
       color: 'black',
       fontWeight: 'bold',
-
-    }
-  })
+    },
+  });
 }
 
 export default memo(MovieDetail);

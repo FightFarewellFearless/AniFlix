@@ -1,7 +1,8 @@
 import {
   Text,
   View,
-  Alert, StyleSheet,
+  Alert,
+  StyleSheet,
   useColorScheme,
   NativeSyntheticEvent,
   NativeScrollEvent,
@@ -53,9 +54,11 @@ function History(props: Props) {
   const [searchKeyword, setSearchKeyword] = useState('');
   const searchKeywordDeferred = useDeferredValue(searchKeyword);
 
-  const filteredData = useMemo(() => data.filter(item =>
-    item.title.toLowerCase().includes(searchKeywordDeferred.toLowerCase())
-  ), [searchKeywordDeferred, data]);
+  const filteredData = useMemo(
+    () =>
+      data.filter(item => item.title.toLowerCase().includes(searchKeywordDeferred.toLowerCase())),
+    [searchKeywordDeferred, data],
+  );
 
   const flatListRef = useRef<FlashList<HistoryJSON>>();
 
@@ -75,42 +78,42 @@ function History(props: Props) {
     };
   });
 
-  const showScrollToTopButton = () => {
-    scrollToTopButtonScale.set(withSpring(1, {
-      damping: 12,
-    }));
-  }
-  const hideScrollToTopButton = () => {
-    scrollToTopButtonScale.set(withSpring(0, {
-      damping: 12,
-    }));
-  }
+  const showScrollToTopButton = useCallback(() => {
+    scrollToTopButtonScale.set(
+      withSpring(1, {
+        damping: 12,
+      }),
+    );
+  }, [scrollToTopButtonScale]);
+  const hideScrollToTopButton = useCallback(() => {
+    scrollToTopButtonScale.set(
+      withSpring(0, {
+        damping: 12,
+      }),
+    );
+  }, [scrollToTopButtonScale]);
 
-  const scrollHandler = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    runOnRuntime(historyRuntime, (value: number) => {
-      'worklet';
-      if (value <= 100) {
-        if (scrollToTopButtonState.get() === 'show') {
+  const scrollHandler = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      runOnRuntime(historyRuntime, (value: number) => {
+        'worklet';
+        if (value <= 100) {
+          if (scrollToTopButtonState.get() === 'show') {
+            runOnJS(hideScrollToTopButton)();
+          }
+          scrollToTopButtonState.set('hide');
+        } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
+          runOnJS(showScrollToTopButton)();
+          scrollToTopButtonState.set('show');
+        } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
           runOnJS(hideScrollToTopButton)();
+          scrollToTopButtonState.set('hide');
         }
-        scrollToTopButtonState.set('hide');
-      } else if (
-        value < scrollLastValue.get() &&
-        scrollToTopButtonState.get() === 'hide'
-      ) {
-        runOnJS(showScrollToTopButton)();
-        scrollToTopButtonState.set('show');
-      } else if (
-        value > scrollLastValue.get() &&
-        scrollToTopButtonState.get() === 'show'
-      ) {
-        runOnJS(hideScrollToTopButton)();
-        scrollToTopButtonState.set('hide');
-      }
-      scrollLastValue.set(value);
-    })(event.nativeEvent.contentOffset.y);
-
-  }, []);
+        scrollLastValue.set(value);
+      })(event.nativeEvent.contentOffset.y);
+    },
+    [hideScrollToTopButton, scrollLastValue, scrollToTopButtonState, showScrollToTopButton],
+  );
 
   const deleteHistory = useCallback(
     async (index: number) => {
@@ -160,10 +163,7 @@ function History(props: Props) {
               <View style={styles.listWatchTime}>
                 <Text style={[globalStyles.text, styles.listDateText]}>
                   {moment
-                    .duration(
-                      moment(Date.now()).diff(item.date, 'seconds'),
-                      'seconds',
-                    )
+                    .duration(moment(Date.now()).diff(item.date, 'seconds'), 'seconds')
                     .humanize() + ' '}
                   yang lalu pukul {moment(item.date).format('HH:mm')}
                 </Text>
@@ -176,9 +176,7 @@ function History(props: Props) {
                   onPress={() => {
                     Alert.alert(
                       'Yakin?',
-                      'Yakin kamu ingin menghapus "' +
-                      item.title.trim() +
-                      '" dari histori?',
+                      'Yakin kamu ingin menghapus "' + item.title.trim() + '" dari histori?',
                       [
                         {
                           text: 'Tidak',
@@ -188,9 +186,7 @@ function History(props: Props) {
                         {
                           text: 'Ya',
                           onPress: () =>
-                            deleteHistory(
-                              data.findIndex(val => val.title === item.title),
-                            ),
+                            deleteHistory(data.findIndex(val => val.title === item.title)),
                         },
                       ],
                     );
@@ -200,14 +196,18 @@ function History(props: Props) {
               </View>
             </View>
             <View style={styles.listTitle}>
-              <Text style={[{ flexShrink: 1 }, globalStyles.text]}>
-                {item.title}
-              </Text>
+              <Text style={[{ flexShrink: 1 }, globalStyles.text]}>{item.title}</Text>
             </View>
 
             <View style={{ flexDirection: 'row' }}>
               <View style={styles.listEpisodeAndPart}>
-                <Text style={[styles.listEpisode, item.isMovie ? { color: '#ff7300', fontWeight: 'bold', fontSize: 16 } : undefined]}>
+                <Text
+                  style={[
+                    styles.listEpisode,
+                    item.isMovie
+                      ? { color: '#ff7300', fontWeight: 'bold', fontSize: 16 }
+                      : undefined,
+                  ]}>
                   {item.isMovie ? 'Movie' : item.episode}
                   {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
@@ -229,7 +229,24 @@ function History(props: Props) {
         </TouchableOpacity>
       );
     },
-    [data, deleteHistory, props.navigation, styles],
+    [
+      data,
+      deleteHistory,
+      globalStyles.text,
+      props.navigation,
+      styles.deleteButton,
+      styles.deleteContainer,
+      styles.lastDuration,
+      styles.lastDurationText,
+      styles.listContainerButton,
+      styles.listDateText,
+      styles.listEpisode,
+      styles.listEpisodeAndPart,
+      styles.listImage,
+      styles.listInfoContainer,
+      styles.listTitle,
+      styles.listWatchTime,
+    ],
   );
 
   const scrollToTop = useCallback(() => {
@@ -237,7 +254,6 @@ function History(props: Props) {
       animated: true,
       offset: 0,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -250,9 +266,11 @@ function History(props: Props) {
           value={searchKeyword}
           onChangeText={setSearchKeyword}
         />
-        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => {
-          setSearchKeyword('');
-        }}>
+        <TouchableOpacity
+          style={{ alignSelf: 'center' }}
+          onPress={() => {
+            setSearchKeyword('');
+          }}>
           <FontAwesomeIcon name="times" size={20} color={globalStyles.text.color} />
         </TouchableOpacity>
         {searchKeyword !== searchKeywordDeferred && (
@@ -270,22 +288,26 @@ function History(props: Props) {
           onScroll={scrollHandler}
           extraData={styles}
           renderItem={renderFlatList}
-          ListHeaderComponent={() => (
-            data.length > 0 &&
-            <View>
-              {searchKeywordDeferred !== '' && (
-                <Text style={[globalStyles.text, styles.searchKeywordText]}>
-                  Menampilkan hasil untuk : {searchKeywordDeferred} ({filteredData.length})
+          ListHeaderComponent={() =>
+            data.length > 0 && (
+              <View>
+                {searchKeywordDeferred !== '' && (
+                  <Text style={[globalStyles.text, styles.searchKeywordText]}>
+                    Menampilkan hasil untuk : {searchKeywordDeferred} ({filteredData.length})
+                  </Text>
+                )}
+                <Text style={[globalStyles.text, { margin: 10 }]}>
+                  Jumlah histori tontonan kamu:{' '}
+                  <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>
+                  {'\n'}
+                  <Text
+                    style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                    Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
+                  </Text>
                 </Text>
-              )}
-              <Text style={[globalStyles.text, { margin: 10 }]}>
-                Jumlah histori tontonan kamu: <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>{'\n'}
-                <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
-                  Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
-                </Text>
-              </Text>
-            </View>
-          )}
+              </View>
+            )
+          }
           ListEmptyComponent={() => (
             <View style={styles.noHistory}>
               <Text style={[globalStyles.text]}>Tidak ada histori tontonan</Text>
@@ -295,11 +317,7 @@ function History(props: Props) {
         <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
           <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
             <View style={styles.scrollToTopIcon}>
-              <Icon
-                name="arrow-up"
-                color={darkText}
-                size={25}
-              />
+              <Icon name="arrow-up" color={darkText} size={25} />
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -383,15 +401,13 @@ function useStyles() {
       color: 'red',
     },
     lastDuration: {
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
     },
     lastDurationText: {
       fontSize: 13,
       fontStyle: 'italic',
     },
-    listWatchTime: {
-
-    },
+    listWatchTime: {},
     listDateText: {
       color: 'gray',
       fontSize: 12,
@@ -399,10 +415,9 @@ function useStyles() {
     },
     deleteContainer: {
       flex: 1,
-      alignItems: 'flex-end'
+      alignItems: 'flex-end',
     },
-    deleteButton: {
-    },
+    deleteButton: {},
     noHistory: {
       flex: 1,
       justifyContent: 'center',
@@ -416,13 +431,13 @@ function useStyles() {
       margin: 10,
       paddingHorizontal: 10,
       flexDirection: 'row',
-      alignItems: 'center'
+      alignItems: 'center',
     },
     searchInput: {
       color: globalStyles.text.color,
       flex: 1,
     },
-    searchKeywordText: { 
+    searchKeywordText: {
       opacity: 0.8,
       fontStyle: 'italic',
       textDecorationLine: 'underline',

@@ -31,10 +31,12 @@ const Stack = createStackNavigator<RootStackNavigator>();
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
-  setWebViewOpen.openWebViewCF = (isOpen: boolean, url: string) => {
-    setIsOpen(isOpen);
-    setCfUrl(url);
-  };
+  useEffect(() => {
+    setWebViewOpen.openWebViewCF = (isOpenCF: boolean, url: string) => {
+      setIsOpen(isOpenCF);
+      setCfUrl(url);
+    };
+  }, []);
   const colorScheme = useColorScheme();
   useEffect(() => {
     StatusBar.setHidden(false);
@@ -48,13 +50,18 @@ function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer theme={colorScheme === 'dark' ? {
-        ...DarkTheme,
-        colors: {
-          ...DarkTheme.colors,
-          background: '#0A0A0A',
-        }
-      } : undefined}>
+      <NavigationContainer
+        theme={
+          colorScheme === 'dark'
+            ? {
+                ...DarkTheme,
+                colors: {
+                  ...DarkTheme.colors,
+                  background: '#0A0A0A',
+                },
+              }
+            : undefined
+        }>
         <Provider store={store}>
           <Stack.Navigator
             initialRouteName="connectToServer"
@@ -66,9 +73,13 @@ function App() {
             <Stack.Screen name="AnimeDetail" component={AniDetail} />
             <Stack.Screen name="MovieDetail" component={MovieDetail} />
             <Stack.Screen name="FromUrl" component={FromUrl} />
-            <Stack.Screen name="Video" component={Video} options={{
-              headerShown: true,
-            }} />
+            <Stack.Screen
+              name="Video"
+              component={Video}
+              options={{
+                headerShown: true,
+              }}
+            />
             <Stack.Screen name="connectToServer" component={Connecting} />
             <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
             <Stack.Screen name="Blocked" component={Blocked} />

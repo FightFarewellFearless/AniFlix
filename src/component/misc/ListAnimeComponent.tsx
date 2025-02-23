@@ -1,23 +1,28 @@
-import { StackActions } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { TouchableOpacity, View, Text, StyleSheet, useWindowDimensions } from "react-native";
+import { StackActions } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { TouchableOpacity, View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { NewAnimeList } from "../../types/anime";
-import { HomeStackNavigator } from "../../types/navigation";
-import { Movies } from "../../utils/animeMovie";
-import ImageLoading from "../ImageLoading";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NewAnimeList } from '../../types/anime';
+import { HomeStackNavigator } from '../../types/navigation';
+import { Movies } from '../../utils/animeMovie';
+import ImageLoading from '../ImageLoading';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export function ListAnimeComponent(props: ({
-  newAnimeData: NewAnimeList;
-  isMovie?: false
-} | { newAnimeData: Movies; isMovie: true }) & {
-  navigationProp:
-  | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-  | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>
-  | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-  | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
-}) {
+export function ListAnimeComponent(
+  props: (
+    | {
+        newAnimeData: NewAnimeList;
+        isMovie?: false;
+      }
+    | { newAnimeData: Movies; isMovie: true }
+  ) & {
+    navigationProp:
+      | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+      | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>
+      | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+      | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
+  },
+) {
   const styles = useStyles();
   const z = props.newAnimeData;
   const navigation = props.navigationProp;
@@ -35,10 +40,7 @@ export function ListAnimeComponent(props: ({
         resizeMode="stretch"
         key={z.thumbnailUrl}
         source={{ uri: z.thumbnailUrl }}
-        style={[
-          styles.listBackground,
-          { borderColor: 'orange' },
-        ]}>
+        style={[styles.listBackground, { borderColor: 'orange' }]}>
         <View style={styles.animeTitleContainer}>
           <Text numberOfLines={2} style={styles.animeTitle}>
             {z.title}
@@ -52,7 +54,8 @@ export function ListAnimeComponent(props: ({
         </View>
         <View style={styles.animeRatingContainer}>
           <Text style={styles.animeRating}>
-            <Icon name={props.isMovie ? "check" : "calendar"} /> {props.isMovie ? "Sub Indo" : props.newAnimeData.releaseDay}
+            <Icon name={props.isMovie ? 'check' : 'calendar'} />{' '}
+            {props.isMovie ? 'Sub Indo' : props.newAnimeData.releaseDay}
           </Text>
         </View>
       </ImageLoading>
@@ -60,11 +63,10 @@ export function ListAnimeComponent(props: ({
   );
 }
 
-
 function useStyles() {
   const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = dimensions.height * 120 / 200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = dimensions.width * 120 / 200 / 1.9;
+  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
   return StyleSheet.create({
     listBackground: {
       overflow: 'hidden',
@@ -117,4 +119,3 @@ function useStyles() {
     },
   });
 }
-

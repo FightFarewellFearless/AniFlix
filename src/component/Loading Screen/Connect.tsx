@@ -38,19 +38,18 @@ import runningText from '../../assets/runningText.json';
 export const JoinDiscord = () => {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
-  return <TouchableOpacity
-    onPress={() => {
-      Linking.openURL('https://discord.gg/sbTwxHb9NM');
-    }}
-    style={styles.bottomCredits}>
-    {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-    <MaterialIcon name="discord" size={43} color={'#7289d9'} />
-    <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
-      {' '}
-      Join discord
-    </Text>
-  </TouchableOpacity>
-}
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        Linking.openURL('https://discord.gg/sbTwxHb9NM');
+      }}
+      style={styles.bottomCredits}>
+      {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
+      <MaterialIcon name="discord" size={43} color={'#7289d9'} />
+      <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}> Join discord</Text>
+    </TouchableOpacity>
+  );
+};
 
 type Props = StackScreenProps<RootStackNavigator, 'connectToServer'>;
 
@@ -110,7 +109,7 @@ function Loading(props: Props) {
     }
     const isInDatabase = (value: string): value is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(value);
-    }
+    };
     for (const dataKey of allKeys) {
       if (!isInDatabase(dataKey)) {
         AsyncStorage.removeItem(dataKey);
@@ -121,12 +120,8 @@ function Loading(props: Props) {
   const deleteUnnecessaryUpdate = useCallback(async () => {
     const isExist = await Promise.all([
       // TODO: delete this line in next 2 versions
-      RNFetchBlob.fs.exists(
-        `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`,
-      ),
-      RNFetchBlob.fs.exists(
-        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`,
-      ),
+      RNFetchBlob.fs.exists(`/storage/emulated/0/Download/AniFlix-${appVersion}.apk`),
+      RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`),
     ]);
     if (isExist.includes(true)) {
       const existingPath = isExist[0]
@@ -139,7 +134,10 @@ function Loading(props: Props) {
 
   const fetchDomain = useCallback(async () => {
     await animeLocalAPI.fetchLatestDomain().catch(() => {
-      ToastAndroid.show('Gagal mendapatkan domain terbaru, menggunakan domain default', ToastAndroid.SHORT);
+      ToastAndroid.show(
+        'Gagal mendapatkan domain terbaru, menggunakan domain default',
+        ToastAndroid.SHORT,
+      );
     });
   }, []);
 
@@ -156,15 +154,14 @@ function Loading(props: Props) {
       },
     )
       .then(d => d.json())
-      .catch(() => { });
+      .catch(() => {});
     clearTimeout(timoeut);
     if (data === undefined) {
       ToastAndroid.show('Error saat mengecek versi', ToastAndroid.SHORT);
       return true;
     } else if (data[0]?.tag_name === appVersion) {
       return true;
-    }
-    else if (data[0] === undefined) {
+    } else if (data[0] === undefined) {
       ToastAndroid.show('Melewatkan pengecekan versi karna terkena rate limit', ToastAndroid.SHORT);
       return true;
     }
@@ -179,27 +176,32 @@ function Loading(props: Props) {
         return {
           ...old,
           'Menyiapkan database': true,
-        }
+        };
       });
       const nativeAppVersion = await checkNativeAppVersion();
       if (nativeAppVersion === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      } else if (nativeAppVersion === true ||
+      } else if (
+        nativeAppVersion === true ||
         __DEV__ // skip update when app is in dev mode
       ) {
-
         const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => {
           ToastAndroid.show('Gagal mengecek update', ToastAndroid.SHORT);
           return null;
         });
 
         if (OTAUpdate !== null && OTAUpdate.isAvailable) {
-          const changelog = await fetch('https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md', {
-            headers: {
-              'User-Agent': deviceUserAgent,
-              'Cache-Control': 'no-cache',
+          const changelog = await fetch(
+            'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
+            {
+              headers: {
+                'User-Agent': deviceUserAgent,
+                'Cache-Control': 'no-cache',
+              },
             },
-          }).then(d => d.text()).catch(() => 'Gagal mendapatkan changelog');
+          )
+            .then(d => d.text())
+            .catch(() => 'Gagal mendapatkan changelog');
           props.navigation.dispatch(
             StackActions.replace('NeedUpdate', {
               changelog,
@@ -209,20 +211,20 @@ function Loading(props: Props) {
             }),
           );
           return;
-        };
+        }
 
         setLoadStatus(old => {
           return {
             ...old,
             'Mengecek versi aplikasi': true,
-          }
+          };
         });
         await fetchDomain();
         setLoadStatus(old => {
           return {
             ...old,
             'Mendapatkan domain terbaru': true,
-          }
+          };
         });
         setIsAnimeMovieWebViewOpen(true);
       } else {
@@ -246,6 +248,7 @@ function Loading(props: Props) {
     checkNativeAppVersion,
     props.navigation,
     deleteUnnecessaryUpdate,
+    fetchDomain,
   ]);
 
   const onAnimeMovieReady = useCallback(() => {
@@ -253,13 +256,13 @@ function Loading(props: Props) {
       return {
         ...old,
         'Mempersiapkan data anime movie': true,
-      }
+      };
     });
     setIsAnimeMovieWebViewOpen(false);
     connectToServer();
-  }, []);
+  }, [connectToServer]);
 
-  const quotes = useMemo(() => runningText[~~(runningText.length * Math.random())], []);
+  const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
 
   return (
     <View style={styles.container}>
@@ -270,9 +273,17 @@ function Loading(props: Props) {
           onAnimeMovieReady={onAnimeMovieReady}
         />
         <View style={styles.quotesBox}>
-          <Text style={[globalStyles.text, { fontSize: 16, fontStyle: 'italic', textAlign: 'center', fontFamily: 'serif' }]}>
+          <Text
+            style={[
+              globalStyles.text,
+              { fontSize: 16, fontStyle: 'italic', textAlign: 'center', fontFamily: 'serif' },
+            ]}>
             "{quotes.quote}"{'\n'}
-            <Text style={[globalStyles.text, { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginTop: 10 }]}>
+            <Text
+              style={[
+                globalStyles.text,
+                { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginTop: 10 },
+              ]}>
               - {quotes.by}
             </Text>
           </Text>
@@ -295,8 +306,7 @@ function Loading(props: Props) {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
-            style={[styles.bottomCredits, { marginRight: 8 }]}
-          >
+            style={[styles.bottomCredits, { marginRight: 8 }]}>
             <Icon name="github" size={43} color={globalStyles.text.color} />
             <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
               {' '}
