@@ -631,7 +631,7 @@ function SearchList({
 function ImageColorShadow({ url }: { url: string }) {
   const [color, setColor] = useState({ r: 0, g: 0, b: 0 });
   useEffect(() => {
-    ImageColors.getColors(url, { pixelSpacing: 3, cache: true, key: url }).then(colors => {
+    ImageColors.getColors(url, { pixelSpacing: 10, cache: true, key: url }).then(colors => {
       if (colors.platform === 'android') {
         const hex = colors.dominant;
         const r = parseInt(hex.substring(1, 3), 16);

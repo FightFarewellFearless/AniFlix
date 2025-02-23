@@ -72,7 +72,7 @@ function AniDetailCopilot(props: Props) {
   const complementThumbnailColor =
     thumbnailColor === '#00000000' ? globalStyles.text.color : complementHex(thumbnailColor);
   useEffect(() => {
-    getColors(data.thumbnailUrl, { pixelSpacing: 2 }).then(colors => {
+    getColors(data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
       if (colors.platform === 'android') {
         setThumbnailColor(colors.dominant);
       }

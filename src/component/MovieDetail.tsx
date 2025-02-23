@@ -28,7 +28,7 @@ function MovieDetail(props: Props) {
   const [imageColors, setImageColors] = useState<string>('#000000');
 
   useEffect(() => {
-    getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 2 }).then(colors => {
+    getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
       if (colors.platform === 'android') {
         const color = colors.dominant;
         setImageColors(color);
