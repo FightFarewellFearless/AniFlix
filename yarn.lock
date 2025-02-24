@@ -4579,7 +4579,7 @@ __metadata:
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.2.0
     react-native-screens: 4.6.0
-    react-native-svg: 15.11.1
+    react-native-svg: 15.11.2
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.1.0
     react-native-webview: 13.13.2
@@ -11983,9 +11983,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg@npm:15.11.1":
-  version: 15.11.1
-  resolution: "react-native-svg@npm:15.11.1"
+"react-native-svg@npm:15.11.2":
+  version: 15.11.2
+  resolution: "react-native-svg@npm:15.11.2"
   dependencies:
     css-select: ^5.1.0
     css-tree: ^1.1.3
@@ -11993,7 +11993,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: be3194d2f3255b90bb239f045092ea46f677277fbd3e02ed6c79a5bcddae487081c971a1f0ed095625806f688e5b3fd5aed6ac200061057fe2bda0e7f09933f6
+  checksum: 7bc2d9a5b7ceb66905e358d995bf102d63ce017db40b024d31a6ada03c21733fd3620f9ad867d631b878e2380033ea8777e75c4f654bc5b420ea902695ed9ba8
   languageName: node
   linkType: hard
 
