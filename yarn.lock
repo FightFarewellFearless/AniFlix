@@ -4570,7 +4570,7 @@ __metadata:
     react-native-dotenv: ^3.4.11
     react-native-element-dropdown: ^2.12.4
     react-native-fetch-api: ^3.0.0
-    react-native-gesture-handler: 2.23.0
+    react-native-gesture-handler: 2.24.0
     react-native-image-colors: ^2.4.0
     react-native-marked: ^6.0.7
     react-native-orientation-locker: ^1.7.0
@@ -11854,9 +11854,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.23.0":
-  version: 2.23.0
-  resolution: "react-native-gesture-handler@npm:2.23.0"
+"react-native-gesture-handler@npm:2.24.0":
+  version: 2.24.0
+  resolution: "react-native-gesture-handler@npm:2.24.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -11864,7 +11864,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: f26400a851f62deed090cdd5e96db42ff8932c5a342f1abe8d2185ed4c7dc52b67da8e685148f2240300bda9cc8fbfbbb053541a8c27110ebff803add42bc7ea
+  checksum: 65abaeef68180fee2811d01d88ff50c231a91faca05279222fcaaa55349e758b68a7d6a9ac3eddfb1887f6b4c4790ac195b99989f1ad8a2a1f3f3bdff3ba0a76
   languageName: node
   linkType: hard
 
