@@ -26,7 +26,7 @@
     "axios": "^1.6.2",
     "buffer": "^6.0.3",
     "cheerio": "1.0.0-rc.12",
-    "expo": "52.0.28",
+    "expo": "52.0.37",
     "expo-document-picker": "13.0.2",
     "expo-linear-gradient": "14.0.2",
     "expo-splash-screen": "0.29.21",
