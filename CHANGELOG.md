@@ -1,3 +1,7 @@
+# v0.8.2-JS_14 (26-Februari-2025)
+
+Update kali ini menambahkan dukungan untuk menambahkan movie ke dalam daftar tonton nanti
+
 # v0.8.2-JS_13 (26-Februari-2025)
 
 ## Peningkatan
