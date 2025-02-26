@@ -75,8 +75,6 @@ function useBackHandler(handler: () => boolean) {
 
 type Props = StackScreenProps<RootStackNavigator, 'Video'>;
 
-const PressableAnimated = ReAnimated.createAnimatedComponent(Pressable);
-
 const defaultLoadingGif =
   'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
 
@@ -110,7 +108,7 @@ function Video(props: Props) {
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
 
-  const animeInfoPressableRef = useRef<View>(null);
+  const synopsisTextRef = useRef<View>(null);
 
   const [animeDetail, setAnimeDetail] = useState<
     | (
@@ -580,7 +578,7 @@ function Video(props: Props) {
   //   }
   // }, []);
   useLayoutEffect(() => {
-    animeInfoPressableRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+    synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
       initialInfoContainerHeight.current = height;
     });
   }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextLength]);
@@ -599,9 +597,7 @@ function Video(props: Props) {
     } else {
       setShowSynopsis(true);
       queueMicrotask(() => {
-        infoContainerHeight.set(
-          withTiming((initialInfoContainerHeight.current as number) + synopsisHeight.current),
-        );
+        infoContainerHeight.set(withTiming(synopsisHeight.current));
       });
     }
   }, [infoContainerHeight, showSynopsis]);
@@ -825,18 +821,18 @@ function Video(props: Props) {
                 <Text style={{ color: darkText }}>Reload video player</Text>
               </TouchableOpacity>
             )}
-            <PressableAnimated
-              style={[styles.container, infoContainerStyle]}
+            <Pressable
+              style={[styles.container]}
               onPressIn={onSynopsisPressIn}
               onPressOut={onSynopsisPressOut}
               // onLayout={onSynopsisLayout}
               onPress={onSynopsisPress}
-              ref={animeInfoPressableRef}
               disabled={synopsisTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
 
-              <Text
-                style={[globalStyles.text, styles.infoSinopsis]}
+              <ReAnimated.Text
+                ref={synopsisTextRef}
+                style={[globalStyles.text, styles.infoSinopsis, infoContainerStyle]}
                 numberOfLines={!showSynopsis ? 2 : undefined}
                 onTextLayout={e => {
                   setSynopsisTextLength(e.nativeEvent.lines.length);
@@ -845,7 +841,7 @@ function Video(props: Props) {
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {animeDetail?.synopsis || 'Tidak ada sinopsis'}
-              </Text>
+              </ReAnimated.Text>
 
               <View style={[styles.infoGenre]}>
                 {(animeDetail?.genres ?? ['Loading']).map(genre => (
@@ -894,7 +890,7 @@ function Video(props: Props) {
                   )}
                 </View>
               )}
-            </PressableAnimated>
+            </Pressable>
 
             <View style={[styles.container, { marginTop: 10 }]}>
               {data.episodeData && (
