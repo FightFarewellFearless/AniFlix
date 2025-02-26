@@ -15,9 +15,14 @@ import {
   ViewStyle,
 } from 'react-native';
 import { memo, useEffect, useMemo, useState } from 'react';
+
+import controlWatchLater from '../utils/watchLaterControl';
+
 import { getColors } from 'react-native-image-colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DarkOverlay from './misc/DarkOverlay';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
+import watchLaterJSON from '../types/watchLaterJSON';
 
 type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
@@ -26,6 +31,15 @@ function MovieDetail(props: Props) {
   const styles = useStyles();
 
   const [imageColors, setImageColors] = useState<string>('#000000');
+
+  const watchLaterListsJson = useSelectorIfFocused(
+    state => state.settings.watchLater,
+    true,
+    state => JSON.parse(state) as watchLaterJSON[],
+  );
+  const isInList = watchLaterListsJson.some(
+    item => item.title === props.route.params.data.title.replace('Subtitle Indonesia', ''),
+  );
 
   useEffect(() => {
     getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
@@ -57,12 +71,27 @@ function MovieDetail(props: Props) {
               justifyContent: 'center',
             }}>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#0ff5c3' }]}
+              disabled={isInList}
+              style={[styles.button, { backgroundColor: isInList ? '#ccc' : '#0ff5c3' }]}
               onPress={() => {
-                ToastAndroid.show('Coming soon...', ToastAndroid.SHORT);
+                const data = props.route.params.data;
+                const watchLaterJson: watchLaterJSON = {
+                  title: data.title.replace('Subtitle Indonesia', ''),
+                  link: props.route.params.link,
+                  rating: data.rating,
+                  releaseYear: data.releaseDate,
+                  thumbnailUrl: data.thumbnailUrl,
+                  genre: data.genres,
+                  date: Date.now(),
+                  isMovie: true,
+                };
+                controlWatchLater('add', watchLaterJson);
+                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
               }}>
-              <Icon name="plus" size={15} color="#fff" />
-              <Text style={styles.buttonText}>Tambahkan ke tonton nanti</Text>
+              <Icon name={isInList ? 'check' : 'plus'} size={15} color="#fff" />
+              <Text style={styles.buttonText}>
+                {isInList ? 'Ditambahkan ke tonton nanti' : 'Tambahkan ke tonton nanti'}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: '#07c9cf' }]}

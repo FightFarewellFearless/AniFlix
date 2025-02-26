@@ -5,6 +5,8 @@ type watchLaterJSON = Required<
     date: number;
     genre: string[];
   }
->;
+> & {
+  isMovie?: boolean;
+};
 
 export default watchLaterJSON;
