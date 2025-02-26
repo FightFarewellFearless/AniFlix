@@ -22,6 +22,7 @@ import {
   ImageBackground,
   Animated,
 } from 'react-native';
+import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import { TouchableOpacity, TextInput } from 'react-native'; //rngh
 import { useFocusEffect, StackActions, CompositeScreenProps } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
@@ -53,8 +54,6 @@ import DarkOverlay from '../misc/DarkOverlay';
 import { Movies, searchMovie } from '../../utils/animeMovie';
 
 import { TouchableOpacity as TouchableOpacityRNGH, FlatList } from 'react-native-gesture-handler';
-
-import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview';
 
 // Remove reanimated animated component creation for TextInput and Pressable
 // Replace:
@@ -261,30 +260,14 @@ function Search(props: Props) {
       />
     );
   }
-
-  const listAnimeDataProvider = useMemo(
-    () => new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(listAnime ?? []),
-    [listAnime],
-  );
-  const listAnimeLayoutProvider = useMemo(
-    () =>
-      new LayoutProvider(
-        () => 'NORMAL',
-        (_, dim) => {
-          dim.height = 60;
-          dim.width = dimensions.width;
-        },
-      ),
-    [dimensions.width],
-  );
   const listAnimeRenderer = useCallback(
-    (type: string | number, animeData: listAnimeTypeList, index: number) => {
+    ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
       return (
         <TouchableOpacity
           onPress={() => {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
-                link: animeData.streamingLink,
+                link: item.streamingLink,
               }),
             );
           }}
@@ -293,7 +276,7 @@ function Search(props: Props) {
           <Text
             numberOfLines={1}
             style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
-            {animeData?.title}
+            {item?.title}
           </Text>
         </TouchableOpacity>
       );
@@ -353,41 +336,16 @@ function Search(props: Props) {
               color={colorScheme === 'dark' ? 'white' : 'black'}
             />
           )}
-          {/* <FlashList
-            data={listAnime}
-            estimatedItemSize={40}
-            keyExtractor={item => item?.title}
-            renderItem={({ item, index }) => {
-              return (
-                <TouchableOpacity
-                  onPress={() => {
-                    props.navigation.dispatch(
-                      StackActions.push('FromUrl', {
-                        link: item.streamingLink,
-                      }),
-                    );
-                  }}
-                  style={styles.animeList}>
-                  <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
-                  <Text style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>{item?.title}</Text>
-                </TouchableOpacity>
-              )
-            }}
-            ItemSeparatorComponent={() => (
-              <View
-                style={{
-                  width: '100%',
-                  borderBottomWidth: 0.5,
-                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
-                }}
-              />
-            )} /> */}
           {listAnime.length > 0 && (
-            <RecyclerListView
-              renderAheadOffset={500}
-              dataProvider={listAnimeDataProvider}
-              layoutProvider={listAnimeLayoutProvider}
-              rowRenderer={listAnimeRenderer}
+            <LegendList
+              waitForInitialLayout
+              estimatedItemSize={56}
+              drawDistance={500}
+              data={listAnime}
+              recycleItems
+              renderItem={listAnimeRenderer}
+              keyExtractor={(_, index) => index.toString()}
+              extraData={styles}
             />
           )}
         </View>
