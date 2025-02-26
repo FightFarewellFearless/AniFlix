@@ -1,3 +1,10 @@
+# v0.8.2-JS_13 (26-Februari-2025)
+
+## Peningkatan
+
+- Potensi peningkatan performa scrolling list di pencarian(Eksperimental)
+- Meningkatkan animasi memperpanjang sinopsis anime saat menonton
+
 # v0.8.2-JS_12 (23-Februari-2025)
 
 Berisi banyak perubahan kode (Bukan fix bug ataupun fitur, hanya perubahan pada format penulisan kode).
