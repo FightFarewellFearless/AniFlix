@@ -1,6 +1,3 @@
-![screenshot](./githubAssets/screenshot.jpg)
-
-
 # AniFlix
 
 <p align="center">
@@ -14,6 +11,12 @@
 Aplikasi streaming anime gratis tanpa iklan, open source!
 
 **_Written in typescript built with react native_** :heart:
+
+## Screenshots
+
+| Home screen | Anime detail | Anime list |
+|--------------|--------------|--------------|
+| ![Home screen](./githubAssets/SS1.jpeg) | ![Anime detail](./githubAssets/SS2.jpeg) | ![Anime list](./githubAssets/SS3.jpeg) |
 
 ## Lengkap dan terbaru!
 
