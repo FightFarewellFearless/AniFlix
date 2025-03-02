@@ -1,3 +1,9 @@
+# v0.8.2-JS_15 (02-Maret-2025)
+
+## Ditingkatkan:
+- Sedikit mengurangi penggunaan RAM
+- Mengembalikan perubahan scrolling list di pencarian pada versi JS_13
+
 # v0.8.2-JS_14 (26-Februari-2025)
 
 Update kali ini menambahkan dukungan untuk menambahkan movie ke dalam daftar tonton nanti
