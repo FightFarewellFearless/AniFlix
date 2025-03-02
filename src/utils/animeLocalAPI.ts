@@ -30,7 +30,8 @@ import {
 import URL from 'url';
 
 import { Buffer } from 'buffer/';
-import { createWorkletRuntime, runOnJS, runOnRuntime } from 'react-native-reanimated';
+import { runOnJS, runOnRuntime } from 'react-native-reanimated';
+import runtime from '../misc/workletRuntime';
 
 let BASE_DOMAIN = 'otakudesu.cloud';
 let BASE_URL = 'https://' + BASE_DOMAIN;
@@ -39,8 +40,6 @@ const BASE = {
   domain: BASE_DOMAIN,
   url: BASE_URL,
 };
-
-const runtime = createWorkletRuntime('listAnime');
 
 const fetchLatestDomain = async () => {
   const domainName = await fetch(

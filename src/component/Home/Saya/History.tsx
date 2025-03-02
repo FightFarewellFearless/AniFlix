@@ -22,13 +22,13 @@ import { AppDispatch } from '../../../misc/reduxStore';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { HistoryJSON } from '../../../types/historyJSON';
 import Animated, {
-  createWorkletRuntime,
   runOnJS,
   runOnRuntime,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import historyRuntime from '../../../misc/workletRuntime';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import ImageLoading from '../../ImageLoading';
@@ -39,8 +39,6 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 // );
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
-
-const historyRuntime = createWorkletRuntime('historyRuntime');
 
 function History(props: Props) {
   const styles = useStyles();
