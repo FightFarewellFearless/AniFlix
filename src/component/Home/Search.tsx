@@ -22,7 +22,6 @@ import {
   ImageBackground,
   Animated,
 } from 'react-native';
-import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import { TouchableOpacity, TextInput } from 'react-native'; //rngh
 import { useFocusEffect, StackActions, CompositeScreenProps } from '@react-navigation/native';
 import useGlobalStyles from '../../assets/style';
@@ -261,7 +260,7 @@ function Search(props: Props) {
     );
   }
   const listAnimeRenderer = useCallback(
-    ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
+    ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
       return (
         <TouchableOpacity
           onPress={() => {
@@ -337,12 +336,10 @@ function Search(props: Props) {
             />
           )}
           {listAnime.length > 0 && (
-            <LegendList
-              waitForInitialLayout
+            <FlashList
               estimatedItemSize={56}
               drawDistance={500}
               data={listAnime}
-              recycleItems
               renderItem={listAnimeRenderer}
               keyExtractor={(_, index) => index.toString()}
               extraData={styles}
