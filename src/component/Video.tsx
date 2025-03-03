@@ -22,6 +22,8 @@ import {
   EmitterSubscription,
   useColorScheme,
   Pressable,
+  Animated,
+  useAnimatedValue,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -35,10 +37,10 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import ReAnimated, {
   BounceIn,
   BounceOut,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+  // runOnJS,
+  // useAnimatedStyle,
+  // useSharedValue,
+  // withTiming,
 } from 'react-native-reanimated';
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
@@ -194,18 +196,18 @@ function Video(props: Props) {
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const infoContainerHeight = useSharedValue(0);
-  const infoContainerOpacity = useSharedValue(1);
   const initialInfoContainerHeight = useRef<number>();
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
-  const infoContainerStyle = useAnimatedStyle(() => {
-    return {
-      opacity: infoContainerOpacity.get(),
-      height: infoContainerHeight.get() === 0 ? 'auto' : infoContainerHeight.get(),
-    };
-  });
+  const infoContainerHeight = useAnimatedValue(0); // useSharedValue
+  const infoContainerOpacity = useAnimatedValue(1); // useSharedValue
+  // const infoContainerStyle = useAnimatedStyle(() => {
+  //   return {
+  //     opacity: infoContainerOpacity.get(),
+  //     height: infoContainerHeight.get() === 0 ? 'auto' : infoContainerHeight.get(),
+  //   };
+  // });
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
     // videoRef.current?.presentFullscreenPlayer();
@@ -570,13 +572,6 @@ function Video(props: Props) {
     [enterFullscreen, exitFullscreen],
   );
 
-  // const onSynopsisLayout = useCallback((e: LayoutChangeEvent) => {
-  //   if (isInfoPressed.current === false) {
-  //     // infoContainerHeight.value = e.nativeEvent.layout.height;
-  //     initialInfoContainerHeight.current =
-  //       e.nativeEvent.layout.height;
-  //   }
-  // }, []);
   useLayoutEffect(() => {
     synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
       initialInfoContainerHeight.current = height;
@@ -585,29 +580,52 @@ function Video(props: Props) {
 
   const onSynopsisPress = useCallback(() => {
     if (!isInfoPressed.current) {
-      infoContainerHeight.set(initialInfoContainerHeight.current!);
+      // infoContainerHeight.set(initialInfoContainerHeight.current!);
+      infoContainerHeight.setValue(initialInfoContainerHeight.current!);
     }
     isInfoPressed.current = true;
     if (showSynopsis) {
-      infoContainerHeight.set(
-        withTiming(initialInfoContainerHeight.current as number, undefined, () => {
-          runOnJS(setShowSynopsis)(false);
-        }),
-      );
+      // infoContainerHeight.set(
+      //   withTiming(initialInfoContainerHeight.current as number, undefined, () => {
+      //     runOnJS(setShowSynopsis)(false);
+      //   }),
+      // );
+      Animated.timing(infoContainerHeight, {
+        toValue: initialInfoContainerHeight.current!,
+        duration: 350,
+        useNativeDriver: false,
+      }).start(({ finished }) => {
+        if (finished) setShowSynopsis(false);
+      });
     } else {
       setShowSynopsis(true);
       queueMicrotask(() => {
-        infoContainerHeight.set(withTiming(synopsisHeight.current));
+        // infoContainerHeight.set(withTiming(synopsisHeight.current));
+        Animated.timing(infoContainerHeight, {
+          toValue: synopsisHeight.current,
+          duration: 350,
+          useNativeDriver: false,
+        }).start();
       });
     }
   }, [infoContainerHeight, showSynopsis]);
 
   const onSynopsisPressIn = useCallback(() => {
-    infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
+    // infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
+    Animated.timing(infoContainerOpacity, {
+      toValue: 0.4,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
   }, [infoContainerOpacity]);
 
   const onSynopsisPressOut = useCallback(() => {
-    infoContainerOpacity.set(withTiming(1, { duration: 100 }));
+    // infoContainerOpacity.set(withTiming(1, { duration: 100 }));
+    Animated.timing(infoContainerOpacity, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
   }, [infoContainerOpacity]);
 
   const batteryAndClock = (
@@ -830,9 +848,17 @@ function Video(props: Props) {
               disabled={synopsisTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
 
-              <ReAnimated.Text
+              <Animated.Text
                 ref={synopsisTextRef}
-                style={[globalStyles.text, styles.infoSinopsis, infoContainerStyle]}
+                style={[
+                  globalStyles.text,
+                  styles.infoSinopsis,
+                  // infoContainerStyle
+                  {
+                    opacity: infoContainerOpacity,
+                    height: showSynopsis ? infoContainerHeight : 'auto',
+                  },
+                ]}
                 numberOfLines={!showSynopsis ? 2 : undefined}
                 onTextLayout={e => {
                   setSynopsisTextLength(e.nativeEvent.lines.length);
@@ -841,7 +867,7 @@ function Video(props: Props) {
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {animeDetail?.synopsis || 'Tidak ada sinopsis'}
-              </ReAnimated.Text>
+              </Animated.Text>
 
               <View style={[styles.infoGenre]}>
                 {(animeDetail?.genres ?? ['Loading']).map(genre => (
