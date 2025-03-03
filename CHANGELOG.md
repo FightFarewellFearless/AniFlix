@@ -1,6 +1,12 @@
+# v0.8.2-JS_17 (03-Maret-2025)
+
+## Diperbaiki
+- Animasi sinopsis
+- Error deteksi anti bot di server `lokal` (movie)
+
 # v0.8.2-JS_16 (03-Maret-2025)
 
-## Ditingkatkan:
+## Diperbaiki:
 - Memperbaiki masalah animasi yang tidak mulus saat memperpanjang sinopsis
 - Memperbaiki ukuran estimasi list di daftar anime > pencarian
 
