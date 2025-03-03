@@ -575,8 +575,15 @@ function Video(props: Props) {
   useLayoutEffect(() => {
     synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
       initialInfoContainerHeight.current = height;
+      infoContainerHeight.setValue(height);
     });
-  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextLength]);
+  }, [
+    animeDetail?.synopsis,
+    animeDetail?.rating,
+    animeDetail?.genres,
+    synopsisTextLength,
+    infoContainerHeight,
+  ]);
 
   const onSynopsisPress = useCallback(() => {
     if (!isInfoPressed.current) {
@@ -856,7 +863,11 @@ function Video(props: Props) {
                   // infoContainerStyle
                   {
                     opacity: infoContainerOpacity,
-                    height: showSynopsis ? infoContainerHeight : 'auto',
+                    height:
+                      // @ts-ignore
+                      infoContainerHeight.__getValue() === 0 || synopsisTextLength <= 2
+                        ? 'auto'
+                        : infoContainerHeight,
                   },
                 ]}
                 numberOfLines={!showSynopsis ? 2 : undefined}
