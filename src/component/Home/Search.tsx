@@ -337,7 +337,7 @@ function Search(props: Props) {
           )}
           {listAnime.length > 0 && (
             <FlashList
-              estimatedItemSize={56}
+              estimatedItemSize={49}
               drawDistance={500}
               data={listAnime}
               renderItem={listAnimeRenderer}
@@ -676,7 +676,7 @@ function useStyles() {
           flexDirection: 'row',
           backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f5f5f5',
           marginHorizontal: 16,
-          marginVertical: 6,
+          marginVertical: 3,
           borderRadius: 12,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 1 },
