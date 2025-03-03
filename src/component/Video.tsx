@@ -704,7 +704,7 @@ function Video(props: Props) {
                   : { uri: data.streamingLink }),
                 baseUrl: `https://${url.parse(data.streamingLink).host}`,
               }}
-              userAgent={deviceUserAgent}
+              userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
               originWhitelist={['*']}
               allowsFullscreenVideo={true}
               injectedJavaScript={`
