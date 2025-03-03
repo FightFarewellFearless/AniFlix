@@ -1,3 +1,9 @@
+# v0.8.2-JS_16 (03-Maret-2025)
+
+## Ditingkatkan:
+- Memperbaiki masalah animasi yang tidak mulus saat memperpanjang sinopsis
+- Memperbaiki ukuran estimasi list di daftar anime > pencarian
+
 # v0.8.2-JS_15 (02-Maret-2025)
 
 ## Ditingkatkan:
