@@ -7,7 +7,7 @@ import {
 } from 'expo-video';
 
 import { useKeepAwake } from 'expo-keep-awake';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   AppState,
@@ -45,7 +45,10 @@ type VideoPlayerProps = {
   headers?: Record<string, string>;
   batteryAndClock?: React.JSX.Element;
 };
-export default function VideoPlayer({
+
+export default memo(VideoPlayer);
+
+function VideoPlayer({
   title,
   streamingURL,
   style,
