@@ -874,7 +874,7 @@ function Video(props: Props) {
                 onTextLayout={e => {
                   setSynopsisTextLength(e.nativeEvent.lines.length);
                   synopsisHeight.current = e.nativeEvent.lines
-                    .slice(2)
+                    // .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {animeDetail?.synopsis || 'Tidak ada sinopsis'}
