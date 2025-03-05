@@ -1,3 +1,13 @@
+# v0.8.2-JS_18 (03-Maret-2025)
+
+Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu utilitas
+
+## Diperbaiki
+- Animasi sinopsis tidak menampilkan seluruh sinopsis
+
+## Dihapus
+- Chat AI. Karena sudah tidak berfungsi dan tidak relevan
+
 # v0.8.2-JS_17 (03-Maret-2025)
 
 ## Diperbaiki
