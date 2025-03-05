@@ -63,6 +63,11 @@ A: Coba gunakan DNS 8.8.8.8 atau 1.1.1.1, atau tunggu update dari developer. Jik
 
 A: video yang sudah di download bisa kamu temukan di `Penyimpanan Internal/Download/`
 
+# Donasi
+
+AniFlix akan selalu sepenuhnya gratis dan open-source.
+Namun jika kamu ingin mendukung projek ini dengan cara berdonasi, kamu bisa memberikan donasi melalui [saweria](https://saweria.co/pirles) atau [trakteer](https://trakteer.id/pirles).
+
 # Catatan
 
 - Video yang terdapat di aplikasi bukan berasal dari server kami.
