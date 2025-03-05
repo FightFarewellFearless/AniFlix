@@ -1,3 +1,13 @@
+# v0.8.2-JS_20 (05-Maret-2025)
+
+Update kali ini memberikan opsi donasi kepada kamu yang ingin mendukung pengembangan aplikasi.
+
+## Ditambahkan
+- Opsi donasi melalui [saweria](https://saweria.co/pirles) atau [trakteer](https://trakteer.id/pirles).
+  > Note: donasi adalah opsional, aplikasi tidak memerlukan biaya sepeser pun untuk digunakan.
+
+  > untuk saat ini belum ada reward khusus untuk donator, baik dari aplikasi maupun server discord, namun jika kamu ingin request sesuatu, kamu bisa join server discord [di sini](https://discord.gg/sbTwxHb9NM) walaupun kamu bukan donator ❤️
+
 # v0.8.2-JS_19 (05-Maret-2025)
 
 Update ini sedikit mengoptimasi kode
