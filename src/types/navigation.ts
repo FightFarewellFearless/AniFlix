@@ -67,6 +67,7 @@ type UtilsStackNavigator = {
   Changelog: undefined;
   Setting: undefined;
   About: undefined;
+  SupportDev: undefined;
 };
 
 type HomeStackNavigator = {

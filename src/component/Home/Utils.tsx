@@ -10,11 +10,13 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';
 import Setting from './Utilitas/Setting';
 import Changelog from './Utilitas/Changelog';
 import About from './Utilitas/About';
 import { memo, useMemo } from 'react';
+import SupportDev from './Utilitas/SupportDev';
 
 const Stack = createStackNavigator<UtilsStackNavigator>();
 
@@ -34,6 +36,11 @@ function Utils() {
       <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
       <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
       <Stack.Screen name="About" component={About} options={{ title: 'Tentang' }} />
+      <Stack.Screen
+        name="SupportDev"
+        component={SupportDev}
+        options={{ title: 'Dukung pengembang' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -97,6 +104,20 @@ function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen
             <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Tentang aplikasi</Text>
             <Text style={[styles.descText, { color: '#dbdbdb' }]}>
               Tentang aplikasi AniFlix dan pengembangnya
+            </Text>
+          </View>
+        </TouchableNativeFeedback>
+
+        <TouchableNativeFeedback
+          onPress={() => {
+            props.navigation.navigate('SupportDev');
+          }}
+          background={TouchableNativeFeedback.Ripple('white', false)}>
+          <View style={[styles.buttonContainer, { backgroundColor: '#810af0' }]}>
+            <MaterialCommunityIcon name="hand-heart" size={40} color={{ color: '#dbdbdb' }.color} />
+            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Dukung pengembang</Text>
+            <Text style={[styles.descText, { color: '#dbdbdb' }]}>
+              Dukung developer melalui donasi atau kontribusi kode sumber
             </Text>
           </View>
         </TouchableNativeFeedback>
