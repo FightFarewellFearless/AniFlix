@@ -1,4 +1,4 @@
-# v0.8.2-JS_18 (03-Maret-2025)
+# v0.8.2-JS_18 (05-Maret-2025)
 
 Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu utilitas
 
