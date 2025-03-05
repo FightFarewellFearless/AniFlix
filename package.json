@@ -32,7 +32,6 @@
     "expo-splash-screen": "0.29.21",
     "expo-updates": "~0.26.15",
     "expo-video": "~2.0.5",
-    "gpti": "^2.0.6",
     "moment": "^2.29.4",
     "react": "18.3.1",
     "react-compiler-runtime": "beta",
@@ -46,7 +45,6 @@
     "react-native-image-colors": "^2.4.0",
     "react-native-marked": "^6.0.7",
     "react-native-orientation-locker": "^1.7.0",
-    "react-native-polyfill-globals": "^3.1.0",
     "react-native-reanimated": "3.16.7",
     "react-native-saf-x": "2.2.3",
     "react-native-safe-area-context": "5.2.0",
@@ -57,9 +55,7 @@
     "react-native-webview": "13.13.2",
     "react-redux": "^9.1.2",
     "recyclerlistview": "^4.2.1",
-    "text-encoding": "^0.7.0",
-    "url": "^0.11.3",
-    "web-streams-polyfill": "^3.3.3"
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

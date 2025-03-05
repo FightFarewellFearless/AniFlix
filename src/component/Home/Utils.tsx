@@ -1,6 +1,5 @@
 import { StackScreenProps, createStackNavigator } from '@react-navigation/stack';
 import { UtilsStackNavigator } from '../../types/navigation';
-import Chat from './Utilitas/Chat';
 import {
   Text,
   View,
@@ -27,7 +26,6 @@ function Utils() {
         component={ChooseScreen}
         options={{ title: 'Pilih utilitas' }}
       />
-      <Stack.Screen name="Chat" component={Chat} />
       <Stack.Screen
         name="SearchAnimeByImage"
         component={SearchAnimeByImage}
@@ -47,18 +45,6 @@ function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen
   return (
     <ScrollView>
       <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.push('Chat');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: 'orange' }]}>
-            <Icon name="comments" size={40} color={{ color: 'black' }.color} />
-            <Text style={[styles.titleText, { color: 'black' }]}>Chat</Text>
-            <Text style={[styles.descText, { color: 'black' }]}>Chat dengan AI Bing dan GPT-4</Text>
-          </View>
-        </TouchableNativeFeedback>
-
         <TouchableNativeFeedback
           onPress={() => {
             props.navigation.navigate('SearchAnimeByImage');
