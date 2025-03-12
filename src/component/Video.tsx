@@ -22,8 +22,8 @@ import {
   EmitterSubscription,
   useColorScheme,
   Pressable,
-  Animated,
-  useAnimatedValue,
+  // Animated,
+  // useAnimatedValue,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native'; //rngh
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -37,10 +37,10 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import ReAnimated, {
   BounceIn,
   BounceOut,
-  // runOnJS,
-  // useAnimatedStyle,
-  // useSharedValue,
-  // withTiming,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
@@ -200,14 +200,14 @@ function Video(props: Props) {
   // const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
-  const infoContainerHeight = useAnimatedValue(0); // useSharedValue
-  const infoContainerOpacity = useAnimatedValue(1); // useSharedValue
-  // const infoContainerStyle = useAnimatedStyle(() => {
-  //   return {
-  //     opacity: infoContainerOpacity.get(),
-  //     height: infoContainerHeight.get() === 0 ? 'auto' : infoContainerHeight.get(),
-  //   };
-  // });
+  const infoContainerHeight = useSharedValue(0); // useSharedValue
+  const infoContainerOpacity = useSharedValue(1); // useSharedValue
+  const infoContainerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: infoContainerOpacity.get(),
+      height: infoContainerHeight.get() === 0 ? 'auto' : infoContainerHeight.get(),
+    };
+  });
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
     // videoRef.current?.presentFullscreenPlayer();
@@ -575,7 +575,7 @@ function Video(props: Props) {
   useLayoutEffect(() => {
     synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
       initialInfoContainerHeight.current = height;
-      infoContainerHeight.setValue(height);
+      // infoContainerHeight.setValue(height);
     });
   }, [
     animeDetail?.synopsis,
@@ -592,47 +592,47 @@ function Video(props: Props) {
     // }
     // isInfoPressed.current = true;
     if (showSynopsis) {
-      // infoContainerHeight.set(
-      //   withTiming(initialInfoContainerHeight.current as number, undefined, () => {
-      //     runOnJS(setShowSynopsis)(false);
-      //   }),
-      // );
-      Animated.timing(infoContainerHeight, {
-        toValue: initialInfoContainerHeight.current!,
-        duration: 350,
-        useNativeDriver: false,
-      }).start(({ finished }) => {
-        if (finished) setShowSynopsis(false);
-      });
+      infoContainerHeight.set(
+        withTiming(initialInfoContainerHeight.current as number, undefined, () => {
+          runOnJS(setShowSynopsis)(false);
+        }),
+      );
+      // Animated.timing(infoContainerHeight, {
+      //   toValue: initialInfoContainerHeight.current!,
+      //   duration: 350,
+      //   useNativeDriver: false,
+      // }).start(({ finished }) => {
+      //   if (finished) setShowSynopsis(false);
+      // });
     } else {
       setShowSynopsis(true);
       queueMicrotask(() => {
-        // infoContainerHeight.set(withTiming(synopsisHeight.current));
-        Animated.timing(infoContainerHeight, {
-          toValue: synopsisHeight.current,
-          duration: 350,
-          useNativeDriver: false,
-        }).start();
+        infoContainerHeight.set(withTiming(synopsisHeight.current));
+        // Animated.timing(infoContainerHeight, {
+        //   toValue: synopsisHeight.current,
+        //   duration: 350,
+        //   useNativeDriver: false,
+        // }).start();
       });
     }
   }, [infoContainerHeight, showSynopsis]);
 
   const onSynopsisPressIn = useCallback(() => {
-    // infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
-    Animated.timing(infoContainerOpacity, {
-      toValue: 0.4,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
+    infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
+    // Animated.timing(infoContainerOpacity, {
+    //   toValue: 0.4,
+    //   duration: 100,
+    //   useNativeDriver: false,
+    // }).start();
   }, [infoContainerOpacity]);
 
   const onSynopsisPressOut = useCallback(() => {
-    // infoContainerOpacity.set(withTiming(1, { duration: 100 }));
-    Animated.timing(infoContainerOpacity, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
+    infoContainerOpacity.set(withTiming(1, { duration: 100 }));
+    // Animated.timing(infoContainerOpacity, {
+    //   toValue: 1,
+    //   duration: 100,
+    //   useNativeDriver: false,
+    // }).start();
   }, [infoContainerOpacity]);
 
   const batteryAndClock = (
@@ -855,20 +855,20 @@ function Video(props: Props) {
               disabled={synopsisTextLength <= 2}>
               <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
 
-              <Animated.Text
+              <ReAnimated.Text
                 ref={synopsisTextRef}
                 style={[
                   globalStyles.text,
                   styles.infoSinopsis,
-                  // infoContainerStyle
-                  {
-                    opacity: infoContainerOpacity,
-                    height:
-                      // @ts-ignore
-                      infoContainerHeight.__getValue() === 0 || synopsisTextLength <= 2
-                        ? 'auto'
-                        : infoContainerHeight,
-                  },
+                  infoContainerStyle,
+                  // {
+                  //   opacity: infoContainerOpacity,
+                  //   height:
+                  //     // @ts-ignore
+                  //     infoContainerHeight.__getValue() === 0 || synopsisTextLength <= 2
+                  //       ? 'auto'
+                  //       : infoContainerHeight,
+                  // },
                 ]}
                 numberOfLines={!showSynopsis ? 2 : undefined}
                 onTextLayout={e => {
@@ -878,7 +878,7 @@ function Video(props: Props) {
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {animeDetail?.synopsis || 'Tidak ada sinopsis'}
-              </Animated.Text>
+              </ReAnimated.Text>
 
               <View style={[styles.infoGenre]}>
                 {(animeDetail?.genres ?? ['Loading']).map(genre => (
