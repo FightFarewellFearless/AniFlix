@@ -1,3 +1,8 @@
+# v0.8.2-JS_21 (12-Maret-2025)
+
+## Diperbaiki
+- Masalah animasi sinopsis
+
 # v0.8.2-JS_20 (05-Maret-2025)
 
 Update kali ini memberikan opsi donasi kepada kamu yang ingin mendukung pengembangan aplikasi.
