@@ -1,3 +1,8 @@
+# v0.8.2-JS_23 (13-Maret-2025)
+
+## Diperbaiki
+- Memperbaiki animasi sinopsis yang "jumping"
+
 # v0.8.2-JS_22 (13-Maret-2025)
 
 Update kali ini menerapkan lazy-loading pada aplikasi, ini berarti penggunaan memori yang lebih efisien, dan waktu mulai aplikasi yang lebih cepat...
