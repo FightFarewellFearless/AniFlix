@@ -1,3 +1,14 @@
+# v0.8.2-JS_22 (13-Maret-2025)
+
+Update kali ini menerapkan lazy-loading pada aplikasi, ini berarti penggunaan memori yang lebih efisien, dan waktu mulai aplikasi yang lebih cepat...
+
+## Ditambahkan
+- Implementasi lazy-loading
+
+## Ditingkatkan
+- Animasi sinopsis
+- Meningkatkan `drawDistance` pada list anime di pencarian
+
 # v0.8.2-JS_21 (12-Maret-2025)
 
 ## Diperbaiki
