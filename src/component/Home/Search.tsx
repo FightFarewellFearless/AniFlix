@@ -338,7 +338,7 @@ function Search(props: Props) {
           {listAnime.length > 0 && (
             <FlashList
               estimatedItemSize={49}
-              drawDistance={500}
+              drawDistance={700}
               data={listAnime}
               renderItem={listAnimeRenderer}
               keyExtractor={(_, index) => index.toString()}
