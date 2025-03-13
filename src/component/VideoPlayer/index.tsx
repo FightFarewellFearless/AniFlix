@@ -298,7 +298,7 @@ function Top({ title }: { title: string }) {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Text style={{ color: 'white' }}>{title}</Text>
+      <Text style={{ color: 'white', fontWeight: 'bold' }}>{title}</Text>
     </View>
   );
 }
@@ -431,14 +431,14 @@ function BottomControl({
       }}>
       <View style={{ width: '95%', flexDirection: 'row', flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 }}>
-          <ReText style={{ color: 'white', zIndex: 1 }} text={currentSecond} />
+          <ReText style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }} text={currentSecond} />
           <SeekBar
             progress={seekBarProgress}
             style={{ flex: 1, zIndex: 0 }}
             onProgressChange={onProgressChange}
             onProgressChangeEnd={onProgressChangeEnd}
           />
-          <ReText style={{ color: 'white', zIndex: 1 }} text={totalSecond} />
+          <ReText style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }} text={totalSecond} />
         </View>
       </View>
       <TouchableOpacity
