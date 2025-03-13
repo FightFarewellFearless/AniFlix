@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { Provider } from 'react-redux';
 
 import Connecting from './src/component/Loading Screen/Connect';
-import AniDetail from './src/component/AniDetail';
-import Home from './src/component/Home/Home';
+// import AniDetail from './src/component/AniDetail';
+const AniDetail = lazy(() => import('./src/component/AniDetail'));
+// import Home from './src/component/Home/Home';
+const Home = lazy(() => import('./src/component/Home/Home'));
 import FromUrl from './src/component/Loading Screen/FromUrl';
-import Video from './src/component/Video';
-import Blocked from './src/component/Blocked';
-import FailedToConnect from './src/component/FailedToConnect';
-import NeedUpdate from './src/component/NeedUpdate';
+// const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
+// import Video from './src/component/Video';
+const Video = lazy(() => import('./src/component/Video'));
+// import Blocked from './src/component/Blocked';
+const Blocked = lazy(() => import('./src/component/Blocked'));
+// import FailedToConnect from './src/component/FailedToConnect';
+const FailedToConnect = lazy(() => import('./src/component/FailedToConnect'));
+// import NeedUpdate from './src/component/NeedUpdate';
+const NeedUpdate = lazy(() => import('./src/component/NeedUpdate'));
 import store from './src/misc/reduxStore';
 import { RootStackNavigator } from './src/types/navigation';
 import useGlobalStyles from './src/assets/style';
@@ -26,6 +33,15 @@ SplashScreen.preventAutoHideAsync();
 
 enableFreeze(true);
 // enableScreens(false);
+
+function Loading() {
+  return (
+    <ActivityIndicator
+      style={{ flex: 1, justifyContent: 'center', alignSelf: 'center' }}
+      size="large"
+    />
+  );
+}
 
 const Stack = createStackNavigator<RootStackNavigator>();
 function App() {
@@ -69,21 +85,69 @@ function App() {
               headerShown: false,
               // animation: 'fade_from_bottom',
             }}>
-            <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="AnimeDetail" component={AniDetail} />
-            <Stack.Screen name="MovieDetail" component={MovieDetail} />
-            <Stack.Screen name="FromUrl" component={FromUrl} />
-            <Stack.Screen
-              name="Video"
-              component={Video}
-              options={{
-                headerShown: true,
-              }}
-            />
-            <Stack.Screen name="connectToServer" component={Connecting} />
-            <Stack.Screen name="NeedUpdate" component={NeedUpdate} />
-            <Stack.Screen name="Blocked" component={Blocked} />
-            <Stack.Screen name="FailedToConnect" component={FailedToConnect} />
+            <Stack.Screen name="Home">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <Home navigation={props.navigation} route={props.route} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="AnimeDetail">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <AniDetail {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="MovieDetail">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <MovieDetail {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="FromUrl">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <FromUrl {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Video">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <Video {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="connectToServer">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <Connecting {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="NeedUpdate">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <NeedUpdate {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Blocked">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <Blocked {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="FailedToConnect">
+              {props => (
+                <Suspense fallback={<Loading />}>
+                  <FailedToConnect {...props} />
+                </Suspense>
+              )}
+            </Stack.Screen>
           </Stack.Navigator>
         </Provider>
         <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>

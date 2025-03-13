@@ -1,4 +1,14 @@
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -35,7 +45,8 @@ import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import AnimeAPI from '../../utils/AnimeAPI';
-import SeeMore from './SeeMore';
+// import SeeMore from './SeeMore';
+const SeeMore = lazy(() => import('./SeeMore'));
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as MeasureText from '@domir/react-native-measure-text';
@@ -60,7 +71,19 @@ function Home(_props: HomeProps) {
         headerShown: false,
       }}>
       <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
-      <SeeMoreStack.Screen name="SeeMore" component={SeeMore} options={{ headerShown: true }} />
+      <SeeMoreStack.Screen name="SeeMore" options={{ headerShown: true }}>
+        {prop => (
+          <Suspense
+            fallback={
+              <ActivityIndicator
+                style={{ flex: 1, justifyContent: 'center', alignSelf: 'center' }}
+                size="large"
+              />
+            }>
+            <SeeMore {...prop} />
+          </Suspense>
+        )}
+      </SeeMoreStack.Screen>
     </SeeMoreStack.Navigator>
   );
 }

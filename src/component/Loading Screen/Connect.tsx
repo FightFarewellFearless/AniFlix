@@ -32,7 +32,10 @@ import RNFetchBlob from 'react-native-blob-util';
 import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import * as Updates from 'expo-updates';
-import { AnimeMovieWebView } from '../../utils/animeMovie';
+// import { AnimeMovieWebView } from '../../utils/animeMovie';
+const AnimeMovieWebView = React.lazy(() =>
+  import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
+);
 import runningText from '../../assets/runningText.json';
 
 export const JoinDiscord = () => {
