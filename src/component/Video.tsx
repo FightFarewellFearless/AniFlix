@@ -197,7 +197,7 @@ function Video(props: Props) {
   const [isPaused, setIsPaused] = useState(false);
 
   const initialInfoContainerHeight = useRef<number>();
-  // const isInfoPressed = useRef(false);
+  const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
   const infoContainerHeight = useSharedValue(0); // useSharedValue
@@ -586,14 +586,14 @@ function Video(props: Props) {
   ]);
 
   const onSynopsisPress = useCallback(() => {
-    // if (!isInfoPressed.current) {
-    //   // infoContainerHeight.set(initialInfoContainerHeight.current!);
-    //   infoContainerHeight.setValue(initialInfoContainerHeight.current!);
-    // }
-    // isInfoPressed.current = true;
+    if (!isInfoPressed.current) {
+      infoContainerHeight.set(initialInfoContainerHeight.current!);
+      // infoContainerHeight.setValue(initialInfoContainerHeight.current!);
+    }
+    isInfoPressed.current = true;
     if (showSynopsis) {
       infoContainerHeight.set(
-        withTiming(initialInfoContainerHeight.current as number, undefined, () => {
+        withTiming(initialInfoContainerHeight.current as number, { duration: 350 }, () => {
           runOnJS(setShowSynopsis)(false);
         }),
       );
@@ -607,7 +607,7 @@ function Video(props: Props) {
     } else {
       setShowSynopsis(true);
       queueMicrotask(() => {
-        infoContainerHeight.set(withTiming(synopsisHeight.current));
+        infoContainerHeight.set(withTiming(synopsisHeight.current, { duration: 350 }));
         // Animated.timing(infoContainerHeight, {
         //   toValue: synopsisHeight.current,
         //   duration: 350,
