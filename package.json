@@ -53,7 +53,7 @@
     "react-native-system-navigation-bar": "^2.6.4",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "13.13.4",
-    "react-redux": "^9.1.2",
+    "react-redux": "^9.2.0",
     "recyclerlistview": "^4.2.1",
     "url": "^0.11.3"
   },
