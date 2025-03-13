@@ -4593,7 +4593,7 @@ __metadata:
     react-native-webview: 13.13.4
     react-redux: ^9.1.2
     react-test-renderer: 18.3.1
-    recyclerlistview: ^4.2.1
+    recyclerlistview: ^4.2.2
     typescript: 5.8.2
     url: ^0.11.3
   languageName: unknown
@@ -12224,7 +12224,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recyclerlistview@npm:4.2.1, recyclerlistview@npm:^4.2.1":
+"recyclerlistview@npm:4.2.1":
   version: 4.2.1
   resolution: "recyclerlistview@npm:4.2.1"
   dependencies:
@@ -12235,6 +12235,20 @@ __metadata:
     react: ">= 15.2.1"
     react-native: ">= 0.30.0"
   checksum: 48e84937f803ac2acb510b2bc36b3ef1ea9c5383540a832f80c87d7e7f933b26c59e4ffc2d7de529be55e14a8d551c4f6660a450ad220142f351e6bf6e630450
+  languageName: node
+  linkType: hard
+
+"recyclerlistview@npm:^4.2.2":
+  version: 4.2.2
+  resolution: "recyclerlistview@npm:4.2.2"
+  dependencies:
+    lodash.debounce: 4.0.8
+    prop-types: 15.8.1
+    ts-object-utils: 0.0.5
+  peerDependencies:
+    react: ">= 15.2.1"
+    react-native: ">= 0.30.0"
+  checksum: 2891280fff86f5a311ddfc08ed33611499a96a9d3b60d1977cf720b73149facc91bcfaabc0f6d7472c93efeef1375601a54552e362581abaed30b6381bde49a9
   languageName: node
   linkType: hard
 
