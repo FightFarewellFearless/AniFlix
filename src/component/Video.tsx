@@ -585,10 +585,17 @@ function Video(props: Props) {
     infoContainerHeight,
   ]);
 
-  const onSynopsisPress = useCallback(() => {
+  const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
       infoContainerHeight.set(initialInfoContainerHeight.current!);
       // infoContainerHeight.setValue(initialInfoContainerHeight.current!);
+
+      /* 
+      wait for the next event loop,
+      make sure the infoContainerHeight is set to initialInfoContainerHeight before starting animation.
+      This is to prevent jumping animation in react-native-reanimated
+      */
+      await new Promise(res => setTimeout(res, 0));
     }
     isInfoPressed.current = true;
     if (showSynopsis) {
