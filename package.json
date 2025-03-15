@@ -22,7 +22,7 @@
     "@react-navigation/native-stack": "^7.2.1",
     "@react-navigation/stack": "^7.1.2",
     "@reduxjs/toolkit": "^2.2.5",
-    "@shopify/flash-list": "^1.7.3",
+    "@shopify/flash-list": "^1.7.5",
     "axios": "^1.8.3",
     "buffer": "^6.0.3",
     "cheerio": "1.0.0-rc.12",

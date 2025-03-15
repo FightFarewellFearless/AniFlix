@@ -3839,17 +3839,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:^1.7.3":
-  version: 1.7.3
-  resolution: "@shopify/flash-list@npm:1.7.3"
+"@shopify/flash-list@npm:^1.7.5":
+  version: 1.7.5
+  resolution: "@shopify/flash-list@npm:1.7.5"
   dependencies:
-    recyclerlistview: 4.2.1
+    recyclerlistview: 4.2.2
     tslib: 2.8.1
   peerDependencies:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: cbf3289779141777eab4ec6f1a59b90c6f2f91fb4a880dad09ace5e37559a1448ddbf7a282c8787bb7b4f1b45d3f612f8a940760accfd88313494d47a1d63cce
+  checksum: 46906eaf2cd89f25c6b8f5bdd465522ecd8a9d2add73d658cfacb78e844e58ee33cb4f969d92c310c0059836f65ebfe1bd3b369209665e1b1579a72b45065c22
   languageName: node
   linkType: hard
 
@@ -4545,7 +4545,7 @@ __metadata:
     "@react-navigation/stack": ^7.1.2
     "@reduxjs/toolkit": ^2.2.5
     "@rnx-kit/align-deps": ^2.5.0
-    "@shopify/flash-list": ^1.7.3
+    "@shopify/flash-list": ^1.7.5
     "@types/jest": ^29.5.13
     "@types/metro-config": ^0.76.3
     "@types/react": ^18.2.6
@@ -12224,7 +12224,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recyclerlistview@npm:4.2.1, recyclerlistview@npm:^4.2.1":
+"recyclerlistview@npm:4.2.2":
+  version: 4.2.2
+  resolution: "recyclerlistview@npm:4.2.2"
+  dependencies:
+    lodash.debounce: 4.0.8
+    prop-types: 15.8.1
+    ts-object-utils: 0.0.5
+  peerDependencies:
+    react: ">= 15.2.1"
+    react-native: ">= 0.30.0"
+  checksum: 2891280fff86f5a311ddfc08ed33611499a96a9d3b60d1977cf720b73149facc91bcfaabc0f6d7472c93efeef1375601a54552e362581abaed30b6381bde49a9
+  languageName: node
+  linkType: hard
+
+"recyclerlistview@npm:^4.2.1":
   version: 4.2.1
   resolution: "recyclerlistview@npm:4.2.1"
   dependencies:
