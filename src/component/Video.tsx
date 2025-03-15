@@ -577,12 +577,11 @@ function Video(props: Props) {
       initialInfoContainerHeight.current = height;
       // infoContainerHeight.setValue(height);
     });
+    // eslint-disable-next-line prettier/prettier
   }, [
     animeDetail?.synopsis,
     animeDetail?.rating,
     animeDetail?.genres,
-    synopsisTextLength,
-    infoContainerHeight,
   ]);
 
   const onSynopsisPress = useCallback(async () => {
