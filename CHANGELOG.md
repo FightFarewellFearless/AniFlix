@@ -1,3 +1,11 @@
+# v0.8.3-JS_1 (15-Maret-2025)
+
+## Diperbaiki
+- Salah pengukuran tinggi pada animasi sinopsis
+
+## Ditingkatkan
+- Mengimplementasi inline-requires
+
 # v0.8.3 (13-Maret-2025)
 
 Upgrade banyak library yang digunakan. Ini mungkin akan memperbaiki beberapa masalah termasuk masalah crash dan masalah lainnya...
