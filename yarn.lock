@@ -2109,9 +2109,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/cli@npm:0.22.19":
-  version: 0.22.19
-  resolution: "@expo/cli@npm:0.22.19"
+"@expo/cli@npm:0.22.20":
+  version: 0.22.20
+  resolution: "@expo/cli@npm:0.22.20"
   dependencies:
     "@0no-co/graphql.web": ^1.0.8
     "@babel/runtime": ^7.20.0
@@ -2187,7 +2187,7 @@ __metadata:
     ws: ^8.12.1
   bin:
     expo-internal: build/bin/cli
-  checksum: 018fce419cd9546d225b15177b066220560265c6fa85f7ea0aa49d52037384f7837fe71724c3492b2b4a4eaecefcbce8395b5c3476c7ae3be52769d468afa9f3
+  checksum: 59a39c02de6462a1da5e47fac5d0a3596e92925f7d1a8448163ab3dde6998544afc724fa0743016f2270697dec6e6c5663203ce9c04a5671b9fb9e5ecf11ce9d
   languageName: node
   linkType: hard
 
@@ -4561,7 +4561,7 @@ __metadata:
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: beta
-    expo: 52.0.38
+    expo: 52.0.39
     expo-document-picker: 13.0.3
     expo-linear-gradient: 14.0.2
     expo-splash-screen: 0.29.22
@@ -7322,12 +7322,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:52.0.38":
-  version: 52.0.38
-  resolution: "expo@npm:52.0.38"
+"expo@npm:52.0.39":
+  version: 52.0.39
+  resolution: "expo@npm:52.0.39"
   dependencies:
     "@babel/runtime": ^7.20.0
-    "@expo/cli": 0.22.19
+    "@expo/cli": 0.22.20
     "@expo/config": ~10.0.11
     "@expo/config-plugins": ~9.0.17
     "@expo/fingerprint": 0.11.11
@@ -7359,7 +7359,7 @@ __metadata:
       optional: true
   bin:
     expo: bin/cli
-  checksum: a0fd33792b6181505f74d5af606f006a7025db36a9fa1128d6e86117f5f4f955e108f13ad52c1df72246abd1608dbdaa9c038fccb9c115790efcb2b2e673fd29
+  checksum: c783be1980806803aaa3173aec950b4d5d9d3852643b78ffe1832313218ae6b36294b42c121342a095a98f0925728d6eca858a5f6ee48d42eb2ab41cbeee9970
   languageName: node
   linkType: hard
 
