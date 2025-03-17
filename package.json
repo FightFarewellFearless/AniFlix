@@ -31,7 +31,7 @@
     "expo-linear-gradient": "14.0.2",
     "expo-splash-screen": "0.29.22",
     "expo-updates": "~0.26.19",
-    "expo-video": "~2.0.5",
+    "expo-video": "~2.0.6",
     "moment": "^2.30.1",
     "react": "18.3.1",
     "react-compiler-runtime": "beta",
