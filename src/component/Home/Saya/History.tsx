@@ -1,26 +1,20 @@
-import {
-  Text,
-  View,
-  Alert,
-  StyleSheet,
-  useColorScheme,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  TextInput,
-  ActivityIndicator,
-} from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
+import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import useGlobalStyles, { darkText } from '../../../assets/style';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import moment from 'moment';
-import { setDatabase } from '../../../misc/reduxSlice';
-import { AppDispatch } from '../../../misc/reduxStore';
-import { SayaDrawerNavigator } from '../../../types/navigation';
-import { HistoryJSON } from '../../../types/historyJSON';
+import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -28,11 +22,17 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import historyRuntime from '../../../misc/workletRuntime';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useDispatch } from 'react-redux';
+import useGlobalStyles, { darkText } from '../../../assets/style';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
+import { setDatabase } from '../../../misc/reduxSlice';
+import { AppDispatch } from '../../../misc/reduxStore';
+import historyRuntime from '../../../misc/workletRuntime';
+import { HistoryJSON } from '../../../types/historyJSON';
+import { SayaDrawerNavigator } from '../../../types/navigation';
 import ImageLoading from '../../ImageLoading';
-import { DrawerScreenProps } from '@react-navigation/drawer';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,

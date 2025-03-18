@@ -1,21 +1,21 @@
 import { StackScreenProps, createStackNavigator } from '@react-navigation/stack';
-import { UtilsStackNavigator } from '../../types/navigation';
+import { memo, useMemo } from 'react';
 import {
+  ScrollView,
+  StyleSheet,
   Text,
+  TouchableNativeFeedback,
   View,
   useColorScheme,
-  TouchableNativeFeedback,
-  StyleSheet,
   useWindowDimensions,
-  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { UtilsStackNavigator } from '../../types/navigation';
+import About from './Utilitas/About';
+import Changelog from './Utilitas/Changelog';
 import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';
 import Setting from './Utilitas/Setting';
-import Changelog from './Utilitas/Changelog';
-import About from './Utilitas/About';
-import { memo, useMemo } from 'react';
 import SupportDev from './Utilitas/SupportDev';
 
 const Stack = createStackNavigator<UtilsStackNavigator>();

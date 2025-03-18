@@ -1,5 +1,5 @@
 import { getStreamingDetail, MovieDetail } from '../utils/animeMovie';
-import { EpisodeBaruHome, AniDetail, AniStreaming } from './anime';
+import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {
   AnimeList: undefined;
@@ -83,9 +83,9 @@ type SayaDrawerNavigator = {
 };
 
 export type {
-  RootStackNavigator,
   HomeNavigator,
   HomeStackNavigator,
-  UtilsStackNavigator,
+  RootStackNavigator,
   SayaDrawerNavigator,
+  UtilsStackNavigator,
 };

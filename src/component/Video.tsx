@@ -1,39 +1,32 @@
 import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-  useLayoutEffect,
   memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import {
-  StatusBar,
-  View,
-  Alert,
-  ScrollView,
-  Text,
-  StyleSheet,
-  BackHandler,
   ActivityIndicator,
-  ToastAndroid,
+  Alert,
+  BackHandler,
+  EmitterSubscription,
   NativeEventEmitter,
   NativeModules,
-  EmitterSubscription,
-  useColorScheme,
   Pressable,
-  // Animated,
-  // useAnimatedValue,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
-import Orientation, { OrientationType } from 'react-native-orientation-locker';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
-const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import { Dropdown } from 'react-native-element-dropdown';
-import url from 'url';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
+import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
   BounceIn,
   BounceOut,
@@ -42,24 +35,29 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import url from 'url';
+const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { StackScreenProps } from '@react-navigation/stack';
-import { RootStackNavigator } from '../types/navigation';
-import { AppDispatch, RootState } from '../misc/reduxStore';
-import AnimeAPI from '../utils/AnimeAPI';
-import WebView from 'react-native-webview';
-import deviceUserAgent from '../utils/deviceUserAgent';
-import { AniDetail } from '../types/anime';
-import VideoPlayer from './VideoPlayer';
 import { StackActions } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
+import WebView from 'react-native-webview';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../misc/reduxStore';
+import { AniDetail } from '../types/anime';
+import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
+import AnimeAPI from '../utils/AnimeAPI';
 import { getMovieDetail, getRawDataIfAvailable } from '../utils/animeMovie';
+import deviceUserAgent from '../utils/deviceUserAgent';
+import VideoPlayer from './VideoPlayer';
 
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';

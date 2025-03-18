@@ -1,6 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import { RootStackNavigator } from '../types/navigation';
-import useGlobalStyles from '../assets/style';
+import { memo, useEffect, useMemo, useState } from 'react';
 import {
   Image,
   ImageBackground,
@@ -14,15 +13,16 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { memo, useEffect, useMemo, useState } from 'react';
+import useGlobalStyles from '../assets/style';
+import { RootStackNavigator } from '../types/navigation';
 
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { getColors } from 'react-native-image-colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DarkOverlay from './misc/DarkOverlay';
 import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../types/watchLaterJSON';
+import DarkOverlay from './misc/DarkOverlay';
 
 type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {

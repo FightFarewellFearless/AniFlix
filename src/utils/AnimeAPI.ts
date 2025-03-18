@@ -1,11 +1,11 @@
 import { ToastAndroid } from 'react-native';
 import {
   AniDetail,
+  AniStreaming,
   EpisodeBaruHome,
+  listAnimeTypeList,
   NewAnimeList,
   SearchAnime,
-  AniStreaming,
-  listAnimeTypeList,
 } from '../types/anime';
 import Anime from './animeLocalAPI';
 import { setWebViewOpen } from './CFBypass';

@@ -1,5 +1,5 @@
-import React, { useState, memo, useCallback, useEffect } from 'react';
-import { View, ActivityIndicator, ImageBackground, ImageBackgroundProps } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, ImageBackground, ImageBackgroundProps, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';

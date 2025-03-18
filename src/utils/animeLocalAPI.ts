@@ -16,9 +16,9 @@
  */
 
 import axios, { AxiosRequestConfig } from 'axios';
-import deviceUserAgent from './deviceUserAgent';
-import cheerio, { Element } from 'cheerio';
 import type { Cheerio } from 'cheerio';
+import cheerio, { Element } from 'cheerio';
+import URL from 'url';
 import {
   AniDetail,
   AniDetailEpsList,
@@ -27,7 +27,7 @@ import {
   SearchAnimeList,
   listAnimeTypeList,
 } from '../types/anime';
-import URL from 'url';
+import deviceUserAgent from './deviceUserAgent';
 
 import { Buffer } from 'buffer/';
 import { runOnJS, runOnRuntime } from 'react-native-reanimated';

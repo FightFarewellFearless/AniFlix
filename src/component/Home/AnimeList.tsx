@@ -1,3 +1,11 @@
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import {
+  NavigationProp,
+  StackActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, {
   lazy,
   memo,
@@ -10,17 +18,17 @@ import React, {
   useState,
 } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  FlatList,
+  ListRenderItemInfo,
+  StyleSheet,
   Text,
   ToastAndroid,
-  StyleSheet,
-  FlatList,
-  useWindowDimensions,
-  ListRenderItemInfo,
   useColorScheme,
-  ActivityIndicator,
+  useWindowDimensions,
+  View,
 } from 'react-native';
-import { TouchableOpacity, ScrollView, RefreshControl } from 'react-native-gesture-handler'; //rngh
+import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native-gesture-handler'; //rngh
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -31,32 +39,24 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  NavigationProp,
-  StackActions,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native';
-import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import runningText from '../../assets/runningText.json';
+import useGlobalStyles from '../../assets/style';
+import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import AnimeAPI from '../../utils/AnimeAPI';
 // import SeeMore from './SeeMore';
 const SeeMore = lazy(() => import('./SeeMore'));
-import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
-import ReText from '../misc/ReText';
 import { useBatteryLevel } from 'react-native-device-info';
-import { version, OTAJSVersion } from '../../../package.json';
+import { OTAJSVersion, version } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
+import ReText from '../misc/ReText';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;

@@ -1,8 +1,8 @@
 import { useContext, useRef } from 'react';
-import { Modal, ToastAndroid, View, Text, TouchableOpacity } from 'react-native';
+import { Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import deviceUserAgent from './deviceUserAgent';
 import { CFBypassIsOpen } from './CFBypass';
+import deviceUserAgent from './deviceUserAgent';
 
 export default CFBypassWebView;
 function CFBypassWebView() {

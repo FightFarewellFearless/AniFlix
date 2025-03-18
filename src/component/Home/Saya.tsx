@@ -1,11 +1,11 @@
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { memo } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import useGlobalStyles from '../../assets/style';
+import { SayaDrawerNavigator } from '../../types/navigation';
 import History from './Saya/History';
 import WatchLater from './Saya/WatchLater';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { SayaDrawerNavigator } from '../../types/navigation';
-import useGlobalStyles from '../../assets/style';
-import { memo } from 'react';
 
 const Drawer = createDrawerNavigator<SayaDrawerNavigator>();
 

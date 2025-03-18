@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { ToastAndroid } from 'react-native';
-import { View } from 'react-native';
+import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import deviceUserAgent from './deviceUserAgent';
 import { Buffer } from 'buffer/';
+import deviceUserAgent from './deviceUserAgent';
 
 import cheerio from 'cheerio';
 

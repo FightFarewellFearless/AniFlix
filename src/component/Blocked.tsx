@@ -1,22 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState, memo, useMemo } from 'react';
+import { WEBHOOK_URL } from '@env';
+import { StackScreenProps } from '@react-navigation/stack';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Text,
-  View,
-  Animated,
-  Vibration,
-  StyleSheet,
-  useColorScheme,
-  Modal,
   Alert,
+  Animated,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  Vibration,
+  View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
 import Icon from 'react-native-vector-icons/Entypo';
 import useGlobalStyles from '../assets/style';
-import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackNavigator } from '../types/navigation';
 import { JoinDiscord } from './Loading Screen/Connect';
-import { TextInput } from 'react-native';
-import { WEBHOOK_URL } from '@env';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 

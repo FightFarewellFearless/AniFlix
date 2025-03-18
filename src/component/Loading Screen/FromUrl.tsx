@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, ActivityIndicator, Text, Alert, ToastAndroid } from 'react-native';
 import { StackActions } from '@react-navigation/native';
-import useGlobalStyles from '../../assets/style';
-import randomTipsArray from '../../assets/loadingTips.json';
-import setHistory from '../../utils/historyControl';
-import { useDispatch, useSelector } from 'react-redux';
 import { StackScreenProps } from '@react-navigation/stack';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Text, ToastAndroid, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import randomTipsArray from '../../assets/loadingTips.json';
+import useGlobalStyles from '../../assets/style';
 import store, { AppDispatch, RootState } from '../../misc/reduxStore';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
-import controlWatchLater from '../../utils/watchLaterControl';
 import AnimeAPI from '../../utils/AnimeAPI';
 import Anime_Whitelist from '../../utils/Anime_Whitelist';
+import setHistory from '../../utils/historyControl';
+import controlWatchLater from '../../utils/watchLaterControl';
 
-import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 import URL from 'url';
+import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 
 // import { setDatabase } from '../misc/reduxSlice';
 

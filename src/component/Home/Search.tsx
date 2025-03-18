@@ -1,58 +1,59 @@
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import React, {
-  useTransition,
+  memo,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useMemo,
-  memo,
+  useTransition,
 } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
   ActivityIndicator,
-  Pressable,
-  Keyboard,
-  useColorScheme,
-  KeyboardAvoidingView,
-  useWindowDimensions,
-  LayoutChangeEvent,
-  ImageBackground,
+  Alert,
   Animated,
+  ImageBackground,
+  Keyboard,
+  KeyboardAvoidingView,
+  LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
-import { TouchableOpacity, TextInput } from 'react-native'; //rngh
-import { useFocusEffect, StackActions, CompositeScreenProps } from '@react-navigation/native';
-import useGlobalStyles from '../../assets/style';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { StackScreenProps } from '@react-navigation/stack';
+import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
+import ImageColors from 'react-native-image-colors';
 import Reanimated, {
-  FadeOutDown,
   FadeInRight,
   FadeInUp,
-  ZoomIn,
-  ZoomOut,
+  FadeOutDown,
   SlideInDown,
   SlideOutDown,
+  ZoomIn,
+  ZoomOut,
 } from 'react-native-reanimated';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
-import ImageLoading from '../ImageLoading';
-import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import { useDispatch } from 'react-redux';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import { setDatabase } from '../../misc/reduxSlice';
 import { AppDispatch } from '../../misc/reduxStore';
-import ImageColors from 'react-native-image-colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import DarkOverlay from '../misc/DarkOverlay';
 import { Movies, searchMovie } from '../../utils/animeMovie';
+import ImageLoading from '../ImageLoading';
+import DarkOverlay from '../misc/DarkOverlay';
 
-import { TouchableOpacity as TouchableOpacityRNGH, FlatList } from 'react-native-gesture-handler';
+import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 
 // Remove reanimated animated component creation for TextInput and Pressable
 // Replace:

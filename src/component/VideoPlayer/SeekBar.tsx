@@ -1,11 +1,11 @@
 import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
-import { ViewStyle, View, StyleSheet, LayoutChangeEvent, useWindowDimensions } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
   SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 type SeekBarProps = {

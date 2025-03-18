@@ -1,21 +1,19 @@
-import React, { Fragment, memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
-  ScrollView,
   ToastAndroid,
-  Alert,
+  TouchableOpacity,
   useColorScheme,
+  View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
-import { version as appVersion, OTAJSVersion } from '../../package.json';
-import useGlobalStyles from '../assets/style';
 import { StackScreenProps } from '@react-navigation/stack';
-import { RootStackNavigator } from '../types/navigation';
+import * as Updates from 'expo-updates';
 import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
   runOnJS,
@@ -24,7 +22,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import * as Updates from 'expo-updates';
+import { version as appVersion, OTAJSVersion } from '../../package.json';
+import useGlobalStyles from '../assets/style';
+import { RootStackNavigator } from '../types/navigation';
 
 type Props = StackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 

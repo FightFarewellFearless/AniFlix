@@ -1,23 +1,22 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  useColorScheme,
-  ToastAndroid,
-  ActivityIndicator,
-  TouchableOpacity,
-  Modal,
-} from 'react-native';
-import { TouchableNativeFeedback } from 'react-native'; //rngh
-import useGlobalStyles from '../../../assets/style';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import * as DocumentPicker from 'expo-document-picker';
-import { memo, useState, useMemo } from 'react';
 import { FlashList } from '@shopify/flash-list';
-import moment from 'moment';
+import * as DocumentPicker from 'expo-document-picker';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React from 'react';
+import moment from 'moment';
+import React, { memo, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableNativeFeedback,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import useGlobalStyles from '../../../assets/style';
 
 interface SearchResult {
   frameCount: number;

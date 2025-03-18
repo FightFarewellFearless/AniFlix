@@ -1,42 +1,42 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StackActions } from '@react-navigation/native';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  View,
   ActivityIndicator,
-  Text,
   Linking,
   StyleSheet,
+  Text,
   ToastAndroid,
+  TouchableOpacity,
   useColorScheme,
+  View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
-import { StackActions } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 
-import { AppDispatch } from '../../misc/reduxStore';
-import { setDatabase } from '../../misc/reduxSlice';
+import { StackScreenProps } from '@react-navigation/stack';
+import RNFetchBlob from 'react-native-blob-util';
+import Orientation from 'react-native-orientation-locker';
+import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { version as appVersion, OTAJSVersion } from '../../../package.json';
-import deviceUserAgent from '../../utils/deviceUserAgent';
-import Orientation from 'react-native-orientation-locker';
-import { StackScreenProps } from '@react-navigation/stack';
+import { setDatabase } from '../../misc/reduxSlice';
+import { AppDispatch } from '../../misc/reduxStore';
+import { EpisodeBaruHome } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
 import { SetDatabaseTarget } from '../../types/redux';
-import { EpisodeBaruHome } from '../../types/anime';
 import AnimeAPI from '../../utils/AnimeAPI';
-import RNFetchBlob from 'react-native-blob-util';
+import deviceUserAgent from '../../utils/deviceUserAgent';
 
 import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import * as Updates from 'expo-updates';
+import runningText from '../../assets/runningText.json';
 // import { AnimeMovieWebView } from '../../utils/animeMovie';
 const AnimeMovieWebView = React.lazy(() =>
   import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
 );
-import runningText from '../../assets/runningText.json';
 
 export const JoinDiscord = () => {
   const styles = useStyles();
@@ -270,14 +270,14 @@ function Loading(props: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-{isAnimeMovieWebViewOpen && (
+        {isAnimeMovieWebViewOpen && (
           <Suspense>
-        <AnimeMovieWebView
-          isWebViewShown={isAnimeMovieWebViewOpen}
-          setIsWebViewShown={setIsAnimeMovieWebViewOpen}
-          onAnimeMovieReady={onAnimeMovieReady}
-        />
-</Suspense>
+            <AnimeMovieWebView
+              isWebViewShown={isAnimeMovieWebViewOpen}
+              setIsWebViewShown={setIsAnimeMovieWebViewOpen}
+              onAnimeMovieReady={onAnimeMovieReady}
+            />
+          </Suspense>
         )}
         <View style={styles.quotesBox}>
           <Text

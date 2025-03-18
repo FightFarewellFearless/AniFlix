@@ -1,15 +1,21 @@
-import React, { memo, useContext, useEffect, useState } from 'react';
-import { Text, StyleSheet, ActivityIndicator, View, ToastAndroid } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
-import { FlashList } from '@shopify/flash-list';
 import { StackScreenProps } from '@react-navigation/stack';
-import { useWindowDimensions } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import React, { memo, useContext, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { HomeStackNavigator } from '../../types/navigation';
-import { ListAnimeComponent } from '../misc/ListAnimeComponent';
-import AnimeAPI from '../../utils/AnimeAPI';
 import { NewAnimeList } from '../../types/anime';
+import { HomeStackNavigator } from '../../types/navigation';
+import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
+import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
 type Props = StackScreenProps<HomeStackNavigator, 'SeeMore'>;
 

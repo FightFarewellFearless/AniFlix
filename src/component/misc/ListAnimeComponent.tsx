@@ -1,13 +1,13 @@
 import { StackActions } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { TouchableOpacity, View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { useMemo } from 'react';
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NewAnimeList } from '../../types/anime';
 import { HomeStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMemo } from 'react';
 
 export function ListAnimeComponent(
   props: (

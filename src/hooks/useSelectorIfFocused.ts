@@ -1,6 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import store, { RootState } from '../misc/reduxStore';
-import { useFocusEffect } from '@react-navigation/native';
 
 function useSelectorIfFocused(
   selector: (state: RootState) => string,

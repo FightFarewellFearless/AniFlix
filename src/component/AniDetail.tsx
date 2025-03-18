@@ -1,18 +1,19 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useMemo, useRef, useState, memo } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Image,
   ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
+  TouchableOpacity,
+  TouchableOpacity as TouchableOpacityRN,
   View,
   useColorScheme,
-  TouchableOpacity as TouchableOpacityRN,
-  Image,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
 import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from 'react-native-copilot';
 import { getColors } from 'react-native-image-colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -21,10 +22,9 @@ import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { complementHex, darkenHexColor } from '../utils/hexColors';
 import { FlashList } from '@shopify/flash-list';
+import { complementHex, darkenHexColor } from '../utils/hexColors';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 

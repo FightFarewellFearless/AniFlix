@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import {
   ImageBackground,
   Linking,
@@ -7,12 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import appPackage from '../../../../package.json';
+import { darkText } from '../../../assets/style';
 import { JoinDiscord } from '../../Loading Screen/Connect';
 import DarkOverlay from '../../misc/DarkOverlay';
-import { darkText } from '../../../assets/style';
-import { memo, useMemo } from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 const tokyo = require('../../../assets/tokyo.jpg');
 

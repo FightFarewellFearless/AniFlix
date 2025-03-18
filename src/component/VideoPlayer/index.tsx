@@ -1,11 +1,12 @@
 /* eslint-disable react-compiler/react-compiler */
 import {
-  StatusChangeEventPayload,
-  useVideoPlayer,
   VideoPlayer as ExpoVideoPlayer,
+  StatusChangeEventPayload,
   VideoView,
+  useVideoPlayer,
 } from 'expo-video';
 
+import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -14,10 +15,10 @@ import {
   GestureResponderEvent,
   Pressable,
   Text,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
 import Reanimated, {
   SharedValue,
   runOnJS,
@@ -30,7 +31,6 @@ import Icons from 'react-native-vector-icons/MaterialIcons';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
-import { useEventListener } from 'expo';
 
 type VideoPlayerProps = {
   title: string;

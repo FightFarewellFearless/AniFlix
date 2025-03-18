@@ -1,10 +1,17 @@
-import React, { useMemo } from 'react';
-import useGlobalStyles, { darkText } from '../assets/style';
 import { StackActions } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Linking, Text, ToastAndroid, View, StyleSheet, useColorScheme } from 'react-native';
-import { TouchableOpacity } from 'react-native'; //rngh
 import { StackScreenProps } from '@react-navigation/stack';
+import React, { useMemo } from 'react';
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import useGlobalStyles, { darkText } from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 
 type Props = StackScreenProps<RootStackNavigator, 'FailedToConnect'>;

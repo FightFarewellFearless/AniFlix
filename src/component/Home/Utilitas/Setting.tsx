@@ -9,8 +9,8 @@ import {
   StyleSheet,
   Switch,
   Text,
-  View,
   useColorScheme,
+  View,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -29,8 +29,8 @@ import { SetDatabaseTarget } from '../../../types/redux';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 
 import { Buffer } from 'buffer/';
-import moment from 'moment';
 import * as DocumentPicker from 'expo-document-picker';
+import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { createDocument } from 'react-native-saf-x';
 

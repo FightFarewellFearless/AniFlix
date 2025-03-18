@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, Slice } from '@reduxjs/toolkit';
-import defaultDatabase from './defaultDatabaseValue.json';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncThunk, createSlice, Slice } from '@reduxjs/toolkit';
 import { SetDatabaseTarget } from '../types/redux';
+import defaultDatabase from './defaultDatabaseValue.json';
 import { AppDispatch, RootState } from './reduxStore';
 
 export const setDatabase = createAsyncThunk<
