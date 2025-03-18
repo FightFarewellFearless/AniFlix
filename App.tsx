@@ -25,7 +25,8 @@ import useGlobalStyles from './src/assets/style';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { enableScreens } from 'react-native-screens';
 import { enableFreeze } from 'react-native-screens';
-import { CFBypassIsOpen, CFBypassWebView, setWebViewOpen } from './src/utils/CFBypass';
+import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
 import MovieDetail from './src/component/MovieDetail';
 
 import * as SplashScreen from 'expo-splash-screen';
@@ -151,7 +152,11 @@ function App() {
           </Stack.Navigator>
         </Provider>
         <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
-          <CFBypassWebView />
+          {isOpen && (
+            <Suspense>
+              <CFBypassWebView />
+            </Suspense>
+          )}
         </CFBypassIsOpen.Provider>
         {__DEV__ && (
           <View style={styles.Dev} pointerEvents="none">

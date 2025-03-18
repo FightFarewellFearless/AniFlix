@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -270,11 +270,15 @@ function Loading(props: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+{isAnimeMovieWebViewOpen && (
+          <Suspense>
         <AnimeMovieWebView
           isWebViewShown={isAnimeMovieWebViewOpen}
           setIsWebViewShown={setIsAnimeMovieWebViewOpen}
           onAnimeMovieReady={onAnimeMovieReady}
         />
+</Suspense>
+        )}
         <View style={styles.quotesBox}>
           <Text
             style={[
