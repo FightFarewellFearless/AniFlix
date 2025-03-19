@@ -3699,9 +3699,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.4.0":
-  version: 7.4.0
-  resolution: "@react-navigation/core@npm:7.4.0"
+"@react-navigation/core@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "@react-navigation/core@npm:7.5.0"
   dependencies:
     "@react-navigation/routers": ^7.2.0
     escape-string-regexp: ^4.0.0
@@ -3712,7 +3712,7 @@ __metadata:
     use-sync-external-store: ^1.2.2
   peerDependencies:
     react: ">= 18.2.0"
-  checksum: 182f7c820416fd0e57cdf85bb5c3d834d7bc45e6c2650e34f4c55329004a816c160e78fadcd1c7f5d945a6d607a42d1d4dfda11c3bdaa4495df62b9be9e1f5e3
+  checksum: 8b447e9e9fda32c790ee2c7fb9404867c0b723e0c25ba3395462aa0af5d413efe827be3af557410fc681e4a966332bf9fc32bb7b778ad22df83d6b87364cc0c1
   languageName: node
   linkType: hard
 
@@ -3770,11 +3770,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.0.15":
-  version: 7.0.15
-  resolution: "@react-navigation/native@npm:7.0.15"
+"@react-navigation/native@npm:^7.0.16":
+  version: 7.0.16
+  resolution: "@react-navigation/native@npm:7.0.16"
   dependencies:
-    "@react-navigation/core": ^7.4.0
+    "@react-navigation/core": ^7.5.0
     escape-string-regexp: ^4.0.0
     fast-deep-equal: ^3.1.3
     nanoid: 3.3.8
@@ -3782,7 +3782,7 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
     react-native: "*"
-  checksum: 170a533ae4e4dc3dfc9e3b16d0df2bbabde4688121009620a95a74020ba4463b01f2d1ad6aa358513cb06af381714d25ceea51e7b0a6fecb719ea143a55fc6a1
+  checksum: 4a6e55d73d2535e24173ff944831456b3489f48c4e045281e06572b24fefe5eec41c12cc598c1e757499806a390362450d0c10335d4a1945c1b853502df4a30a
   languageName: node
   linkType: hard
 
@@ -4553,7 +4553,7 @@ __metadata:
     "@react-native/typescript-config": 0.77.1
     "@react-navigation/bottom-tabs": ^7.2.1
     "@react-navigation/drawer": ^7.1.2
-    "@react-navigation/native": ^7.0.15
+    "@react-navigation/native": ^7.0.16
     "@react-navigation/native-stack": ^7.2.1
     "@react-navigation/stack": ^7.1.2
     "@reduxjs/toolkit": ^2.2.5
