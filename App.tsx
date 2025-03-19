@@ -1,7 +1,15 @@
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Appearance,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { Provider } from 'react-redux';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -25,10 +33,12 @@ const FailedToConnect = lazy(() => import('./src/component/FailedToConnect'));
 const NeedUpdate = lazy(() => import('./src/component/NeedUpdate'));
 // import { enableScreens } from 'react-native-screens';
 import { enableFreeze } from 'react-native-screens';
-import MovieDetail from './src/component/MovieDetail';
 import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+// import MovieDetail from './src/component/MovieDetail';
+const MovieDetail = lazy(() => import('./src/component/MovieDetail'));
 const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
@@ -56,6 +66,11 @@ function App() {
   }, []);
   const colorScheme = useColorScheme();
   useEffect(() => {
+    AsyncStorage.getItem('colorScheme').then(value => {
+      if (value !== 'auto' && (value === 'light' || value === 'dark')) {
+        Appearance.setColorScheme(value);
+      }
+    });
     StatusBar.setHidden(false);
     SplashScreen.hideAsync();
   }, []);

@@ -1,7 +1,8 @@
-import { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Appearance,
   FlatList,
   Modal,
   PermissionsAndroid,
@@ -32,6 +33,7 @@ import { Buffer } from 'buffer/';
 import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
+import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import { createDocument } from 'react-native-saf-x';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
@@ -53,6 +55,9 @@ function Setting(_props: Props) {
     (state: RootState) => state.settings.enableBatteryTimeInfo,
     true,
   );
+
+  const appTheme = useSelectorIfFocused(state => state.settings.colorScheme, true);
+  const appThemeDropdown = useRef<IDropdownRef>(null);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -220,6 +225,54 @@ function Setting(_props: Props) {
 
   const settingsData: SettingsData[] = [
     {
+      title: 'Tema aplikasi',
+      description: 'Beralih ke tema gelap atau terang',
+      icon: <Icon name="sun-o" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Dropdown
+          data={[
+            { label: 'Mengikuti sistem', value: 'auto' },
+            { label: 'Tema terang', value: 'light' },
+            { label: 'Tema gelap', value: 'dark' },
+          ]}
+          onChange={data => {
+            if (data.value === 'light' || data.value === 'dark') {
+              Appearance.setColorScheme(data.value);
+            } else if (data.value === 'auto') {
+              Appearance.setColorScheme(undefined);
+            }
+            dispatchSettings(
+              setDatabase({
+                target: 'colorScheme',
+                value: data.value,
+              }),
+            );
+          }}
+          ref={appThemeDropdown}
+          value={appTheme}
+          labelField={'label'}
+          valueField={'value'}
+          maxHeight={300}
+          style={styles.dropdownStyle}
+          containerStyle={{
+            maxWidth: '50%',
+          }}
+          itemTextStyle={{
+            color: globalStyles.text.color,
+            fontSize: 15,
+            textAlign: 'center',
+          }}
+          itemContainerStyle={styles.dropdownItemContainerStyle}
+          activeColor="#7a7c16"
+          selectedTextStyle={styles.dropdownSelectedTextStyle}
+          placeholderStyle={{ color: globalStyles.text.color }}
+        />
+      ),
+      handler: () => {
+        appThemeDropdown.current?.open();
+      },
+    },
+    {
       title: 'Nyalakan informasi baterai dan waktu',
       description:
         'Beri tahu saya persentase baterai dan waktu, saat sedang menonton dalam mode fullscreen',
@@ -317,6 +370,14 @@ function useStyles() {
   return useMemo(
     () =>
       StyleSheet.create({
+        dropdownStyle: {
+          width: 150,
+          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
+          padding: 5,
+          borderRadius: 4,
+          borderWidth: 1,
+          borderColor: 'black',
+        },
         settingListContainer: {
           flex: 1,
           paddingVertical: 10,
@@ -387,14 +448,6 @@ function useStyles() {
           fontWeight: 'bold',
           fontSize: 17,
         },
-        dropdownStyle: {
-          width: 100,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-          padding: 5,
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: 'black',
-        },
         dropdownContainerStyle: {
           width: 120,
         },
@@ -404,6 +457,8 @@ function useStyles() {
           textAlign: 'center',
         },
         dropdownItemContainerStyle: {
+          borderColor: colorScheme !== 'dark' ? '#2c2c2c' : '#ccc9c9',
+          borderWidth: StyleSheet.hairlineWidth,
           backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
         },
         dropdownSelectedTextStyle: {

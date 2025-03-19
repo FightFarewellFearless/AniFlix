@@ -3,5 +3,6 @@
     "enableBatteryTimeInfo": "false",
     "watchLater": "[]",
     "searchHistory": "[]",
-    "copilot.watchLater_firstTime": "true"
+    "copilot.watchLater_firstTime": "true",
+    "colorScheme": "auto"
 }
