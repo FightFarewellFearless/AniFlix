@@ -3101,6 +3101,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pirles/react-native-element-dropdown@npm:^2.13.0":
+  version: 2.13.0
+  resolution: "@pirles/react-native-element-dropdown@npm:2.13.0"
+  dependencies:
+    lodash: ^4.17.21
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 04601169463e1c58c45be32aa484508b10c338d3d50f4c0b539c8e6c2b3f07ecc967b0b3523d88aba12ece1df5353137869418ce76f6a2a1261679fc39a6de04
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -4531,6 +4543,7 @@ __metadata:
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
     "@domir/react-native-measure-text": ^0.1.8
+    "@pirles/react-native-element-dropdown": ^2.13.0
     "@react-native-async-storage/async-storage": ^2.1.2
     "@react-native-community/cli": ^15.0.1
     "@react-native-community/cli-platform-android": ^15.0.1
@@ -4577,7 +4590,6 @@ __metadata:
     react-native-copilot: ^3.3.3
     react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
-    react-native-element-dropdown: ^2.12.4
     react-native-fetch-api: ^3.0.0
     react-native-gesture-handler: 2.24.0
     react-native-image-colors: ^2.4.0
@@ -11814,18 +11826,6 @@ __metadata:
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
   checksum: 02366958e92f6d1ff6746cb1f85803e460235604ccf4970daebdc217f994b716d0334f361d1f087fac976d5e2beebfe8d17b6bc13e6236538d2dbd8d25226465
-  languageName: node
-  linkType: hard
-
-"react-native-element-dropdown@npm:^2.12.4":
-  version: 2.12.4
-  resolution: "react-native-element-dropdown@npm:2.12.4"
-  dependencies:
-    lodash: ^4.17.21
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 4ac8962df350beb1a89d7994c4a96f06a5956f5ca7755e41b93c4d23873eedf4150903be74bbab8ebba9710da07c0c93ab29d2ff4345db797898ffef198bbadf
   languageName: node
   linkType: hard
 

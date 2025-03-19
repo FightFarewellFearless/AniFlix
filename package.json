@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@domir/react-native-measure-text": "^0.1.8",
+    "@pirles/react-native-element-dropdown": "^2.13.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/drawer": "^7.1.2",
@@ -39,7 +40,6 @@
     "react-native-blob-util": "^0.21.2",
     "react-native-copilot": "^3.3.3",
     "react-native-device-info": "^14.0.4",
-    "react-native-element-dropdown": "^2.12.4",
     "react-native-fetch-api": "^3.0.0",
     "react-native-gesture-handler": "2.24.0",
     "react-native-image-colors": "^2.4.0",

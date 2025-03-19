@@ -25,12 +25,12 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import { Dropdown } from 'react-native-element-dropdown';
+import { Dropdown } from '@pirles/react-native-element-dropdown';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
-  BounceIn,
-  BounceOut,
   runOnJS,
+  StretchInX,
+  StretchOutX,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -1065,8 +1065,8 @@ function LoadingModal({
     }
   }, [isLoading, setIsPaused]);
 
-  const entering = useMemo(() => BounceIn.duration(300), []);
-  const exiting = useMemo(() => BounceOut.duration(300), []);
+  const entering = useMemo(() => StretchInX.duration(300), []);
+  const exiting = useMemo(() => StretchOutX.duration(300), []);
 
   return (
     isLoading && (
@@ -1266,6 +1266,8 @@ function useStyles() {
           textAlign: 'center',
         },
         dropdownItemContainerStyle: {
+          borderColor: colorScheme !== 'dark' ? '#2c2c2c' : '#ccc9c9',
+          borderWidth: StyleSheet.hairlineWidth,
           backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
         },
         dropdownSelectedTextStyle: {
