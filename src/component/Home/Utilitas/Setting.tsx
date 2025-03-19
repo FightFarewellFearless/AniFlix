@@ -227,7 +227,7 @@ function Setting(_props: Props) {
     {
       title: 'Tema aplikasi',
       description: 'Beralih ke tema gelap atau terang',
-      icon: <Icon name="sun-o" style={globalStyles.text} size={iconSize} />,
+      icon: <Icon name="paint-brush" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Dropdown
           data={[
@@ -263,7 +263,7 @@ function Setting(_props: Props) {
             textAlign: 'center',
           }}
           itemContainerStyle={styles.dropdownItemContainerStyle}
-          activeColor="#7a7c16"
+          activeColor="#0f8eb4"
           selectedTextStyle={styles.dropdownSelectedTextStyle}
           placeholderStyle={{ color: globalStyles.text.color }}
         />
@@ -463,6 +463,7 @@ function useStyles() {
         },
         dropdownSelectedTextStyle: {
           color: globalStyles.text.color,
+          textAlign: 'center',
         },
       }),
     [colorScheme, globalStyles.text.color],

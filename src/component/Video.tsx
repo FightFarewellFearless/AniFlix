@@ -933,7 +933,7 @@ function Video(props: Props) {
               )}
             </Pressable>
 
-            <View style={[styles.container, { marginTop: 10 }]}>
+            <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
               {data.episodeData && (
                 <View style={[styles.episodeDataControl]}>
                   <TouchableOpacity
@@ -1272,6 +1272,7 @@ function useStyles() {
         },
         dropdownSelectedTextStyle: {
           color: globalStyles.text.color,
+          textAlign: 'center',
         },
         reloadPlayer: {
           backgroundColor: '#0050ac',
