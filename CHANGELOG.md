@@ -1,3 +1,12 @@
+# v0.8.3-JS_2 (19-Maret-2025)
+
+## Ditambahkan
+- Opsi mengganti tema aplikasi (gelap/terang) di pengaturan
+- Animasi dropdown (Pilih resolusi)
+
+## Ditingkatkan
+- Improvisasi lazy loading
+
 # v0.8.3-JS_1 (15-Maret-2025)
 
 ## Diperbaiki
