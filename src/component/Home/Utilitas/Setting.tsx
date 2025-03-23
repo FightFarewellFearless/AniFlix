@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Appearance,
+  ColorSchemeName,
   FlatList,
   Modal,
   PermissionsAndroid,
@@ -29,11 +30,11 @@ import { UtilsStackNavigator } from '../../../types/navigation';
 import { SetDatabaseTarget } from '../../../types/redux';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 
+import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import { Buffer } from 'buffer/';
 import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import { createDocument } from 'react-native-saf-x';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
@@ -156,7 +157,9 @@ function Setting(_props: Props) {
 
       // RNFS.readFile(doc.fileCopyUri).then(console.log);
       const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
-      const backupDataJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+      const backupDataJSON: typeof defaultDatabaseValue = JSON.parse(
+        Buffer.from(data, 'base64').toString('utf8'),
+      );
       await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
       try {
         (Object.keys(backupDataJSON) as SetDatabaseTarget[])
@@ -165,10 +168,15 @@ function Setting(_props: Props) {
             if (value === 'history' || value === 'watchLater') {
               restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
             } else {
+              const restoredData = backupDataJSON[value];
+              if (value === 'colorScheme')
+                Appearance.setColorScheme(
+                  restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
+                );
               dispatchSettings(
                 setDatabase({
                   target: value,
-                  value: backupDataJSON[value],
+                  value: restoredData,
                 }),
               );
             }
