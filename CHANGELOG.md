@@ -1,3 +1,9 @@
+# v0.8.3-JS_3 (23-Maret-2025)
+
+## Diperbaiki
+- Animasi dropdown yang salah ukuran ketika data berubah
+- Tema aplikasi yang tidak berubah setelah pemulihan backup
+
 # v0.8.3-JS_2 (19-Maret-2025)
 
 ## Ditambahkan
