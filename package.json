@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@domir/react-native-measure-text": "^0.1.8",
-    "@pirles/react-native-element-dropdown": "^2.14.0",
+    "@pirles/react-native-element-dropdown": "^2.15.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/drawer": "^7.1.2",

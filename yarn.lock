@@ -3101,15 +3101,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pirles/react-native-element-dropdown@npm:^2.14.0":
-  version: 2.14.0
-  resolution: "@pirles/react-native-element-dropdown@npm:2.14.0"
+"@pirles/react-native-element-dropdown@npm:^2.15.0":
+  version: 2.15.0
+  resolution: "@pirles/react-native-element-dropdown@npm:2.15.0"
   dependencies:
     lodash: ^4.17.21
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: c31dfaed62c704467fb539ae5909c4f042e79897e487529784a18a8e1961990b3699db953fdde525951bb084b5fb9c2e1b21608f98427aae3d2cdcccf076e772
+  checksum: c7be550f083b273decd442ddedd3edfa02f4de236dbfe81348b2df7d2dc3427973b3efb42ba9dbd5cc70cf0a3e94930aed28dbd1deff4e1f5980492cd2c626f8
   languageName: node
   linkType: hard
 
@@ -4543,7 +4543,7 @@ __metadata:
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
     "@domir/react-native-measure-text": ^0.1.8
-    "@pirles/react-native-element-dropdown": ^2.14.0
+    "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-async-storage/async-storage": ^2.1.2
     "@react-native-community/cli": ^15.0.1
     "@react-native-community/cli-platform-android": ^15.0.1
