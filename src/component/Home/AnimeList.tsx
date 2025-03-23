@@ -9,7 +9,6 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import React, {
   lazy,
   memo,
-  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -57,6 +56,7 @@ import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
+import SuspenseLoading from '../misc/SuspenseLoading';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
@@ -73,15 +73,9 @@ function Home(_props: HomeProps) {
       <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
       <SeeMoreStack.Screen name="SeeMore" options={{ headerShown: true }}>
         {prop => (
-          <Suspense
-            fallback={
-              <ActivityIndicator
-                style={{ flex: 1, justifyContent: 'center', alignSelf: 'center' }}
-                size="large"
-              />
-            }>
+          <SuspenseLoading>
             <SeeMore {...prop} />
-          </Suspense>
+          </SuspenseLoading>
         )}
       </SeeMoreStack.Screen>
     </SeeMoreStack.Navigator>
