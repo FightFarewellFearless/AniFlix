@@ -33,7 +33,7 @@ jobs:
         node-version: '20'
 
     - name: Install dependencies
-      run: sudo corepack enable && yarn set version 3.8.2 && rm -f yarn.lock && yarn install
+      run: sudo corepack enable && corepack prepare yarn@3.8.2 --activate && yarn install
 
     - name: Build Android APK
       run: |
