@@ -23,7 +23,7 @@ import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
 import { complementHex, darkenHexColor } from '../utils/hexColors';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
@@ -202,7 +202,8 @@ function AniDetailCopilot(props: Props) {
       </ImageBackground>
 
       <View style={[styles.container, { backgroundColor: thumbnailColor }]}>
-        <FlashList
+        <LegendList
+          recycleItems
           drawDistance={500}
           estimatedItemSize={41}
           data={data.episodeList}

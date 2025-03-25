@@ -1,6 +1,6 @@
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -11,10 +11,10 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -58,7 +58,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
+  const flatListRef = useRef<LegendListRef>(null);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 
@@ -119,8 +119,6 @@ function History(props: Props) {
       const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
-      // console.log(Date.now() - time);
-      flatListRef.current?.prepareForLayoutAnimationRender();
       dispatchSettings(
         setDatabase({
           target: 'history',
@@ -133,8 +131,8 @@ function History(props: Props) {
 
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
-  const renderFlatList = useCallback<ListRenderItem<HistoryJSON>>(
-    ({ item }) => {
+  const renderFlatList = useCallback(
+    ({ item }: LegendListRenderItemProps<HistoryJSON>) => {
       return (
         <TouchableOpacity
           // entering={FadeInRight}
@@ -276,11 +274,11 @@ function History(props: Props) {
         )}
       </View>
       <View style={styles.historyContainer}>
-        <FlashList
+        <LegendList
+          recycleItems
           drawDistance={500}
           data={filteredData}
           estimatedItemSize={160}
-          // @ts-ignore
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}

@@ -5,16 +5,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import React, {
-  lazy,
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -43,49 +34,24 @@ import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
-import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-// import SeeMore from './SeeMore';
-const SeeMore = lazy(() => import('./SeeMore'));
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
-import { createStackNavigator, StackScreenProps } from '@react-navigation/stack';
 import { useBatteryLevel } from 'react-native-device-info';
 import { OTAJSVersion, version } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
-import SuspenseLoading from '../misc/SuspenseLoading';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
-type HomeListProps = StackScreenProps<HomeStackNavigator, 'HomeList'>;
 
-const SeeMoreStack = createStackNavigator<HomeStackNavigator>();
+const Home = memo(HomeList);
+export default Home;
 
-function Home(_props: HomeProps) {
-  return (
-    <SeeMoreStack.Navigator
-      initialRouteName="HomeList"
-      screenOptions={{
-        headerShown: false,
-      }}>
-      <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
-      <SeeMoreStack.Screen name="SeeMore" options={{ headerShown: true }}>
-        {prop => (
-          <SuspenseLoading>
-            <SeeMore {...prop} />
-          </SuspenseLoading>
-        )}
-      </SeeMoreStack.Screen>
-    </SeeMoreStack.Navigator>
-  );
-}
-
-const HomeListMemo = memo(HomeList);
-
-function HomeList(props: HomeListProps) {
+function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -286,7 +252,7 @@ function HomeList(props: HomeListProps) {
 
 const EpisodeBaru = memo(EpisodeBaruUNMEMO, (prev, next) => {
   return (
-    prev.data?.newAnime[0].title === next.data?.newAnime[0].title &&
+    prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
     prev.styles === next.styles &&
     prev.globalStyles.text === next.globalStyles.text
   );
@@ -299,7 +265,7 @@ function EpisodeBaruUNMEMO({
   props,
 }: {
   data: EpisodeBaruType | undefined;
-  props: HomeListProps;
+  props: HomeProps;
   styles: ReturnType<typeof useStyles>;
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
@@ -344,7 +310,7 @@ function EpisodeBaruUNMEMO({
 }
 
 const MovieList = memo(MovieListUNMEMO);
-function MovieListUNMEMO({ props }: { props: HomeListProps }) {
+function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
 
@@ -657,5 +623,3 @@ function useStyles() {
     [LIST_BACKGROUND_HEIGHT, LIST_BACKGROUND_WIDTH, colorScheme],
   );
 }
-
-export default memo(Home);

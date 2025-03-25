@@ -59,6 +59,9 @@ type RootStackNavigator = {
   Maintenance: {
     message?: string;
   };
+  SeeMore: {
+    type: 'AnimeList' | 'MovieList';
+  };
 };
 
 type UtilsStackNavigator = {
@@ -70,22 +73,9 @@ type UtilsStackNavigator = {
   SupportDev: undefined;
 };
 
-type HomeStackNavigator = {
-  SeeMore: {
-    type: 'AnimeList' | 'MovieList';
-  };
-  HomeList: undefined;
-};
-
 type SayaDrawerNavigator = {
   History: undefined;
   WatchLater: undefined;
 };
 
-export type {
-  HomeNavigator,
-  HomeStackNavigator,
-  RootStackNavigator,
-  SayaDrawerNavigator,
-  UtilsStackNavigator,
-};
+export type { HomeNavigator, RootStackNavigator, SayaDrawerNavigator, UtilsStackNavigator };

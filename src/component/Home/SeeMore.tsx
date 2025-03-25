@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
-import { HomeStackNavigator } from '../../types/navigation';
+import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
-type Props = StackScreenProps<HomeStackNavigator, 'SeeMore'>;
+type Props = StackScreenProps<RootStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
   const { paramsState: animeData, setParamsState: setAnimeData } =
@@ -45,7 +45,8 @@ function SeeMore(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <FlashList
+      <LegendList
+        recycleItems
         drawDistance={500}
         data={
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (
@@ -71,7 +72,7 @@ function SeeMore(props: Props) {
           )
         }
         numColumns={numColumns}
-        estimatedItemSize={LIST_HEIGHT}
+        estimatedItemSize={LIST_HEIGHT + 5} // 5: the marginVertical from ListAnimeComponent
         ListFooterComponent={
           <>
             {isLoading && <ActivityIndicator />}

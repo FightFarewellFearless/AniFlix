@@ -33,7 +33,7 @@ import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import { LinearGradient } from 'expo-linear-gradient';
 import ImageColors from 'react-native-image-colors';
 import Reanimated, {
@@ -245,7 +245,7 @@ function Search(props: Props) {
     setSearchButtonWidth(layout.nativeEvent.layout.width);
   }, []);
 
-  function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
+  function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
       textInputRef.current?.setNativeProps({ text: '' });
@@ -261,7 +261,7 @@ function Search(props: Props) {
     );
   }
   const listAnimeRenderer = useCallback(
-    ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
+    ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
       return (
         <TouchableOpacity
           onPress={() => {
@@ -337,8 +337,10 @@ function Search(props: Props) {
             />
           )}
           {listAnime.length > 0 && (
-            <FlashList
-              estimatedItemSize={49}
+            <LegendList
+              recycleItems
+              maintainVisibleContentPosition
+              estimatedItemSize={50}
               drawDistance={700}
               data={listAnime}
               renderItem={listAnimeRenderer}
@@ -408,14 +410,15 @@ function Search(props: Props) {
           exiting={FadeOutDown}
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
-            <FlashList
+            <LegendList
+              recycleItems
               drawDistance={500}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
               extraData={styles}
               renderItem={renderSearchHistory}
-              estimatedItemSize={32}
+              estimatedItemSize={47}
               ItemSeparatorComponent={() => (
                 <View
                   pointerEvents="none"

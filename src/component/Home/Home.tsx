@@ -1,13 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { lazy, memo, useState } from 'react';
+import React, { lazy, memo, useContext, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon5 from 'react-native-vector-icons/FontAwesome5';
-import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { EpisodeBaruHome as HomeType } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { Movies } from '../../utils/animeMovie';
 import SuspenseLoading from '../misc/SuspenseLoading';
+import { EpisodeBaruHomeContext } from '../../misc/context';
 
 const EpisodeBaruHome = lazy(() => import('./AnimeList'));
 const Search = lazy(() => import('./Search'));
@@ -66,26 +64,24 @@ const tabScreens = [
 ] as const;
 
 function BottomTabs(props: Props) {
-  const [paramsState, setParamsState] = useState<HomeType>(props.route.params.data);
-  const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
-
+  const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
+  useEffect(() => {
+    setAnimeData?.(props.route.params.data);
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
-      <MovieListHomeContext.Provider
-        value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarHideOnKeyboard: true,
-          }}>
-          {tabScreens.map(({ name, component: Component, options }) => (
-            <Tab.Screen key={name} name={name} options={options}>
-              {Component}
-            </Tab.Screen>
-          ))}
-        </Tab.Navigator>
-      </MovieListHomeContext.Provider>
-    </EpisodeBaruHomeContext.Provider>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+      }}>
+      {tabScreens.map(({ name, component: Component, options }) => (
+        <Tab.Screen key={name} name={name} options={options}>
+          {Component}
+        </Tab.Screen>
+      ))}
+    </Tab.Navigator>
   );
 }
 

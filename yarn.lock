@@ -3111,6 +3111,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@legendapp/list@npm:^1.0.0-beta.24":
+  version: 1.0.0-beta.24
+  resolution: "@legendapp/list@npm:1.0.0-beta.24"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 82669dfe41a9bf8f38c51d4a7d63e928325b2e8f6af84095d8761813cc3d4e9afcc28405862c01a14442deb4809eaa672f8783928c42d53e7b54fa4431d82c3c
+  languageName: node
+  linkType: hard
+
 "@manypkg/find-root@npm:^1.1.0":
   version: 1.1.0
   resolution: "@manypkg/find-root@npm:1.1.0"
@@ -4649,6 +4659,7 @@ __metadata:
     "@babel/preset-env": ^7.26.9
     "@babel/runtime": ^7.27.0
     "@domir/react-native-measure-text": ^0.1.8
+    "@legendapp/list": ^1.0.0-beta.24
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-async-storage/async-storage": 2.1.2
     "@react-native-community/cli": ^18.0.0

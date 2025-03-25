@@ -4,9 +4,10 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NewAnimeList } from '../../types/anime';
-import { HomeStackNavigator } from '../../types/navigation';
+import { RootStackNavigator, HomeNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 export function ListAnimeComponent(
   props: (
@@ -17,10 +18,10 @@ export function ListAnimeComponent(
     | { newAnimeData: Movies; isMovie: true }
   ) & {
     navigationProp:
-      | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-      | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>
-      | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-      | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
+      | StackNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | StackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
+      | BottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | BottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
   },
 ) {
   const styles = useStyles();
