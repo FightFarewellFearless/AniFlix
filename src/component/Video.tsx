@@ -670,6 +670,14 @@ function Video(props: Props) {
         };
   }, [data.resolution, data.resolutionRaw]);
 
+  const resolutionDropdownData = useMemo(() => {
+    return Object.entries(data.resolutionRaw)
+      .filter(z => z[1] !== undefined)
+      .map(z => {
+        return { label: z[1].resolution, value: z[1] };
+      });
+  }, [data.resolutionRaw]);
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -989,11 +997,7 @@ function Video(props: Props) {
                 <Dropdown
                   value={resolutionDropdownValue}
                   placeholder="Pilih resolusi"
-                  data={Object.entries(data.resolutionRaw)
-                    .filter(z => z[1] !== undefined)
-                    .map(z => {
-                      return { label: z[1].resolution, value: z[1] };
-                    })}
+                  data={resolutionDropdownData}
                   valueField="value"
                   labelField="label"
                   onChange={val => {
