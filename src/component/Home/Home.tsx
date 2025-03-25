@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { lazy, memo, useContext, useEffect } from 'react';
+import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon5 from 'react-native-vector-icons/FontAwesome5';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -66,7 +66,9 @@ const tabScreens = [
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
   useEffect(() => {
-    setAnimeData?.(props.route.params.data);
+    startTransition(() => {
+      setAnimeData?.(props.route.params.data);
+    });
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
