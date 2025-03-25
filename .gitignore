@@ -87,3 +87,5 @@ dist
 
 # etc
 .git*
+!.github
+!.gitignore
