@@ -194,7 +194,7 @@ function Video(props: Props) {
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const initialInfoContainerHeight = useRef<number>();
+  const initialInfoContainerHeight = useRef<number>(null);
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
@@ -681,6 +681,7 @@ function Video(props: Props) {
               title={data.title}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}
+              // @ts-expect-error
               videoRef={videoRef}
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}

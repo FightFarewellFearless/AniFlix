@@ -427,7 +427,7 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
 
 function useLocalTime() {
   const time = useSharedValue(new Date().toLocaleTimeString());
-  const currTime = useRef<string>();
+  const currTime = useRef<string>(null);
   useFocusEffect(
     useCallback(() => {
       time.set(new Date().toLocaleTimeString());

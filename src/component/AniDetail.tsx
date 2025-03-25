@@ -80,13 +80,13 @@ function AniDetailCopilot(props: Props) {
   }, [data.thumbnailUrl]);
 
   const isCopilotAlreadyStopped = useRef(false);
-  const copilotTimeout = useRef<NodeJS.Timeout>();
+  const copilotTimeout = useRef<NodeJS.Timeout>(null);
   useEffect(() => {
     copilotEvents.off('stop');
     copilotEvents.on('stop', () => {
       isCopilotAlreadyStopped.current = true;
     });
-    clearTimeout(copilotTimeout.current);
+    if (copilotTimeout.current) clearTimeout(copilotTimeout.current);
     copilotTimeout.current = setTimeout(async () => {
       if (
         isCopilotAlreadyStopped.current === false &&

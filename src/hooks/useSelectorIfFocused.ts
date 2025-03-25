@@ -16,7 +16,7 @@ function useSelectorIfFocused<T = string>(
   fetchOnFocus?: boolean,
   modifierFunc?: (result: string) => T,
 ) {
-  const lastValue = useRef<string>();
+  const lastValue = useRef<string>(null);
   const [data, setData] = useState<T | string>(
     modifierFunc ? modifierFunc(selector(store.getState())) : selector(store.getState()),
   );

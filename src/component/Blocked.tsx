@@ -18,6 +18,7 @@ import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 import { JoinDiscord } from './Loading Screen/Connect';
 
+// @ts-expect-error
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
 type Props = StackScreenProps<RootStackNavigator, 'Blocked'>;

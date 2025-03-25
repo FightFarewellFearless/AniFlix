@@ -58,7 +58,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<FlashList<HistoryJSON>>();
+  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
 
   const dispatchSettings = useDispatch<AppDispatch>();
 

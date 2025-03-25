@@ -7,7 +7,7 @@ import deviceUserAgent from './deviceUserAgent';
 export default CFBypassWebView;
 function CFBypassWebView() {
   const bypassContext = useContext(CFBypassIsOpen);
-  const webView = useRef<WebView>();
+  const webView = useRef<WebView>(null);
   const lastTitle = useRef('');
   return (
     <Modal
@@ -21,7 +21,6 @@ function CFBypassWebView() {
             Selesaikan captcha dibawah ini untuk melanjutkan
           </Text>
           <WebView
-            // @ts-ignore
             ref={webView}
             userAgent={deviceUserAgent}
             source={{
