@@ -77,7 +77,7 @@ function SeeMore(props: Props) {
             {isLoading && <ActivityIndicator />}
 
             <TouchableOpacity
-              style={styles.LihatLebih}
+              style={styles.seeMoreButton}
               onPress={async () => {
                 if (isLoading) {
                   return;
@@ -113,7 +113,7 @@ function SeeMore(props: Props) {
 }
 
 const styles = StyleSheet.create({
-  LihatLebih: {
+  seeMoreButton: {
     backgroundColor: '#007bff', // Bootstrap primary button color
     paddingHorizontal: 16,
     paddingVertical: 8,

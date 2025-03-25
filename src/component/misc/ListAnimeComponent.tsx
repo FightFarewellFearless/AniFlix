@@ -1,5 +1,4 @@
 import { StackActions } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
@@ -20,8 +19,8 @@ export function ListAnimeComponent(
     navigationProp:
       | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
       | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>
-      | NativeStackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
-      | NativeStackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
+      | StackNavigationProp<HomeStackNavigator, 'HomeList', undefined>
+      | StackNavigationProp<HomeStackNavigator, 'SeeMore', undefined>;
   },
 ) {
   const styles = useStyles();

@@ -5,7 +5,6 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, {
   lazy,
   memo,
@@ -23,11 +22,12 @@ import {
   StyleSheet,
   Text,
   ToastAndroid,
+  TouchableOpacity,
   useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native-gesture-handler'; //rngh
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler'; //rngh
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -50,6 +50,7 @@ const SeeMore = lazy(() => import('./SeeMore'));
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
+import { createStackNavigator, StackScreenProps } from '@react-navigation/stack';
 import { useBatteryLevel } from 'react-native-device-info';
 import { OTAJSVersion, version } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
@@ -59,9 +60,9 @@ import ReText from '../misc/ReText';
 import SuspenseLoading from '../misc/SuspenseLoading';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
-type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
+type HomeListProps = StackScreenProps<HomeStackNavigator, 'HomeList'>;
 
-const SeeMoreStack = createNativeStackNavigator<HomeStackNavigator>();
+const SeeMoreStack = createStackNavigator<HomeStackNavigator>();
 
 function Home(_props: HomeProps) {
   return (
@@ -318,7 +319,7 @@ function EpisodeBaruUNMEMO({
       <View style={styles.titleContainer}>
         <Text style={[styles.titleText, globalStyles.text]}>Episode terbaru: </Text>
         <TouchableOpacity
-          containerStyle={{ flex: 1 }}
+          // containerStyle={{ flex: 1 }} // rngh
           style={styles.seeMoreContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -383,7 +384,7 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
       <View style={styles.titleContainer}>
         <Text style={[styles.titleText, globalStyles.text]}>Movie terbaru: </Text>
         <TouchableOpacity
-          containerStyle={{ flex: 1 }}
+          // containerStyle={{ flex: 1 }} // rngh
           style={styles.seeMoreContainer}
           disabled={data?.length === 0}
           onPress={() => {
