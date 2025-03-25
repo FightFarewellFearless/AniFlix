@@ -1,6 +1,6 @@
+import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -281,6 +281,7 @@ function History(props: Props) {
           estimatedItemSize={160}
           ref={flatListRef}
           keyExtractor={keyExtractor}
+          renderScrollComponent={scrollProps => <ScrollView {...scrollProps} />}
           onScroll={scrollHandler}
           extraData={styles}
           renderItem={renderFlatList}
