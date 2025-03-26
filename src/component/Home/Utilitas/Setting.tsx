@@ -238,11 +238,7 @@ function Setting(_props: Props) {
       icon: <Icon name="paint-brush" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Dropdown
-          data={[
-            { label: 'Mengikuti sistem', value: 'auto' },
-            { label: 'Tema terang', value: 'light' },
-            { label: 'Tema gelap', value: 'dark' },
-          ]}
+          data={DROPDOWN_THEME_DATA}
           onChange={data => {
             if (data.value === 'light' || data.value === 'dark') {
               Appearance.setColorScheme(data.value);
@@ -477,5 +473,11 @@ function useStyles() {
     [colorScheme, globalStyles.text.color],
   );
 }
+
+const DROPDOWN_THEME_DATA = [
+  { label: 'Mengikuti sistem', value: 'auto' },
+  { label: 'Tema terang', value: 'light' },
+  { label: 'Tema gelap', value: 'dark' },
+];
 
 export default memo(Setting);
