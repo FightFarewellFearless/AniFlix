@@ -2109,9 +2109,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/cli@npm:0.22.19":
-  version: 0.22.19
-  resolution: "@expo/cli@npm:0.22.19"
+"@expo/cli@npm:0.22.22":
+  version: 0.22.22
+  resolution: "@expo/cli@npm:0.22.22"
   dependencies:
     "@0no-co/graphql.web": ^1.0.8
     "@babel/runtime": ^7.20.0
@@ -2187,7 +2187,7 @@ __metadata:
     ws: ^8.12.1
   bin:
     expo-internal: build/bin/cli
-  checksum: 018fce419cd9546d225b15177b066220560265c6fa85f7ea0aa49d52037384f7837fe71724c3492b2b4a4eaecefcbce8395b5c3476c7ae3be52769d468afa9f3
+  checksum: 12d0e4feef74386c36a1f6bb416e7b04f79f62da5a22127d7ea2cc0246a79cc94439dde4d596e99135efa29b18c96d95f68e43259fd708a3d4535d3960e552eb
   languageName: node
   linkType: hard
 
@@ -4574,7 +4574,7 @@ __metadata:
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: beta
-    expo: 52.0.38
+    expo: 52.0.41
     expo-document-picker: 13.0.3
     expo-linear-gradient: 14.0.2
     expo-splash-screen: 0.29.22
@@ -7133,23 +7133,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-asset@npm:~11.0.4":
-  version: 11.0.4
-  resolution: "expo-asset@npm:11.0.4"
+"expo-asset@npm:~11.0.5":
+  version: 11.0.5
+  resolution: "expo-asset@npm:11.0.5"
   dependencies:
     "@expo/image-utils": ^0.6.5
-    expo-constants: ~17.0.7
+    expo-constants: ~17.0.8
     invariant: ^2.2.4
     md5-file: ^3.2.3
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 21cf9b34e4e51c5af2e424de2445c9d4d5d5e010692f712300f8a7f3c8b89ff39ad92dfb0f177557592a1d49c5480eba0257ff5770f25b4568831cf955853db5
+  checksum: 7650dc032f76b0924eedaf24dee135b293e5c3258e0a9e43a6db7c93ef40ea6b6d6a47432bf80f3051f3b62e40a6ccb25e8acca820baa791d52a2e95432868bc
   languageName: node
   linkType: hard
 
-"expo-constants@npm:~17.0.7, expo-constants@npm:~17.0.8":
+"expo-constants@npm:~17.0.8":
   version: 17.0.8
   resolution: "expo-constants@npm:17.0.8"
   dependencies:
@@ -7178,15 +7178,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-file-system@npm:~18.0.11":
-  version: 18.0.11
-  resolution: "expo-file-system@npm:18.0.11"
+"expo-file-system@npm:~18.0.12":
+  version: 18.0.12
+  resolution: "expo-file-system@npm:18.0.12"
   dependencies:
     web-streams-polyfill: ^3.3.2
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 2cbb30eee9b12a3eff867a425900f6bef47d4417c39744c24ab1d47ef7398c9cb952716db8dd59a4ddc474a9dab4bcfa903412c10a56144d64cb00a9afcc8c56
+  checksum: 9724e2a9da1cf596d82920cf3cec3d4d6e6544d3b057c7e5895d2aac6f2fc30d9f963774198254fcde707030974407b13a4da7558160fc2278fc388cb183d253
   languageName: node
   linkType: hard
 
@@ -7334,21 +7334,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:52.0.38":
-  version: 52.0.38
-  resolution: "expo@npm:52.0.38"
+"expo@npm:52.0.41":
+  version: 52.0.41
+  resolution: "expo@npm:52.0.41"
   dependencies:
     "@babel/runtime": ^7.20.0
-    "@expo/cli": 0.22.19
+    "@expo/cli": 0.22.22
     "@expo/config": ~10.0.11
     "@expo/config-plugins": ~9.0.17
     "@expo/fingerprint": 0.11.11
     "@expo/metro-config": 0.19.12
     "@expo/vector-icons": ^14.0.0
     babel-preset-expo: ~12.0.9
-    expo-asset: ~11.0.4
+    expo-asset: ~11.0.5
     expo-constants: ~17.0.8
-    expo-file-system: ~18.0.11
+    expo-file-system: ~18.0.12
     expo-font: ~13.0.4
     expo-keep-awake: ~14.0.3
     expo-modules-autolinking: 2.0.8
@@ -7371,7 +7371,9 @@ __metadata:
       optional: true
   bin:
     expo: bin/cli
-  checksum: a0fd33792b6181505f74d5af606f006a7025db36a9fa1128d6e86117f5f4f955e108f13ad52c1df72246abd1608dbdaa9c038fccb9c115790efcb2b2e673fd29
+    expo-modules-autolinking: bin/autolinking
+    fingerprint: bin/fingerprint
+  checksum: 19e14c19ed241d89f2858f8e732760dd4fa6305819dc733572d26600cf727696946916f5c9bd3147aa269a9d45b794ca5dfd8db60d587f4f5892592aa0e3d704
   languageName: node
   linkType: hard
 
