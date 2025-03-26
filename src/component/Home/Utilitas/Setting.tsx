@@ -14,7 +14,19 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Pressable, PressableProps } from 'react-native-gesture-handler';
+function TouchableOpacity(props: PressableProps): ReturnType<typeof Pressable> {
+  const style = props.style ?? {};
+  return (
+    <Pressable
+      {...props}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.5 : 1,
+        ...(typeof style === 'object' && !Array.isArray(style) ? style : {}),
+      })}
+    />
+  );
+}
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 
