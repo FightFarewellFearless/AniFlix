@@ -62,6 +62,7 @@ import VideoPlayer from './VideoPlayer';
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
+import Skeleton from './misc/Skeleton';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -116,7 +117,7 @@ function Video(props: Props) {
         | Omit<AniDetail, 'episodeList'>
       )
     | undefined
-  >();
+  >(undefined);
 
   useEffect(() => {
     if (props.route.params.isMovie) {
@@ -902,15 +903,27 @@ function Video(props: Props) {
                     // .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
-                {animeDetail?.synopsis || 'Tidak ada sinopsis'}
+                {animeDetail === undefined ? (
+                  <Skeleton width={150} height={20} />
+                ) : (
+                  animeDetail?.synopsis || 'Tidak ada sinopsis'
+                )}
               </ReAnimated.Text>
 
               <View style={[styles.infoGenre]}>
-                {(animeDetail?.genres ?? ['Loading']).map(genre => (
-                  <Text key={genre} style={[globalStyles.text, styles.genre]}>
-                    {genre}
-                  </Text>
-                ))}
+                {animeDetail === undefined ? (
+                  <View style={{ gap: 5, flexDirection: 'row' }}>
+                    <Skeleton width={50} height={20} />
+                    <Skeleton width={50} height={20} />
+                    <Skeleton width={50} height={20} />
+                  </View>
+                ) : (
+                  animeDetail.genres.map(genre => (
+                    <Text key={genre} style={[globalStyles.text, styles.genre]}>
+                      {genre}
+                    </Text>
+                  ))
+                )}
               </View>
 
               <View style={styles.infoData}>

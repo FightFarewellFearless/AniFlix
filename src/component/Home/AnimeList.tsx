@@ -7,7 +7,6 @@ import {
 } from '@react-navigation/native';
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   ListRenderItemInfo,
   StyleSheet,
@@ -45,6 +44,7 @@ import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
+import Skeleton from '../misc/Skeleton';
 
 type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
@@ -136,18 +136,27 @@ function HomeList(props: HomeProps) {
 
   const refreshing = useCallback(() => {
     setRefresh(true);
+    setData?.(val => {
+      return {
+        ...val,
+        newAnime: [],
+      };
+    }); // so the skeleton loading show
 
     setAnimeMovieRefreshingKey(val => val + 1);
 
-    AnimeAPI.home()
-      .then(async jsondata => {
-        setData?.(jsondata);
-        setRefresh(false);
-      })
-      .catch(() => {
-        ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
-        setRefresh(false);
-      });
+    setTimeout(() => {
+      AnimeAPI.home()
+        .then(async jsondata => {
+          setData?.(jsondata);
+          setRefresh(false);
+        })
+        .catch(() => {
+          ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
+          setRefresh(false);
+        });
+    }, 0);
+
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -298,13 +307,17 @@ function EpisodeBaruUNMEMO({
           <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
         </TouchableOpacity>
       </View>
-      <FlatList
-        horizontal
-        data={data?.newAnime.slice(0, 25)}
-        renderItem={renderNewAnime}
-        extraData={styles}
-        showsHorizontalScrollIndicator={false}
-      />
+      {(data?.newAnime.length || 0) > 0 ? (
+        <FlatList
+          horizontal
+          data={data?.newAnime.slice(0, 25)}
+          renderItem={renderNewAnime}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        <ShowSkeletonLoading />
+      )}
     </View>
   );
 }
@@ -330,6 +343,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    setData?.([]); // so the skeleton loading show
     getLatestMovie()
       .then(movieData => {
         if ('isError' in movieData) {
@@ -386,8 +400,21 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
           showsHorizontalScrollIndicator={false}
         />
       ) : (
-        <ActivityIndicator size="large" style={{ flex: 1, display: isError ? 'none' : 'flex' }} />
+        !isError && <ShowSkeletonLoading />
       )}
+    </View>
+  );
+}
+
+function ShowSkeletonLoading() {
+  const dimensions = useWindowDimensions();
+  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
+  return (
+    <View style={{ flexDirection: 'row', gap: 5 }}>
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
     </View>
   );
 }
