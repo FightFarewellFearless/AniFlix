@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -33,6 +32,11 @@ import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import * as Updates from 'expo-updates';
 import runningText from '../../assets/runningText.json';
+import {
+  hasMigratedFromAsyncStorage,
+  migrateFromAsyncStorage,
+  storage,
+} from '../../utils/DatabaseManager';
 // import { AnimeMovieWebView } from '../../utils/animeMovie';
 const AnimeMovieWebView = React.lazy(() =>
   import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
@@ -90,10 +94,16 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
+    console.log(hasMigratedFromAsyncStorage);
+    if (!hasMigratedFromAsyncStorage) {
+      await migrateFromAsyncStorage();
+      ToastAndroid.show('Migrasi dari AsyncStorage ke MMKV berhasil', ToastAndroid.SHORT);
+    }
+
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
-    const allKeys = await AsyncStorage.getAllKeys();
+    const allKeys = storage.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
-      const data = await AsyncStorage.getItem(dataKey);
+      const data = storage.getString(dataKey);
       if (data === null) {
         dispatchSettings(
           setDatabase({
@@ -114,8 +124,8 @@ function Loading(props: Props) {
       return (arrOfDefaultData as readonly string[]).includes(value);
     };
     for (const dataKey of allKeys) {
-      if (!isInDatabase(dataKey)) {
-        AsyncStorage.removeItem(dataKey);
+      if (!isInDatabase(dataKey) && !dataKey.startsWith('IGNORE_DEFAULT_DB_')) {
+        storage.delete(dataKey);
       }
     }
   }, [dispatchSettings]);

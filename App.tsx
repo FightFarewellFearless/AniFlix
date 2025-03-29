@@ -1,21 +1,21 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
-import { Provider } from 'react-redux';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Provider } from 'react-redux';
 
-import useGlobalStyles from './src/assets/style';
-import store from './src/misc/reduxStore';
-import { RootStackNavigator } from './src/types/navigation';
 import { enableFreeze } from 'react-native-screens';
-import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+import useGlobalStyles from './src/assets/style';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
-import { EpisodeBaruHome } from './src/types/anime';
-import { Movies } from './src/utils/animeMovie';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
+import store from './src/misc/reduxStore';
+import { EpisodeBaruHome } from './src/types/anime';
+import { RootStackNavigator } from './src/types/navigation';
+import { Movies } from './src/utils/animeMovie';
+import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+import { storage } from './src/utils/DatabaseManager';
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
@@ -80,11 +80,13 @@ function App() {
   }, []);
 
   useEffect(() => {
-    AsyncStorage.getItem('colorScheme').then(value => {
-      if (value !== 'auto' && (value === 'light' || value === 'dark')) {
-        Appearance.setColorScheme(value);
-      }
-    });
+    const colorSchemeValue = storage.getString('colorScheme');
+    if (
+      colorSchemeValue !== 'auto' &&
+      (colorSchemeValue === 'light' || colorSchemeValue === 'dark')
+    ) {
+      Appearance.setColorScheme(colorSchemeValue);
+    }
     StatusBar.setHidden(false);
     SplashScreen.hideAsync();
   }, []);

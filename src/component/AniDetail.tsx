@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
@@ -24,6 +23,7 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { LegendList } from '@legendapp/list';
+import { storage } from '../utils/DatabaseManager';
 import { complementHex, darkenHexColor } from '../utils/hexColors';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
@@ -90,11 +90,11 @@ function AniDetailCopilot(props: Props) {
     copilotTimeout.current = setTimeout(async () => {
       if (
         isCopilotAlreadyStopped.current === false &&
-        (await AsyncStorage.getItem('copilot.watchLater_firstTime')) === 'true' &&
+        storage.getString('copilot.watchLater_firstTime') === 'true' &&
         !isInList
       ) {
         start();
-        await AsyncStorage.setItem('copilot.watchLater_firstTime', 'false');
+        storage.set('copilot.watchLater_firstTime', 'false');
       }
     }, 500);
   }, [start, copilotEvents, isInList]);

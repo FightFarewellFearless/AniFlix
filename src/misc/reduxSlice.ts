@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice, Slice } from '@reduxjs/toolkit';
 import { SetDatabaseTarget } from '../types/redux';
+import { storage } from '../utils/DatabaseManager';
 import defaultDatabase from './defaultDatabaseValue.json';
 import { AppDispatch, RootState } from './reduxStore';
 
@@ -19,7 +19,7 @@ export const setDatabase = createAsyncThunk<
   }
 >('settings/setDatabase', async action => {
   const value = typeof action.value !== 'string' ? JSON.stringify(action.value) : action.value;
-  AsyncStorage.setItem(action.target, value);
+  storage.set(action.target, value);
   return { target: action.target, value };
 });
 
