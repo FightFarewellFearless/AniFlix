@@ -49,8 +49,6 @@ import throttleFunction from '../utils/throttleFunction';
 import { StackActions } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import WebView from 'react-native-webview';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../misc/reduxStore';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
@@ -63,6 +61,7 @@ import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
 import Skeleton from './misc/Skeleton';
+import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -85,12 +84,10 @@ function Video(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
-  const enableBatteryTimeInfo = useSelector(
+  const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const history = useSelector((state: RootState) => state.settings.history);
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const history = useSelectorIfFocused((state: RootState) => state.settings.history);
 
   const historyData = useRef(props.route.params.historyData);
 
@@ -162,7 +159,6 @@ function Video(props: Props) {
         currentTime: number,
         stateData: RootStackNavigator['Video']['data'],
         settContext: string,
-        dispatchContext: typeof dispatchSettings,
         isMovie?: boolean,
       ) => {
         if (Math.floor(currentTime) === 0) {
@@ -172,15 +168,7 @@ function Video(props: Props) {
           resolution: stateData.resolution,
           lastDuration: currentTime,
         };
-        setHistory(
-          stateData,
-          currentLink.current,
-          true,
-          additionalData,
-          settContext,
-          dispatchContext,
-          isMovie,
-        );
+        setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
         historyData.current = additionalData;
       },
       3000,
@@ -460,15 +448,9 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistoryThrottle(
-        currentTime,
-        data,
-        history,
-        dispatchSettings,
-        props.route.params.isMovie,
-      );
+      updateHistoryThrottle(currentTime, data, history, props.route.params.isMovie);
     },
-    [updateHistoryThrottle, data, history, dispatchSettings, props.route.params.isMovie],
+    [updateHistoryThrottle, data, history, props.route.params.isMovie],
   );
 
   const episodeDataControl = useCallback(
@@ -522,9 +504,9 @@ function Video(props: Props) {
       historyData.current = undefined;
       currentLink.current = dataLink;
 
-      setHistory(result, dataLink, undefined, undefined, history, dispatchSettings);
+      setHistory(result, dataLink, undefined, undefined, history);
     },
-    [loading, history, dispatchSettings],
+    [loading, history],
   );
 
   const cancelLoading = useCallback(() => {

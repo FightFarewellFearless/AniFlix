@@ -1,6 +1,6 @@
-import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -24,14 +24,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import { setDatabase } from '../../../misc/reduxSlice';
-import { AppDispatch } from '../../../misc/reduxStore';
 import historyRuntime from '../../../misc/workletRuntime';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
+import { storage } from '../../../utils/DatabaseManager';
 import ImageLoading from '../../ImageLoading';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
@@ -58,9 +56,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<LegendListRef>(null);
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -119,20 +115,15 @@ function History(props: Props) {
       const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
-      dispatchSettings(
-        setDatabase({
-          target: 'history',
-          value: newValue,
-        }),
-      );
+      storage.set('history', newValue);
     },
-    [dispatchSettings, data],
+    [data],
   );
 
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
   const renderFlatList = useCallback(
-    ({ item }: LegendListRenderItemProps<HistoryJSON>) => {
+    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
       return (
         <TouchableOpacity
           // entering={FadeInRight}
@@ -274,14 +265,12 @@ function History(props: Props) {
         )}
       </View>
       <View style={styles.historyContainer}>
-        <LegendList
-          recycleItems
+        <FlashList
           drawDistance={500}
           data={filteredData}
           estimatedItemSize={160}
           ref={flatListRef}
           keyExtractor={keyExtractor}
-          renderScrollComponent={scrollProps => <ScrollView {...scrollProps} />}
           onScroll={scrollHandler}
           extraData={styles}
           renderItem={renderFlatList}

@@ -1,7 +1,6 @@
-import { setDatabase } from '../misc/reduxSlice';
-import { AppDispatch } from '../misc/reduxStore';
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
+import { storage } from './DatabaseManager';
 
 function setHistory(
   targetData: RootStackNavigator['Video']['data'],
@@ -9,7 +8,6 @@ function setHistory(
   skipUpdateDate = false,
   additionalData: Partial<HistoryAdditionalData> | {} = {},
   historyData: string,
-  dispatchSettings: AppDispatch,
   isMovie?: boolean,
 ) {
   const data: HistoryJSON[] = JSON.parse(historyData);
@@ -32,11 +30,6 @@ function setHistory(
     date: skipUpdateDate ? date : Date.now(),
     isMovie,
   });
-  dispatchSettings(
-    setDatabase({
-      target: 'history',
-      value: JSON.stringify(data),
-    }),
-  );
+  storage.set('history', JSON.stringify(data));
 }
 export default setHistory;

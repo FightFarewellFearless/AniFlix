@@ -4,13 +4,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Provider } from 'react-redux';
 
 import { enableFreeze } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
-import store from './src/misc/reduxStore';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { Movies } from './src/utils/animeMovie';
@@ -113,19 +111,17 @@ function App() {
                   }
                 : undefined
             }>
-            <Provider store={store}>
-              <Stack.Navigator
-                initialRouteName="connectToServer"
-                screenOptions={{
-                  headerShown: false,
-                }}>
-                {screens.map(({ name, component, options }) => (
-                  <Stack.Screen key={name} name={name} options={options}>
-                    {component}
-                  </Stack.Screen>
-                ))}
-              </Stack.Navigator>
-            </Provider>
+            <Stack.Navigator
+              initialRouteName="connectToServer"
+              screenOptions={{
+                headerShown: false,
+              }}>
+              {screens.map(({ name, component, options }) => (
+                <Stack.Screen key={name} name={name} options={options}>
+                  {component}
+                </Stack.Screen>
+              ))}
+            </Stack.Navigator>
             <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
               {isOpen && (
                 <Suspense>

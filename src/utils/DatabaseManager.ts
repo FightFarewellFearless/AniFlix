@@ -1,7 +1,95 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { MMKV } from 'react-native-mmkv';
 
+export type RootState = {
+  settings: {
+    history: string;
+    enableBatteryTimeInfo: string;
+    watchLater: string;
+    searchHistory: string;
+    'copilot.watchLater_firstTime': string;
+    colorScheme: string;
+  };
+};
+
 export const storage = new MMKV();
+
+export function getState(): RootState {
+  const settings: Record<keyof RootState['settings'], string | undefined> = {
+    history: undefined,
+    enableBatteryTimeInfo: undefined,
+    watchLater: undefined,
+    searchHistory: undefined,
+    'copilot.watchLater_firstTime': undefined,
+    colorScheme: undefined,
+  };
+  storage.getAllKeys().forEach(key => {
+    if (Object.keys(settings).includes(key)) {
+      const typedKey = key as keyof RootState['settings'];
+      settings[typedKey] = storage.getString(key);
+    }
+  });
+  const resolvedSettings = Object.fromEntries(
+    Object.entries(settings).map(([key, value]) => [key, value ?? '']),
+  ) as RootState['settings'];
+  return { settings: resolvedSettings };
+}
+
+export function useSelectorIfFocused(
+  selector: (state: RootState) => string,
+  fetchOnFocus?: boolean,
+): string;
+export function useSelectorIfFocused<T = string>(
+  selector: (state: RootState) => string,
+  fetchOnFocus?: boolean,
+  modifierFunc?: (result: string) => T,
+): T;
+export function useSelectorIfFocused<T = string>(
+  selector: (state: RootState) => string,
+  fetchOnFocus?: boolean,
+  modifierFunc?: (result: string) => T,
+) {
+  const fetch = () => {
+    const settings: Record<keyof RootState['settings'], string | undefined> = {
+      history: undefined,
+      enableBatteryTimeInfo: undefined,
+      watchLater: undefined,
+      searchHistory: undefined,
+      'copilot.watchLater_firstTime': undefined,
+      colorScheme: undefined,
+    };
+    storage.getAllKeys().forEach(key => {
+      if (Object.keys(settings).includes(key)) {
+        const typedKey = key as keyof RootState['settings'];
+        settings[typedKey] = storage.getString(key);
+      }
+    });
+    const resolvedSettings = Object.fromEntries(
+      Object.entries(settings).map(([key, value]) => [key, value ?? '']),
+    ) as RootState['settings'];
+    return modifierFunc
+      ? modifierFunc(selector({ settings: resolvedSettings }))
+      : selector({ settings: resolvedSettings });
+  };
+  const [data, setData] = useState<T | string>(fetch);
+  useFocusEffect(
+    useCallback(() => {
+      if (fetchOnFocus) {
+        setData(fetch());
+      }
+      const listener = storage.addOnValueChangedListener(() => {
+        setData(fetch());
+      });
+      return listener.remove;
+      // eslint-disable-next-line react-compiler/react-compiler
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+  return data;
+}
+
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export const hasMigratedFromAsyncStorage = storage.getBoolean(
   'IGNORE_DEFAULT_DB_hasMigratedFromAsyncStorage',

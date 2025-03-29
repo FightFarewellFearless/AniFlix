@@ -45,15 +45,13 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import { useDispatch } from 'react-redux';
 import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
 import { Movies, searchMovie } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
+import { storage } from '../../utils/DatabaseManager';
 
 // Remove reanimated animated component creation for TextInput and Pressable
 // Replace:
@@ -112,7 +110,6 @@ function Search(props: Props) {
     true,
     result => JSON.parse(result) as string[],
   );
-  const dispatchSettings = useDispatch<AppDispatch>();
 
   const textInputRef = useRef<TextInput>(null);
 
@@ -167,12 +164,7 @@ function Search(props: Props) {
           searchHistory.splice(searchHistory.indexOf(searchText.current), 1);
         }
         searchHistory.unshift(searchText.current);
-        dispatchSettings(
-          setDatabase({
-            target: 'searchHistory',
-            value: JSON.stringify(searchHistory),
-          }),
-        );
+        storage.set('searchHistory', JSON.stringify(searchHistory));
       })
       .catch(err => {
         const errMessage =
@@ -182,7 +174,7 @@ function Search(props: Props) {
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [dispatchSettings, searchHistory]);
+  }, [searchHistory]);
 
   const onPressIn = useCallback(() => {
     Animated.timing(searchButtonOpacity, {
@@ -466,7 +458,6 @@ function HistoryList({
   data: string[];
 }) {
   const globalStyles = useGlobalStyles();
-  const dispatch = useDispatch<AppDispatch>();
   const styles = useStyles();
   return (
     <View
@@ -492,11 +483,9 @@ function HistoryList({
         <TouchableOpacity
           hitSlop={14}
           onPress={() => {
-            dispatch(
-              setDatabase({
-                target: 'searchHistory',
-                value: JSON.stringify(searchHistory.filter((_, i) => i !== index)),
-              }),
+            storage.set(
+              'searchHistory',
+              JSON.stringify(searchHistory.filter((_, i) => i !== index)),
             );
           }}>
           <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />

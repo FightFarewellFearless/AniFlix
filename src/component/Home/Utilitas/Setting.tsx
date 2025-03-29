@@ -15,6 +15,8 @@ import {
   View,
 } from 'react-native';
 import { Pressable, PressableProps } from 'react-native-gesture-handler';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import useGlobalStyles, { darkText } from '../../../assets/style';
 function TouchableOpacity(props: PressableProps): ReturnType<typeof Pressable> {
   const style = props.style ?? {};
   return (
@@ -27,19 +29,13 @@ function TouchableOpacity(props: PressableProps): ReturnType<typeof Pressable> {
     />
   );
 }
-import Icon from 'react-native-vector-icons/FontAwesome';
-import useGlobalStyles, { darkText } from '../../../assets/style';
-
-import { useDispatch } from 'react-redux';
 
 import { StackScreenProps } from '@react-navigation/stack';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
-import { setDatabase } from '../../../misc/reduxSlice';
-import store, { AppDispatch, RootState } from '../../../misc/reduxStore';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { UtilsStackNavigator } from '../../../types/navigation';
-import { SetDatabaseTarget } from '../../../types/redux';
+import { SetDatabaseTarget } from '../../../types/databaseTarget';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
@@ -48,6 +44,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { createDocument } from 'react-native-saf-x';
+import { getState, RootState, storage } from '../../../utils/DatabaseManager';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 
@@ -72,16 +69,9 @@ function Setting(_props: Props) {
   const appTheme = useSelectorIfFocused(state => state.settings.colorScheme, true);
   const appThemeDropdown = useRef<IDropdownRef>(null);
 
-  const dispatchSettings = useDispatch<AppDispatch>();
-
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const setBatteryTimeInfoSwitch = (value: string) => {
-    dispatchSettings(
-      setDatabase({
-        target: 'enableBatteryTimeInfo',
-        value,
-      }),
-    );
+    storage.set('enableBatteryTimeInfo', value);
   };
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,9 +104,7 @@ function Setting(_props: Props) {
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        const data = Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString(
-          'base64',
-        );
+        const data = Buffer.from(JSON.stringify(getState().settings), 'utf8').toString('base64');
         const backupFile = await createDocument(data, {
           initialName: fileuri,
           mimeType: 'text/plain',
@@ -132,9 +120,7 @@ function Setting(_props: Props) {
 
   const restoreHistoryOrWatchLater = useCallback(
     (restoreDataFromBackup: (HistoryJSON | watchLaterJSON)[], target: 'history' | 'watchLater') => {
-      const currentData: typeof restoreDataFromBackup = JSON.parse(
-        store.getState().settings[target],
-      );
+      const currentData: typeof restoreDataFromBackup = JSON.parse(getState().settings[target]);
 
       for (const result of restoreDataFromBackup) {
         const dataINDEX = currentData.findIndex(val => val.title === result.title);
@@ -148,14 +134,9 @@ function Setting(_props: Props) {
         currentData.push(result);
       }
       currentData.sort((a, b) => b.date - a.date);
-      dispatchSettings(
-        setDatabase({
-          target,
-          value: JSON.stringify(currentData),
-        }),
-      );
+      storage.set(target, JSON.stringify(currentData));
     },
-    [dispatchSettings],
+    [],
   );
 
   const restoreData = useCallback(async () => {
@@ -185,12 +166,7 @@ function Setting(_props: Props) {
                 Appearance.setColorScheme(
                   restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
                 );
-              dispatchSettings(
-                setDatabase({
-                  target: value,
-                  value: restoredData,
-                }),
-              );
+              storage.set(value, restoredData);
             }
           });
         Alert.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
@@ -206,7 +182,7 @@ function Setting(_props: Props) {
     } finally {
       setModalVisible(false);
     }
-  }, [dispatchSettings, restoreHistoryOrWatchLater]);
+  }, [restoreHistoryOrWatchLater]);
 
   const deleteHistory = useCallback(() => {
     Alert.alert(
@@ -223,12 +199,7 @@ function Setting(_props: Props) {
             setModalVisible(true);
             await new Promise(res => setTimeout(res, 1));
             try {
-              dispatchSettings(
-                setDatabase({
-                  target: 'history',
-                  value: '[]',
-                }),
-              );
+              storage.set('history', '[]');
               Alert.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
             } catch (e: any) {
               Alert.alert('Gagal menghapus histori!', e.message);
@@ -239,7 +210,7 @@ function Setting(_props: Props) {
         },
       ],
     );
-  }, [dispatchSettings]);
+  }, []);
 
   const iconSize = 18;
 
@@ -257,12 +228,7 @@ function Setting(_props: Props) {
             } else if (data.value === 'auto') {
               Appearance.setColorScheme(undefined);
             }
-            dispatchSettings(
-              setDatabase({
-                target: 'colorScheme',
-                value: data.value,
-              }),
-            );
+            storage.set('colorScheme', data.value);
           }}
           ref={appThemeDropdown}
           value={appTheme}

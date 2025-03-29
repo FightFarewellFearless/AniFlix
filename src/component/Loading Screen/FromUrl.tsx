@@ -2,10 +2,8 @@ import { StackActions } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Text, ToastAndroid, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
 import randomTipsArray from '../../assets/loadingTips.json';
 import useGlobalStyles from '../../assets/style';
-import store, { AppDispatch, RootState } from '../../misc/reduxStore';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import AnimeAPI from '../../utils/AnimeAPI';
@@ -15,8 +13,7 @@ import controlWatchLater from '../../utils/watchLaterControl';
 
 import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
-
-// import { setDatabase } from '../misc/reduxSlice';
+import { getState, RootState, useSelectorIfFocused } from '../../utils/DatabaseManager';
 
 type Props = StackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -24,8 +21,7 @@ function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
   const [dots, setDots] = useState<string>('');
 
-  const historyData = useSelector((state: RootState) => state.settings.history);
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const historyData = useSelectorIfFocused((state: RootState) => state.settings.history);
 
   const randomTips = useRef<string>(
     // eslint-disable-next-line no-bitwise
@@ -74,13 +70,12 @@ function FromUrl(props: Props) {
               false,
               props.route.params.historyData,
               historyData,
-              dispatchSettings,
               props.route.params.isMovie,
             );
 
             const episodeIndex = result.title.toLowerCase().indexOf(' episode');
             const title = episodeIndex >= 0 ? result.title.slice(0, episodeIndex) : result.title;
-            const watchLater: watchLaterJSON[] = JSON.parse(store.getState().settings.watchLater);
+            const watchLater: watchLaterJSON[] = JSON.parse(getState().settings.watchLater);
             const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
             if (watchLaterIndex >= 0) {
               controlWatchLater('delete', watchLaterIndex);
@@ -147,12 +142,11 @@ function FromUrl(props: Props) {
                 false,
                 props.route.params.historyData,
                 historyData,
-                dispatchSettings,
               );
 
               const episodeIndex = result.title.toLowerCase().indexOf(' episode');
               const title = episodeIndex >= 0 ? result.title.slice(0, episodeIndex) : result.title;
-              const watchLater: watchLaterJSON[] = JSON.parse(store.getState().settings.watchLater);
+              const watchLater: watchLaterJSON[] = JSON.parse(getState().settings.watchLater);
               const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from 'react-redux';
 
 import { StackScreenProps } from '@react-navigation/stack';
 import RNFetchBlob from 'react-native-blob-util';
@@ -20,11 +19,9 @@ import Orientation from 'react-native-orientation-locker';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
 import { EpisodeBaruHome } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
-import { SetDatabaseTarget } from '../../types/redux';
+import { SetDatabaseTarget } from '../../types/databaseTarget';
 import AnimeAPI from '../../utils/AnimeAPI';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 
@@ -77,8 +74,6 @@ function Loading(props: Props) {
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
 
-  const dispatchSettings = useDispatch<AppDispatch>();
-
   const connectToServer = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
       props.navigation.dispatch(StackActions.replace('FailedToConnect'));
@@ -94,7 +89,6 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
-    console.log(hasMigratedFromAsyncStorage);
     if (!hasMigratedFromAsyncStorage) {
       await migrateFromAsyncStorage();
       ToastAndroid.show('Migrasi dari AsyncStorage ke MMKV berhasil', ToastAndroid.SHORT);
@@ -104,21 +98,10 @@ function Loading(props: Props) {
     const allKeys = storage.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
       const data = storage.getString(dataKey);
-      if (data === null) {
-        dispatchSettings(
-          setDatabase({
-            target: dataKey,
-            value: defaultDatabase[dataKey],
-          }),
-        );
+      if (data === undefined) {
+        storage.set(dataKey, defaultDatabase[dataKey]);
         continue;
       }
-      dispatchSettings(
-        setDatabase({
-          target: dataKey,
-          value: data,
-        }),
-      );
     }
     const isInDatabase = (value: string): value is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(value);
@@ -128,7 +111,7 @@ function Loading(props: Props) {
         storage.delete(dataKey);
       }
     }
-  }, [dispatchSettings]);
+  }, []);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
     const isExist = await Promise.all([
