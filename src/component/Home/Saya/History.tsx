@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; // RNGH
 import Animated, {
   runOnJS,
   runOnRuntime,
