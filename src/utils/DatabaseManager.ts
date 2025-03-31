@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { MMKV } from 'react-native-mmkv';
 
 export type RootState = {
@@ -74,16 +74,20 @@ export function useSelectorIfFocused<T = string>(
       : selector({ settings: resolvedSettings });
   };
   const [data, setData] = useState<T | string>(fetch);
+  const oldData = useRef(data);
   useFocusEffect(
     useCallback(() => {
       if (fetchOnFocus) {
         const newValue = fetch();
-        if (JSON.stringify(newValue) !== JSON.stringify(data)) {
+        if (JSON.stringify(newValue) !== JSON.stringify(oldData.current)) {
           setData(newValue);
+          oldData.current = newValue;
         }
       }
       const listener = storage.addOnValueChangedListener(() => {
-        setData(fetch());
+        const newValue = fetch();
+        setData(newValue);
+        oldData.current = newValue;
       });
       return listener.remove;
       // eslint-disable-next-line react-compiler/react-compiler
