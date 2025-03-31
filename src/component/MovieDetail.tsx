@@ -60,8 +60,8 @@ function MovieDetail(props: Props) {
           <Text style={styles.titleText}>{props.route.params.data.title}</Text>
           <Image
             source={{ uri: props.route.params.data.thumbnailUrl }}
-            resizeMode="center"
-            style={[{ width: '70%', flex: 1 }]}
+            resizeMode="contain"
+            style={[{ width: '70%', height: '70%' }]}
           />
           <View
             style={{
