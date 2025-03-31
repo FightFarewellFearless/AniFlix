@@ -1,6 +1,6 @@
+import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; // RNGH
+import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -31,7 +31,7 @@ import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { storage } from '../../../utils/DatabaseManager';
 import ImageLoading from '../../ImageLoading';
-import { LegendList } from '@legendapp/list';
+import { ScrollView } from 'react-native-gesture-handler';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,
@@ -57,7 +57,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
+  const flatListRef = useRef<LegendListRef>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -124,7 +124,7 @@ function History(props: Props) {
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
   const renderFlatList = useCallback(
-    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
+    ({ item }: LegendListRenderItemProps<HistoryJSON>) => {
       return (
         <TouchableOpacity
           // entering={FadeInRight}
@@ -268,6 +268,7 @@ function History(props: Props) {
       <View style={styles.historyContainer}>
         <LegendList
           recycleItems
+          renderScrollComponent={scrollProps => <ScrollView {...scrollProps} />}
           drawDistance={250}
           data={filteredData}
           estimatedItemSize={160}

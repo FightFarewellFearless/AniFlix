@@ -1,3 +1,4 @@
+import { StackScreenProps } from '@react-navigation/stack';
 import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,28 +15,13 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { Pressable, PressableProps } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
-function TouchableOpacity(props: PressableProps): ReturnType<typeof Pressable> {
-  const style = props.style ?? {};
-  return (
-    <Pressable
-      {...props}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.5 : 1,
-        ...(typeof style === 'object' && !Array.isArray(style) ? style : {}),
-      })}
-    />
-  );
-}
-
-import { StackScreenProps } from '@react-navigation/stack';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
+import { SetDatabaseTarget } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { UtilsStackNavigator } from '../../../types/navigation';
-import { SetDatabaseTarget } from '../../../types/databaseTarget';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
@@ -45,6 +31,7 @@ import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { createDocument } from 'react-native-saf-x';
 import { getState, RootState, storage } from '../../../utils/DatabaseManager';
+import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 
