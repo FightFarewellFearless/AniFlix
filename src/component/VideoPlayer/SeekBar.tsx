@@ -90,11 +90,11 @@ export default function SeekBar({
   const { width } = useWindowDimensions();
 
   useLayoutEffect(() => {
-    // @ts-expect-error
-    const view = viewRef.current?.unstable_getBoundingClientRect();
-    if (view.width > 1) {
-      parentWidth.set(view.width);
-    }
+    viewRef.current?.measure((_x, _y, measuredWidth) => {
+      if (measuredWidth > 1) {
+        parentWidth.set(width);
+      }
+    });
   }, [parentWidth, width]);
 
   return (
