@@ -641,18 +641,6 @@ function Video(props: Props) {
     </>
   );
 
-  const resolutionDropdownValue = useMemo(() => {
-    return data.resolution === undefined
-      ? undefined
-      : {
-          label: data.resolution,
-          value:
-            data.resolutionRaw?.[
-              data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-            ],
-        };
-  }, [data.resolution, data.resolutionRaw]);
-
   const resolutionDropdownData = useMemo(() => {
     return Object.entries(data.resolutionRaw)
       .filter(z => z[1] !== undefined)
@@ -990,7 +978,13 @@ function Video(props: Props) {
               )}
               <View style={{ maxWidth: '50%' }}>
                 <Dropdown
-                  value={resolutionDropdownValue}
+                  value={{
+                    label: data.resolution,
+                    value:
+                      data.resolutionRaw?.[
+                        data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
+                      ],
+                  }}
                   placeholder="Pilih resolusi"
                   data={resolutionDropdownData}
                   valueField="value"
