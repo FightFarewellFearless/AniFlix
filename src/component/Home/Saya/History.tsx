@@ -1,4 +1,3 @@
-import { LegendList, LegendListRef, LegendListRenderItemProps } from '@legendapp/list';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
 import moment from 'moment';
@@ -6,6 +5,7 @@ import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 
 import {
   ActivityIndicator,
   Alert,
+  ListRenderItemInfo,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   runOnRuntime,
@@ -56,7 +56,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<LegendListRef>(null);
+  const flatListRef = useRef<FlatList>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -123,7 +123,7 @@ function History(props: Props) {
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
   const renderFlatList = useCallback(
-    ({ item }: LegendListRenderItemProps<HistoryJSON>) => {
+    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
       return (
         <TouchableOpacity
           // entering={FadeInRight}
@@ -265,12 +265,10 @@ function History(props: Props) {
         </TouchableOpacity>
       </View>
       <View style={styles.historyContainer}>
-        <LegendList
-          recycleItems
-          renderScrollComponent={scrollProps => <ScrollView {...scrollProps} />}
-          drawDistance={250}
+        <FlatList
+          // drawDistance={250}
           data={filteredData}
-          estimatedItemSize={160}
+          // estimatedItemSize={160}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
