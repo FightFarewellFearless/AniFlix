@@ -77,7 +77,10 @@ export function useSelectorIfFocused<T = string>(
   useFocusEffect(
     useCallback(() => {
       if (fetchOnFocus) {
-        setData(fetch());
+        const newValue = fetch();
+        if (JSON.stringify(newValue) !== JSON.stringify(data)) {
+          setData(newValue);
+        }
       }
       const listener = storage.addOnValueChangedListener(() => {
         setData(fetch());

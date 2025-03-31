@@ -216,24 +216,7 @@ function History(props: Props) {
         </TouchableOpacity>
       );
     },
-    [
-      data,
-      deleteHistory,
-      globalStyles.text,
-      props.navigation,
-      styles.deleteButton,
-      styles.deleteContainer,
-      styles.lastDuration,
-      styles.lastDurationText,
-      styles.listContainerButton,
-      styles.listDateText,
-      styles.listEpisode,
-      styles.listEpisodeAndPart,
-      styles.listImage,
-      styles.listInfoContainer,
-      styles.listTitle,
-      styles.listWatchTime,
-    ],
+    [data, deleteHistory, globalStyles.text, props.navigation, styles],
   );
 
   const scrollToTop = useCallback(() => {
@@ -269,10 +252,17 @@ function History(props: Props) {
           // drawDistance={250}
           data={filteredData}
           // estimatedItemSize={160}
+          getItemLayout={(_, index) => {
+            return {
+              length: 160,
+              offset: 160 * index,
+              index,
+            };
+          }}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
-          removeClippedSubviews
+          removeClippedSubviews={true}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>
