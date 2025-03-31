@@ -254,6 +254,9 @@ function History(props: Props) {
           value={searchKeyword}
           onChangeText={setSearchKeyword}
         />
+        {searchKeyword !== searchKeywordDeferred && (
+          <ActivityIndicator color={globalStyles.text.color} />
+        )}
         <TouchableOpacity
           style={{ alignSelf: 'center' }}
           onPress={() => {
@@ -261,9 +264,6 @@ function History(props: Props) {
           }}>
           <FontAwesomeIcon name="times" size={20} color={globalStyles.text.color} />
         </TouchableOpacity>
-        {searchKeyword !== searchKeywordDeferred && (
-          <ActivityIndicator color={globalStyles.text.color} />
-        )}
       </View>
       <View style={styles.historyContainer}>
         <LegendList
