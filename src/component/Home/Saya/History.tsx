@@ -31,6 +31,7 @@ import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { storage } from '../../../utils/DatabaseManager';
 import ImageLoading from '../../ImageLoading';
+import { LegendList } from '@legendapp/list';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,
@@ -265,8 +266,9 @@ function History(props: Props) {
         )}
       </View>
       <View style={styles.historyContainer}>
-        <FlashList
-          drawDistance={500}
+        <LegendList
+          recycleItems
+          drawDistance={250}
           data={filteredData}
           estimatedItemSize={160}
           ref={flatListRef}

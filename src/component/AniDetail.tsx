@@ -204,7 +204,7 @@ function AniDetailCopilot(props: Props) {
       <View style={[styles.container, { backgroundColor: thumbnailColor }]}>
         <LegendList
           recycleItems
-          drawDistance={500}
+          drawDistance={250}
           estimatedItemSize={41}
           data={data.episodeList}
           renderItem={({ item }) => (

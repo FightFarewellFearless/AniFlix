@@ -47,7 +47,7 @@ function SeeMore(props: Props) {
     <View style={{ flex: 1 }}>
       <LegendList
         recycleItems
-        drawDistance={500}
+        drawDistance={250}
         data={
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (
             | NewAnimeList

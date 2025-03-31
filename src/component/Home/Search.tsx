@@ -404,7 +404,7 @@ function Search(props: Props) {
           <View style={{ height: '100%' }}>
             <LegendList
               recycleItems
-              drawDistance={500}
+              drawDistance={250}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
