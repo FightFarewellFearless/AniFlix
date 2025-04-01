@@ -31,6 +31,7 @@ import ReAnimated, {
   runOnJS,
   StretchInX,
   StretchOutX,
+  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -106,7 +107,7 @@ function Video(props: Props) {
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
 
-  const synopsisTextRef = useRef<View>(null);
+  const synopsisTextRef = useAnimatedRef<View>();
 
   const [animeDetail, setAnimeDetail] = useState<
     | (
@@ -558,12 +559,7 @@ function Video(props: Props) {
       initialInfoContainerHeight.current = height;
       // infoContainerHeight.setValue(height);
     });
-    // eslint-disable-next-line prettier/prettier
-  }, [
-    animeDetail?.synopsis,
-    animeDetail?.rating,
-    animeDetail?.genres,
-  ]);
+  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextRef]);
 
   const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
