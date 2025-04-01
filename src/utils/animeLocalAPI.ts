@@ -30,7 +30,6 @@ import {
 import deviceUserAgent from './deviceUserAgent';
 
 import { Buffer } from 'buffer/';
-import { runOnJS } from 'react-native-reanimated';
 
 let BASE_DOMAIN = 'otakudesu.cloud';
 let BASE_URL = 'https://' + BASE_DOMAIN;
@@ -458,8 +457,7 @@ const listAnime = async (
         }
       }
     }
-    // Assuming `runOnJS` is a function that you've defined elsewhere:
-    runOnJS(res)(listAnimeData);
+    res(listAnimeData);
     // globalThis.gc?.();
     // })();
   });

@@ -15,12 +15,7 @@ import {
   View,
 } from 'react-native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
@@ -87,23 +82,20 @@ function History(props: Props) {
 
   const scrollHandler = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      // runOnRuntime(historyRuntime, (value: number) => {
-      // 'worklet';
       const value = event.nativeEvent.contentOffset.y;
       if (value <= 100) {
         if (scrollToTopButtonState.get() === 'show') {
-          runOnJS(hideScrollToTopButton)();
+          hideScrollToTopButton();
         }
         scrollToTopButtonState.set('hide');
       } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
-        runOnJS(showScrollToTopButton)();
+        showScrollToTopButton();
         scrollToTopButtonState.set('show');
       } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
-        runOnJS(hideScrollToTopButton)();
+        hideScrollToTopButton();
         scrollToTopButtonState.set('hide');
       }
       scrollLastValue.set(value);
-      // })(event.nativeEvent.contentOffset.y);
     },
     [hideScrollToTopButton, scrollLastValue, scrollToTopButtonState, showScrollToTopButton],
   );
