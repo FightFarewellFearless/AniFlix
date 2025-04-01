@@ -254,6 +254,8 @@ function History(props: Props) {
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
           removeClippedSubviews={true}
+          windowSize={3}
+          initialNumToRender={5}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>

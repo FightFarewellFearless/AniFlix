@@ -450,15 +450,15 @@ const listAnime = async (
           title: removeHtmlTags(title),
           streamingLink: href,
         });
-        if (streamingCallback !== undefined && listAnimeData.length % 50 === 0) {
-          // call every 50
-          await new Promise(resolve => setTimeout(resolve, 150));
+        if (streamingCallback !== undefined && listAnimeData.length % 15 === 0) {
+          // call every 15
           streamingCallback?.(listAnimeData);
         }
+        if (listAnimeData.length % 50 === 0) await new Promise(resolve => setTimeout(resolve, 150));
       }
     }
     res(listAnimeData);
-    // globalThis.gc?.();
+    globalThis.gc?.();
     // })();
   });
 };
