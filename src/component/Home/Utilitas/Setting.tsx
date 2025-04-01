@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { reloadAppAsync } from 'expo';
 import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -268,6 +269,24 @@ function Setting(_props: Props) {
       description: 'Menghapus semua histori tontonan kamu',
       icon: <Icon name="trash" style={{ color: 'red' }} size={iconSize} />,
       handler: deleteHistory,
+    },
+    {
+      title: 'Reload aplikasi',
+      description: 'Muat ulang aplikasi',
+      icon: <Icon name="refresh" style={globalStyles.text} size={iconSize} />,
+      handler: () => {
+        Alert.alert('Restart aplikasi', 'Aplikasi akan di muat ulang', [
+          {
+            text: 'Batal',
+          },
+          {
+            text: 'Lanjut',
+            onPress: () => {
+              reloadAppAsync('setting.restart');
+            },
+          },
+        ]);
+      },
     },
   ];
 
