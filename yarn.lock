@@ -3716,23 +3716,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.1.2":
-  version: 7.1.2
-  resolution: "@react-navigation/drawer@npm:7.1.2"
+"@react-navigation/drawer@npm:^7.3.3":
+  version: 7.3.3
+  resolution: "@react-navigation/drawer@npm:7.3.3"
   dependencies:
-    "@react-navigation/elements": ^2.2.6
+    "@react-navigation/elements": ^2.3.2
     color: ^4.2.3
-    react-native-drawer-layout: ^4.1.1
+    react-native-drawer-layout: ^4.1.3
     use-latest-callback: ^0.2.1
   peerDependencies:
-    "@react-navigation/native": ^7.0.15
+    "@react-navigation/native": ^7.1.0
     react: ">= 18.2.0"
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 67e6f1e2beed45af9c62e74e1da0a4bf4e1d068bc112d7fa73251b38b8a589dd4fda303650dbb95403e47f22350be410ed9d0b5dcf7d1f77a9509412a304d33b
+  checksum: a7da482a86c08f5c3aa614b0b2d804b098fed30a64f12e8dce2e7702214cf3b42800e5614187a1a868da7450ddbd86611bfba4828dd50ce0fc52321ea3ca78db
   languageName: node
   linkType: hard
 
@@ -3751,6 +3751,24 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: 4979be0fb72ae667f34c7f6a665ac366f29d8bebf50a4e0919b9f0aa74c1ac13a913ca1fd474f5fa829109c041bea2befaf682adf5a91ca09474dbd7b0b9edc1
+  languageName: node
+  linkType: hard
+
+"@react-navigation/elements@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "@react-navigation/elements@npm:2.3.2"
+  dependencies:
+    color: ^4.2.3
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.0
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 3f764fbf689cafd89ace8e8b871b797e981d42ca7815621a6be7deceb4fcde6a1f5aa9829ff1b2bfc24530fc5f13e1841b3820542daa0d70c9b636bde32cd2b7
   languageName: node
   linkType: hard
 
@@ -4552,7 +4570,7 @@ __metadata:
     "@react-native/metro-config": 0.77.1
     "@react-native/typescript-config": 0.77.1
     "@react-navigation/bottom-tabs": ^7.2.1
-    "@react-navigation/drawer": ^7.1.2
+    "@react-navigation/drawer": ^7.3.3
     "@react-navigation/native": ^7.0.15
     "@react-navigation/native-stack": ^7.2.1
     "@react-navigation/stack": ^7.1.2
@@ -11815,9 +11833,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-drawer-layout@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "react-native-drawer-layout@npm:4.1.1"
+"react-native-drawer-layout@npm:^4.1.3":
+  version: 4.1.3
+  resolution: "react-native-drawer-layout@npm:4.1.3"
   dependencies:
     use-latest-callback: ^0.2.1
   peerDependencies:
@@ -11825,7 +11843,7 @@ __metadata:
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
-  checksum: 02366958e92f6d1ff6746cb1f85803e460235604ccf4970daebdc217f994b716d0334f361d1f087fac976d5e2beebfe8d17b6bc13e6236538d2dbd8d25226465
+  checksum: 098fbe525e8e8fa69dabbc9ff3cfd880500037fe60479af4407c42b95a207d0eb7fbf325d1d3d2fd37b320eb4e24534ac10859c8dd84d3edb039d98fe4cc0bdc
   languageName: node
   linkType: hard
 
