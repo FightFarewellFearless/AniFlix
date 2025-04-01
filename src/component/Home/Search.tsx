@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, {
   memo,
   useCallback,
@@ -66,7 +66,7 @@ const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(Keybo
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<HomeNavigator, 'Search'>,
-  StackScreenProps<RootStackNavigator>
+  NativeStackScreenProps<RootStackNavigator>
 >;
 
 function Search(props: Props) {
@@ -92,6 +92,7 @@ function Search(props: Props) {
 
   const searchText = useRef<string>('');
   const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
+  const [listAnimeLoading, setListAnimeLoading] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [loading, setLoading] = useState(false);
@@ -114,6 +115,7 @@ function Search(props: Props) {
   const textInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
+    setListAnimeLoading(true);
     AnimeAPI.listAnime(undefined, animeData => {
       startTransition(() => {
         setListAnime(animeData);
@@ -121,9 +123,11 @@ function Search(props: Props) {
     })
       .then(animeData => {
         setListAnime(animeData);
+        setListAnimeLoading(false);
       })
       .catch(() => {
         setListAnime(null);
+        setListAnimeLoading(false);
       });
   }, []);
 
@@ -322,7 +326,7 @@ function Search(props: Props) {
             style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
-          {isPending && (
+          {(isPending || listAnimeLoading) && (
             <ActivityIndicator
               style={{ position: 'absolute' }}
               color={colorScheme === 'dark' ? 'white' : 'black'}
@@ -335,6 +339,7 @@ function Search(props: Props) {
               estimatedItemSize={50}
               drawDistance={700}
               data={listAnime}
+              key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
               keyExtractor={(_, index) => index.toString()}
               extraData={styles}
@@ -345,6 +350,7 @@ function Search(props: Props) {
         <TouchableOpacity
           onPress={() => {
             setListAnime([]);
+            setListAnimeLoading(true);
             AnimeAPI.listAnime(undefined, animeData => {
               startTransition(() => {
                 setListAnime(animeData);
@@ -352,9 +358,11 @@ function Search(props: Props) {
             })
               .then(animeData => {
                 setListAnime(animeData);
+                setListAnimeLoading(false);
               })
               .catch(() => {
                 setListAnime(null);
+                setListAnimeLoading(false);
               });
           }}
           style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>

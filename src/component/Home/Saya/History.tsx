@@ -17,7 +17,6 @@ import {
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
-  runOnRuntime,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -26,7 +25,6 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import historyRuntime from '../../../misc/workletRuntime';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { storage } from '../../../utils/DatabaseManager';
@@ -89,22 +87,23 @@ function History(props: Props) {
 
   const scrollHandler = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      runOnRuntime(historyRuntime, (value: number) => {
-        'worklet';
-        if (value <= 100) {
-          if (scrollToTopButtonState.get() === 'show') {
-            runOnJS(hideScrollToTopButton)();
-          }
-          scrollToTopButtonState.set('hide');
-        } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
-          runOnJS(showScrollToTopButton)();
-          scrollToTopButtonState.set('show');
-        } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
+      // runOnRuntime(historyRuntime, (value: number) => {
+      // 'worklet';
+      const value = event.nativeEvent.contentOffset.y;
+      if (value <= 100) {
+        if (scrollToTopButtonState.get() === 'show') {
           runOnJS(hideScrollToTopButton)();
-          scrollToTopButtonState.set('hide');
         }
-        scrollLastValue.set(value);
-      })(event.nativeEvent.contentOffset.y);
+        scrollToTopButtonState.set('hide');
+      } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
+        runOnJS(showScrollToTopButton)();
+        scrollToTopButtonState.set('show');
+      } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
+        runOnJS(hideScrollToTopButton)();
+        scrollToTopButtonState.set('hide');
+      }
+      scrollLastValue.set(value);
+      // })(event.nativeEvent.contentOffset.y);
     },
     [hideScrollToTopButton, scrollLastValue, scrollToTopButtonState, showScrollToTopButton],
   );

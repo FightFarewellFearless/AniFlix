@@ -1,4 +1,4 @@
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LegendList } from '@legendapp/list';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
@@ -17,7 +17,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
-type Props = StackScreenProps<RootStackNavigator, 'SeeMore'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
   const { paramsState: animeData, setParamsState: setAnimeData } =

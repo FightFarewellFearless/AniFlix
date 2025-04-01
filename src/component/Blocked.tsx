@@ -1,5 +1,5 @@
 import { WEBHOOK_URL } from '@env';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -21,7 +21,7 @@ import { JoinDiscord } from './Loading Screen/Connect';
 // @ts-expect-error
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-type Props = StackScreenProps<RootStackNavigator, 'Blocked'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Blocked'>;
 
 function Blocked(props: Props) {
   const globalStyles = useGlobalStyles();

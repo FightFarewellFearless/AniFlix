@@ -1,4 +1,4 @@
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -28,7 +28,7 @@ import { complementHex, darkenHexColor } from '../utils/hexColors';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
-type Props = StackScreenProps<RootStackNavigator, 'AnimeDetail'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 function AniDetail(props: Props) {
   const colorScheme = useColorScheme();
   return (

@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon5 from 'react-native-vector-icons/FontAwesome5';
@@ -12,7 +12,7 @@ const Search = lazy(() => import('./Search'));
 const Utils = lazy(() => import('./Utils'));
 const Saya = lazy(() => import('./Saya'));
 
-type Props = StackScreenProps<RootStackNavigator, 'Home'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createBottomTabNavigator<HomeNavigator>();
 
 const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (

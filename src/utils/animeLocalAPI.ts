@@ -30,8 +30,7 @@ import {
 import deviceUserAgent from './deviceUserAgent';
 
 import { Buffer } from 'buffer/';
-import { runOnJS, runOnRuntime } from 'react-native-reanimated';
-import runtime from '../misc/workletRuntime';
+import { runOnJS } from 'react-native-reanimated';
 
 let BASE_DOMAIN = 'otakudesu.cloud';
 let BASE_URL = 'https://' + BASE_DOMAIN;
@@ -427,41 +426,42 @@ const listAnime = async (
 
   const data = response!.data as string;
 
-  return await new Promise(res => {
-    runOnRuntime(runtime, () => {
-      'worklet';
-      function removeHtmlTags(str: string) {
-        return str.replace(/<[^>]*>?/gm, '');
-      }
-      const listAnimeData: listAnimeTypeList[] = [];
-      // Match the opening div tag with class "jdlbar" and capture until the closing div tag
-      const divRegex = /<div class="jdlbar">(.*?)<\/div>/g;
+  return await new Promise(async res => {
+    // runOnRuntime(runtime, () => {
+    // 'worklet';
+    function removeHtmlTags(str: string) {
+      return str.replace(/<[^>]*>?/gm, '');
+    }
+    const listAnimeData: listAnimeTypeList[] = [];
+    // Match the opening div tag with class "jdlbar" and capture until the closing div tag
+    const divRegex = /<div class="jdlbar">(.*?)<\/div>/g;
 
-      let divMatch: RegExpExecArray | null;
-      while ((divMatch = divRegex.exec(data)) !== null) {
-        const divContent = divMatch[1];
-        // Match the anchor tag, capturing the text and href separately
-        const anchorRegex = /<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/;
+    let divMatch: RegExpExecArray | null;
+    while ((divMatch = divRegex.exec(data)) !== null) {
+      const divContent = divMatch[1];
+      // Match the anchor tag, capturing the text and href separately
+      const anchorRegex = /<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/;
 
-        const anchorMatch = anchorRegex.exec(divContent);
-        if (anchorMatch) {
-          const href = anchorMatch[1];
-          const title = anchorMatch[2].trim();
+      const anchorMatch = anchorRegex.exec(divContent);
+      if (anchorMatch) {
+        const href = anchorMatch[1];
+        const title = anchorMatch[2].trim();
 
-          listAnimeData.push({
-            title: removeHtmlTags(title),
-            streamingLink: href,
-          });
-          if (streamingCallback !== undefined && listAnimeData.length % 43 === 0) {
-            // call every 93
-            runOnJS(streamingCallback)(listAnimeData);
-          }
+        listAnimeData.push({
+          title: removeHtmlTags(title),
+          streamingLink: href,
+        });
+        if (streamingCallback !== undefined && listAnimeData.length % 50 === 0) {
+          // call every 50
+          await new Promise(resolve => setTimeout(resolve, 150));
+          streamingCallback?.(listAnimeData);
         }
       }
-      // Assuming `runOnJS` is a function that you've defined elsewhere:
-      runOnJS(res)(listAnimeData);
-      globalThis.gc?.();
-    })();
+    }
+    // Assuming `runOnJS` is a function that you've defined elsewhere:
+    runOnJS(res)(listAnimeData);
+    // globalThis.gc?.();
+    // })();
   });
 };
 

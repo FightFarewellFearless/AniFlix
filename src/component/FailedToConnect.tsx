@@ -1,5 +1,5 @@
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import {
   Linking,
@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 
-type Props = StackScreenProps<RootStackNavigator, 'FailedToConnect'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
 function FailedToConnect(props: Props) {
   const globalStyles = useGlobalStyles();

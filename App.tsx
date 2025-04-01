@@ -1,5 +1,8 @@
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
@@ -30,7 +33,7 @@ const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
 SplashScreen.preventAutoHideAsync();
 enableFreeze(true);
 
-const Stack = createStackNavigator<RootStackNavigator>();
+const Stack = createNativeStackNavigator<RootStackNavigator>();
 
 const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   <SuspenseLoading>
@@ -41,7 +44,7 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
 type Screens = {
   name: keyof RootStackNavigator;
   component: (props: any) => React.JSX.Element;
-  options?: StackNavigationOptions;
+  options?: NativeStackNavigationOptions;
 }[];
 
 const screens: Screens = [

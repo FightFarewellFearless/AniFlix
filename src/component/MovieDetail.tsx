@@ -1,4 +1,4 @@
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useEffect, useMemo, useState } from 'react';
 import {
   Image,
@@ -24,7 +24,7 @@ import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../types/watchLaterJSON';
 import DarkOverlay from './misc/DarkOverlay';
 
-type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
   const window = useWindowDimensions();
   const globalStyles = useGlobalStyles();

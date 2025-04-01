@@ -1,5 +1,5 @@
 import { StackActions } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -18,8 +18,8 @@ export function ListAnimeComponent(
     | { newAnimeData: Movies; isMovie: true }
   ) & {
     navigationProp:
-      | StackNavigationProp<HomeNavigator, 'AnimeList', undefined>
-      | StackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
+      | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
       | BottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | BottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
   },

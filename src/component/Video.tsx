@@ -47,7 +47,7 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
@@ -73,7 +73,7 @@ function useBackHandler(handler: () => boolean) {
   }, [handler]);
 }
 
-type Props = StackScreenProps<RootStackNavigator, 'Video'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const defaultLoadingGif =
   'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';

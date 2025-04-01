@@ -1,5 +1,5 @@
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Text, ToastAndroid, View } from 'react-native';
 import randomTipsArray from '../../assets/loadingTips.json';
@@ -15,7 +15,7 @@ import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 import { getState, RootState, useSelectorIfFocused } from '../../utils/DatabaseManager';
 
-type Props = StackScreenProps<RootStackNavigator, 'FromUrl'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
