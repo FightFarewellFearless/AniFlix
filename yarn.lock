@@ -3754,6 +3754,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/elements@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "@react-navigation/elements@npm:2.3.2"
+  dependencies:
+    color: ^4.2.3
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.0
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 3f764fbf689cafd89ace8e8b871b797e981d42ca7815621a6be7deceb4fcde6a1f5aa9829ff1b2bfc24530fc5f13e1841b3820542daa0d70c9b636bde32cd2b7
+  languageName: node
+  linkType: hard
+
 "@react-navigation/native-stack@npm:^7.2.1":
   version: 7.2.1
   resolution: "@react-navigation/native-stack@npm:7.2.1"
@@ -3795,20 +3813,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/stack@npm:^7.1.2":
-  version: 7.1.2
-  resolution: "@react-navigation/stack@npm:7.1.2"
+"@react-navigation/stack@npm:^7.2.4":
+  version: 7.2.4
+  resolution: "@react-navigation/stack@npm:7.2.4"
   dependencies:
-    "@react-navigation/elements": ^2.2.6
+    "@react-navigation/elements": ^2.3.2
     color: ^4.2.3
   peerDependencies:
-    "@react-navigation/native": ^7.0.15
+    "@react-navigation/native": ^7.1.0
     react: ">= 18.2.0"
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 8ee3e52c22b393a162815df623ba4ea0b50d0ceac2f121473df472c843834ef5699eff851d44140c9fcdbab79525f33b4eaa5137c4cc38d2d5bdff4802706162
+  checksum: 8d222f7d40214bcb1b61811171c68675671fd4bc434b63fc55771cf518584ea81d8290c882480504a3cc9ed3b052952ff892ad14cb7fa27accc983d538e4c673
   languageName: node
   linkType: hard
 
@@ -4555,7 +4573,7 @@ __metadata:
     "@react-navigation/drawer": ^7.1.2
     "@react-navigation/native": ^7.0.15
     "@react-navigation/native-stack": ^7.2.1
-    "@react-navigation/stack": ^7.1.2
+    "@react-navigation/stack": ^7.2.4
     "@reduxjs/toolkit": ^2.2.5
     "@rnx-kit/align-deps": ^2.5.0
     "@shopify/flash-list": ^1.7.3
