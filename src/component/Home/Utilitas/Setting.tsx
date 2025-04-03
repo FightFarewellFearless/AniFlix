@@ -275,7 +275,7 @@ function Setting(_props: Props) {
       description: 'Muat ulang aplikasi',
       icon: <Icon name="refresh" style={globalStyles.text} size={iconSize} />,
       handler: () => {
-        Alert.alert('Restart aplikasi', 'Aplikasi akan di muat ulang', [
+        Alert.alert('Reload aplikasi', 'Aplikasi akan di muat ulang', [
           {
             text: 'Batal',
           },
