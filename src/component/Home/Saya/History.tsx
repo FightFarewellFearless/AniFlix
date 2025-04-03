@@ -240,6 +240,8 @@ function History(props: Props) {
       </View>
       <View style={styles.historyContainer}>
         <FlatList
+          // TODO: this is a temporary fix for unresponsive RNGH's button remove when fixed
+          showsVerticalScrollIndicator={false}
           // drawDistance={250}
           data={filteredData}
           // estimatedItemSize={160}
