@@ -313,15 +313,16 @@ function Search(props: Props) {
         </AnimatedPressable>
       </View>
 
-      {listAnime?.length === 0 && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
-          <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
-        </View>
-      )}
+      {listAnime?.length === 0 ||
+        (listAnimeLoading && (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
+            <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
+          </View>
+        ))}
 
       {data === null && movieData === null && listAnime !== null ? (
-        <View style={{ flex: listAnime?.length === 0 ? 0 : 1 }}>
+        <View style={{ flex: listAnime?.length === 0 || listAnimeLoading ? 0 : 1 }}>
           <Text
             style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
@@ -332,7 +333,7 @@ function Search(props: Props) {
               color={colorScheme === 'dark' ? 'white' : 'black'}
             />
           )}
-          {listAnime.length > 0 && (
+          {listAnime.length > 0 && !listAnimeLoading && (
             <LegendList
               recycleItems
               maintainVisibleContentPosition
