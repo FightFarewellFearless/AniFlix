@@ -4602,7 +4602,7 @@ __metadata:
     react-native-svg: 15.11.2
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.2.0
-    react-native-webview: 13.13.4
+    react-native-webview: 13.13.5
     react-redux: ^9.1.2
     react-test-renderer: 18.3.1
     recyclerlistview: ^4.2.1
@@ -12010,16 +12010,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.13.4":
-  version: 13.13.4
-  resolution: "react-native-webview@npm:13.13.4"
+"react-native-webview@npm:13.13.5":
+  version: 13.13.5
+  resolution: "react-native-webview@npm:13.13.5"
   dependencies:
     escape-string-regexp: ^4.0.0
     invariant: 2.2.4
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 5dc6580a974c25c701f4e17027145c583574b3efc50a9d799328c82d169e0806fed6d1517652b9d1a4d877a0e8d7e70f98838e271399c763576a2cf6b60a8c29
+  checksum: 7f3bce1b37d6be9b2f07f0f7481181d5344f9e58022645b0d20dc58cd66056bb6efecacb231963959db6283cc66d977593db62a403c7c151f83568f83041c2eb
   languageName: node
   linkType: hard
 
