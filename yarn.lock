@@ -4123,13 +4123,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.6":
+"@types/react@npm:*":
   version: 18.3.12
   resolution: "@types/react@npm:18.3.12"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
   checksum: 4ab1577a8c2105a5e316536f724117c90eee5f4bd5c137fc82a2253d8c1fd299dedaa07e8dfc95d6e2f04a4be3cb8b0e1b06098c6233ebd55c508d88099395b7
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "@types/react@npm:19.1.0"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: 7dd7e021897509a68672ab38c268d2f1f519306ade66cc12ffce4dd46e9d2b4224ab49e0b1191b17ac5eceafc65d76e987d6c5b0679224ddbb46f8debce5decc
   languageName: node
   linkType: hard
 
@@ -4561,7 +4570,7 @@ __metadata:
     "@shopify/flash-list": ^1.7.3
     "@types/jest": ^29.5.13
     "@types/metro-config": ^0.76.3
-    "@types/react": ^18.2.6
+    "@types/react": ^19.1.0
     "@types/react-native-vector-icons": ^6.4.18
     "@types/react-test-renderer": ^18.0.0
     axios: ^1.8.3
@@ -4583,7 +4592,7 @@ __metadata:
     jest: ^29.6.3
     moment: ^2.30.1
     prettier: ^3.5.2
-    react: 18.3.1
+    react: 19.1.0
     react-compiler-runtime: beta
     react-native: 0.77.1
     react-native-blob-util: ^0.21.2
@@ -4603,6 +4612,7 @@ __metadata:
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.2.0
     react-native-webview: 13.13.4
+    react-native-worklets: 0.1.0
     react-redux: ^9.1.2
     react-test-renderer: 18.3.1
     recyclerlistview: ^4.2.1
@@ -12023,6 +12033,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-worklets@npm:0.1.0":
+  version: 0.1.0
+  resolution: "react-native-worklets@npm:0.1.0"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+    react: "*"
+    react-native: "*"
+  checksum: 72841f88527ad71d8933c88ce32363e926428ff572260ee58c1f92e7902de17976bf214edf0ff6ee3e3b9ed63c1359bedf39f29a58a8d52babf2d4be6268b3bb
+  languageName: node
+  linkType: hard
+
 "react-native@npm:0.77.1":
   version: 0.77.1
   resolution: "react-native@npm:0.77.1"
@@ -12127,12 +12148,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.3.1":
-  version: 18.3.1
-  resolution: "react@npm:18.3.1"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: a27bcfa8ff7c15a1e50244ad0d0c1cb2ad4375eeffefd266a64889beea6f6b64c4966c9b37d14ee32d6c9fcd5aa6ba183b6988167ab4d127d13e7cb5b386a376
+"react@npm:19.1.0":
+  version: 19.1.0
+  resolution: "react@npm:19.1.0"
+  checksum: c0905f8cfb878b0543a5522727e5ed79c67c8111dc16ceee135b7fe19dce77b2c1c19293513061a8934e721292bfc1517e0487e262d1906f306bdf95fa54d02f
   languageName: node
   linkType: hard
 
