@@ -18,7 +18,6 @@ export default function Skeleton({ height, width }: { height: number; width: num
             duration: 1500,
             useNativeDriver: true,
           }),
-          Animated.delay(100),
           Animated.timing(shiningPosition, {
             toValue: 0,
             duration: 0,
@@ -36,20 +35,20 @@ export default function Skeleton({ height, width }: { height: number; width: num
 
   const translateX = shiningPosition.interpolate({
     inputRange: [0, 1],
-    outputRange: [-(width + height), width],
+    outputRange: [-width - 100, width],
   });
 
   const shiningStyle = {
-    transform: [{ translateX }, { rotate: '35deg' }, { translateY: -(height * (30 / 100)) }],
+    transform: [{ translateX }],
   };
 
   return (
     <View style={[styles.container, { height, width }]}>
       <AnimatedLinearGradient
-        colors={['transparent', '#dfdfdf', 'transparent']}
-        locations={[0, 0.5, 1]}
-        start={{ x: 0, y: 1 }}
-        end={{ x: 1, y: 1 }}
+        colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0)']}
+        locations={[0.3, 0.5, 0.7]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
         style={[styles.shining, shiningStyle]}
       />
     </View>
@@ -61,13 +60,14 @@ function useStyles() {
   return React.useMemo(() => {
     return StyleSheet.create({
       container: {
-        backgroundColor: colorScheme === 'dark' ? '#5f5f5f' : '#afafaf',
-        borderRadius: 8,
+        backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#f0f0f0',
+        borderRadius: 12,
         overflow: 'hidden',
       },
       shining: {
-        width: 20,
-        height: '200%',
+        width: '200%',
+        height: '100%',
+        position: 'absolute',
       },
     });
   }, [colorScheme]);
