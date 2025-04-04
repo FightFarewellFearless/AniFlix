@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, startTransition, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
@@ -27,16 +27,28 @@ const ImageLoading = (props: ImageBackgroundProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const onLoadStart = useCallback(() => setLoading(true), []);
-  const onLoadEnd = useCallback(() => setLoading(false), []);
+  const onLoadStart = useCallback(() => {
+    startTransition(() => {
+      setLoading(true);
+    });
+  }, []);
+  const onLoadEnd = useCallback(() => {
+    startTransition(() => {
+      setLoading(false);
+    });
+  }, []);
   const onError = useCallback(() => {
-    setError(true);
-    setLoading(false);
+    startTransition(() => {
+      setError(true);
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
-    setLoading(false);
-    setError(false);
+    startTransition(() => {
+      setLoading(false);
+      setError(false);
+    });
   }, [source]);
 
   return (
