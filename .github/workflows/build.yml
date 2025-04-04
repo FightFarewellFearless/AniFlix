@@ -67,4 +67,4 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
          name: universal-${{ inputs.type }}
-         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-${{ env.build_type }}-universal.apk
+         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-universal-${{ env.build_type }}.apk
