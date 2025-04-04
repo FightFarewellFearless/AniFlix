@@ -1,11 +1,12 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon5 from 'react-native-vector-icons/FontAwesome5';
+import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import SuspenseLoading from '../misc/SuspenseLoading';
-import { EpisodeBaruHomeContext } from '../../misc/context';
 
 const EpisodeBaruHome = lazy(() => import('./AnimeList'));
 const Search = lazy(() => import('./Search'));
@@ -65,6 +66,7 @@ const tabScreens = [
 
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
+  const colorScheme = useColorScheme();
   useEffect(() => {
     startTransition(() => {
       setAnimeData?.(props.route.params.data);
@@ -77,6 +79,22 @@ function BottomTabs(props: Props) {
       screenOptions={{
         headerShown: false,
         tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          backgroundColor: colorScheme === 'dark' ? '#121212' : '#f8f9fa',
+          borderTopWidth: 0,
+          boxShadow: '0 0 5px rgba(0, 0, 0, 0.185)',
+          paddingVertical: 10,
+        },
+        tabBarActiveTintColor: colorScheme === 'dark' ? '#007bff' : '#0056b3',
+        tabBarInactiveTintColor: colorScheme === 'dark' ? '#666666' : '#bbbbbb',
+        tabBarLabelStyle: {
+          fontSize: 13,
+          fontWeight: '700',
+          textTransform: 'uppercase',
+        },
+        tabBarIconStyle: {
+          marginBottom: -5,
+        },
       }}>
       {tabScreens.map(({ name, component: Component, options }) => (
         <Tab.Screen key={name} name={name} options={options}>
