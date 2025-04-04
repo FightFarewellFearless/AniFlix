@@ -257,7 +257,7 @@ function History(props: Props) {
           onScroll={scrollHandler}
           removeClippedSubviews={true}
           windowSize={3}
-          initialNumToRender={5}
+          initialNumToRender={0}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>
