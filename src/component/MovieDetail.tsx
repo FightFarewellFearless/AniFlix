@@ -57,11 +57,13 @@ function MovieDetail(props: Props) {
         style={[styles.posterContainer, { height: (window.height * 40) / 100 }]}>
         <DarkOverlay />
         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', rowGap: 6 }]}>
-          <Text style={styles.titleText}>{props.route.params.data.title}</Text>
+          <Text adjustsFontSizeToFit allowFontScaling style={styles.titleText}>
+            {props.route.params.data.title}
+          </Text>
           <Image
             source={{ uri: props.route.params.data.thumbnailUrl }}
             resizeMode="contain"
-            style={[{ width: '70%', height: '70%' }]}
+            style={{ flex: 1, width: '70%' }}
           />
           <View
             style={{
