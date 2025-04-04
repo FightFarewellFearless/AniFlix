@@ -47,19 +47,24 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: arm64-v8a-${{ inputs.type }}
-        path: android/app/build/outputs/apk/${{ env.build_type }}/arm64-v8a/anime-${{ env.build_type }}.apk
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-arm64-v8a-${{ env.build_type }}.apk
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: armeabi-v7a-${{ inputs.type }}
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-armeabi-v7a-${{ env.build_type }}.apk
  
     - uses: actions/upload-artifact@v4
       with:
         name: x86-${{ inputs.type }}
-        path: android/app/build/outputs/apk/${{ env.build_type }}/x86/anime-${{ env.build_type }}.apk
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-x86-${{ env.build_type }}.apk
  
     - uses: actions/upload-artifact@v4
       with:
          name: x86_64-${{ inputs.type }}
-         path: android/app/build/outputs/apk/${{ env.build_type }}/x86_64/anime-${{ env.build_type }}.apk
+         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-x86_64-${{ env.build_type }}.apk
  
     - uses: actions/upload-artifact@v4
       with:
          name: universal-${{ inputs.type }}
-         path: android/app/build/outputs/apk/${{ env.build_type }}/universal/anime-${{ env.build_type }}.apk
+         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-${{ env.build_type }}-universal.apk
