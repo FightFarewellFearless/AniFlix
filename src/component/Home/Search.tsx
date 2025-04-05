@@ -407,6 +407,7 @@ function Search(props: Props) {
       {/* SEARCH HISTORY VIEW */}
       {searchHistoryDisplay && (
         <Reanimated_KeyboardAvoidingView
+          behavior="height"
           entering={FadeInUp.duration(700)}
           exiting={FadeOutDown}
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
@@ -740,7 +741,7 @@ function useStyles() {
         },
         searchHistoryContainer: {
           position: 'absolute',
-          top: '10%',
+          top: 42 + 12,
           left: 12,
           right: 12,
           height: '80%',
