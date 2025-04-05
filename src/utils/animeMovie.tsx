@@ -445,6 +445,19 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   useEffect(() => {
     isError = false;
   }, []);
+  useEffect(() => {
+    if (isWebViewShown) {
+      const timeout = setTimeout(() => {
+        isError = true;
+        setIsWebViewShown(false);
+        onAnimeMovieReady();
+        ToastAndroid.show('Gagal menambil data movie: timeout', ToastAndroid.SHORT);
+      }, 10_000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
   return (
     <View style={{ height: 0, display: 'none' }}>
       {isWebViewShown && (

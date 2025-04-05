@@ -169,7 +169,7 @@ function SearchAnimeByImage() {
         </View>
       )}
       <FlashList
-        drawDistance={500}
+        drawDistance={250}
         data={searchResult?.result?.filter(val => val.anilist.isAdult === false)}
         renderItem={({ item }) => (
           <View style={styles.searchResultContainer}>

@@ -1,4 +1,4 @@
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useEffect, useMemo, useState } from 'react';
 import {
   Image,
@@ -24,7 +24,7 @@ import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../types/watchLaterJSON';
 import DarkOverlay from './misc/DarkOverlay';
 
-type Props = StackScreenProps<RootStackNavigator, 'MovieDetail'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
   const window = useWindowDimensions();
   const globalStyles = useGlobalStyles();
@@ -57,11 +57,13 @@ function MovieDetail(props: Props) {
         style={[styles.posterContainer, { height: (window.height * 40) / 100 }]}>
         <DarkOverlay />
         <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', rowGap: 6 }]}>
-          <Text style={styles.titleText}>{props.route.params.data.title}</Text>
+          <Text adjustsFontSizeToFit allowFontScaling style={styles.titleText}>
+            {props.route.params.data.title}
+          </Text>
           <Image
             source={{ uri: props.route.params.data.thumbnailUrl }}
-            resizeMode="center"
-            style={[{ width: '70%', flex: 1 }]}
+            resizeMode="contain"
+            style={{ flex: 1, width: '70%' }}
           />
           <View
             style={{

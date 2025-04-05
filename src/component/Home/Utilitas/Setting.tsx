@@ -1,3 +1,5 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { reloadAppAsync } from 'expo';
 import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,20 +16,13 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
-
-import { useDispatch } from 'react-redux';
-
-import { StackScreenProps } from '@react-navigation/stack';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
-import { setDatabase } from '../../../misc/reduxSlice';
-import store, { AppDispatch, RootState } from '../../../misc/reduxStore';
+import { SetDatabaseTarget } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { UtilsStackNavigator } from '../../../types/navigation';
-import { SetDatabaseTarget } from '../../../types/redux';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
@@ -36,6 +31,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { createDocument } from 'react-native-saf-x';
+import { getState, RootState, storage } from '../../../utils/DatabaseManager';
+import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 
@@ -47,7 +44,7 @@ interface SettingsData {
   handler: () => any;
 }
 
-type Props = StackScreenProps<UtilsStackNavigator, 'Setting'>;
+type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
   const globalStyles = useGlobalStyles();
@@ -60,16 +57,9 @@ function Setting(_props: Props) {
   const appTheme = useSelectorIfFocused(state => state.settings.colorScheme, true);
   const appThemeDropdown = useRef<IDropdownRef>(null);
 
-  const dispatchSettings = useDispatch<AppDispatch>();
-
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const setBatteryTimeInfoSwitch = (value: string) => {
-    dispatchSettings(
-      setDatabase({
-        target: 'enableBatteryTimeInfo',
-        value,
-      }),
-    );
+    storage.set('enableBatteryTimeInfo', value);
   };
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -102,9 +92,7 @@ function Setting(_props: Props) {
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        const data = Buffer.from(JSON.stringify(store.getState().settings), 'utf8').toString(
-          'base64',
-        );
+        const data = Buffer.from(JSON.stringify(getState().settings), 'utf8').toString('base64');
         const backupFile = await createDocument(data, {
           initialName: fileuri,
           mimeType: 'text/plain',
@@ -120,9 +108,7 @@ function Setting(_props: Props) {
 
   const restoreHistoryOrWatchLater = useCallback(
     (restoreDataFromBackup: (HistoryJSON | watchLaterJSON)[], target: 'history' | 'watchLater') => {
-      const currentData: typeof restoreDataFromBackup = JSON.parse(
-        store.getState().settings[target],
-      );
+      const currentData: typeof restoreDataFromBackup = JSON.parse(getState().settings[target]);
 
       for (const result of restoreDataFromBackup) {
         const dataINDEX = currentData.findIndex(val => val.title === result.title);
@@ -136,14 +122,9 @@ function Setting(_props: Props) {
         currentData.push(result);
       }
       currentData.sort((a, b) => b.date - a.date);
-      dispatchSettings(
-        setDatabase({
-          target,
-          value: JSON.stringify(currentData),
-        }),
-      );
+      storage.set(target, JSON.stringify(currentData));
     },
-    [dispatchSettings],
+    [],
   );
 
   const restoreData = useCallback(async () => {
@@ -173,12 +154,7 @@ function Setting(_props: Props) {
                 Appearance.setColorScheme(
                   restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
                 );
-              dispatchSettings(
-                setDatabase({
-                  target: value,
-                  value: restoredData,
-                }),
-              );
+              storage.set(value, restoredData);
             }
           });
         Alert.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
@@ -194,7 +170,7 @@ function Setting(_props: Props) {
     } finally {
       setModalVisible(false);
     }
-  }, [dispatchSettings, restoreHistoryOrWatchLater]);
+  }, [restoreHistoryOrWatchLater]);
 
   const deleteHistory = useCallback(() => {
     Alert.alert(
@@ -211,12 +187,7 @@ function Setting(_props: Props) {
             setModalVisible(true);
             await new Promise(res => setTimeout(res, 1));
             try {
-              dispatchSettings(
-                setDatabase({
-                  target: 'history',
-                  value: '[]',
-                }),
-              );
+              storage.set('history', '[]');
               Alert.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
             } catch (e: any) {
               Alert.alert('Gagal menghapus histori!', e.message);
@@ -227,7 +198,7 @@ function Setting(_props: Props) {
         },
       ],
     );
-  }, [dispatchSettings]);
+  }, []);
 
   const iconSize = 18;
 
@@ -238,23 +209,14 @@ function Setting(_props: Props) {
       icon: <Icon name="paint-brush" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Dropdown
-          data={[
-            { label: 'Mengikuti sistem', value: 'auto' },
-            { label: 'Tema terang', value: 'light' },
-            { label: 'Tema gelap', value: 'dark' },
-          ]}
+          data={DROPDOWN_THEME_DATA}
           onChange={data => {
             if (data.value === 'light' || data.value === 'dark') {
               Appearance.setColorScheme(data.value);
             } else if (data.value === 'auto') {
               Appearance.setColorScheme(undefined);
             }
-            dispatchSettings(
-              setDatabase({
-                target: 'colorScheme',
-                value: data.value,
-              }),
-            );
+            storage.set('colorScheme', data.value);
           }}
           ref={appThemeDropdown}
           value={appTheme}
@@ -307,6 +269,24 @@ function Setting(_props: Props) {
       description: 'Menghapus semua histori tontonan kamu',
       icon: <Icon name="trash" style={{ color: 'red' }} size={iconSize} />,
       handler: deleteHistory,
+    },
+    {
+      title: 'Reload aplikasi',
+      description: 'Muat ulang aplikasi',
+      icon: <Icon name="refresh" style={globalStyles.text} size={iconSize} />,
+      handler: () => {
+        Alert.alert('Reload aplikasi', 'Aplikasi akan di muat ulang', [
+          {
+            text: 'Batal',
+          },
+          {
+            text: 'Lanjut',
+            onPress: () => {
+              reloadAppAsync('setting.restart');
+            },
+          },
+        ]);
+      },
     },
   ];
 
@@ -477,5 +457,11 @@ function useStyles() {
     [colorScheme, globalStyles.text.color],
   );
 }
+
+const DROPDOWN_THEME_DATA = [
+  { label: 'Mengikuti sistem', value: 'auto' },
+  { label: 'Tema terang', value: 'light' },
+  { label: 'Tema gelap', value: 'dark' },
+];
 
 export default memo(Setting);

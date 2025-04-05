@@ -31,6 +31,7 @@ import ReAnimated, {
   runOnJS,
   StretchInX,
   StretchOutX,
+  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -47,10 +48,8 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../misc/reduxStore';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
@@ -62,6 +61,8 @@ import VideoPlayer from './VideoPlayer';
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
+import Skeleton from './misc/Skeleton';
+import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -73,7 +74,7 @@ function useBackHandler(handler: () => boolean) {
   }, [handler]);
 }
 
-type Props = StackScreenProps<RootStackNavigator, 'Video'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const defaultLoadingGif =
   'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
@@ -84,12 +85,10 @@ function Video(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
-  const enableBatteryTimeInfo = useSelector(
+  const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const history = useSelector((state: RootState) => state.settings.history);
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const history = useSelectorIfFocused((state: RootState) => state.settings.history);
 
   const historyData = useRef(props.route.params.historyData);
 
@@ -108,7 +107,7 @@ function Video(props: Props) {
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
 
-  const synopsisTextRef = useRef<View>(null);
+  const synopsisTextRef = useAnimatedRef<View>();
 
   const [animeDetail, setAnimeDetail] = useState<
     | (
@@ -116,7 +115,7 @@ function Video(props: Props) {
         | Omit<AniDetail, 'episodeList'>
       )
     | undefined
-  >();
+  >(undefined);
 
   useEffect(() => {
     if (props.route.params.isMovie) {
@@ -161,7 +160,6 @@ function Video(props: Props) {
         currentTime: number,
         stateData: RootStackNavigator['Video']['data'],
         settContext: string,
-        dispatchContext: typeof dispatchSettings,
         isMovie?: boolean,
       ) => {
         if (Math.floor(currentTime) === 0) {
@@ -171,15 +169,7 @@ function Video(props: Props) {
           resolution: stateData.resolution,
           lastDuration: currentTime,
         };
-        setHistory(
-          stateData,
-          currentLink.current,
-          true,
-          additionalData,
-          settContext,
-          dispatchContext,
-          isMovie,
-        );
+        setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
         historyData.current = additionalData;
       },
       3000,
@@ -194,7 +184,7 @@ function Video(props: Props) {
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const initialInfoContainerHeight = useRef<number>();
+  const initialInfoContainerHeight = useRef<number>(null);
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
@@ -459,15 +449,9 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistoryThrottle(
-        currentTime,
-        data,
-        history,
-        dispatchSettings,
-        props.route.params.isMovie,
-      );
+      updateHistoryThrottle(currentTime, data, history, props.route.params.isMovie);
     },
-    [updateHistoryThrottle, data, history, dispatchSettings, props.route.params.isMovie],
+    [updateHistoryThrottle, data, history, props.route.params.isMovie],
   );
 
   const episodeDataControl = useCallback(
@@ -521,9 +505,9 @@ function Video(props: Props) {
       historyData.current = undefined;
       currentLink.current = dataLink;
 
-      setHistory(result, dataLink, undefined, undefined, history, dispatchSettings);
+      setHistory(result, dataLink, undefined, undefined, history);
     },
-    [loading, history, dispatchSettings],
+    [loading, history],
   );
 
   const cancelLoading = useCallback(() => {
@@ -575,12 +559,7 @@ function Video(props: Props) {
       initialInfoContainerHeight.current = height;
       // infoContainerHeight.setValue(height);
     });
-    // eslint-disable-next-line prettier/prettier
-  }, [
-    animeDetail?.synopsis,
-    animeDetail?.rating,
-    animeDetail?.genres,
-  ]);
+  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextRef]);
 
   const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
@@ -658,6 +637,14 @@ function Video(props: Props) {
     </>
   );
 
+  const resolutionDropdownData = useMemo(() => {
+    return Object.entries(data.resolutionRaw)
+      .filter(z => z[1] !== undefined)
+      .map(z => {
+        return { label: z[1].resolution, value: z[1] };
+      });
+  }, [data.resolutionRaw]);
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -681,6 +668,7 @@ function Video(props: Props) {
               title={data.title}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}
+              // @ts-expect-error
               videoRef={videoRef}
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}
@@ -881,15 +869,27 @@ function Video(props: Props) {
                     // .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
-                {animeDetail?.synopsis || 'Tidak ada sinopsis'}
+                {animeDetail === undefined ? (
+                  <Skeleton width={150} height={20} />
+                ) : (
+                  animeDetail?.synopsis || 'Tidak ada sinopsis'
+                )}
               </ReAnimated.Text>
 
               <View style={[styles.infoGenre]}>
-                {(animeDetail?.genres ?? ['Loading']).map(genre => (
-                  <Text key={genre} style={[globalStyles.text, styles.genre]}>
-                    {genre}
-                  </Text>
-                ))}
+                {animeDetail === undefined ? (
+                  <View style={{ gap: 5, flexDirection: 'row' }}>
+                    <Skeleton width={50} height={20} />
+                    <Skeleton width={50} height={20} />
+                    <Skeleton width={50} height={20} />
+                  </View>
+                ) : (
+                  animeDetail.genres.map(genre => (
+                    <Text key={genre} style={[globalStyles.text, styles.genre]}>
+                      {genre}
+                    </Text>
+                  ))
+                )}
               </View>
 
               <View style={styles.infoData}>
@@ -974,23 +974,15 @@ function Video(props: Props) {
               )}
               <View style={{ maxWidth: '50%' }}>
                 <Dropdown
-                  value={
-                    data.resolution === undefined
-                      ? undefined
-                      : {
-                          label: data.resolution,
-                          value:
-                            data.resolutionRaw?.[
-                              data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                            ],
-                        }
-                  }
+                  value={{
+                    label: data.resolution,
+                    value:
+                      data.resolutionRaw?.[
+                        data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
+                      ],
+                  }}
                   placeholder="Pilih resolusi"
-                  data={Object.entries(data.resolutionRaw)
-                    .filter(z => z[1] !== undefined)
-                    .map(z => {
-                      return { label: z[1].resolution, value: z[1] };
-                    })}
+                  data={resolutionDropdownData}
                   valueField="value"
                   labelField="label"
                   onChange={val => {

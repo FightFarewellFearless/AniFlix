@@ -12,7 +12,7 @@ import {
 import { useMarkdown } from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
 import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
@@ -26,7 +26,7 @@ import { version as appVersion, OTAJSVersion } from '../../package.json';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 
-type Props = StackScreenProps<RootStackNavigator, 'NeedUpdate'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
 const MB = 1000;
 

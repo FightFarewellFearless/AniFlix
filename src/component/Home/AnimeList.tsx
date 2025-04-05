@@ -1,33 +1,22 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {
   NavigationProp,
   StackActions,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, {
-  lazy,
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   ListRenderItemInfo,
   StyleSheet,
   Text,
   ToastAndroid,
+  TouchableOpacity,
   useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { RefreshControl, ScrollView, TouchableOpacity } from 'react-native-gesture-handler'; //rngh
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler'; //rngh
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -43,48 +32,26 @@ import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
-import { HomeNavigator, HomeStackNavigator, RootStackNavigator } from '../../types/navigation';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-// import SeeMore from './SeeMore';
-const SeeMore = lazy(() => import('./SeeMore'));
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { useBatteryLevel } from 'react-native-device-info';
 import { OTAJSVersion, version } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
-import SuspenseLoading from '../misc/SuspenseLoading';
+import Skeleton from '../misc/Skeleton';
 
-type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
-type HomeListProps = NativeStackScreenProps<HomeStackNavigator, 'HomeList'>;
+type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
-const SeeMoreStack = createNativeStackNavigator<HomeStackNavigator>();
+const Home = memo(HomeList);
+export default Home;
 
-function Home(_props: HomeProps) {
-  return (
-    <SeeMoreStack.Navigator
-      initialRouteName="HomeList"
-      screenOptions={{
-        headerShown: false,
-      }}>
-      <SeeMoreStack.Screen name="HomeList" component={HomeListMemo} />
-      <SeeMoreStack.Screen name="SeeMore" options={{ headerShown: true }}>
-        {prop => (
-          <SuspenseLoading>
-            <SeeMore {...prop} />
-          </SuspenseLoading>
-        )}
-      </SeeMoreStack.Screen>
-    </SeeMoreStack.Navigator>
-  );
-}
-
-const HomeListMemo = memo(HomeList);
-
-function HomeList(props: HomeListProps) {
+function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -140,9 +107,9 @@ function HomeList(props: HomeListProps) {
           runOnJS(setLayoutWidth)(quote);
         }
         boxTextAnim.set(0);
-        if (finished === false) return;
+        if (!finished) return;
         boxTextAnim.set(
-          withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+          withDelay(2000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
         );
       }
 
@@ -154,7 +121,7 @@ function HomeList(props: HomeListProps) {
       // }, 15500);
 
       boxTextAnim.set(
-        withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+        withDelay(1000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
       );
 
       return () => {
@@ -169,18 +136,27 @@ function HomeList(props: HomeListProps) {
 
   const refreshing = useCallback(() => {
     setRefresh(true);
+    setData?.(val => {
+      return {
+        ...val,
+        newAnime: [],
+      };
+    }); // so the skeleton loading show
 
     setAnimeMovieRefreshingKey(val => val + 1);
 
-    AnimeAPI.home()
-      .then(async jsondata => {
-        setData?.(jsondata);
-        setRefresh(false);
-      })
-      .catch(() => {
-        ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
-        setRefresh(false);
-      });
+    setTimeout(() => {
+      AnimeAPI.home()
+        .then(async jsondata => {
+          setData?.(jsondata);
+          setRefresh(false);
+        })
+        .catch(() => {
+          ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
+          setRefresh(false);
+        });
+    }, 0);
+
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -285,7 +261,7 @@ function HomeList(props: HomeListProps) {
 
 const EpisodeBaru = memo(EpisodeBaruUNMEMO, (prev, next) => {
   return (
-    prev.data?.newAnime[0].title === next.data?.newAnime[0].title &&
+    prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
     prev.styles === next.styles &&
     prev.globalStyles.text === next.globalStyles.text
   );
@@ -298,7 +274,7 @@ function EpisodeBaruUNMEMO({
   props,
 }: {
   data: EpisodeBaruType | undefined;
-  props: HomeListProps;
+  props: HomeProps;
   styles: ReturnType<typeof useStyles>;
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
@@ -318,7 +294,7 @@ function EpisodeBaruUNMEMO({
       <View style={styles.titleContainer}>
         <Text style={[styles.titleText, globalStyles.text]}>Episode terbaru: </Text>
         <TouchableOpacity
-          containerStyle={{ flex: 1 }}
+          // containerStyle={{ flex: 1 }} // rngh
           style={styles.seeMoreContainer}
           onPress={() => {
             props.navigation.dispatch(
@@ -326,24 +302,35 @@ function EpisodeBaruUNMEMO({
                 type: 'AnimeList',
               }),
             );
+            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+            setTimeout(() => {
+              props.navigation.dispatch(StackActions.push('Blank'));
+              setTimeout(() => {
+                props.navigation.goBack();
+              }, 0);
+            }, 500);
           }}>
           <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
           <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
         </TouchableOpacity>
       </View>
-      <FlatList
-        horizontal
-        data={data?.newAnime.slice(0, 25)}
-        renderItem={renderNewAnime}
-        extraData={styles}
-        showsHorizontalScrollIndicator={false}
-      />
+      {(data?.newAnime.length || 0) > 0 ? (
+        <FlatList
+          horizontal
+          data={data?.newAnime.slice(0, 25)}
+          renderItem={renderNewAnime}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        <ShowSkeletonLoading />
+      )}
     </View>
   );
 }
 
 const MovieList = memo(MovieListUNMEMO);
-function MovieListUNMEMO({ props }: { props: HomeListProps }) {
+function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
 
@@ -363,6 +350,7 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    setData?.([]); // so the skeleton loading show
     getLatestMovie()
       .then(movieData => {
         if ('isError' in movieData) {
@@ -383,7 +371,7 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
       <View style={styles.titleContainer}>
         <Text style={[styles.titleText, globalStyles.text]}>Movie terbaru: </Text>
         <TouchableOpacity
-          containerStyle={{ flex: 1 }}
+          // containerStyle={{ flex: 1 }} // rngh
           style={styles.seeMoreContainer}
           disabled={data?.length === 0}
           onPress={() => {
@@ -392,6 +380,13 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
                 type: 'MovieList',
               }),
             );
+            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+            setTimeout(() => {
+              props.navigation.dispatch(StackActions.push('Blank'));
+              setTimeout(() => {
+                props.navigation.goBack();
+              }, 0);
+            }, 500);
           }}>
           <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
           <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
@@ -419,15 +414,28 @@ function MovieListUNMEMO({ props }: { props: HomeListProps }) {
           showsHorizontalScrollIndicator={false}
         />
       ) : (
-        <ActivityIndicator size="large" style={{ flex: 1, display: isError ? 'none' : 'flex' }} />
+        !isError && <ShowSkeletonLoading />
       )}
+    </View>
+  );
+}
+
+function ShowSkeletonLoading() {
+  const dimensions = useWindowDimensions();
+  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
+  return (
+    <View style={{ flexDirection: 'row', gap: 5 }}>
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
+      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
     </View>
   );
 }
 
 function useLocalTime() {
   const time = useSharedValue(new Date().toLocaleTimeString());
-  const currTime = useRef<string>();
+  const currTime = useRef<string>(null);
   useFocusEffect(
     useCallback(() => {
       time.set(new Date().toLocaleTimeString());
@@ -656,5 +664,3 @@ function useStyles() {
     [LIST_BACKGROUND_HEIGHT, LIST_BACKGROUND_WIDTH, colorScheme],
   );
 }
-
-export default memo(Home);

@@ -1,6 +1,7 @@
 /*
 This code is from react-native-redash
 */
+import { useLayoutEffect, useState } from 'react';
 import type { TextProps as RNTextProps } from 'react-native';
 import { StyleSheet, TextInput } from 'react-native';
 import Animated, { useAnimatedProps } from 'react-native-reanimated';
@@ -21,6 +22,10 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 const ReText = (props: TextProps) => {
   const { text, style } = { style: {}, ...props };
+  const [defaultValue, setDefaultValue] = useState('');
+  useLayoutEffect(() => {
+    setDefaultValue(text.get());
+  }, [text]);
   const animatedProps = useAnimatedProps(() => {
     return {
       text: text.get(),
@@ -31,7 +36,7 @@ const ReText = (props: TextProps) => {
     <AnimatedTextInput
       underlineColorAndroid="transparent"
       editable={false}
-      value={text.get()}
+      value={defaultValue}
       style={[styles.baseStyle, style]}
       {...{ animatedProps }}
     />

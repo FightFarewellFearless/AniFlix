@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -13,19 +12,16 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from 'react-redux';
 
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
 import { EpisodeBaruHome } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
-import { SetDatabaseTarget } from '../../types/redux';
+import { SetDatabaseTarget } from '../../types/databaseTarget';
 import AnimeAPI from '../../utils/AnimeAPI';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 
@@ -33,6 +29,11 @@ import animeLocalAPI from '../../utils/animeLocalAPI';
 
 import * as Updates from 'expo-updates';
 import runningText from '../../assets/runningText.json';
+import {
+  hasMigratedFromAsyncStorage,
+  migrateFromAsyncStorage,
+  storage,
+} from '../../utils/DatabaseManager';
 // import { AnimeMovieWebView } from '../../utils/animeMovie';
 const AnimeMovieWebView = React.lazy(() =>
   import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
@@ -54,7 +55,7 @@ export const JoinDiscord = () => {
   );
 };
 
-type Props = StackScreenProps<RootStackNavigator, 'connectToServer'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
   const styles = useStyles();
@@ -73,8 +74,6 @@ function Loading(props: Props) {
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
 
-  const dispatchSettings = useDispatch<AppDispatch>();
-
   const connectToServer = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
       props.navigation.dispatch(StackActions.replace('FailedToConnect'));
@@ -90,35 +89,29 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
+    if (!hasMigratedFromAsyncStorage) {
+      await migrateFromAsyncStorage();
+      ToastAndroid.show('Migrasi dari AsyncStorage ke MMKV berhasil', ToastAndroid.SHORT);
+    }
+
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
-    const allKeys = await AsyncStorage.getAllKeys();
+    const allKeys = storage.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
-      const data = await AsyncStorage.getItem(dataKey);
-      if (data === null) {
-        dispatchSettings(
-          setDatabase({
-            target: dataKey,
-            value: defaultDatabase[dataKey],
-          }),
-        );
+      const data = storage.getString(dataKey);
+      if (data === undefined) {
+        storage.set(dataKey, defaultDatabase[dataKey]);
         continue;
       }
-      dispatchSettings(
-        setDatabase({
-          target: dataKey,
-          value: data,
-        }),
-      );
     }
     const isInDatabase = (value: string): value is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(value);
     };
     for (const dataKey of allKeys) {
-      if (!isInDatabase(dataKey)) {
-        AsyncStorage.removeItem(dataKey);
+      if (!isInDatabase(dataKey) && !dataKey.startsWith('IGNORE_DEFAULT_DB_')) {
+        storage.delete(dataKey);
       }
     }
-  }, [dispatchSettings]);
+  }, []);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
     const isExist = await Promise.all([

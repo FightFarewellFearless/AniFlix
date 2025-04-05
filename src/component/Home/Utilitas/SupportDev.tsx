@@ -99,7 +99,15 @@ function useStyles() {
         alignItems: 'center',
         margin: 20,
         borderRadius: 15,
-        boxShadow: '-1 -2 10 2 rgb(112, 32, 204)',
+        boxShadow: [
+          {
+            offsetX: -1,
+            offsetY: -2,
+            blurRadius: '10px',
+            spreadDistance: '2px',
+            color: 'rgb(112, 32, 204)',
+          },
+        ],
       },
       headerTitle: {
         fontSize: 24,
@@ -134,7 +142,15 @@ function useStyles() {
         padding: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        boxShadow: '-1 -2 10 1 rgb(158, 161, 193);',
+        boxShadow: [
+          {
+            offsetX: -1,
+            offsetY: -2,
+            blurRadius: '10px',
+            spreadDistance: '1px',
+            color: 'rgb(158, 161, 193)',
+          },
+        ],
         elevation: 3,
       },
       donationButtonText: {
@@ -146,7 +162,15 @@ function useStyles() {
         borderRadius: 10,
         padding: 15,
         marginTop: 10,
-        boxShadow: '-1 -2 10 1 rgb(158, 161, 193);',
+        boxShadow: [
+          {
+            offsetX: -1,
+            offsetY: -2,
+            blurRadius: '10px',
+            spreadDistance: '1px',
+            color: 'rgb(158, 161, 193)',
+          },
+        ],
         elevation: 3,
       },
       cardDesc: {
