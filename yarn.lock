@@ -4579,13 +4579,11 @@ __metadata:
     moment: ^2.30.1
     prettier: ^3.5.2
     react: 19.0.0
-    react-compiler-runtime: beta
     react-native: 0.79.0-rc.4
     react-native-blob-util: ^0.21.2
     react-native-copilot: ^3.3.3
     react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
-    react-native-fetch-api: ^3.0.0
     react-native-gesture-handler: 2.25.0
     react-native-image-colors: ^2.4.0
     react-native-marked: ^6.0.7
@@ -10896,13 +10894,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-defer@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "p-defer@npm:3.0.0"
-  checksum: ac3b0976a1c76b67cca1a34e00f7299b0cc230891f820749686aa84f8947326bbe0f8e3b7d9ca511578ee06f0c1a6e0ff68c8e9c325eac455f09d99f91697161
-  languageName: node
-  linkType: hard
-
 "p-filter@npm:^2.1.0":
   version: 2.1.0
   resolution: "p-filter@npm:2.1.0"
@@ -11527,15 +11518,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-compiler-runtime@npm:beta":
-  version: 19.0.0-beta-27714ef-20250124
-  resolution: "react-compiler-runtime@npm:19.0.0-beta-27714ef-20250124"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0 || ^19.0.0 || ^0.0.0-experimental
-  checksum: ad0a4af2a83cef171115dd21fb5b70d963f225bf052fbafe5cb8ab0d3d600c3a8616b601af635460d795c1d934fb21c106c43be2faa28019e4896dbc656fdf23
-  languageName: node
-  linkType: hard
-
 "react-devtools-core@npm:^6.1.1":
   version: 6.1.1
   resolution: "react-devtools-core@npm:6.1.1"
@@ -11642,15 +11624,6 @@ __metadata:
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
   checksum: 8560d0529897c6c20b394471184ed42d6ccde84a85aac575de43f4894c67aaed69d77f7a684d61059ca4b3b738846e9068c5c62eb1c84986069f7a9ae7cea5f9
-  languageName: node
-  linkType: hard
-
-"react-native-fetch-api@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "react-native-fetch-api@npm:3.0.0"
-  dependencies:
-    p-defer: ^3.0.0
-  checksum: f10f435060551c470711ba0b3663e3d49c7701aae84ea645d66992d756b13e923fb5762b324d3583d85c1c0def4138b9cc3f686bab1c1bc10d3ad82dc7175c99
   languageName: node
   linkType: hard
 
