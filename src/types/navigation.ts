@@ -62,6 +62,7 @@ type RootStackNavigator = {
   SeeMore: {
     type: 'AnimeList' | 'MovieList';
   };
+  Blank: undefined;
 };
 
 type UtilsStackNavigator = {

@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
+import Blank from './src/component/misc/Blank';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
 import { EpisodeBaruHome } from './src/types/anime';
@@ -59,6 +60,7 @@ const screens: Screens = [
   { name: 'Blocked', component: withSuspense(Blocked), options: undefined },
   { name: 'FailedToConnect', component: withSuspense(FailedToConnect), options: undefined },
   { name: 'SeeMore', component: withSuspense(SeeMore), options: { headerShown: true } },
+  { name: 'Blank', component: withSuspense(Blank), options: { animation: 'none' } },
 ];
 
 function App() {

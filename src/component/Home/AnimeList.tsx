@@ -302,6 +302,13 @@ function EpisodeBaruUNMEMO({
                 type: 'AnimeList',
               }),
             );
+            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+            setTimeout(() => {
+              props.navigation.dispatch(StackActions.push('Blank'));
+              setTimeout(() => {
+                props.navigation.goBack();
+              }, 0);
+            }, 500);
           }}>
           <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
           <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
@@ -373,6 +380,13 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
                 type: 'MovieList',
               }),
             );
+            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+            setTimeout(() => {
+              props.navigation.dispatch(StackActions.push('Blank'));
+              setTimeout(() => {
+                props.navigation.goBack();
+              }, 0);
+            }, 500);
           }}>
           <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
           <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
