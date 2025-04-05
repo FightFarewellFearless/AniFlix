@@ -14,6 +14,7 @@
     "rename": "mv android/app/build/outputs/apk/release/anime-release.apk android/app/build/outputs/apk/release/aniflix.apk"
   },
   "dependencies": {
+    "@bottom-tabs/react-navigation": "^0.9.0",
     "@domir/react-native-measure-text": "^0.1.8",
     "@legendapp/list": "^1.0.0-beta.28",
     "@pirles/react-native-element-dropdown": "^2.15.0",
@@ -36,6 +37,7 @@
     "react": "19.0.0",
     "react-native": "0.79.0-rc.4",
     "react-native-blob-util": "^0.21.2",
+    "react-native-bottom-tabs": "^0.9.0",
     "react-native-copilot": "^3.3.3",
     "react-native-device-info": "^14.0.4",
     "react-native-gesture-handler": "2.25.0",
