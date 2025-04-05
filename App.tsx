@@ -8,7 +8,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { enableFreeze } from 'react-native-screens';
+import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
@@ -32,6 +32,7 @@ const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
 
 SplashScreen.preventAutoHideAsync();
 enableFreeze(true);
+enableScreens(true);
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 

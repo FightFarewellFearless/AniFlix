@@ -1,4 +1,3 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {
   NavigationProp,
   StackActions,
@@ -38,6 +37,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 
 import * as MeasureText from '@domir/react-native-measure-text';
 
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { useBatteryLevel } from 'react-native-device-info';
 import { OTAJSVersion, version } from '../../../package.json';
 import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
@@ -46,7 +46,7 @@ import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
 
-type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
 const Home = memo(HomeList);
 export default Home;
@@ -107,9 +107,9 @@ function HomeList(props: HomeProps) {
           runOnJS(setLayoutWidth)(quote);
         }
         boxTextAnim.set(0);
-        if (finished === false) return;
+        if (!finished) return;
         boxTextAnim.set(
-          withDelay(2000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+          withDelay(2000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
         );
       }
 
@@ -121,7 +121,7 @@ function HomeList(props: HomeProps) {
       // }, 15500);
 
       boxTextAnim.set(
-        withDelay(1000, withTiming(1, { duration: 20000, easing: Easing.linear }, callback)),
+        withDelay(1000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
       );
 
       return () => {

@@ -1,5 +1,5 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LegendList } from '@legendapp/list';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,

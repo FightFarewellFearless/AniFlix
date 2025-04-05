@@ -1,9 +1,10 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  createNativeBottomTabNavigator,
+  NativeBottomTabNavigationOptions,
+} from '@bottom-tabs/react-navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Icon5 from 'react-native-vector-icons/FontAwesome5';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import SuspenseLoading from '../misc/SuspenseLoading';
@@ -14,7 +15,7 @@ const Utils = lazy(() => import('./Utils'));
 const Saya = lazy(() => import('./Saya'));
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
-const Tab = createBottomTabNavigator<HomeNavigator>();
+const Tab = createNativeBottomTabNavigator<HomeNavigator>();
 
 const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   <SuspenseLoading>
@@ -22,14 +23,16 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   </SuspenseLoading>
 );
 
-const tabScreens = [
+const tabScreens: {
+  name: keyof HomeNavigator;
+  component: (props: any) => React.JSX.Element;
+  options: NativeBottomTabNavigationOptions;
+}[] = [
   {
     name: 'AnimeList',
     component: withSuspense(EpisodeBaruHome),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="home" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/home.svg'),
       tabBarLabel: 'Beranda',
     },
   },
@@ -37,19 +40,15 @@ const tabScreens = [
     name: 'Search',
     component: withSuspense(Search),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="search" style={{ color }} size={20} />
-      ),
-      tabBarLabel: 'Cari',
+      tabBarIcon: () => require('../../assets/icons/search.svg'),
+      tabBarLabel: 'Pencarian',
     },
   },
   {
     name: 'Saya',
     component: withSuspense(Saya),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="user" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/user.svg'),
       tabBarLabel: 'Saya',
     },
   },
@@ -57,12 +56,10 @@ const tabScreens = [
     name: 'Utilitas',
     component: withSuspense(Utils),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon5 name="toolbox" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/tools.svg'),
     },
   },
-] as const;
+];
 
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
@@ -76,25 +73,13 @@ function BottomTabs(props: Props) {
   }, []);
   return (
     <Tab.Navigator
+      tabBarStyle={{
+        backgroundColor: colorScheme === 'dark' ? '#222222' : '#fff',
+      }}
+      activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
       screenOptions={{
-        headerShown: false,
-        tabBarHideOnKeyboard: true,
-        tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#121212' : '#f8f9fa',
-          borderTopWidth: 0,
-          boxShadow: '0 0 5px rgba(0, 0, 0, 0.185)',
-          paddingVertical: 10,
-        },
+        freezeOnBlur: true,
         tabBarActiveTintColor: colorScheme === 'dark' ? '#007bff' : '#0056b3',
-        tabBarInactiveTintColor: colorScheme === 'dark' ? '#666666' : '#bbbbbb',
-        tabBarLabelStyle: {
-          fontSize: 13,
-          fontWeight: '700',
-          textTransform: 'uppercase',
-        },
-        tabBarIconStyle: {
-          marginBottom: -5,
-        },
       }}>
       {tabScreens.map(({ name, component: Component, options }) => (
         <Tab.Screen key={name} name={name} options={options}>

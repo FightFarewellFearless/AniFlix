@@ -1,13 +1,13 @@
+import { NativeBottomTabNavigationProp } from '@bottom-tabs/react-navigation';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NewAnimeList } from '../../types/anime';
-import { RootStackNavigator, HomeNavigator } from '../../types/navigation';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 export function ListAnimeComponent(
   props: (
@@ -20,8 +20,8 @@ export function ListAnimeComponent(
     navigationProp:
       | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
-      | BottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
-      | BottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
+      | NativeBottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | NativeBottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
   },
 ) {
   const styles = useStyles();

@@ -1,4 +1,3 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, {
@@ -50,6 +49,7 @@ import { Movies, searchMovie } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
 
@@ -65,7 +65,7 @@ const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpa
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<HomeNavigator, 'Search'>,
+  NativeBottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
 >;
 
