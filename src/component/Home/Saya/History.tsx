@@ -1,11 +1,11 @@
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  ListRenderItemInfo,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native'; // RNGH
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -49,7 +49,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -239,25 +239,25 @@ function History(props: Props) {
         </TouchableOpacity>
       </View>
       <View style={styles.historyContainer}>
-        <FlatList
+        <FlashList
           // TODO: this is a temporary fix for unresponsive RNGH's button remove when fixed
-          showsVerticalScrollIndicator={false}
+          // showsVerticalScrollIndicator={false}
           // drawDistance={250}
           data={filteredData}
-          // estimatedItemSize={160}
-          getItemLayout={(_, index) => {
-            return {
-              length: 160,
-              offset: 160 * index,
-              index,
-            };
-          }}
+          estimatedItemSize={160}
+          // getItemLayout={(_, index) => {
+          //   return {
+          //     length: 160,
+          //     offset: 160 * index,
+          //     index,
+          //   };
+          // }}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
           removeClippedSubviews={true}
-          windowSize={3}
-          initialNumToRender={0}
+          // windowSize={3}
+          // initialNumToRender={0}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>
