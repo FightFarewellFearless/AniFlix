@@ -63,6 +63,13 @@ function FromUrl(props: Props) {
                 isMovie: true,
               }),
             );
+            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+            setTimeout(() => {
+              props.navigation.dispatch(StackActions.push('Blank'));
+              setTimeout(() => {
+                props.navigation.goBack();
+              }, 0);
+            }, 500);
             // History
             setHistory(
               result,
@@ -134,6 +141,13 @@ function FromUrl(props: Props) {
                   historyData: props.route.params.historyData,
                 }),
               );
+              // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
+              setTimeout(() => {
+                props.navigation.dispatch(StackActions.push('Blank'));
+                setTimeout(() => {
+                  props.navigation.goBack();
+                }, 0);
+              }, 500);
 
               // History
               setHistory(
