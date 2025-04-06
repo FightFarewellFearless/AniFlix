@@ -60,7 +60,11 @@ const screens: Screens = [
   { name: 'Blocked', component: withSuspense(Blocked), options: undefined },
   { name: 'FailedToConnect', component: withSuspense(FailedToConnect), options: undefined },
   { name: 'SeeMore', component: withSuspense(SeeMore), options: { headerShown: true } },
-  { name: 'Blank', component: withSuspense(Blank), options: { animation: 'none' } },
+  {
+    name: 'Blank',
+    component: withSuspense(Blank),
+    options: { animation: 'none', presentation: 'transparentModal' },
+  },
 ];
 
 function App() {
