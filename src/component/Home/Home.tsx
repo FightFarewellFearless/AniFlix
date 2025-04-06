@@ -74,7 +74,7 @@ function BottomTabs(props: Props) {
   return (
     <Tab.Navigator
       tabBarStyle={{
-        backgroundColor: colorScheme === 'dark' ? '#222222' : '#fff',
+        backgroundColor: colorScheme === 'dark' ? '#181818' : '#fff',
       }}
       activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
       screenOptions={{
