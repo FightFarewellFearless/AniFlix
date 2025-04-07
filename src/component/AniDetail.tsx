@@ -97,6 +97,11 @@ function AniDetailCopilot(props: Props) {
         storage.set('copilot.watchLater_firstTime', 'false');
       }
     }, 500);
+    return () => {
+      copilotTimeout.current && clearTimeout(copilotTimeout.current);
+      copilotEvents.off('stop');
+      isCopilotAlreadyStopped.current = false;
+    };
   }, [start, copilotEvents, isInList]);
 
   const colorScheme = useColorScheme();
