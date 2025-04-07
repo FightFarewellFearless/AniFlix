@@ -16,7 +16,7 @@
   "dependencies": {
     "@bottom-tabs/react-navigation": "^0.9.0",
     "@domir/react-native-measure-text": "^0.1.8",
-    "@legendapp/list": "^1.0.0-beta.28",
+    "@legendapp/list": "^1.0.0-beta.29",
     "@pirles/react-native-element-dropdown": "^2.15.0",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/drawer": "^7.3.8",
