@@ -43,6 +43,14 @@ function FromUrl(props: Props) {
         getMovieDetail(props.route.params.link, abort.signal)
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            if ('isError' in result) {
+              Alert.alert(
+                'Error',
+                'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
+              );
+              props.navigation.goBack();
+              return;
+            }
             props.navigation.dispatch(
               StackActions.replace('MovieDetail', {
                 data: result,

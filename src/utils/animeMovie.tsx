@@ -58,7 +58,13 @@ export async function getLatestMovie(signal?: AbortSignal, page?: number) {
   return movies;
 }
 
-export async function getMovieDetail(url: string, signal?: AbortSignal): Promise<MovieDetail> {
+export async function getMovieDetail(
+  url: string,
+  signal?: AbortSignal,
+): Promise<MovieDetail | { isError: true }> {
+  if (isError) {
+    return { isError };
+  }
   let err;
   const response = await fetch(url, {
     signal,
