@@ -58,8 +58,8 @@ const ImageLoading = (props: ImageBackgroundProps) => {
       {children}
       {(loading || error) && (
         <View style={styles.overlay}>
-          {loading && <ActivityIndicator />}
-          {error && <Icon name="exclamation-circle" />}
+          {loading && <ActivityIndicator size={25} />}
+          {error && <Icon name="exclamation-circle" color="red" size={18} />}
         </View>
       )}
     </ImageBackground>
