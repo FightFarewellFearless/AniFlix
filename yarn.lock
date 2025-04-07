@@ -4595,7 +4595,7 @@ __metadata:
     react-native-image-colors: ^2.4.0
     react-native-marked: ^6.0.7
     react-native-orientation-locker: ^1.7.0
-    react-native-reanimated: 3.17.1
+    react-native-reanimated: 3.17.2
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.3.0
     react-native-screens: 4.9.2
@@ -11907,9 +11907,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:3.17.1":
-  version: 3.17.1
-  resolution: "react-native-reanimated@npm:3.17.1"
+"react-native-reanimated@npm:3.17.2":
+  version: 3.17.2
+  resolution: "react-native-reanimated@npm:3.17.2"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -11927,7 +11927,7 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: fd05040a3fc6a8f4efb387657c0cd6c314e5e6b50f859e127d6891d8f81c65b020ddcf78615aa0074b4e134e450d38c40db916c544e1e2efa26c50c82815607d
+  checksum: f94a84996fae553c40ba8e51fdf8bd54eb4def18f7ece6a6fa204e2047574e053696f4baa58545115821bc65e03d790fd12ff05fe0c68bc911a4f153934698b4
   languageName: node
   linkType: hard
 
