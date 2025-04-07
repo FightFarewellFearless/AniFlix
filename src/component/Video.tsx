@@ -870,7 +870,7 @@ function Video(props: Props) {
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
                 {animeDetail === undefined ? (
-                  <Skeleton width={150} height={20} />
+                  <Skeleton stopOnBlur={false} width={150} height={20} />
                 ) : (
                   animeDetail?.synopsis || 'Tidak ada sinopsis'
                 )}
@@ -879,9 +879,9 @@ function Video(props: Props) {
               <View style={[styles.infoGenre]}>
                 {animeDetail === undefined ? (
                   <View style={{ gap: 5, flexDirection: 'row' }}>
-                    <Skeleton width={50} height={20} />
-                    <Skeleton width={50} height={20} />
-                    <Skeleton width={50} height={20} />
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
                   </View>
                 ) : (
                   animeDetail.genres.map(genre => (
