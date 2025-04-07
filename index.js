@@ -6,8 +6,9 @@ import { AppRegistry, Text } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 
-import { fetch } from 'expo/fetch';
-global.fetch = fetch;
+import { fetch as expoFetch } from 'expo/fetch';
+global.RNFetch = fetch;
+global.fetch = expoFetch;
 
 require('moment/locale/id');
 
