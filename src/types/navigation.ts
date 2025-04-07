@@ -1,4 +1,4 @@
-import { getStreamingDetail, MovieDetail } from '../utils/animeMovie';
+import { MovieDetail, MovieStreamingDetail } from '../utils/animeMovie';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {
@@ -30,7 +30,7 @@ type RootStackNavigator = {
     };
   };
   Video: {
-    data: AniStreaming | Awaited<ReturnType<typeof getStreamingDetail>>;
+    data: AniStreaming | MovieStreamingDetail;
     link: string;
     historyData?: {
       resolution: string | undefined;
