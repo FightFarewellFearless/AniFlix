@@ -1,10 +1,11 @@
 # v0.9.0 () TODO : mengembalikan proguard, mengembalikan channel update ke main, BOTTOM TABS EXTRA PADDING WORKAROUND
 
-Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi.
+Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi termasuk design ulang beberapa antarmuka aplikasi.
 Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta eliminasi beberapa kode yang dirasa tidak terlalu penting (penggunaan redux, dll..), ini meningkatkan performa aplikasi terutama untuk perangkat lawas.
 
 ## Ditambahkan
 - Opsi untuk memuat ulang aplikasi di menu pengaturan
+- Tampilan aplikasi
 - Tampilan Error untuk menghindari aplikasi crash (hanya berlaku untuk JavaScript dan tidak untuk native crash)
 
 ## Ditingkatkan
