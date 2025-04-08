@@ -10,6 +10,7 @@ Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta elimina
 ## Ditingkatkan
 - Performa aplikasi secara keseluruhan (responsif, animasi, beberapa UI/UX, dan lain-lain...)
 - Potensi untuk penggunaan memori yang lebih sedikit.
+- Menambahkan informasi panduan pada error history anime lama
 
 ## Diperbaiki
 - Memperbaiki masalah laporan whitelist anime
