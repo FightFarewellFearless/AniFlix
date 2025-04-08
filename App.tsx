@@ -4,7 +4,7 @@ import {
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -18,7 +18,7 @@ import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { Movies } from './src/utils/animeMovie';
-import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { storage } from './src/utils/DatabaseManager';
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
@@ -109,9 +109,16 @@ function App() {
   return (
     <ErrorBoundary FallbackComponent={FallbackComponent}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
-          <MovieListHomeContext.Provider
-            value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
+        <EpisodeBaruHomeContext
+          value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
+          <MovieListHomeContext
+            value={useMemo(
+              () => ({
+                paramsState: movieParamsState,
+                setParamsState: setMovieParamsState,
+              }),
+              [movieParamsState],
+            )}>
             <NavigationContainer
               theme={
                 colorScheme === 'dark'
@@ -135,21 +142,22 @@ function App() {
                   </Stack.Screen>
                 ))}
               </Stack.Navigator>
-              <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
+              <CFBypassIsOpenContext
+                value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
                 {isOpen && (
                   <Suspense>
                     <CFBypassWebView />
                   </Suspense>
                 )}
-              </CFBypassIsOpen.Provider>
+              </CFBypassIsOpenContext>
               {__DEV__ && (
                 <View style={styles.Dev} pointerEvents="none">
                   <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
                 </View>
               )}
             </NavigationContainer>
-          </MovieListHomeContext.Provider>
-        </EpisodeBaruHomeContext.Provider>
+          </MovieListHomeContext>
+        </EpisodeBaruHomeContext>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );
