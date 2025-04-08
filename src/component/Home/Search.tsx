@@ -674,7 +674,7 @@ function useStyles() {
         searchButton: {
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#5289ff',
+          backgroundColor: '#00c7a6',
           borderRadius: 8,
           marginRight: 12,
           paddingHorizontal: 12,
