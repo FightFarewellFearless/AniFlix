@@ -67,6 +67,7 @@ function useStyles() {
         backgroundColor: '#2196f3',
         borderRadius: 50,
         padding: 16,
+        marginBottom: 8,
       },
       buttonText: {
         color: '#fff',
