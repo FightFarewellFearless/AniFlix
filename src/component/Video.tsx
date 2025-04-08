@@ -1,3 +1,4 @@
+import { Dropdown } from '@pirles/react-native-element-dropdown';
 import React, {
   memo,
   useCallback,
@@ -25,7 +26,6 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import { Dropdown } from '@pirles/react-native-element-dropdown';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
   runOnJS,
@@ -54,15 +54,15 @@ import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
 import AnimeAPI from '../utils/AnimeAPI';
-import { getMovieDetail, getRawDataIfAvailable } from '../utils/animeMovie';
+import { getMovieDetail, getRawDataIfAvailable, MovieDetail } from '../utils/animeMovie';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import VideoPlayer from './VideoPlayer';
 
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
-import Skeleton from './misc/Skeleton';
 import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
+import Skeleton from './misc/Skeleton';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -110,16 +110,20 @@ function Video(props: Props) {
   const synopsisTextRef = useAnimatedRef<View>();
 
   const [animeDetail, setAnimeDetail] = useState<
-    | (
-        | (Awaited<ReturnType<typeof getMovieDetail>> & { status: 'Movie'; releaseYear: string })
-        | Omit<AniDetail, 'episodeList'>
-      )
+    | ((MovieDetail & { status: 'Movie'; releaseYear: string }) | Omit<AniDetail, 'episodeList'>)
     | undefined
   >(undefined);
 
   useEffect(() => {
     if (props.route.params.isMovie) {
       getMovieDetail(data.episodeData.animeDetail).then(detail => {
+        if ('isError' in detail) {
+          Alert.alert(
+            'Error',
+            'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
+          );
+          return;
+        }
         setAnimeDetail({
           ...detail,
           rating: detail.rating,
