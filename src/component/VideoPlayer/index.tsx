@@ -36,7 +36,7 @@ type VideoPlayerProps = {
   title: string;
   streamingURL: string;
   style?: ViewStyle;
-  videoRef: React.RefObject<VideoView>;
+  videoRef?: React.RefObject<VideoView>;
   onFullscreenUpdate?: (isFullscreen: boolean) => void;
   fullscreen?: boolean;
   onLoad?: () => void;
