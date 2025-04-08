@@ -236,7 +236,7 @@ function VideoPlayer({
 
         <Reanimated.View
           pointerEvents="box-none"
-          style={[{ flex: 1, zIndex: 999 }, showControlsStyle]}>
+          style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
           <Top title={title} />
           <CenterControl
             isBuffering={isBuffering}
@@ -294,7 +294,6 @@ function Top({ title }: { title: string }) {
       style={{
         width: '100%',
         height: 50,
-        backgroundColor: '#00000093',
         justifyContent: 'center',
         alignItems: 'center',
       }}>
@@ -422,7 +421,7 @@ function BottomControl({
     <Pressable
       style={{
         flexDirection: 'row',
-        backgroundColor: '#00000069',
+
         position: 'absolute',
         bottom: 0,
         alignSelf: 'center',
