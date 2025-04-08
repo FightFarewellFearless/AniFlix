@@ -32,6 +32,10 @@ jobs:
       with:
         node-version: '20'
 
+    - name: extract .env file from secrets
+      run: |
+        echo "${{ secrets.DOTENV }}" > .env
+
     - name: Install dependencies
       run: sudo corepack enable && corepack prepare yarn@3.8.2 --activate && yarn config set -H enableImmutableInstalls false && yarn install
 
