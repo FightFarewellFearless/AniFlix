@@ -1,3 +1,28 @@
+# v0.9.0 () TODO : mengembalikan proguard, mengembalikan channel update ke main, BOTTOM TABS EXTRA PADDING WORKAROUND
+
+Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi.
+Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta eliminasi beberapa kode yang dirasa tidak terlalu penting (penggunaan redux, dll..), ini meningkatkan performa aplikasi terutama untuk perangkat lawas.
+
+## Ditambahkan
+- Opsi untuk memuat ulang aplikasi di menu pengaturan
+- Tampilan Error untuk menghindari aplikasi crash (hanya berlaku untuk JavaScript dan tidak untuk native crash)
+
+## Ditingkatkan
+- Performa aplikasi secara keseluruhan (responsif, animasi, beberapa UI/UX, dan lain-lain...)
+- Potensi untuk penggunaan memori yang lebih sedikit.
+
+## Diperbaiki
+- Memperbaiki masalah laporan whitelist anime
+- Masalah pada menu dropdown
+
+## Perubahan lain-lain
+- Upgrade react-native ke versi 0.79
+- Optimasi kode, fokus pada performa dan stabilitas aplikasi
+- Migrasi database ke MMKV (Memory-Map Key-Value)
+- Bottom tabs sekarang menggunakan native android (BottomNavigationView) oleh react-native-bottom-tabs, ini berarti pengalaman menggunakan aplikasi menjadi lebih mulus dan lancar
+- Mengubah Theme aplikasi ke material3 di AndroidManifest.xml mengikuti react-native-bottom-tabs
+- Dan masih banyak perubahan lainnya...
+
 # v0.8.3-JS_3 (23-Maret-2025)
 
 ## Diperbaiki
