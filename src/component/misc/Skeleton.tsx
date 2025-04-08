@@ -1,17 +1,19 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { Animated, StyleSheet, useColorScheme, View } from 'react-native';
+import { Animated, StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function Skeleton({
   height,
   width,
+  style = {},
   stopOnBlur = true,
 }: {
   height: number;
   width: number;
+  style?: ViewStyle;
   stopOnBlur?: boolean;
 }) {
   const styles = useStyles();
@@ -62,7 +64,7 @@ export default function Skeleton({
   };
 
   return (
-    <View style={[styles.container, { height, width }]}>
+    <View style={[styles.container, { height, width }, style]}>
       <AnimatedLinearGradient
         colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0)']}
         locations={[0.3, 0.5, 0.7]}

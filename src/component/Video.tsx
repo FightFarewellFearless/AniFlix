@@ -688,6 +688,7 @@ function Video(props: Props) {
           ) : data.streamingType === 'embed' ? (
             <WebView
               style={{ flex: 1, zIndex: 1 }}
+              ref={webviewRef}
               key={data.streamingLink}
               setSupportMultipleWindows={false}
               onShouldStartLoadWithRequest={navigator => {
@@ -953,8 +954,9 @@ function Video(props: Props) {
                     onPress={() => {
                       episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
                     }}>
+                    <Icon name="arrow-left" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
-                      <Icon name="arrow-left" size={18} color="black" /> Episode sebelumnya
+                      Episode sebelumnya
                     </Text>
                   </TouchableOpacity>
 
@@ -970,8 +972,9 @@ function Video(props: Props) {
                     onPress={() => {
                       episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
                     }}>
+                    <Icon name="arrow-right" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
-                      Episode selanjutnya <Icon name="arrow-right" size={18} color="black" />
+                      Episode selanjutnya
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1108,6 +1111,7 @@ function TimeInfo() {
 function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
@@ -1116,7 +1120,7 @@ function useStyles() {
           width: '100%',
           height: '100%',
           zIndex: 100,
-          backgroundColor: '#0000008a',
+          backgroundColor: 'rgba(0,0,0,0.7)',
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -1124,34 +1128,33 @@ function useStyles() {
           flex: 0.15,
           minWidth: 300,
           minHeight: 80,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#f0f0f0',
-          borderColor: 'gold',
+          backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#FFFFFF',
+          borderRadius: 12,
           borderWidth: 1,
-          alignContent: 'center',
+          borderColor: colorScheme === 'dark' ? '#404040' : '#E0E0E0',
+          alignItems: 'center',
           alignSelf: 'center',
           justifyContent: 'center',
-          alignItems: 'center',
+          elevation: 5,
         },
         batteryInfo: {
           position: 'absolute',
-          right: 10,
-          top: 10,
+          right: 15,
+          top: 15,
           flexDirection: 'row',
           alignItems: 'center',
-          padding: 3,
-          borderRadius: 7,
-          backgroundColor: '#00000085',
+          padding: 6,
+          borderRadius: 20,
+          backgroundColor: 'rgba(0,0,0,0.6)',
           zIndex: 1,
         },
         timeInfo: {
           position: 'absolute',
-          left: 10,
-          top: 10,
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: 3,
-          borderRadius: 7,
-          backgroundColor: '#00000085',
+          left: 15,
+          top: 15,
+          padding: 6,
+          borderRadius: 20,
+          backgroundColor: 'rgba(0,0,0,0.6)',
           zIndex: 1,
         },
         fullscreen: {
@@ -1163,125 +1166,155 @@ function useStyles() {
         },
         notFullscreen: {
           position: 'relative',
-          flex: 0.44,
-        },
-        dlbtn: {
-          flex: 1,
-          flexDirection: 'row',
+          aspectRatio: 16 / 9,
+          backgroundColor: '#000',
         },
         container: {
-          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#ebebeb',
-          elevation: colorScheme === 'light' ? 3 : undefined,
-          padding: 13,
-          overflow: 'hidden',
+          backgroundColor: colorScheme === 'dark' ? '#1F1F1F' : '#FFFFFF',
+          padding: 15,
+          borderRadius: 12,
+          marginHorizontal: 10,
+          marginVertical: 5,
+          elevation: 2,
         },
         infoTitle: {
-          textAlign: 'center',
-          fontWeight: 'bold',
-          fontSize: 18,
-          marginBottom: 5,
-          fontFamily: '',
+          fontSize: 20,
+          fontWeight: '600',
+          color: colorScheme === 'dark' ? '#FFFFFF' : '#1A1A1A',
+          marginBottom: 10,
         },
         infoSinopsis: {
-          fontSize: 13.5,
-          color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
+          fontSize: 14,
+          lineHeight: 20,
+          color: colorScheme === 'dark' ? '#A0A0A0' : '#666666',
         },
         infoGenre: {
-          marginVertical: 5,
           flexDirection: 'row',
           flexWrap: 'wrap',
-          alignContent: 'stretch',
+          marginVertical: 10,
+          gap: 8,
         },
         genre: {
-          borderWidth: 1,
-          borderColor: 'gray',
-          padding: 2,
-          margin: 2,
-          fontSize: 11,
-          textAlign: 'center',
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F0F0F0',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: colorScheme === 'dark' ? '#D0D0D0' : '#555555',
         },
         infoData: {
           flexDirection: 'row',
-          justifyContent: 'space-around',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 10,
         },
         status: {
-          borderRadius: 5,
-          padding: 3,
-          fontWeight: 'bold',
-          elevation: 4,
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          fontWeight: '600',
+          color: '#FFFFFF',
+          backgroundColor: '#4CAF50',
         },
         releaseYear: {
-          backgroundColor: '#15d8b7',
-          borderRadius: 5,
-          padding: 3,
-          paddingHorizontal: 5,
-          textAlign: 'center',
-          alignSelf: 'center',
-          fontWeight: 'bold',
-          elevation: 4,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F0F0F0',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: colorScheme === 'dark' ? '#D0D0D0' : '#555555',
         },
         rating: {
-          backgroundColor: 'orange',
-          borderRadius: 5,
-          color: '#1f1f1f',
-          padding: 3,
-          fontWeight: 'bold',
-          elevation: 4,
+          backgroundColor: '#FFD700',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: '#1A1A1A',
+          fontWeight: '600',
         },
         episodeDataControl: {
           flexDirection: 'row',
-          flexWrap: 'wrap',
+          gap: 10,
           justifyContent: 'center',
+          marginBottom: 15,
         },
         episodeDataControlButton: {
-          padding: 5,
+          flex: 1,
+          padding: 12,
+          borderRadius: 8,
+          backgroundColor: '#2196F3',
+          alignItems: 'center',
+          opacity: 1,
+        },
+        disabledButton: {
+          backgroundColor: '#666666',
+          opacity: 0.7,
         },
         downloadButton: {
-          backgroundColor: '#0050ac',
-          borderRadius: 5,
-          marginTop: 40,
-          padding: 9,
-          width: '85%',
+          backgroundColor: '#115f9e',
+          borderRadius: 8,
+          padding: 15,
+          flexDirection: 'row',
+          justifyContent: 'center',
           alignItems: 'center',
-          alignSelf: 'center',
+          gap: 8,
+          marginHorizontal: 10,
+          marginVertical: 15,
         },
         dropdownStyle: {
-          width: '100%',
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-          padding: 5,
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: 'black',
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          padding: 10,
+          borderRadius: 8,
+          borderWidth: 0,
         },
         dropdownContainerStyle: {
-          maxWidth: '50%',
+          width: 200,
+          borderRadius: 8,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          borderWidth: 0,
+          elevation: 5,
         },
         dropdownItemTextStyle: {
           color: globalStyles.text.color,
-          fontSize: 15,
-          textAlign: 'center',
+          fontSize: 14,
         },
         dropdownItemContainerStyle: {
-          borderColor: colorScheme !== 'dark' ? '#2c2c2c' : '#ccc9c9',
-          borderWidth: StyleSheet.hairlineWidth,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+          borderRadius: 6,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
         },
         dropdownSelectedTextStyle: {
           color: globalStyles.text.color,
-          textAlign: 'center',
+          fontSize: 14,
         },
         reloadPlayer: {
-          backgroundColor: '#0050ac',
-          borderRadius: 5,
-          marginTop: 6,
-          padding: 9,
-          width: '85%',
+          backgroundColor: '#00756c',
+          borderRadius: 8,
+          padding: 12,
+          flexDirection: 'row',
           alignItems: 'center',
-          alignSelf: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          marginHorizontal: 10,
+          marginVertical: 10,
+        },
+        warningContainer: {
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#FFF3E0',
+          borderRadius: 8,
+          padding: 15,
+          marginHorizontal: 10,
+          marginVertical: 5,
+          borderLeftWidth: 4,
+          borderLeftColor: '#FF9800',
+        },
+        warningText: {
+          color: colorScheme === 'dark' ? '#FFB300' : '#E65100',
+          fontSize: 13,
+          lineHeight: 18,
         },
       }),
     [globalStyles, colorScheme],
   );
 }
-
 export default memo(Video);

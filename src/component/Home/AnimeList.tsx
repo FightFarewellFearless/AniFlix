@@ -1,3 +1,5 @@
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
+import * as MeasureText from '@domir/react-native-measure-text';
 import {
   NavigationProp,
   StackActions,
@@ -16,7 +18,8 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'; //rngh
+import { useBatteryLevel } from 'react-native-device-info';
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -27,20 +30,14 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { NewAnimeList } from '../../types/anime';
+import { EpisodeBaruHome as EpisodeBaruType, NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-
-import * as MeasureText from '@domir/react-native-measure-text';
-
-import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
-import { useBatteryLevel } from 'react-native-device-info';
-import { OTAJSVersion, version } from '../../../package.json';
-import { EpisodeBaruHome as EpisodeBaruType } from '../../types/anime';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
@@ -57,9 +54,7 @@ function HomeList(props: HomeProps) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
-
   const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0);
-
   const windowSize = useWindowDimensions();
 
   const boxTextAnim = useSharedValue(0);
@@ -79,14 +74,6 @@ function HomeList(props: HomeProps) {
     );
     return quote;
   });
-
-  // useEffect(() => {
-  //   if (data?.announcment.enable === true) {
-  //     setAnnouncmentVisible(true);
-  //   }
-  // eslint-disable-next-line react-compiler/react-compiler
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -113,36 +100,19 @@ function HomeList(props: HomeProps) {
         );
       }
 
-      // const interval = setInterval(() => {
-      //   textLayoutWidth.value = 0;
-      //   setAnimationText(
-      //     runningText[Math.floor(Math.random() * runningText.length)],
-      //   );
-      // }, 15500);
-
       boxTextAnim.set(
         withDelay(1000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
       );
 
       return () => {
         cancelAnimation(boxTextAnim);
-        // boxTextAnim.value = 0;
-        // clearInterval(interval);
       };
-      // eslint-disable-next-line react-compiler/react-compiler
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [boxTextAnim, textLayoutWidth]),
   );
 
   const refreshing = useCallback(() => {
     setRefresh(true);
-    setData?.(val => {
-      return {
-        ...val,
-        newAnime: [],
-      };
-    }); // so the skeleton loading show
-
+    setData?.(val => ({ ...val, newAnime: [] }));
     setAnimeMovieRefreshingKey(val => val + 1);
 
     setTimeout(() => {
@@ -156,10 +126,7 @@ function HomeList(props: HomeProps) {
           setRefresh(false);
         });
     }, 0);
-
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setData]);
 
   const AnimationTextStyle = useAnimatedStyle(() => {
     return {
@@ -177,99 +144,85 @@ function HomeList(props: HomeProps) {
   });
 
   const jadwalAnimeComponent = useMemo(() => {
-    return Object.keys(data?.jadwalAnime ?? {}).map(key => {
-      return (
-        <View key={key} style={[styles.listContainer, { marginTop: 15, marginHorizontal: 12 }]}>
-          <Text
-            style={[globalStyles.text, { fontWeight: 'bold', fontSize: 18, alignSelf: 'center' }]}>
-            {key}
-          </Text>
-          {data?.jadwalAnime[key]!.map((item, index) => (
-            <TouchableOpacity
-              style={{
-                backgroundColor:
-                  index % 2 === 0
-                    ? colorScheme === 'dark'
-                      ? '#292929'
-                      : '#fff'
-                    : colorScheme === 'dark'
-                      ? '#212121'
-                      : '#f5f5f5',
-              }}
-              key={item.title}
-              onPress={() => {
-                props.navigation.dispatch(
-                  StackActions.push('FromUrl', {
-                    link: item.link,
-                  }),
-                );
-              }}>
-              <Text style={[globalStyles.text, { textAlign: 'center' }]}>{item.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
-    });
-  }, [colorScheme, data?.jadwalAnime, globalStyles.text, props.navigation, styles.listContainer]);
+    return Object.keys(data?.jadwalAnime ?? {}).map(key => (
+      <View key={key} style={styles.scheduleContainer}>
+        <Text style={styles.scheduleDay}>{key}</Text>
+        {data?.jadwalAnime[key]!.map((item, index) => (
+          <TouchableOpacity
+            style={[
+              styles.scheduleItem,
+              index % 2 === 0 ? styles.scheduleItemEven : styles.scheduleItemOdd,
+            ]}
+            key={item.title}
+            onPress={() => {
+              props.navigation.dispatch(StackActions.push('FromUrl', { link: item.link }));
+            }}>
+            <Text style={styles.scheduleTitle}>{item.title}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    ));
+  }, [data?.jadwalAnime, props.navigation, styles]);
 
   return (
     <ScrollView
-      style={{ flex: 1 }}
+      style={styles.container}
       refreshControl={
         <RefreshControl
           refreshing={refresh}
           onRefresh={refreshing}
-          progressBackgroundColor="#292929"
-          colors={['#00a2ff', 'red']}
+          progressBackgroundColor={colorScheme === 'dark' ? '#121212' : '#f5f5f7'}
+          colors={['#00a2ff', '#BB86FC']}
         />
       }>
-      <View style={styles.box}>
-        <View style={styles.boxItem}>
-          <View style={styles.boxHeader}>
-            <ReText style={[globalStyles.text, styles.boxTime]} text={localTime} />
-            <Text style={[globalStyles.text, styles.boxBattery]}>
-              {Math.round((battery ?? 0) * 100)}%
-            </Text>
-          </View>
-          <Text style={[globalStyles.text, styles.boxAppName]}>
-            AniFlix{' '}
-            <Text style={styles.boxAppVer}>
-              {version}-JS_{OTAJSVersion}
-            </Text>
+      <View style={styles.headerCard}>
+        <View style={styles.headerInfo}>
+          <ReText style={styles.timeText} text={localTime} />
+          <Text style={styles.batteryText}>{Math.round((battery ?? 0) * 100)}%</Text>
+        </View>
+
+        <View style={styles.appInfo}>
+          <Text style={styles.appName}>AniFlix</Text>
+          <Text style={styles.appVersion}>
+            {version}-JS_{OTAJSVersion}
           </Text>
-          {/* running text animation */}
+        </View>
+
+        <View style={{ overflow: 'hidden' }}>
           <Reanimated.Text
             onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
-            style={[styles.boxText, AnimationTextStyle]}>
+            style={[styles.runningText, AnimationTextStyle]}>
             {animationText}
           </Reanimated.Text>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.boxRefreshData} onPress={refreshing} disabled={refresh}>
-        <Text style={[{ color: '#ffffff', fontWeight: 'bold' }]}>
-          <Icon name="refresh" /> Refresh data
-        </Text>
+      <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
+        <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
+        <Text style={styles.refreshText}>Refresh Data</Text>
       </TouchableOpacity>
+
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
       <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
 
-      {jadwalAnimeComponent}
+      <View style={styles.scheduleSection}>
+        <Text style={styles.sectionTitle}>Jadwal Anime</Text>
+        {jadwalAnimeComponent}
+      </View>
     </ScrollView>
   );
 }
 
-const EpisodeBaru = memo(EpisodeBaruUNMEMO, (prev, next) => {
-  return (
+const EpisodeBaru = memo(
+  EpisodeBaruUNMEMO,
+  (prev, next) =>
     prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
     prev.styles === next.styles &&
-    prev.globalStyles.text === next.globalStyles.text
-  );
-});
+    prev.globalStyles.text === next.globalStyles.text,
+);
 
 function EpisodeBaruUNMEMO({
   styles,
-  globalStyles,
   data,
   props,
 }: {
@@ -290,28 +243,21 @@ function EpisodeBaruUNMEMO({
   );
 
   return (
-    <View style={styles.listContainer}>
-      <View style={styles.titleContainer}>
-        <Text style={[styles.titleText, globalStyles.text]}>Episode terbaru: </Text>
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Episode Terbaru</Text>
         <TouchableOpacity
-          // containerStyle={{ flex: 1 }} // rngh
-          style={styles.seeMoreContainer}
+          style={styles.seeMoreButton}
           onPress={() => {
-            props.navigation.dispatch(
-              StackActions.push('SeeMore', {
-                type: 'AnimeList',
-              }),
-            );
+            props.navigation.dispatch(StackActions.push('SeeMore', { type: 'AnimeList' }));
             // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
             setTimeout(() => {
               props.navigation.dispatch(StackActions.push('Blank'));
-              setTimeout(() => {
-                props.navigation.goBack();
-              }, 0);
+              setTimeout(() => props.navigation.goBack(), 0);
             }, 500);
           }}>
-          <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
-          <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
         </TouchableOpacity>
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
@@ -332,7 +278,9 @@ function EpisodeBaruUNMEMO({
 const MovieList = memo(MovieListUNMEMO);
 function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
-  const globalStyles = useGlobalStyles();
+  const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const [isError, setIsError] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<Movies>) => (
@@ -346,9 +294,6 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
     [props.navigation],
   );
 
-  const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
-  const [isError, setIsError] = useState(false);
-
   useEffect(() => {
     setData?.([]); // so the skeleton loading show
     getLatestMovie()
@@ -359,52 +304,43 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
           setData?.(movieData);
         }
       })
-      .catch(() => {
-        setIsError(true);
-      });
+      .catch(() => setIsError(true));
   }, [setData]);
 
-  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
-
   return (
-    <View style={[styles.listContainer, { marginTop: 15 }]}>
-      <View style={styles.titleContainer}>
-        <Text style={[styles.titleText, globalStyles.text]}>Movie terbaru: </Text>
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Movie Terbaru</Text>
         <TouchableOpacity
-          // containerStyle={{ flex: 1 }} // rngh
-          style={styles.seeMoreContainer}
+          style={styles.seeMoreButton}
           disabled={data?.length === 0}
           onPress={() => {
-            props.navigation.dispatch(
-              StackActions.push('SeeMore', {
-                type: 'MovieList',
-              }),
-            );
+            props.navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
             // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
             setTimeout(() => {
               props.navigation.dispatch(StackActions.push('Blank'));
-              setTimeout(() => {
-                props.navigation.goBack();
-              }, 0);
+              setTimeout(() => props.navigation.goBack(), 0);
             }, 500);
           }}>
-          <Text style={[globalStyles.text, styles.seeMoreText]}>Lihat semua </Text>
-          <Icon name="long-arrow-right" color={globalStyles.text.color} size={20} />
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
         </TouchableOpacity>
       </View>
+
       {isError && (
-        <Text
+        <TouchableOpacity
           onPress={() => {
             navigation.reset({
               index: 0,
               routes: [{ name: 'connectToServer' }],
             });
           }}
-          style={[globalStyles.text, { textAlign: 'center', color: '#d80000' }]}>
-          Error mendapatkan data awal yang dibutuhkan, ketuk disini untuk mencoba ulang dari loading
-          screen
-        </Text>
+          style={styles.errorContainer}>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
+        </TouchableOpacity>
       )}
+
       {data?.length !== 0 ? (
         <FlatList
           horizontal
@@ -425,10 +361,15 @@ function ShowSkeletonLoading() {
   const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
   const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
   return (
-    <View style={{ flexDirection: 'row', gap: 5 }}>
-      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
-      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
-      <Skeleton width={LIST_BACKGROUND_WIDTH} height={LIST_BACKGROUND_HEIGHT} />
+    <View style={{ flexDirection: 'row', gap: 12 }}>
+      {[1, 2, 3].map((_, index) => (
+        <Skeleton
+          key={index}
+          width={LIST_BACKGROUND_WIDTH}
+          height={LIST_BACKGROUND_HEIGHT}
+          style={{ borderRadius: 8 }}
+        />
+      ))}
     </View>
   );
 }
@@ -446,9 +387,7 @@ function useLocalTime() {
           currTime.current = string;
         }
       }, 500);
-      return () => {
-        clearInterval(interval);
-      };
+      return () => clearInterval(interval);
     }, [time]),
   );
   return time;
@@ -456,211 +395,160 @@ function useLocalTime() {
 
 function useStyles() {
   const colorScheme = useColorScheme();
-  const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        modalContainer: {
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#000000d0',
-        },
-        modalContent: {
-          flex: 0.15,
-          backgroundColor: colorScheme === 'dark' ? '#181818' : '#d1d1d1',
-          borderRadius: 9,
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: 100,
-          minWidth: 250,
-          elevation: 16,
-          shadowColor: '#202020',
-        },
-        modalPengumuman: {
-          flex: 1,
-          justifyContent: 'flex-start',
-        },
-        pengumuman: {
-          fontSize: 19,
-          color: '#ff0000b6',
-          fontWeight: 'bold',
-        },
-        announcmentText: {
-          flex: 1,
-          flexGrow: 3,
-          minWidth: 120,
-          backgroundColor: colorScheme === 'dark' ? '#353535' : 'white',
-          paddingTop: 1,
-          borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? 'white' : 'black',
-        },
-        announcmentMessage: {
-          textAlign: 'center',
-          fontWeight: 'bold',
-          fontSize: 14,
-        },
-        announcmentOK: {
-          flex: 1,
-          alignSelf: 'flex-end',
-          justifyContent: 'flex-end',
-        },
-        announcmentOKButton: {
-          backgroundColor: '#264914',
-          width: 50,
-          padding: 5,
-          borderRadius: 3,
-        },
-        announcmentOKText: {
-          color: '#44a4ff',
-          textShadowColor: 'black',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 2,
-          fontWeight: 'bold',
-          textAlign: 'center',
-        },
-        box: {
-          flex: 1,
-          height: 100,
-          margin: 10,
-        },
-        boxItem: {
-          flex: 1,
-          backgroundColor: colorScheme === 'dark' ? '#363636' : '#eeeeee',
-          borderColor: '#ff9100ff',
-          borderWidth: 2,
-          padding: 4,
-          justifyContent: 'center',
-          overflow: 'hidden',
-        },
-        boxAppName: {
-          flexDirection: 'row',
-          alignSelf: 'center',
-          fontSize: 20,
-          fontWeight: 'bold',
-        },
-        boxAppVer: {
-          fontSize: 13,
-        },
-        boxHeader: {
-          position: 'absolute',
-          top: 0,
-          width: '100%',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          padding: 5,
-        },
-        boxTime: {
-          fontWeight: 'bold',
-          position: 'absolute',
-          top: -10,
-          left: 0,
-        },
-        boxRefreshData: {
-          marginBottom: 4,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#0aafcc',
-          paddingHorizontal: 5,
-          paddingVertical: 2,
-          borderRadius: 5,
-        },
-        boxBattery: {
-          fontWeight: 'bold',
-          position: 'absolute',
-          top: 0,
-          right: 0,
-        },
-        boxText: {
-          position: 'absolute',
-          bottom: 0,
-          color: '#2093ff',
-          fontWeight: 'bold',
-          // fontSize: 14,
-          textShadowColor: colorScheme === 'dark' ? 'black' : '#cfcfcf',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 2,
-        },
-        listContainer: {
-          position: 'relative',
-          backgroundColor: colorScheme === 'dark' ? '#272727' : '#ebebeb',
-          paddingVertical: 10,
-          borderRadius: 10,
-          elevation: 5,
-        },
-        titleContainer: {
-          flex: 1,
-          flexDirection: 'row',
-          marginBottom: 10,
-        },
-        titleText: {
-          fontSize: 20,
-          fontWeight: 'bold',
-          alignSelf: 'center',
-        },
-        seeMoreContainer: {
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          alignContent: 'flex-end',
-        },
-        seeMoreText: {
-          fontSize: 14,
-          fontWeight: 'bold',
-          color: '#007db8',
-        },
-        listBackground: {
-          overflow: 'hidden',
-          width: LIST_BACKGROUND_WIDTH,
-          height: LIST_BACKGROUND_HEIGHT,
-          borderWidth: 1,
-          marginRight: 5,
-          marginVertical: 5,
-          flex: 2,
-          borderRadius: 7,
-        },
-        animeTitleContainer: {
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-        },
-        animeTitle: {
-          fontSize: 11,
-          color: 'black',
-          backgroundColor: 'orange',
-          opacity: 0.8,
-          textAlign: 'center',
-          fontWeight: 'bold',
-        },
-        animeEpisodeContainer: {
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          flexDirection: 'row',
-        },
-        animeEpisode: {
-          fontSize: 10,
-          color: '#000000',
-          backgroundColor: '#0099ff',
-          opacity: 0.8,
-          borderRadius: 2,
-          padding: 1,
-        },
-        animeRatingContainer: {
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-        },
-        animeRating: {
-          fontSize: 10,
-          color: 'black',
-          backgroundColor: 'orange',
-          opacity: 0.8,
-          padding: 2,
-          borderRadius: 3,
-        },
-      }),
-    [LIST_BACKGROUND_HEIGHT, LIST_BACKGROUND_WIDTH, colorScheme],
-  );
+  const isDark = colorScheme === 'dark';
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#121212' : '#f5f5f7',
+    },
+    headerCard: {
+      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+      borderRadius: 16,
+      padding: 5,
+      margin: 16,
+      marginBottom: 12,
+      elevation: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    headerInfo: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    timeText: {
+      fontSize: 14,
+      color: isDark ? '#BB86FC' : '#6200EE',
+      fontWeight: 'bold',
+    },
+    batteryText: {
+      fontSize: 14,
+      color: isDark ? '#BB86FC' : '#6200EE',
+      fontWeight: 'bold',
+    },
+    appInfo: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'center',
+      marginBottom: 16,
+    },
+    appName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: isDark ? '#E0E0E0' : '#333',
+      marginRight: 8,
+    },
+    appVersion: {
+      fontSize: 12,
+      color: isDark ? '#AAA' : '#777',
+    },
+    runningText: {
+      color: isDark ? '#BB86FC' : '#6200EE',
+      fontWeight: 'bold',
+      fontSize: 14,
+    },
+    refreshButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#0aafcc',
+      paddingVertical: 4,
+      borderRadius: 8,
+      marginHorizontal: 16,
+      marginBottom: 16,
+    },
+    refreshIcon: {
+      marginRight: 8,
+    },
+    refreshText: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    sectionContainer: {
+      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+      borderRadius: 16,
+      paddingVertical: 8,
+      marginHorizontal: 3,
+      marginBottom: 16,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: isDark ? '#E0E0E0' : '#333',
+    },
+    seeMoreButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    seeMoreText: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      color: '#007db8',
+      marginRight: 4,
+    },
+    scheduleSection: {
+      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+      borderRadius: 16,
+      padding: 16,
+      marginHorizontal: 16,
+      marginBottom: 16,
+      elevation: 2,
+    },
+    scheduleContainer: {
+      marginBottom: 16,
+    },
+    scheduleDay: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: isDark ? '#BB86FC' : '#6200EE',
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    scheduleItem: {
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+    scheduleItemEven: {
+      backgroundColor: isDark ? '#252525' : '#F5F5F5',
+    },
+    scheduleItemOdd: {
+      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+    },
+    scheduleTitle: {
+      fontSize: 14,
+      color: isDark ? '#E0E0E0' : '#333',
+      textAlign: 'center',
+    },
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 16,
+      backgroundColor: isDark ? '#2A1E1E' : '#FFEBEE',
+      borderRadius: 8,
+      marginHorizontal: 16,
+    },
+    errorText: {
+      fontSize: 14,
+      color: '#d80000',
+      marginLeft: 8,
+      textAlign: 'center',
+    },
+  });
 }
