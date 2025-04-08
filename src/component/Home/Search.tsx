@@ -308,8 +308,10 @@ function Search(props: Props) {
           onPressIn={onPressIn}
           onPressOut={onPressOut}
           style={[styles.searchButton, pressableAnimationStyle]}>
-          <Text allowFontScaling={false} style={{ color: '#272727', paddingHorizontal: 12 }}>
-            <Icon name="search" style={{ color: '#413939' }} size={17} />
+          <Text
+            allowFontScaling={false}
+            style={{ color: '#141414', paddingHorizontal: 12, fontWeight: 'bold' }}>
+            <Icon name="search" size={17} />
             Cari
           </Text>
         </AnimatedPressable>
@@ -489,8 +491,12 @@ function HistoryList({
         onPress={() => {
           onChangeTextFunction(item);
         }}>
-        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>{item}</Text>
+        <View
+          style={{ justifyContent: 'center', alignItems: 'center', flex: 1, flexDirection: 'row' }}>
+          <Icon name="history" size={20} style={{ color: '#00c7a6' }} />
+          <Text style={[globalStyles.text, { fontWeight: 'bold', flex: 1, textAlign: 'center' }]}>
+            {item}
+          </Text>
         </View>
         <TouchableOpacity
           hitSlop={14}
@@ -500,7 +506,7 @@ function HistoryList({
               JSON.stringify(searchHistory.filter((_, i) => i !== index)),
             );
           }}>
-          <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />
+          <Icon name="times" size={25} style={{ color: '#ff0f0f' }} />
         </TouchableOpacity>
       </TouchableOpacity>
     </View>
@@ -632,19 +638,23 @@ function useStyles() {
           fontSize: 17,
         },
         loadingView: {
-          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
           position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          height: 40,
+          bottom: 10,
+          left: 0,
+          right: 0,
           justifyContent: 'center',
           alignItems: 'center',
+        },
+        loadingText: {
+          fontWeight: 'bold',
+          color: colorScheme === 'dark' ? '#53c412' : 'black',
+          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+          padding: 12,
           zIndex: 2,
-          borderRadius: 3,
+          borderRadius: 12,
           borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
           borderWidth: 1.3,
         },
-        loadingText: {},
         searchInput: {
           height: 42,
           borderWidth: 1,
@@ -664,7 +674,7 @@ function useStyles() {
         searchButton: {
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#ff8c00',
+          backgroundColor: '#5289ff',
           borderRadius: 8,
           marginRight: 12,
           paddingHorizontal: 12,
@@ -762,7 +772,7 @@ function useStyles() {
           padding: 4,
         },
         searchHistoryItemContainer: {
-          backgroundColor: colorScheme === 'light' ? '#00c0c7' : '#007c7c',
+          backgroundColor: colorScheme === 'light' ? '#e3e5e6' : '#252525',
           borderRadius: 9,
           marginVertical: 3,
         },
