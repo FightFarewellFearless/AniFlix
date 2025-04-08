@@ -6,11 +6,13 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
 import Blank from './src/component/misc/Blank';
+import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
 import { EpisodeBaruHome } from './src/types/anime';
@@ -105,49 +107,51 @@ function App() {
   }, [colorScheme]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
-        <MovieListHomeContext.Provider
-          value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
-          <NavigationContainer
-            theme={
-              colorScheme === 'dark'
-                ? {
-                    ...DarkTheme,
-                    colors: {
-                      ...DarkTheme.colors,
-                      background: '#0A0A0A',
-                    },
-                  }
-                : undefined
-            }>
-            <Stack.Navigator
-              initialRouteName="connectToServer"
-              screenOptions={{
-                headerShown: false,
-              }}>
-              {screens.map(({ name, component, options }) => (
-                <Stack.Screen key={name} name={name} options={options}>
-                  {component}
-                </Stack.Screen>
-              ))}
-            </Stack.Navigator>
-            <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
-              {isOpen && (
-                <Suspense>
-                  <CFBypassWebView />
-                </Suspense>
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
+          <MovieListHomeContext.Provider
+            value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
+            <NavigationContainer
+              theme={
+                colorScheme === 'dark'
+                  ? {
+                      ...DarkTheme,
+                      colors: {
+                        ...DarkTheme.colors,
+                        background: '#0A0A0A',
+                      },
+                    }
+                  : undefined
+              }>
+              <Stack.Navigator
+                initialRouteName="connectToServer"
+                screenOptions={{
+                  headerShown: false,
+                }}>
+                {screens.map(({ name, component, options }) => (
+                  <Stack.Screen key={name} name={name} options={options}>
+                    {component}
+                  </Stack.Screen>
+                ))}
+              </Stack.Navigator>
+              <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
+                {isOpen && (
+                  <Suspense>
+                    <CFBypassWebView />
+                  </Suspense>
+                )}
+              </CFBypassIsOpen.Provider>
+              {__DEV__ && (
+                <View style={styles.Dev} pointerEvents="none">
+                  <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                </View>
               )}
-            </CFBypassIsOpen.Provider>
-            {__DEV__ && (
-              <View style={styles.Dev} pointerEvents="none">
-                <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-              </View>
-            )}
-          </NavigationContainer>
-        </MovieListHomeContext.Provider>
-      </EpisodeBaruHomeContext.Provider>
-    </GestureHandlerRootView>
+            </NavigationContainer>
+          </MovieListHomeContext.Provider>
+        </EpisodeBaruHomeContext.Provider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

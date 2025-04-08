@@ -39,6 +39,7 @@
     "react-native-bottom-tabs": "^0.9.0",
     "react-native-copilot": "^3.3.3",
     "react-native-device-info": "^14.0.4",
+    "react-native-error-boundary": "^2.0.0",
     "react-native-gesture-handler": "2.25.0",
     "react-native-image-colors": "^2.4.0",
     "react-native-marked": "^6.0.7",

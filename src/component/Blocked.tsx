@@ -1,4 +1,4 @@
-import { WEBHOOK_URL } from '@env';
+import { WEBHOOK_WHITELIST_URL } from '@env';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -64,7 +64,7 @@ function Blocked(props: Props) {
   const textInputDescription = useRef<string>('');
   const sendRequest = useCallback(() => {
     setIsRequestModalOpen(false);
-    fetch(WEBHOOK_URL, {
+    fetch(WEBHOOK_WHITELIST_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

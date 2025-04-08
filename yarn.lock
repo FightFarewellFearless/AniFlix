@@ -4583,6 +4583,7 @@ __metadata:
     react-native-copilot: ^3.3.3
     react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
+    react-native-error-boundary: ^2.0.0
     react-native-gesture-handler: 2.25.0
     react-native-image-colors: ^2.4.0
     react-native-marked: ^6.0.7
@@ -11637,6 +11638,20 @@ __metadata:
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
   checksum: 8560d0529897c6c20b394471184ed42d6ccde84a85aac575de43f4894c67aaed69d77f7a684d61059ca4b3b738846e9068c5c62eb1c84986069f7a9ae7cea5f9
+  languageName: node
+  linkType: hard
+
+"react-native-error-boundary@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "react-native-error-boundary@npm:2.0.0"
+  peerDependencies:
+    "@types/react-native": ">=0.57.7"
+    react: ">=16.6.0"
+    react-native: ">=0.57.7"
+  peerDependenciesMeta:
+    "@types/react-native":
+      optional: true
+  checksum: af286da2f50c6104b63fc3919e0e64c21923fee66b38be490cf13390f22497d8300c767e64fcfaa71a0df9cdcd43c6579935213305fef4d8a635df681fc982ff
   languageName: node
   linkType: hard
 
