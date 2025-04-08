@@ -251,7 +251,7 @@ const fromUrl = async (
   } else {
     const title = aniDetail.find('h1.posttl').text().trim();
     let streamingLink = await getStreamLink(
-      aniDetail.find('div.responsive-embed-stream > iframe').attr('src')!,
+      aniDetail.find('div.responsive-embed-stream > iframe').attr('src'),
       signal,
     );
     const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
@@ -354,9 +354,14 @@ const fromUrl = async (
 };
 
 const getStreamLink = async (
-  downLink: string,
+  downLink: string | undefined,
   signal?: AbortSignal,
 ): Promise<string | undefined> => {
+  if (downLink === undefined)
+    throw new Error(
+      'Gagal mendapatkan link streaming, kemungkinan ini adalah anime dari history lama, ' +
+        'untuk menonton anime ini, silahkan cari melalui pencarian dan pilih episode yang sesuai',
+    );
   if (downLink.includes('desustream') || downLink.includes('desudrive')) {
     let err = false;
     let errorObj: Error | null = null;
