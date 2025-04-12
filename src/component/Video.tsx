@@ -955,8 +955,9 @@ function Video(props: Props) {
                         marginRight: 5,
                       },
                     ]}
-                    onPress={() => {
-                      episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                    onPress={async () => {
+                      await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                      global.gc?.();
                     }}>
                     <Icon name="arrow-left" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
@@ -973,8 +974,9 @@ function Video(props: Props) {
                         backgroundColor: data.episodeData.next ? '#00ccff' : '#525252',
                       },
                     ]}
-                    onPress={() => {
-                      episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                    onPress={async () => {
+                      await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                      global.gc?.();
                     }}>
                     <Icon name="arrow-right" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
@@ -996,8 +998,9 @@ function Video(props: Props) {
                   data={resolutionDropdownData}
                   valueField="value"
                   labelField="label"
-                  onChange={val => {
-                    setResolution(val.value.dataContent, val.label);
+                  onChange={async val => {
+                    await setResolution(val.value.dataContent, val.label);
+                    global.gc?.();
                   }}
                   style={styles.dropdownStyle}
                   containerStyle={styles.dropdownContainerStyle}
