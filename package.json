@@ -29,6 +29,7 @@
     "expo": "^53.0.0-preview.5",
     "expo-document-picker": "13.1.1",
     "expo-linear-gradient": "14.1.1",
+    "expo-screen-orientation": "8.1.2",
     "expo-splash-screen": "0.29.23-canary-20250404-87e2506",
     "expo-updates": "1.0.0-canary-20250404-87e2506",
     "expo-video": "2.1.1",

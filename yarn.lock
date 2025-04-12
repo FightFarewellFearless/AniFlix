@@ -4577,6 +4577,7 @@ __metadata:
     expo: ^53.0.0-preview.5
     expo-document-picker: 13.1.1
     expo-linear-gradient: 14.1.1
+    expo-screen-orientation: 8.1.2
     expo-splash-screen: 0.29.23-canary-20250404-87e2506
     expo-updates: 1.0.0-canary-20250404-87e2506
     expo-video: 2.1.1
@@ -7195,6 +7196,16 @@ __metadata:
   dependencies:
     invariant: ^2.2.4
   checksum: db33c279a9c83cc415bb12d6b1f1723f31120e620dfc06398c5ba43304046cecfb3309dec0f0aec8e7b1f05559676630e9593564cbda1ab0b5bfd6d10ded3c85
+  languageName: node
+  linkType: hard
+
+"expo-screen-orientation@npm:8.1.2":
+  version: 8.1.2
+  resolution: "expo-screen-orientation@npm:8.1.2"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: ce8e368c1a2b2d5b97a423d7b9ac204dbbe9e36f81cb22912bcec7fa02724ce7a21b466b2b055bb96733f1256ce69663e66bf6987490ca8a46aa0217e48d3279
   languageName: node
   linkType: hard
 
