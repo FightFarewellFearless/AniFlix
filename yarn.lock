@@ -4597,7 +4597,7 @@ __metadata:
     react-native-orientation-locker: ^1.7.0
     react-native-reanimated: 3.17.1
     react-native-saf-x: 2.2.3
-    react-native-safe-area-context: 5.3.0
+    react-native-safe-area-context: 5.4.0
     react-native-screens: 4.9.2
     react-native-svg: 15.11.2
     react-native-system-navigation-bar: ^2.6.4
@@ -11941,13 +11941,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:5.3.0":
-  version: 5.3.0
-  resolution: "react-native-safe-area-context@npm:5.3.0"
+"react-native-safe-area-context@npm:5.4.0":
+  version: 5.4.0
+  resolution: "react-native-safe-area-context@npm:5.4.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 21f18b1286fc7bc6f38f864b7468848c16c58106ae429633e8f655dabb80571beba19ac8aa8bc5e1b2e926d75afddd7ded919a56450aa00c36d56f7fb421f782
+  checksum: 7d7f9a8278048650fd207d436798bd062d6f78d771cb0665b92aef69dba870251339e6812e1d669fd1958345288bd0f9ac98fbfe353c13958d18b58dc946c341
   languageName: node
   linkType: hard
 
