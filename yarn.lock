@@ -2400,7 +2400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/prebuild-config@npm:^8.0.27, @expo/prebuild-config@npm:^8.0.29":
+"@expo/prebuild-config@npm:^8.0.29":
   version: 8.0.29
   resolution: "@expo/prebuild-config@npm:8.0.29"
   dependencies:
@@ -2416,6 +2416,25 @@ __metadata:
     semver: ^7.6.0
     xml2js: 0.6.0
   checksum: 4104a0e7522165a080c13c6b72833a7ca3969bebd6e22dcb3e7b1b26985bd2adf38b88f6ed2d52ae874352074a6b0f41c2ad3b39243a5ee96a1e447162e49320
+  languageName: node
+  linkType: hard
+
+"@expo/prebuild-config@npm:~8.2.0":
+  version: 8.2.0
+  resolution: "@expo/prebuild-config@npm:8.2.0"
+  dependencies:
+    "@expo/config": ~10.0.11
+    "@expo/config-plugins": ~9.0.17
+    "@expo/config-types": ^52.0.5
+    "@expo/image-utils": ^0.6.5
+    "@expo/json-file": ^9.0.2
+    "@react-native/normalize-colors": 0.76.9
+    debug: ^4.3.1
+    fs-extra: ^9.0.0
+    resolve-from: ^5.0.0
+    semver: ^7.6.0
+    xml2js: 0.6.0
+  checksum: 5c9d194e63cc4ec9ba3076179832ce928208e09846981cccc6f07e70742b1d7a29bf7594788543578ced75a42fbc0d4a624c4bd7af73e755d220170090f0b2e5
   languageName: node
   linkType: hard
 
@@ -3652,6 +3671,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native/normalize-colors@npm:0.76.9":
+  version: 0.76.9
+  resolution: "@react-native/normalize-colors@npm:0.76.9"
+  checksum: 4fddb977b8aad2e848cb698f13b9ffec539668e8ae891846327d5e23ce3de13dea59a2dfbea8a154ea034791c7abc3f7d1d4c8caae2114f7a683c78b221aed36
+  languageName: node
+  linkType: hard
+
 "@react-native/normalize-colors@npm:0.77.1":
   version: 0.77.1
   resolution: "@react-native/normalize-colors@npm:0.77.1"
@@ -4577,7 +4603,7 @@ __metadata:
     expo: 52.0.38
     expo-document-picker: 13.0.3
     expo-linear-gradient: 14.0.2
-    expo-splash-screen: 0.29.22
+    expo-splash-screen: 0.29.24
     expo-updates: ~0.26.19
     expo-video: ~2.0.5
     jest: ^29.6.3
@@ -7269,14 +7295,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-splash-screen@npm:0.29.22":
-  version: 0.29.22
-  resolution: "expo-splash-screen@npm:0.29.22"
+"expo-splash-screen@npm:0.29.24":
+  version: 0.29.24
+  resolution: "expo-splash-screen@npm:0.29.24"
   dependencies:
-    "@expo/prebuild-config": ^8.0.27
+    "@expo/prebuild-config": ~8.2.0
   peerDependencies:
     expo: "*"
-  checksum: 78446f0057a28530f5dcbfe5ae375fd5b216f5f3712b19483d7a72731e95f9e05db3fb6dbd641ceaca508100feced12c31664809450ac668e037895e6c55dbb2
+  checksum: 6a2b1c0c58490e67821f9c5ef6d6d8fdf55d95a8b856d42ebe28d66e5221ab9f03dbf08329e4ec9196ba7942730db96fccaceb87e7d6f2963cca204727aad577
   languageName: node
   linkType: hard
 
