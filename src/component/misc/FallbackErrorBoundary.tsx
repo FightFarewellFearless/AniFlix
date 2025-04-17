@@ -1,4 +1,5 @@
 import { WEBHOOK_REPORT_ERROR } from '@env';
+import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
 import {
   Alert,
@@ -23,7 +24,11 @@ const FallbackComponent = (props: Props) => {
         <Text style={[styles.title, globalStyles.text]}>Ups!</Text>
         <Text style={[styles.subtitle, globalStyles.text]}>Telah terjadi crash</Text>
         <Text style={[styles.error, globalStyles.text]}>{props.error.toString()}</Text>
-        <TouchableOpacity style={styles.button} onPress={props.resetError}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            reloadAppAsync();
+          }}>
           <Text style={[styles.buttonText, globalStyles.text]}>Coba kembali</Text>
         </TouchableOpacity>
         <TouchableOpacity
