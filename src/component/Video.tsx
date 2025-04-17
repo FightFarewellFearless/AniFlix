@@ -1,4 +1,6 @@
 import { Dropdown } from '@pirles/react-native-element-dropdown';
+import * as ExpoOrientation from 'expo-screen-orientation';
+import { OrientationChangeEvent } from 'expo-screen-orientation';
 import React, {
   memo,
   useCallback,
@@ -26,7 +28,6 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import ExpoOrientation, { OrientationChangeEvent } from 'expo-screen-orientation';
 import ReAnimated, {
   runOnJS,
   StretchInX,

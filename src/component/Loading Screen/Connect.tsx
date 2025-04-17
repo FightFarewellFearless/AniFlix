@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import ExpoOrientation from 'expo-screen-orientation';
+import * as ExpoOrientation from 'expo-screen-orientation';
 import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
