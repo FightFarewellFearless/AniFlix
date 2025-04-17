@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
+import ExpoOrientation from 'expo-screen-orientation';
 import ReAnimated, {
   runOnJS,
   StretchInX,

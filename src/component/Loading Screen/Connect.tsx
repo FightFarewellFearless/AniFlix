@@ -1,5 +1,6 @@
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import ExpoOrientation from 'expo-screen-orientation';
 import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -13,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
-import Orientation from 'react-native-orientation-locker';
+import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
@@ -55,7 +56,7 @@ function Loading(props: Props) {
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
-    Orientation.lockToPortrait();
+    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
   }, []);
 
   const [loadStatus, setLoadStatus] = useState({
@@ -68,6 +69,7 @@ function Loading(props: Props) {
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const progressValueAnimation = useSharedValue(0);
 
   const connectToServer = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
@@ -238,8 +240,14 @@ function Loading(props: Props) {
   useEffect(() => {
     const completedSteps = Object.values(loadStatus).filter(Boolean).length;
     const totalSteps = Object.keys(loadStatus).length;
-    setProgressValue((completedSteps / totalSteps) * 100);
-  }, [loadStatus]);
+    const progress = (completedSteps / totalSteps) * 100;
+    setProgressValue(progress);
+    progressValueAnimation.set(withTiming(progress));
+  }, [loadStatus, progressValueAnimation]);
+
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressValueAnimation.get()}%`,
+  }));
 
   const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
 
@@ -275,7 +283,7 @@ function Loading(props: Props) {
 
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progressValue}%` }]} />
+            <Reanimated.View style={[styles.progressFill, progressBarStyle]} />
           </View>
           <Text style={styles.progressText}>{Math.round(progressValue)}%</Text>
         </View>

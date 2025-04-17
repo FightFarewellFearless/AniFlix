@@ -69,6 +69,9 @@ function VideoPlayer({
   const player = useVideoPlayer(
     {
       uri: streamingURL,
+      metadata: {
+        title,
+      },
       headers: {
         'User-Agent': deviceUserAgent,
         ...headers,
@@ -77,6 +80,7 @@ function VideoPlayer({
     initialPlayer => {
       initialPlayer.audioMixingMode = 'doNotMix';
       initialPlayer.timeUpdateEventInterval = 1;
+      initialPlayer.showNowPlayingNotification = true;
     },
   );
 
@@ -223,6 +227,7 @@ function VideoPlayer({
   return (
     <View style={[style]}>
       <VideoView
+        allowsPictureInPicture={true}
         pointerEvents="none"
         player={player}
         key={streamingURL}

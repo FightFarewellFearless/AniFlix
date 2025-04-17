@@ -14,7 +14,9 @@
     "runtimeVersion": "0.8.3"
   },
   "plugins": [
-    "expo-video"
+    ["expo-video", {
+      "supportsPictureInPicture": true
+    }]
   ],
   "experiments": {
     "reactCompiler": false
