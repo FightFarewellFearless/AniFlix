@@ -71,6 +71,7 @@ function VideoPlayer({
       uri: streamingURL,
       metadata: {
         title,
+        artist: 'AniFlix',
       },
       headers: {
         'User-Agent': deviceUserAgent,
@@ -224,9 +225,22 @@ function VideoPlayer({
       display: showControlsOpacity.get() === 0 ? 'none' : 'flex',
     };
   });
+
+  const onPiPStop = useCallback(() => {
+    setTimeout(() => {
+      if (AppState.currentState === 'active' && !paused) {
+        player.play();
+        setPaused(false);
+      }
+    }, 100);
+    player.pause();
+    setPaused(true);
+  }, [paused, player]);
+
   return (
     <View style={[style]}>
       <VideoView
+        onPictureInPictureStop={onPiPStop}
         allowsPictureInPicture={true}
         pointerEvents="none"
         player={player}
@@ -257,6 +271,7 @@ function VideoPlayer({
             onLoad={onLoad}
           />
           <BottomControl
+            videoRef={videoRef}
             currentDurationSecond={currentDurationSecond}
             totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen}
@@ -385,6 +400,7 @@ function CenterControl({
 
 function BottomControl({
   seekBarProgress,
+  videoRef,
   onProgressChange,
   onProgressChangeEnd,
   onFullScreenButtonPressed,
@@ -393,6 +409,7 @@ function BottomControl({
   totalDurationSecond,
 }: {
   seekBarProgress: SharedValue<number>;
+  videoRef: React.RefObject<VideoView> | undefined;
   onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
   onFullScreenButtonPressed: () => void;
@@ -400,6 +417,9 @@ function BottomControl({
   currentDurationSecond: SharedValue<number>;
   totalDurationSecond: SharedValue<number>;
 }) {
+  const requestPiP = useCallback(() => {
+    videoRef?.current?.startPictureInPicture();
+  }, [videoRef]);
   const totalSecond = useDerivedValue(() => {
     'worklet';
     const sec = Math.floor(totalDurationSecond.get() % 60);
@@ -434,23 +454,38 @@ function BottomControl({
         paddingHorizontal: 5,
       }}>
       <View style={{ width: '95%', flexDirection: 'row', flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 }}>
-          <ReText style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }} text={currentSecond} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 1, flex: 1 }}>
+          <ReText
+            style={{ color: 'white', zIndex: 1, fontWeight: 'bold', fontSize: 13 }}
+            text={currentSecond}
+          />
+          <Text style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }}>/</Text>
+          <ReText
+            style={{ color: 'white', zIndex: 1, fontWeight: 'bold', fontSize: 13 }}
+            text={totalSecond}
+          />
           <SeekBar
             progress={seekBarProgress}
             style={{ flex: 1, zIndex: 0 }}
             onProgressChange={onProgressChange}
             onProgressChangeEnd={onProgressChangeEnd}
           />
-          <ReText style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }} text={totalSecond} />
         </View>
       </View>
-      <TouchableOpacity
-        style={{ justifyContent: 'center' }}
-        /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
-        hitSlop={5}>
-        <Icons name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'} size={28} color={'white'} />
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', gap: 2 }}>
+        <TouchableOpacity
+          style={{ justifyContent: 'center', marginLeft: 6 }}
+          /* //rngh - containerStyle */ onPress={requestPiP}
+          hitSlop={2}>
+          <Icons name={'picture-in-picture'} size={22} color={'white'} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ justifyContent: 'center' }}
+          /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
+          hitSlop={2}>
+          <Icons name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'} size={28} color={'white'} />
+        </TouchableOpacity>
+      </View>
     </Pressable>
   );
 }

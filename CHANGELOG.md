@@ -7,6 +7,8 @@ Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta elimina
 - Opsi untuk memuat ulang aplikasi di menu pengaturan
 - Tampilan aplikasi
 - Tampilan Error untuk menghindari aplikasi crash (hanya berlaku untuk JavaScript dan tidak untuk native crash)
+- Fitur Picture-in-Picture saat menonton
+- Notifikasi "Now playing" saat menonton
 
 ## Ditingkatkan
 - Performa aplikasi secara keseluruhan (responsif, animasi, beberapa UI/UX, dan lain-lain...)
@@ -23,6 +25,7 @@ Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta elimina
 - Migrasi database ke MMKV (Memory-Map Key-Value)
 - Bottom tabs sekarang menggunakan native android (BottomNavigationView) oleh react-native-bottom-tabs, ini berarti pengalaman menggunakan aplikasi menjadi lebih mulus dan lancar
 - Mengubah Theme aplikasi ke material3 di AndroidManifest.xml mengikuti react-native-bottom-tabs
+- Menghapus pengecekan file aplikasi yang tidak perlu saat aplikasi dijalankan
 - Dan masih banyak perubahan lainnya...
 
 # v0.8.3-JS_3 (23-Maret-2025)
