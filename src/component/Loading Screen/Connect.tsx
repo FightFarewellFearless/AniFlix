@@ -1,6 +1,5 @@
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import * as ExpoOrientation from 'expo-screen-orientation';
 import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -14,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
+import Orientation from 'react-native-orientation-locker';
 import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -56,7 +56,7 @@ function Loading(props: Props) {
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
-    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
+    Orientation.lockToPortrait();
   }, []);
 
   const [loadStatus, setLoadStatus] = useState({

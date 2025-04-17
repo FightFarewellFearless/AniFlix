@@ -1,6 +1,4 @@
 import { Dropdown } from '@pirles/react-native-element-dropdown';
-import * as ExpoOrientation from 'expo-screen-orientation';
-import { OrientationChangeEvent } from 'expo-screen-orientation';
 import React, {
   memo,
   useCallback,
@@ -28,6 +26,7 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
   runOnJS,
   StretchInX,
@@ -202,20 +201,20 @@ function Video(props: Props) {
     };
   });
 
-  const enterFullscreen = useCallback((landscape?: OrientationChangeEvent) => {
+  const enterFullscreen = useCallback((landscape?: OrientationType) => {
     // videoRef.current?.presentFullscreenPlayer();
     if (landscape === undefined) {
-      ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE);
+      Orientation.lockToLandscape();
     } else {
-      switch (landscape.orientationInfo.orientation) {
-        case ExpoOrientation.Orientation.LANDSCAPE_LEFT:
-          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE_LEFT);
+      switch (landscape) {
+        case 'LANDSCAPE-LEFT':
+          Orientation.lockToLandscapeLeft();
           break;
-        case ExpoOrientation.Orientation.LANDSCAPE_RIGHT:
-          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE_RIGHT);
+        case 'LANDSCAPE-RIGHT':
+          Orientation.lockToLandscapeRight();
           break;
         default:
-          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE);
+          Orientation.lockToLandscape();
       }
     }
     SystemNavigationBar.fullScreen(true);
@@ -228,18 +227,15 @@ function Video(props: Props) {
     SystemNavigationBar.fullScreen(false);
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
+    Orientation.lockToPortrait();
     setFullscreen(false);
   }, []);
 
   const orientationDidChange = useCallback(
-    (orientation: OrientationChangeEvent) => {
-      if (
-        orientation.orientationInfo.orientation === ExpoOrientation.Orientation.PORTRAIT_DOWN ||
-        orientation.orientationInfo.orientation === ExpoOrientation.Orientation.PORTRAIT_UP
-      ) {
+    (orientation: OrientationType) => {
+      if (orientation === 'PORTRAIT') {
         exitFullscreen();
-      } else if (orientation.orientationInfo.orientation === ExpoOrientation.Orientation.UNKNOWN) {
+      } else if (orientation !== 'UNKNOWN') {
         enterFullscreen(orientation);
       }
     },
@@ -247,15 +243,15 @@ function Video(props: Props) {
   );
 
   const willUnmountHandler = useCallback(() => {
-    ExpoOrientation.removeOrientationChangeListeners();
-    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
+    Orientation.removeDeviceOrientationListener(orientationDidChange);
+    Orientation.lockToPortrait();
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-  }, []);
+  }, [orientationDidChange]);
 
   // didMount and willUnmount
   useEffect(() => {
-    ExpoOrientation.addOrientationChangeListener(orientationDidChange);
+    Orientation.addDeviceOrientationListener(orientationDidChange);
 
     return () => {
       willUnmountHandler();
