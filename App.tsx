@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Alert, Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -44,6 +44,16 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
     <Component {...props} />
   </SuspenseLoading>
 );
+
+// TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
+const defaultHandler = ErrorUtils.getGlobalHandler();
+ErrorUtils.setGlobalHandler((error, isFatal) => {
+  if (error instanceof Error) {
+    if (error.message.includes('expected an Object')) {
+      Alert.alert('Error', 'Crash telah di suppress');
+    } else defaultHandler(error, isFatal);
+  }
+});
 
 type Screens = {
   name: keyof RootStackNavigator;
