@@ -29,7 +29,7 @@ const FallbackComponent = (props: Props) => {
           onPress={() => {
             reloadAppAsync();
           }}>
-          <Text style={[styles.buttonText, globalStyles.text]}>Coba kembali</Text>
+          <Text style={[styles.buttonText, globalStyles.text]}>Reload aplikasi</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: 'red' }]}
