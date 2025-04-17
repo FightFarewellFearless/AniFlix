@@ -26,8 +26,7 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import Orientation, { OrientationType } from 'react-native-orientation-locker';
-import ExpoOrientation from 'expo-screen-orientation';
+import ExpoOrientation, { OrientationChangeEvent } from 'expo-screen-orientation';
 import ReAnimated, {
   runOnJS,
   StretchInX,
@@ -202,20 +201,20 @@ function Video(props: Props) {
     };
   });
 
-  const enterFullscreen = useCallback((landscape?: OrientationType) => {
+  const enterFullscreen = useCallback((landscape?: OrientationChangeEvent) => {
     // videoRef.current?.presentFullscreenPlayer();
     if (landscape === undefined) {
-      Orientation.lockToLandscape();
+      ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE);
     } else {
-      switch (landscape) {
-        case 'LANDSCAPE-LEFT':
-          Orientation.lockToLandscapeLeft();
+      switch (landscape.orientationInfo.orientation) {
+        case ExpoOrientation.Orientation.LANDSCAPE_LEFT:
+          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE_LEFT);
           break;
-        case 'LANDSCAPE-RIGHT':
-          Orientation.lockToLandscapeRight();
+        case ExpoOrientation.Orientation.LANDSCAPE_RIGHT:
+          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE_RIGHT);
           break;
         default:
-          Orientation.lockToLandscape();
+          ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.LANDSCAPE);
       }
     }
     SystemNavigationBar.fullScreen(true);
@@ -228,15 +227,18 @@ function Video(props: Props) {
     SystemNavigationBar.fullScreen(false);
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-    Orientation.lockToPortrait();
+    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
     setFullscreen(false);
   }, []);
 
   const orientationDidChange = useCallback(
-    (orientation: OrientationType) => {
-      if (orientation === 'PORTRAIT') {
+    (orientation: OrientationChangeEvent) => {
+      if (
+        orientation.orientationInfo.orientation === ExpoOrientation.Orientation.PORTRAIT_DOWN ||
+        orientation.orientationInfo.orientation === ExpoOrientation.Orientation.PORTRAIT_UP
+      ) {
         exitFullscreen();
-      } else if (orientation !== 'UNKNOWN') {
+      } else if (orientation.orientationInfo.orientation === ExpoOrientation.Orientation.UNKNOWN) {
         enterFullscreen(orientation);
       }
     },
@@ -244,15 +246,15 @@ function Video(props: Props) {
   );
 
   const willUnmountHandler = useCallback(() => {
-    Orientation.removeDeviceOrientationListener(orientationDidChange);
-    Orientation.lockToPortrait();
+    ExpoOrientation.removeOrientationChangeListeners();
+    ExpoOrientation.lockAsync(ExpoOrientation.OrientationLock.PORTRAIT);
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-  }, [orientationDidChange]);
+  }, []);
 
   // didMount and willUnmount
   useEffect(() => {
-    Orientation.addDeviceOrientationListener(orientationDidChange);
+    ExpoOrientation.addOrientationChangeListener(orientationDidChange);
 
     return () => {
       willUnmountHandler();
