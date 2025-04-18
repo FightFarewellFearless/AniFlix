@@ -124,12 +124,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
-            resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
             archivesBaseName = "anime"
-        }
-        releaseStaging {
-            resValue "string", "CodePushDeploymentKey", '"L2i2Zo9RWLHzv2PVtkWjvFZXto1dntqmObnov"'
-            matchingFallbacks = ['release']
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -139,7 +134,6 @@ android {
             shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             archivesBaseName = "anime"
-            resValue "string", "CodePushDeploymentKey", '"2dG5lg7zBly5UF41q1hBkZUj3K31GL5nrIiQD"'
         }
     }
 }
