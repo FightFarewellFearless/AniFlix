@@ -13,7 +13,7 @@ import {
 import DeviceInfo from 'react-native-device-info';
 import useGlobalStyles from '../../assets/style';
 
-export type Props = { error: Error; resetError: () => void };
+export type Props = { error: Error };
 
 const FallbackComponent = (props: Props) => {
   const globalStyles = useGlobalStyles();

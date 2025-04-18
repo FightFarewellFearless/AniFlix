@@ -5,16 +5,18 @@ import {
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Alert, Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
 import Blank from './src/component/misc/Blank';
+import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
+import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { Movies } from './src/utils/animeMovie';
@@ -46,14 +48,17 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
 );
 
 // TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
-const defaultHandler = ErrorUtils.getGlobalHandler();
-ErrorUtils.setGlobalHandler((error, isFatal) => {
-  if (error instanceof Error) {
-    if (error.message.includes('expected an Object')) {
-      Alert.alert('Error', 'Crash telah di suppress');
-    } else defaultHandler(error, isFatal);
-  }
-});
+if (!__DEV__) {
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    if (error instanceof Error && isFatal) {
+      console.error('[Suppressed Error]:', error);
+      if (error.message.includes('Value is undefined, expected an Object')) {
+        return;
+      }
+      replaceAllWith('ErrorScreen', { error });
+    }
+  });
+}
 
 type Screens = {
   name: keyof RootStackNavigator;
@@ -76,6 +81,10 @@ const screens: Screens = [
     name: 'Blank',
     component: withSuspense(Blank),
     options: { animation: 'none', presentation: 'transparentModal' },
+  },
+  {
+    name: 'ErrorScreen',
+    component: ErrorScreen,
   },
 ];
 
@@ -130,6 +139,7 @@ function App() {
               [movieParamsState],
             )}>
             <NavigationContainer
+              ref={navigationRef}
               theme={
                 colorScheme === 'dark'
                   ? {

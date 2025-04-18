@@ -63,6 +63,7 @@ type RootStackNavigator = {
     type: 'AnimeList' | 'MovieList';
   };
   Blank: undefined;
+  ErrorScreen: { error: Error };
 };
 
 type UtilsStackNavigator = {
