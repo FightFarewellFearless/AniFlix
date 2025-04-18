@@ -4,7 +4,7 @@
   <img src="./android/app/src/main/res/playstore-icon.png" width="250" height="250" alt="logo aplikasi">
 </p>
 
-[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.77-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
+[![built with Codeium](https://codeium.com/badges/main)](https://codeium.com/badges/main) ![GitHub top language](https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix) ![license](https://img.shields.io/github/license/FightFarewellFearless/AniFlix) ![Built with react-native](https://img.shields.io/badge/React%20Native-v0.79-blue.svg?style=flat&logo=react) ![Versi terbaru](https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru)
 
 
 
@@ -14,9 +14,9 @@ Aplikasi streaming anime gratis tanpa iklan, open source!
 
 ## Screenshots
 
-| Home screen | Anime detail | Anime list |
+| Home screen | Anime detail | Anime list | Video |
 |--------------|--------------|--------------|
-| ![Home screen](./githubAssets/SS1.jpeg) | ![Anime detail](./githubAssets/SS2.jpeg) | ![Anime list](./githubAssets/SS3.jpeg) |
+| ![Home screen](./githubAssets/SS1.jpeg) | ![Anime detail](./githubAssets/SS2.jpeg) | ![Anime list](./githubAssets/SS3.jpeg) | ![Video](./githubAssets/SS4.jpeg) |
 
 ## Lengkap dan terbaru!
 
