@@ -668,7 +668,6 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <VideoPlayer
-              key={data.streamingLink}
               title={data.title}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}

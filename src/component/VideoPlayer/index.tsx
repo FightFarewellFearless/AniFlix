@@ -85,18 +85,19 @@ function VideoPlayer({
     },
   );
 
-  useEffect(() => {
-    return () => {
-      player.release();
-    };
-  }, [player]);
-
   const seekBarProgress = useSharedValue(0);
   const seekBarProgressDisabled = useSharedValue(false);
 
   const pressableShowControlsLocation = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const [isBuffering, setIsBuffering] = useState(true);
+  useEffect(() => {
+    setIsBuffering(true);
+    seekBarProgress.set(0);
+    currentDurationSecond.set(0);
+    totalDurationSecond.set(0);
+  }, [currentDurationSecond, seekBarProgress, streamingURL, totalDurationSecond]);
+
   const [isError, setIsError] = useState(false);
 
   const [paused, setPaused] = useState(isPaused ?? false);
