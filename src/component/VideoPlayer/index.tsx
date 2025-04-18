@@ -85,6 +85,12 @@ function VideoPlayer({
     },
   );
 
+  useEffect(() => {
+    return () => {
+      player.release();
+    };
+  }, [player]);
+
   const seekBarProgress = useSharedValue(0);
   const seekBarProgressDisabled = useSharedValue(false);
 
