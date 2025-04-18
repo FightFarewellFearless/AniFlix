@@ -669,6 +669,7 @@ function Video(props: Props) {
           data.streamingType === 'raw' ? (
             <VideoPlayer
               title={data.title}
+              thumbnailURL={data.thumbnailUrl}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}
               // @ts-expect-error

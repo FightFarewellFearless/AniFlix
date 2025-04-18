@@ -34,6 +34,7 @@ import SeekBar from './SeekBar';
 
 type VideoPlayerProps = {
   title: string;
+  thumbnailURL?: string;
   streamingURL: string;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView>;
@@ -50,6 +51,7 @@ export default memo(VideoPlayer);
 
 function VideoPlayer({
   title,
+  thumbnailURL,
   streamingURL,
   style,
   videoRef,
@@ -72,6 +74,7 @@ function VideoPlayer({
       metadata: {
         title,
         artist: 'AniFlix',
+        artwork: thumbnailURL,
       },
       headers: {
         'User-Agent': deviceUserAgent,
