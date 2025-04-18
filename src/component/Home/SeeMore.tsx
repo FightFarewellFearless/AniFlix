@@ -1,5 +1,5 @@
-import { StackScreenProps } from '@react-navigation/stack';
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
-import { HomeStackNavigator } from '../../types/navigation';
+import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 
-type Props = StackScreenProps<HomeStackNavigator, 'SeeMore'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
 
 function SeeMore(props: Props) {
   const { paramsState: animeData, setParamsState: setAnimeData } =
@@ -45,8 +45,9 @@ function SeeMore(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <FlashList
-        drawDistance={500}
+      <LegendList
+        recycleItems
+        drawDistance={250}
         data={
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (
             | NewAnimeList
@@ -71,13 +72,13 @@ function SeeMore(props: Props) {
           )
         }
         numColumns={numColumns}
-        estimatedItemSize={LIST_HEIGHT}
+        estimatedItemSize={LIST_HEIGHT + 5} // 5: the marginVertical from ListAnimeComponent
         ListFooterComponent={
           <>
             {isLoading && <ActivityIndicator />}
 
             <TouchableOpacity
-              style={styles.LihatLebih}
+              style={styles.seeMoreButton}
               onPress={async () => {
                 if (isLoading) {
                   return;
@@ -113,7 +114,7 @@ function SeeMore(props: Props) {
 }
 
 const styles = StyleSheet.create({
-  LihatLebih: {
+  seeMoreButton: {
     backgroundColor: '#007bff', // Bootstrap primary button color
     paddingHorizontal: 16,
     paddingVertical: 8,

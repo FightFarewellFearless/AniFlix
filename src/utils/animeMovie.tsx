@@ -58,7 +58,13 @@ export async function getLatestMovie(signal?: AbortSignal, page?: number) {
   return movies;
 }
 
-export async function getMovieDetail(url: string, signal?: AbortSignal): Promise<MovieDetail> {
+export async function getMovieDetail(
+  url: string,
+  signal?: AbortSignal,
+): Promise<MovieDetail | { isError: true }> {
+  if (isError) {
+    return { isError };
+  }
   let err;
   const response = await fetch(url, {
     signal,
@@ -118,7 +124,22 @@ export async function getMovieDetail(url: string, signal?: AbortSignal): Promise
 }
 
 type LinksType = { title: string; url: string }[];
-export async function getStreamingDetail(url: string, signal?: AbortSignal) {
+export type MovieStreamingDetail = {
+  title: string;
+  thumbnailUrl: string;
+  episodeData: { animeDetail: string; next: undefined; previous: undefined };
+  streamingType: string;
+  streamingLink: string;
+  resolution: string;
+  resolutionRaw: { resolution: string; dataContent: string }[];
+};
+export async function getStreamingDetail(
+  url: string,
+  signal?: AbortSignal,
+): Promise<MovieStreamingDetail | { isError: true }> {
+  if (isError) {
+    return { isError };
+  }
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
@@ -327,7 +348,7 @@ async function getPogoRawData(pogodata: string, signal?: AbortSignal) {
   return text.split("src: '")[1].split("'")[0];
 }
 
-async function getAceRawData(acedata: string, signal?: AbortSignal) {
+async function getAceRawData(acedata: string, signal?: AbortSignal): Promise<string | false> {
   const url = cheerio.load(Buffer.from(acedata, 'base64').toString('utf8'))('iframe').attr('src')!;
   const response = await fetch(url, {
     signal,
@@ -392,7 +413,7 @@ async function getAceRawData(acedata: string, signal?: AbortSignal) {
       resAceFileText.split('sources: JSON.parse(atob("')[1].split('"')[0],
       'base64',
     ).toString('utf8'),
-  )[0].file;
+  )[0].file as string;
   return 'https://acefile.co' + streamLink;
 }
 
@@ -418,6 +439,9 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
 }
 
 export async function searchMovie(query: string, signal?: AbortSignal) {
+  if (isError) {
+    return { isError };
+  }
   const response = await fetch('https://154.26.137.28/?s=' + encodeURIComponent(query), {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
@@ -445,6 +469,19 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   useEffect(() => {
     isError = false;
   }, []);
+  useEffect(() => {
+    if (isWebViewShown) {
+      const timeout = setTimeout(() => {
+        isError = true;
+        setIsWebViewShown(false);
+        onAnimeMovieReady();
+        ToastAndroid.show('Gagal menambil data movie: timeout', ToastAndroid.SHORT);
+      }, 10_000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
   return (
     <View style={{ height: 0, display: 'none' }}>
       {isWebViewShown && (

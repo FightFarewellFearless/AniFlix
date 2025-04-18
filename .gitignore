@@ -33,6 +33,7 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+.kotlin/
 
 # node.js
 #
@@ -86,3 +87,5 @@ dist
 
 # etc
 .git*
+!.github
+!.gitignore

@@ -1,18 +1,27 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Provider } from 'react-redux';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import ErrorBoundary from 'react-native-error-boundary';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
-import store from './src/misc/reduxStore';
-import { RootStackNavigator } from './src/types/navigation';
-import { enableFreeze } from 'react-native-screens';
-import { CFBypassIsOpen, setWebViewOpen } from './src/utils/CFBypass';
+import Blank from './src/component/misc/Blank';
+import ErrorScreen from './src/component/misc/ErrorScreen';
+import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
+import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
+import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
+import { EpisodeBaruHome } from './src/types/anime';
+import { RootStackNavigator } from './src/types/navigation';
+import { Movies } from './src/utils/animeMovie';
+import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
+import { storage } from './src/utils/DatabaseManager';
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
@@ -24,11 +33,13 @@ const MovieDetail = lazy(() => import('./src/component/MovieDetail'));
 const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
 const Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
 const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
+const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
 
 SplashScreen.preventAutoHideAsync();
 enableFreeze(true);
+enableScreens(true);
 
-const Stack = createStackNavigator<RootStackNavigator>();
+const Stack = createNativeStackNavigator<RootStackNavigator>();
 
 const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   <SuspenseLoading>
@@ -36,21 +47,57 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   </SuspenseLoading>
 );
 
-const screens = [
-  { name: 'Home', component: withSuspense(Home) },
-  { name: 'AnimeDetail', component: withSuspense(AniDetail) },
-  { name: 'MovieDetail', component: withSuspense(MovieDetail) },
-  { name: 'FromUrl', component: withSuspense(FromUrl) },
-  { name: 'Video', component: withSuspense(Video) },
-  { name: 'connectToServer', component: withSuspense(Connecting) },
-  { name: 'NeedUpdate', component: withSuspense(NeedUpdate) },
-  { name: 'Blocked', component: withSuspense(Blocked) },
-  { name: 'FailedToConnect', component: withSuspense(FailedToConnect) },
-] as const;
+// TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
+if (!__DEV__) {
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    if (error instanceof Error && isFatal) {
+      console.error('[Suppressed Error]:', error);
+      if (error.message.includes('Value is undefined, expected an Object')) {
+        return;
+      }
+      replaceAllWith('ErrorScreen', { error });
+    }
+  });
+}
+
+type Screens = {
+  name: keyof RootStackNavigator;
+  component: (props: any) => React.JSX.Element;
+  options?: NativeStackNavigationOptions;
+}[];
+
+const screens: Screens = [
+  { name: 'Home', component: withSuspense(Home), options: undefined },
+  { name: 'AnimeDetail', component: withSuspense(AniDetail), options: undefined },
+  { name: 'MovieDetail', component: withSuspense(MovieDetail), options: undefined },
+  { name: 'FromUrl', component: withSuspense(FromUrl), options: undefined },
+  { name: 'Video', component: withSuspense(Video), options: undefined },
+  { name: 'connectToServer', component: withSuspense(Connecting), options: undefined },
+  { name: 'NeedUpdate', component: withSuspense(NeedUpdate), options: undefined },
+  { name: 'Blocked', component: withSuspense(Blocked), options: undefined },
+  { name: 'FailedToConnect', component: withSuspense(FailedToConnect), options: undefined },
+  { name: 'SeeMore', component: withSuspense(SeeMore), options: { headerShown: true } },
+  {
+    name: 'Blank',
+    component: withSuspense(Blank),
+    options: { animation: 'none', presentation: 'transparentModal' },
+  },
+  {
+    name: 'ErrorScreen',
+    component: ErrorScreen,
+  },
+];
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
+
+  const [paramsState, setParamsState] = useState<EpisodeBaruHome>({
+    jadwalAnime: {},
+    newAnime: [],
+  });
+  const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
+
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
 
@@ -62,11 +109,13 @@ function App() {
   }, []);
 
   useEffect(() => {
-    AsyncStorage.getItem('colorScheme').then(value => {
-      if (value !== 'auto' && (value === 'light' || value === 'dark')) {
-        Appearance.setColorScheme(value);
-      }
-    });
+    const colorSchemeValue = storage.getString('colorScheme');
+    if (
+      colorSchemeValue !== 'auto' &&
+      (colorSchemeValue === 'light' || colorSchemeValue === 'dark')
+    ) {
+      Appearance.setColorScheme(colorSchemeValue);
+    }
     StatusBar.setHidden(false);
     SplashScreen.hideAsync();
   }, []);
@@ -77,46 +126,60 @@ function App() {
   }, [colorScheme]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer
-        theme={
-          colorScheme === 'dark'
-            ? {
-                ...DarkTheme,
-                colors: {
-                  ...DarkTheme.colors,
-                  background: '#0A0A0A',
-                },
-              }
-            : undefined
-        }>
-        <Provider store={store}>
-          <Stack.Navigator
-            initialRouteName="connectToServer"
-            screenOptions={{
-              headerShown: false,
-            }}>
-            {screens.map(({ name, component }) => (
-              <Stack.Screen key={name} name={name}>
-                {component}
-              </Stack.Screen>
-            ))}
-          </Stack.Navigator>
-        </Provider>
-        <CFBypassIsOpen.Provider value={{ isOpen, url: cfUrl, setIsOpen }}>
-          {isOpen && (
-            <Suspense>
-              <CFBypassWebView />
-            </Suspense>
-          )}
-        </CFBypassIsOpen.Provider>
-        {__DEV__ && (
-          <View style={styles.Dev} pointerEvents="none">
-            <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-          </View>
-        )}
-      </NavigationContainer>
-    </GestureHandlerRootView>
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <EpisodeBaruHomeContext
+          value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
+          <MovieListHomeContext
+            value={useMemo(
+              () => ({
+                paramsState: movieParamsState,
+                setParamsState: setMovieParamsState,
+              }),
+              [movieParamsState],
+            )}>
+            <NavigationContainer
+              ref={navigationRef}
+              theme={
+                colorScheme === 'dark'
+                  ? {
+                      ...DarkTheme,
+                      colors: {
+                        ...DarkTheme.colors,
+                        background: '#0A0A0A',
+                      },
+                    }
+                  : undefined
+              }>
+              <Stack.Navigator
+                initialRouteName="connectToServer"
+                screenOptions={{
+                  headerShown: false,
+                }}>
+                {screens.map(({ name, component, options }) => (
+                  <Stack.Screen key={name} name={name} options={options}>
+                    {component}
+                  </Stack.Screen>
+                ))}
+              </Stack.Navigator>
+              <CFBypassIsOpenContext
+                value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                {isOpen && (
+                  <Suspense>
+                    <CFBypassWebView />
+                  </Suspense>
+                )}
+              </CFBypassIsOpenContext>
+              {__DEV__ && (
+                <View style={styles.Dev} pointerEvents="none">
+                  <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                </View>
+              )}
+            </NavigationContainer>
+          </MovieListHomeContext>
+        </EpisodeBaruHomeContext>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

@@ -1,6 +1,5 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, {
   memo,
   useCallback,
@@ -33,7 +32,7 @@ import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import { LinearGradient } from 'expo-linear-gradient';
 import ImageColors from 'react-native-image-colors';
 import Reanimated, {
@@ -45,15 +44,14 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import { useDispatch } from 'react-redux';
 import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
 import { Movies, searchMovie } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
+import { storage } from '../../utils/DatabaseManager';
 
 // Remove reanimated animated component creation for TextInput and Pressable
 // Replace:
@@ -67,8 +65,8 @@ const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpa
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<HomeNavigator, 'Search'>,
-  StackScreenProps<RootStackNavigator>
+  NativeBottomTabScreenProps<HomeNavigator, 'Search'>,
+  NativeStackScreenProps<RootStackNavigator>
 >;
 
 function Search(props: Props) {
@@ -94,6 +92,7 @@ function Search(props: Props) {
 
   const searchText = useRef<string>('');
   const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
+  const [listAnimeLoading, setListAnimeLoading] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [loading, setLoading] = useState(false);
@@ -112,11 +111,11 @@ function Search(props: Props) {
     true,
     result => JSON.parse(result) as string[],
   );
-  const dispatchSettings = useDispatch<AppDispatch>();
 
   const textInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
+    setListAnimeLoading(true);
     AnimeAPI.listAnime(undefined, animeData => {
       startTransition(() => {
         setListAnime(animeData);
@@ -124,9 +123,11 @@ function Search(props: Props) {
     })
       .then(animeData => {
         setListAnime(animeData);
+        setListAnimeLoading(false);
       })
       .catch(() => {
         setListAnime(null);
+        setListAnimeLoading(false);
       });
   }, []);
 
@@ -160,19 +161,16 @@ function Search(props: Props) {
     Promise.all([AnimeAPI.search(searchText.current), searchMovie(searchText.current)])
       .then(([animeResult, movieResult]) => {
         setCurrentSearchQuery(searchText.current);
-        setMovieData(movieResult);
+        if (!('isError' in movieResult)) {
+          setMovieData(movieResult);
+        }
         setData(animeResult);
         setLoading(false);
         if (searchHistory.includes(searchText.current)) {
           searchHistory.splice(searchHistory.indexOf(searchText.current), 1);
         }
         searchHistory.unshift(searchText.current);
-        dispatchSettings(
-          setDatabase({
-            target: 'searchHistory',
-            value: JSON.stringify(searchHistory),
-          }),
-        );
+        storage.set('searchHistory', JSON.stringify(searchHistory));
       })
       .catch(err => {
         const errMessage =
@@ -182,7 +180,7 @@ function Search(props: Props) {
         Alert.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [dispatchSettings, searchHistory]);
+  }, [searchHistory]);
 
   const onPressIn = useCallback(() => {
     Animated.timing(searchButtonOpacity, {
@@ -245,7 +243,7 @@ function Search(props: Props) {
     setSearchButtonWidth(layout.nativeEvent.layout.width);
   }, []);
 
-  function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
+  function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
       textInputRef.current?.setNativeProps({ text: '' });
@@ -261,7 +259,7 @@ function Search(props: Props) {
     );
   }
   const listAnimeRenderer = useCallback(
-    ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
+    ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
       return (
         <TouchableOpacity
           onPress={() => {
@@ -310,37 +308,43 @@ function Search(props: Props) {
           onPressIn={onPressIn}
           onPressOut={onPressOut}
           style={[styles.searchButton, pressableAnimationStyle]}>
-          <Text allowFontScaling={false} style={{ color: '#272727', paddingHorizontal: 12 }}>
-            <Icon name="search" style={{ color: '#413939' }} size={17} />
+          <Text
+            allowFontScaling={false}
+            style={{ color: '#141414', paddingHorizontal: 12, fontWeight: 'bold' }}>
+            <Icon name="search" size={17} />
             Cari
           </Text>
         </AnimatedPressable>
       </View>
 
-      {listAnime?.length === 0 && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
-          <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
-        </View>
-      )}
+      {listAnime?.length === 0 ||
+        (listAnimeLoading && (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
+            <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
+          </View>
+        ))}
 
       {data === null && movieData === null && listAnime !== null ? (
-        <View style={{ flex: listAnime?.length === 0 ? 0 : 1 }}>
+        <View style={{ flex: listAnime?.length === 0 || listAnimeLoading ? 0 : 1 }}>
           <Text
             style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
             Total anime: {listAnime.length} (belum termasuk movie)
           </Text>
-          {isPending && (
+          {(isPending || listAnimeLoading) && (
             <ActivityIndicator
               style={{ position: 'absolute' }}
               color={colorScheme === 'dark' ? 'white' : 'black'}
             />
           )}
-          {listAnime.length > 0 && (
-            <FlashList
-              estimatedItemSize={49}
+          {listAnime.length > 0 && !listAnimeLoading && (
+            <LegendList
+              recycleItems
+              maintainVisibleContentPosition
+              estimatedItemSize={50}
               drawDistance={700}
               data={listAnime}
+              key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
               keyExtractor={(_, index) => index.toString()}
               extraData={styles}
@@ -351,6 +355,7 @@ function Search(props: Props) {
         <TouchableOpacity
           onPress={() => {
             setListAnime([]);
+            setListAnimeLoading(true);
             AnimeAPI.listAnime(undefined, animeData => {
               startTransition(() => {
                 setListAnime(animeData);
@@ -358,9 +363,11 @@ function Search(props: Props) {
             })
               .then(animeData => {
                 setListAnime(animeData);
+                setListAnimeLoading(false);
               })
               .catch(() => {
                 setListAnime(null);
+                setListAnimeLoading(false);
               });
           }}
           style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
@@ -404,18 +411,20 @@ function Search(props: Props) {
       {/* SEARCH HISTORY VIEW */}
       {searchHistoryDisplay && (
         <Reanimated_KeyboardAvoidingView
+          behavior="height"
           entering={FadeInUp.duration(700)}
           exiting={FadeOutDown}
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
-            <FlashList
-              drawDistance={500}
+            <LegendList
+              recycleItems
+              drawDistance={250}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
               extraData={styles}
               renderItem={renderSearchHistory}
-              estimatedItemSize={32}
+              estimatedItemSize={47}
               ItemSeparatorComponent={() => (
                 <View
                   pointerEvents="none"
@@ -463,7 +472,6 @@ function HistoryList({
   data: string[];
 }) {
   const globalStyles = useGlobalStyles();
-  const dispatch = useDispatch<AppDispatch>();
   const styles = useStyles();
   return (
     <View
@@ -483,20 +491,22 @@ function HistoryList({
         onPress={() => {
           onChangeTextFunction(item);
         }}>
-        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>{item}</Text>
+        <View
+          style={{ justifyContent: 'center', alignItems: 'center', flex: 1, flexDirection: 'row' }}>
+          <Icon name="history" size={20} style={{ color: '#00c7a6' }} />
+          <Text style={[globalStyles.text, { fontWeight: 'bold', flex: 1, textAlign: 'center' }]}>
+            {item}
+          </Text>
         </View>
         <TouchableOpacity
           hitSlop={14}
           onPress={() => {
-            dispatch(
-              setDatabase({
-                target: 'searchHistory',
-                value: JSON.stringify(searchHistory.filter((_, i) => i !== index)),
-              }),
+            storage.set(
+              'searchHistory',
+              JSON.stringify(searchHistory.filter((_, i) => i !== index)),
             );
           }}>
-          <Icon name="close" size={25} style={{ color: '#ff0f0f' }} />
+          <Icon name="times" size={25} style={{ color: '#ff0f0f' }} />
         </TouchableOpacity>
       </TouchableOpacity>
     </View>
@@ -628,19 +638,23 @@ function useStyles() {
           fontSize: 17,
         },
         loadingView: {
-          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
           position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          height: 40,
+          bottom: 10,
+          left: 0,
+          right: 0,
           justifyContent: 'center',
           alignItems: 'center',
+        },
+        loadingText: {
+          fontWeight: 'bold',
+          color: colorScheme === 'dark' ? '#53c412' : 'black',
+          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f0f0f0',
+          padding: 12,
           zIndex: 2,
-          borderRadius: 3,
+          borderRadius: 12,
           borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
           borderWidth: 1.3,
         },
-        loadingText: {},
         searchInput: {
           height: 42,
           borderWidth: 1,
@@ -660,7 +674,7 @@ function useStyles() {
         searchButton: {
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#ff8c00',
+          backgroundColor: '#00c7a6',
           borderRadius: 8,
           marginRight: 12,
           paddingHorizontal: 12,
@@ -739,7 +753,7 @@ function useStyles() {
         },
         searchHistoryContainer: {
           position: 'absolute',
-          top: '10%',
+          top: 42 + 12,
           left: 12,
           right: 12,
           height: '80%',
@@ -758,7 +772,7 @@ function useStyles() {
           padding: 4,
         },
         searchHistoryItemContainer: {
-          backgroundColor: colorScheme === 'light' ? '#00c0c7' : '#007c7c',
+          backgroundColor: colorScheme === 'light' ? '#e3e5e6' : '#252525',
           borderRadius: 9,
           marginVertical: 3,
         },

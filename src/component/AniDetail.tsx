@@ -1,5 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -23,12 +22,13 @@ import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
+import { storage } from '../utils/DatabaseManager';
 import { complementHex, darkenHexColor } from '../utils/hexColors';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
-type Props = StackScreenProps<RootStackNavigator, 'AnimeDetail'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 function AniDetail(props: Props) {
   const colorScheme = useColorScheme();
   return (
@@ -80,23 +80,28 @@ function AniDetailCopilot(props: Props) {
   }, [data.thumbnailUrl]);
 
   const isCopilotAlreadyStopped = useRef(false);
-  const copilotTimeout = useRef<NodeJS.Timeout>();
+  const copilotTimeout = useRef<NodeJS.Timeout>(null);
   useEffect(() => {
     copilotEvents.off('stop');
     copilotEvents.on('stop', () => {
       isCopilotAlreadyStopped.current = true;
     });
-    clearTimeout(copilotTimeout.current);
+    if (copilotTimeout.current) clearTimeout(copilotTimeout.current);
     copilotTimeout.current = setTimeout(async () => {
       if (
         isCopilotAlreadyStopped.current === false &&
-        (await AsyncStorage.getItem('copilot.watchLater_firstTime')) === 'true' &&
+        storage.getString('copilot.watchLater_firstTime') === 'true' &&
         !isInList
       ) {
         start();
-        await AsyncStorage.setItem('copilot.watchLater_firstTime', 'false');
+        storage.set('copilot.watchLater_firstTime', 'false');
       }
     }, 500);
+    return () => {
+      copilotTimeout.current && clearTimeout(copilotTimeout.current);
+      copilotEvents.off('stop');
+      isCopilotAlreadyStopped.current = false;
+    };
   }, [start, copilotEvents, isInList]);
 
   const colorScheme = useColorScheme();
@@ -202,8 +207,9 @@ function AniDetailCopilot(props: Props) {
       </ImageBackground>
 
       <View style={[styles.container, { backgroundColor: thumbnailColor }]}>
-        <FlashList
-          drawDistance={500}
+        <LegendList
+          recycleItems
+          drawDistance={250}
           estimatedItemSize={41}
           data={data.episodeList}
           renderItem={({ item }) => (

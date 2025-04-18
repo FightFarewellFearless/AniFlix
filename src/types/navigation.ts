@@ -1,4 +1,4 @@
-import { getStreamingDetail, MovieDetail } from '../utils/animeMovie';
+import { MovieDetail, MovieStreamingDetail } from '../utils/animeMovie';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {
@@ -30,7 +30,7 @@ type RootStackNavigator = {
     };
   };
   Video: {
-    data: AniStreaming | Awaited<ReturnType<typeof getStreamingDetail>>;
+    data: AniStreaming | MovieStreamingDetail;
     link: string;
     historyData?: {
       resolution: string | undefined;
@@ -59,6 +59,11 @@ type RootStackNavigator = {
   Maintenance: {
     message?: string;
   };
+  SeeMore: {
+    type: 'AnimeList' | 'MovieList';
+  };
+  Blank: undefined;
+  ErrorScreen: { error: Error };
 };
 
 type UtilsStackNavigator = {
@@ -70,22 +75,9 @@ type UtilsStackNavigator = {
   SupportDev: undefined;
 };
 
-type HomeStackNavigator = {
-  SeeMore: {
-    type: 'AnimeList' | 'MovieList';
-  };
-  HomeList: undefined;
-};
-
 type SayaDrawerNavigator = {
   History: undefined;
   WatchLater: undefined;
 };
 
-export type {
-  HomeNavigator,
-  HomeStackNavigator,
-  RootStackNavigator,
-  SayaDrawerNavigator,
-  UtilsStackNavigator,
-};
+export type { HomeNavigator, RootStackNavigator, SayaDrawerNavigator, UtilsStackNavigator };

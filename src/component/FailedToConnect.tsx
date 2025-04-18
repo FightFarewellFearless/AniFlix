@@ -1,31 +1,28 @@
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
-import {
-  Linking,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Linking, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import useGlobalStyles, { darkText } from '../assets/style';
+import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 
-type Props = StackScreenProps<RootStackNavigator, 'FailedToConnect'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
 function FailedToConnect(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
+
   const openLink = async () => {
     const url = 'https://github.com/FightFarewellFearless/AniFlix/issues/new';
-    if (await Linking.canOpenURL(url)) {
-      Linking.openURL(url);
-    } else {
-      ToastAndroid.show('https tidak didukung!', ToastAndroid.SHORT);
-    }
+    Linking.canOpenURL(url)
+      .then(supported => {
+        if (supported) {
+          return Linking.openURL(url);
+        } else {
+          console.log("Don't know how to open URI: " + url);
+        }
+      })
+      .catch(err => console.error('An error occurred', err));
   };
 
   const tryagain = () => {
@@ -33,107 +30,159 @@ function FailedToConnect(props: Props) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-        }}>
-        <Icon
-          name="server-network-off"
-          style={[
-            globalStyles.text,
-            {
-              textShadowColor: 'red',
-              textShadowOffset: { width: 1, height: 0 },
-              textShadowRadius: 5,
-            },
-          ]}
-          size={40}
-        />
-        <Text style={[{ textAlign: 'center', fontWeight: '400' }, globalStyles.text]}>
-          Gagal terhubung ke server{'\n'}
-          Pastikan kamu terhubung ke internet dan coba lagi.{'\n'}
-          Jika masalah berlanjut, silahkan laporkan ke github issue: {'\n'}{' '}
-          <Text onPress={openLink} style={{ color: '#0066CC' }}>
-            Buat issues baru di github
-          </Text>
-          {'\n'} Atau join discord dengan klik tombol "Join discord" dibawah
+    <View style={[styles.container]}>
+      <View style={styles.content}>
+        <Icon name="server-network-off" size={60} color="#E57373" style={styles.icon} />
+        <Text style={[styles.title, globalStyles.text]}>Koneksi Gagal</Text>
+        <Text style={[styles.subtitle, globalStyles.text]}>
+          Tidak dapat terhubung ke server. Harap periksa koneksi internet Anda dan coba lagi.
         </Text>
-        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
-          Jika kamu menggunakan DNS pastikan untuk tidak menggunakan versi "security" DNS tersebut{' '}
-          (jika ada).
-        </Text>
-        <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
-          Direkomendasikan menggunakan DNS 1.1.1.1 atau 8.8.8.8
-        </Text>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#008a83',
-            borderRadius: 5,
-            padding: 3,
-            marginTop: 14,
-            zIndex: 1,
-            elevation: 7,
-            shadowColor: 'white',
-          }}
-          onPress={tryagain}>
-          <Text style={[{ fontSize: 17, fontWeight: 'bold' }, { color: darkText }]}>
-            <Icon name="refresh" size={17} /> Coba lagi
-          </Text>
+
+        <TouchableOpacity style={styles.retryButton} onPress={tryagain}>
+          <Icon name="refresh" size={20} color="#fff" />
+          <Text style={styles.retryButtonText}>Coba Lagi</Text>
         </TouchableOpacity>
-        <View
-          style={{
-            position: 'absolute',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            bottom: 45,
-          }}>
+
+        <View style={styles.helpSection}>
+          <Text style={[styles.helpText, globalStyles.text]}>
+            Jika masalah berlanjut, laporkan di GitHub:
+          </Text>
+          <TouchableOpacity onPress={openLink}>
+            <Text style={styles.linkText}>Buat issue baru di GitHub</Text>
+          </TouchableOpacity>
+          <Text style={[styles.helpText, globalStyles.text]}>
+            Atau bergabung dengan server Discord kami dengan mengklik tombol "Gabung Discord" di
+            bawah.
+          </Text>
+        </View>
+
+        <View style={styles.dnsSection}>
+          <Text style={[styles.dnsText, globalStyles.text]}>
+            Jika kamu menggunakan DNS, pastikan untuk tidak menggunakan DNS versi "keamanan" (jika
+            ada).
+          </Text>
+          <Text style={[styles.dnsText, globalStyles.text]}>
+            DNS yang disarankan: 1.1.1.1 atau 8.8.8.8
+          </Text>
+        </View>
+
+        <View style={styles.bottomActions}>
           <TouchableOpacity
             onPress={() => {
               Linking.openURL('https://github.com/FightFarewellFearless/AniFlix');
             }}
-            style={[styles.bottomCredits, { marginRight: 8 }]}>
-            {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-            <Icon name="github" size={43} color={globalStyles.text.color} />
-            <Text style={[globalStyles.text, { fontSize: 12 }]}> Open-Sourced on github</Text>
+            style={styles.bottomCreditButton}>
+            <Icon name="github" size={30} color={globalStyles.text.color} />
+            <Text style={[styles.bottomCreditText, globalStyles.text]}>Open-Sourced on GitHub</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
               Linking.openURL('https://discord.gg/sbTwxHb9NM');
             }}
-            style={styles.bottomCredits}>
-            {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-            <Icon name="discord" size={43} color={'#7289d9'} />
-            <Text style={[globalStyles.text, { fontSize: 12 }]}> Join discord</Text>
+            style={styles.bottomCreditButton}>
+            <Icon name="discord" size={30} color="#7289d9" />
+            <Text style={[styles.bottomCreditText, globalStyles.text]}>Gabung Discord</Text>
           </TouchableOpacity>
         </View>
       </View>
-      <Text style={[globalStyles.text, { position: 'absolute', bottom: 0 }]}>
-        {require('../../package.json').version}
+
+      <Text style={[styles.versionText, globalStyles.text]}>
+        Versi: {require('../../package.json').version}
       </Text>
     </View>
   );
 }
 
-function useStyles() {
+const useStyles = () => {
   const colorScheme = useColorScheme();
 
   return useMemo(
     () =>
       StyleSheet.create({
-        bottomCredits: {
-          flexDirection: 'row',
-          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#a8a8a8',
-          padding: 10,
-          borderRadius: 8,
+        container: {
+          flex: 1,
+          justifyContent: 'center',
           alignItems: 'center',
+        },
+        content: {
+          width: '80%',
+          alignItems: 'center',
+        },
+        icon: {
+          marginBottom: 20,
+        },
+        title: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          marginBottom: 10,
+        },
+        subtitle: {
+          fontSize: 16,
+          textAlign: 'center',
+          marginBottom: 20,
+        },
+        retryButton: {
+          backgroundColor: '#2979FF',
+          paddingVertical: 12,
+          paddingHorizontal: 24,
+          borderRadius: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 20,
+        },
+        retryButtonText: {
+          color: '#fff',
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginLeft: 8,
+        },
+        helpSection: {
+          marginBottom: 20,
+          alignItems: 'center',
+        },
+        helpText: {
+          fontSize: 14,
+          textAlign: 'center',
+          marginBottom: 5,
+        },
+        linkText: {
+          color: '#2979FF',
+          fontSize: 14,
+          textAlign: 'center',
+          textDecorationLine: 'underline',
+        },
+        dnsSection: {
+          marginBottom: 20,
+          alignItems: 'center',
+        },
+        dnsText: {
+          fontSize: 12,
+          textAlign: 'center',
+        },
+        bottomActions: {
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          width: '100%',
+          marginBottom: 20,
+        },
+        bottomCreditButton: {
+          alignItems: 'center',
+          padding: 10,
+          borderRadius: 5,
+          backgroundColor: colorScheme === 'dark' ? '#292929' : '#dbdbdb',
+        },
+        bottomCreditText: {
+          fontSize: 12,
+        },
+        versionText: {
+          position: 'absolute',
+          bottom: 10,
+          fontSize: 12,
         },
       }),
     [colorScheme],
   );
-}
+};
 
 export default React.memo(FailedToConnect);

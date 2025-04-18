@@ -1,4 +1,5 @@
-declare module '*.md' {
-  const value: string;
-  export default value;
+declare global {
+  var RNFetch: typeof fetch;
+  var ErrorUtils: import('react-native').ErrorUtils;
 }
+export {};

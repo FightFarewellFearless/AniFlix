@@ -1,4 +1,5 @@
-import { StackScreenProps, createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo } from 'react';
 import {
   ScrollView,
@@ -18,7 +19,7 @@ import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';
 import Setting from './Utilitas/Setting';
 import SupportDev from './Utilitas/SupportDev';
 
-const Stack = createStackNavigator<UtilsStackNavigator>();
+const Stack = createNativeStackNavigator<UtilsStackNavigator>();
 
 function Utils() {
   return (
@@ -47,7 +48,7 @@ function Utils() {
 
 export default memo(Utils);
 
-function ChooseScreen(props: StackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
+function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();
   return (
     <ScrollView>

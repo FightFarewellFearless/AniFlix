@@ -32,17 +32,43 @@ jobs:
       with:
         node-version: '20'
 
+    - name: extract .env file from secrets
+      run: |
+        echo "${{ secrets.DOTENV }}" > .env
+
     - name: Install dependencies
-      run: corepack enable && yarn set version 3.8.2 && yarn install
+      run: sudo corepack enable && corepack prepare yarn@3.8.2 --activate && yarn config set -H enableImmutableInstalls false && yarn install
 
     - name: Build Android APK
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assemble${{inputs.type}}
+        ./gradlew assemble${{ inputs.type }}
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
+    - name: Convert Build Type to Lowercase
+      run: echo "build_type=$(echo '${{ inputs.type }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+    - uses: actions/upload-artifact@v4
       with:
-        name: ${{inputs.type == 'Release' && 'app-release' || 'app-debug'}}
-        path: android/app/build/outputs/apk/${{inputs.type == 'Release' && 'release' || 'debug'}}/anime-${{inputs.type == 'Release' && 'release' || 'debug'}}.apk
+        name: arm64-v8a-${{ inputs.type }}
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-arm64-v8a-${{ env.build_type }}.apk
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: armeabi-v7a-${{ inputs.type }}
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-armeabi-v7a-${{ env.build_type }}.apk
+ 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: x86-${{ inputs.type }}
+        path: android/app/build/outputs/apk/${{ env.build_type }}/anime-x86-${{ env.build_type }}.apk
+ 
+    - uses: actions/upload-artifact@v4
+      with:
+         name: x86_64-${{ inputs.type }}
+         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-x86_64-${{ env.build_type }}.apk
+ 
+    - uses: actions/upload-artifact@v4
+      with:
+         name: universal-${{ inputs.type }}
+         path: android/app/build/outputs/apk/${{ env.build_type }}/anime-universal-${{ env.build_type }}.apk

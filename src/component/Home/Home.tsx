@@ -1,12 +1,12 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StackScreenProps } from '@react-navigation/stack';
-import React, { lazy, memo, useState } from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Icon5 from 'react-native-vector-icons/FontAwesome5';
-import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { EpisodeBaruHome as HomeType } from '../../types/anime';
+import {
+  createNativeBottomTabNavigator,
+  NativeBottomTabNavigationOptions,
+} from '@bottom-tabs/react-navigation';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
+import { useColorScheme } from 'react-native';
+import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { Movies } from '../../utils/animeMovie';
 import SuspenseLoading from '../misc/SuspenseLoading';
 
 const EpisodeBaruHome = lazy(() => import('./AnimeList'));
@@ -14,8 +14,8 @@ const Search = lazy(() => import('./Search'));
 const Utils = lazy(() => import('./Utils'));
 const Saya = lazy(() => import('./Saya'));
 
-type Props = StackScreenProps<RootStackNavigator, 'Home'>;
-const Tab = createBottomTabNavigator<HomeNavigator>();
+type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
+const Tab = createNativeBottomTabNavigator<HomeNavigator>();
 
 const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   <SuspenseLoading>
@@ -23,14 +23,16 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
   </SuspenseLoading>
 );
 
-const tabScreens = [
+const tabScreens: {
+  name: keyof HomeNavigator;
+  component: (props: any) => React.JSX.Element;
+  options: NativeBottomTabNavigationOptions;
+}[] = [
   {
     name: 'AnimeList',
     component: withSuspense(EpisodeBaruHome),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="home" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/home.svg'),
       tabBarLabel: 'Beranda',
     },
   },
@@ -38,19 +40,15 @@ const tabScreens = [
     name: 'Search',
     component: withSuspense(Search),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="search" style={{ color }} size={20} />
-      ),
-      tabBarLabel: 'Cari',
+      tabBarIcon: () => require('../../assets/icons/search.svg'),
+      tabBarLabel: 'Pencarian',
     },
   },
   {
     name: 'Saya',
     component: withSuspense(Saya),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon name="user" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/user.svg'),
       tabBarLabel: 'Saya',
     },
   },
@@ -58,34 +56,37 @@ const tabScreens = [
     name: 'Utilitas',
     component: withSuspense(Utils),
     options: {
-      tabBarIcon: ({ color }: { color: string }) => (
-        <Icon5 name="toolbox" style={{ color }} size={20} />
-      ),
+      tabBarIcon: () => require('../../assets/icons/tools.svg'),
     },
   },
-] as const;
+];
 
 function BottomTabs(props: Props) {
-  const [paramsState, setParamsState] = useState<HomeType>(props.route.params.data);
-  const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
-
+  const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
+  const colorScheme = useColorScheme();
+  useEffect(() => {
+    startTransition(() => {
+      setAnimeData?.(props.route.params.data);
+    });
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    <EpisodeBaruHomeContext.Provider value={{ paramsState, setParamsState }}>
-      <MovieListHomeContext.Provider
-        value={{ paramsState: movieParamsState, setParamsState: setMovieParamsState }}>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarHideOnKeyboard: true,
-          }}>
-          {tabScreens.map(({ name, component: Component, options }) => (
-            <Tab.Screen key={name} name={name} options={options}>
-              {Component}
-            </Tab.Screen>
-          ))}
-        </Tab.Navigator>
-      </MovieListHomeContext.Provider>
-    </EpisodeBaruHomeContext.Provider>
+    <Tab.Navigator
+      tabBarStyle={{
+        backgroundColor: colorScheme === 'dark' ? '#181818' : '#fff',
+      }}
+      activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
+      screenOptions={{
+        freezeOnBlur: true,
+        tabBarActiveTintColor: colorScheme === 'dark' ? '#007bff' : '#0056b3',
+      }}>
+      {tabScreens.map(({ name, component: Component, options }) => (
+        <Tab.Screen key={name} name={name} options={options}>
+          {Component}
+        </Tab.Screen>
+      ))}
+    </Tab.Navigator>
   );
 }
 

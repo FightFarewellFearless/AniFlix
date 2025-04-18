@@ -16,6 +16,9 @@ function Saya() {
       screenOptions={{
         headerTintColor: globalStyles.text.color,
         drawerType: 'front',
+        drawerStyle: {
+          width: '65%',
+        },
       }}>
       <Drawer.Screen
         name="History"

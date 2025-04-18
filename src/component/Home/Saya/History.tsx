@@ -1,6 +1,6 @@
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -11,27 +11,18 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
-import Animated, {
-  runOnJS,
-  runOnRuntime,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import { TouchableOpacity } from 'react-native'; // RNGH
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from 'react-redux';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
-import { setDatabase } from '../../../misc/reduxSlice';
-import { AppDispatch } from '../../../misc/reduxStore';
-import historyRuntime from '../../../misc/workletRuntime';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
+import { storage } from '../../../utils/DatabaseManager';
 import ImageLoading from '../../ImageLoading';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
@@ -58,9 +49,7 @@ function History(props: Props) {
     [searchKeywordDeferred, data],
   );
 
-  const flatListRef = useRef<FlashList<HistoryJSON>>();
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const flatListRef = useRef<FlashList<HistoryJSON>>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -93,22 +82,20 @@ function History(props: Props) {
 
   const scrollHandler = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      runOnRuntime(historyRuntime, (value: number) => {
-        'worklet';
-        if (value <= 100) {
-          if (scrollToTopButtonState.get() === 'show') {
-            runOnJS(hideScrollToTopButton)();
-          }
-          scrollToTopButtonState.set('hide');
-        } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
-          runOnJS(showScrollToTopButton)();
-          scrollToTopButtonState.set('show');
-        } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
-          runOnJS(hideScrollToTopButton)();
-          scrollToTopButtonState.set('hide');
+      const value = event.nativeEvent.contentOffset.y;
+      if (value <= 100) {
+        if (scrollToTopButtonState.get() === 'show') {
+          hideScrollToTopButton();
         }
-        scrollLastValue.set(value);
-      })(event.nativeEvent.contentOffset.y);
+        scrollToTopButtonState.set('hide');
+      } else if (value < scrollLastValue.get() && scrollToTopButtonState.get() === 'hide') {
+        showScrollToTopButton();
+        scrollToTopButtonState.set('show');
+      } else if (value > scrollLastValue.get() && scrollToTopButtonState.get() === 'show') {
+        hideScrollToTopButton();
+        scrollToTopButtonState.set('hide');
+      }
+      scrollLastValue.set(value);
     },
     [hideScrollToTopButton, scrollLastValue, scrollToTopButtonState, showScrollToTopButton],
   );
@@ -119,22 +106,15 @@ function History(props: Props) {
       const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
-      // console.log(Date.now() - time);
-      flatListRef.current?.prepareForLayoutAnimationRender();
-      dispatchSettings(
-        setDatabase({
-          target: 'history',
-          value: newValue,
-        }),
-      );
+      storage.set('history', newValue);
     },
-    [dispatchSettings, data],
+    [data],
   );
 
   const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
 
-  const renderFlatList = useCallback<ListRenderItem<HistoryJSON>>(
-    ({ item }) => {
+  const renderFlatList = useCallback(
+    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
       return (
         <TouchableOpacity
           // entering={FadeInRight}
@@ -227,24 +207,7 @@ function History(props: Props) {
         </TouchableOpacity>
       );
     },
-    [
-      data,
-      deleteHistory,
-      globalStyles.text,
-      props.navigation,
-      styles.deleteButton,
-      styles.deleteContainer,
-      styles.lastDuration,
-      styles.lastDurationText,
-      styles.listContainerButton,
-      styles.listDateText,
-      styles.listEpisode,
-      styles.listEpisodeAndPart,
-      styles.listImage,
-      styles.listInfoContainer,
-      styles.listTitle,
-      styles.listWatchTime,
-    ],
+    [data, deleteHistory, globalStyles.text, props.navigation, styles],
   );
 
   const scrollToTop = useCallback(() => {
@@ -264,6 +227,9 @@ function History(props: Props) {
           value={searchKeyword}
           onChangeText={setSearchKeyword}
         />
+        {searchKeyword !== searchKeywordDeferred && (
+          <ActivityIndicator color={globalStyles.text.color} />
+        )}
         <TouchableOpacity
           style={{ alignSelf: 'center' }}
           onPress={() => {
@@ -271,19 +237,27 @@ function History(props: Props) {
           }}>
           <FontAwesomeIcon name="times" size={20} color={globalStyles.text.color} />
         </TouchableOpacity>
-        {searchKeyword !== searchKeywordDeferred && (
-          <ActivityIndicator color={globalStyles.text.color} />
-        )}
       </View>
       <View style={styles.historyContainer}>
         <FlashList
-          drawDistance={500}
+          // TODO: this is a temporary fix for unresponsive RNGH's button remove when fixed
+          // showsVerticalScrollIndicator={false}
+          // drawDistance={250}
           data={filteredData}
           estimatedItemSize={160}
-          // @ts-ignore
+          // getItemLayout={(_, index) => {
+          //   return {
+          //     length: 160,
+          //     offset: 160 * index,
+          //     index,
+          //   };
+          // }}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
+          removeClippedSubviews={true}
+          // windowSize={3}
+          // initialNumToRender={0}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>

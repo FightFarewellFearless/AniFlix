@@ -11,10 +11,12 @@
     "url": "https://u.expo.dev/ccdabe85-93a9-4297-936c-074a7cf27a4a"
   },
   "android": {
-    "runtimeVersion": "0.8.3"
+    "runtimeVersion": "0.9.0"
   },
   "plugins": [
-    "expo-video"
+    ["expo-video", {
+      "supportsPictureInPicture": true
+    }]
   ],
   "experiments": {
     "reactCompiler": false

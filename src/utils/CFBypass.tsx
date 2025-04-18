@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-export const CFBypassIsOpen = createContext({
+export const CFBypassIsOpenContext = createContext({
   isOpen: false,
   url: '',
   setIsOpen: (_isOpen: boolean) => {},

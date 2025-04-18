@@ -1,5 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackActions } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,54 +12,49 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from 'react-redux';
-
-import { StackScreenProps } from '@react-navigation/stack';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
+import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
+import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { setDatabase } from '../../misc/reduxSlice';
-import { AppDispatch } from '../../misc/reduxStore';
 import { EpisodeBaruHome } from '../../types/anime';
+import { SetDatabaseTarget } from '../../types/databaseTarget';
 import { RootStackNavigator } from '../../types/navigation';
-import { SetDatabaseTarget } from '../../types/redux';
 import AnimeAPI from '../../utils/AnimeAPI';
+import animeLocalAPI from '../../utils/animeLocalAPI';
+import {
+  hasMigratedFromAsyncStorage,
+  migrateFromAsyncStorage,
+  storage,
+} from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 
-import animeLocalAPI from '../../utils/animeLocalAPI';
-
-import * as Updates from 'expo-updates';
-import runningText from '../../assets/runningText.json';
-// import { AnimeMovieWebView } from '../../utils/animeMovie';
 const AnimeMovieWebView = React.lazy(() =>
   import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
 );
 
 export const JoinDiscord = () => {
   const styles = useStyles();
-  const globalStyles = useGlobalStyles();
   return (
     <TouchableOpacity
-      onPress={() => {
-        Linking.openURL('https://discord.gg/sbTwxHb9NM');
-      }}
-      style={styles.bottomCredits}>
-      {/* <Image source={rnLogo} style={{ height: 40, width: 40 }} /> */}
-      <MaterialIcon name="discord" size={43} color={'#7289d9'} />
-      <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}> Join discord</Text>
+      onPress={() => Linking.openURL('https://discord.gg/sbTwxHb9NM')}
+      style={styles.socialButton}>
+      <MaterialIcon name="discord" size={24} color={'#7289d9'} />
+      <Text style={styles.socialButtonText}>Join Discord</Text>
     </TouchableOpacity>
   );
 };
 
-type Props = StackScreenProps<RootStackNavigator, 'connectToServer'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+
   useEffect(() => {
     Orientation.lockToPortrait();
   }, []);
@@ -72,65 +68,47 @@ function Loading(props: Props) {
   });
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const [progressValue, setProgressValue] = useState(0);
+  const progressValueAnimation = useSharedValue(0);
 
   const connectToServer = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
       props.navigation.dispatch(StackActions.replace('FailedToConnect'));
     });
-    if (jsondata === undefined) {
-      return;
-    }
-    props.navigation.dispatch(
-      StackActions.replace('Home', {
-        data: jsondata,
-      }),
-    );
+    if (jsondata === undefined) return;
+    props.navigation.dispatch(StackActions.replace('Home', { data: jsondata }));
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
+    if (!hasMigratedFromAsyncStorage) {
+      await migrateFromAsyncStorage();
+      ToastAndroid.show('Migrasi dari AsyncStorage ke MMKV berhasil', ToastAndroid.SHORT);
+    }
+
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
-    const allKeys = await AsyncStorage.getAllKeys();
+    const allKeys = storage.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
-      const data = await AsyncStorage.getItem(dataKey);
-      if (data === null) {
-        dispatchSettings(
-          setDatabase({
-            target: dataKey,
-            value: defaultDatabase[dataKey],
-          }),
-        );
+      const data = storage.getString(dataKey);
+      if (data === undefined) {
+        storage.set(dataKey, defaultDatabase[dataKey]);
         continue;
       }
-      dispatchSettings(
-        setDatabase({
-          target: dataKey,
-          value: data,
-        }),
-      );
     }
     const isInDatabase = (value: string): value is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(value);
     };
     for (const dataKey of allKeys) {
-      if (!isInDatabase(dataKey)) {
-        AsyncStorage.removeItem(dataKey);
+      if (!isInDatabase(dataKey) && !dataKey.startsWith('IGNORE_DEFAULT_DB_')) {
+        storage.delete(dataKey);
       }
     }
-  }, [dispatchSettings]);
+  }, []);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
-    const isExist = await Promise.all([
-      // TODO: delete this line in next 2 versions
-      RNFetchBlob.fs.exists(`/storage/emulated/0/Download/AniFlix-${appVersion}.apk`),
-      RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`),
-    ]);
-    if (isExist.includes(true)) {
-      const existingPath = isExist[0]
-        ? `/storage/emulated/0/Download/AniFlix-${appVersion}.apk`
-        : `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`;
-      await RNFetchBlob.fs.unlink(existingPath);
+    const downloadPath = `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`;
+    const isExist = await RNFetchBlob.fs.exists(downloadPath);
+    if (isExist) {
+      await RNFetchBlob.fs.unlink(downloadPath);
       ToastAndroid.show('Menghapus update tidak terpakai', ToastAndroid.SHORT);
     }
   }, []);
@@ -171,23 +149,28 @@ function Loading(props: Props) {
     return data[0];
   }, []);
 
+  const onAnimeMovieReady = useCallback(() => {
+    setLoadStatus(old => ({
+      ...old,
+      'Mempersiapkan data anime movie': true,
+    }));
+    setIsAnimeMovieWebViewOpen(false);
+    connectToServer();
+  }, [connectToServer]);
+
   useEffect(() => {
     (async () => {
       await prepareData();
       await deleteUnnecessaryUpdate();
-      setLoadStatus(old => {
-        return {
-          ...old,
-          'Menyiapkan database': true,
-        };
-      });
+      setLoadStatus(old => ({
+        ...old,
+        'Menyiapkan database': true,
+      }));
+
       const nativeAppVersion = await checkNativeAppVersion();
       if (nativeAppVersion === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      } else if (
-        nativeAppVersion === true ||
-        __DEV__ // skip update when app is in dev mode
-      ) {
+      } else if (nativeAppVersion === true || __DEV__) {
         const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => {
           ToastAndroid.show('Gagal mengecek update', ToastAndroid.SHORT);
           return null;
@@ -208,7 +191,6 @@ function Loading(props: Props) {
           props.navigation.dispatch(
             StackActions.replace('NeedUpdate', {
               changelog,
-              // size: "OTAUpdate.packageSize",
               size: 0,
               nativeUpdate: false,
             }),
@@ -216,19 +198,15 @@ function Loading(props: Props) {
           return;
         }
 
-        setLoadStatus(old => {
-          return {
-            ...old,
-            'Mengecek versi aplikasi': true,
-          };
-        });
+        setLoadStatus(old => ({
+          ...old,
+          'Mengecek versi aplikasi': true,
+        }));
         await fetchDomain();
-        setLoadStatus(old => {
-          return {
-            ...old,
-            'Mendapatkan domain terbaru': true,
-          };
-        });
+        setLoadStatus(old => ({
+          ...old,
+          'Mendapatkan domain terbaru': true,
+        }));
         setIsAnimeMovieWebViewOpen(true);
       } else {
         const latestVersion = nativeAppVersion.tag_name;
@@ -254,16 +232,17 @@ function Loading(props: Props) {
     fetchDomain,
   ]);
 
-  const onAnimeMovieReady = useCallback(() => {
-    setLoadStatus(old => {
-      return {
-        ...old,
-        'Mempersiapkan data anime movie': true,
-      };
-    });
-    setIsAnimeMovieWebViewOpen(false);
-    connectToServer();
-  }, [connectToServer]);
+  useEffect(() => {
+    const completedSteps = Object.values(loadStatus).filter(Boolean).length;
+    const totalSteps = Object.keys(loadStatus).length;
+    const progress = (completedSteps / totalSteps) * 100;
+    setProgressValue(progress);
+    progressValueAnimation.set(withTiming(progress));
+  }, [loadStatus, progressValueAnimation]);
+
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressValueAnimation.get()}%`,
+  }));
 
   const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
 
@@ -279,46 +258,52 @@ function Loading(props: Props) {
             />
           </Suspense>
         )}
-        <View style={styles.quotesBox}>
-          <Text
-            style={[
-              globalStyles.text,
-              { fontSize: 16, fontStyle: 'italic', textAlign: 'center', fontFamily: 'serif' },
-            ]}>
-            "{quotes.quote}"{'\n'}
-            <Text
-              style={[
-                globalStyles.text,
-                { fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginTop: 10 },
-              ]}>
-              - {quotes.by}
-            </Text>
-          </Text>
+
+        <View style={styles.header}>
+          <Text style={styles.appName}>AniFlix</Text>
+          <Text style={styles.subtitle}>Loading your anime experience...</Text>
         </View>
-        <Text style={[globalStyles.text, { fontSize: 18, marginBottom: 10 }]}>
-          Tunggu sebentar ya.. lagi loading
-        </Text>
-        {Object.entries(loadStatus).map(([key, value]) => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }} key={key}>
-            {!value ? (
-              <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
-            ) : (
-              <Icon name="check" size={14} color="green" />
-            )}
-            <Text style={globalStyles.text}>{' ' + key}</Text>
+
+        <View style={styles.quoteCard}>
+          <MaterialIcon name="format-quote-open" size={24} color={styles.quoteIcon.color} />
+          <Text style={styles.quoteText}>"{quotes.quote}"</Text>
+          <Text style={styles.quoteAuthor}>— {quotes.by}</Text>
+          <MaterialIcon
+            name="format-quote-close"
+            size={24}
+            color={styles.quoteIcon.color}
+            style={styles.quoteCloseIcon}
+          />
+        </View>
+
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <Reanimated.View style={[styles.progressFill, progressBarStyle]} />
           </View>
-        ))}
+          <Text style={styles.progressText}>{Math.round(progressValue)}%</Text>
+        </View>
+
+        <View style={styles.statusContainer}>
+          {Object.entries(loadStatus).map(([key, value]) => (
+            <View style={styles.statusItem} key={key}>
+              {value ? (
+                <MaterialIcon name="check-circle" size={20} color="#4CAF50" />
+              ) : (
+                <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
+              )}
+              <Text style={styles.statusText}>{key}</Text>
+            </View>
+          ))}
+        </View>
       </View>
+
       <View style={styles.footer}>
-        <View style={styles.buttonRow}>
+        <View style={styles.socialButtons}>
           <TouchableOpacity
             onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
-            style={[styles.bottomCredits, { marginRight: 8 }]}>
-            <Icon name="github" size={43} color={globalStyles.text.color} />
-            <Text style={[globalStyles.text, { fontSize: 12, fontWeight: 'bold' }]}>
-              {' '}
-              Open-Sourced on github
-            </Text>
+            style={styles.socialButton}>
+            <Icon name="github" size={24} color={globalStyles.text.color} />
+            <Text style={styles.socialButtonText}>GitHub</Text>
           </TouchableOpacity>
           <JoinDiscord />
         </View>
@@ -336,23 +321,10 @@ function useStyles() {
   return useMemo(
     () =>
       StyleSheet.create({
-        quotesBox: {
-          position: 'absolute',
-          top: 10,
-          padding: 20,
-          marginVertical: 20,
-          borderRadius: 10,
-          borderColor: isDark ? '#444' : '#ccc',
-          borderWidth: 1,
-          elevation: 2,
-        },
-        loadingIndicator: {
-          color: isDark ? '#BB86FC' : '#6200EE',
-        },
         container: {
           flex: 1,
-          backgroundColor: isDark ? '#141414' : '#ffffff',
-          padding: 20,
+          backgroundColor: isDark ? '#121212' : '#f5f5f5',
+          padding: 24,
           justifyContent: 'space-between',
         },
         content: {
@@ -360,30 +332,129 @@ function useStyles() {
           alignItems: 'center',
           justifyContent: 'center',
         },
+        header: {
+          alignItems: 'center',
+          marginBottom: 32,
+        },
+        appName: {
+          fontSize: 32,
+          fontWeight: 'bold',
+          color: isDark ? '#BB86FC' : '#6200EE',
+          marginBottom: 8,
+        },
+        subtitle: {
+          fontSize: 16,
+          color: isDark ? '#aaa' : '#666',
+        },
+        quoteCard: {
+          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 24,
+          width: '100%',
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        quoteIcon: {
+          color: isDark ? '#BB86FC' : '#6200EE',
+          opacity: 0.6,
+        },
+        quoteCloseIcon: {
+          alignSelf: 'flex-end',
+          marginTop: -10,
+        },
+        quoteText: {
+          fontSize: 16,
+          fontStyle: 'italic',
+          color: isDark ? '#e0e0e0' : '#333',
+          textAlign: 'center',
+          marginVertical: 8,
+          lineHeight: 24,
+        },
+        quoteAuthor: {
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: isDark ? '#BB86FC' : '#6200EE',
+          textAlign: 'right',
+          marginTop: 8,
+        },
+        progressContainer: {
+          width: '100%',
+          marginBottom: 24,
+          alignItems: 'center',
+        },
+        progressBar: {
+          height: 8,
+          width: '100%',
+          backgroundColor: isDark ? '#333' : '#e0e0e0',
+          borderRadius: 4,
+          overflow: 'hidden',
+          marginBottom: 8,
+        },
+        progressFill: {
+          height: '100%',
+          backgroundColor: isDark ? '#BB86FC' : '#6200EE',
+          borderRadius: 4,
+        },
+        progressText: {
+          fontSize: 14,
+          color: isDark ? '#aaa' : '#666',
+        },
+        statusContainer: {
+          width: '100%',
+          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          borderRadius: 12,
+          padding: 16,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        statusItem: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 8,
+        },
+        statusText: {
+          fontSize: 14,
+          color: isDark ? '#e0e0e0' : '#333',
+          marginLeft: 12,
+        },
         footer: {
           alignItems: 'center',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          paddingTop: 16,
         },
-        buttonRow: {
+        socialButtons: {
           flexDirection: 'row',
           justifyContent: 'center',
-          width: '100%',
-          marginBottom: 10,
+          marginBottom: 16,
+        },
+        socialButton: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: isDark ? '#252525' : '#e0e0e0',
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          borderRadius: 20,
+          marginHorizontal: 8,
+        },
+        socialButtonText: {
+          fontSize: 14,
+          fontWeight: '500',
+          color: isDark ? '#e0e0e0' : '#333',
+          marginLeft: 8,
         },
         versionText: {
           fontSize: 12,
-          color: isDark ? '#aaa' : '#888',
+          color: isDark ? '#666' : '#999',
+          marginBottom: 8,
         },
-        bottomCredits: {
-          flexDirection: 'row',
-          backgroundColor: isDark ? '#2b2b2b' : '#d8d8d8',
-          padding: 10,
-          borderRadius: 8,
-          alignItems: 'center',
-          elevation: 4,
+        loadingIndicator: {
+          color: isDark ? '#BB86FC' : '#6200EE',
         },
       }),
     [isDark],

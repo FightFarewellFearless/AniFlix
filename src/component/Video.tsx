@@ -1,3 +1,4 @@
+import { Dropdown } from '@pirles/react-native-element-dropdown';
 import React, {
   memo,
   useCallback,
@@ -25,12 +26,12 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import { Dropdown } from '@pirles/react-native-element-dropdown';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
   runOnJS,
   StretchInX,
   StretchOutX,
+  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -47,21 +48,21 @@ import setHistory from '../utils/historyControl';
 import throttleFunction from '../utils/throttleFunction';
 
 import { StackActions } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../misc/reduxStore';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
 import AnimeAPI from '../utils/AnimeAPI';
-import { getMovieDetail, getRawDataIfAvailable } from '../utils/animeMovie';
+import { getMovieDetail, getRawDataIfAvailable, MovieDetail } from '../utils/animeMovie';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import VideoPlayer from './VideoPlayer';
 
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
+import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
+import Skeleton from './misc/Skeleton';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -73,7 +74,7 @@ function useBackHandler(handler: () => boolean) {
   }, [handler]);
 }
 
-type Props = StackScreenProps<RootStackNavigator, 'Video'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
 const defaultLoadingGif =
   'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
@@ -84,12 +85,10 @@ function Video(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
-  const enableBatteryTimeInfo = useSelector(
+  const enableBatteryTimeInfo = useSelectorIfFocused(
     (state: RootState) => state.settings.enableBatteryTimeInfo,
   );
-  const history = useSelector((state: RootState) => state.settings.history);
-
-  const dispatchSettings = useDispatch<AppDispatch>();
+  const history = useSelectorIfFocused((state: RootState) => state.settings.history);
 
   const historyData = useRef(props.route.params.historyData);
 
@@ -108,19 +107,23 @@ function Video(props: Props) {
   const webviewRef = useRef<WebView>(null);
   const embedInformationRef = useRef<View>(null);
 
-  const synopsisTextRef = useRef<View>(null);
+  const synopsisTextRef = useAnimatedRef<View>();
 
   const [animeDetail, setAnimeDetail] = useState<
-    | (
-        | (Awaited<ReturnType<typeof getMovieDetail>> & { status: 'Movie'; releaseYear: string })
-        | Omit<AniDetail, 'episodeList'>
-      )
+    | ((MovieDetail & { status: 'Movie'; releaseYear: string }) | Omit<AniDetail, 'episodeList'>)
     | undefined
-  >();
+  >(undefined);
 
   useEffect(() => {
     if (props.route.params.isMovie) {
       getMovieDetail(data.episodeData.animeDetail).then(detail => {
+        if ('isError' in detail) {
+          Alert.alert(
+            'Error',
+            'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
+          );
+          return;
+        }
         setAnimeDetail({
           ...detail,
           rating: detail.rating,
@@ -161,7 +164,6 @@ function Video(props: Props) {
         currentTime: number,
         stateData: RootStackNavigator['Video']['data'],
         settContext: string,
-        dispatchContext: typeof dispatchSettings,
         isMovie?: boolean,
       ) => {
         if (Math.floor(currentTime) === 0) {
@@ -171,15 +173,7 @@ function Video(props: Props) {
           resolution: stateData.resolution,
           lastDuration: currentTime,
         };
-        setHistory(
-          stateData,
-          currentLink.current,
-          true,
-          additionalData,
-          settContext,
-          dispatchContext,
-          isMovie,
-        );
+        setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
         historyData.current = additionalData;
       },
       3000,
@@ -194,7 +188,7 @@ function Video(props: Props) {
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const initialInfoContainerHeight = useRef<number>();
+  const initialInfoContainerHeight = useRef<number>(null);
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
@@ -459,15 +453,9 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistoryThrottle(
-        currentTime,
-        data,
-        history,
-        dispatchSettings,
-        props.route.params.isMovie,
-      );
+      updateHistoryThrottle(currentTime, data, history, props.route.params.isMovie);
     },
-    [updateHistoryThrottle, data, history, dispatchSettings, props.route.params.isMovie],
+    [updateHistoryThrottle, data, history, props.route.params.isMovie],
   );
 
   const episodeDataControl = useCallback(
@@ -521,9 +509,9 @@ function Video(props: Props) {
       historyData.current = undefined;
       currentLink.current = dataLink;
 
-      setHistory(result, dataLink, undefined, undefined, history, dispatchSettings);
+      setHistory(result, dataLink, undefined, undefined, history);
     },
-    [loading, history, dispatchSettings],
+    [loading, history],
   );
 
   const cancelLoading = useCallback(() => {
@@ -575,12 +563,7 @@ function Video(props: Props) {
       initialInfoContainerHeight.current = height;
       // infoContainerHeight.setValue(height);
     });
-    // eslint-disable-next-line prettier/prettier
-  }, [
-    animeDetail?.synopsis,
-    animeDetail?.rating,
-    animeDetail?.genres,
-  ]);
+  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextRef]);
 
   const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
@@ -658,6 +641,14 @@ function Video(props: Props) {
     </>
   );
 
+  const resolutionDropdownData = useMemo(() => {
+    return Object.entries(data.resolutionRaw)
+      .filter(z => z[1] !== undefined)
+      .map(z => {
+        return { label: z[1].resolution, value: z[1] };
+      });
+  }, [data.resolutionRaw]);
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -677,10 +668,11 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <VideoPlayer
-              key={data.streamingLink}
               title={data.title}
+              thumbnailURL={data.thumbnailUrl}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}
+              // @ts-expect-error
               videoRef={videoRef}
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}
@@ -694,37 +686,42 @@ function Video(props: Props) {
               batteryAndClock={batteryAndClock}
             />
           ) : data.streamingType === 'embed' ? (
-            <WebView
-              style={{ flex: 1, zIndex: 1 }}
-              key={data.streamingLink}
-              setSupportMultipleWindows={false}
-              onShouldStartLoadWithRequest={navigator => {
-                const res =
-                  navigator.url.includes(url.parse(data.streamingLink).host as string) ||
-                  navigator.url.includes(defaultLoadingGif);
-                if (!res) {
-                  webviewRef.current?.stopLoading();
-                }
-                return res;
-              }}
-              source={{
-                ...(data.resolution?.includes('lokal')
-                  ? {
-                      html: `<iframe src="${data.streamingLink}" style="width: 100vw; height: 100vh;" allowFullScreen>`,
-                    }
-                  : { uri: data.streamingLink }),
-                baseUrl: `https://${url.parse(data.streamingLink).host}`,
-              }}
-              userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
-              originWhitelist={['*']}
-              allowsFullscreenVideo={true}
-              injectedJavaScript={`
+            <>
+              {/* TEMP|TODO|WORKAROUND: Temporary fix for webview layout not working properly when using native-stack */}
+              <VideoPlayer title="" streamingURL="" style={{ display: 'none' }} />
+              <WebView
+                style={{ flex: 1, zIndex: 1 }}
+                ref={webviewRef}
+                key={data.streamingLink}
+                setSupportMultipleWindows={false}
+                onShouldStartLoadWithRequest={navigator => {
+                  const res =
+                    navigator.url.includes(url.parse(data.streamingLink).host as string) ||
+                    navigator.url.includes(defaultLoadingGif);
+                  if (!res) {
+                    webviewRef.current?.stopLoading();
+                  }
+                  return res;
+                }}
+                source={{
+                  ...(data.resolution?.includes('lokal')
+                    ? {
+                        html: `<iframe src="${data.streamingLink}" style="width: 100vw; height: 100vh;" allowFullScreen>`,
+                      }
+                    : { uri: data.streamingLink }),
+                  baseUrl: `https://${url.parse(data.streamingLink).host}`,
+                }}
+                userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
+                originWhitelist={['*']}
+                allowsFullscreenVideo={true}
+                injectedJavaScript={`
                 window.alert = function() {}; // Disable alerts
                 window.confirm = function() {}; // Disable confirms
                 window.prompt = function() {}; // Disable prompts
                 window.open = function() {}; // Disable opening new windows
               `}
-            />
+              />
+            </>
           ) : (
             <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
@@ -881,15 +878,27 @@ function Video(props: Props) {
                     // .slice(2)
                     .reduce((prev, curr) => prev + curr.height, 0);
                 }}>
-                {animeDetail?.synopsis || 'Tidak ada sinopsis'}
+                {animeDetail === undefined ? (
+                  <Skeleton stopOnBlur={false} width={150} height={20} />
+                ) : (
+                  animeDetail?.synopsis || 'Tidak ada sinopsis'
+                )}
               </ReAnimated.Text>
 
               <View style={[styles.infoGenre]}>
-                {(animeDetail?.genres ?? ['Loading']).map(genre => (
-                  <Text key={genre} style={[globalStyles.text, styles.genre]}>
-                    {genre}
-                  </Text>
-                ))}
+                {animeDetail === undefined ? (
+                  <View style={{ gap: 5, flexDirection: 'row' }}>
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
+                    <Skeleton stopOnBlur={false} width={50} height={20} />
+                  </View>
+                ) : (
+                  animeDetail.genres.map(genre => (
+                    <Text key={genre} style={[globalStyles.text, styles.genre]}>
+                      {genre}
+                    </Text>
+                  ))
+                )}
               </View>
 
               <View style={styles.infoData}>
@@ -946,11 +955,13 @@ function Video(props: Props) {
                         marginRight: 5,
                       },
                     ]}
-                    onPress={() => {
-                      episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                    onPress={async () => {
+                      await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                      global.gc?.();
                     }}>
+                    <Icon name="arrow-left" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
-                      <Icon name="arrow-left" size={18} color="black" /> Episode sebelumnya
+                      Episode sebelumnya
                     </Text>
                   </TouchableOpacity>
 
@@ -963,38 +974,33 @@ function Video(props: Props) {
                         backgroundColor: data.episodeData.next ? '#00ccff' : '#525252',
                       },
                     ]}
-                    onPress={() => {
-                      episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                    onPress={async () => {
+                      await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                      global.gc?.();
                     }}>
+                    <Icon name="arrow-right" size={18} color="black" />
                     <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
-                      Episode selanjutnya <Icon name="arrow-right" size={18} color="black" />
+                      Episode selanjutnya
                     </Text>
                   </TouchableOpacity>
                 </View>
               )}
               <View style={{ maxWidth: '50%' }}>
                 <Dropdown
-                  value={
-                    data.resolution === undefined
-                      ? undefined
-                      : {
-                          label: data.resolution,
-                          value:
-                            data.resolutionRaw?.[
-                              data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                            ],
-                        }
-                  }
+                  value={{
+                    label: data.resolution,
+                    value:
+                      data.resolutionRaw?.[
+                        data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
+                      ],
+                  }}
                   placeholder="Pilih resolusi"
-                  data={Object.entries(data.resolutionRaw)
-                    .filter(z => z[1] !== undefined)
-                    .map(z => {
-                      return { label: z[1].resolution, value: z[1] };
-                    })}
+                  data={resolutionDropdownData}
                   valueField="value"
                   labelField="label"
-                  onChange={val => {
-                    setResolution(val.value.dataContent, val.label);
+                  onChange={async val => {
+                    await setResolution(val.value.dataContent, val.label);
+                    global.gc?.();
                   }}
                   style={styles.dropdownStyle}
                   containerStyle={styles.dropdownContainerStyle}
@@ -1112,6 +1118,7 @@ function TimeInfo() {
 function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
@@ -1120,7 +1127,7 @@ function useStyles() {
           width: '100%',
           height: '100%',
           zIndex: 100,
-          backgroundColor: '#0000008a',
+          backgroundColor: 'rgba(0,0,0,0.7)',
           justifyContent: 'center',
           alignItems: 'center',
         },
@@ -1128,34 +1135,33 @@ function useStyles() {
           flex: 0.15,
           minWidth: 300,
           minHeight: 80,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#f0f0f0',
-          borderColor: 'gold',
+          backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#FFFFFF',
+          borderRadius: 12,
           borderWidth: 1,
-          alignContent: 'center',
+          borderColor: colorScheme === 'dark' ? '#404040' : '#E0E0E0',
+          alignItems: 'center',
           alignSelf: 'center',
           justifyContent: 'center',
-          alignItems: 'center',
+          elevation: 5,
         },
         batteryInfo: {
           position: 'absolute',
-          right: 10,
-          top: 10,
+          right: 15,
+          top: 15,
           flexDirection: 'row',
           alignItems: 'center',
-          padding: 3,
-          borderRadius: 7,
-          backgroundColor: '#00000085',
+          padding: 6,
+          borderRadius: 20,
+          backgroundColor: 'rgba(0,0,0,0.6)',
           zIndex: 1,
         },
         timeInfo: {
           position: 'absolute',
-          left: 10,
-          top: 10,
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: 3,
-          borderRadius: 7,
-          backgroundColor: '#00000085',
+          left: 15,
+          top: 15,
+          padding: 6,
+          borderRadius: 20,
+          backgroundColor: 'rgba(0,0,0,0.6)',
           zIndex: 1,
         },
         fullscreen: {
@@ -1167,125 +1173,155 @@ function useStyles() {
         },
         notFullscreen: {
           position: 'relative',
-          flex: 0.44,
-        },
-        dlbtn: {
-          flex: 1,
-          flexDirection: 'row',
+          aspectRatio: 16 / 9,
+          backgroundColor: '#000',
         },
         container: {
-          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#ebebeb',
-          elevation: colorScheme === 'light' ? 3 : undefined,
-          padding: 13,
-          overflow: 'hidden',
+          backgroundColor: colorScheme === 'dark' ? '#1F1F1F' : '#FFFFFF',
+          padding: 15,
+          borderRadius: 12,
+          marginHorizontal: 10,
+          marginVertical: 5,
+          elevation: 2,
         },
         infoTitle: {
-          textAlign: 'center',
-          fontWeight: 'bold',
-          fontSize: 18,
-          marginBottom: 5,
-          fontFamily: '',
+          fontSize: 20,
+          fontWeight: '600',
+          color: colorScheme === 'dark' ? '#FFFFFF' : '#1A1A1A',
+          marginBottom: 10,
         },
         infoSinopsis: {
-          fontSize: 13.5,
-          color: colorScheme === 'dark' ? '#a5a5a5' : '#474747',
+          fontSize: 14,
+          lineHeight: 20,
+          color: colorScheme === 'dark' ? '#A0A0A0' : '#666666',
         },
         infoGenre: {
-          marginVertical: 5,
           flexDirection: 'row',
           flexWrap: 'wrap',
-          alignContent: 'stretch',
+          marginVertical: 10,
+          gap: 8,
         },
         genre: {
-          borderWidth: 1,
-          borderColor: 'gray',
-          padding: 2,
-          margin: 2,
-          fontSize: 11,
-          textAlign: 'center',
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F0F0F0',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: colorScheme === 'dark' ? '#D0D0D0' : '#555555',
         },
         infoData: {
           flexDirection: 'row',
-          justifyContent: 'space-around',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 10,
         },
         status: {
-          borderRadius: 5,
-          padding: 3,
-          fontWeight: 'bold',
-          elevation: 4,
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          fontWeight: '600',
+          color: '#FFFFFF',
+          backgroundColor: '#4CAF50',
         },
         releaseYear: {
-          backgroundColor: '#15d8b7',
-          borderRadius: 5,
-          padding: 3,
-          paddingHorizontal: 5,
-          textAlign: 'center',
-          alignSelf: 'center',
-          fontWeight: 'bold',
-          elevation: 4,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F0F0F0',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: colorScheme === 'dark' ? '#D0D0D0' : '#555555',
         },
         rating: {
-          backgroundColor: 'orange',
-          borderRadius: 5,
-          color: '#1f1f1f',
-          padding: 3,
-          fontWeight: 'bold',
-          elevation: 4,
+          backgroundColor: '#FFD700',
+          paddingVertical: 4,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          fontSize: 12,
+          color: '#1A1A1A',
+          fontWeight: '600',
         },
         episodeDataControl: {
           flexDirection: 'row',
-          flexWrap: 'wrap',
+          gap: 10,
           justifyContent: 'center',
+          marginBottom: 15,
         },
         episodeDataControlButton: {
-          padding: 5,
+          flex: 1,
+          padding: 12,
+          borderRadius: 8,
+          backgroundColor: '#2196F3',
+          alignItems: 'center',
+          opacity: 1,
+        },
+        disabledButton: {
+          backgroundColor: '#666666',
+          opacity: 0.7,
         },
         downloadButton: {
-          backgroundColor: '#0050ac',
-          borderRadius: 5,
-          marginTop: 40,
-          padding: 9,
-          width: '85%',
+          backgroundColor: '#115f9e',
+          borderRadius: 8,
+          padding: 15,
+          flexDirection: 'row',
+          justifyContent: 'center',
           alignItems: 'center',
-          alignSelf: 'center',
+          gap: 8,
+          marginHorizontal: 10,
+          marginVertical: 15,
         },
         dropdownStyle: {
-          width: '100%',
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-          padding: 5,
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: 'black',
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          padding: 10,
+          borderRadius: 8,
+          borderWidth: 0,
         },
         dropdownContainerStyle: {
-          maxWidth: '50%',
+          width: 200,
+          borderRadius: 8,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          borderWidth: 0,
+          elevation: 5,
         },
         dropdownItemTextStyle: {
           color: globalStyles.text.color,
-          fontSize: 15,
-          textAlign: 'center',
+          fontSize: 14,
         },
         dropdownItemContainerStyle: {
-          borderColor: colorScheme !== 'dark' ? '#2c2c2c' : '#ccc9c9',
-          borderWidth: StyleSheet.hairlineWidth,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+          borderRadius: 6,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
         },
         dropdownSelectedTextStyle: {
           color: globalStyles.text.color,
-          textAlign: 'center',
+          fontSize: 14,
         },
         reloadPlayer: {
-          backgroundColor: '#0050ac',
-          borderRadius: 5,
-          marginTop: 6,
-          padding: 9,
-          width: '85%',
+          backgroundColor: '#00756c',
+          borderRadius: 8,
+          padding: 12,
+          flexDirection: 'row',
           alignItems: 'center',
-          alignSelf: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          marginHorizontal: 10,
+          marginVertical: 10,
+        },
+        warningContainer: {
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#FFF3E0',
+          borderRadius: 8,
+          padding: 15,
+          marginHorizontal: 10,
+          marginVertical: 5,
+          borderLeftWidth: 4,
+          borderLeftColor: '#FF9800',
+        },
+        warningText: {
+          color: colorScheme === 'dark' ? '#FFB300' : '#E65100',
+          fontSize: 13,
+          lineHeight: 18,
         },
       }),
     [globalStyles, colorScheme],
   );
 }
-
 export default memo(Video);
