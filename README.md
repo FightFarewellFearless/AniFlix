@@ -15,7 +15,7 @@ Aplikasi streaming anime gratis tanpa iklan, open source!
 ## Screenshots
 
 | Home screen | Anime detail | Anime list | Video |
-|--------------|--------------|--------------|
+|--------------|--------------|--------------|--------------|
 | ![Home screen](./githubAssets/SS1.jpeg) | ![Anime detail](./githubAssets/SS2.jpeg) | ![Anime list](./githubAssets/SS3.jpeg) | ![Video](./githubAssets/SS4.jpeg) |
 
 ## Lengkap dan terbaru!
