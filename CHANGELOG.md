@@ -2,15 +2,16 @@
 
 Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi termasuk design ulang beberapa antarmuka aplikasi.
 Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta eliminasi beberapa kode yang dirasa tidak terlalu penting (penggunaan redux, dll..), ini meningkatkan performa aplikasi terutama untuk perangkat lawas.
+Fun fact: Update kali ini berisi lebih dari 140 commits di github
 
 ## Ditambahkan
 - Opsi untuk memuat ulang aplikasi di menu pengaturan
-- Tampilan aplikasi
 - Tampilan Error untuk menghindari aplikasi crash (hanya berlaku untuk JavaScript dan tidak untuk native crash)
 - Fitur Picture-in-Picture saat menonton
 - Notifikasi "Now playing" saat menonton
 
 ## Ditingkatkan
+- Tampilan aplikasi
 - Performa aplikasi secara keseluruhan (responsif, animasi, beberapa UI/UX, dan lain-lain...)
 - Potensi untuk penggunaan memori yang lebih sedikit.
 - Menambahkan informasi panduan pada error history anime lama
