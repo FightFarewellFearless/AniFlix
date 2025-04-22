@@ -4769,7 +4769,7 @@ __metadata:
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: beta
     expo: ^53.0.0-preview.7
-    expo-document-picker: 13.1.2
+    expo-document-picker: 13.1.3
     expo-linear-gradient: 14.1.2
     expo-splash-screen: 0.29.24
     expo-updates: 1.0.0-canary-20250404-87e2506
@@ -7293,12 +7293,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-document-picker@npm:13.1.2":
-  version: 13.1.2
-  resolution: "expo-document-picker@npm:13.1.2"
+"expo-document-picker@npm:13.1.3":
+  version: 13.1.3
+  resolution: "expo-document-picker@npm:13.1.3"
   peerDependencies:
     expo: "*"
-  checksum: a9415f67fcc6c8f7a50be7a360fed59951233822163f47542a6c499732c794a0c1f5dc103829c2f55048278e19605761d89e4bfca843a1d148eb715b206d8abc
+  checksum: 43623a414f52becd11155e46668ee7f1f9fea837f9504d6d3c5af880797822a94669fec712914b8ec2862b326490cdb61880549a4e8102b73c274a66cf8b45b9
   languageName: node
   linkType: hard
 
