@@ -1,3 +1,16 @@
+# v0.9.0_JS-1 (25-April-2025)
+
+## Perubahan
+- Sekarang, notifikasi "now playing" dimatikan secara bawaan. Kamu bisa mengaktifkan nya di menu pengaturan
+
+## Diperbaiki
+- Memperbaiki masalah tombol yang tidak bisa ditekan di bagian Video (terjadi di beberapa kasus tertentu)
+- Memperbaiki scroll yang ter-reset saat menghapus histori pencarian
+
+## Perubahan lainnya (Tidak berdampak secara langsung)
+- Mengurangi delay pada loading listAnime
+- list anime yang lebih efisien
+
 # v0.9.0 (18-April-2025)
 
 Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi termasuk design ulang beberapa antarmuka aplikasi.
