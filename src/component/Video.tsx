@@ -1,4 +1,4 @@
-import { Dropdown } from '@pirles/react-native-element-dropdown';
+import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import React, {
   memo,
   useCallback,
@@ -21,7 +21,6 @@ import {
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
@@ -40,6 +39,7 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import url from 'url';
+import { TouchableOpacity } from './misc/TouchableOpacityRNGH';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
@@ -105,6 +105,7 @@ function Video(props: Props) {
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoView>(null);
   const webviewRef = useRef<WebView>(null);
+  const dropdownResolutionRef = useRef<IDropdownRef>(null);
   const embedInformationRef = useRef<View>(null);
 
   const synopsisTextRef = useAnimatedRef<View>();
@@ -985,34 +986,40 @@ function Video(props: Props) {
                   </TouchableOpacity>
                 </View>
               )}
-              <View style={{ maxWidth: '50%' }}>
-                <Dropdown
-                  value={{
-                    label: data.resolution,
-                    value:
-                      data.resolutionRaw?.[
-                        data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                      ],
-                  }}
-                  placeholder="Pilih resolusi"
-                  data={resolutionDropdownData}
-                  valueField="value"
-                  labelField="label"
-                  onChange={async val => {
-                    await setResolution(val.value.dataContent, val.label);
-                    global.gc?.();
-                  }}
-                  style={styles.dropdownStyle}
-                  containerStyle={styles.dropdownContainerStyle}
-                  itemTextStyle={styles.dropdownItemTextStyle}
-                  itemContainerStyle={styles.dropdownItemContainerStyle}
-                  activeColor="#16687c"
-                  selectedTextStyle={styles.dropdownSelectedTextStyle}
-                  placeholderStyle={{ color: globalStyles.text.color }}
-                  autoScroll
-                  dropdownPosition="top"
-                />
-              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  dropdownResolutionRef.current?.open();
+                }}>
+                <View pointerEvents="box-only" style={{ maxWidth: '50%' }}>
+                  <Dropdown
+                    ref={dropdownResolutionRef}
+                    value={{
+                      label: data.resolution,
+                      value:
+                        data.resolutionRaw?.[
+                          data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
+                        ],
+                    }}
+                    placeholder="Pilih resolusi"
+                    data={resolutionDropdownData}
+                    valueField="value"
+                    labelField="label"
+                    onChange={async val => {
+                      await setResolution(val.value.dataContent, val.label);
+                      global.gc?.();
+                    }}
+                    style={styles.dropdownStyle}
+                    containerStyle={styles.dropdownContainerStyle}
+                    itemTextStyle={styles.dropdownItemTextStyle}
+                    itemContainerStyle={styles.dropdownItemContainerStyle}
+                    activeColor="#16687c"
+                    selectedTextStyle={styles.dropdownSelectedTextStyle}
+                    placeholderStyle={{ color: globalStyles.text.color }}
+                    autoScroll
+                    dropdownPosition="top"
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
 
             {data.resolution?.includes('pogo') && (
@@ -1253,11 +1260,6 @@ function useStyles() {
           borderRadius: 8,
           backgroundColor: '#2196F3',
           alignItems: 'center',
-          opacity: 1,
-        },
-        disabledButton: {
-          backgroundColor: '#666666',
-          opacity: 0.7,
         },
         downloadButton: {
           backgroundColor: '#115f9e',
