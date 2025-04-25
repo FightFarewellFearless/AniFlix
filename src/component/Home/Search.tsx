@@ -50,6 +50,7 @@ import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
 
@@ -243,7 +244,7 @@ function Search(props: Props) {
     setSearchButtonWidth(layout.nativeEvent.layout.width);
   }, []);
 
-  function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
+  function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
       textInputRef.current?.setNativeProps({ text: '' });
@@ -415,8 +416,8 @@ function Search(props: Props) {
           exiting={FadeOutDown}
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
           <View style={{ height: '100%' }}>
-            <LegendList
-              recycleItems
+            <FlashList
+              // recycleItems
               drawDistance={250}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
