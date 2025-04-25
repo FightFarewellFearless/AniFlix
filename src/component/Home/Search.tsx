@@ -342,7 +342,6 @@ function Search(props: Props) {
               recycleItems
               maintainVisibleContentPosition
               estimatedItemSize={50}
-              drawDistance={700}
               data={listAnime}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
@@ -422,6 +421,7 @@ function Search(props: Props) {
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
               data={searchHistory}
+              keyExtractor={searchHistoryKeyExtractor}
               extraData={styles}
               renderItem={renderSearchHistory}
               estimatedItemSize={47}
@@ -619,6 +619,10 @@ function ImageColorShadow({ url }: { url: string }) {
       style={{ width: 13, marginRight: 4 }}
     />
   );
+}
+
+function searchHistoryKeyExtractor(name: string, _index: number) {
+  return name;
 }
 
 function useStyles() {
