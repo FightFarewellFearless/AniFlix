@@ -7,6 +7,7 @@ export type RootState = {
   settings: {
     history: string;
     enableBatteryTimeInfo: string;
+    enableNowPlayingNotification: string;
     watchLater: string;
     searchHistory: string;
     'copilot.watchLater_firstTime': string;
@@ -20,6 +21,7 @@ export function getState(): RootState {
   const settings: Record<keyof RootState['settings'], string | undefined> = {
     history: undefined,
     enableBatteryTimeInfo: undefined,
+    enableNowPlayingNotification: undefined,
     watchLater: undefined,
     searchHistory: undefined,
     'copilot.watchLater_firstTime': undefined,
@@ -55,6 +57,7 @@ export function useSelectorIfFocused<T = string>(
     const settings: Record<keyof RootState['settings'], string | undefined> = {
       history: undefined,
       enableBatteryTimeInfo: undefined,
+      enableNowPlayingNotification: undefined,
       watchLater: undefined,
       searchHistory: undefined,
       'copilot.watchLater_firstTime': undefined,

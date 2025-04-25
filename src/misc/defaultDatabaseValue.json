@@ -1,6 +1,7 @@
 {
     "history": "[]",
     "enableBatteryTimeInfo": "false",
+    "enableNowPlayingNotification": "false",
     "watchLater": "[]",
     "searchHistory": "[]",
     "copilot.watchLater_firstTime": "true",

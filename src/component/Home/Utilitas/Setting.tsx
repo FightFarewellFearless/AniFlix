@@ -58,17 +58,23 @@ function Setting(_props: Props) {
   const appThemeDropdown = useRef<IDropdownRef>(null);
 
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
-  const setBatteryTimeInfoSwitch = (value: string) => {
-    storage.set('enableBatteryTimeInfo', value);
-  };
+  const batteryTimeSwitchHandler = useCallback(() => {
+    const newValue = String(!batteryTimeInfoSwitch);
+    storage.set('enableBatteryTimeInfo', newValue);
+  }, [batteryTimeInfoSwitch]);
+
+  const nowPlayingNotificationSwitch = useSelectorIfFocused(
+    state => state.settings.enableNowPlayingNotification,
+    true,
+    res => res === 'true',
+  );
+  const nowPlayingNotificationSwitchHandler = useCallback(() => {
+    const newValue = String(!nowPlayingNotificationSwitch);
+    storage.set('enableNowPlayingNotification', newValue);
+  }, [nowPlayingNotificationSwitch]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalText, setModalText] = useState('');
-
-  const batteryTimeSwitchHandler = () => {
-    const newValue = String(!batteryTimeInfoSwitch);
-    setBatteryTimeInfoSwitch(newValue);
-  };
 
   const backupData = useCallback(async () => {
     try {
@@ -243,7 +249,7 @@ function Setting(_props: Props) {
       },
     },
     {
-      title: 'Nyalakan informasi baterai dan waktu',
+      title: 'Nyalakan informasi baterai dan waktu saat menonton',
       description:
         'Beri tahu saya persentase baterai dan waktu, saat sedang menonton dalam mode fullscreen',
       icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
@@ -251,6 +257,18 @@ function Setting(_props: Props) {
         <Switch value={batteryTimeInfoSwitch} onValueChange={batteryTimeSwitchHandler} />
       ),
       handler: batteryTimeSwitchHandler,
+    },
+    {
+      title: 'Tampilkan notifikasi saat menonton',
+      description: 'Tampilkan notifkasi "now playing" saat sedang menonton',
+      icon: <Icon name="bell" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Switch
+          value={nowPlayingNotificationSwitch}
+          onValueChange={nowPlayingNotificationSwitchHandler}
+        />
+      ),
+      handler: nowPlayingNotificationSwitchHandler,
     },
     {
       title: 'Cadangkan data',
@@ -262,7 +280,7 @@ function Setting(_props: Props) {
       title: 'Pulihkan data',
       description: 'Pulihkan seluruh data aplikasi',
       icon: <Icon name="history" style={globalStyles.text} size={iconSize} />,
-      handler: () => restoreData(),
+      handler: restoreData,
     },
     {
       title: 'Hapus histori tontonan',
@@ -389,6 +407,7 @@ function useStyles() {
         },
         settingListTextTitle: {
           fontWeight: 'bold',
+          textAlign: 'center',
         },
         settingListTextDescription: {
           textAlign: 'center',

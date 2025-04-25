@@ -28,6 +28,7 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
@@ -68,6 +69,12 @@ function VideoPlayer({
   const currentDurationSecond = useSharedValue(0);
   const totalDurationSecond = useSharedValue(0);
 
+  const enableNowPlayingNotification = useSelectorIfFocused(
+    state => state.settings.enableNowPlayingNotification,
+    true,
+    res => res === 'true',
+  );
+
   const player = useVideoPlayer(
     {
       uri: streamingURL,
@@ -84,7 +91,7 @@ function VideoPlayer({
     initialPlayer => {
       initialPlayer.audioMixingMode = 'doNotMix';
       initialPlayer.timeUpdateEventInterval = 1;
-      initialPlayer.showNowPlayingNotification = true;
+      initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
 
