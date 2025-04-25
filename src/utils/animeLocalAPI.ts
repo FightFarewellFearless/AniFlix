@@ -460,7 +460,7 @@ const listAnime = async (
           streamingCallback?.(listAnimeData);
         }
         if (listAnimeData.length % 150 === 0)
-          await new Promise(resolve => setTimeout(resolve, 150));
+          await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
     res(listAnimeData);
