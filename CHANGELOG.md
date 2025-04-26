@@ -1,3 +1,8 @@
+# v0.9.0_JS-2 (27-April-2025)
+
+## Diperbaiki
+- Episode list yang tidak bisa di scroll pada detail anime
+
 # v0.9.0_JS-1 (25-April-2025)
 
 ## Perubahan
