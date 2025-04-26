@@ -212,6 +212,7 @@ function AniDetailCopilot(props: Props) {
           drawDistance={250}
           estimatedItemSize={41}
           data={data.episodeList}
+          keyExtractor={(_, index) => index.toString()} // it's safe to use index as key because the data can't be changed
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.episodeButton}
