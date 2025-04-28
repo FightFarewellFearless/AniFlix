@@ -1,3 +1,8 @@
+# v0.9.0_JS-3 (28-April-2025)
+
+## Diperbaiki
+- Tampilan edge-to-edge pada android 15
+
 # v0.9.0_JS-2 (27-April-2025)
 
 ## Diperbaiki
