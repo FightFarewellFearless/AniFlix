@@ -1,8 +1,3 @@
-# v0.9.0_JS-4 (28-April-2025)
-
-## Diperbaiki
-- Tampilan pemberitahuan tonton nanti tidak akurat.
-
 # v0.9.0_JS-3 (28-April-2025)
 
 ## Diperbaiki
