@@ -1,4 +1,3 @@
-import { LegendList } from '@legendapp/list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
@@ -6,7 +5,6 @@ import {
   Image,
   ImageBackground,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -24,6 +22,7 @@ import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
+import { LegendList } from '@legendapp/list';
 import { storage } from '../utils/DatabaseManager';
 import { complementHex, darkenHexColor } from '../utils/hexColors';
 
@@ -34,7 +33,6 @@ function AniDetail(props: Props) {
   const colorScheme = useColorScheme();
   return (
     <CopilotProvider
-      verticalOffset={StatusBar.currentHeight}
       overlay="svg"
       androidStatusBarVisible={true}
       animated
