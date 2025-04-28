@@ -9,11 +9,13 @@ import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'r
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
 import Blank from './src/component/misc/Blank';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
+import SafeAreaWrapper from './src/component/misc/SafeAreaWrapper';
 import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from './src/misc/context';
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
@@ -41,10 +43,12 @@ enableScreens(true);
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 
-const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
-  <SuspenseLoading>
-    <Component {...props} />
-  </SuspenseLoading>
+const withSuspenseAndSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
+  <SafeAreaWrapper>
+    <SuspenseLoading>
+      <Component {...props} />
+    </SuspenseLoading>
+  </SafeAreaWrapper>
 );
 
 // TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
@@ -67,19 +71,23 @@ type Screens = {
 }[];
 
 const screens: Screens = [
-  { name: 'Home', component: withSuspense(Home), options: undefined },
-  { name: 'AnimeDetail', component: withSuspense(AniDetail), options: undefined },
-  { name: 'MovieDetail', component: withSuspense(MovieDetail), options: undefined },
-  { name: 'FromUrl', component: withSuspense(FromUrl), options: undefined },
-  { name: 'Video', component: withSuspense(Video), options: undefined },
-  { name: 'connectToServer', component: withSuspense(Connecting), options: undefined },
-  { name: 'NeedUpdate', component: withSuspense(NeedUpdate), options: undefined },
-  { name: 'Blocked', component: withSuspense(Blocked), options: undefined },
-  { name: 'FailedToConnect', component: withSuspense(FailedToConnect), options: undefined },
-  { name: 'SeeMore', component: withSuspense(SeeMore), options: { headerShown: true } },
+  { name: 'Home', component: withSuspenseAndSafeArea(Home), options: undefined },
+  { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail), options: undefined },
+  { name: 'MovieDetail', component: withSuspenseAndSafeArea(MovieDetail), options: undefined },
+  { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
+  { name: 'Video', component: withSuspenseAndSafeArea(Video), options: undefined },
+  { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },
+  { name: 'NeedUpdate', component: withSuspenseAndSafeArea(NeedUpdate), options: undefined },
+  { name: 'Blocked', component: withSuspenseAndSafeArea(Blocked), options: undefined },
+  {
+    name: 'FailedToConnect',
+    component: withSuspenseAndSafeArea(FailedToConnect),
+    options: undefined,
+  },
+  { name: 'SeeMore', component: withSuspenseAndSafeArea(SeeMore), options: { headerShown: true } },
   {
     name: 'Blank',
-    component: withSuspense(Blank),
+    component: withSuspenseAndSafeArea(Blank),
     options: { animation: 'none', presentation: 'transparentModal' },
   },
   {
@@ -126,60 +134,62 @@ function App() {
   }, [colorScheme]);
 
   return (
-    <ErrorBoundary FallbackComponent={FallbackComponent}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <EpisodeBaruHomeContext
-          value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
-          <MovieListHomeContext
-            value={useMemo(
-              () => ({
-                paramsState: movieParamsState,
-                setParamsState: setMovieParamsState,
-              }),
-              [movieParamsState],
-            )}>
-            <NavigationContainer
-              ref={navigationRef}
-              theme={
-                colorScheme === 'dark'
-                  ? {
-                      ...DarkTheme,
-                      colors: {
-                        ...DarkTheme.colors,
-                        background: '#0A0A0A',
-                      },
-                    }
-                  : undefined
-              }>
-              <Stack.Navigator
-                initialRouteName="connectToServer"
-                screenOptions={{
-                  headerShown: false,
-                }}>
-                {screens.map(({ name, component, options }) => (
-                  <Stack.Screen key={name} name={name} options={options}>
-                    {component}
-                  </Stack.Screen>
-                ))}
-              </Stack.Navigator>
-              <CFBypassIsOpenContext
-                value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
-                {isOpen && (
-                  <Suspense>
-                    <CFBypassWebView />
-                  </Suspense>
+    <SafeAreaProvider>
+      <ErrorBoundary FallbackComponent={FallbackComponent}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <EpisodeBaruHomeContext
+            value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
+            <MovieListHomeContext
+              value={useMemo(
+                () => ({
+                  paramsState: movieParamsState,
+                  setParamsState: setMovieParamsState,
+                }),
+                [movieParamsState],
+              )}>
+              <NavigationContainer
+                ref={navigationRef}
+                theme={
+                  colorScheme === 'dark'
+                    ? {
+                        ...DarkTheme,
+                        colors: {
+                          ...DarkTheme.colors,
+                          background: '#0A0A0A',
+                        },
+                      }
+                    : undefined
+                }>
+                <Stack.Navigator
+                  initialRouteName="connectToServer"
+                  screenOptions={{
+                    headerShown: false,
+                  }}>
+                  {screens.map(({ name, component, options }) => (
+                    <Stack.Screen key={name} name={name} options={options}>
+                      {component}
+                    </Stack.Screen>
+                  ))}
+                </Stack.Navigator>
+                <CFBypassIsOpenContext
+                  value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                  {isOpen && (
+                    <Suspense>
+                      <CFBypassWebView />
+                    </Suspense>
+                  )}
+                </CFBypassIsOpenContext>
+                {__DEV__ && (
+                  <View style={styles.Dev} pointerEvents="none">
+                    <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                  </View>
                 )}
-              </CFBypassIsOpenContext>
-              {__DEV__ && (
-                <View style={styles.Dev} pointerEvents="none">
-                  <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-                </View>
-              )}
-            </NavigationContainer>
-          </MovieListHomeContext>
-        </EpisodeBaruHomeContext>
-      </GestureHandlerRootView>
-    </ErrorBoundary>
+              </NavigationContainer>
+            </MovieListHomeContext>
+          </EpisodeBaruHomeContext>
+        </GestureHandlerRootView>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 
