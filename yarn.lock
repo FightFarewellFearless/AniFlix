@@ -3277,13 +3277,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@legendapp/list@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@legendapp/list@npm:1.0.5"
+"@legendapp/list@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@legendapp/list@npm:1.0.7"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 8ad0abba72fe580df1c680ab1e5d13d2e1f4ac12c3fcd1caf13ee36b219f82597f6e8aebc4529be000530d44a6b903f8245e0b4e102e1ec3a7efbb86dd9f1129
+  checksum: e912299950d372c2b44ac7624abba1baf152be2824295cfe22f36b274372746fd37556ca75324327d6a0c4b0fa75dbea94dbf76d1affb94d092ffa09d784a278
   languageName: node
   linkType: hard
 
@@ -4739,7 +4739,7 @@ __metadata:
     "@babel/runtime": ^7.27.0
     "@bottom-tabs/react-navigation": ^0.9.0
     "@domir/react-native-measure-text": ^0.1.8
-    "@legendapp/list": ^1.0.5
+    "@legendapp/list": ^1.0.7
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-async-storage/async-storage": 2.1.2
     "@react-native-community/cli": ^18.0.0
