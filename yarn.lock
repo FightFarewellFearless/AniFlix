@@ -4773,7 +4773,7 @@ __metadata:
     expo-linear-gradient: 14.1.2
     expo-splash-screen: 0.29.24
     expo-updates: 1.0.0-canary-20250404-87e2506
-    expo-video: 2.1.2
+    expo-video: 2.1.8
     jest: ^29.6.3
     moment: ^2.30.1
     prettier: ^3.5.2
@@ -7452,14 +7452,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-video@npm:2.1.2":
-  version: 2.1.2
-  resolution: "expo-video@npm:2.1.2"
+"expo-video@npm:2.1.8":
+  version: 2.1.8
+  resolution: "expo-video@npm:2.1.8"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: bf18e9ed156118dd23d573247f282ec0e681c45904339eb78584e76ccb48eea9b4b632c19fb7de3bb3859f907470e850fa9965a50af4e109ed2a4bc958dd15fa
+  checksum: 761ed86919af8ec96381fa82e32821802f8eb8dc234351ffe171d4665434048649e5c6e380d7099cf1b0958565323f6edd97f865421781851b654b9a204072d4
   languageName: node
   linkType: hard
 
