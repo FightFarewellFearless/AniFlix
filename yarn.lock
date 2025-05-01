@@ -4770,7 +4770,7 @@ __metadata:
     eslint-plugin-react-compiler: beta
     expo: ^53.0.0-preview.7
     expo-document-picker: 13.1.2
-    expo-linear-gradient: 14.1.2
+    expo-linear-gradient: 14.1.4
     expo-splash-screen: 0.29.24
     expo-updates: 1.0.0-canary-20250404-87e2506
     expo-video: 2.1.2
@@ -7350,14 +7350,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-linear-gradient@npm:14.1.2":
-  version: 14.1.2
-  resolution: "expo-linear-gradient@npm:14.1.2"
+"expo-linear-gradient@npm:14.1.4":
+  version: 14.1.4
+  resolution: "expo-linear-gradient@npm:14.1.4"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 88dae235b0d5c52966bfce87adfe2c5d15ce16d7132d68552c7a11b3f0408a27259a4c83c66ff77e62ac939c099e1aad973797ef4eeb1fe967284cfdb766ae36
+  checksum: eab8d01fcce1b8b42ea401c681b5151c3b161666fa3a00181fddae4fb64c23f65945afc60176f9c367fe6963fdd4192e5de86a8b50203581f99bcea872b11451
   languageName: node
   linkType: hard
 
