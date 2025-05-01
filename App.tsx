@@ -43,13 +43,19 @@ enableScreens(true);
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 
-const withSuspenseAndSafeArea = (Component: React.ComponentType<any>) => (props: any) => (
-  <SafeAreaWrapper>
+const withSuspenseAndSafeArea = (Component: React.ComponentType<any>, safeArea = true) => {
+  const SuspenseComponent = (props: any) => (
     <SuspenseLoading>
       <Component {...props} />
     </SuspenseLoading>
-  </SafeAreaWrapper>
-);
+  );
+  return (props: any) =>
+    safeArea ? (
+      <SafeAreaWrapper>{<SuspenseComponent {...props} />}</SafeAreaWrapper>
+    ) : (
+      <SuspenseComponent {...props} />
+    );
+};
 
 // TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
 if (!__DEV__) {
@@ -75,7 +81,7 @@ const screens: Screens = [
   { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail), options: undefined },
   { name: 'MovieDetail', component: withSuspenseAndSafeArea(MovieDetail), options: undefined },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
-  { name: 'Video', component: withSuspenseAndSafeArea(Video), options: undefined },
+  { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },
   { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },
   { name: 'NeedUpdate', component: withSuspenseAndSafeArea(NeedUpdate), options: undefined },
   { name: 'Blocked', component: withSuspenseAndSafeArea(Blocked), options: undefined },
