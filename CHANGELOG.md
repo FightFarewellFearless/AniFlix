@@ -1,4 +1,4 @@
-# v0.9.0_JS-3 (1-Mei-2025)
+# v0.9.0_JS-4 (1-Mei-2025)
 
 ## Diperbaiki
 - Tampilan fullscreen
