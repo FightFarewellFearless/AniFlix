@@ -78,30 +78,29 @@ function HomeList(props: HomeProps) {
   useFocusEffect(
     useCallback(() => {
       const setLayoutWidth = (quote: string) => {
-        textLayoutWidth.set(
-          MeasureText.measureWidth(quote, {
-            fontWeight: 'bold',
-            fontSize: 17,
-          }),
-        );
+        const newWidth = MeasureText.measureWidth(quote, {
+          fontWeight: 'bold',
+          fontSize: 17,
+        });
+        textLayoutWidth.set(newWidth);
+        setAnimationText(quote);
       };
       function callback(finished?: boolean) {
         if (finished) {
           textLayoutWidth.set(0);
           const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
           const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
-          runOnJS(setAnimationText)(quote);
           runOnJS(setLayoutWidth)(quote);
         }
         boxTextAnim.set(0);
         if (!finished) return;
         boxTextAnim.set(
-          withDelay(2000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
+          withDelay(2000, withTiming(1, { duration: 15_000, easing: Easing.linear }, callback)),
         );
       }
 
       boxTextAnim.set(
-        withDelay(1000, withTiming(1, { duration: 20_000, easing: Easing.linear }, callback)),
+        withDelay(1000, withTiming(1, { duration: 15_000, easing: Easing.linear }, callback)),
       );
 
       return () => {
@@ -188,7 +187,7 @@ function HomeList(props: HomeProps) {
           </Text>
         </View>
 
-        <View style={{ overflow: 'hidden' }}>
+        <View style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
           <Reanimated.Text
             onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
             style={[styles.runningText, AnimationTextStyle]}>
@@ -406,6 +405,7 @@ function useStyles() {
       backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
       borderRadius: 16,
       padding: 5,
+      paddingBottom: 16,
       margin: 16,
       marginBottom: 12,
       elevation: 4,
