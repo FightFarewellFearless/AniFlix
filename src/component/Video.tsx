@@ -1,4 +1,7 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
+import { Buffer } from 'buffer/';
+import cheerio from 'cheerio';
+import { VideoView } from 'expo-video';
 import React, {
   memo,
   useCallback,
@@ -35,6 +38,7 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -55,14 +59,10 @@ import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
 import AnimeAPI from '../utils/AnimeAPI';
 import { getMovieDetail, getRawDataIfAvailable, MovieDetail } from '../utils/animeMovie';
-import deviceUserAgent from '../utils/deviceUserAgent';
-import VideoPlayer from './VideoPlayer';
-
-import { Buffer } from 'buffer/';
-import cheerio from 'cheerio';
-import { VideoView } from 'expo-video';
 import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
+import deviceUserAgent from '../utils/deviceUserAgent';
 import Skeleton from './misc/Skeleton';
+import VideoPlayer from './VideoPlayer';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -650,6 +650,8 @@ function Video(props: Props) {
       });
   }, [data.resolutionRaw]);
 
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
@@ -734,7 +736,7 @@ function Video(props: Props) {
         // mengecek apakah sedang dalam keadaan fullscreen atau tidak
         // jika ya, maka hanya menampilkan video saja
         !fullscreen && (
-          <ScrollView style={{ flex: 1 }}>
+          <ScrollView style={{ flex: 1, paddingBottom: insets.bottom }}>
             {/* movie information */}
             {props.route.params.isMovie && (
               <View style={{ backgroundColor: '#fde24b', marginVertical: 5 }}>
