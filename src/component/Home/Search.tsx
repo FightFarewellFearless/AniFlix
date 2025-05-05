@@ -341,12 +341,12 @@ function Search(props: Props) {
           {listAnime.length > 0 && !listAnimeLoading && (
             <LegendList
               recycleItems
-              maintainVisibleContentPosition
-              estimatedItemSize={50}
+              drawDistance={500}
+              estimatedItemSize={49.61574074074074}
               data={listAnime}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
-              keyExtractor={(_, index) => index.toString()}
+              keyExtractor={item => item.title}
               extraData={styles}
             />
           )}
