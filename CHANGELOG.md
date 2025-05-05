@@ -1,3 +1,10 @@
+# v0.9.0_JS-5 (5-Mei-2025)
+
+## Diperbaiki
+- Tampilan edge-to-edge pada bagian pemutaran
+- "Jumping layout" saat mengganti quotes di Beranda
+- Improvisasi list anime
+
 # v0.9.0_JS-4 (1-Mei-2025)
 
 ## Diperbaiki
