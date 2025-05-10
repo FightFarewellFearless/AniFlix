@@ -46,7 +46,7 @@
     "react-native-mmkv": "^3.2.0",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.14.1",
-    "react-native-reanimated": "3.17.4",
+    "react-native-reanimated": "3.17.5",
     "react-native-saf-x": "2.2.3",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "4.10.0",
