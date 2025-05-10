@@ -8,11 +8,11 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Appbar, PaperProvider } from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
 import useGlobalStyles from './src/assets/style';
-import Blank from './src/component/misc/Blank';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
 import SafeAreaWrapper from './src/component/misc/SafeAreaWrapper';
@@ -92,11 +92,6 @@ const screens: Screens = [
   },
   { name: 'SeeMore', component: withSuspenseAndSafeArea(SeeMore), options: { headerShown: true } },
   {
-    name: 'Blank',
-    component: withSuspenseAndSafeArea(Blank),
-    options: { animation: 'none', presentation: 'transparentModal' },
-  },
-  {
     name: 'ErrorScreen',
     component: ErrorScreen,
   },
@@ -166,17 +161,38 @@ function App() {
                       }
                     : undefined
                 }>
-                <Stack.Navigator
-                  initialRouteName="connectToServer"
-                  screenOptions={{
-                    headerShown: false,
-                  }}>
-                  {screens.map(({ name, component, options }) => (
-                    <Stack.Screen key={name} name={name} options={options}>
-                      {component}
-                    </Stack.Screen>
-                  ))}
-                </Stack.Navigator>
+                <PaperProvider>
+                  <Stack.Navigator
+                    initialRouteName="connectToServer"
+                    screenOptions={{
+                      headerShown: false,
+                      header: props => (
+                        <Appbar.Header>
+                          {props.back && (
+                            <Appbar.BackAction
+                              onPress={() => {
+                                props.navigation.goBack();
+                              }}
+                            />
+                          )}
+                          <Appbar.Content
+                            titleStyle={{ fontWeight: 'bold' }}
+                            title={
+                              typeof props.options.headerTitle === 'string'
+                                ? props.options.headerTitle
+                                : ''
+                            }
+                          />
+                        </Appbar.Header>
+                      ),
+                    }}>
+                    {screens.map(({ name, component, options }) => (
+                      <Stack.Screen key={name} name={name} options={options}>
+                        {component}
+                      </Stack.Screen>
+                    ))}
+                  </Stack.Navigator>
+                </PaperProvider>
                 <CFBypassIsOpenContext
                   value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
                   {isOpen && (

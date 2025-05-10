@@ -14,6 +14,11 @@ module.exports = {
       },
     ],
   ],
+  env: {
+    production: {
+      plugins: ['react-native-paper/babel'],
+    },
+  },
   // eslint-disable-next-line prettier/prettier
   plugins: [
     ['module:react-native-dotenv'],

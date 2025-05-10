@@ -342,7 +342,6 @@ function Search(props: Props) {
             <LegendList
               recycleItems
               drawDistance={500}
-              estimatedItemSize={49.61574074074074}
               data={listAnime}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}

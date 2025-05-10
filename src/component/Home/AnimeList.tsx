@@ -249,11 +249,6 @@ function EpisodeBaruUNMEMO({
           style={styles.seeMoreButton}
           onPress={() => {
             props.navigation.dispatch(StackActions.push('SeeMore', { type: 'AnimeList' }));
-            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
-            setTimeout(() => {
-              props.navigation.dispatch(StackActions.push('Blank'));
-              setTimeout(() => props.navigation.goBack(), 0);
-            }, 500);
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
           <MaterialIcon name="chevron-right" size={20} color="#007db8" />
@@ -315,11 +310,6 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
           disabled={data?.length === 0}
           onPress={() => {
             props.navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
-            // TEMP|TODO|WORKAROUND: Temporary fix for bottom-tabs extra padding
-            setTimeout(() => {
-              props.navigation.dispatch(StackActions.push('Blank'));
-              setTimeout(() => props.navigation.goBack(), 0);
-            }, 500);
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
           <MaterialIcon name="chevron-right" size={20} color="#007db8" />

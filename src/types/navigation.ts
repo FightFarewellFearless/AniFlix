@@ -62,7 +62,6 @@ type RootStackNavigator = {
   SeeMore: {
     type: 'AnimeList' | 'MovieList';
   };
-  Blank: undefined;
   ErrorScreen: { error: Error };
 };
 
