@@ -1,3 +1,9 @@
+# v0.9.0_JS-6 (10-Mei-2025)
+
+## Diperbaiki
+- Extra padding pada bagian bawah ketika navigasi.
+  > Terlihat lebih sering pada perangkat lawas
+
 # v0.9.0_JS-5 (5-Mei-2025)
 
 ## Diperbaiki
