@@ -1,3 +1,10 @@
+# v0.9.0_JS-7 (29-Mei-2025)
+
+## Ditingkatkan
+- Tampilan pada menu utilitas
+- Tampilan dialog yang lebih baik
+- Tampilan koneksi ke server dioptimalkan
+
 # v0.9.0_JS-6 (10-Mei-2025)
 
 ## Diperbaiki
