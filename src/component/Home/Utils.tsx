@@ -10,7 +10,6 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UtilsStackNavigator } from '../../types/navigation';
 import About from './Utilitas/About';
@@ -48,80 +47,61 @@ function Utils() {
 
 export default memo(Utils);
 
+const Screens = [
+  {
+    title: 'Cari Anime dari Gambar',
+    desc: 'Cari judul anime dari gambar screenshot.',
+    icon: 'image',
+    color: '#3a8fac',
+    screen: 'SearchAnimeByImage',
+  },
+  {
+    title: 'Catatan update',
+    desc: 'Perubahan setiap update mulai dari versi 0.6.0',
+    icon: 'history',
+    color: '#417e3b',
+    screen: 'Changelog',
+  },
+  {
+    title: 'Pengaturan',
+    desc: 'Atur aplikasi AniFlix kamu',
+    icon: 'cog',
+    color: '#615e58',
+    screen: 'Setting',
+  },
+  {
+    title: 'Tentang aplikasi',
+    desc: 'Tentang aplikasi AniFlix dan pengembangnya',
+    icon: 'information',
+    color: '#166db4',
+    screen: 'About',
+  },
+  {
+    title: 'Dukung pengembang',
+    desc: 'Dukung developer melalui donasi atau kontribusi kode sumber',
+    icon: 'hand-heart',
+    color: '#810af0',
+    screen: 'SupportDev',
+  },
+] as const;
+
 function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();
   return (
     <ScrollView>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.navigate('SearchAnimeByImage');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#3a8fac' }]}>
-            <Icon name="image" size={40} color={{ color: 'black' }.color} />
-            <Text style={[styles.titleText, { color: 'black' }]}>
-              Cari anime berdasarkan gambar
-            </Text>
-            <Text style={[styles.descText, { color: 'black' }]}>
-              Cari judul anime dari gambar screenshot.
-            </Text>
-          </View>
-        </TouchableNativeFeedback>
-
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.navigate('Changelog');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#417e3b' }]}>
-            <Icon name="history" size={40} color={{ color: '#dbdbdb' }.color} />
-            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Catatan update</Text>
-            <Text style={[styles.descText, { color: '#dbdbdb' }]}>
-              Perubahan setiap update mulai dari versi 0.6.0
-            </Text>
-          </View>
-        </TouchableNativeFeedback>
-
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.navigate('Setting');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#615e58' }]}>
-            <Icon name="cog" size={40} color={{ color: '#dbdbdb' }.color} />
-            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Pengaturan</Text>
-            <Text style={[styles.descText, { color: '#dbdbdb' }]}>Atur aplikasi AniFlix kamu</Text>
-          </View>
-        </TouchableNativeFeedback>
-
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.navigate('About');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#166db4' }]}>
-            <Icon name="info-circle" size={40} color={{ color: '#dbdbdb' }.color} />
-            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Tentang aplikasi</Text>
-            <Text style={[styles.descText, { color: '#dbdbdb' }]}>
-              Tentang aplikasi AniFlix dan pengembangnya
-            </Text>
-          </View>
-        </TouchableNativeFeedback>
-
-        <TouchableNativeFeedback
-          onPress={() => {
-            props.navigation.navigate('SupportDev');
-          }}
-          background={TouchableNativeFeedback.Ripple('white', false)}>
-          <View style={[styles.buttonContainer, { backgroundColor: '#810af0' }]}>
-            <MaterialCommunityIcon name="hand-heart" size={40} color={{ color: '#dbdbdb' }.color} />
-            <Text style={[styles.titleText, { color: '#dbdbdb' }]}>Dukung pengembang</Text>
-            <Text style={[styles.descText, { color: '#dbdbdb' }]}>
-              Dukung developer melalui donasi atau kontribusi kode sumber
-            </Text>
-          </View>
-        </TouchableNativeFeedback>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 4 }}>
+        {Screens.map((screen, index) => (
+          <TouchableNativeFeedback
+            key={index}
+            onPress={() => props.navigation.navigate(screen.screen)}
+            background={TouchableNativeFeedback.Ripple('#ffffff', false)}>
+            <View style={styles.buttonContainer}>
+              <MaterialCommunityIcon name={screen.icon} size={30} color={screen.color} />
+              <Text style={styles.titleText}>{screen.title}</Text>
+              <Text style={styles.descText}>{screen.desc}</Text>
+            </View>
+          </TouchableNativeFeedback>
+        ))}
       </View>
     </ScrollView>
   );
@@ -130,26 +110,28 @@ function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'Choose
 function useStyles() {
   const dimensions = useWindowDimensions();
   const colorScheme = useColorScheme();
-  const GAP = 2;
+  const GAP = 4;
   const devidedWidth = (dimensions.width - GAP) / 2;
   return useMemo(
     () =>
       StyleSheet.create({
         buttonContainer: {
-          backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#d1d1d1',
+          backgroundColor: colorScheme === 'dark' ? '#313131' : '#f1f1f1',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: 10,
+          padding: 20,
           elevation: 5,
           width: devidedWidth < 150 ? '100%' : devidedWidth,
           minWidth: 150,
         },
         titleText: {
+          color: colorScheme === 'dark' ? '#ffffff' : '#000000',
           textAlign: 'center',
           fontWeight: 'bold',
           fontSize: 17,
         },
         descText: {
+          color: colorScheme === 'dark' ? '#ffffff' : '#000000',
           textAlign: 'center',
         },
       }),
