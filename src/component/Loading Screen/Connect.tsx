@@ -14,7 +14,14 @@ import {
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
-import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  FadeInUp,
+  FadeOutDown,
+  default as Reanimated,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
@@ -284,16 +291,25 @@ function Loading(props: Props) {
         </View>
 
         <View style={styles.statusContainer}>
-          {Object.entries(loadStatus).map(([key, value]) => (
-            <View style={styles.statusItem} key={key}>
-              {value ? (
-                <MaterialIcon name="check-circle" size={20} color="#4CAF50" />
-              ) : (
-                <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
-              )}
-              <Text style={styles.statusText}>{key}</Text>
-            </View>
-          ))}
+          {(() => {
+            const currentLoading = Object.entries(loadStatus).find(a => a[1] === false)!;
+            const key = currentLoading[0];
+            const value = currentLoading[1];
+            return (
+              <Reanimated.View
+                entering={FadeInUp}
+                exiting={FadeOutDown}
+                style={styles.statusItem}
+                key={key}>
+                {value ? (
+                  <MaterialIcon name="check-circle" size={20} color="#4CAF50" />
+                ) : (
+                  <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
+                )}
+                <Text style={styles.statusText}>{key}</Text>
+              </Reanimated.View>
+            );
+          })()}
         </View>
       </View>
 
@@ -323,11 +339,14 @@ function useStyles() {
       StyleSheet.create({
         container: {
           flex: 1,
+          flexShrink: 1,
           backgroundColor: isDark ? '#121212' : '#f5f5f5',
           padding: 24,
           justifyContent: 'space-between',
         },
         content: {
+          flexWrap: 'wrap',
+          flexShrink: 1,
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
@@ -351,12 +370,7 @@ function useStyles() {
           borderRadius: 12,
           padding: 20,
           marginBottom: 24,
-          width: '100%',
           elevation: 2,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
         },
         quoteIcon: {
           color: isDark ? '#BB86FC' : '#6200EE',
@@ -382,6 +396,8 @@ function useStyles() {
           marginTop: 8,
         },
         progressContainer: {
+          flexShrink: 0,
+          flexWrap: 'nowrap',
           width: '100%',
           marginBottom: 24,
           alignItems: 'center',
@@ -409,10 +425,6 @@ function useStyles() {
           borderRadius: 12,
           padding: 16,
           elevation: 2,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
         },
         statusItem: {
           flexDirection: 'row',
