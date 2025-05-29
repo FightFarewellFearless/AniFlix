@@ -1,6 +1,5 @@
 import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,6 +24,7 @@ import Animated, {
 import { version as appVersion, OTAJSVersion } from '../../package.json';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
+import DialogManager from '../utils/dialogManager';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 
@@ -114,7 +114,7 @@ function NeedUpdate(props: Props) {
       Updates.fetchUpdateAsync()
         .then(() => {
           downloadProgress.set(100);
-          Alert.alert('Download selesai', 'Restart aplikasi untuk melakukan update', [
+          DialogManager.alert('Download selesai', 'Restart aplikasi untuk melakukan update', [
             {
               text: 'Restart',
               onPress: () => {
@@ -129,7 +129,7 @@ function NeedUpdate(props: Props) {
         });
     }
     ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
-    Alert.alert(
+    DialogManager.alert(
       'Perhatian',
       'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
     );

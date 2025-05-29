@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { Alert, PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import deviceUserAgent from './deviceUserAgent';
+import DialogManager from './dialogManager';
 
 function useDownloadAnime() {
   const downloadAnime = useCallback(
@@ -14,19 +15,22 @@ function useDownloadAnime() {
       callback: () => any,
     ) => {
       if (downloadSource.includes(source) && force === false) {
-        Alert.alert('Lanjutkan?', 'kamu sudah mengunduh bagian ini. Masih ingin melanjutkan?', [
-          {
-            text: 'Batalkan',
-            style: 'cancel',
-            onPress: () => null,
-          },
-          {
-            text: 'Lanjutkan',
-            onPress: () => {
-              downloadAnime(source, downloadSource, Title, resolution, true, callback);
+        DialogManager.alert(
+          'Lanjutkan?',
+          'kamu sudah mengunduh bagian ini. Masih ingin melanjutkan?',
+          [
+            {
+              text: 'Batalkan',
+              onPress: () => null,
             },
-          },
-        ]);
+            {
+              text: 'Lanjutkan',
+              onPress: () => {
+                downloadAnime(source, downloadSource, Title, resolution, true, callback);
+              },
+            },
+          ],
+        );
         return;
       }
       const sourceLength = downloadSource.filter(z => z === source).length;
@@ -46,13 +50,16 @@ function useDownloadAnime() {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           download();
         } else {
-          Alert.alert('Akses ditolak', 'Gagal mendownload karena akses ke penyimpanan di tolak');
+          DialogManager.alert(
+            'Akses ditolak',
+            'Gagal mendownload karena akses ke penyimpanan di tolak',
+          );
         }
       }
 
       async function download() {
         if (source.includes('mp4upload')) {
-          Alert.alert('Perhatian', 'Download movie dari mp4upload mungkin akan gagal!');
+          DialogManager.alert('Perhatian', 'Download movie dari mp4upload mungkin akan gagal!');
         }
         RNFetchBlob.config({
           trusty: true,

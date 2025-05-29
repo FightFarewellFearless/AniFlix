@@ -11,7 +11,6 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   ImageBackground,
   Keyboard,
@@ -53,6 +52,7 @@ import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
+import DialogManager from '../../utils/dialogManager';
 
 // Remove reanimated animated component creation for TextInput and Pressable
 // Replace:
@@ -178,7 +178,7 @@ function Search(props: Props) {
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
             : 'Error tidak diketahui: ' + err.message;
-        Alert.alert('Error', errMessage);
+        DialogManager.alert('Error', errMessage);
         setLoading(false);
       });
   }, [searchHistory]);

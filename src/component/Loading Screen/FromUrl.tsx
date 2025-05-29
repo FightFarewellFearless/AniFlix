@@ -1,19 +1,20 @@
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Text, ToastAndroid, View } from 'react-native';
+import { ActivityIndicator, Text, ToastAndroid, View } from 'react-native';
 import randomTipsArray from '../../assets/loadingTips.json';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
-import AnimeAPI from '../../utils/AnimeAPI';
 import Anime_Whitelist from '../../utils/Anime_Whitelist';
+import AnimeAPI from '../../utils/AnimeAPI';
 import setHistory from '../../utils/historyControl';
 import controlWatchLater from '../../utils/watchLaterControl';
 
 import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 import { getState, RootState, useSelectorIfFocused } from '../../utils/DatabaseManager';
+import DialogManager from '../../utils/dialogManager';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -32,7 +33,7 @@ function FromUrl(props: Props) {
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
     if (props.route.params.link.includes('nanimex')) {
       props.navigation.goBack();
-      Alert.alert(
+      DialogManager.alert(
         'Perhatian!',
         'Dikarenakan data yang digunakan berbeda, history lama tidak didukung, sehingga sebagai solusi, kamu harus mencari anime ini secara manual di menu pencarian dan pilih episode yang sesuai.',
       );
@@ -44,7 +45,7 @@ function FromUrl(props: Props) {
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if ('isError' in result) {
-              Alert.alert(
+              DialogManager.alert(
                 'Error',
                 'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
               );
@@ -64,7 +65,7 @@ function FromUrl(props: Props) {
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if ('isError' in result) {
-              Alert.alert(
+              DialogManager.alert(
                 'Error',
                 'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
               );
@@ -104,7 +105,7 @@ function FromUrl(props: Props) {
       AnimeAPI.fromUrl(props.route.params.link, resolution, !!resolution, undefined, abort.signal)
         .then(async result => {
           if (result === 'Unsupported') {
-            Alert.alert(
+            DialogManager.alert(
               'Tidak didukung!',
               'Anime yang kamu tuju tidak memiliki data yang didukung!',
             );
@@ -129,7 +130,7 @@ function FromUrl(props: Props) {
                 return;
               }
               if (Anime_Whitelist.list.includes(props.route.params.link)) {
-                Alert.alert(
+                DialogManager.alert(
                   'Perhatian!',
                   'Anime ini mungkin mengandung konten dewasa seperti ecchi. Namun telah di whitelist dan diizinkan tayang. Mohon bijak dalam menonton.',
                 );
@@ -170,7 +171,7 @@ function FromUrl(props: Props) {
               }
             }
           } catch (e: any) {
-            Alert.alert('Error', e.message);
+            DialogManager.alert('Error', e.message);
             props.navigation.goBack();
           }
         })
@@ -197,7 +198,7 @@ function FromUrl(props: Props) {
         err.message === 'Network Error'
           ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
           : 'Error tidak diketahui: ' + err.message;
-      Alert.alert('Error', errMessage);
+      DialogManager.alert('Error', errMessage);
       props.navigation.goBack();
     },
     [props],

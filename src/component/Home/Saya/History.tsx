@@ -5,7 +5,6 @@ import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -23,6 +22,7 @@ import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { storage } from '../../../utils/DatabaseManager';
+import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
@@ -152,14 +152,13 @@ function History(props: Props) {
                   style={styles.deleteButton}
                   hitSlop={10}
                   onPress={() => {
-                    Alert.alert(
+                    DialogManager.alert(
                       'Yakin?',
                       'Yakin kamu ingin menghapus "' + item.title.trim() + '" dari histori?',
                       [
                         {
                           text: 'Tidak',
                           onPress: () => null,
-                          style: 'cancel',
                         },
                         {
                           text: 'Ya',

@@ -3,7 +3,6 @@ import { reloadAppAsync } from 'expo';
 import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Appearance,
   ColorSchemeName,
   FlatList,
@@ -32,6 +31,7 @@ import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { createDocument } from 'react-native-saf-x';
 import { getState, RootState, storage } from '../../../utils/DatabaseManager';
+import DialogManager from '../../../utils/dialogManager';
 import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
@@ -90,7 +90,7 @@ function Setting(_props: Props) {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           backup();
         } else {
-          Alert.alert(
+          DialogManager.alert(
             'Akses ditolak',
             'Gagal mencadangkan data dikarenakan akses ke penyimpanan di tolak',
           );
@@ -104,11 +104,11 @@ function Setting(_props: Props) {
           mimeType: 'text/plain',
         });
         if (backupFile) {
-          Alert.alert('Berhasil', `Data berhasil di backup!`);
+          DialogManager.alert('Berhasil', `Data berhasil di backup!`);
         }
       }
     } catch (e: any) {
-      Alert.alert('Error', e.message);
+      DialogManager.alert('Error', e.message);
     }
   }, []);
 
@@ -163,23 +163,23 @@ function Setting(_props: Props) {
               storage.set(value, restoredData);
             }
           });
-        Alert.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
+        DialogManager.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
       } catch (e: any) {
-        Alert.alert('Restore gagal!', e.message);
+        DialogManager.alert('Restore gagal!', e.message);
       }
     } catch (e: any) {
       const errMessage =
         e.message === 'Network Error'
           ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
           : 'Error tidak diketahui: ' + e.message;
-      Alert.alert('Restore gagal!', errMessage);
+      DialogManager.alert('Restore gagal!', errMessage);
     } finally {
       setModalVisible(false);
     }
   }, [restoreHistoryOrWatchLater]);
 
   const deleteHistory = useCallback(() => {
-    Alert.alert(
+    DialogManager.alert(
       'Peringatan!!!',
       'Ini akan menghapus semua histori tontonan kamu.\nApakah kamu yakin ingin lanjut?',
       [
@@ -194,9 +194,9 @@ function Setting(_props: Props) {
             await new Promise(res => setTimeout(res, 1));
             try {
               storage.set('history', '[]');
-              Alert.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
+              DialogManager.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
             } catch (e: any) {
-              Alert.alert('Gagal menghapus histori!', e.message);
+              DialogManager.alert('Gagal menghapus histori!', e.message);
             } finally {
               setModalVisible(false);
             }
@@ -293,7 +293,7 @@ function Setting(_props: Props) {
       description: 'Muat ulang aplikasi',
       icon: <Icon name="refresh" style={globalStyles.text} size={iconSize} />,
       handler: () => {
-        Alert.alert('Reload aplikasi', 'Aplikasi akan di muat ulang', [
+        DialogManager.alert('Reload aplikasi', 'Aplikasi akan di muat ulang', [
           {
             text: 'Batal',
           },

@@ -2,7 +2,6 @@ import { WEBHOOK_WHITELIST_URL } from '@env';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   Modal,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import { RootStackNavigator } from '../types/navigation';
+import DialogManager from '../utils/dialogManager';
 import { JoinDiscord } from './Loading Screen/Connect';
 
 // @ts-expect-error
@@ -99,10 +99,10 @@ function Blocked(props: Props) {
       }),
     })
       .then(() => {
-        Alert.alert('Berhasil', 'Permintaan Anda berhasil dikirim!');
+        DialogManager.alert('Berhasil', 'Permintaan Anda berhasil dikirim!');
       })
       .catch(() => {
-        Alert.alert('Gagal', 'Permintaan Anda gagal dikirim!');
+        DialogManager.alert('Gagal', 'Permintaan Anda gagal dikirim!');
       });
 
     textInputDescription.current = '';

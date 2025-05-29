@@ -8,7 +8,7 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Appbar, PaperProvider } from 'react-native-paper';
+import { Appbar, Button, Dialog, PaperProvider, Portal } from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
@@ -24,6 +24,7 @@ import { RootStackNavigator } from './src/types/navigation';
 import { Movies } from './src/utils/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { storage } from './src/utils/DatabaseManager';
+import DialogManager from './src/utils/dialogManager';
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
@@ -134,6 +135,17 @@ function App() {
     StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
   }, [colorScheme]);
 
+  // Dialog related
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogContent, setDialogContent] = useState({
+    title: '',
+    message: '',
+    buttons: [] as { text: string; onPress: () => void }[],
+  });
+  useEffect(() => {
+    DialogManager.setupDialog(setDialogVisible, setDialogContent);
+  }, []);
+
   return (
     <SafeAreaProvider>
       <ErrorBoundary FallbackComponent={FallbackComponent}>
@@ -162,6 +174,30 @@ function App() {
                     : undefined
                 }>
                 <PaperProvider>
+                  <Portal>
+                    <Dialog
+                      visible={dialogVisible}
+                      dismissable={false}
+                      dismissableBackButton
+                      onDismiss={() => setDialogVisible(false)}>
+                      <Dialog.Title>{dialogContent.title}</Dialog.Title>
+                      <Dialog.Content>
+                        <Text style={globalStyles.text}>{dialogContent.message}</Text>
+                      </Dialog.Content>
+                      <Dialog.Actions>
+                        {dialogContent.buttons.map((button, index) => (
+                          <Button
+                            key={index}
+                            onPress={() => {
+                              button.onPress();
+                              setDialogVisible(false);
+                            }}>
+                            {button.text}
+                          </Button>
+                        ))}
+                      </Dialog.Actions>
+                    </Dialog>
+                  </Portal>
                   <Stack.Navigator
                     initialRouteName="connectToServer"
                     screenOptions={{

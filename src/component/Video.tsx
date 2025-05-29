@@ -13,7 +13,6 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   BackHandler,
   EmitterSubscription,
   NativeEventEmitter,
@@ -61,6 +60,7 @@ import AnimeAPI from '../utils/AnimeAPI';
 import { getMovieDetail, getRawDataIfAvailable, MovieDetail } from '../utils/animeMovie';
 import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 import deviceUserAgent from '../utils/deviceUserAgent';
+import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
 import VideoPlayer from './VideoPlayer';
 
@@ -119,7 +119,7 @@ function Video(props: Props) {
     if (props.route.params.isMovie) {
       getMovieDetail(data.episodeData.animeDetail).then(detail => {
         if ('isError' in detail) {
-          Alert.alert(
+          DialogManager.alert(
             'Error',
             'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
           );
@@ -338,7 +338,7 @@ function Video(props: Props) {
             err.message === 'Network Error'
               ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
               : 'Error tidak diketahui: ' + err.message;
-          Alert.alert('Error', errMessage);
+          DialogManager.alert('Error', errMessage);
           setLoading(false);
           return { error: true };
         });
@@ -362,7 +362,7 @@ function Video(props: Props) {
       }
       if (resultData === undefined) {
         setLoading(false);
-        Alert.alert('Ganti resolusi gagal', 'Gagal mengganti resolusi karena data kosong!');
+        DialogManager.alert('Ganti resolusi gagal', 'Gagal mengganti resolusi karena data kosong!');
         return;
       }
       if (typeof resultData !== 'string' && ('canceled' in resultData || 'error' in resultData)) {
@@ -483,21 +483,24 @@ function Video(props: Props) {
           err.message === 'Network Error'
             ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
             : 'Error tidak diketahui: ' + err.message;
-        Alert.alert('Error', errMessage);
+        DialogManager.alert('Error', errMessage);
         setLoading(false);
       });
       if (result === undefined) {
         return;
       }
       if (result === 'Unsupported') {
-        Alert.alert('Tidak didukung!', 'Anime yang kamu tuju tidak memiliki data yang didukung!');
+        DialogManager.alert(
+          'Tidak didukung!',
+          'Anime yang kamu tuju tidak memiliki data yang didukung!',
+        );
         setLoading(false);
         return;
       }
 
       if (result.type !== 'animeStreaming') {
         setLoading(false);
-        Alert.alert(
+        DialogManager.alert(
           'Kesalahan!!',
           'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
         );
@@ -534,7 +537,7 @@ function Video(props: Props) {
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
-    // Alert.alert('Perhatian', `
+    // DialogManager.alert('Perhatian', `
     // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
     // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
     // `)
