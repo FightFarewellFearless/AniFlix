@@ -113,87 +113,101 @@ function SearchAnimeByImage() {
         </View>
       </Modal>
 
-      <View style={styles.card}>
-        <TouchableNativeFeedback
-          background={TouchableNativeFeedback.Ripple(
-            colorScheme === 'dark' ? '#3a3a3a' : '#e0e0e0',
-            false,
-          )}
-          onPress={() => {
-            DocumentPicker.getDocumentAsync({
-              type: ['image/*'],
-              copyToCacheDirectory: false,
-            }).then(result => {
-              setChoosenImage(result.assets?.[0].uri);
-              const formData = new FormData();
-              // @ts-expect-error
-              formData.append('image', {
-                uri: result.assets?.[0].uri,
-                name: 'image.png',
-                type: 'image/png',
-              });
-              setIsLoading(true);
-              RNFetch('https://api.trace.moe/search?anilistInfo', {
-                method: 'POST',
-                body: formData,
-              })
-                .then(e => e.json() as Promise<SearchResult>)
-                .then(setSearchResult)
-                .finally(() => {
-                  setIsLoading(false);
-                })
-                .catch(() => {
-                  setSearchResult({
-                    frameCount: 0,
-                    error: '',
-                    result: exampleResultArray,
-                  });
-                  ToastAndroid.show('Terjadi kesalahan!', ToastAndroid.SHORT);
-                });
-            });
-          }}>
-          <View style={styles.imagePicker}>
-            <Icon name="image" size={32} color={colorScheme === 'dark' ? '#BB86FC' : '#6200EE'} />
-            <Text style={styles.imagePickerText}>Pilih Gambar</Text>
-            <Text style={styles.imagePickerSubtext}>Format: JPG, PNG</Text>
-          </View>
-        </TouchableNativeFeedback>
-      </View>
-
-      <View style={styles.tipsContainer}>
-        <View style={styles.tipItem}>
-          <MaterialIcon
-            name="warning"
-            size={16}
-            color={colorScheme === 'dark' ? '#FFA726' : '#FB8C00'}
-          />
-          <Text style={styles.tipText}>*Filter hasil dewasa aktif</Text>
-        </View>
-        <View style={styles.tipItem}>
-          <MaterialIcon
-            name="lightbulb"
-            size={16}
-            color={colorScheme === 'dark' ? '#4FC3F7' : '#039BE5'}
-          />
-          <Text style={styles.tipText}>
-            **Untuk hasil maksimal pastikan gambar tidak terpotong dan tidak ada border tambahan
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.imagePreviewContainer}>
-        {choosenImage ? (
-          <Image source={{ uri: choosenImage }} style={styles.selectedImage} resizeMode="contain" />
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Icon name="image" size={48} color={colorScheme === 'dark' ? '#555' : '#aaa'} />
-            <Text style={styles.placeholderText}>Pilih gambar terlebih dahulu</Text>
-          </View>
-        )}
-      </View>
-
       <FlashList
         data={searchResult?.result?.filter(val => val.anilist.isAdult === false)}
+        ListHeaderComponent={() => {
+          return (
+            <>
+              <View style={styles.card}>
+                <TouchableNativeFeedback
+                  background={TouchableNativeFeedback.Ripple(
+                    colorScheme === 'dark' ? '#3a3a3a' : '#e0e0e0',
+                    false,
+                  )}
+                  onPress={() => {
+                    DocumentPicker.getDocumentAsync({
+                      type: ['image/*'],
+                      copyToCacheDirectory: false,
+                    }).then(result => {
+                      setChoosenImage(result.assets?.[0].uri);
+                      const formData = new FormData();
+                      // @ts-expect-error
+                      formData.append('image', {
+                        uri: result.assets?.[0].uri,
+                        name: 'image.png',
+                        type: 'image/png',
+                      });
+                      setIsLoading(true);
+                      RNFetch('https://api.trace.moe/search?anilistInfo', {
+                        method: 'POST',
+                        body: formData,
+                      })
+                        .then(e => e.json() as Promise<SearchResult>)
+                        .then(setSearchResult)
+                        .finally(() => {
+                          setIsLoading(false);
+                        })
+                        .catch(() => {
+                          setSearchResult({
+                            frameCount: 0,
+                            error: '',
+                            result: exampleResultArray,
+                          });
+                          ToastAndroid.show('Terjadi kesalahan!', ToastAndroid.SHORT);
+                        });
+                    });
+                  }}>
+                  <View style={styles.imagePicker}>
+                    <Icon
+                      name="image"
+                      size={32}
+                      color={colorScheme === 'dark' ? '#BB86FC' : '#6200EE'}
+                    />
+                    <Text style={styles.imagePickerText}>Pilih Gambar</Text>
+                    <Text style={styles.imagePickerSubtext}>Format: JPG, PNG</Text>
+                  </View>
+                </TouchableNativeFeedback>
+              </View>
+
+              <View style={styles.tipsContainer}>
+                <View style={styles.tipItem}>
+                  <MaterialIcon
+                    name="warning"
+                    size={16}
+                    color={colorScheme === 'dark' ? '#FFA726' : '#FB8C00'}
+                  />
+                  <Text style={styles.tipText}>*Filter hasil dewasa aktif</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <MaterialIcon
+                    name="lightbulb"
+                    size={16}
+                    color={colorScheme === 'dark' ? '#4FC3F7' : '#039BE5'}
+                  />
+                  <Text style={styles.tipText}>
+                    **Untuk hasil maksimal pastikan gambar tidak terpotong dan tidak ada border
+                    tambahan
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.imagePreviewContainer}>
+                {choosenImage ? (
+                  <Image
+                    source={{ uri: choosenImage }}
+                    style={styles.selectedImage}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <View style={styles.placeholderContainer}>
+                    <Icon name="image" size={48} color={colorScheme === 'dark' ? '#555' : '#aaa'} />
+                    <Text style={styles.placeholderText}>Pilih gambar terlebih dahulu</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          );
+        }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.resultCard}
@@ -271,10 +285,6 @@ function useStyles() {
           borderRadius: 12,
           overflow: 'hidden',
           elevation: 2,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
           marginBottom: 16,
         },
         imagePicker: {
@@ -308,7 +318,8 @@ function useStyles() {
           flex: 1,
         },
         imagePreviewContainer: {
-          height: '30%',
+          width: '100%',
+          height: 128,
           backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
           borderRadius: 12,
           marginBottom: 16,
