@@ -1,3 +1,8 @@
+# v0.9.0_JS-8 (29-Mei-2025)
+
+## Perubahan lain
+- Memaksa render ulang video player setiap ada perubahan streaming link
+
 # v0.9.0_JS-7 (29-Mei-2025)
 
 ## Ditingkatkan
