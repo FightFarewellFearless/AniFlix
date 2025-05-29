@@ -3289,15 +3289,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@legendapp/list@npm:^1.0.10":
-  version: 1.0.10
-  resolution: "@legendapp/list@npm:1.0.10"
+"@legendapp/list@npm:^1.0.14":
+  version: 1.0.14
+  resolution: "@legendapp/list@npm:1.0.14"
   dependencies:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 7b455e035750c3d501e5ea31fc4066f2209eaa77203e5193f25b07895ab14fb1c264b890830926f51374390d45e5fc33787235a05fdc4883672e6b3cb5571d79
+  checksum: 2fc8c552bd7a66fbb5a408df5cb0ecf2a82d8eba53f71cad726f6581e0641ec07823ee71d8195e8df19100c5a50f61057c00818bc63c6be053314f564e46804c
   languageName: node
   linkType: hard
 
@@ -3955,9 +3955,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.9.1":
-  version: 7.9.1
-  resolution: "@react-navigation/core@npm:7.9.1"
+"@react-navigation/core@npm:^7.9.2":
+  version: 7.9.2
+  resolution: "@react-navigation/core@npm:7.9.2"
   dependencies:
     "@react-navigation/routers": ^7.3.7
     escape-string-regexp: ^4.0.0
@@ -3968,69 +3968,69 @@ __metadata:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: ">= 18.2.0"
-  checksum: 5691905aec026a510773dcd3841e15d3318d790375313db8611a10d4c6cfb70c33043a9e487b82b8331cc87dd929b70b1aadce4b507b928152a242d08c8e7d60
+  checksum: 346040b232b8e9dae6930cc8dd306020d3c6779d0aaf704947ca7279b7862aa0fc2e91abdcd8cc25b373d98435d787149539ca86e314317e7a5465df1e640239
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.3.11":
-  version: 7.3.11
-  resolution: "@react-navigation/drawer@npm:7.3.11"
+"@react-navigation/drawer@npm:^7.3.12":
+  version: 7.3.12
+  resolution: "@react-navigation/drawer@npm:7.3.12"
   dependencies:
-    "@react-navigation/elements": ^2.4.1
+    "@react-navigation/elements": ^2.4.2
     color: ^4.2.3
     react-native-drawer-layout: ^4.1.8
     use-latest-callback: ^0.2.3
   peerDependencies:
-    "@react-navigation/native": ^7.1.8
+    "@react-navigation/native": ^7.1.9
     react: ">= 18.2.0"
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 83346874d2e1796ff1246b880d913220656fa453c4d2f2f7675bf4c1060c3ea027452473d45889065f52e7913e9c426f34fc20e931f68f7a06a7ccfbd358a468
+  checksum: 4a3fcff2ce818abe88d0a3175f0e446da6a61e585c1496a68ae4fcd983f109372be3d785c3f0c2bb2da397b1b35a012c1c98e6988fa81a819757676c299cd7c1
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@react-navigation/elements@npm:2.4.1"
+"@react-navigation/elements@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@react-navigation/elements@npm:2.4.2"
   dependencies:
     color: ^4.2.3
   peerDependencies:
     "@react-native-masked-view/masked-view": ">= 0.2.0"
-    "@react-navigation/native": ^7.1.8
+    "@react-navigation/native": ^7.1.9
     react: ">= 18.2.0"
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
   peerDependenciesMeta:
     "@react-native-masked-view/masked-view":
       optional: true
-  checksum: ac9adb33d2195849c4ac11bf51ac885e283581e7e3ebb6cf775a9569940da55a789ed74dc30e8f706e65518d8ea709035f364afcecd310f4e97410072bc67482
+  checksum: 5fee0e6601d50512256028c5de9da924ab17e5edbdfbf84963c1e95b0a3da05eb09aa753111453f3a9701b7d123dbb14c2ce2bff888ec9488fcc893872e2e079
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.3.12":
-  version: 7.3.12
-  resolution: "@react-navigation/native-stack@npm:7.3.12"
+"@react-navigation/native-stack@npm:^7.3.13":
+  version: 7.3.13
+  resolution: "@react-navigation/native-stack@npm:7.3.13"
   dependencies:
-    "@react-navigation/elements": ^2.4.1
+    "@react-navigation/elements": ^2.4.2
     warn-once: ^0.1.1
   peerDependencies:
-    "@react-navigation/native": ^7.1.8
+    "@react-navigation/native": ^7.1.9
     react: ">= 18.2.0"
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 367e52770c954378e8b5972ad771cfabd1ea41d0c20f843f981f070fac8923092a52a3de1becd1ccc036ca376dd894a7b1f8c29a1c81f518a84c158ebfe87f92
+  checksum: 141d208b35a84875226cea53125e47925ce21c828a69fffe7e44439cff1b5d7ae16dc41db3d0e48a84a349ec44d636294d3fde58e5dde4d1415c3b3aeeef670c
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.1.8":
-  version: 7.1.8
-  resolution: "@react-navigation/native@npm:7.1.8"
+"@react-navigation/native@npm:^7.1.9":
+  version: 7.1.9
+  resolution: "@react-navigation/native@npm:7.1.9"
   dependencies:
-    "@react-navigation/core": ^7.9.1
+    "@react-navigation/core": ^7.9.2
     escape-string-regexp: ^4.0.0
     fast-deep-equal: ^3.1.3
     nanoid: ^3.3.11
@@ -4038,7 +4038,7 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
     react-native: "*"
-  checksum: 4b36e283cb35f8f8f9bbef141d2670b43cfbcbe253c2cfd83a07cc78890a9eb73cce586b3c9523e3c79e29360bd435766dc36248f31e833e46da4e5f6a0247f9
+  checksum: 3dd504d6d7c4482612c48909754d051a68b36d5d7cdf1ae610333da99c1309e194b65cd4e79ed343dd12cbbb55a3fb856453830d6cb45b54f6f3fe88464667cd
   languageName: node
   linkType: hard
 
@@ -4753,7 +4753,7 @@ __metadata:
     "@babel/runtime": ^7.27.0
     "@bottom-tabs/react-navigation": ^0.9.0
     "@domir/react-native-measure-text": ^0.1.8
-    "@legendapp/list": ^1.0.10
+    "@legendapp/list": ^1.0.14
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-async-storage/async-storage": 2.1.2
     "@react-native-community/cli": ^18.0.0
@@ -4762,9 +4762,9 @@ __metadata:
     "@react-native/eslint-config": 0.79.1
     "@react-native/metro-config": 0.79.1
     "@react-native/typescript-config": 0.79.1
-    "@react-navigation/drawer": ^7.3.11
-    "@react-navigation/native": ^7.1.8
-    "@react-navigation/native-stack": ^7.3.12
+    "@react-navigation/drawer": ^7.3.12
+    "@react-navigation/native": ^7.1.9
+    "@react-navigation/native-stack": ^7.3.13
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^1.8.0
     "@types/jest": ^29.5.14
