@@ -674,6 +674,7 @@ function Video(props: Props) {
           // mengecek apakah video tersedia
           data.streamingType === 'raw' ? (
             <VideoPlayer
+              key={data.streamingLink}
               title={data.title}
               thumbnailURL={data.thumbnailUrl}
               streamingURL={data.streamingLink}
