@@ -131,14 +131,13 @@ function SearchAnimeByImage() {
                     }).then(result => {
                       setChoosenImage(result.assets?.[0].uri);
                       const formData = new FormData();
-                      // @ts-expect-error
                       formData.append('image', {
                         uri: result.assets?.[0].uri,
                         name: 'image.png',
                         type: 'image/png',
                       });
                       setIsLoading(true);
-                      RNFetch('https://api.trace.moe/search?anilistInfo', {
+                      fetch('https://api.trace.moe/search?anilistInfo', {
                         method: 'POST',
                         body: formData,
                       })
