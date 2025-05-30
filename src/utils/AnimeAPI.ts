@@ -99,12 +99,13 @@ class AnimeAPI {
         },
         method: 'GET',
         signal,
-      }).catch(() => {
-        throw new Error('canceled');
+      }).catch(err => {
+        if (err instanceof Error && err.message.includes('Aborted')) throw new Error('canceled');
+        else return err as Error;
       });
-      // if(statusCode instanceof Error) {
-      //   throw statusCode;
-      // }
+      if (statusCode instanceof Error) {
+        throw statusCode;
+      }
       const html = await statusCode.text();
       const regex = /<title>(.*?)<\/title>/;
       const title = html.match(regex)?.[1];
