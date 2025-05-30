@@ -4805,7 +4805,7 @@ __metadata:
     react-native-mmkv: ^3.2.0
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.1
-    react-native-reanimated: 3.17.4
+    react-native-reanimated: 3.18.0
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.4.0
     react-native-screens: 4.10.0
@@ -12041,9 +12041,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:3.17.4":
-  version: 3.17.4
-  resolution: "react-native-reanimated@npm:3.17.4"
+"react-native-reanimated@npm:3.18.0":
+  version: 3.18.0
+  resolution: "react-native-reanimated@npm:3.18.0"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -12061,7 +12061,7 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 8c812466c3a1d7d3576365f16c62183efd9651ae769849a40240a3f674131960e2380c8536232563dd0935a607696eb373abcece899ce4152bfdd711778e7cd7
+  checksum: d425c0bd2004012330242b6d0abbf32b4f7d4f2090bc4af4b1b156a5edd8a3c6deb1fbf6b1cf5041be8f67615d5853742cef74c5b25d9d00aea4688112d0b1a2
   languageName: node
   linkType: hard
 
