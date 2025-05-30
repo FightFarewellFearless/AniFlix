@@ -1,3 +1,8 @@
+# v0.9.0_JS-9 (30-Mei-2025)
+
+## Diperbaiki
+- Masalah beberapa tombol yang tidak bisa ditekan pada kasus tertentu
+
 # v0.9.0_JS-8 (29-Mei-2025)
 
 ## Perubahan lain
