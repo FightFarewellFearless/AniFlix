@@ -1,3 +1,8 @@
+# v0.9.0_JS-10 (30-Mei-2025)
+
+## Diperbaiki
+- Pesan error tidak muncul
+
 # v0.9.0_JS-9 (30-Mei-2025)
 
 ## Diperbaiki
