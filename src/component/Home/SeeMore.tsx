@@ -16,6 +16,7 @@ import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
+import { MIN_IMAGE_WIDTH } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
 
@@ -29,10 +30,9 @@ function SeeMore(props: Props) {
       ? (animeData?.newAnime.length ?? 0) / 25
       : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
-  const columnWidth = (dimensions.width * 120) / 200 / 1.9;
+  let columnWidth = (dimensions.width * 120) / 200 / 1.9;
+  columnWidth = Math.max(columnWidth, MIN_IMAGE_WIDTH);
   const numColumns = Math.floor(dimensions.width / columnWidth);
-
-  const LIST_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -72,7 +72,6 @@ function SeeMore(props: Props) {
           )
         }
         numColumns={numColumns}
-        estimatedItemSize={LIST_HEIGHT + 5} // 5: the marginVertical from ListAnimeComponent
         ListFooterComponent={
           <>
             {isLoading && <ActivityIndicator />}

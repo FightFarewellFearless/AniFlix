@@ -334,7 +334,9 @@ function Top({ title }: { title: string }) {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Text style={{ color: 'white', fontWeight: 'bold' }}>{title}</Text>
+      <Text style={{ color: 'white', fontWeight: 'bold' }} numberOfLines={2}>
+        {title}
+      </Text>
     </View>
   );
 }
@@ -367,7 +369,8 @@ function CenterControl({
       onStartShouldSetResponder={() => true}
       style={{
         position: 'absolute',
-        top: '50%',
+        top: 0,
+        bottom: 0,
         alignSelf: 'center',
         flexDirection: 'row',
         alignItems: 'center',

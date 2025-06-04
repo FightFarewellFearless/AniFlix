@@ -8,6 +8,7 @@ import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
+import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 
 export function ListAnimeComponent(
   props: (
@@ -66,8 +67,10 @@ export function ListAnimeComponent(
 
 function useStyles() {
   const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
+  let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.95;
+  LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
+  LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
   return useMemo(
     () =>
       StyleSheet.create({

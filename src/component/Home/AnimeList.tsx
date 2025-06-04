@@ -43,6 +43,9 @@ import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
 
+export const MIN_IMAGE_HEIGHT = 200;
+export const MIN_IMAGE_WIDTH = 100;
+
 type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
 const Home = memo(HomeList);
@@ -347,8 +350,10 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
 
 function ShowSkeletonLoading() {
   const dimensions = useWindowDimensions();
-  const LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
-  const LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 1.9;
+  let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
+  LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
+  LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
   return (
     <View style={{ flexDirection: 'row', gap: 12 }}>
       {[1, 2, 3].map((_, index) => (
@@ -399,10 +404,6 @@ function useStyles() {
       margin: 16,
       marginBottom: 12,
       elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
     },
     headerInfo: {
       flexDirection: 'row',
@@ -465,10 +466,6 @@ function useStyles() {
       marginHorizontal: 3,
       marginBottom: 16,
       elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
     },
     sectionHeader: {
       flexDirection: 'row',
