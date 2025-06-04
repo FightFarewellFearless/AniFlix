@@ -740,7 +740,7 @@ function Video(props: Props) {
         // mengecek apakah sedang dalam keadaan fullscreen atau tidak
         // jika ya, maka hanya menampilkan video saja
         !fullscreen && (
-          <ScrollView style={{ flex: 1, paddingBottom: insets.bottom }}>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: insets.bottom }}>
             {/* movie information */}
             {props.route.params.isMovie && (
               <View style={{ backgroundColor: '#fde24b', marginVertical: 5 }}>
@@ -967,7 +967,11 @@ function Video(props: Props) {
                       global.gc?.();
                     }}>
                     <Icon name="arrow-left" size={18} color="black" />
-                    <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
+                    <Text
+                      style={[
+                        globalStyles.text,
+                        { fontWeight: 'bold', color: 'black', textAlign: 'center' },
+                      ]}>
                       Episode sebelumnya
                     </Text>
                   </TouchableOpacity>
@@ -986,7 +990,11 @@ function Video(props: Props) {
                       global.gc?.();
                     }}>
                     <Icon name="arrow-right" size={18} color="black" />
-                    <Text style={[globalStyles.text, { fontWeight: 'bold', color: 'black' }]}>
+                    <Text
+                      style={[
+                        globalStyles.text,
+                        { fontWeight: 'bold', color: 'black', textAlign: 'center' },
+                      ]}>
                       Episode selanjutnya
                     </Text>
                   </TouchableOpacity>
@@ -1224,7 +1232,9 @@ function useStyles() {
         },
         infoData: {
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          justifyContent: 'space-around',
+          alignContent: 'center',
           alignItems: 'center',
           marginTop: 10,
         },
