@@ -293,15 +293,17 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
 
   useEffect(() => {
     setData?.([]); // so the skeleton loading show
-    getLatestMovie()
-      .then(movieData => {
-        if ('isError' in movieData) {
-          setIsError(true);
-        } else {
-          setData?.(movieData);
-        }
-      })
-      .catch(() => setIsError(true));
+    queueMicrotask(() => {
+      getLatestMovie()
+        .then(movieData => {
+          if ('isError' in movieData) {
+            setIsError(true);
+          } else {
+            setData?.(movieData);
+          }
+        })
+        .catch(() => setIsError(true));
+    });
   }, [setData]);
 
   return (
