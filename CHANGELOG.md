@@ -1,3 +1,15 @@
+# v0.9.0_JS-11 (5-Juni-2025)
+
+## Diperbaiki
+- Tampilan edge-to-edge pada saat streaming (tombol download yang tertutup navigasi sistem)
+- Masalah layout pada list anime
+
+## Ditingkatkan
+- Membuat beberapa layout lebih responsif terhadap berbagai ukuran jendela
+  > perubahan terkait dengan responsive layout lainnya akan di update di versi mendatang.
+- UI pada list anime dan hasil search anime
+- Data fetching pada saat refresh data di beranda
+
 # v0.9.0_JS-10 (30-Mei-2025)
 
 ## Diperbaiki
