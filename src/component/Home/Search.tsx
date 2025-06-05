@@ -341,7 +341,7 @@ function Search(props: Props) {
           {listAnime.length > 0 && !listAnimeLoading && (
             <LegendList
               recycleItems
-              estimatedItemSize={47}
+              waitForInitialLayout
               drawDistance={500}
               data={listAnime}
               key={listAnimeLoading.toString()}
@@ -707,16 +707,16 @@ function useStyles() {
           justifyContent: 'center',
           paddingVertical: 10,
           flexDirection: 'row',
-          backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f5f5f5',
+          backgroundColor: colorScheme === 'dark' ? '#1d1d1d' : '#f5f5f5',
           marginHorizontal: 16,
           borderRadius: 12,
           elevation: 2,
         },
         animeListIndex: {
-          textAlign: 'left',
+          marginLeft: 4,
           fontWeight: 'bold',
           fontSize: 12,
-          color: colorScheme === 'light' ? '#000769' : '#00bb00',
+          color: colorScheme === 'light' ? '#000769' : '#007e00',
         },
         animeSearchListDetailText: {
           fontWeight: 'bold',
