@@ -1,9 +1,18 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
-import { Animated, StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, useColorScheme, View, ViewStyle } from 'react-native';
+import Reanimated, {
+  cancelAnimation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const ReanimatedLinearGradient = Reanimated.createAnimatedComponent(LinearGradient);
 
 export default function Skeleton({
   height,
@@ -17,60 +26,54 @@ export default function Skeleton({
   stopOnBlur?: boolean;
 }) {
   const styles = useStyles();
-  const [shiningPosition] = useState(() => new Animated.Value(0));
+  const shiningPosition = useSharedValue(0);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(shiningPosition, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shiningPosition, {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
+    const startAnimation = () => {
+      shiningPosition.value = withRepeat(
+        withSequence(withTiming(1, { duration: 1500 }), withTiming(0, { duration: 0 })),
+        -1,
+      );
+    };
+
+    startAnimation();
+
     let navigationFocus: ReturnType<typeof navigation.addListener>;
     let navigationBlur: ReturnType<typeof navigation.addListener>;
+
     if (stopOnBlur) {
       navigationBlur = navigation.addListener('blur', () => {
-        animation.stop();
+        cancelAnimation(shiningPosition);
       });
       navigationFocus = navigation.addListener('focus', () => {
-        animation.start();
+        shiningPosition.value = 0;
+        startAnimation();
       });
     }
-    animation.start();
 
     return () => {
-      animation.stop();
+      cancelAnimation(shiningPosition);
       navigationFocus && navigationFocus();
       navigationBlur && navigationBlur();
     };
-  }, [navigation, shiningPosition, stopOnBlur]);
+  }, [navigation, stopOnBlur, shiningPosition]);
 
-  const translateX = shiningPosition.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-width - 100, width],
+  const animatedShiningStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(shiningPosition.value, [0, 1], [-width - 100, width]);
+    return {
+      transform: [{ translateX }],
+    };
   });
-
-  const shiningStyle = {
-    transform: [{ translateX }],
-  };
 
   return (
     <View style={[styles.container, { height, width }, style]}>
-      <AnimatedLinearGradient
+      <ReanimatedLinearGradient
         colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0)']}
         locations={[0.3, 0.5, 0.7]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
-        style={[styles.shining, shiningStyle]}
+        style={[styles.shining, animatedShiningStyle]}
       />
     </View>
   );
