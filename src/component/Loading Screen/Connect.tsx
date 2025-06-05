@@ -33,16 +33,13 @@ import { SetDatabaseTarget } from '../../types/databaseTarget';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import animeLocalAPI from '../../utils/animeLocalAPI';
+import { AnimeMovieWebView } from '../../utils/animeMovie';
 import {
   hasMigratedFromAsyncStorage,
   migrateFromAsyncStorage,
   storage,
 } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
-
-const AnimeMovieWebView = React.lazy(() =>
-  import('../../utils/animeMovie').then(a => ({ default: a.AnimeMovieWebView })),
-);
 
 export const JoinDiscord = () => {
   const styles = useStyles();
