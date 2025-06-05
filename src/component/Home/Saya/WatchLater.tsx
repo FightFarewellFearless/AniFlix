@@ -9,6 +9,7 @@ import useGlobalStyles from '../../../assets/style';
 import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import watchLaterJSON from '../../../types/watchLaterJSON';
+import DialogManager from '../../../utils/dialogManager';
 import controlWatchLater from '../../../utils/watchLaterControl';
 import ImageLoading from '../../ImageLoading';
 
@@ -66,8 +67,22 @@ function WatchLater(props: Props) {
               <TouchableOpacity
                 hitSlop={4}
                 onPress={() => {
-                  flashlistRef.current?.prepareForLayoutAnimationRender();
-                  controlWatchLater('delete', index);
+                  DialogManager.alert(
+                    'Hapus daftar tonton nanti',
+                    `Apakah kamu yakin ingin menghapus "${item.title}" dari daftar tonton nanti?`,
+                    [
+                      {
+                        text: 'Batal',
+                        onPress: () => {},
+                      },
+                      {
+                        text: 'Hapus',
+                        onPress: () => {
+                          controlWatchLater('delete', index);
+                        },
+                      },
+                    ],
+                  );
                 }}
                 style={styles.listDeleteContainer}>
                 <Icon name="delete-forever" size={20} color="#17e2af" />
@@ -106,7 +121,7 @@ function WatchLater(props: Props) {
           ref={flashlistRef}
           data={watchLaterLists}
           extraData={styles}
-          estimatedItemSize={210}
+          estimatedItemSize={169}
           renderItem={renderItem}
           keyExtractor={extractKey}
           ListHeaderComponent={() => (
@@ -140,7 +155,7 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
           borderRadius: 16,
           elevation: 5,
-          height: 200,
+          height: 160,
           overflow: 'hidden',
         },
         listInfoContainer: {
@@ -148,8 +163,8 @@ function useStyles() {
           flexDirection: 'column',
         },
         thumbnail: {
-          height: 200,
-          width: 120,
+          height: 160,
+          width: 80,
           borderTopLeftRadius: 16,
           borderBottomLeftRadius: 16,
           marginRight: 7,
