@@ -341,11 +341,9 @@ function Search(props: Props) {
           {listAnime.length > 0 && !listAnimeLoading && (
             <LegendList
               recycleItems
+              estimatedItemSize={47}
               drawDistance={500}
               data={listAnime}
-              contentContainerStyle={{
-                gap: 4,
-              }}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
               keyExtractor={item => item.title}
@@ -394,6 +392,7 @@ function Search(props: Props) {
           {data.result.length > 0 || (movieData && movieData.length > 0) ? (
             <FlatList
               // estimatedItemSize={209}
+              contentContainerStyle={{ gap: 6 }}
               data={[...(movieData ?? []), ...data.result]}
               keyExtractor={(_, index) => index?.toString()}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
@@ -564,12 +563,12 @@ function SearchList({
               style={[
                 styles.statusInfo,
                 {
-                  borderColor:
+                  backgroundColor:
                     !isMovie(z) && z.status === 'Ongoing'
-                      ? '#cf0000'
+                      ? '#920000'
                       : isMovie(z)
-                        ? 'orange'
-                        : '#22b422',
+                        ? '#a06800'
+                        : '#006600',
                 },
               ]}>
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
@@ -587,9 +586,28 @@ function SearchList({
 
         <View style={styles.releaseInfo}>
           {!isMovie(z) && (
-            <Text style={[globalStyles.text, styles.animeSearchListDetailText]} numberOfLines={1}>
-              <Icon name="tags" /> {z.genres.join(', ')}
-            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0, 0, 0, 0.445)',
+                paddingHorizontal: 6,
+                paddingVertical: 3,
+                borderRadius: 5,
+                alignSelf: 'flex-start',
+              }}>
+              <Text
+                style={[
+                  globalStyles.text,
+                  styles.animeSearchListDetailText,
+                  {
+                    fontSize: 14,
+                  },
+                ]}
+                numberOfLines={1}>
+                <Icon name="tags" /> {z.genres.join(', ')}
+              </Text>
+            </View>
           )}
         </View>
       </ImageBackground>
@@ -685,8 +703,9 @@ function useStyles() {
           elevation: 3,
         },
         animeList: {
+          marginVertical: 4,
           justifyContent: 'center',
-          paddingVertical: 12,
+          paddingVertical: 10,
           flexDirection: 'row',
           backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f5f5f5',
           marginHorizontal: 16,
@@ -705,14 +724,13 @@ function useStyles() {
         },
         listContainer: {
           flexDirection: 'row',
-          marginVertical: 8,
           backgroundColor: colorScheme === 'dark' ? '#333' : '#fff',
           borderRadius: 16,
           elevation: 4,
         },
         listImage: {
-          width: 110,
-          height: 180,
+          width: 80,
+          height: 150,
           borderTopLeftRadius: 16,
           borderBottomLeftRadius: 16,
         },
@@ -726,7 +744,8 @@ function useStyles() {
           flex: 1,
         },
         statusInfo: {
-          borderWidth: 1,
+          padding: 4,
+          borderRadius: 6,
         },
         releaseInfo: {
           justifyContent: 'flex-end',
