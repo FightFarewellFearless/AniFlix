@@ -262,22 +262,26 @@ function Search(props: Props) {
   const listAnimeRenderer = useCallback(
     ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
       return (
-        <TouchableOpacity
-          onPress={() => {
-            props.navigation.dispatch(
-              StackActions.push('FromUrl', {
-                link: item.streamingLink,
-              }),
-            );
-          }}
-          style={styles.animeList}>
-          <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
-          <Text
-            numberOfLines={1}
-            style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
-            {item?.title}
-          </Text>
-        </TouchableOpacity>
+        <>
+          {/* Add some spacing between items, workround for gap issue in legendlist */}
+          <View style={{ height: 4 }} />
+          <TouchableOpacity
+            onPress={() => {
+              props.navigation.dispatch(
+                StackActions.push('FromUrl', {
+                  link: item.streamingLink,
+                }),
+              );
+            }}
+            style={styles.animeList}>
+            <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
+            <Text
+              numberOfLines={1}
+              style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
+              {item?.title}
+            </Text>
+          </TouchableOpacity>
+        </>
       );
     },
     [globalStyles.text, props.navigation, styles],
@@ -703,7 +707,6 @@ function useStyles() {
           elevation: 3,
         },
         animeList: {
-          marginVertical: 4,
           justifyContent: 'center',
           paddingVertical: 10,
           flexDirection: 'row',
