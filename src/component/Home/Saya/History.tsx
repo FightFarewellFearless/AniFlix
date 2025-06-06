@@ -197,7 +197,7 @@ function History(props: Props) {
               {item.lastDuration !== undefined && (
                 <View style={styles.lastDuration}>
                   <Text style={[globalStyles.text, styles.lastDurationText]}>
-                    <FontAwesomeIcon name="clock-o" size={16} color={darkText} />{' '}
+                    <FontAwesomeIcon name="clock-o" size={16} color={globalStyles.text.color} />{' '}
                     {formatTimeFromSeconds(item.lastDuration)}
                   </Text>
                 </View>
