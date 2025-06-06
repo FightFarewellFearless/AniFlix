@@ -1,3 +1,14 @@
+# v0.9.0_JS-12 (6-Juni-2025)
+
+## Ditambahkan 
+- Konfirmasi saat ingin menghapus daftar tonton nanti
+
+## Diperbaiki
+- History list menjadi kosong saat ukuran layar/window terlalu kecil
+
+## Ditingkatkan
+- styling pada bagian `History` dan `WatchLater`
+
 # v0.9.0_JS-11 (5-Juni-2025)
 
 ## Diperbaiki
