@@ -1,3 +1,7 @@
+# v0.9.0_JS-13 (6-Juni-2025)
+
+Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi sistem
+
 # v0.9.0_JS-12 (6-Juni-2025)
 
 ## Ditambahkan 
