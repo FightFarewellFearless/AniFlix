@@ -130,7 +130,11 @@ function WatchLater(props: Props) {
                 Jumlah daftar tonton nanti kamu:{' '}
                 <Text style={{ fontWeight: 'bold' }}>{watchLaterLists.length}</Text>
                 {'\n'}
-                <Text style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    { margin: 10, fontWeight: 'bold', fontSize: 12, color: 'gray' },
+                  ]}>
                   Sejak {moment(watchLaterLists.at(-1)!.date).format('DD MMMM YYYY')}
                 </Text>
               </Text>
