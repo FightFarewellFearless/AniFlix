@@ -66,10 +66,16 @@ export default function Skeleton({
     };
   });
 
+  const colorScheme = useColorScheme();
+
   return (
     <View style={[styles.container, { height, width }, style]}>
       <ReanimatedLinearGradient
-        colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0)']}
+        colors={[
+          'rgba(255, 255, 255, 0)',
+          colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(129, 129, 129, 0.4)',
+          'rgba(255, 255, 255, 0)',
+        ]}
         locations={[0.3, 0.5, 0.7]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
