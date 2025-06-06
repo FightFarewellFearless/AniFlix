@@ -12,6 +12,7 @@ import { Appbar, Button, Dialog, PaperProvider, Portal } from 'react-native-pape
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 import useGlobalStyles from './src/assets/style';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
@@ -133,6 +134,7 @@ function App() {
   useEffect(() => {
     StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
     StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
+    SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
   }, [colorScheme]);
 
   // Dialog related
