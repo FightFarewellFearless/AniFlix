@@ -380,16 +380,15 @@ function useStyles() {
           fontSize: 13,
           fontStyle: 'italic',
         },
-        listWatchTime: {},
+        listWatchTime: {
+          flex: 1,
+        },
         listDateText: {
           color: 'gray',
           fontSize: 12,
           fontWeight: '500',
         },
-        deleteContainer: {
-          flex: 1,
-          alignItems: 'flex-end',
-        },
+        deleteContainer: {},
         deleteButton: {},
         noHistory: {
           flex: 1,
