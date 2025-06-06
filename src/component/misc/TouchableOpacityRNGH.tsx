@@ -20,6 +20,7 @@ export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Press
   const sigleTaps = useMemo(
     () =>
       Gesture.Tap()
+        .maxDuration(1500)
         .enabled(!props.disabled)
         .onBegin(() => {
           opacity.set(withTiming(0.5, { duration: 100 }));
