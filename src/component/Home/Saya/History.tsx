@@ -168,7 +168,7 @@ function History(props: Props) {
                       ],
                     );
                   }}>
-                  <Icon name="delete-forever" size={28} style={{ color: 'red' }} />
+                  <Icon name="delete-forever" size={26} style={{ color: 'red' }} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -197,6 +197,7 @@ function History(props: Props) {
               {item.lastDuration !== undefined && (
                 <View style={styles.lastDuration}>
                   <Text style={[globalStyles.text, styles.lastDurationText]}>
+                    <FontAwesomeIcon name="clock-o" size={16} color={darkText} />{' '}
                     {formatTimeFromSeconds(item.lastDuration)}
                   </Text>
                 </View>
@@ -272,7 +273,10 @@ function History(props: Props) {
                   <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>
                   {'\n'}
                   <Text
-                    style={[globalStyles.text, { margin: 10, fontWeight: 'bold', fontSize: 14 }]}>
+                    style={[
+                      globalStyles.text,
+                      { margin: 10, fontWeight: 'bold', fontSize: 12, color: 'gray' },
+                    ]}>
                     Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
                   </Text>
                 </Text>
@@ -346,8 +350,8 @@ function useStyles() {
           elevation: 5,
         },
         listImage: {
-          width: 90,
-          height: 150,
+          width: 80,
+          height: 140,
           borderTopLeftRadius: 16,
           borderBottomLeftRadius: 16,
           marginRight: 7,
@@ -366,8 +370,9 @@ function useStyles() {
           flex: 1,
         },
         listEpisode: {
-          color: '#1eb1a9',
-          fontSize: 12,
+          color: '#1e6ab1',
+          fontSize: 13,
+          fontWeight: 'bold',
         },
         listPart: {
           fontSize: 12,
@@ -384,9 +389,9 @@ function useStyles() {
           flex: 1,
         },
         listDateText: {
-          color: 'gray',
+          color: '#a0a0a0',
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: 'bold',
         },
         deleteContainer: {},
         deleteButton: {},
