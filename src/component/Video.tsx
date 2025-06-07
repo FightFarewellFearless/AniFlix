@@ -1001,10 +1001,11 @@ function Video(props: Props) {
                 </View>
               )}
               <TouchableOpacity
+                style={{ maxWidth: '50%' }}
                 onPress={() => {
                   dropdownResolutionRef.current?.open();
                 }}>
-                <View pointerEvents="box-only" style={{ maxWidth: '50%' }}>
+                <View pointerEvents="box-only">
                   <Dropdown
                     ref={dropdownResolutionRef}
                     value={{
