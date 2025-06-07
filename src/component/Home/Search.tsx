@@ -263,9 +263,7 @@ function Search(props: Props) {
     ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
       return (
         <>
-          {/* Add some spacing between items, workround for gap issue in legendlist */}
-          <View style={{ height: 4 }} />
-          <TouchableOpacity
+                    <TouchableOpacity
             onPress={() => {
               props.navigation.dispatch(
                 StackActions.push('FromUrl', {
@@ -350,6 +348,7 @@ function Search(props: Props) {
               data={listAnime}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
+              ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
               keyExtractor={item => item.title}
               extraData={styles}
             />
