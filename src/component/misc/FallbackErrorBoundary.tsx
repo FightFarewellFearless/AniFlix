@@ -2,6 +2,7 @@ import { WEBHOOK_REPORT_ERROR } from '@env';
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
 import {
+  Alert,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -11,7 +12,6 @@ import {
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import useGlobalStyles from '../../assets/style';
-import DialogManager from '../../utils/dialogManager';
 
 export type Props = { error: Error };
 
@@ -120,9 +120,9 @@ function reportToDev(error: Error) {
     }),
   })
     .then(() => {
-      DialogManager.alert('Sukses', 'Laporan berhasil dikirim!');
+      Alert.alert('Sukses', 'Laporan berhasil dikirim!');
     })
     .catch(() => {
-      DialogManager.alert('Gagal', 'Laporan gagal dikirim!');
+      Alert.alert('Gagal', 'Laporan gagal dikirim!');
     });
 }
