@@ -1,3 +1,10 @@
+# v0.9.0_JS-14 (7-Juni-2025)
+
+## Diperbaiki
+- Ukuran hit rect pada tombol pilih resolusi
+- Crash ketika spam keyboard dan tombol pencarian
+- Feedback (alert) yang tidak muncul ketika melaporkan crash
+
 # v0.9.0_JS-13 (6-Juni-2025)
 
 Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi sistem
