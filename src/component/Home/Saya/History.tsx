@@ -178,23 +178,26 @@ function History(props: Props) {
 
             <View style={{ flexDirection: 'row' }}>
               <View style={styles.listEpisodeAndPart}>
-                {item.isMovie && (
-                  <Text
-                    style={[
-                      styles.listEpisode,
-                      { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
-                      {
-                        textAlignVertical: 'center',
+                <Text style={styles.listEpisode}>
+                  {item.isMovie && (
+                    <View
+                      style={{
                         backgroundColor: '#ff7300',
                         borderRadius: 4,
                         paddingHorizontal: 6,
                         paddingVertical: 2,
-                      },
-                    ]}>
-                    Movie
-                  </Text>
-                )}
-                {item.episode && <Text style={styles.listEpisode}>{item.episode}</Text>}
+                      }}>
+                      <Text
+                        style={[
+                          styles.listEpisode,
+                          { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                        ]}>
+                        Movie
+                      </Text>
+                    </View>
+                  )}{' '}
+                  {item.episode}
+                </Text>
                 {/* this commented code is keep for historical reason (nostalgic lmao) */}
                 {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
