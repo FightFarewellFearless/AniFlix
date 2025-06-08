@@ -125,7 +125,7 @@ function MovieDetail(props: Props) {
                     link: episode.url,
                   });
                 }}>
-                <Icon name="play" size={15} color="#fff" />
+                <Icon name="play" size={15} color="#0a456d" />
                 <Text style={styles.buttonText}>{episode.title}</Text>
               </TouchableOpacity>
             ))}
