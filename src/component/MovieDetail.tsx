@@ -109,6 +109,29 @@ function MovieDetail(props: Props) {
           </View>
         </View>
       </ImageBackground>
+      {props.route.params.data.episodeList.length > 1 && (
+        <Section style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={[styles.container, { gap: 4 }]}>
+            <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 17 }]}>
+              Daftar Episode
+            </Text>
+            {props.route.params.data.episodeList.map((episode, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.button, { backgroundColor: '#00e1ff' }]}
+                onPress={() => {
+                  props.navigation.navigate('FromUrl', {
+                    isMovie: true,
+                    link: episode.url,
+                  });
+                }}>
+                <Icon name="play" size={15} color="#fff" />
+                <Text style={styles.buttonText}>{episode.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Section>
+      )}
       <Section style={{ flexDirection: 'row' }}>
         <View style={styles.container}>
           <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>

@@ -57,7 +57,12 @@ import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
 import AnimeAPI from '../utils/AnimeAPI';
-import { getMovieDetail, getRawDataIfAvailable, MovieDetail } from '../utils/animeMovie';
+import {
+  getMovieDetail,
+  getRawDataIfAvailable,
+  getStreamingDetail,
+  MovieDetail,
+} from '../utils/animeMovie';
 import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
@@ -466,57 +471,82 @@ function Video(props: Props) {
         return;
       }
       setLoading(true);
-      const result = await AnimeAPI.fromUrl(
-        dataLink,
-        undefined,
-        undefined,
-        undefined,
-        abortController.current?.signal,
-      ).catch(err => {
-        if (err.message === 'Silahkan selesaikan captcha') {
+      if (props.route.params.isMovie) {
+        const result = await getStreamingDetail(dataLink, abortController.current?.signal).catch(
+          err => {
+            if (err.message === 'canceled') {
+              return;
+            }
+            const errMessage =
+              err.message === 'Network Error'
+                ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+                : 'Error tidak diketahui: ' + err.message;
+            DialogManager.alert('Error', errMessage);
+            setLoading(false);
+          },
+        );
+        if (result === undefined) return;
+        if ('isError' in result) {
+          DialogManager.alert(
+            'Error',
+            'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
+          );
+        } else {
+          setData(result);
+          setHistory(result, dataLink, undefined, undefined, history, props.route.params.isMovie);
+        }
+      } else {
+        const result = await AnimeAPI.fromUrl(
+          dataLink,
+          undefined,
+          undefined,
+          undefined,
+          abortController.current?.signal,
+        ).catch(err => {
+          if (err.message === 'Silahkan selesaikan captcha') {
+            setLoading(false);
+            return;
+          }
+          if (err.message === 'canceled') {
+            return;
+          }
+          const errMessage =
+            err.message === 'Network Error'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + err.message;
+          DialogManager.alert('Error', errMessage);
+          setLoading(false);
+        });
+        if (result === undefined) {
+          return;
+        }
+        if (result === 'Unsupported') {
+          DialogManager.alert(
+            'Tidak didukung!',
+            'Anime yang kamu tuju tidak memiliki data yang didukung!',
+          );
           setLoading(false);
           return;
         }
-        if (err.message === 'canceled') {
+
+        if (result.type !== 'animeStreaming') {
+          setLoading(false);
+          DialogManager.alert(
+            'Kesalahan!!',
+            'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
+          );
           return;
         }
-        const errMessage =
-          err.message === 'Network Error'
-            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.message;
-        DialogManager.alert('Error', errMessage);
-        setLoading(false);
-      });
-      if (result === undefined) {
-        return;
-      }
-      if (result === 'Unsupported') {
-        DialogManager.alert(
-          'Tidak didukung!',
-          'Anime yang kamu tuju tidak memiliki data yang didukung!',
-        );
-        setLoading(false);
-        return;
-      }
 
-      if (result.type !== 'animeStreaming') {
-        setLoading(false);
-        DialogManager.alert(
-          'Kesalahan!!',
-          'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
-        );
-        return;
+        setData(result);
+        setHistory(result, dataLink, undefined, undefined, history);
       }
-
-      setData(result);
       setLoading(false);
       firstTimeLoad.current = false;
       historyData.current = undefined;
       currentLink.current = dataLink;
-
-      setHistory(result, dataLink, undefined, undefined, history);
     },
-    [loading, history],
+    [loading, history, props.route.params.isMovie],
   );
 
   const cancelLoading = useCallback(() => {

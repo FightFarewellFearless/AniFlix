@@ -19,6 +19,7 @@ export interface MovieDetail {
   title: string;
   synopsis: string;
   streamingUrl: string;
+  episodeList: { title: string; url: string }[];
   thumbnailUrl: string;
   genres: string[];
   rating: string;
@@ -82,7 +83,8 @@ export async function getMovieDetail(
   const $ = cheerio.load(data);
   const title = $('header > h1.entry-title').text().trim();
   const thumbnailUrl = $('div.entry-content.serial-info > img').attr('src')!;
-  const streamingUrl = $('ul.daftar > li > a').attr('href')!;
+  const episodeList = $('ul.daftar > li a');
+  const streamingUrl = episodeList.last().attr('href')!;
   const mightBeSynopsisArray = $('div.entry-content.serial-info p').toArray();
   const synopsisText = [];
   for (const synopsis of mightBeSynopsisArray) {
@@ -114,6 +116,9 @@ export async function getMovieDetail(
     title,
     synopsis: synopsisText.join('\n'),
     streamingUrl,
+    episodeList: episodeList
+      .map((_i, el) => ({ title: $(el).text().trim(), url: $(el).attr('href')! }))
+      .toArray(),
     thumbnailUrl,
     genres,
     rating,
@@ -127,7 +132,7 @@ type LinksType = { title: string; url: string }[];
 export type MovieStreamingDetail = {
   title: string;
   thumbnailUrl: string;
-  episodeData: { animeDetail: string; next: undefined; previous: undefined };
+  episodeData: { animeDetail: string; next: string | undefined; previous: string | undefined };
   streamingType: string;
   streamingLink: string;
   resolution: string;
@@ -147,8 +152,20 @@ export async function getStreamingDetail(
   const data = await response.text();
   const $ = cheerio.load(data);
 
-  const title = $('div.entry-content > i:nth-child(5) > a').text().trim();
-  const originalDetailLink = $('div.nvs.nvsc > a').attr('href')!;
+  const episodeData = {
+    animeDetail: $('div.nvs.nvsc > a').attr('href')!,
+    next: $('a[rel="next"]').attr('href') ?? undefined,
+    previous: $('a[rel="prev"]').attr('href') ?? undefined,
+  };
+
+  const animeTitle = $('div.entry-content > i:nth-child(5) > a').text().trim();
+  const animeTitleWithEpisode = $('div.entry-content > h2').text().trim();
+  const title =
+    episodeData.next || episodeData.previous
+      ? animeTitle +
+        ' Episode ' +
+        (animeTitleWithEpisode.match(/(\d+)\s+Subtitle Indonesia/) ?? [])[0]
+      : animeTitle;
 
   const thumbnailUrl = $('div.entry-content > img').attr('src')!;
 
@@ -274,11 +291,7 @@ export async function getStreamingDetail(
   return {
     title,
     thumbnailUrl,
-    episodeData: {
-      animeDetail: originalDetailLink,
-      next: undefined,
-      previous: undefined,
-    },
+    episodeData,
     streamingType: isRawAvailable ? 'raw' : 'embed',
     streamingLink: isRawAvailable
       ? (streamingLink as string)

@@ -178,20 +178,29 @@ function History(props: Props) {
 
             <View style={{ flexDirection: 'row' }}>
               <View style={styles.listEpisodeAndPart}>
-                <Text
-                  style={[
-                    styles.listEpisode,
-                    item.isMovie
-                      ? { color: '#ff7300', fontWeight: 'bold', fontSize: 16 }
-                      : undefined,
-                  ]}>
-                  {item.isMovie ? 'Movie' : item.episode}
-                  {/* {item.part !== undefined && (
+                {item.isMovie && (
+                  <Text
+                    style={[
+                      styles.listEpisode,
+                      { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                      {
+                        textAlignVertical: 'center',
+                        backgroundColor: '#ff7300',
+                        borderRadius: 4,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                      },
+                    ]}>
+                    Movie
+                  </Text>
+                )}
+                {item.episode && <Text style={styles.listEpisode}>{item.episode}</Text>}
+                {/* this commented code is keep for historical reason (nostalgic lmao) */}
+                {/* {item.part !== undefined && (
                   <Text style={styles.listPart}>
                     {' Part ' + (item.part + 1)}
                   </Text>
                 )} */}
-                </Text>
               </View>
 
               {item.lastDuration !== undefined && (
@@ -367,7 +376,10 @@ function useStyles() {
         },
         listEpisodeAndPart: {
           justifyContent: 'flex-start',
+          flexDirection: 'row',
+          gap: 5,
           flex: 1,
+          flexShrink: 1,
         },
         listEpisode: {
           color: '#1e6ab1',
