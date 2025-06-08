@@ -309,17 +309,17 @@ function VideoPlayer({
           />
         </Reanimated.View>
 
-        <Icons
+        <View
           style={{
             position: 'absolute',
-            top: '50%',
+            top: 0,
+            bottom: 0,
             alignSelf: 'center',
+            justifyContent: 'center',
             display: isError ? 'flex' : 'none',
-          }}
-          name="error"
-          size={50}
-          color="red"
-        />
+          }}>
+          <Icons name="error" size={50} color="red" />
+        </View>
       </Pressable>
     </View>
   );
