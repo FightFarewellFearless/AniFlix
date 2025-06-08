@@ -257,6 +257,7 @@ function Video(props: Props) {
     return () => {
       willUnmountHandler();
       abortController.current?.abort();
+      global.gc?.();
     };
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
