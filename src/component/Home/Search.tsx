@@ -11,20 +11,16 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  Animated,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
-  LayoutChangeEvent,
-  Pressable,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   useColorScheme,
-  useWindowDimensions,
 } from 'react-native';
+import { TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
@@ -52,13 +48,7 @@ import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-
-// Remove reanimated animated component creation for TextInput and Pressable
-// Replace:
-// const TextInputAnimation = Reanimated.createAnimatedComponent(TextInput);
-// const PressableAnimation = Reanimated.createAnimatedComponent(Pressable);
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { TextInput as TextInputType } from 'react-native';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
@@ -75,7 +65,8 @@ function Search(props: Props) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
-  const dimensions = useWindowDimensions();
+
+  const textInputRef = useRef<TextInputType>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -90,29 +81,21 @@ function Search(props: Props) {
     }, []),
   );
 
-  const searchText = useRef<string>('');
+  const [searchText, setSearchText] = useState<string>('');
   const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
   const [listAnimeLoading, setListAnimeLoading] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [loading, setLoading] = useState(false);
-  const [searchHistoryDisplay, setSearchHistoryDisplay] = useState<boolean>(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
-  // Remove useSharedValue; instead initialize Animated.Values
-  const [searchButtonAnimation] = useState(() => new Animated.Value(100));
-  const [searchButtonOpacity] = useState(() => new Animated.Value(1));
-  const [searchTextAnimationColor] = useState(() => new Animated.Value(0));
-  // Replace shared value for button width with state.
-  const [searchButtonWidth, setSearchButtonWidth] = useState(75);
-  const searchButtonMounted = useRef(false);
+
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
 
   const searchHistory = useSelectorIfFocused(
     state => state.settings.searchHistory,
     true,
     result => JSON.parse(result) as string[],
   );
-
-  const textInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     setListAnimeLoading(true);
@@ -131,45 +114,28 @@ function Search(props: Props) {
       });
   }, []);
 
-  const onChangeText = useCallback(
-    (text: string) => {
-      searchText.current = text;
-      if (searchText.current !== '' && searchButtonMounted.current === false) {
-        Animated.timing(searchButtonAnimation, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      } else if (searchButtonMounted.current === true && searchText.current === '') {
-        Animated.timing(searchButtonAnimation, {
-          toValue: 100,
-          duration: 250,
-          useNativeDriver: false,
-        }).start();
-      }
-      searchButtonMounted.current = searchText.current !== '';
-    },
-    [searchButtonAnimation],
-  );
+  const onChangeText = useCallback((text: string) => {
+    setSearchText(text);
+  }, []);
 
   const submit = useCallback(() => {
-    if (searchText.current === '') {
+    if (searchText === '') {
       return;
     }
     setLoading(true);
     textInputRef.current?.blur();
-    Promise.all([AnimeAPI.search(searchText.current), searchMovie(searchText.current)])
+    Promise.all([AnimeAPI.search(searchText), searchMovie(searchText)])
       .then(([animeResult, movieResult]) => {
-        setCurrentSearchQuery(searchText.current);
+        setCurrentSearchQuery(searchText);
         if (!('isError' in movieResult)) {
           setMovieData(movieResult);
         }
         setData(animeResult);
         setLoading(false);
-        if (searchHistory.includes(searchText.current)) {
-          searchHistory.splice(searchHistory.indexOf(searchText.current), 1);
+        if (searchHistory.includes(searchText)) {
+          searchHistory.splice(searchHistory.indexOf(searchText), 1);
         }
-        searchHistory.unshift(searchText.current);
+        searchHistory.unshift(searchText);
         storage.set('searchHistory', JSON.stringify(searchHistory));
       })
       .catch(err => {
@@ -180,74 +146,11 @@ function Search(props: Props) {
         DialogManager.alert('Error', errMessage);
         setLoading(false);
       });
-  }, [searchHistory]);
-
-  const onPressIn = useCallback(() => {
-    Animated.timing(searchButtonOpacity, {
-      toValue: 0.4,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
-  }, [searchButtonOpacity]);
-
-  const onPressOut = useCallback(() => {
-    Animated.timing(searchButtonOpacity, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
-  }, [searchButtonOpacity]);
-
-  const onSearchTextFocus = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: false,
-    }).start();
-    setSearchHistoryDisplay(true);
-  }, [searchTextAnimationColor]);
-
-  const onSearchTextBlur = useCallback(() => {
-    Animated.timing(searchTextAnimationColor, {
-      toValue: 0,
-      duration: 400,
-      useNativeDriver: false,
-    }).start();
-    setSearchHistoryDisplay(false);
-  }, [searchTextAnimationColor]);
-
-  // Compute animated styles using default Animated.interpolate
-  const animatedInputWidth = searchButtonAnimation.interpolate({
-    inputRange: [0, 100],
-    outputRange: [dimensions.width - searchButtonWidth, dimensions.width - 10],
-  });
-  const borderColor = searchTextAnimationColor.interpolate({
-    inputRange: [0, 1],
-    outputRange: [colorScheme === 'dark' ? 'rgb(197,197,197)' : 'rgb(0,0,0)', 'rgb(0,124,128)'],
-  });
-  const textInputAnimationStyle = {
-    width: animatedInputWidth,
-    borderTopColor: borderColor,
-    borderBottomColor: borderColor,
-  };
-  const pressableAnimationStyle = {
-    opacity: searchButtonOpacity,
-    transform: [
-      {
-        translateX: searchButtonAnimation,
-      },
-    ],
-  };
-
-  const onPressableLayoutChange = useCallback((layout: LayoutChangeEvent) => {
-    setSearchButtonWidth(layout.nativeEvent.layout.width);
-  }, []);
+  }, [searchHistory, searchText]);
 
   function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
-      textInputRef.current?.setNativeProps({ text: '' });
-      textInputRef.current?.setNativeProps({ text });
     };
     return (
       <HistoryList
@@ -284,40 +187,34 @@ function Search(props: Props) {
     [globalStyles.text, props.navigation, styles],
   );
 
+  const onTextInputFocus = useCallback(() => {
+    setShowSearchHistory(true);
+  }, []);
+  const onTextInputBlur = useCallback(() => {
+    setShowSearchHistory(false);
+  }, []);
+
   return (
     <View style={[{ flex: 1 }]}>
-      <View style={{ flexDirection: 'row' }}>
-        {/* {data !== null && (
+      {/* {data !== null && (
           <TouchableOpacity>
             <Icon name="close" />
           </TouchableOpacity>
         )} */}
-        {/* Replace animated components: */}
-        <AnimatedTextInput
-          onSubmitEditing={submit}
-          onChangeText={onChangeText}
-          placeholder="Cari anime/movie disini"
-          placeholderTextColor={colorScheme === 'dark' ? '#707070' : 'black'}
-          onFocus={onSearchTextFocus}
-          onBlur={onSearchTextBlur}
-          autoCorrect={false}
-          ref={textInputRef}
-          style={[styles.searchInput, textInputAnimationStyle]}
-        />
-        <AnimatedPressable
-          onLayout={onPressableLayoutChange}
-          onPress={submit}
-          onPressIn={onPressIn}
-          onPressOut={onPressOut}
-          style={[styles.searchButton, pressableAnimationStyle]}>
-          <Text
-            allowFontScaling={false}
-            style={{ color: '#141414', paddingHorizontal: 12, fontWeight: 'bold' }}>
-            <Icon name="search" size={17} />
-            Cari
-          </Text>
-        </AnimatedPressable>
-      </View>
+      {/* Replace animated components: */}
+      <TextInput
+        mode="outlined"
+        onSubmitEditing={submit}
+        onChangeText={onChangeText}
+        onBlur={onTextInputBlur}
+        onFocus={onTextInputFocus}
+        label="Cari anime/movie disini"
+        value={searchText}
+        autoCorrect={false}
+        ref={textInputRef}
+        right={<TextInput.Icon icon="magnify" onPress={submit} size={20} />}
+        style={[styles.searchInput]}
+      />
 
       {listAnime?.length === 0 ||
         (listAnimeLoading && (
@@ -412,7 +309,7 @@ function Search(props: Props) {
         </Reanimated.View>
       )}
       {/* SEARCH HISTORY VIEW */}
-      {searchHistoryDisplay && (
+      {showSearchHistory && (
         <Reanimated_KeyboardAvoidingView
           behavior="height"
           entering={FadeInUp.duration(700)}
@@ -684,15 +581,6 @@ function useStyles() {
         },
         searchInput: {
           height: 42,
-          borderWidth: 1,
-          borderColor: colorScheme === 'dark' ? '#444' : '#ddd',
-          borderRadius: 8,
-          backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#fff',
-          marginHorizontal: 5,
-          paddingHorizontal: 14,
-          textAlign: 'left',
-          color: globalStyles.text.color,
-          elevation: 2,
         },
         searchButton: {
           justifyContent: 'center',
