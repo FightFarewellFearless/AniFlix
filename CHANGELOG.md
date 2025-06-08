@@ -2,13 +2,10 @@
 
 ## Ditambahkan
 - Dukungan untuk banyak episode pada data movie (seperti pada `Kaguya-sama` special episode)
-
 ## Diperbaiki
 - Ikon error tidak berapa tepat di tengah video player
-
 ## Ditingkatkan
 - Tampilan Text Input menggunakan react-native-paper dengan desain Material 3
-
 ## Lainnya
 - Menjalankan garbage-collector pada saat keluar dari layar `Video` untuk free-up RAM
 
@@ -27,10 +24,8 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 
 ## Ditambahkan 
 - Konfirmasi saat ingin menghapus daftar tonton nanti
-
 ## Diperbaiki
 - History list menjadi kosong saat ukuran layar/window terlalu kecil
-
 ## Ditingkatkan
 - styling pada bagian `History` dan `WatchLater`
 
@@ -39,7 +34,6 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 ## Diperbaiki
 - Tampilan edge-to-edge pada saat streaming (tombol download yang tertutup navigasi sistem)
 - Masalah layout pada list anime
-
 ## Ditingkatkan
 - Membuat beberapa layout lebih responsif terhadap berbagai ukuran jendela
   > perubahan terkait dengan responsive layout lainnya akan di update di versi mendatang.
@@ -101,11 +95,9 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 
 ## Perubahan
 - Sekarang, notifikasi "now playing" dimatikan secara bawaan. Kamu bisa mengaktifkan nya di menu pengaturan
-
 ## Diperbaiki
 - Memperbaiki masalah tombol yang tidak bisa ditekan di bagian Video (terjadi di beberapa kasus tertentu)
 - Memperbaiki scroll yang ter-reset saat menghapus histori pencarian
-
 ## Perubahan lainnya (Tidak berdampak secara langsung)
 - Mengurangi delay pada loading listAnime
 - list anime yang lebih efisien
@@ -121,17 +113,14 @@ Fun fact: Update kali ini berisi lebih dari 140 commits di github
 - Tampilan Error untuk menghindari aplikasi crash (hanya berlaku untuk JavaScript dan tidak untuk native crash)
 - Fitur Picture-in-Picture saat menonton
 - Notifikasi "Now playing" saat menonton
-
 ## Ditingkatkan
 - Tampilan aplikasi
 - Performa aplikasi secara keseluruhan (responsif, animasi, beberapa UI/UX, dan lain-lain...)
 - Potensi untuk penggunaan memori yang lebih sedikit.
 - Menambahkan informasi panduan pada error history anime lama
-
 ## Diperbaiki
 - Memperbaiki masalah laporan whitelist anime
 - Masalah pada menu dropdown
-
 ## Perubahan lain-lain
 - Upgrade react-native ke versi 0.79
 - Optimasi kode, fokus pada performa dan stabilitas aplikasi
@@ -152,7 +141,6 @@ Fun fact: Update kali ini berisi lebih dari 140 commits di github
 ## Ditambahkan
 - Opsi mengganti tema aplikasi (gelap/terang) di pengaturan
 - Animasi dropdown (Pilih resolusi)
-
 ## Ditingkatkan
 - Improvisasi lazy loading
 
@@ -160,7 +148,6 @@ Fun fact: Update kali ini berisi lebih dari 140 commits di github
 
 ## Diperbaiki
 - Salah pengukuran tinggi pada animasi sinopsis
-
 ## Ditingkatkan
 - Mengimplementasi inline-requires
 
@@ -179,7 +166,6 @@ Update kali ini menerapkan lazy-loading pada aplikasi, ini berarti penggunaan me
 
 ## Ditambahkan
 - Implementasi lazy-loading
-
 ## Ditingkatkan
 - Animasi sinopsis
 - Meningkatkan `drawDistance` pada list anime di pencarian
@@ -209,7 +195,6 @@ Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu util
 
 ## Diperbaiki
 - Animasi sinopsis tidak menampilkan seluruh sinopsis
-
 ## Dihapus
 - Chat AI. Karena sudah tidak berfungsi dan tidak relevan
 
@@ -270,11 +255,8 @@ Perubahan kecil di kode dengan harapan peningkatan performa
 # v0.8.2-JS_8 (20-Februari-2025)
 
 ## Penambahan
-
 - Memperlihatkan versi JS di menu update aplikasi
-
 ## Perubahan
-
 - Drawer animation diubah dari 'slide' ke 'front' untuk bagian "Saya" (history dan tonton nanti)
 - Mengurangi draw distance di list untuk menghindari lag saat render ulang
 
@@ -285,29 +267,23 @@ Mencegah komponen di render ulang menggunakan react-freeze
 # v0.8.2-JS_6 (18-Februari-2025)
 
 ## Perbaikan
-
 - Memperbaiki pull-to-refresh tidak bekerja pada Beranda
-
 ## Peningkatan
-
 - Sedikit mengubah tampilan beranda
 
 # v0.8.2-JS_5 (16-Februari-2025)
 
 ## Perbaikan
-
 - Memperbaiki pengambilan data resolusi tetap terjadi meski pengguna sudah membatalkan permintaan
 
 # v0.8.2-JS_4 (16-Februari-2025)
 
 ## Perbaikan
-
 - Memperbaiki masalah performa ketika menghapus search history
 
 # v0.8.2-JS_3 (16-Februari-2025)
 
 ## Peningkatan
-
 - Meningkatkan pengalaman scrolling pada hampir semua list di aplikasi
 
 # v0.8.2-JS_2 (16-Februari-2025)
@@ -317,15 +293,10 @@ Mencegah komponen di render ulang menggunakan react-freeze
 # v0.8.2-JS_1 (16-Februari-2025)
 
 ## Penambahan
-
 - Menambahkan quotes pada loading screen awal aplikasi
-
 ## Peningkatan
-
 - Meningkatkan pengalaman scrolling dengan mengurangi blank space dan menambah render ahead offset.
-
 ## Perbaikan
-
 - Memperbaiki masalah styling pada tombol tutup di bagian Search ketika tidak ada anime yang ditemukan
 
 # v0.8.2 (09-Februari-2025)
@@ -335,44 +306,34 @@ Rilis ini berisi peningkatan performa scrolling list (dan mungkin performa anima
 Perubahan lainnya meliputi tapi tidak terbatas pada: Upgrade library yang digunakan termasuk react-native 0.77 yang mungkin akan memperbaiki beberapa masalah lain termasuk masalah text yang terpotong pada beberapa device (Berdasarkan RN 0.77 Changelog)
 
 ## Peningkatan
-
 - Memperbagus tampilan/UI pada bagian:
    - Update
    - Search (anime list)
    - Tampilan layar awal loading
 - Peningkatan performa scrolling dan mungkin juga performa animasi
-
 ## Perbaikan
-
 - Memperbaiki crash pada beberapa tipe anime movie
 - Memperbaiki gambar cover/thumbnail yang tersimpan di history
-
 ## Penghapusan
-
 - Menghapus animasi pada list history
   > Dengan alasan performa
 
 # v0.8.1 (23-Januari-2025)
 
 ## Perbaikan
-
 - Memperbaiki masalah pewarnaan saat mengaktifkan dark mode di beberapa perangkat Xiaomi
 
 # v0.8.0-JS_2 (10-Januari-2025)
 
 ## Penambahan dan pengoptimalan
-
 - Menambahkan tombol untuk menghapus input pencarian pada menu Histori
 - Mengoptimalkan performa ketika mencari judul histori dengan menggunakan deferred value untuk mencegah terlalu banyak render ulang ketika sedang mengetik
-
 ## Perbaikan
-
 - Memperbaiki loading indicator menyebabkan list berubah posisi pada menu Search->List anime
 
 # v0.8.0-JS_1 (05-Januari-2025)
 
 ## Perbaikan
-
 - Memperbaiki masalah seek bar pada video player
 
 # v0.8.0 (05-Januari-2025)
@@ -385,18 +346,13 @@ Update kali ini mungkin tidak memberikan banyak perubahan kepada pengguna, namun
 > NB: Kamu mungkin mengalami masalah performa ketika menggulir list, terutama bagian History, ini adalah masalah dari library FlashList yang memang belum optimal di new architecture.
 
 ## Penambahan
-
 - Menambahkan `Tentang aplikasi` pada bagian Utilitas
 - Menambahkan Pemberitahuan jika pengguna hendak menonton anime yang telah di `Whitelist` oleh developer
 - Menambahkan quotes inspiratif pada bagian Home screen menggantikan pemberitahuan lawas aplikasi
 - Dan lain-lain...
-
 ## Pengahpusan
-
 - Menghapus animasi pindah layar pada bagian home
-
 ## Perubahan
-
 - Mengganti library OTA update dari `react-native-codepush` ke `expo-updates` untuk menjamin kompatibilitas dengan new-architecture
 - Migrasi video player dari `expo-av` ke `expo-video`
 - Disable text font scaling karena aplikasi tidak di desain untuk mendukung aksesbilitas tersebut
@@ -404,7 +360,6 @@ Update kali ini mungkin tidak memberikan banyak perubahan kepada pengguna, namun
   - Mendukung refresh saat terjadi error
   - Otomatis memperlihatkan control saat terjadi error, background, dan berakhirnya video
 - Dan masih banyak lagi...
-
 
 # 0.7.2-JS_3 (29-Desember-2024) 
 
@@ -424,15 +379,12 @@ MOVIE BETA TAHAP 2.
 Ini adalah update ke 2 dalam pengembangan tipe data movie, update kali ini hanya merupakan penambahan beberapa fitur kecil dan beberapa perbaikan masalah. Update ini memberikan pengalaman menggunakan aplikasi yang lebih stabil.
 
 ## Penambahan
-
 - Menambahkan berbagai macam peringatan dan informasi terkait server dari movie.
 - Menambahkan 1 server cadangan baru (lokal) untuk movie.
   > Perlu di ingat server ini tidak mendukung pemutaran melalui aplikasi dan akan menggunakan WebView untuk memutar video melalui server ini, jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu menggunakan server "lokal". Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
 - Menambahkan tombol "close" informasi tambahan ketika memutar melalui server pihak ketiga (melalui WebView)
 - Otomatis scroll ke resolusi yang saat ini dipilih saat membuka Dropdown pemilihan resolusi (revert ke update sebelumnya)
-
 ## Perbaikan
-
 - Memperbaiki masalah stuck di loading screen pada bagian mengambil data movie yang cukup acak terjadi.
   > Perlu diingat jika error saat mengambil data movie terjadi, cobalah untuk mematikan VPN/proxy, menghidupkan dan mematikan ulang mode pesawat, mematikan DNS pribadi.
 - Memperbaiki (kayaknya sih udah bener hehehe) masalah yang terjadi dengan server AceFile ketika mengambil data yang seharusnya ada.
@@ -449,43 +401,33 @@ Di tahap pertama ini kamu belum bisa mencari judul anime movie, dan menyimpan mo
 Saya selaku developer mengucapkan terima kasih karena sudah setia menggunakan aplikasi ini, jika ada keluhan atau saran bisa disampaikan lewat server discord (join dengan cara menekan tombol Join Discord di Loading Screen awal aplikasi).
 
 ## Penambahan
-
 - Menambahkan dukungan anime movie!
   > Untuk saat ini kamu hanya bisa menonton movie terbaru, belum bisa mencari judul movie, dan belum bisa menyimpan movie ke daftar tonton nanti.
-
 ## Perubahan
-
 - Saat terjadi error, sekarang hanya akan memunculkan pesan singkat alih-alih pesan yang sangat amat panjang dan ternyata tidak terlalu berguna
 - Linear color gradient di bagian episode anime sekarang gelap/terang tergantung dark mode di HP kamu
 - UI yang diperbagus
   - Menyocokkan beberapa warna dengan light mode
   - Banyak perubahan lain...
 - Perubahan lain di dalam di kode aplikasi (tidak begitu terlihat pada pengguna)
-
 ## Perbaikan
-
 - Memperbaiki masalah mengganti resolusi di server desudrive
 
 # v0.7.2 (08-November-2024)
 
 ## Penambahan
-
 - Menambahkan header di bagian video (streaming)
-
 ## Perubahan lain
-
 - Upgrade dependencies ke versi terbaru untuk persiapan react-native 0.76
 
 # v0.7.1-JS_3 (06-Oktober-2024)
 
 ## Perbaikan
-
 - Menambah sistem bypass cloudflare
 
 # v0.7.1-JS_2 (16-September-2024)
 
 ## Perubahan
-
 - Memblokir anime dengan genre `Ecchi` dan sejenisnya.
   > Ini bertujuan untuk menjaga aplikasi agar tetap aman untuk semua umur
 
@@ -495,17 +437,13 @@ Saya selaku developer mengucapkan terima kasih karena sudah setia menggunakan ap
 # v0.7.1-JS_1 (30-Agustus-2024)
 
 ## Perbaikan
-
 - Memperbaiki loading "Infinite Loading" pada menu pencarian
 
 # v0.7.1 (30-Agustus-2024)
 
 ## Perubahan
-
 - Upgrade React-Native ke versi 0.75
-
 ## Perbaikan
-
 - Memperbaiki masalah streaming anime
 - Memperbaiki masalah pergantian resolusi
 
@@ -514,11 +452,8 @@ Saya selaku developer mengucapkan terima kasih karena sudah setia menggunakan ap
 # v0.7.0-JS_1 (11-Agustus-2024)
 
 ## Penambahan
-
 - [Cari anime berdasarkan gambar]: Memungkinkan kamu untuk melihat potongan adegan dengan menekan pada bagian anime yang ingin kamu lihat
-
 ## Perbaikan
-
 - Memperbaiki masalah bahasa pada bagian `histori` dan `tonton nanti` yang muncul pada kasus tertentu
 
 # v0.7.0 (10-Agustus-2024)
@@ -530,15 +465,11 @@ Versi ini memperkenalkan OTA update agar update aplikasi menjadi lebih ringan, m
   > Menggunakan CodePush
 
   > Mulai versi 0.7.0 dan seterusnya, update penting aplikasi yang tidak memerlukan download ulang aplikasi akan di rilis melalui CodePush dan dapat diinstal oleh pengguna secara langsung dari aplikasi.
-
 ## Perubahan
-
 - Sedikit menambah detail pada bagian pencarian
 - Mengganti metode pencadangan database
   > Menggunakan SAF (Storage Access Framework) agar pengguna bisa memilih lokasi, dan nama file yang akan di backup.
-
 ## Perbaikan
-
 - Memperbaiki masalah saat membatalkan pergantian resolusi atau episode
 - Memperbaiki beberapa masalah styling
 - Memperbaiki kebanyakan tombol terkadang tidak berfungsi (tidak merespon)
@@ -557,7 +488,6 @@ Note: aplikasi sendiri masih berjalan di old architecture karena masalah kestabi
   - Memperbaiki masalah tidak bisa backup data
 - Mengatasi masalah desain tampilan pada layar ponsel yang kecil
 - Memperbaiki masalah status bar yang disembunyikan ketika membuka menu (modal) seperti ketika mengganti resolusi
-
 ## Perubahan lain
 - Memperbaiki dan merubah sedikit tampilan agar lebih baik
 - Perubahan kecil di bagian kode (tidak terlihat pada pengguna)
@@ -571,7 +501,6 @@ Dari segi pengembangan dan program, versi ini kemungkin adalah versi terakhir ya
 - Menambahkan splash screen ke dalam aplikasi
 - Menambahkan copilot (tutorial) ke bagian tonton nanti, dikarenakan banyak yang belum tahu cara menambahkan anime ke daftar tonton nanti
 - Menambahkan animasi ke dalam video control
-
 ## Perbaikan/Perubahan
 - Sedikit perubahan pada layar "Menghubungkan ke server"
 - Memperbaiki status bar yang tidak berubah warna sesuai dengan tema sistem.
@@ -597,7 +526,6 @@ Dari segi pengembangan dan program, versi ini kemungkin adalah versi terakhir ya
 
 ## Penambahan
 - Menambahkan `Catatan Rilis` ke bagian utilitas
-
 ## Perbaikan & Perubahan
 - Beberapa anime lawas banyak yang eror, oleh karena itu, kamu sekarang dapat memilih secara manual server yang akan digunakan berikut bersama dengan resolusi nya.
 
@@ -608,10 +536,8 @@ Perbaikan masalah streaming untuk anime yang baru rilis.
 ## Perbaikan
 - Memperbaiki masalah ketika streaming anime yang baru rilis
 - Memperbaiki masalah WebView
-
 ## Perubahan penting
 - Mulai sekarang, Minimum versi Android untuk menggunakan aplikasi ini adalah android 6
-
 ## Perubahan lain
 - Upgrade versi react-native ke 0.74-rc.6
 - Dan beberapa perubahan kecil lain...
@@ -621,25 +547,18 @@ Perbaikan masalah streaming untuk anime yang baru rilis.
 Versi ini mengandung banyak perubahan kode yang akan sangat berguna untuk perubahan di masa mendatang. Versi ini juga mengandung perubahan yang meningkatkan performa, penyederhanaan layout, perbaikan bug, perubahan video player, perubahan fitur chat(sekarang menggunakan bing), dan lain-lain.
 
 ## Penambahan
-
 - Menambahkan fitur mencari scene anime berdasarkan gambar/screenshot
-
 ## Perubahan/perbaikan
-
 - Pilihan untuk menggunakan BING AI di bagian chat
 - Mengganti video player - Buatan sendiri :v
 - Memperbaiki masalah gagal loading gambar
 - Memperbaiki masalah gagal mengecek versi aplikasi yang akan mengakibatkan gagal untuk koneksi ke server
 - Memperbaiki masalah saat mengganti dari 'mode malam' ke 'mode terang' dan sebaliknya
 - Memperbaiki masalah frame drop ketika loading list anime di bagian penarian (belum sepenuhnya terselesaikan)
-
 ## Penghapusan
-
 - Menghapus pengaturan kunci orientasi - dikarenakan orientasi akan otomatis dikunci ke portrait (kecuali saat menonton)
 - Menghapus pengaturan download melalui browser - dikarenakan data yang digunakan saat ini mustahil untuk di download lewat browser
-
 ## Perubahan lain
-
 - Perubahan lisensi kode dari CC BY-NC ke GNU GPLv3
 - Menambahkan informasi yang mungkin berguna ketika gagal koneksi ke server
 - Memperbagus sedikit tampilan
