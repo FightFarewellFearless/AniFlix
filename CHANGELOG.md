@@ -1,3 +1,17 @@
+# v0.9.0_JS-15 (8-Juni-2025)
+
+## Ditambahkan
+- Dukungan untuk banyak episode pada data movie (seperti pada `Kaguya-sama` special episode)
+
+## Diperbaiki
+- Ikon error tidak berapa tepat di tengah video player
+
+## Ditingkatkan
+- Tampilan Text Input menggunakan react-native-paper dengan desain Material 3
+
+## Lainnya
+- Menjalankan garbage-collector pada saat keluar dari layar `Video` untuk free-up RAM
+
 # v0.9.0_JS-14 (7-Juni-2025)
 
 ## Diperbaiki
