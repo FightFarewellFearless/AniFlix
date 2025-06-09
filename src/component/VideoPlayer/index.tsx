@@ -169,6 +169,7 @@ function VideoPlayer({
     }
   });
   useEventListener(player, 'timeUpdate', e => {
+    if (paused) return; // Do not update time if video is paused (fix for video history not synced)
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
