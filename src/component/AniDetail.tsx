@@ -1,10 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Appearance,
   Image,
   ImageBackground,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -23,8 +25,11 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { LegendList } from '@legendapp/list';
+import { useFocusEffect } from '@react-navigation/native';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { storage } from '../utils/DatabaseManager';
 import { complementHex, darkenHexColor } from '../utils/hexColors';
+import { hexIsDark } from '../utils/hexIsDark';
 
 const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
 
@@ -79,6 +84,21 @@ function AniDetailCopilot(props: Props) {
     });
   }, [data.thumbnailUrl]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (thumbnailColor === '#00000000') return;
+      StatusBar.setBackgroundColor(thumbnailColor);
+      StatusBar.setBarStyle(hexIsDark(thumbnailColor) ? 'light-content' : 'dark-content');
+      SystemNavigationBar.setNavigationColor(thumbnailColor);
+      return () => {
+        const colorScheme = Appearance.getColorScheme();
+        StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+        StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
+        SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+      };
+    }, [thumbnailColor]),
+  );
+
   const isCopilotAlreadyStopped = useRef(false);
   const copilotTimeout = useRef<NodeJS.Timeout>(null);
   useEffect(() => {
@@ -115,7 +135,8 @@ function AniDetailCopilot(props: Props) {
     <View style={styles.container}>
       <LinearGradient
         style={[styles.container, styles.centerChildren]}
-        colors={[thumbnailColor, endThumbnailColor]}>
+        colors={[thumbnailColor, thumbnailColor, endThumbnailColor]}
+        locations={[0, 0.7, 1]}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={[styles.title, { color: complementThumbnailColor }]}>
             {data.title.split('(Episode')[0]}

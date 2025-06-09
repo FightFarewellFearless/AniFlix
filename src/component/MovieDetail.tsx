@@ -1,9 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Appearance,
   Image,
   ImageBackground,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -18,10 +20,13 @@ import { RootStackNavigator } from '../types/navigation';
 
 import controlWatchLater from '../utils/watchLaterControl';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { getColors } from 'react-native-image-colors';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import watchLaterJSON from '../types/watchLaterJSON';
+import { hexIsDark } from '../utils/hexIsDark';
 import DarkOverlay from './misc/DarkOverlay';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
@@ -49,6 +54,22 @@ function MovieDetail(props: Props) {
       }
     });
   }, [props.route.params.data.thumbnailUrl]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (imageColors === '#000000') return;
+      StatusBar.setBackgroundColor(imageColors);
+      StatusBar.setBarStyle(hexIsDark(imageColors) ? 'light-content' : 'dark-content');
+      SystemNavigationBar.setNavigationColor(imageColors);
+      return () => {
+        const colorScheme = Appearance.getColorScheme();
+        StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+        StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
+        SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+      };
+    }, [imageColors]),
+  );
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: imageColors }]}>
       <ImageBackground
