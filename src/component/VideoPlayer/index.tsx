@@ -8,7 +8,7 @@ import {
 
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   AppState,
@@ -33,12 +33,16 @@ import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
 
+export type PlayerRef = {
+  skipTo: (duration: number) => void;
+};
 type VideoPlayerProps = {
   title: string;
   thumbnailURL?: string;
   streamingURL: string;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView>;
+  ref?: React.Ref<PlayerRef>;
   onFullscreenUpdate?: (isFullscreen: boolean) => void;
   fullscreen?: boolean;
   onLoad?: () => void;
@@ -56,6 +60,7 @@ function VideoPlayer({
   streamingURL,
   style,
   videoRef,
+  ref,
   onFullscreenUpdate,
   fullscreen,
   onLoad,
@@ -175,6 +180,17 @@ function VideoPlayer({
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
     onDurationChange?.(e.currentTime);
   });
+  useImperativeHandle(
+    ref,
+    () => ({
+      skipTo: (duration: number) => {
+        player.currentTime = duration;
+        currentDurationSecond.set(duration);
+        seekBarProgress.set(duration / (player.duration ?? 1));
+      },
+    }),
+    [player, currentDurationSecond, seekBarProgress],
+  );
   useEventListener(player, 'playToEnd', () => {
     setShowControls(true);
   });

@@ -66,7 +66,7 @@ import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
-import VideoPlayer from './VideoPlayer';
+import VideoPlayer, { PlayerRef } from './VideoPlayer';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -108,6 +108,7 @@ function Video(props: Props) {
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoView>(null);
+  const playerRef = useRef<PlayerRef>(null);
   const webviewRef = useRef<WebView>(null);
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
   const embedInformationRef = useRef<View>(null);
@@ -559,7 +560,7 @@ function Video(props: Props) {
       return;
     }
     if (videoRef.current && videoRef.current.props.player) {
-      videoRef.current.props.player.currentTime = historyData.current.lastDuration;
+      playerRef.current?.skipTo(historyData.current.lastDuration);
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
@@ -707,6 +708,7 @@ function Video(props: Props) {
               style={{ flex: 1, zIndex: 1 }}
               // @ts-expect-error
               videoRef={videoRef}
+              ref={playerRef}
               fullscreen={fullscreen}
               onFullscreenUpdate={fullscreenUpdate}
               onDurationChange={handleProgress}
