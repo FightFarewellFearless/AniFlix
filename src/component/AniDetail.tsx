@@ -208,23 +208,26 @@ function AniDetailCopilot(props: Props) {
         source={{ uri: data.thumbnailUrl }}
         blurRadius={5}
         resizeMode="cover"
-        style={{ maxHeight: '20%', alignItems: 'center', justifyContent: 'center' }}>
-        <View
-          style={{
-            backgroundColor: '#0000009d',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-          }}
+        style={styles.synopsisBackground}>
+        <LinearGradient
+          colors={[`${thumbnailColor}D0`, `${thumbnailColor}A0`]}
+          style={styles.synopsisOverlay}
         />
-        <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
-          <Icon name="tags" /> {data.genres.join(', ')}
-        </Text>
-        <ScrollView style={[styles.synopsis]}>
-          <Text style={[styles.detailText, { color: '#d8d8d8', textAlign: 'center' }]}>
-            {data.synopsis === '' ? 'Tidak ada sinopsis' : data.synopsis}
+
+        <View style={styles.synopsisContentContainer}>
+          <Text style={[styles.genreText, { color: complementThumbnailColor }]}>
+            <Icon name="tags" /> {data.genres.join(', ')}
           </Text>
-        </ScrollView>
+          <Text style={[styles.synopsisTitle, { color: complementThumbnailColor }]}>Sinopsis</Text>
+          <ScrollView
+            style={styles.synopsisScrollView}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={styles.synopsisScrollViewContent}>
+            <Text style={[styles.synopsisText, { color: complementThumbnailColor }]}>
+              {data.synopsis === '' ? 'Tidak ada sinopsis yang tersedia.' : data.synopsis}
+            </Text>
+          </ScrollView>
+        </View>
       </ImageBackground>
 
       <View style={[styles.container, { backgroundColor: thumbnailColor }]}>
@@ -305,7 +308,57 @@ function useStyles() {
           textShadowRadius: 0.8,
           fontWeight: 'bold',
         },
-        synopsis: {},
+        synopsisBackground: {
+          maxHeight: '28%',
+          minHeight: 120,
+          width: '100%',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        synopsisOverlay: {
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+        },
+        synopsisContentContainer: {
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          width: '100%',
+          alignItems: 'center',
+        },
+        genreText: {
+          textAlign: 'center',
+          marginBottom: 8,
+          fontSize: 13,
+          fontWeight: 'bold',
+          textShadowColor: 'black',
+          textShadowOffset: { width: 0.5, height: 0.5 },
+          textShadowRadius: 0.5,
+        },
+        synopsisTitle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          marginBottom: 5,
+          textShadowColor: 'black',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 1,
+        },
+        synopsisScrollView: {
+          maxHeight: 120,
+          width: '100%',
+        },
+        synopsisScrollViewContent: {
+          paddingVertical: 5,
+        },
+        synopsisText: {
+          textAlign: 'justify',
+          fontSize: 13,
+          fontWeight: 'bold',
+          lineHeight: 18,
+          textShadowColor: 'black',
+          textShadowOffset: { width: 0.5, height: 0.5 },
+          textShadowRadius: 0.5,
+        },
         episodeButton: {
           padding: 10,
         },
