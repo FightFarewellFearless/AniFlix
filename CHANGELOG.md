@@ -1,3 +1,9 @@
+# v0.9.0_JS-18 (9-Juni-2025)
+
+## Diperbaiki
+- Memperbaiki seek bar pada video player yang delay setelah melanjutkan dari history tontonan (Silent update pada JS-17)
+- Warna background pada `AniDetail` yang tidak konsisten antara dark mode dan light mode
+
 # v0.9.0_JS-17 (9-Juni-2025)
 
 ## Diperbaiki
