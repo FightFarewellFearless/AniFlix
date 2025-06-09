@@ -1,3 +1,8 @@
+# v0.9.0_JS-17 (9-Juni-2025)
+
+## Diperbaiki
+- Interval history update
+
 # v0.9.0_JS-16 (9-Juni-2025)
 
 ## Diperbaiki
