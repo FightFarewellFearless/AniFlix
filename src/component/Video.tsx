@@ -454,6 +454,7 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
+      if (currentTime % 2 === 0) return; // to prevent too frequent updates
       updateHistory(currentTime, data, history, props.route.params.isMovie);
     },
     [updateHistory, data, history, props.route.params.isMovie],

@@ -90,7 +90,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = 'doNotMix';
-      initialPlayer.timeUpdateEventInterval = 2;
+      initialPlayer.timeUpdateEventInterval = 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
