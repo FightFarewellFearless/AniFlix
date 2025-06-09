@@ -1,3 +1,10 @@
+# v0.9.0_JS-16 (9-Juni-2025)
+
+## Diperbaiki
+- Race condition pada data histori
+## Ditingkatkan
+- UI/UX pada layar episode anime
+
 # v0.9.0_JS-15 (8-Juni-2025)
 
 ## Ditambahkan
