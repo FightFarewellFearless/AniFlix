@@ -48,7 +48,6 @@ const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 import useGlobalStyles, { darkText, lightText } from '../assets/style';
 import useDownloadAnimeFunction from '../utils/downloadAnime';
 import setHistory from '../utils/historyControl';
-import throttleFunction from '../utils/throttleFunction';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -162,28 +161,23 @@ function Video(props: Props) {
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateHistoryThrottle = useCallback(
-    throttleFunction(
-      (
-        currentTime: number,
-        stateData: RootStackNavigator['Video']['data'],
-        settContext: string,
-        isMovie?: boolean,
-      ) => {
-        if (Math.floor(currentTime) === 0) {
-          return;
-        }
-        const additionalData = {
-          resolution: stateData.resolution,
-          lastDuration: currentTime,
-        };
-        setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
-        historyData.current = additionalData;
-      },
-      3000,
-    ),
+  const updateHistory = useCallback(
+    (
+      currentTime: number,
+      stateData: RootStackNavigator['Video']['data'],
+      settContext: string,
+      isMovie?: boolean,
+    ) => {
+      if (Math.floor(currentTime) === 0) {
+        return;
+      }
+      const additionalData = {
+        resolution: stateData.resolution,
+        lastDuration: currentTime,
+      };
+      setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
+      historyData.current = additionalData;
+    },
     [],
   );
 
@@ -460,9 +454,9 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistoryThrottle(currentTime, data, history, props.route.params.isMovie);
+      updateHistory(currentTime, data, history, props.route.params.isMovie);
     },
-    [updateHistoryThrottle, data, history, props.route.params.isMovie],
+    [updateHistory, data, history, props.route.params.isMovie],
   );
 
   const episodeDataControl = useCallback(
