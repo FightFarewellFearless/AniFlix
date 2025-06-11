@@ -257,7 +257,6 @@ function Video(props: Props) {
     return () => {
       willUnmountHandler();
       abortController.current?.abort();
-      global.gc?.();
     };
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -992,7 +991,6 @@ function Video(props: Props) {
                     ]}
                     onPress={async () => {
                       await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
-                      global.gc?.();
                     }}>
                     <Icon name="arrow-left" size={18} color="black" />
                     <Text
@@ -1015,7 +1013,6 @@ function Video(props: Props) {
                     ]}
                     onPress={async () => {
                       await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
-                      global.gc?.();
                     }}>
                     <Icon name="arrow-right" size={18} color="black" />
                     <Text
@@ -1049,7 +1046,6 @@ function Video(props: Props) {
                     labelField="label"
                     onChange={async val => {
                       await setResolution(val.value.dataContent, val.label);
-                      global.gc?.();
                     }}
                     style={styles.dropdownStyle}
                     containerStyle={styles.dropdownContainerStyle}

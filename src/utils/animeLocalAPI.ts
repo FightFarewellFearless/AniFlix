@@ -464,7 +464,6 @@ const listAnime = async (
       }
     }
     res(listAnimeData);
-    globalThis.gc?.();
     // })();
   });
 };
