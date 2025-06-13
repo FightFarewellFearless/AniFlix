@@ -4504,7 +4504,7 @@ __metadata:
     react-native-error-boundary: ^2.0.0
     react-native-gesture-handler: 2.25.0
     react-native-image-colors: ^2.4.0
-    react-native-marked: ^6.0.7
+    react-native-marked: ^7.0.1
     react-native-mmkv: ^3.2.0
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.5
@@ -7661,6 +7661,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"github-slugger@npm:2.0.0":
+  version: 2.0.0
+  resolution: "github-slugger@npm:2.0.0"
+  checksum: 250375cde2058f21454872c2c79f72c4637340c30c51ff158ca4ec71cbc478f33d54477d787a662f9207aeb095a2060f155bc01f15329ba8a5fb6698e0fc81f8
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -7927,10 +7934,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html-entities@npm:2.5.2":
-  version: 2.5.2
-  resolution: "html-entities@npm:2.5.2"
-  checksum: b23f4a07d33d49ade1994069af4e13d31650e3fb62621e92ae10ecdf01d1a98065c78fd20fdc92b4c7881612210b37c275f2c9fba9777650ab0d6f2ceb3b99b6
+"html-entities@npm:2.6.0":
+  version: 2.6.0
+  resolution: "html-entities@npm:2.6.0"
+  checksum: 720643f7954019c80911430a7df2728524c07080edfe812610bfc5d8191cd772b470bee0ee151bf7426679314ae53cf28a1c845d702123714e625a8565b26567
   languageName: node
   linkType: hard
 
@@ -9576,12 +9583,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:5.0.5":
-  version: 5.0.5
-  resolution: "marked@npm:5.0.5"
+"marked@npm:15.0.12":
+  version: 15.0.12
+  resolution: "marked@npm:15.0.12"
   bin:
     marked: bin/marked.js
-  checksum: 0148b62895e93dff7f209469ec1d0d5cbb52e4d974c6ed02d35f9feaf75580c2daf16610486b0c36780c75d893b14103e74c8737f9921e54b3bd2b4d1dc51039
+  checksum: 2ac72fc0bc7ecb47de246e396c7054d311f55379957e4e01796c12d196cb84480e8d53e54948f957a078f9166692fea8b0309fc597f26f855573e7ba5c1ec7eb
   languageName: node
   linkType: hard
 
@@ -11630,21 +11637,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-marked@npm:^6.0.7":
-  version: 6.0.7
-  resolution: "react-native-marked@npm:6.0.7"
+"react-native-marked@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "react-native-marked@npm:7.0.1"
   dependencies:
     "@jsamr/counter-style": 2.0.2
     "@jsamr/react-native-li": 2.3.1
-    html-entities: 2.5.2
-    marked: 5.0.5
-    react-native-table-component: 1.2.2
+    github-slugger: 2.0.0
+    html-entities: 2.6.0
+    marked: 15.0.12
+    react-native-reanimated-table: 0.0.2
     svg-parser: 2.0.4
   peerDependencies:
-    react: ^16.8.6 || ^17.0.0 || ^18.0.0
-    react-native: ">=0.60.0"
+    react: ">=16.8.6"
+    react-native: ">=0.76.0"
     react-native-svg: ">=12.3.0"
-  checksum: 8eb478028271b322e6fd9ec3ae683225b09597e28ce49cd8ea031f98b21517974f0087026f8347ba42b95e0e94084f4b2e709e1e4bab46b334003d2755a52c6b
+  checksum: 3a2802dcebec356942e5987ca25bff3baa14443f4378662a6769ae33181dc37ec1bb42ce45cd5520168ebbdfb02841a5ddcea30ee69198bcccbbe912191c5cd4
   languageName: node
   linkType: hard
 
@@ -11684,6 +11692,16 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: "*"
   checksum: f986937ebeb2cdea338d384dfc7814d2c0dbe3e8cd3645ce720832b78f588eccf3fc490bf1afb942a9d6046cd842984c011316c4d9c2fabf59a38ae1a47fccb3
+  languageName: node
+  linkType: hard
+
+"react-native-reanimated-table@npm:0.0.2":
+  version: 0.0.2
+  resolution: "react-native-reanimated-table@npm:0.0.2"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-native: ">=0.6.0"
+  checksum: ab1a326d9880bc49febbb1ab325ede544c86b4ca2faf713904e8aa64d05478e36f6d545a819bc82a7d234c23ea6cf9e4fcbc2dc804a7e7f9240d5f21eb28e76c
   languageName: node
   linkType: hard
 
@@ -11766,13 +11784,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: b0fe20a00c5640ec98efb80c4441c0b38ea9fd7c87289be588bd27ff2553f4e5e2d3c9df9e4c752c7f6bcc135c7a848eea37c94e97259dd3f4e47de8e84d0de5
-  languageName: node
-  linkType: hard
-
-"react-native-table-component@npm:1.2.2":
-  version: 1.2.2
-  resolution: "react-native-table-component@npm:1.2.2"
-  checksum: 906a0ae3b23bcf4a98237d07853bb416feb3d512a4f28e758470a3c45154f15e92445d57ef272e3c3c24c7355ec6ccbf6b53e7ce917ed1964b9f973084d88c46
   languageName: node
   linkType: hard
 

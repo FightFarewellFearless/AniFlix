@@ -42,7 +42,7 @@
     "react-native-error-boundary": "^2.0.0",
     "react-native-gesture-handler": "2.25.0",
     "react-native-image-colors": "^2.4.0",
-    "react-native-marked": "^6.0.7",
+    "react-native-marked": "^7.0.1",
     "react-native-mmkv": "^3.2.0",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.14.5",
