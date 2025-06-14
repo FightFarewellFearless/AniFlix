@@ -133,6 +133,7 @@ function History(props: Props) {
           <ImageLoading
             contentFit="fill"
             source={{ uri: item.thumbnailUrl }}
+            recyclingKey={item.thumbnailUrl}
             style={styles.listImage}
           />
 

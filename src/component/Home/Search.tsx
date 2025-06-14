@@ -440,7 +440,12 @@ function SearchList({
           }),
         );
       }}>
-      <ImageLoading contentFit="fill" source={{ uri: z.thumbnailUrl }} style={styles.listImage} />
+      <ImageLoading
+        contentFit="fill"
+        source={{ uri: z.thumbnailUrl }}
+        style={styles.listImage}
+        recyclingKey={z.thumbnailUrl}
+      />
       <ImageColorShadow url={z.thumbnailUrl} />
 
       <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>

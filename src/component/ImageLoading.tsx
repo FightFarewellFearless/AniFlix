@@ -46,21 +46,21 @@ const ImageLoading = (props: ImageBackgroundProps) => {
   }, [source]);
 
   const isFocused = useIsFocused();
-  if (!isFocused) return <View style={style} />;
 
   return (
     <ImageBackground
       {...restProps}
       source={
-        source &&
-        typeof source === 'object' &&
-        'uri' in source &&
-        typeof imageSourceUri === 'string'
-          ? { ...source, uri: imageSourceUri }
-          : source
+        !isFocused
+          ? undefined
+          : source &&
+              typeof source === 'object' &&
+              'uri' in source &&
+              typeof imageSourceUri === 'string'
+            ? { ...source, uri: imageSourceUri }
+            : source
       }
       style={[style, styles.imageBackground]}
-      recyclingKey={JSON.stringify(source)}
       onLoadStart={onLoadStart}
       onLoadEnd={onLoadEnd}
       onError={onError}>

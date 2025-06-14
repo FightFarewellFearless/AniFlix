@@ -42,6 +42,7 @@ export function ListAnimeComponent(
         contentFit="fill"
         key={z.thumbnailUrl}
         source={{ uri: z.thumbnailUrl }}
+        recyclingKey={z.thumbnailUrl}
         style={[styles.listBackground, { borderColor: 'orange' }]}>
         <View style={styles.animeTitleContainer}>
           <Text numberOfLines={2} style={styles.animeTitle}>
