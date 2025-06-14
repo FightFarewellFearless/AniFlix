@@ -1,6 +1,7 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import { ImageBackground, ImageBackgroundProps } from 'expo-image';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
@@ -43,6 +44,9 @@ const ImageLoading = (props: ImageBackgroundProps) => {
     setLoading(false);
     setError(false);
   }, [source]);
+
+  const isFocused = useIsFocused();
+  if (!isFocused) return <View style={style} />;
 
   return (
     <ImageBackground
