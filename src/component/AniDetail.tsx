@@ -62,6 +62,8 @@ function AniDetailCopilot(props: Props) {
 
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+
   const data = props.route.params.data;
 
   const watchLaterListsJson = useSelectorIfFocused(
@@ -79,10 +81,10 @@ function AniDetailCopilot(props: Props) {
   useEffect(() => {
     getColors(data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
       if (colors.platform === 'android') {
-        setThumbnailColor(colors.dominant);
+        setThumbnailColor(colorScheme === 'dark' ? colors.darkMuted : colors.lightMuted);
       }
     });
-  }, [data.thumbnailUrl]);
+  }, [data.thumbnailUrl, colorScheme]);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,12 +93,11 @@ function AniDetailCopilot(props: Props) {
       StatusBar.setBarStyle(hexIsDark(thumbnailColor) ? 'light-content' : 'dark-content');
       SystemNavigationBar.setNavigationColor(thumbnailColor);
       return () => {
-        const colorScheme = Appearance.getColorScheme();
         StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
         StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
         SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
       };
-    }, [thumbnailColor]),
+    }, [colorScheme, thumbnailColor]),
   );
 
   const isCopilotAlreadyStopped = useRef(false);
@@ -123,8 +124,6 @@ function AniDetailCopilot(props: Props) {
       isCopilotAlreadyStopped.current = false;
     };
   }, [start, copilotEvents, isInList]);
-
-  const colorScheme = useColorScheme();
 
   const endThumbnailColor = useMemo(
     () => darkenHexColor(thumbnailColor, 50 * (colorScheme === 'dark' ? 1 : -1)),

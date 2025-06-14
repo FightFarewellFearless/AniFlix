@@ -33,6 +33,7 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
 function MovieDetail(props: Props) {
   const window = useWindowDimensions();
   const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   const [imageColors, setImageColors] = useState<string>('#000000');
@@ -49,11 +50,11 @@ function MovieDetail(props: Props) {
   useEffect(() => {
     getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
       if (colors.platform === 'android') {
-        const color = colors.dominant;
+        const color = colorScheme === 'dark' ? colors.darkMuted : colors.lightMuted;
         setImageColors(color);
       }
     });
-  }, [props.route.params.data.thumbnailUrl]);
+  }, [colorScheme, props.route.params.data.thumbnailUrl]);
 
   useFocusEffect(
     useCallback(() => {
@@ -62,12 +63,11 @@ function MovieDetail(props: Props) {
       StatusBar.setBarStyle(hexIsDark(imageColors) ? 'light-content' : 'dark-content');
       SystemNavigationBar.setNavigationColor(imageColors);
       return () => {
-        const colorScheme = Appearance.getColorScheme();
         StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
         StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
         SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
       };
-    }, [imageColors]),
+    }, [colorScheme, imageColors]),
   );
 
   return (
