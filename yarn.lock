@@ -4487,6 +4487,7 @@ __metadata:
     eslint-plugin-react-compiler: beta
     expo: ^53.0.11
     expo-document-picker: 13.1.5
+    expo-image: ^2.3.0
     expo-linear-gradient: 14.1.5
     expo-splash-screen: 0.30.9
     expo-updates: 0.28.14
@@ -4502,7 +4503,7 @@ __metadata:
     react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
     react-native-error-boundary: ^2.0.0
-    react-native-gesture-handler: 2.25.0
+    react-native-gesture-handler: 2.26.0
     react-native-image-colors: ^2.4.0
     react-native-marked: ^7.0.1
     react-native-mmkv: ^3.2.0
@@ -7047,6 +7048,21 @@ __metadata:
     expo: "*"
     react: "*"
   checksum: 1db08552d60e8fcbab6301f45e08ef382f5a8b7009348ddffd188566f7ce1e9aa5476c2d1f7dc869db85e25338acc1aea6173a85d5a2f5785b2409d5499a4886
+  languageName: node
+  linkType: hard
+
+"expo-image@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "expo-image@npm:2.3.0"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 14d6585175b56bb0536c7023addc57c69cde0b8446a0a9568ce02c132ccc21f78ab9f075aa36de569af1d486c984df25a3f44d0379b9a05ebd2231cdcfd856f6
   languageName: node
   linkType: hard
 
@@ -11600,9 +11616,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.25.0":
-  version: 2.25.0
-  resolution: "react-native-gesture-handler@npm:2.25.0"
+"react-native-gesture-handler@npm:2.26.0":
+  version: 2.26.0
+  resolution: "react-native-gesture-handler@npm:2.26.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -11610,7 +11626,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 51b155bcc56043b9e06bf8ded089c44348e8da297b38e73f203f2d6ce8bd51698f85a38dca8eeab3d2ab721aeddefc270acd99e16cf493b20f1f429ad02214b8
+  checksum: e01cc57598b1cd2b4bf2886906e0d3a03ef09a57ce7a8ab530ec7779853919bb8265dd9afc0f023a0418cf60f6762eb27d1d71f8e3e9416a78ab0ddd55c22bb9
   languageName: node
   linkType: hard
 
