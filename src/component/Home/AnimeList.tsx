@@ -1,5 +1,6 @@
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import * as MeasureText from '@domir/react-native-measure-text';
+import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import {
   NavigationProp,
   StackActions,
@@ -8,8 +9,6 @@ import {
 } from '@react-navigation/native';
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  FlatList,
-  ListRenderItemInfo,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -234,7 +233,7 @@ function EpisodeBaruUNMEMO({
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
   const renderNewAnime = useCallback(
-    ({ item }: ListRenderItemInfo<NewAnimeList>) => (
+    ({ item }: LegendListRenderItemProps<NewAnimeList>) => (
       <ListAnimeComponent
         newAnimeData={item}
         key={'btn' + item.title + item.episode}
@@ -258,9 +257,11 @@ function EpisodeBaruUNMEMO({
         </TouchableOpacity>
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
-        <FlatList
+        <LegendList
+          recycleItems
           horizontal
-          data={data?.newAnime.slice(0, 25)}
+          data={(data?.newAnime ?? []).slice(0, 25)}
+          keyExtractor={z => z.title}
           renderItem={renderNewAnime}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
@@ -280,7 +281,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
-    ({ item }: ListRenderItemInfo<Movies>) => (
+    ({ item }: LegendListRenderItemProps<Movies>) => (
       <ListAnimeComponent
         newAnimeData={item}
         isMovie={true}
@@ -336,10 +337,12 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
       )}
 
       {data?.length !== 0 ? (
-        <FlatList
+        <LegendList
+          recycleItems
           horizontal
-          data={data?.slice(0, 25)}
+          data={data?.slice(0, 25) ?? []}
           renderItem={renderMovie}
+          keyExtractor={z => z.title}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
