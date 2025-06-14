@@ -1,12 +1,12 @@
 import { useIsFocused } from '@react-navigation/native';
-import { ImageBackground, ImageBackgroundProps } from 'expo-image';
+import { Image, ImageProps } from 'expo-image';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
 
-const ImageLoading = (props: ImageBackgroundProps) => {
+const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   const { source, style, children, ...restProps } = props;
 
   const imageSourceUri = React.useMemo(() => {
@@ -48,22 +48,24 @@ const ImageLoading = (props: ImageBackgroundProps) => {
   const isFocused = useIsFocused();
 
   return (
-    <ImageBackground
-      {...restProps}
-      source={
-        !isFocused
-          ? undefined
-          : source &&
-              typeof source === 'object' &&
-              'uri' in source &&
-              typeof imageSourceUri === 'string'
-            ? { ...source, uri: imageSourceUri }
-            : source
-      }
-      style={[style, styles.imageBackground]}
-      onLoadStart={onLoadStart}
-      onLoadEnd={onLoadEnd}
-      onError={onError}>
+    <View style={[style, styles.imageBackground]}>
+      {isFocused && (
+        <Image
+          {...restProps}
+          source={
+            source &&
+            typeof source === 'object' &&
+            'uri' in source &&
+            typeof imageSourceUri === 'string'
+              ? { ...source, uri: imageSourceUri }
+              : source
+          }
+          style={[StyleSheet.absoluteFill]}
+          onLoadStart={onLoadStart}
+          onLoadEnd={onLoadEnd}
+          onError={onError}
+        />
+      )}
       {children}
       {(loading || error) && (
         <View style={styles.overlay}>
@@ -71,7 +73,7 @@ const ImageLoading = (props: ImageBackgroundProps) => {
           {error && <Icon name="exclamation-circle" color="red" size={18} />}
         </View>
       )}
-    </ImageBackground>
+    </View>
   );
 };
 
