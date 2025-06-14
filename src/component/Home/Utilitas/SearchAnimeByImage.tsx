@@ -1,11 +1,11 @@
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
+import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Modal,
   StyleSheet,
   Text,
@@ -195,7 +195,7 @@ function SearchAnimeByImage() {
                   <Image
                     source={{ uri: choosenImage }}
                     style={styles.selectedImage}
-                    resizeMode="contain"
+                    contentFit="contain"
                   />
                 ) : (
                   <View style={styles.placeholderContainer}>

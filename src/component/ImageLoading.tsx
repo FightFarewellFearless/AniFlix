@@ -1,11 +1,6 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  ImageBackground,
-  ImageBackgroundProps,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { ImageBackground, ImageBackgroundProps } from 'expo-image';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
@@ -14,7 +9,13 @@ const ImageLoading = (props: ImageBackgroundProps) => {
   const { source, style, children, ...restProps } = props;
 
   const imageSourceUri = React.useMemo(() => {
-    if (typeof source === 'object' && !Array.isArray(source) && source.uri) {
+    if (
+      source &&
+      typeof source === 'object' &&
+      !Array.isArray(source) &&
+      'uri' in source &&
+      source.uri
+    ) {
       if (source.uri.includes('otakudesu')) {
         const withoutDomain = URL.parse(source.uri);
         return `${withoutDomain.protocol}//${AnimeLocal.BASE.domain}${withoutDomain.pathname}`;
@@ -47,11 +48,15 @@ const ImageLoading = (props: ImageBackgroundProps) => {
     <ImageBackground
       {...restProps}
       source={
-        typeof source === 'object' && 'uri' in source && typeof imageSourceUri === 'string'
+        source &&
+        typeof source === 'object' &&
+        'uri' in source &&
+        typeof imageSourceUri === 'string'
           ? { ...source, uri: imageSourceUri }
           : source
       }
       style={[style, styles.imageBackground]}
+      recyclingKey={JSON.stringify(source)}
       onLoadStart={onLoadStart}
       onLoadEnd={onLoadEnd}
       onError={onError}>

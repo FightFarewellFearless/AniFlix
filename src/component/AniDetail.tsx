@@ -1,10 +1,8 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image, ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Appearance,
-  Image,
-  ImageBackground,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -164,7 +162,7 @@ function AniDetailCopilot(props: Props) {
               { width: 135, height: 'auto', maxHeight: 200, marginVertical: 12 },
               styles.imageContainerChild,
             ]}>
-            <Image source={{ uri: data.thumbnailUrl }} style={[{ flex: 1 }]} resizeMode="contain" />
+            <Image source={{ uri: data.thumbnailUrl }} style={[{ flex: 1 }]} contentFit="contain" />
             <CopilotStep
               text="Kamu bisa klik bagian ini untuk menambahkan anime ini ke daftar tonton nanti"
               order={1}
@@ -206,7 +204,7 @@ function AniDetailCopilot(props: Props) {
       <ImageBackground
         source={{ uri: data.thumbnailUrl }}
         blurRadius={5}
-        resizeMode="cover"
+        contentFit="cover"
         style={styles.synopsisBackground}>
         <LinearGradient
           colors={[`${thumbnailColor}D0`, `${thumbnailColor}A0`]}

@@ -39,7 +39,7 @@ export function ListAnimeComponent(
         );
       }}>
       <ImageLoading
-        resizeMode="stretch"
+        contentFit="fill"
         key={z.thumbnailUrl}
         source={{ uri: z.thumbnailUrl }}
         style={[styles.listBackground, { borderColor: 'orange' }]}>

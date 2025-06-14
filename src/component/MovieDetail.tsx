@@ -1,8 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Image } from 'expo-image';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Appearance,
-  Image,
   ImageBackground,
   ScrollView,
   StatusBar,
@@ -83,7 +82,7 @@ function MovieDetail(props: Props) {
           </Text>
           <Image
             source={{ uri: props.route.params.data.thumbnailUrl }}
-            resizeMode="contain"
+            contentFit="contain"
             style={{ flex: 1, width: '70%' }}
           />
           <View

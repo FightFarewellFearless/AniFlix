@@ -1,13 +1,6 @@
+import { ImageBackground } from 'expo-image';
 import { memo, useMemo } from 'react';
-import {
-  ImageBackground,
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appPackage from '../../../../package.json';
 import { darkText } from '../../../assets/style';
@@ -27,7 +20,7 @@ function About() {
   );
   const styles = useStyles();
   return (
-    <ImageBackground source={tokyo} resizeMode="cover" style={{ flex: 1 }}>
+    <ImageBackground source={tokyo} contentFit="cover" style={{ flex: 1 }}>
       <DarkOverlay transparent={0.75} />
       <ScrollView style={styles.container}>
         <Text style={styles.header}>

@@ -1,5 +1,6 @@
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ImageBackground } from 'expo-image';
 import React, {
   memo,
   useCallback,
@@ -11,7 +12,6 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
@@ -45,10 +45,10 @@ import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
+import { TextInput as TextInputType } from 'react-native';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-import { TextInput as TextInputType } from 'react-native';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
@@ -440,11 +440,7 @@ function SearchList({
           }),
         );
       }}>
-      <ImageLoading
-        resizeMode="stretch"
-        source={{ uri: z.thumbnailUrl }}
-        style={styles.listImage}
-      />
+      <ImageLoading contentFit="fill" source={{ uri: z.thumbnailUrl }} style={styles.listImage} />
       <ImageColorShadow url={z.thumbnailUrl} />
 
       <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>

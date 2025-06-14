@@ -131,7 +131,7 @@ function History(props: Props) {
             );
           }}>
           <ImageLoading
-            resizeMode="stretch"
+            contentFit="fill"
             source={{ uri: item.thumbnailUrl }}
             style={styles.listImage}
           />
