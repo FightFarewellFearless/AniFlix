@@ -17,6 +17,7 @@ type Props = {
 
 export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Pressable> {
   const opacity = useSharedValue(1);
+  const onPress = props.onPress;
   const sigleTaps = useMemo(
     () =>
       Gesture.Tap()
@@ -29,20 +30,15 @@ export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Press
           opacity.set(withTiming(1, { duration: 100 }));
         })
         .onEnd(() => {
-          if (props.onPress) {
-            runOnJS(props.onPress)();
+          if (onPress) {
+            runOnJS(onPress)();
           }
         }),
-    [opacity, props.disabled, props.onPress],
+    [opacity, props.disabled, onPress],
   );
   return (
     <GestureDetector gesture={sigleTaps}>
       <Reanimated.View style={[StyleSheet.flatten(props.style), { opacity }]}>
-        {/* 
-          TODO: The current implementation somehow gives an error
-          [Reanimated] Tried to modify key `current` of an object which has been already passed to a worklet 
-          Possibly related to react-native-dropdown-element's ref
-        */}
         {props.children}
       </Reanimated.View>
     </GestureDetector>
