@@ -37,7 +37,7 @@ export async function getLatestKomikuReleases(
       const title = listItem.find('div.kan h3').text().trim();
       const thumbnailUrl = listItem.find('img').attr('src') || '';
       const detailUrl = listItem.find('a').attr('href') || '';
-      const type = listItem.find('div.tpe1_inf b').text().trim() as 'Manga' | 'Manhwa' | 'Manhua';
+      const type = listItem.find('div.tpe1_inf b').text().trim() as LatestKomikuRelease['type'];
       const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
       const concept = listItem.find('div.tpe1_inf').clone().find('b').remove().end().text().trim();
       const shortDescription = listItem.find('div.kan p').text().trim();
@@ -213,7 +213,7 @@ export async function komikuSearch(query: string, signal?: AbortSignal): Promise
       const title = listItem.find('div.kan h3').text().trim();
       const thumbnailUrl = listItem.find('img').attr('src') || '';
       const detailUrl = listItem.find('a').attr('href') || '';
-      const type = listItem.find('div.tpe1_inf b').text().trim() as 'Manga' | 'Manhwa' | 'Manhua';
+      const type = listItem.find('div.tpe1_inf b').text().trim() as KomikuSearch['type'];
       const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
       const concept = listItem.find('div.tpe1_inf').clone().find('b').remove().end().text().trim();
       const additionalInfo = listItem.find('div.kan p').text().trim();
