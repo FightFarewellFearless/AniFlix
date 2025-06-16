@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
-import { memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import { JSX, memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Appearance,
