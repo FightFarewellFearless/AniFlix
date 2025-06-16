@@ -193,8 +193,8 @@ function Video(props: Props) {
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
   const synopsisHeight = useRef(0);
-  const infoContainerHeight = useSharedValue(0); // useSharedValue
-  const infoContainerOpacity = useSharedValue(1); // useSharedValue
+  const infoContainerHeight = useSharedValue(0);
+  const infoContainerOpacity = useSharedValue(1);
   const infoContainerStyle = useAnimatedStyle(() => {
     return {
       opacity: infoContainerOpacity.get(),
@@ -244,17 +244,17 @@ function Video(props: Props) {
   );
 
   const willUnmountHandler = useCallback(() => {
-    Orientation.removeDeviceOrientationListener(orientationDidChange);
     Orientation.lockToPortrait();
     StatusBar.setHidden(false);
     SystemNavigationBar.navigationShow();
-  }, [orientationDidChange]);
+  }, []);
 
   // didMount and willUnmount
   useEffect(() => {
     Orientation.addDeviceOrientationListener(orientationDidChange);
 
     return () => {
+      Orientation.removeDeviceOrientationListener(orientationDidChange);
       willUnmountHandler();
       abortController.current?.abort();
     };
@@ -274,14 +274,12 @@ function Video(props: Props) {
   useEffect(() => {
     let _batteryEvent: EmitterSubscription | null;
     if (enableBatteryTimeInfo === 'true') {
-      DeviceInfo.getBatteryLevel().then(async batteryLevels => {
-        setBatteryLevel(batteryLevels);
+      DeviceInfo.getBatteryLevel().then(async currentLevel => {
+        setBatteryLevel(currentLevel);
         _batteryEvent = deviceInfoEmitter.addListener(
           'RNDeviceInfo_batteryLevelDidChange',
-          async batteryLvel => {
-            if (batteryLevel !== batteryLvel) {
-              onBatteryStateChange({ batteryLevel: batteryLvel });
-            }
+          async levelChanged => {
+            setBatteryLevel(levelChanged);
           },
         );
         setBatteryTimeEnable(true);
@@ -291,30 +289,20 @@ function Video(props: Props) {
       _batteryEvent && _batteryEvent.remove();
       _batteryEvent = null;
     };
-  }, [batteryLevel, enableBatteryTimeInfo]);
+  }, [enableBatteryTimeInfo]);
 
-  const onHardwareBackPress = useCallback(
-    (isFullsc: boolean) => {
-      if (!isFullsc) {
+  // BackHandler event
+  useBackHandler(
+    useCallback(() => {
+      if (!fullscreen) {
         willUnmountHandler();
         return false;
       } else {
         exitFullscreen();
         return true;
       }
-    },
-    [exitFullscreen, willUnmountHandler],
+    }, [exitFullscreen, fullscreen, willUnmountHandler]),
   );
-
-  // BackHandler event
-  useEffect(() => {
-    const backHandlerEvent = BackHandler.addEventListener('hardwareBackPress', () =>
-      onHardwareBackPress(fullscreen),
-    );
-    return () => {
-      backHandlerEvent.remove();
-    };
-  }, [fullscreen, onHardwareBackPress]);
 
   const setResolution = useCallback(
     async (res: string, resolution: string) => {
@@ -421,14 +409,6 @@ function Video(props: Props) {
       />
     );
   }, [batteryLevel]);
-
-  const onBatteryStateChange = ({
-    batteryLevel: currentBatteryLevel,
-  }: {
-    batteryLevel: number;
-  }) => {
-    setBatteryLevel(currentBatteryLevel);
-  };
 
   const downloadAnime = useCallback(async () => {
     if (data.streamingType === 'embed') {
@@ -591,14 +571,12 @@ function Video(props: Props) {
   useLayoutEffect(() => {
     synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
       initialInfoContainerHeight.current = height;
-      // infoContainerHeight.setValue(height);
     });
   }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextRef]);
 
   const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
       infoContainerHeight.set(initialInfoContainerHeight.current!);
-      // infoContainerHeight.setValue(initialInfoContainerHeight.current!);
 
       /* 
       wait for the next event loop,
@@ -614,42 +592,20 @@ function Video(props: Props) {
           runOnJS(setShowSynopsis)(false);
         }),
       );
-      // Animated.timing(infoContainerHeight, {
-      //   toValue: initialInfoContainerHeight.current!,
-      //   duration: 350,
-      //   useNativeDriver: false,
-      // }).start(({ finished }) => {
-      //   if (finished) setShowSynopsis(false);
-      // });
     } else {
       setShowSynopsis(true);
       queueMicrotask(() => {
         infoContainerHeight.set(withTiming(synopsisHeight.current, { duration: 350 }));
-        // Animated.timing(infoContainerHeight, {
-        //   toValue: synopsisHeight.current,
-        //   duration: 350,
-        //   useNativeDriver: false,
-        // }).start();
       });
     }
   }, [infoContainerHeight, showSynopsis]);
 
   const onSynopsisPressIn = useCallback(() => {
     infoContainerOpacity.set(withTiming(0.4, { duration: 100 }));
-    // Animated.timing(infoContainerOpacity, {
-    //   toValue: 0.4,
-    //   duration: 100,
-    //   useNativeDriver: false,
-    // }).start();
   }, [infoContainerOpacity]);
 
   const onSynopsisPressOut = useCallback(() => {
     infoContainerOpacity.set(withTiming(1, { duration: 100 }));
-    // Animated.timing(infoContainerOpacity, {
-    //   toValue: 1,
-    //   duration: 100,
-    //   useNativeDriver: false,
-    // }).start();
   }, [infoContainerOpacity]);
 
   const batteryAndClock = (
@@ -892,19 +848,7 @@ function Video(props: Props) {
 
               <ReAnimated.Text
                 ref={synopsisTextRef}
-                style={[
-                  globalStyles.text,
-                  styles.infoSinopsis,
-                  infoContainerStyle,
-                  // {
-                  //   opacity: infoContainerOpacity,
-                  //   height:
-                  //     // @ts-ignore
-                  //     infoContainerHeight.__getValue() === 0 || synopsisTextLength <= 2
-                  //       ? 'auto'
-                  //       : infoContainerHeight,
-                  // },
-                ]}
+                style={[globalStyles.text, styles.infoSinopsis, infoContainerStyle]}
                 numberOfLines={!showSynopsis ? 2 : undefined}
                 onTextLayout={e => {
                   setSynopsisTextLength(e.nativeEvent.lines.length);
@@ -1102,12 +1046,14 @@ function LoadingModal({
 }) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
-  useBackHandler(() => {
-    if (isLoading) {
-      cancelLoading();
-    }
-    return isLoading;
-  });
+  useBackHandler(
+    useCallback(() => {
+      if (isLoading) {
+        cancelLoading();
+      }
+      return isLoading;
+    }, [isLoading, cancelLoading]),
+  );
 
   useEffect(() => {
     if (isLoading) {

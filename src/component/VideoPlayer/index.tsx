@@ -1,10 +1,5 @@
 /* eslint-disable react-compiler/react-compiler */
-import {
-  VideoPlayer as ExpoVideoPlayer,
-  StatusChangeEventPayload,
-  VideoView,
-  useVideoPlayer,
-} from 'expo-video';
+import { VideoPlayer as ExpoVideoPlayer, VideoView, useVideoPlayer } from 'expo-video';
 
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -129,44 +124,31 @@ function VideoPlayer({
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
 
-  const playbackStatusUpdate = useCallback(
-    ({ status }: StatusChangeEventPayload) => {
-      if (status === 'readyToPlay') {
-        setIsError(false);
-        setIsBuffering(false);
-        totalDurationSecond.set(player.duration ?? 0);
-        if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(player.currentTime);
+  useEventListener(player, 'statusChange', ({ status }) => {
+    if (status === 'readyToPlay') {
+      setIsError(false);
+      setIsBuffering(false);
+      totalDurationSecond.set(player.duration ?? 0);
+      if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(player.currentTime);
 
-        if (seekBarProgressDisabled.get() === false)
-          seekBarProgress.set(player.currentTime / (player.duration ?? 1));
+      if (seekBarProgressDisabled.get() === false)
+        seekBarProgress.set(player.currentTime / (player.duration ?? 1));
 
-        currentDurationSecond.get() < 1 && onLoad?.();
-        onDurationChange?.(player.currentTime);
+      currentDurationSecond.get() < 1 && onLoad?.();
+      onDurationChange?.(player.currentTime);
 
-        // Fix: video is playing when app is in background
-        if (AppState.currentState === 'background') {
-          setPaused(true);
-          player.pause();
-        }
-      } else if (status === 'loading') {
-        setIsBuffering(true);
-      } else if (status === 'error') {
-        setIsError(true);
-        setIsBuffering(false);
+      // Fix: video is playing when app is in background
+      if (AppState.currentState === 'background') {
+        setPaused(true);
+        player.pause();
       }
-    },
-    [
-      totalDurationSecond,
-      player,
-      seekBarProgressDisabled,
-      currentDurationSecond,
-      seekBarProgress,
-      onLoad,
-      onDurationChange,
-    ],
-  );
-
-  useEventListener(player, 'statusChange', playbackStatusUpdate);
+    } else if (status === 'loading') {
+      setIsBuffering(true);
+    } else if (status === 'error') {
+      setIsError(true);
+      setIsBuffering(false);
+    }
+  });
   useEventListener(player, 'playingChange', e => {
     setPaused(!e.isPlaying);
     if (!e.isPlaying) {
@@ -174,7 +156,7 @@ function VideoPlayer({
     }
   });
   useEventListener(player, 'timeUpdate', e => {
-    if (paused) return; // Do not update time if video is paused (fix for video history not synced)
+    if (!player.playing) return; // Do not update time if video is paused (fix for video history not synced)
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
@@ -260,16 +242,25 @@ function VideoPlayer({
     };
   });
 
+  const pipTimeout = useRef<NodeJS.Timeout>(null);
   const onPiPStop = useCallback(() => {
-    setTimeout(() => {
+    pipTimeout.current = setTimeout(() => {
       if (AppState.currentState === 'active' && !paused) {
-        player.play();
+        try {
+          player.play();
+        } catch {}
         setPaused(false);
       }
     }, 100);
     player.pause();
     setPaused(true);
   }, [paused, player]);
+
+  useEffect(() => {
+    return () => {
+      pipTimeout.current && clearTimeout(pipTimeout.current);
+    };
+  }, []);
 
   return (
     <View style={[style]}>

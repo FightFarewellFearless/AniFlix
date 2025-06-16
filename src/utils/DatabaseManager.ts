@@ -95,7 +95,7 @@ export function useSelectorIfFocused<T = string>(
       return listener.remove;
       // eslint-disable-next-line react-compiler/react-compiler
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [fetchOnFocus]),
   );
   return data;
 }
