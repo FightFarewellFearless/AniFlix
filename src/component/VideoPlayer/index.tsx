@@ -36,7 +36,7 @@ type VideoPlayerProps = {
   thumbnailURL?: string;
   streamingURL: string;
   style?: ViewStyle;
-  videoRef?: React.RefObject<VideoView>;
+  videoRef?: React.RefObject<VideoView | null>;
   ref?: React.Ref<PlayerRef>;
   onFullscreenUpdate?: (isFullscreen: boolean) => void;
   fullscreen?: boolean;
@@ -437,7 +437,7 @@ function BottomControl({
   totalDurationSecond,
 }: {
   seekBarProgress: SharedValue<number>;
-  videoRef: React.RefObject<VideoView> | undefined;
+  videoRef?: React.RefObject<VideoView | null>;
   onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
   onFullScreenButtonPressed: () => void;

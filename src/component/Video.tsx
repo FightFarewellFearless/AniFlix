@@ -659,7 +659,6 @@ function Video(props: Props) {
               thumbnailURL={data.thumbnailUrl}
               streamingURL={data.streamingLink}
               style={{ flex: 1, zIndex: 1 }}
-              // @ts-expect-error
               videoRef={videoRef}
               ref={playerRef}
               fullscreen={fullscreen}
