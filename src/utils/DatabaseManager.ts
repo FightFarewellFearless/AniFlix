@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { MMKV } from 'react-native-mmkv';
+import defaultDatabase from '../misc/defaultDatabaseValue.json';
 
 export type RootState = {
   settings: {
@@ -30,12 +31,10 @@ export function getState(): RootState {
   storage.getAllKeys().forEach(key => {
     if (Object.keys(settings).includes(key)) {
       const typedKey = key as keyof RootState['settings'];
-      settings[typedKey] = storage.getString(key);
+      settings[typedKey] = storage.getString(key) ?? defaultDatabase[typedKey];
     }
   });
-  const resolvedSettings = Object.fromEntries(
-    Object.entries(settings).map(([key, value]) => [key, value ?? '']),
-  ) as RootState['settings'];
+  const resolvedSettings = settings as RootState['settings'];
   return { settings: resolvedSettings };
 }
 
@@ -66,35 +65,33 @@ export function useSelectorIfFocused<T = string>(
     storage.getAllKeys().forEach(key => {
       if (Object.keys(settings).includes(key)) {
         const typedKey = key as keyof RootState['settings'];
-        settings[typedKey] = storage.getString(key);
+        settings[typedKey] = storage.getString(key) ?? defaultDatabase[typedKey];
       }
     });
-    const resolvedSettings = Object.fromEntries(
-      Object.entries(settings).map(([key, value]) => [key, value ?? '']),
-    ) as RootState['settings'];
+    const resolvedSettings = settings as RootState['settings'];
     return modifierFunc
       ? modifierFunc(selector({ settings: resolvedSettings }))
       : selector({ settings: resolvedSettings });
   };
+  const stableFetch = useRef(fetch);
+  stableFetch.current = fetch;
   const [data, setData] = useState<T | string>(fetch);
   const oldData = useRef(data);
   useFocusEffect(
     useCallback(() => {
       if (fetchOnFocus) {
-        const newValue = fetch();
+        const newValue = stableFetch.current();
         if (JSON.stringify(newValue) !== JSON.stringify(oldData.current)) {
           setData(newValue);
           oldData.current = newValue;
         }
       }
       const listener = storage.addOnValueChangedListener(() => {
-        const newValue = fetch();
+        const newValue = stableFetch.current();
         setData(newValue);
         oldData.current = newValue;
       });
       return listener.remove;
-      // eslint-disable-next-line react-compiler/react-compiler
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchOnFocus]),
   );
   return data;
@@ -108,7 +105,6 @@ export const hasMigratedFromAsyncStorage = storage.getBoolean(
 // TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
 export async function migrateFromAsyncStorage(): Promise<void> {
   console.log('Migrating from AsyncStorage -> MMKV...');
-  const start = global.performance.now();
 
   const keys = await AsyncStorage.getAllKeys();
 
@@ -121,13 +117,9 @@ export async function migrateFromAsyncStorage(): Promise<void> {
         AsyncStorage.removeItem(key);
       }
     } catch (error) {
-      console.error(`Failed to migrate key "${key}" from AsyncStorage to MMKV!`, error);
       throw error;
     }
   }
 
   storage.set('IGNORE_DEFAULT_DB_hasMigratedFromAsyncStorage', true);
-
-  const end = global.performance.now();
-  console.log(`Migrated from AsyncStorage -> MMKV in ${end - start}ms!`);
 }
