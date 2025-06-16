@@ -232,11 +232,15 @@ function Video(props: Props) {
 
   const orientationDidChange = useCallback(
     (orientation: OrientationType) => {
-      if (orientation === 'PORTRAIT') {
-        exitFullscreen();
-      } else if (orientation !== 'UNKNOWN') {
-        enterFullscreen(orientation);
-      }
+      Orientation.getAutoRotateState(state => {
+        if (state) {
+          if (orientation === 'PORTRAIT') {
+            exitFullscreen();
+          } else if (orientation !== 'UNKNOWN') {
+            enterFullscreen(orientation);
+          }
+        }
+      });
     },
     [enterFullscreen, exitFullscreen],
   );
