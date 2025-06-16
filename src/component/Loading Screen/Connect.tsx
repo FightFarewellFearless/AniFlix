@@ -86,7 +86,6 @@ function Loading(props: Props) {
   const prepareData = useCallback(async () => {
     if (!hasMigratedFromAsyncStorage) {
       await migrateFromAsyncStorage();
-      ToastAndroid.show('Migrasi dari AsyncStorage ke MMKV berhasil', ToastAndroid.SHORT);
     }
 
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
