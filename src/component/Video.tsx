@@ -51,6 +51,7 @@ import setHistory from '../utils/historyControl';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useMMKVString } from 'react-native-mmkv';
 import WebView from 'react-native-webview';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
@@ -62,7 +63,6 @@ import {
   getStreamingDetail,
   MovieDetail,
 } from '../utils/animeMovie';
-import { RootState, useSelectorIfFocused } from '../utils/DatabaseManager';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
@@ -89,10 +89,8 @@ function Video(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
-  const enableBatteryTimeInfo = useSelectorIfFocused(
-    (state: RootState) => state.settings.enableBatteryTimeInfo,
-  );
-  const history = useSelectorIfFocused((state: RootState) => state.settings.history);
+  const [enableBatteryTimeInfo] = useMMKVString('enableBatteryTimeInfo');
+  const [history = '[]'] = useMMKVString('history');
 
   const historyData = useRef(props.route.params.historyData);
 
