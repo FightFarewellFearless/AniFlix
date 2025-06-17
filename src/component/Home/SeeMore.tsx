@@ -59,13 +59,13 @@ function SeeMore(props: Props) {
         renderItem={({ item }) =>
           props.route.params.type === 'MovieList' ? (
             <ListAnimeComponent
-              isMovie={true}
+              type="movie"
               newAnimeData={item as Movies}
               navigationProp={props.navigation}
             />
           ) : (
             <ListAnimeComponent
-              isMovie={false}
+              type="anime"
               newAnimeData={item as NewAnimeList}
               navigationProp={props.navigation}
             />

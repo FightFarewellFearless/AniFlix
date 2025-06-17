@@ -34,6 +34,7 @@ const Blocked = lazy(() => import('./src/component/Blocked'));
 const FailedToConnect = lazy(() => import('./src/component/FailedToConnect'));
 const NeedUpdate = lazy(() => import('./src/component/NeedUpdate'));
 const MovieDetail = lazy(() => import('./src/component/MovieDetail'));
+const ComicsDetail = lazy(() => import('./src/component/ComicsDetail'));
 const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
 const Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
 const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
@@ -82,6 +83,7 @@ const screens: Screens = [
   { name: 'Home', component: withSuspenseAndSafeArea(Home), options: undefined },
   { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail), options: undefined },
   { name: 'MovieDetail', component: withSuspenseAndSafeArea(MovieDetail), options: undefined },
+  { name: 'ComicsDetail', component: withSuspenseAndSafeArea(ComicsDetail), options: undefined },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
   { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },
   { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },

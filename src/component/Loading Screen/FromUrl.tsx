@@ -15,6 +15,7 @@ import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 import { getState, RootState, useSelectorIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
+import { getKomikuDetailFromUrl } from '../../utils/komiku';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -39,7 +40,7 @@ function FromUrl(props: Props) {
       );
       return;
     }
-    if (props.route.params.isMovie) {
+    if (props.route.params.type === 'movie') {
       if (URL.parse(props.route.params.link)?.pathname?.split('/')[1] === 'anime') {
         getMovieDetail(props.route.params.link, abort.signal)
           .then(result => {
@@ -87,7 +88,7 @@ function FromUrl(props: Props) {
               false,
               props.route.params.historyData,
               historyData,
-              props.route.params.isMovie,
+              props.route.params.type === 'movie',
             );
 
             const episodeIndex = result.title.toLowerCase().indexOf(' episode');
@@ -101,7 +102,7 @@ function FromUrl(props: Props) {
           })
           .catch(handleError);
       }
-    } else {
+    } else if (props.route.params.type === 'anime' || props.route.params.type === undefined) {
       AnimeAPI.fromUrl(props.route.params.link, resolution, !!resolution, undefined, abort.signal)
         .then(async result => {
           if (result === 'Unsupported') {
@@ -176,6 +177,20 @@ function FromUrl(props: Props) {
           }
         })
         .catch(handleError);
+    } else {
+      if (props.route.params.link.includes('/manga/')) {
+        getKomikuDetailFromUrl(props.route.params.link, abort.signal)
+          .then(result => {
+            if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            props.navigation.dispatch(
+              StackActions.replace('ComicsDetail', {
+                data: result,
+                link: props.route.params.link,
+              }),
+            );
+          })
+          .catch(handleError);
+      }
     }
     return () => {
       abort.abort();

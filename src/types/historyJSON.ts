@@ -5,6 +5,7 @@ interface HistoryJSON extends Partial<HistoryAdditionalData> {
   thumbnailUrl: string;
   date: number;
   isMovie?: boolean;
+  isComics?: boolean;
 }
 
 interface HistoryAdditionalData {

@@ -20,7 +20,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Searchbar, SegmentedButtons } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
@@ -45,10 +45,12 @@ import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { TextInput as TextInputType } from 'react-native';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
 import { storage } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
+import { KomikuSearch, komikuSearch } from '../../utils/komiku';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
@@ -65,6 +67,8 @@ function Search(props: Props) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
+  const [searchType, setSearchType] = useState<'anime' | 'comics'>('anime');
 
   const textInputRef = useRef<TextInputType>(null);
 
@@ -86,6 +90,7 @@ function Search(props: Props) {
   const [listAnimeLoading, setListAnimeLoading] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
+  const [comicsData, setComicsData] = useState<null | KomikuSearch[]>(null);
   const [loading, setLoading] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
 
@@ -124,29 +129,49 @@ function Search(props: Props) {
     }
     setLoading(true);
     textInputRef.current?.blur();
-    Promise.all([AnimeAPI.search(searchText), searchMovie(searchText)])
-      .then(([animeResult, movieResult]) => {
-        setCurrentSearchQuery(searchText);
-        if (!('isError' in movieResult)) {
-          setMovieData(movieResult);
-        }
-        setData(animeResult);
-        setLoading(false);
-        if (searchHistory.includes(searchText)) {
-          searchHistory.splice(searchHistory.indexOf(searchText), 1);
-        }
-        searchHistory.unshift(searchText);
-        storage.set('searchHistory', JSON.stringify(searchHistory));
-      })
-      .catch(err => {
-        const errMessage =
-          err.message === 'Network Error'
-            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-            : 'Error tidak diketahui: ' + err.message;
-        DialogManager.alert('Error', errMessage);
-        setLoading(false);
-      });
-  }, [searchHistory, searchText]);
+    if (searchType === 'anime') {
+      Promise.all([AnimeAPI.search(searchText), searchMovie(searchText)])
+        .then(([animeResult, movieResult]) => {
+          setCurrentSearchQuery(searchText);
+          setComicsData(null);
+          if (!('isError' in movieResult)) {
+            setMovieData(movieResult);
+          }
+          setData(animeResult);
+        })
+        .finally(() => {
+          if (searchHistory.includes(searchText)) {
+            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          }
+          searchHistory.unshift(searchText);
+          storage.set('searchHistory', JSON.stringify(searchHistory));
+          setLoading(false);
+        })
+        .catch(err => {
+          const errMessage =
+            err.message === 'Network Error'
+              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+              : 'Error tidak diketahui: ' + err.message;
+          DialogManager.alert('Error', errMessage);
+        });
+    } else {
+      komikuSearch(searchText)
+        .then(result => {
+          setData(null);
+          setMovieData(null);
+          setComicsData(result);
+        })
+        .finally(() => {
+          if (searchHistory.includes(searchText)) {
+            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          }
+          searchHistory.unshift(searchText);
+          storage.set('searchHistory', JSON.stringify(searchHistory));
+          setCurrentSearchQuery(searchText);
+          setLoading(false);
+        });
+    }
+  }, [searchHistory, searchText, searchType]);
 
   function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
     const onChangeTextFunction = (text: string) => {
@@ -162,7 +187,7 @@ function Search(props: Props) {
     );
   }
   const listAnimeRenderer = useCallback(
-    ({ index, item }: LegendListRenderItemProps<listAnimeTypeList>) => {
+    ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
       return (
         <>
           <TouchableOpacity
@@ -202,18 +227,34 @@ function Search(props: Props) {
           </TouchableOpacity>
         )} */}
       {/* Replace animated components: */}
-      <TextInput
-        mode="outlined"
+      <Searchbar
         onSubmitEditing={submit}
+        onIconPress={submit}
         onChangeText={onChangeText}
         onBlur={onTextInputBlur}
         onFocus={onTextInputFocus}
-        label="Cari anime/movie disini"
+        placeholder="Cari disini"
         value={searchText}
         autoCorrect={false}
         ref={textInputRef}
-        right={<TextInput.Icon icon="magnify" onPress={submit} size={20} />}
-        style={[styles.searchInput]}
+      />
+
+      <SegmentedButtons
+        style={{ marginTop: 6 }}
+        value={searchType}
+        onValueChange={setSearchType}
+        buttons={[
+          {
+            value: 'anime',
+            label: 'Cari anime/movie',
+            icon: 'movie-search',
+          },
+          {
+            value: 'comics',
+            label: 'Cari komik',
+            icon: 'book-search',
+          },
+        ]}
       />
 
       {listAnime?.length === 0 ||
@@ -224,7 +265,7 @@ function Search(props: Props) {
           </View>
         ))}
 
-      {data === null && movieData === null && listAnime !== null ? (
+      {data === null && movieData === null && comicsData === null && listAnime !== null ? (
         <View style={{ flex: listAnime?.length === 0 || listAnimeLoading ? 0 : 1 }}>
           <Text
             style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
@@ -237,10 +278,10 @@ function Search(props: Props) {
             />
           )}
           {listAnime.length > 0 && !listAnimeLoading && (
-            <LegendList
-              recycleItems
-              waitForInitialLayout
-              drawDistance={500}
+            <FlashList
+              // recycleItems
+              // waitForInitialLayout
+              // drawDistance={500}
               data={listAnime}
               key={listAnimeLoading.toString()}
               renderItem={listAnimeRenderer}
@@ -250,7 +291,7 @@ function Search(props: Props) {
             />
           )}
         </View>
-      ) : data === null ? (
+      ) : data === null && comicsData === null ? (
         <TouchableOpacity
           onPress={() => {
             setListAnime([]);
@@ -285,20 +326,22 @@ function Search(props: Props) {
             Hasil pencarian untuk: {currentSearchQuery}
             {movieData &&
               movieData.length > 0 &&
-              data.result.length > 0 &&
+              (data?.result?.length ?? 0) > 0 &&
               '\n(Movie di tempatkan di urutan atas)'}
           </Text>
-          {data.result.length > 0 || (movieData && movieData.length > 0) ? (
+          {(data?.result?.length ?? 0) > 0 ||
+          (movieData && movieData.length > 0) ||
+          (comicsData && comicsData.length > 0) ? (
             <FlatList
               // estimatedItemSize={209}
               contentContainerStyle={{ gap: 6 }}
-              data={[...(movieData ?? []), ...data.result]}
+              data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
               keyExtractor={(_, index) => index?.toString()}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
             />
           ) : (
-            <Text style={globalStyles.text}>
-              Tidak ada hasil untuk pencarian anime maupun movie!
+            <Text style={[globalStyles.text, { textAlign: 'center' }]}>
+              Tidak ada hasil pencarian yang ditemukan!
             </Text>
           )}
         </>
@@ -345,12 +388,13 @@ function Search(props: Props) {
           </View>
         </Reanimated_KeyboardAvoidingView>
       )}
-      {data !== null && (
+      {(data !== null || comicsData !== null) && (
         <TouchableOpacityAnimated
           containerStyle={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
             setMovieData(null);
+            setComicsData(null);
           }}
           entering={ZoomIn}
           exiting={ZoomOut}>
@@ -420,39 +464,60 @@ function SearchList({
   item: z,
   parentProps: props,
 }: {
-  item: Movies | SearchAnimeResult;
+  item: Movies | SearchAnimeResult | KomikuSearch;
   parentProps: Props;
 }) {
-  const isMovie = (data: Movies | SearchAnimeResult): data is Movies => {
-    return !('animeUrl' in data);
+  const isMovie = (data: Movies | SearchAnimeResult | KomikuSearch): data is Movies => {
+    return !('animeUrl' in data) && !('detailUrl' in data);
+  };
+  const isComic = (data: Movies | SearchAnimeResult | KomikuSearch): data is KomikuSearch => {
+    return 'additionalInfo' in data;
+  };
+  const isAnime = (data: Movies | SearchAnimeResult | KomikuSearch): data is SearchAnimeResult => {
+    return 'animeUrl' in data;
   };
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   return (
     <TouchableOpacityAnimated
       entering={FadeInRight}
-      style={styles.listContainer}
+      style={[styles.listContainer, { minHeight: 100 }]}
       onPress={() => {
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
-            link: isMovie(z) ? z.url : z.animeUrl,
-            isMovie: isMovie(z),
+            link: isMovie(z) ? z.url : isComic(z) ? z.detailUrl : z.animeUrl,
+            type: isMovie(z) ? 'movie' : isComic(z) ? 'comics' : 'anime',
           }),
         );
       }}>
       <ImageLoading
         contentFit="fill"
         source={{ uri: z.thumbnailUrl }}
-        style={styles.listImage}
-        recyclingKey={z.thumbnailUrl}
-      />
+        style={[styles.listImage, isComic(z) ? { width: 150, height: 'auto' } : undefined]}
+        recyclingKey={z.thumbnailUrl}>
+        {isComic(z) && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 5,
+              right: 5,
+              backgroundColor: '#0000009d',
+              padding: 5,
+              borderRadius: 8,
+            }}>
+            <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>
+              {z.latestChapter}
+            </Text>
+          </View>
+        )}
+      </ImageLoading>
       <ImageColorShadow url={z.thumbnailUrl} />
 
       <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>
         <DarkOverlay transparent={0.7} />
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
-            {!isMovie(z) && (
+            {isAnime(z) && (
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
                 <Icon name="star" style={{ color: 'gold' }} /> {z.rating}
               </Text>
@@ -464,7 +529,7 @@ function SearchList({
                 styles.statusInfo,
                 {
                   backgroundColor:
-                    !isMovie(z) && z.status === 'Ongoing'
+                    isAnime(z) && z.status === 'Ongoing'
                       ? '#920000'
                       : isMovie(z)
                         ? '#a06800'
@@ -472,14 +537,16 @@ function SearchList({
                 },
               ]}>
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                {isMovie(z) ? 'Movie' : z.status}
+                {isMovie(z) ? 'Movie' : isComic(z) ? z.type : z.status}
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.listTitle}>
-          <Text style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
+        <View style={[styles.listTitle]}>
+          <Text
+            numberOfLines={4}
+            style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
             {z?.title}
           </Text>
         </View>
@@ -505,7 +572,7 @@ function SearchList({
                   },
                 ]}
                 numberOfLines={1}>
-                <Icon name="tags" /> {z.genres.join(', ')}
+                <Icon name="tags" /> {isAnime(z) ? z.genres.join(', ') : z.concept}
               </Text>
             </View>
           )}
@@ -580,19 +647,6 @@ function useStyles() {
           borderColor: colorScheme === 'dark' ? '#53c412' : 'black',
           borderWidth: 1.3,
         },
-        searchInput: {
-          height: 42,
-        },
-        searchButton: {
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#00c7a6',
-          borderRadius: 8,
-          marginRight: 12,
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          elevation: 3,
-        },
         animeList: {
           justifyContent: 'center',
           paddingVertical: 10,
@@ -626,6 +680,7 @@ function useStyles() {
         },
         listTitle: {
           flexShrink: 1,
+          paddingHorizontal: 5,
           justifyContent: 'center',
           flex: 1,
           marginLeft: 5,

@@ -9,6 +9,7 @@ function setHistory(
   additionalData: Partial<HistoryAdditionalData> | {} = {},
   historyData: string,
   isMovie?: boolean,
+  isComics?: boolean,
 ) {
   const data: HistoryJSON[] = JSON.parse(historyData);
   const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
@@ -29,6 +30,7 @@ function setHistory(
     thumbnailUrl: targetData.thumbnailUrl,
     date: skipUpdateDate ? date : Date.now(),
     isMovie,
+    isComics,
   });
   storage.set('history', JSON.stringify(data));
 }

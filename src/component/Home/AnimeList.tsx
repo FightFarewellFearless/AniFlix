@@ -41,6 +41,7 @@ import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
+import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -56,7 +57,7 @@ function HomeList(props: HomeProps) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
-  const [animeMovieRefreshingKey, setAnimeMovieRefreshingKey] = useState(0);
+  const [refreshingKey, setRefreshingKey] = useState(0);
   const windowSize = useWindowDimensions();
 
   const boxTextAnim = useSharedValue(0);
@@ -114,7 +115,7 @@ function HomeList(props: HomeProps) {
   const refreshing = useCallback(() => {
     setRefresh(true);
     setData?.(val => ({ ...val, newAnime: [] }));
-    setAnimeMovieRefreshingKey(val => val + 1);
+    setRefreshingKey(val => val + 1);
 
     setTimeout(() => {
       AnimeAPI.home()
@@ -204,7 +205,8 @@ function HomeList(props: HomeProps) {
       </TouchableOpacity>
 
       <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
-      <MovieList props={props} key={'anime_movie' + animeMovieRefreshingKey} />
+      <MovieList props={props} key={'anime_movie' + refreshingKey} />
+      <ComicList key={'comick' + refreshingKey} />
 
       <View style={styles.scheduleSection}>
         <Text style={styles.sectionTitle}>Jadwal Anime</Text>
@@ -258,6 +260,7 @@ function EpisodeBaruUNMEMO({
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
         <LegendList
+          contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
           data={(data?.newAnime ?? []).slice(0, 25)}
@@ -284,7 +287,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
     ({ item }: LegendListRenderItemProps<Movies>) => (
       <ListAnimeComponent
         newAnimeData={item}
-        isMovie={true}
+        type="movie"
         key={'btn' + item.title}
         navigationProp={props.navigation}
       />
@@ -338,6 +341,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
 
       {data?.length !== 0 ? (
         <LegendList
+          contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
           data={data?.slice(0, 25) ?? []}
@@ -353,21 +357,101 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
   );
 }
 
+const ComicList = memo(ComicListUNMEMO);
+function ComicListUNMEMO() {
+  const styles = useStyles();
+  const [isError, setIsError] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackNavigator, 'AnimeDetail'>>();
+
+  const [data, setData] = useState<LatestKomikuRelease[]>([]);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      getLatestKomikuReleases()
+        .then(z => {
+          setData(z);
+        })
+        .catch(() => setIsError(true));
+    });
+  }, []);
+
+  const renderComics = useCallback(
+    ({ item }: LegendListRenderItemProps<LatestKomikuRelease>) => (
+      <ListAnimeComponent
+        newAnimeData={item}
+        type="comics"
+        key={'btn' + item.title}
+        // @ts-expect-error
+        navigationProp={navigation}
+      />
+    ),
+    [navigation],
+  );
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Komik Terbaru</Text>
+        {/* <TouchableOpacity
+          style={styles.seeMoreButton}
+          disabled={data?.length === 0}
+          onPress={() => {
+            navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
+          }}>
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
+        </TouchableOpacity> */}
+      </View>
+
+      {isError && (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
+      )}
+
+      {data?.length !== 0 ? (
+        <LegendList
+          contentContainerStyle={{ gap: 6 }}
+          recycleItems
+          horizontal
+          data={data.slice(0, 25)}
+          renderItem={renderComics}
+          keyExtractor={z => z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
+  );
+}
+
 function ShowSkeletonLoading() {
   const dimensions = useWindowDimensions();
-  let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.2;
+  let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
   let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
   LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
   LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
   return (
     <View style={{ flexDirection: 'row', gap: 12 }}>
       {[1, 2, 3].map((_, index) => (
-        <Skeleton
-          key={index}
-          width={LIST_BACKGROUND_WIDTH}
-          height={LIST_BACKGROUND_HEIGHT}
-          style={{ borderRadius: 8 }}
-        />
+        <View key={index} style={{ gap: 6 }}>
+          <Skeleton
+            key={index + 'image'}
+            width={LIST_BACKGROUND_WIDTH}
+            height={LIST_BACKGROUND_HEIGHT}
+            style={{ borderRadius: 8 }}
+          />
+          <Skeleton key={index + 'title'} width={LIST_BACKGROUND_WIDTH} height={20} />
+          <View key={index + 'info'} style={{ flexDirection: 'row', gap: 2 }}>
+            <Skeleton key={index + 'info1'} width={LIST_BACKGROUND_WIDTH / 2} height={20} />
+            <Skeleton key={index + 'info2'} width={LIST_BACKGROUND_WIDTH / 2} height={20} />
+          </View>
+        </View>
       ))}
     </View>
   );

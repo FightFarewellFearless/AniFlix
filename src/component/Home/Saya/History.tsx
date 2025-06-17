@@ -126,7 +126,7 @@ function History(props: Props) {
               StackActions.push('FromUrl', {
                 link: item.link,
                 historyData: item,
-                isMovie: item.isMovie,
+                type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
               }),
             );
           }}>

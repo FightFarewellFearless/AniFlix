@@ -39,7 +39,7 @@ function WatchLater(props: Props) {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
                 link: item.link,
-                isMovie: item.isMovie,
+                type: item.isMovie ? 'movie' : 'anime',
               }),
             );
           }}>

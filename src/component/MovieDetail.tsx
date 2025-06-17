@@ -119,7 +119,7 @@ function MovieDetail(props: Props) {
               style={[styles.button, { backgroundColor: '#07c9cf' }]}
               onPress={() => {
                 props.navigation.navigate('FromUrl', {
-                  isMovie: true,
+                  type: 'movie',
                   link: props.route.params.data.streamingUrl,
                 });
               }}>
@@ -141,7 +141,7 @@ function MovieDetail(props: Props) {
                 style={[styles.button, { backgroundColor: '#00e1ff' }]}
                 onPress={() => {
                   props.navigation.navigate('FromUrl', {
-                    isMovie: true,
+                    type: 'movie',
                     link: episode.url,
                   });
                 }}>

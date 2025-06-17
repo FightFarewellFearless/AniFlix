@@ -1,4 +1,5 @@
 import { MovieDetail, MovieStreamingDetail } from '../utils/animeMovie';
+import { KomikuDetail } from '../utils/komiku';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {
@@ -21,9 +22,13 @@ type RootStackNavigator = {
     data: MovieDetail;
     link: string;
   };
+  ComicsDetail: {
+    data: KomikuDetail;
+    link: string;
+  };
   FromUrl: {
     link: string;
-    isMovie?: boolean;
+    type?: 'comics' | 'anime' | 'movie';
     historyData?: {
       resolution: string;
       lastDuration: number;
