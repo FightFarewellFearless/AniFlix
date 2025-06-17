@@ -32,7 +32,7 @@ export default function Skeleton({
   useEffect(() => {
     const startAnimation = () => {
       shiningPosition.value = withRepeat(
-        withSequence(withTiming(1, { duration: 1500 }), withTiming(0, { duration: 0 })),
+        withSequence(withTiming(1, { duration: 1300 }), withTiming(0, { duration: 0 })),
         -1,
       );
     };
