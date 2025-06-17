@@ -1,6 +1,7 @@
+import { LazyLegendList } from '@legendapp/list';
 import { ImageBackground } from 'expo-image';
 import { memo, useMemo } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appPackage from '../../../../package.json';
 import { darkText } from '../../../assets/style';
@@ -22,7 +23,7 @@ function About() {
   return (
     <ImageBackground source={tokyo} contentFit="cover" style={{ flex: 1 }}>
       <DarkOverlay transparent={0.75} />
-      <ScrollView style={styles.container}>
+      <LazyLegendList style={styles.container}>
         <Text style={styles.header}>
           AniFlix {appPackage.version}-JS_{appPackage.OTAJSVersion}
           {'\n'}
@@ -85,7 +86,7 @@ function About() {
               );
             },
           )}
-      </ScrollView>
+      </LazyLegendList>
     </ImageBackground>
   );
 }
