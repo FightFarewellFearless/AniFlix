@@ -262,6 +262,13 @@ function VideoPlayer({
     };
   }, []);
 
+  // run gc on streamingURL change
+  useEffect(() => {
+    return () => {
+      globalThis.gc?.();
+    };
+  }, [streamingURL]);
+
   return (
     <View style={[style]}>
       <VideoView
