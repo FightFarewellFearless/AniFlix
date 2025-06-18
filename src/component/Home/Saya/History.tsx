@@ -265,6 +265,9 @@ function History(props: Props) {
           //     index,
           //   };
           // }}
+
+          // fix: weird flashlist crash (undefined) (might be related to concurrent render)
+          key={searchKeywordDeferred}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
