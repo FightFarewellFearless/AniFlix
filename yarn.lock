@@ -3333,9 +3333,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.10.1":
-  version: 7.10.1
-  resolution: "@react-navigation/core@npm:7.10.1"
+"@react-navigation/core@npm:^7.11.0":
+  version: 7.11.0
+  resolution: "@react-navigation/core@npm:7.11.0"
   dependencies:
     "@react-navigation/routers": ^7.4.1
     escape-string-regexp: ^4.0.0
@@ -3346,7 +3346,7 @@ __metadata:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: ">= 18.2.0"
-  checksum: 2a46253291ad157bf44485736f9fd0e6812f8fd2e326372aba670c36d30150ec55fe6e03735c5e135a514575b6b0a15cfac90fc102b4997c8e12a80163cae397
+  checksum: d7a8450ab07b0a918246b9e525af1da460ac791895f6a5a73ecb209ec93b1b10e9a60d2ff5fdac09aa09f33aa73e5fcbc317b71e4af2a861301db708f1413cba
   languageName: node
   linkType: hard
 
@@ -3405,11 +3405,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.1.11":
-  version: 7.1.11
-  resolution: "@react-navigation/native@npm:7.1.11"
+"@react-navigation/native@npm:^7.1.12":
+  version: 7.1.12
+  resolution: "@react-navigation/native@npm:7.1.12"
   dependencies:
-    "@react-navigation/core": ^7.10.1
+    "@react-navigation/core": ^7.11.0
     escape-string-regexp: ^4.0.0
     fast-deep-equal: ^3.1.3
     nanoid: ^3.3.11
@@ -3417,7 +3417,7 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
     react-native: "*"
-  checksum: b7bd97992fb0e3ba7662d80256f460a989c6d4c2a9dd85a6faf3ea2115b30b964ebe130e0058666d7c9edebaff11fb659bd7891521d9ddb56769236beaebd164
+  checksum: def025fbff282cfe1de55bff2c1f6c2a04c56236f3e59511fd97af081b1e3e81568434d7659faf4b7ed30674ca668010ab306f940b8a0b9cff4bd7010601a80f
   languageName: node
   linkType: hard
 
@@ -4106,7 +4106,7 @@ __metadata:
     "@react-native/metro-config": 0.79.3
     "@react-native/typescript-config": 0.79.3
     "@react-navigation/drawer": ^7.4.2
-    "@react-navigation/native": ^7.1.11
+    "@react-navigation/native": ^7.1.12
     "@react-navigation/native-stack": ^7.3.16
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^1.8.2
