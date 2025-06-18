@@ -82,12 +82,10 @@ export async function getKomikuDetailFromUrl(
 ): Promise<KomikuDetail> {
   const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
   const data = await response.text();
-  const time = performance.now();
   const $ = cheerio.load(data, {
     xmlMode: true,
     decodeEntities: false,
   });
-  console.log(`Page loaded in ${performance.now() - time} ms`);
   const tableInfo = $('table.inftable tr')
     .map((_i, el) => {
       const row = $(el).find('td');
