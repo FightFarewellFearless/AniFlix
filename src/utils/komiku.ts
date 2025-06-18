@@ -82,7 +82,12 @@ export async function getKomikuDetailFromUrl(
 ): Promise<KomikuDetail> {
   const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
   const data = await response.text();
-  const $ = cheerio.load(data);
+  const time = performance.now();
+  const $ = cheerio.load(data, {
+    xmlMode: true,
+    decodeEntities: false,
+  });
+  console.log(`Page loaded in ${performance.now() - time} ms`);
   const tableInfo = $('table.inftable tr')
     .map((_i, el) => {
       const row = $(el).find('td');
@@ -113,8 +118,13 @@ export async function getKomikuDetailFromUrl(
     .map((_i, el) => $(el).text().trim())
     .toArray();
   const synopsis = $('section#Sinopsis > p').text().trim();
-  const chapters = $('table#Daftar_Chapter tr:has(td)')
-    .map((_i, el) => {
+  const allChapterElements = $('table#Daftar_Chapter tr:has(td)').toArray();
+  const batchSize = 150;
+  const chapters = [];
+  for (let i = 0; i < allChapterElements.length; i += batchSize) {
+    if (signal?.aborted) break;
+    const batch = allChapterElements.slice(i, i + batchSize);
+    const batchResults = batch.map(el => {
       const td = $(el);
       const judulseries = td.find('.judulseries');
       const chapterUrl = judulseries.find('a').attr('href');
@@ -122,10 +132,14 @@ export async function getKomikuDetailFromUrl(
         chapter: judulseries.text().trim(),
         chapterUrl: normalizeUrl(chapterUrl ?? ''),
         releaseDate: td.find('.tanggalseries').text().trim(),
-        views: td.find('.pembaca').text().trim(),
+        views: td.find('.pembaca > i').text().trim(),
       };
-    })
-    .toArray();
+    });
+    chapters.push(...batchResults);
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+
+  if (signal?.aborted) throw new Error('canceled');
 
   return {
     title,
