@@ -1,10 +1,15 @@
-import { LegendList } from '@legendapp/list';
+import { AnimatedLegendList } from '@legendapp/list/reanimated';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Button, Divider } from 'react-native-paper';
-import Reanimated, { interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Reanimated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
@@ -17,34 +22,28 @@ export default function ComicsDetail(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(e => {
+    scrollOffset.value = e.contentOffset.y;
+  });
   const imageStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
           translateY: interpolate(
             scrollOffset.value,
-            [-IMG_HEIGHT, 0, IMG_HEIGHT],
-            [-IMG_HEIGHT / 2, 0, IMG_HEIGHT * 0.75],
-            'clamp',
-          ),
-        },
-        {
-          scale: interpolate(
-            scrollOffset.value,
-            [-IMG_HEIGHT, 0, IMG_HEIGHT],
-            [2, 1, 1.2],
+            [0, IMG_HEIGHT * 2],
+            [0, IMG_HEIGHT * 0.85],
             'clamp',
           ),
         },
       ],
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT * 0.85], [1, 0], 'clamp'),
     };
   });
   const { data } = props.route.params;
   return (
-    <LegendList
-      onScroll={e => {
-        scrollOffset.set(e.nativeEvent.contentOffset.y);
-      }}
+    <AnimatedLegendList
+      onScroll={scrollHandler}
       data={data.chapters}
       renderItem={({ item }) => {
         return (
