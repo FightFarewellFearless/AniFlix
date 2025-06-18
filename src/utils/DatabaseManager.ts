@@ -11,7 +11,6 @@ export type RootState = {
     enableNowPlayingNotification: string;
     watchLater: string;
     searchHistory: string;
-    'copilot.watchLater_firstTime': string;
     colorScheme: string;
   };
 };
@@ -25,7 +24,6 @@ export function getState(): RootState {
     enableNowPlayingNotification: undefined,
     watchLater: undefined,
     searchHistory: undefined,
-    'copilot.watchLater_firstTime': undefined,
     colorScheme: undefined,
   };
   storage.getAllKeys().forEach(key => {
@@ -59,7 +57,6 @@ export function useSelectorIfFocused<T = string>(
       enableNowPlayingNotification: undefined,
       watchLater: undefined,
       searchHistory: undefined,
-      'copilot.watchLater_firstTime': undefined,
       colorScheme: undefined,
     };
     storage.getAllKeys().forEach(key => {

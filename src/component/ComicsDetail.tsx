@@ -1,5 +1,5 @@
-import { AnimatedLegendList } from '@legendapp/list/reanimated';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
@@ -13,8 +13,11 @@ import Reanimated, {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
+import { KomikuDetail } from '../utils/komiku';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
+const ReanimatedFlashList =
+  Reanimated.createAnimatedComponent<FlashListProps<KomikuDetail['chapters'][0]>>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
 const IMG_HEIGHT = 200;
@@ -42,7 +45,7 @@ export default function ComicsDetail(props: Props) {
   });
   const { data } = props.route.params;
   return (
-    <AnimatedLegendList
+    <ReanimatedFlashList
       onScroll={scrollHandler}
       data={data.chapters}
       renderItem={({ item }) => {
@@ -111,9 +114,9 @@ export default function ComicsDetail(props: Props) {
 
               <Text style={[globalStyles.text]}>{data.synopsis}</Text>
             </View>
-            <View style={{ flexDirection: 'column' }}>
+            <View style={{ flexDirection: 'column', flex: 1 }}>
               <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
-              <View style={{ flexDirection: 'row' }}>
+              <View style={{ gap: 10 }}>
                 <Button
                   buttonColor={styles.additionalInfoText.backgroundColor}
                   textColor={styles.additionalInfoText.color}
@@ -210,6 +213,7 @@ function useStyles() {
           flexDirection: 'row',
           gap: 4,
           flexWrap: 'wrap',
+          marginBottom: 12,
         },
         additionalInfoText: {
           color: globalStyles.text.color,

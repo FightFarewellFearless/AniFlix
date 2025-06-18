@@ -1,63 +1,40 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image, ImageBackground } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Image } from 'expo-image';
+import { memo, useMemo } from 'react';
 import {
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
-  TouchableOpacity as TouchableOpacityRN,
   View,
   useColorScheme,
 } from 'react-native';
-import { CopilotProvider, CopilotStep, useCopilot, walkthroughable } from 'react-native-copilot';
-import { getColors } from 'react-native-image-colors';
+import { Button, Divider } from 'react-native-paper';
+import Reanimated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import useGlobalStyles, { lightText } from '../assets/style';
+import useGlobalStyles from '../assets/style';
 import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
-import { LegendList } from '@legendapp/list';
-import { useFocusEffect } from '@react-navigation/native';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { storage } from '../utils/DatabaseManager';
-import { complementHex, darkenHexColor } from '../utils/hexColors';
-import { hexIsDark } from '../utils/hexIsDark';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { AniDetailEpsList } from '../types/anime';
 
-const TouchableOpacityCopilot = walkthroughable(TouchableOpacityRN);
+const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
+const ReanimatedFlashList =
+  Reanimated.createAnimatedComponent<FlashListProps<AniDetailEpsList>>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
-function AniDetail(props: Props) {
-  const colorScheme = useColorScheme();
-  return (
-    <CopilotProvider
-      overlay="svg"
-      androidStatusBarVisible={true}
-      animated
-      labels={{
-        finish: 'Oke',
-      }}
-      backdropColor="rgba(0, 0, 0, 0.692)"
-      tooltipStyle={{
-        backgroundColor:
-          (global as any).nativeFabricUIManager === undefined
-            ? colorScheme === 'dark'
-              ? '#2b2b2b'
-              : '#f8f8f8'
-            : 'white',
-      }}>
-      <AniDetailCopilot {...props} />
-    </CopilotProvider>
-  );
-}
-function AniDetailCopilot(props: Props) {
-  const { start, copilotEvents } = useCopilot();
 
+const IMG_HEADER_HEIGHT = 250;
+
+function AniDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
@@ -72,305 +49,353 @@ function AniDetailCopilot(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
+  const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(e => {
+    scrollOffset.value = e.contentOffset.y;
+  });
 
-  const [thumbnailColor, setThumbnailColor] = useState('#00000000');
-  const complementThumbnailColor =
-    thumbnailColor === '#00000000' ? globalStyles.text.color : complementHex(thumbnailColor);
-  useEffect(() => {
-    getColors(data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
-      if (colors.platform === 'android') {
-        setThumbnailColor(colorScheme === 'dark' ? colors.darkMuted : colors.lightMuted);
-      }
-    });
-  }, [data.thumbnailUrl, colorScheme]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (thumbnailColor === '#00000000') return;
-      StatusBar.setBackgroundColor(thumbnailColor);
-      StatusBar.setBarStyle(hexIsDark(thumbnailColor) ? 'light-content' : 'dark-content');
-      SystemNavigationBar.setNavigationColor(thumbnailColor);
-      return () => {
-        StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
-        StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
-        SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
-      };
-    }, [colorScheme, thumbnailColor]),
-  );
-
-  const isCopilotAlreadyStopped = useRef(false);
-  const copilotTimeout = useRef<NodeJS.Timeout>(null);
-  useEffect(() => {
-    copilotEvents.off('stop');
-    copilotEvents.on('stop', () => {
-      isCopilotAlreadyStopped.current = true;
-    });
-    if (copilotTimeout.current) clearTimeout(copilotTimeout.current);
-    copilotTimeout.current = setTimeout(async () => {
-      if (
-        isCopilotAlreadyStopped.current === false &&
-        storage.getString('copilot.watchLater_firstTime') === 'true' &&
-        !isInList
-      ) {
-        start();
-        storage.set('copilot.watchLater_firstTime', 'false');
-      }
-    }, 500);
-    return () => {
-      copilotTimeout.current && clearTimeout(copilotTimeout.current);
-      copilotEvents.off('stop');
-      isCopilotAlreadyStopped.current = false;
+  const headerImageStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [0, IMG_HEADER_HEIGHT * 2],
+            [0, IMG_HEADER_HEIGHT * 0.85],
+            'clamp',
+          ),
+        },
+      ],
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT * 0.85], [1, 0], 'clamp'),
     };
-  }, [start, copilotEvents, isInList]);
+  });
 
-  const endThumbnailColor = useMemo(
-    () => darkenHexColor(thumbnailColor, 50 * (colorScheme === 'dark' ? 1 : -1)),
-    [colorScheme, thumbnailColor],
-  );
-
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        style={[styles.container, styles.centerChildren]}
-        colors={[thumbnailColor, thumbnailColor, endThumbnailColor]}
-        locations={[0, 0.7, 1]}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={[styles.title, { color: complementThumbnailColor }]}>
-            {data.title.split('(Episode')[0]}
-          </Text>
-          <Text
-            style={[
-              styles.title,
-              { color: complementThumbnailColor, fontWeight: 'normal', fontSize: 14 },
-            ]}>
-            {data.alternativeTitle}
-          </Text>
-        </View>
-        <View style={styles.imageContainer}>
-          <View style={[styles.imageContainerChild, { alignItems: 'flex-start' }]}>
-            <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
-              <Icon name="star" color="yellow" /> {data.rating === '' ? '-' : data.rating}
-              {'\n'}
-              <Icon name="calendar" /> {data.releaseYear + '\n'}
-              <Icon name="tags" /> {data.status + '\n'}
-              <Icon name="building" /> {data.studio + '\n'}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              { width: 135, height: 'auto', maxHeight: 200, marginVertical: 12 },
-              styles.imageContainerChild,
-            ]}>
-            <Image source={{ uri: data.thumbnailUrl }} style={[{ flex: 1 }]} contentFit="contain" />
-            <CopilotStep
-              text="Kamu bisa klik bagian ini untuk menambahkan anime ini ke daftar tonton nanti"
-              order={1}
-              name="watch-later">
-              <TouchableOpacityCopilot
-                disabled={isInList}
-                style={{ position: 'absolute', bottom: 10, right: 0 }}
-                onPress={() => {
-                  const watchLaterJson: watchLaterJSON = {
-                    title: data.title.replace('Subtitle Indonesia', ''),
-                    link: props.route.params.link,
-                    rating: data.rating,
-                    releaseYear: data.releaseYear,
-                    thumbnailUrl: data.thumbnailUrl,
-                    genre: data.genres,
-                    date: Date.now(),
-                  };
-                  controlWatchLater('add', watchLaterJson);
-                  ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
-                }}>
-                {/* tonton nanti */}
-                <View style={{ backgroundColor: '#0084ff', padding: 5, borderRadius: 5 }}>
-                  <Icon name={isInList ? 'check' : 'clock-o'} color={lightText} size={15} />
-                </View>
-              </TouchableOpacityCopilot>
-            </CopilotStep>
-          </View>
-
-          <View style={[styles.imageContainerChild, { alignItems: 'flex-end' }]}>
-            <Text style={[styles.detailText, { color: complementThumbnailColor }]}>
-              <Icon name="film" /> {data.animeType + '\n'}
-              <Icon name="play" /> {data.minutesPerEp + '\n'}
-              <Icon name="eye" /> {data.episodeList.length + '/' + data.epsTotal + ' Episode\n'}
-            </Text>
-          </View>
-        </View>
-      </LinearGradient>
-
-      <ImageBackground
-        source={{ uri: data.thumbnailUrl }}
-        blurRadius={5}
-        contentFit="cover"
-        style={styles.synopsisBackground}>
-        <LinearGradient
-          colors={[`${thumbnailColor}D0`, `${thumbnailColor}A0`]}
-          style={styles.synopsisOverlay}
+  const ListHeaderComponent = useMemo(() => {
+    return (
+      <View style={styles.mainContainer}>
+        <ReanimatedImage
+          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
+          source={{ uri: data.thumbnailUrl }}
+          contentFit="cover"
         />
 
-        <View style={styles.synopsisContentContainer}>
-          <Text style={[styles.genreText, { color: complementThumbnailColor }]}>
-            <Icon name="tags" /> {data.genres.join(', ')}
-          </Text>
-          <Text style={[styles.synopsisTitle, { color: complementThumbnailColor }]}>Sinopsis</Text>
-          <ScrollView
-            style={styles.synopsisScrollView}
-            showsVerticalScrollIndicator={true}
-            contentContainerStyle={styles.synopsisScrollViewContent}>
-            <Text style={[styles.synopsisText, { color: complementThumbnailColor }]}>
-              {data.synopsis === '' ? 'Tidak ada sinopsis yang tersedia.' : data.synopsis}
-            </Text>
-          </ScrollView>
-        </View>
-      </ImageBackground>
-
-      <View style={[styles.container, { backgroundColor: thumbnailColor }]}>
-        <LegendList
-          recycleItems
-          drawDistance={250}
-          estimatedItemSize={41}
-          data={data.episodeList}
-          keyExtractor={(_, index) => index.toString()} // it's safe to use index as key because the data can't be changed
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.episodeButton}
-              onPress={() => {
-                props.navigation.navigate('FromUrl', {
-                  link: item.link,
-                });
-              }}>
-              <Text
-                style={[
-                  globalStyles.text,
-                  styles.episodeText,
-                  { color: complementThumbnailColor },
-                ]}>
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-          )}
-          ItemSeparatorComponent={() => (
+        <View
+          style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
+          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+            <Image
+              source={{ uri: data.thumbnailUrl }}
+              style={styles.thumbnail}
+              contentFit="contain"
+            />
             <View
               style={{
-                width: '100%',
-                borderBottomWidth: 0.5,
-                borderColor: complementThumbnailColor,
-              }}
-            />
-          )}
-          extraData={colorScheme + complementThumbnailColor}
-        />
+                transform: styles.thumbnail.transform,
+                flexDirection: 'row',
+                gap: 5,
+                marginTop: 5,
+              }}>
+              <Text style={[globalStyles.text, styles.type]}>{data.animeType}</Text>
+              <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoContainer}>
+            <Text style={[globalStyles.text, styles.title]}>
+              {data.title.replace('Subtitle Indonesia', '').trim()}
+            </Text>
+            {data.alternativeTitle && (
+              <Text style={[globalStyles.text, styles.title, styles.indonesianTitle]}>
+                {data.alternativeTitle}
+              </Text>
+            )}
+            <Text style={[globalStyles.text, styles.author]}>
+              <Icon name="building" /> {data.studio}
+            </Text>
+            <View style={styles.genreContainer}>
+              {data.genres.map(genre => (
+                <Text style={styles.genre} key={genre}>
+                  {genre}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.secondaryInfoContainer}>
+            <View style={styles.additionalInfo}>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
+              </Text>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="calendar" /> {data.releaseYear}
+              </Text>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="play-circle" /> {data.minutesPerEp}
+              </Text>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="eye" /> {data.episodeList.length + '/' + data.epsTotal + ' Episode'}
+              </Text>
+            </View>
+
+            <View style={[styles.synopsisContainer]}>
+              <Text style={[globalStyles.text, styles.synopsisTitle]}>Sinopsis</Text>
+              <View style={styles.synopsisView}>
+                <Text style={[globalStyles.text, styles.synopsisText]}>
+                  {data.synopsis === '' ? 'Tidak ada sinopsis yang tersedia.' : data.synopsis}
+                </Text>
+              </View>
+            </View>
+
+            <Button
+              buttonColor={styles.additionalInfoText.backgroundColor}
+              textColor={styles.additionalInfoText.color}
+              mode="contained"
+              icon="playlist-plus"
+              disabled={isInList}
+              onPress={() => {
+                const watchLaterJson: watchLaterJSON = {
+                  title: data.title.replace('Subtitle Indonesia', ''),
+                  link: props.route.params.link,
+                  rating: data.rating,
+                  releaseYear: data.releaseYear,
+                  thumbnailUrl: data.thumbnailUrl,
+                  genre: data.genres,
+                  date: Date.now(),
+                };
+                controlWatchLater('add', watchLaterJson);
+                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+              }}>
+              {isInList ? 'Sudah Ditambahkan' : 'Tonton Nanti'}
+            </Button>
+
+            <View style={styles.listChapterTextContainer}>
+              <Text style={[globalStyles.text, styles.listChapterText]}>Daftar Episode</Text>
+            </View>
+
+            <View style={styles.chapterButtonsContainer}>
+              <Button
+                buttonColor={styles.additionalInfoText.backgroundColor}
+                textColor={styles.additionalInfoText.color}
+                mode="contained"
+                onPress={() => {
+                  if (data.episodeList.length > 0) {
+                    props.navigation.navigate('FromUrl', {
+                      link: data.episodeList[data.episodeList.length - 1].link,
+                    });
+                  } else {
+                    ToastAndroid.show('Tidak ada episode untuk ditonton', ToastAndroid.SHORT);
+                  }
+                }}>
+                Tonton Episode Pertama
+              </Button>
+              <Button
+                buttonColor={styles.additionalInfoText.backgroundColor}
+                textColor={styles.additionalInfoText.color}
+                mode="contained"
+                onPress={() => {
+                  if (data.episodeList.length > 0) {
+                    props.navigation.navigate('FromUrl', {
+                      link: data.episodeList[0].link,
+                    });
+                  } else {
+                    ToastAndroid.show('Tidak ada episode untuk ditonton', ToastAndroid.SHORT);
+                  }
+                }}>
+                Tonton Episode Terbaru
+              </Button>
+            </View>
+          </View>
+        </View>
       </View>
-    </View>
+    );
+  }, [
+    data,
+    isInList,
+    styles,
+    globalStyles,
+    headerImageStyle,
+    props.navigation,
+    props.route.params.link,
+  ]);
+
+  return (
+    <ReanimatedFlashList
+      onScroll={scrollHandler}
+      data={data.episodeList}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.episodeButton}
+          onPress={() => {
+            props.navigation.navigate('FromUrl', {
+              link: item.link,
+            });
+          }}>
+          <View style={styles.episodeTitleContainer}>
+            <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+      ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
+      keyExtractor={item => item.title}
+      contentContainerStyle={{ backgroundColor: styles.mainContainer.backgroundColor }}
+      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+      ListHeaderComponent={ListHeaderComponent}
+      extraData={colorScheme}
+    />
   );
 }
 
 function useStyles() {
   const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
   return useMemo(
     () =>
       StyleSheet.create({
-        container: {
+        mainContainer: {
           flex: 1,
+          backgroundColor: colorScheme === 'dark' ? '#0c0c0c' : '#ebebeb',
         },
-        centerChildren: {
-          justifyContent: 'center',
-          alignItems: 'center',
+
+        mainContent: {
+          gap: 15,
+          flex: 1,
+          flexWrap: 'wrap',
+          flexDirection: 'row',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          paddingHorizontal: 20,
+          paddingVertical: 15,
+          marginTop: -20,
+        },
+        infoContainer: {
+          gap: 5,
+          flex: 1,
+          flexDirection: 'column',
+        },
+        thumbnail: {
+          margin: 15,
+          width: 110,
+          height: 150,
+          borderRadius: 10,
+          transform: [{ translateY: -40 }],
+        },
+        type: {
+          backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+          color: colorScheme === 'dark' ? 'white' : 'black',
+          fontWeight: 'bold',
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 10,
+          alignSelf: 'flex-start',
+        },
+        status: {
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: colorScheme === 'dark' ? 'white' : 'black',
+          alignSelf: 'flex-start',
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          color: globalStyles.text.color,
         },
         title: {
-          fontSize: 20,
+          flexShrink: 1,
+          fontSize: 22,
           fontWeight: 'bold',
           color: globalStyles.text.color,
-          textAlign: 'center',
-          textShadowColor: 'black',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 1,
         },
-        imageContainer: {
-          flex: 1,
+        indonesianTitle: {
+          fontSize: 16,
+          fontWeight: 'normal',
+          opacity: 0.8,
+        },
+        author: {
+          color: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
+          marginTop: 5,
+        },
+        secondaryInfoContainer: {
+          width: '100%',
+          gap: 15,
+        },
+        genreContainer: {
           flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 8,
+          marginTop: 10,
+        },
+        genre: {
+          color: globalStyles.text.color,
+          fontWeight: 'bold',
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
+        },
+        additionalInfo: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 10,
           justifyContent: 'space-around',
           alignItems: 'center',
-        },
-        imageContainerChild: {
-          flex: 1,
-        },
-        detailText: {
-          color: globalStyles.text.color,
-          textShadowColor: 'black',
-          textShadowOffset: { width: 0.8, height: 0.8 },
-          textShadowRadius: 0.8,
-          fontWeight: 'bold',
-        },
-        synopsisBackground: {
-          maxHeight: '28%',
-          minHeight: 120,
-          width: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        synopsisOverlay: {
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-        },
-        synopsisContentContainer: {
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          width: '100%',
-          alignItems: 'center',
-        },
-        genreText: {
-          textAlign: 'center',
-          marginBottom: 8,
-          fontSize: 13,
-          fontWeight: 'bold',
-          textShadowColor: 'black',
-          textShadowOffset: { width: 0.5, height: 0.5 },
-          textShadowRadius: 0.5,
-        },
-        synopsisTitle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          marginBottom: 5,
-          textShadowColor: 'black',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 1,
-        },
-        synopsisScrollView: {
-          maxHeight: 120,
-          width: '100%',
-        },
-        synopsisScrollViewContent: {
           paddingVertical: 5,
+        },
+        additionalInfoText: {
+          color: globalStyles.text.color,
+          fontWeight: 'bold',
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#008cdd',
+        },
+        synopsisContainer: {},
+        synopsisTitle: {
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: 8,
+          color: globalStyles.text.color,
+        },
+        synopsisView: {
+          paddingBottom: 10,
         },
         synopsisText: {
           textAlign: 'justify',
-          fontSize: 13,
+          fontSize: 14,
+          lineHeight: 20,
+          color: globalStyles.text.color,
+          opacity: 0.9,
+        },
+        listChapterTextContainer: {
+          paddingVertical: 10,
+        },
+        listChapterText: {
           fontWeight: 'bold',
-          lineHeight: 18,
-          textShadowColor: 'black',
-          textShadowOffset: { width: 0.5, height: 0.5 },
-          textShadowRadius: 0.5,
+          fontSize: 22,
+          color: globalStyles.text.color,
+          textAlign: 'center',
+        },
+        chapterButtonsContainer: {
+          gap: 10,
         },
         episodeButton: {
-          padding: 10,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingVertical: 15,
+          paddingHorizontal: 20,
+          backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
+        },
+        episodeTitleContainer: {
+          flex: 2,
         },
         episodeText: {
-          fontSize: 15,
-          fontStyle: 'italic',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          textDecorationLine: 'underline',
-          textShadowColor: 'black',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 1,
+          fontSize: 16,
+          fontWeight: '600',
+          color: colorScheme === 'dark' ? '#ffffff' : '#333333',
+        },
+        chapterDivider: {
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#e0e0e0',
+          height: 0.8,
         },
       }),
-    [globalStyles.text.color],
+    [colorScheme, globalStyles.text.color],
   );
 }
 

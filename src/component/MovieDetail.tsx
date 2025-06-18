@@ -1,104 +1,155 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 import {
-  ImageBackground,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
-  useColorScheme,
-  useWindowDimensions,
   View,
-  ViewStyle,
+  useColorScheme,
 } from 'react-native';
+import { Button, Divider } from 'react-native-paper';
+import Reanimated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
+import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { RootStackNavigator } from '../types/navigation';
-
+import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
-import { useFocusEffect } from '@react-navigation/native';
-import { getColors } from 'react-native-image-colors';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
-import watchLaterJSON from '../types/watchLaterJSON';
-import { hexIsDark } from '../utils/hexIsDark';
-import DarkOverlay from './misc/DarkOverlay';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
+
+interface MovieEpisode {
+  title: string;
+  url: string;
+}
+const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
+const ReanimatedFlashList =
+  Reanimated.createAnimatedComponent<FlashListProps<MovieEpisode>>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
+
+const IMG_HEADER_HEIGHT = 250;
+
 function MovieDetail(props: Props) {
-  const window = useWindowDimensions();
+  const styles = useStyles();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
-  const styles = useStyles();
 
-  const [imageColors, setImageColors] = useState<string>('#000000');
+  const data = props.route.params.data;
 
   const watchLaterListsJson = useSelectorIfFocused(
     state => state.settings.watchLater,
     true,
     state => JSON.parse(state) as watchLaterJSON[],
   );
-  const isInList = watchLaterListsJson.some(
-    item => item.title === props.route.params.data.title.replace('Subtitle Indonesia', ''),
-  );
+  const isInList = watchLaterListsJson.some(item => item.title === data.title);
+  const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler(e => {
+    scrollOffset.value = e.contentOffset.y;
+  });
 
-  useEffect(() => {
-    getColors(props.route.params.data.thumbnailUrl, { pixelSpacing: 10 }).then(colors => {
-      if (colors.platform === 'android') {
-        const color = colorScheme === 'dark' ? colors.darkMuted : colors.lightMuted;
-        setImageColors(color);
-      }
-    });
-  }, [colorScheme, props.route.params.data.thumbnailUrl]);
+  const headerImageStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [0, IMG_HEADER_HEIGHT * 2],
+            [0, IMG_HEADER_HEIGHT * 0.85],
+            'clamp',
+          ),
+        },
+      ],
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT * 0.85], [1, 0], 'clamp'),
+    };
+  });
 
-  useFocusEffect(
-    useCallback(() => {
-      if (imageColors === '#000000') return;
-      StatusBar.setBackgroundColor(imageColors);
-      StatusBar.setBarStyle(hexIsDark(imageColors) ? 'light-content' : 'dark-content');
-      SystemNavigationBar.setNavigationColor(imageColors);
-      return () => {
-        StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
-        StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
-        SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
-      };
-    }, [colorScheme, imageColors]),
-  );
+  const ListHeaderComponent = useMemo(() => {
+    const hasMultipleEpisodes = data.episodeList.length > 1;
 
-  return (
-    <ScrollView style={[styles.container, { backgroundColor: imageColors }]}>
-      <ImageBackground
-        source={{ uri: props.route.params.data.thumbnailUrl }}
-        blurRadius={3}
-        style={[styles.posterContainer, { height: (window.height * 40) / 100 }]}>
-        <DarkOverlay />
-        <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', rowGap: 6 }]}>
-          <Text adjustsFontSizeToFit allowFontScaling style={styles.titleText}>
-            {props.route.params.data.title}
-          </Text>
-          <Image
-            source={{ uri: props.route.params.data.thumbnailUrl }}
-            contentFit="contain"
-            style={{ flex: 1, width: '70%' }}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              columnGap: 4,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}>
-            <TouchableOpacity
-              disabled={isInList}
-              style={[styles.button, { backgroundColor: isInList ? '#ccc' : '#0ff5c3' }]}
+    return (
+      <View style={styles.mainContainer}>
+        <ReanimatedImage
+          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
+          source={{ uri: data.thumbnailUrl }}
+          contentFit="cover"
+        />
+
+        <View
+          style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
+          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+            <Image
+              source={{ uri: data.thumbnailUrl }}
+              style={styles.thumbnail}
+              contentFit="contain"
+            />
+            <View
+              style={{
+                transform: styles.thumbnail.transform,
+                flexDirection: 'row',
+                gap: 5,
+                marginTop: 5,
+              }}>
+              <Text style={[globalStyles.text, styles.type]}>Movie</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoContainer}>
+            <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
+            <Text style={[globalStyles.text, styles.author]}>
+              <Icon name="building" /> {data.studio}
+            </Text>
+            <View style={styles.genreContainer}>
+              {data.genres.map(genre => (
+                <Text style={styles.genre} key={genre}>
+                  {genre}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.secondaryInfoContainer}>
+            <View style={styles.additionalInfo}>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
+              </Text>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="calendar" /> {data.releaseDate}
+              </Text>
+              <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                <Icon name="refresh" /> {data.updateDate}
+              </Text>
+              {hasMultipleEpisodes && (
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="list" /> {data.episodeList.length} Episode
+                </Text>
+              )}
+            </View>
+
+            <View style={[styles.synopsisContainer]}>
+              <Text style={[globalStyles.text, styles.synopsisTitle]}>Sinopsis</Text>
+              <View style={styles.synopsisView}>
+                <Text style={[globalStyles.text, styles.synopsisText]}>
+                  {data.synopsis === '' ? 'Tidak ada sinopsis yang tersedia.' : data.synopsis}
+                </Text>
+              </View>
+            </View>
+
+            <Button
+              icon="playlist-plus"
+              buttonColor={styles.additionalInfoText.backgroundColor}
+              textColor={styles.additionalInfoText.color}
+              mode="contained"
               onPress={() => {
-                const data = props.route.params.data;
                 const watchLaterJson: watchLaterJSON = {
-                  title: data.title.replace('Subtitle Indonesia', ''),
+                  title: data.title,
                   link: props.route.params.link,
                   rating: data.rating,
                   releaseYear: data.releaseDate,
@@ -109,134 +160,246 @@ function MovieDetail(props: Props) {
                 };
                 controlWatchLater('add', watchLaterJson);
                 ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
-              }}>
-              <Icon name={isInList ? 'check' : 'plus'} size={15} color="#fff" />
-              <Text style={styles.buttonText}>
-                {isInList ? 'Ditambahkan ke tonton nanti' : 'Tambahkan ke tonton nanti'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#07c9cf' }]}
-              onPress={() => {
-                props.navigation.navigate('FromUrl', {
-                  type: 'movie',
-                  link: props.route.params.data.streamingUrl,
-                });
-              }}>
-              <Icon name="play" size={15} color="#fff" />
-              <Text style={styles.buttonText}>Tonton sekarang</Text>
-            </TouchableOpacity>
+              }}
+              disabled={isInList}>
+              {isInList ? 'Sudah Ditambahkan' : 'Tonton Nanti'}
+            </Button>
+
+            {hasMultipleEpisodes && (
+              <View style={styles.listChapterTextContainer}>
+                <Text style={[globalStyles.text, styles.listChapterText]}>Daftar Episode</Text>
+              </View>
+            )}
+
+            <View style={styles.chapterButtonsContainer}>
+              {hasMultipleEpisodes ? (
+                <>
+                  <Button
+                    buttonColor={styles.additionalInfoText.backgroundColor}
+                    textColor={styles.additionalInfoText.color}
+                    mode="contained"
+                    onPress={() => {
+                      props.navigation.navigate('FromUrl', {
+                        link: data.episodeList[data.episodeList.length - 1].url,
+                        type: 'movie',
+                      });
+                    }}>
+                    Tonton Episode Pertama
+                  </Button>
+                  <Button
+                    buttonColor={styles.additionalInfoText.backgroundColor}
+                    textColor={styles.additionalInfoText.color}
+                    mode="contained"
+                    onPress={() => {
+                      props.navigation.navigate('FromUrl', {
+                        link: data.episodeList[0].url,
+                        type: 'movie',
+                      });
+                    }}>
+                    Tonton Episode Terakhir
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  icon="movie-open-play"
+                  buttonColor={styles.additionalInfoText.backgroundColor}
+                  textColor={styles.additionalInfoText.color}
+                  mode="contained"
+                  style={{ flex: 1 }}
+                  onPress={() => {
+                    props.navigation.navigate('FromUrl', {
+                      link: data.streamingUrl,
+                      type: 'movie',
+                    });
+                  }}>
+                  Tonton Sekarang
+                </Button>
+              )}
+            </View>
           </View>
         </View>
-      </ImageBackground>
-      {props.route.params.data.episodeList.length > 1 && (
-        <Section style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <View style={[styles.container, { gap: 4 }]}>
-            <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 17 }]}>
-              Daftar Episode
-            </Text>
-            {props.route.params.data.episodeList.map((episode, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.button, { backgroundColor: '#00e1ff' }]}
-                onPress={() => {
-                  props.navigation.navigate('FromUrl', {
-                    type: 'movie',
-                    link: episode.url,
-                  });
-                }}>
-                <Icon name="play" size={15} color="#0a456d" />
-                <Text style={styles.buttonText}>{episode.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Section>
-      )}
-      <Section style={{ flexDirection: 'row' }}>
-        <View style={styles.container}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="star" size={15} color="#ffbb00" /> {props.route.params.data.rating}
-          </Text>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="calendar" size={15} color="#ffbb00" /> {props.route.params.data.releaseDate}
-          </Text>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="refresh" size={15} color="#ffbb00" /> {props.route.params.data.updateDate}
-          </Text>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="users" size={15} color="#ffbb00" /> {props.route.params.data.studio}
-          </Text>
-        </View>
+      </View>
+    );
+  }, [
+    data,
+    isInList,
+    styles,
+    globalStyles,
+    headerImageStyle,
+    props.navigation,
+    props.route.params.link,
+  ]);
 
-        <View style={styles.container}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
-            <Icon name="tags" size={15} color="#ffbb00" /> Genre:{' '}
-            {props.route.params.data.genres.join(', ')}
-          </Text>
-        </View>
-      </Section>
-      <Section>
-        <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 17 }]}>Sinopsis</Text>
-        <Text style={[globalStyles.text, { textAlign: 'justify' }]}>
-          {props.route.params.data.synopsis}
-        </Text>
-      </Section>
-    </ScrollView>
-  );
-}
-
-function Section(props: { children?: React.ReactNode; style?: ViewStyle }) {
-  const colorScheme = useColorScheme();
   return (
-    <View
-      style={{
-        ...(props.style ?? {}),
-        gap: 4,
-        backgroundColor: colorScheme === 'dark' ? '#1b1b1b' : '#f7f7f7',
-        padding: 10,
-        marginVertical: 2,
-        marginHorizontal: 1,
-        borderRadius: 8,
-      }}>
-      {props.children}
-    </View>
+    <ReanimatedFlashList
+      onScroll={scrollHandler}
+      data={data.episodeList.length > 1 ? data.episodeList : []}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.episodeButton}
+          onPress={() => {
+            props.navigation.navigate('FromUrl', {
+              link: item.url,
+              type: 'movie',
+            });
+          }}>
+          <View style={styles.episodeTitleContainer}>
+            <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+      ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
+      keyExtractor={item => item.title}
+      contentContainerStyle={{ backgroundColor: styles.mainContainer.backgroundColor }}
+      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+      ListHeaderComponent={ListHeaderComponent}
+      extraData={colorScheme}
+      estimatedItemSize={60}
+    />
   );
 }
 
 function useStyles() {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
   return useMemo(
     () =>
       StyleSheet.create({
-        container: {
+        mainContainer: {
           flex: 1,
+          backgroundColor: colorScheme === 'dark' ? '#0c0c0c' : '#ebebeb',
         },
-        posterContainer: {
-          borderRadius: 10,
-        },
-        titleText: {
-          color: 'white',
-          fontWeight: 'bold',
-          fontSize: 18,
-          textAlign: 'center',
-          textShadowColor: 'black',
-          textShadowOffset: { width: 1.4, height: 1.4 },
-          textShadowRadius: 1,
-        },
-        button: {
-          padding: 8,
-          borderRadius: 5,
-          alignItems: 'center',
-          justifyContent: 'center',
+        mainContent: {
+          gap: 15,
+          flex: 1,
+          flexWrap: 'wrap',
           flexDirection: 'row',
-          columnGap: 4,
-          elevation: 5,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          paddingHorizontal: 20,
+          paddingVertical: 15,
+          marginTop: -20,
         },
-        buttonText: {
-          color: 'black',
+        infoContainer: {
+          gap: 5,
+          flex: 1,
+          flexDirection: 'column',
+        },
+        thumbnail: {
+          margin: 15,
+          width: 110,
+          height: 150,
+          borderRadius: 10,
+          transform: [{ translateY: -40 }],
+        },
+        type: {
+          backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+          color: colorScheme === 'dark' ? 'white' : 'black',
           fontWeight: 'bold',
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 10,
+          alignSelf: 'flex-start',
+        },
+        title: {
+          flexShrink: 1,
+          fontSize: 22,
+          fontWeight: 'bold',
+          color: globalStyles.text.color,
+        },
+        author: {
+          color: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
+          marginTop: 5,
+        },
+        secondaryInfoContainer: {
+          width: '100%',
+          gap: 15,
+        },
+        genreContainer: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 8,
+          marginTop: 10,
+        },
+        genre: {
+          color: globalStyles.text.color,
+          fontWeight: 'bold',
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
+        },
+        additionalInfo: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 10,
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          paddingVertical: 5,
+        },
+        additionalInfoText: {
+          color: globalStyles.text.color,
+          fontWeight: 'bold',
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#008cdd',
+        },
+        synopsisContainer: {},
+        synopsisTitle: {
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: 8,
+          color: globalStyles.text.color,
+        },
+        synopsisView: {
+          paddingBottom: 10,
+        },
+        synopsisText: {
+          textAlign: 'justify',
+          fontSize: 14,
+          lineHeight: 20,
+          color: globalStyles.text.color,
+          opacity: 0.9,
+        },
+        listChapterTextContainer: {
+          paddingVertical: 10,
+        },
+        listChapterText: {
+          fontWeight: 'bold',
+          fontSize: 22,
+          color: globalStyles.text.color,
+          textAlign: 'center',
+        },
+        chapterButtonsContainer: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          gap: 10,
+          marginBottom: 15,
+        },
+        episodeButton: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingVertical: 15,
+          paddingHorizontal: 20,
+          backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
+        },
+        episodeTitleContainer: {
+          flex: 2,
+        },
+        episodeText: {
+          fontSize: 16,
+          fontWeight: '600',
+          color: colorScheme === 'dark' ? '#ffffff' : '#333333',
+        },
+        chapterDivider: {
+          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#e0e0e0',
+          height: 0.8,
         },
       }),
-    [],
+    [colorScheme, globalStyles.text.color],
   );
 }
 
