@@ -127,7 +127,7 @@ class AnimeAPI {
         throw e;
       } else if (
         e.message !== 'Network Error' ||
-        e.message !== 'AbortError' ||
+        e.name !== 'AbortError' ||
         e.message !== 'canceled'
       ) {
         throw e;
