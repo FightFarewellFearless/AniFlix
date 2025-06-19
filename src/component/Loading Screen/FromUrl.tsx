@@ -15,7 +15,7 @@ import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
 import { getState, RootState, useSelectorIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-import { getKomikuDetailFromUrl } from '../../utils/komiku';
+import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/komiku';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -187,6 +187,28 @@ function FromUrl(props: Props) {
                 data: result,
                 link: props.route.params.link,
               }),
+            );
+          })
+          .catch(handleError);
+      } else {
+        getKomikuReading(props.route.params.link, abort.signal)
+          .then(result => {
+            if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            props.navigation.dispatch(
+              StackActions.replace('ComicsReading', {
+                data: result,
+                historyData: props.route.params.historyData,
+                link: props.route.params.link,
+              }),
+            );
+            setHistory(
+              result,
+              props.route.params.link,
+              false,
+              props.route.params.historyData,
+              historyData,
+              false,
+              true,
             );
           })
           .catch(handleError);

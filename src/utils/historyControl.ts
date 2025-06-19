@@ -1,9 +1,10 @@
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
 import { storage } from './DatabaseManager';
+import { KomikuReading } from './komiku';
 
 function setHistory(
-  targetData: RootStackNavigator['Video']['data'],
+  targetData: RootStackNavigator['Video']['data'] | KomikuReading,
   link: string,
   skipUpdateDate = false,
   additionalData: Partial<HistoryAdditionalData> | {} = {},
@@ -12,7 +13,7 @@ function setHistory(
   isComics?: boolean,
 ) {
   const data: HistoryJSON[] = JSON.parse(historyData);
-  const episodeIndex = targetData.title.toLowerCase().indexOf('episode');
+  const episodeIndex = targetData.title.toLowerCase().indexOf(isComics ? 'chapter' : 'episode');
   const title = episodeIndex >= 0 ? targetData.title.slice(0, episodeIndex) : targetData.title;
   const episode = episodeIndex < 0 ? null : targetData.title.slice(episodeIndex);
   const dataINDEX = data.findIndex(val => val.title === title);

@@ -158,6 +158,7 @@ export async function getKomikuDetailFromUrl(
 
 export interface KomikuReading {
   title: string;
+  thumbnailUrl: string;
   chapter: string;
   releaseDate: string;
   readingDirection: string;
@@ -168,7 +169,10 @@ export interface KomikuReading {
 export async function getKomikuReading(url: string, signal?: AbortSignal): Promise<KomikuReading> {
   const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
   const data = await response.text();
-  const $ = cheerio.load(data);
+  const $ = cheerio.load(data, {
+    xmlMode: true,
+    decodeEntities: false,
+  });
   const tableInfo = $('table.tbl tr')
     .map((_i, el) => {
       const row = $(el).find('td');
@@ -183,7 +187,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
   const readingDirection =
     tableInfo.find(z => z.key === 'Arah Baca')?.value ?? 'Data tidak tersedia';
   const chapter = $('header > h1').text().trim();
-  const comicImages = $('div#Baca_Komik > img')
+  const comicImages = $('div#Baca_Komik img')
     .map((_i, el) => {
       return $(el).attr('src');
     })
@@ -193,6 +197,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
 
   return {
     title,
+    thumbnailUrl: data.split("data[5] = '")[1].split("'")[0],
     releaseDate,
     readingDirection,
     chapter,

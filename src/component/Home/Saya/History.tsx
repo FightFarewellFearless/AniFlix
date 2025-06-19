@@ -180,6 +180,23 @@ function History(props: Props) {
             <View style={{ flexDirection: 'row' }}>
               <View style={styles.listEpisodeAndPart}>
                 <Text style={styles.listEpisode}>
+                  {item.isComics && (
+                    <View
+                      style={{
+                        backgroundColor: '#00586e',
+                        borderRadius: 4,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                      }}>
+                      <Text
+                        style={[
+                          styles.listEpisode,
+                          { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                        ]}>
+                        Komik
+                      </Text>
+                    </View>
+                  )}{' '}
                   {item.isMovie && (
                     <View
                       style={{
@@ -210,8 +227,14 @@ function History(props: Props) {
               {item.lastDuration !== undefined && (
                 <View style={styles.lastDuration}>
                   <Text style={[globalStyles.text, styles.lastDurationText]}>
-                    <FontAwesomeIcon name="clock-o" size={16} color={globalStyles.text.color} />{' '}
-                    {formatTimeFromSeconds(item.lastDuration)}
+                    <FontAwesomeIcon
+                      name={item.isComics ? 'book' : 'clock-o'}
+                      size={16}
+                      color={globalStyles.text.color}
+                    />{' '}
+                    {item.isComics
+                      ? 'Halaman ' + (item.lastDuration + 1)
+                      : formatTimeFromSeconds(item.lastDuration)}
                   </Text>
                 </View>
               )}
@@ -399,6 +422,7 @@ function useStyles() {
         },
         lastDuration: {
           justifyContent: 'flex-end',
+          marginRight: 4,
         },
         lastDurationText: {
           fontSize: 13,
