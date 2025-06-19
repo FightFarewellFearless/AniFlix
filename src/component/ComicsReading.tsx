@@ -57,7 +57,7 @@ export default function ComicsReading(props: Props) {
             }
     const options = {
       root: null,
-      rootMargin: '200px 0px 200px 0px',
+      rootMargin: '20px 0px -500px 0px',
       threshold: 0.01
     };
 
@@ -65,7 +65,7 @@ export default function ComicsReading(props: Props) {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
-          window.ReactNativeWebView.postMessage(entry.target.id);
+          window.ReactNativeWebView.postMessage(img.id);
         }
       });
     }, options);
