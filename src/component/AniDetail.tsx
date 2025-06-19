@@ -9,7 +9,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Button, Divider } from 'react-native-paper';
+import { Button, Divider, Surface } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -94,8 +94,23 @@ function AniDetail(props: Props) {
                 gap: 5,
                 marginTop: 5,
               }}>
-              <Text style={[globalStyles.text, styles.type]}>{data.animeType}</Text>
-              <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+              <Surface
+                elevation={3}
+                style={{
+                  backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+                  borderRadius: 10,
+                }}>
+                <Text style={[globalStyles.text, styles.type]}>{data.animeType}</Text>
+              </Surface>
+              <Surface
+                elevation={3}
+                style={{
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
+                }}>
+                <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+              </Surface>
             </View>
           </View>
 
@@ -113,30 +128,44 @@ function AniDetail(props: Props) {
             </Text>
             <View style={styles.genreContainer}>
               {data.genres.map(genre => (
-                <Text style={styles.genre} key={genre}>
-                  {genre}
-                </Text>
+                <Surface
+                  key={genre}
+                  elevation={3}
+                  style={{
+                    borderRadius: 8,
+                    backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
+                  }}>
+                  <Text style={styles.genre}>{genre}</Text>
+                </Surface>
               ))}
             </View>
           </View>
 
           <View style={styles.secondaryInfoContainer}>
             <View style={styles.additionalInfo}>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
-              </Text>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="calendar" /> {data.releaseYear}
-              </Text>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="play-circle" /> {data.minutesPerEp}
-              </Text>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="eye" /> {data.episodeList.length + '/' + data.epsTotal + ' Episode'}
-              </Text>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
+                </Text>
+              </Surface>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="calendar" /> {data.releaseYear}
+                </Text>
+              </Surface>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="play-circle" /> {data.minutesPerEp}
+                </Text>
+              </Surface>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="eye" /> {data.episodeList.length + '/' + data.epsTotal + ' Episode'}
+                </Text>
+              </Surface>
             </View>
 
-            <View style={[styles.synopsisContainer]}>
+            <View style={styles.synopsisContainer}>
               <Text style={[globalStyles.text, styles.synopsisTitle]}>Sinopsis</Text>
               <View style={styles.synopsisView}>
                 <Text style={[globalStyles.text, styles.synopsisText]}>
@@ -146,9 +175,9 @@ function AniDetail(props: Props) {
             </View>
 
             <Button
-              buttonColor={styles.additionalInfoText.backgroundColor}
+              buttonColor={styles.additionalInfoTextSurface.backgroundColor}
               textColor={styles.additionalInfoText.color}
-              mode="contained"
+              mode="elevated"
               icon="playlist-plus"
               disabled={isInList}
               onPress={() => {
@@ -173,9 +202,9 @@ function AniDetail(props: Props) {
 
             <View style={styles.chapterButtonsContainer}>
               <Button
-                buttonColor={styles.additionalInfoText.backgroundColor}
+                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
-                mode="contained"
+                mode="elevated"
                 onPress={() => {
                   if (data.episodeList.length > 0) {
                     props.navigation.navigate('FromUrl', {
@@ -188,9 +217,9 @@ function AniDetail(props: Props) {
                 Tonton Episode Pertama
               </Button>
               <Button
-                buttonColor={styles.additionalInfoText.backgroundColor}
+                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
-                mode="contained"
+                mode="elevated"
                 onPress={() => {
                   if (data.episodeList.length > 0) {
                     props.navigation.navigate('FromUrl', {
@@ -215,6 +244,7 @@ function AniDetail(props: Props) {
     headerImageStyle,
     props.navigation,
     props.route.params.link,
+    colorScheme,
   ]);
 
   return (
@@ -279,19 +309,12 @@ function useStyles() {
           transform: [{ translateY: -40 }],
         },
         type: {
-          backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
           color: colorScheme === 'dark' ? 'white' : 'black',
           fontWeight: 'bold',
           paddingHorizontal: 8,
           paddingVertical: 4,
-          borderRadius: 10,
-          alignSelf: 'flex-start',
         },
         status: {
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: colorScheme === 'dark' ? 'white' : 'black',
-          alignSelf: 'flex-start',
           paddingHorizontal: 8,
           paddingVertical: 4,
           color: globalStyles.text.color,
@@ -324,10 +347,8 @@ function useStyles() {
         genre: {
           color: globalStyles.text.color,
           fontWeight: 'bold',
-          borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 4,
-          backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
         },
         additionalInfo: {
           flexDirection: 'row',
@@ -337,13 +358,15 @@ function useStyles() {
           alignItems: 'center',
           paddingVertical: 5,
         },
+        additionalInfoTextSurface: {
+          borderRadius: 8,
+          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#0396eb',
+        },
         additionalInfoText: {
           color: globalStyles.text.color,
           fontWeight: 'bold',
-          borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 4,
-          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#008cdd',
         },
         synopsisContainer: {},
         synopsisTitle: {

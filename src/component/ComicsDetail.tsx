@@ -1,9 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { Button, Divider } from 'react-native-paper';
+import { Button, Divider, Surface } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -22,6 +22,7 @@ const ReanimatedFlashList =
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
 const IMG_HEIGHT = 200;
 export default function ComicsDetail(props: Props) {
+  const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   const scrollOffset = useSharedValue(0);
@@ -44,13 +45,22 @@ export default function ComicsDetail(props: Props) {
     };
   });
   const { data } = props.route.params;
+  const readComic = useCallback(
+    (link: string) => {
+      props.navigation.navigate('FromUrl', {
+        link,
+        type: 'comics',
+      });
+    },
+    [props.navigation],
+  );
   return (
     <ReanimatedFlashList
       onScroll={scrollHandler}
       data={data.chapters}
       renderItem={({ item }) => {
         return (
-          <TouchableOpacity style={styles.chapterItem}>
+          <TouchableOpacity style={styles.chapterItem} onPress={() => readComic(item.chapterUrl)}>
             <View style={styles.chapterTitleContainer}>
               <Text style={[globalStyles.text, styles.chapterText]}>{item.chapter}</Text>
             </View>
@@ -79,8 +89,23 @@ export default function ComicsDetail(props: Props) {
             <View style={{ flexDirection: 'column', alignItems: 'center' }}>
               <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
               <View style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
-                <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
-                <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+                <Surface
+                  elevation={3}
+                  style={{
+                    backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+                    borderRadius: 10,
+                  }}>
+                  <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
+                </Surface>
+                <Surface
+                  elevation={3}
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    borderColor: colorScheme === 'dark' ? 'white' : 'black',
+                  }}>
+                  <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+                </Surface>
               </View>
             </View>
             <View style={styles.infoContainer}>
@@ -92,24 +117,37 @@ export default function ComicsDetail(props: Props) {
               <View style={styles.genreContainer}>
                 {data.genres.map(z => {
                   return (
-                    <Text style={styles.genre} key={z}>
-                      {z}
-                    </Text>
+                    <Surface
+                      key={z}
+                      elevation={3}
+                      style={{
+                        borderRadius: 8,
+                      }}>
+                      <Text style={styles.genre} key={z}>
+                        {z}
+                      </Text>
+                    </Surface>
                   );
                 })}
               </View>
             </View>
             <View style={styles.secondaryInfoContainer}>
               <View style={styles.additionalInfo}>
-                <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="check-circle" /> {data.minAge}
-                </Text>
-                <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="eye" /> {data.readingDirection}
-                </Text>
-                <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="tag" /> {data.concept}
-                </Text>
+                <Surface style={styles.additionalInfoTextSurface}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon name="check-circle" /> {data.minAge}
+                  </Text>
+                </Surface>
+                <Surface style={styles.additionalInfoTextSurface}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon name="map-signs" /> {data.readingDirection}
+                  </Text>
+                </Surface>
+                <Surface style={styles.additionalInfoTextSurface}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon name="tag" /> {data.concept}
+                  </Text>
+                </Surface>
               </View>
 
               <Text style={[globalStyles.text]}>{data.synopsis}</Text>
@@ -118,15 +156,17 @@ export default function ComicsDetail(props: Props) {
               <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
               <View style={{ gap: 10 }}>
                 <Button
-                  buttonColor={styles.additionalInfoText.backgroundColor}
+                  onPress={() => readComic(data.chapters[data.chapters.length - 1].chapterUrl)}
+                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                   textColor={styles.additionalInfoText.color}
-                  mode="contained">
+                  mode="elevated">
                   Baca Chapter Pertama
                 </Button>
                 <Button
-                  buttonColor={styles.additionalInfoText.backgroundColor}
+                  onPress={() => readComic(data.chapters[0].chapterUrl)}
+                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                   textColor={styles.additionalInfoText.color}
-                  mode="contained">
+                  mode="elevated">
                   Baca Chapter Terbaru
                 </Button>
               </View>
@@ -170,16 +210,11 @@ function useStyles() {
           transform: [{ translateY: -30 }],
         },
         type: {
-          backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
           color: colorScheme === 'dark' ? 'white' : 'black',
           fontWeight: 'bold',
           padding: 5,
-          borderRadius: 10,
         },
         status: {
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: colorScheme === 'dark' ? 'white' : 'black',
           alignSelf: 'flex-start',
           padding: 5,
         },
@@ -204,10 +239,8 @@ function useStyles() {
         genre: {
           color: globalStyles.text.color,
           fontWeight: 'bold',
-          borderRadius: 8,
           alignSelf: 'flex-start',
           padding: 4,
-          backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
         },
         additionalInfo: {
           flexDirection: 'row',
@@ -215,13 +248,15 @@ function useStyles() {
           flexWrap: 'wrap',
           marginBottom: 12,
         },
+        additionalInfoTextSurface: {
+          borderRadius: 8,
+          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#00a2ff',
+        },
         additionalInfoText: {
           color: globalStyles.text.color,
           fontWeight: 'bold',
-          borderRadius: 8,
           alignSelf: 'flex-start',
           padding: 4,
-          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#008cdd',
         },
         listChapterText: {
           fontWeight: 'bold',

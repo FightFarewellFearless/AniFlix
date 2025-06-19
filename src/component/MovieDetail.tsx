@@ -9,7 +9,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Button, Divider } from 'react-native-paper';
+import { Button, Divider, Surface } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -90,15 +90,19 @@ function MovieDetail(props: Props) {
               style={styles.thumbnail}
               contentFit="contain"
             />
-            <View
+            <Surface
               style={{
+                backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
                 transform: styles.thumbnail.transform,
                 flexDirection: 'row',
                 gap: 5,
                 marginTop: 5,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 10,
               }}>
               <Text style={[globalStyles.text, styles.type]}>Movie</Text>
-            </View>
+            </Surface>
           </View>
 
           <View style={styles.infoContainer}>
@@ -108,28 +112,39 @@ function MovieDetail(props: Props) {
             </Text>
             <View style={styles.genreContainer}>
               {data.genres.map(genre => (
-                <Text style={styles.genre} key={genre}>
-                  {genre}
-                </Text>
+                <Surface
+                  key={genre}
+                  elevation={3}
+                  style={{ borderRadius: styles.genre.borderRadius }}>
+                  <Text style={styles.genre}>{genre}</Text>
+                </Surface>
               ))}
             </View>
           </View>
 
           <View style={styles.secondaryInfoContainer}>
             <View style={styles.additionalInfo}>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
-              </Text>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="calendar" /> {data.releaseDate}
-              </Text>
-              <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                <Icon name="refresh" /> {data.updateDate}
-              </Text>
-              {hasMultipleEpisodes && (
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="list" /> {data.episodeList.length} Episode
+                  <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
                 </Text>
+              </Surface>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="calendar" /> {data.releaseDate}
+                </Text>
+              </Surface>
+              <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                  <Icon name="refresh" /> {data.updateDate}
+                </Text>
+              </Surface>
+              {hasMultipleEpisodes && (
+                <Surface elevation={3} style={styles.additionalInfoTextSurface}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon name="list" /> {data.episodeList.length} Episode
+                  </Text>
+                </Surface>
               )}
             </View>
 
@@ -144,9 +159,9 @@ function MovieDetail(props: Props) {
 
             <Button
               icon="playlist-plus"
-              buttonColor={styles.additionalInfoText.backgroundColor}
+              buttonColor={styles.additionalInfoTextSurface.backgroundColor}
               textColor={styles.additionalInfoText.color}
-              mode="contained"
+              mode="elevated"
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
                   title: data.title,
@@ -175,9 +190,9 @@ function MovieDetail(props: Props) {
               {hasMultipleEpisodes ? (
                 <>
                   <Button
-                    buttonColor={styles.additionalInfoText.backgroundColor}
+                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                     textColor={styles.additionalInfoText.color}
-                    mode="contained"
+                    mode="elevated"
                     onPress={() => {
                       props.navigation.navigate('FromUrl', {
                         link: data.episodeList[data.episodeList.length - 1].url,
@@ -187,9 +202,9 @@ function MovieDetail(props: Props) {
                     Tonton Episode Pertama
                   </Button>
                   <Button
-                    buttonColor={styles.additionalInfoText.backgroundColor}
+                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                     textColor={styles.additionalInfoText.color}
-                    mode="contained"
+                    mode="elevated"
                     onPress={() => {
                       props.navigation.navigate('FromUrl', {
                         link: data.episodeList[0].url,
@@ -202,9 +217,9 @@ function MovieDetail(props: Props) {
               ) : (
                 <Button
                   icon="movie-open-play"
-                  buttonColor={styles.additionalInfoText.backgroundColor}
+                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                   textColor={styles.additionalInfoText.color}
-                  mode="contained"
+                  mode="elevated"
                   style={{ flex: 1 }}
                   onPress={() => {
                     props.navigation.navigate('FromUrl', {
@@ -221,13 +236,42 @@ function MovieDetail(props: Props) {
       </View>
     );
   }, [
-    data,
-    isInList,
-    styles,
-    globalStyles,
+    data.episodeList,
+    data.thumbnailUrl,
+    data.title,
+    data.studio,
+    data.genres,
+    data.rating,
+    data.releaseDate,
+    data.updateDate,
+    data.synopsis,
+    data.streamingUrl,
+    styles.mainContainer,
+    styles.mainContent,
+    styles.thumbnail,
+    styles.type,
+    styles.infoContainer,
+    styles.title,
+    styles.author,
+    styles.genreContainer,
+    styles.secondaryInfoContainer,
+    styles.additionalInfo,
+    styles.additionalInfoTextSurface,
+    styles.additionalInfoText,
+    styles.synopsisContainer,
+    styles.synopsisTitle,
+    styles.synopsisView,
+    styles.synopsisText,
+    styles.listChapterTextContainer,
+    styles.listChapterText,
+    styles.chapterButtonsContainer,
+    styles.genre,
     headerImageStyle,
-    props.navigation,
+    colorScheme,
+    globalStyles.text,
+    isInList,
     props.route.params.link,
+    props.navigation,
   ]);
 
   return (
@@ -293,13 +337,8 @@ function useStyles() {
           transform: [{ translateY: -40 }],
         },
         type: {
-          backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
           color: colorScheme === 'dark' ? 'white' : 'black',
           fontWeight: 'bold',
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          borderRadius: 10,
-          alignSelf: 'flex-start',
         },
         title: {
           flexShrink: 1,
@@ -327,7 +366,6 @@ function useStyles() {
           borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 4,
-          backgroundColor: colorScheme === 'dark' ? '#222222' : '#cccccc',
         },
         additionalInfo: {
           flexDirection: 'row',
@@ -337,13 +375,15 @@ function useStyles() {
           alignItems: 'center',
           paddingVertical: 5,
         },
-        additionalInfoText: {
-          color: globalStyles.text.color,
-          fontWeight: 'bold',
+        additionalInfoTextSurface: {
           borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 4,
-          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#008cdd',
+          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#00a2ff',
+        },
+        additionalInfoText: {
+          color: globalStyles.text.color,
+          fontWeight: 'bold',
         },
         synopsisContainer: {},
         synopsisTitle: {
