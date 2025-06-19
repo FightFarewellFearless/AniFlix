@@ -13,8 +13,6 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
 export default function ComicsReading(props: Props) {
   const comicImages = props.route.params.data.comicImages;
-
-  const spinnerUrl = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJtYXJnaW46IGF1dG87IGJhY2tncm91bmQ6IG5vbmU7IGRpc3BsYXk6IGJsb2NrOyBzaGFwZS1yZW5kZXJpbmc6IGF1dG87IiB3aWR0aD0iNDhweCIgaGVpZ2h0PSI0OHB4IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQiPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzMiIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2U9IiM5M2RiZTkiIHN0cm9rZS1kYXNoYXJyYXk9IjUwLjI2NTQ4MjQ1NzQzNjY5IDUwLjI2NTQ4MjQ1NzQzNjY5IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiPgo8YW5pbWF0ZVRyYW5zZm9ybSBhdHRyaWJ1dGVOYW1lPSJ0cmFuc2Zvcm0iIHR5cGU9InJvdGF0ZSIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiIGR1cj0iMXMiIHZhbHVlcz0iMCA1MCA1MDszNjAgNTAgNTAiIGtleVRpbWVzPSIwOzEiPjwvYW5pbWF0ZVRyYW5zZm9ybT4KPC9jaXJjbGU+Cjwvc3ZnPg==`;
   const errorIconUrl = `data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pjxzdmcgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxwYXRoIGQ9Ik0wIDBIMjRWMjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMTIgM2M0LjI4NCAwIDguMjIgMS40OTcgMTEuMzEgMy45OTZMMjIuNDk4IDhIMTh2NS41NzFMMTIgMjEgLjY5IDYuOTk3QzMuNzggNC40OTcgNy43MTQgMyAxMiAzem0xMCAxNnYyaC0ydi0yaDJ6bTAtOXY3aC0ydi03aDJ6Ii8+PC9nPjwvc3ZnPg==`;
 
   const styles = `
@@ -27,9 +25,6 @@ export default function ComicsReading(props: Props) {
         background-position: center;
         background-size: 48px 48px;
       }
-      img.loading {
-        background-image: url('${spinnerUrl}');
-      }
       img.error {
         background-image: url('${errorIconUrl}');
       }
@@ -38,7 +33,7 @@ export default function ComicsReading(props: Props) {
 
   const body = comicImages
     .map((link, index) => {
-      return `<img data-src="${link}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style="width: 100%; display: block;" id="${index}" />`;
+      return `<img loading="lazy" src="${link}" style="width: 100%; display: block;" id="${index}" />`;
     })
     .join('\n');
 
@@ -49,16 +44,20 @@ export default function ComicsReading(props: Props) {
               props.route.params.historyData
                 ? `
 
-  const element = document.getElementById('${props.route.params.historyData.lastDuration}');
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
+  const lastDuration = '${props.route.params.historyData.lastDuration}';
+  const target = document.getElementById(lastDuration);
+  if (target) {
+    target.scrollIntoView({ behavior: 'instant' });
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }, 1000);
   };
 `
                 : ''
             }
     const options = {
       root: null,
-      rootMargin: '200px',
+      rootMargin: '200px 0px 200px 0px',
       threshold: 0.01
     };
 
@@ -66,26 +65,17 @@ export default function ComicsReading(props: Props) {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
-          const src = img.getAttribute('data-src');
-
-          if (src) {
-            img.classList.add('loading');
-            img.setAttribute('src', src);
-          }
-          
           window.ReactNativeWebView.postMessage(entry.target.id);
         }
       });
     }, options);
 
-    document.querySelectorAll('img[data-src]').forEach(img => {
+    document.querySelectorAll('img').forEach(img => {
       img.onload = () => {
-        img.classList.remove('loading', 'error');
+        img.classList.remove('error');
         img.style.minHeight = 'auto';
-        img.removeAttribute('data-src');
       };
       img.onerror = () => {
-        img.classList.remove('loading');
         img.classList.add('error');
       };
       observer.observe(img);
@@ -93,10 +83,10 @@ export default function ComicsReading(props: Props) {
 
     document.addEventListener('click', (e) => {
       if (e.target && e.target.tagName === 'IMG' && e.target.classList.contains('error')) {
-        const src = e.target.getAttribute('data-src');
+        const src = e.target.getAttribute('src');
         if (src) {
           e.target.classList.remove('error');
-          e.target.classList.add('loading');
+          e.target.setAttribute('src', '');
           e.target.setAttribute('src', src);
         }
       }
@@ -136,6 +126,7 @@ export default function ComicsReading(props: Props) {
   const [moveChapterLoading, setMoveChapterLoading] = useState(false);
   const moveChapter = useCallback(
     (url: string) => {
+      if (moveChapterLoading) return;
       setMoveChapterLoading(true);
       getKomikuReading(url, abortController.current?.signal)
         .then(res => {
@@ -151,9 +142,9 @@ export default function ComicsReading(props: Props) {
         })
         .finally(() => setMoveChapterLoading(false));
     },
-    [props.navigation],
+    [moveChapterLoading, props.navigation],
   );
-  console.log(props.route.params.historyData);
+
   const { data } = props.route.params;
 
   return (
