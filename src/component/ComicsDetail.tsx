@@ -1,9 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { Button, Divider, Surface } from 'react-native-paper';
+import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -54,10 +54,24 @@ export default function ComicsDetail(props: Props) {
     },
     [props.navigation],
   );
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredChapters = useMemo(() => {
+    return data.chapters.filter(chapter => {
+      return chapter.chapter.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [data.chapters, searchQuery]);
+
   return (
     <ReanimatedFlashList
       onScroll={scrollHandler}
-      data={data.chapters}
+      data={filteredChapters}
+      ListEmptyComponent={() => (
+        <View style={styles.mainContainer}>
+          <Text style={globalStyles.text}>Tidak ada chapter</Text>
+        </View>
+      )}
       renderItem={({ item }) => {
         return (
           <TouchableOpacity style={styles.chapterItem} onPress={() => readComic(item.chapterUrl)}>
@@ -170,6 +184,13 @@ export default function ComicsDetail(props: Props) {
                   Baca Chapter Terbaru
                 </Button>
               </View>
+              <TextInput
+                onChangeText={setSearchQuery}
+                value={searchQuery}
+                style={{ margin: 10 }}
+                label="Cari chapter"
+                keyboardType="numeric"
+              />
             </View>
           </View>
         </>

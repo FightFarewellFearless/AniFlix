@@ -2,9 +2,11 @@ import {
   createNativeBottomTabNavigator,
   NativeBottomTabNavigationOptions,
 } from '@bottom-tabs/react-navigation';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { lazy, memo, startTransition, useContext, useEffect } from 'react';
+import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import { AvoidSoftInput } from 'react-native-avoid-softinput';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import SuspenseLoading from '../misc/SuspenseLoading';
@@ -71,6 +73,14 @@ function BottomTabs(props: Props) {
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      AvoidSoftInput.setAdjustPan();
+      return () => {
+        AvoidSoftInput.setAdjustResize();
+      };
+    }, []),
+  );
   return (
     <Tab.Navigator
       tabBarStyle={{

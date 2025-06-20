@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Button, Divider, Surface } from 'react-native-paper';
+import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedScrollHandler,
@@ -69,6 +69,14 @@ function AniDetail(props: Props) {
       opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT * 0.85], [1, 0], 'clamp'),
     };
   });
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredEpisodes = useMemo(() => {
+    return data.episodeList.filter(eps => {
+      return eps.title.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [data.episodeList, searchQuery]);
 
   const ListHeaderComponent = useMemo(() => {
     return (
@@ -232,6 +240,12 @@ function AniDetail(props: Props) {
                 Tonton Episode Terbaru
               </Button>
             </View>
+            <TextInput
+              keyboardType="numeric"
+              label="Cari Episode"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
         </View>
       </View>
@@ -245,12 +259,13 @@ function AniDetail(props: Props) {
     props.navigation,
     props.route.params.link,
     colorScheme,
+    searchQuery,
   ]);
 
   return (
     <ReanimatedFlashList
       onScroll={scrollHandler}
-      data={data.episodeList}
+      data={filteredEpisodes}
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.episodeButton}
