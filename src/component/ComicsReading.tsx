@@ -167,6 +167,7 @@ export default function ComicsReading(props: Props) {
         </Snackbar>
       </Portal>
       <WebView
+        overScrollMode="never"
         cacheEnabled={false}
         source={{ html }}
         injectedJavaScript={injectedJavaScript}
