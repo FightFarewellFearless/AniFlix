@@ -28,8 +28,6 @@ import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
 import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
-import { LinearGradient } from 'expo-linear-gradient';
-import ImageColors from 'react-native-image-colors';
 import Reanimated, {
   FadeInRight,
   FadeInUp,
@@ -511,7 +509,6 @@ function SearchList({
           </View>
         )}
       </ImageLoading>
-      <ImageColorShadow url={z.thumbnailUrl} />
 
       <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>
         <DarkOverlay transparent={0.7} />
@@ -579,33 +576,6 @@ function SearchList({
         </View>
       </ImageBackground>
     </TouchableOpacityAnimated>
-  );
-}
-
-function ImageColorShadow({ url }: { url: string }) {
-  const [color, setColor] = useState({ r: 0, g: 0, b: 0 });
-  useEffect(() => {
-    ImageColors.getColors(url, { pixelSpacing: 10, cache: true, key: url }).then(colors => {
-      if (colors.platform === 'android') {
-        const hex = colors.dominant;
-        const r = parseInt(hex.substring(1, 3), 16);
-        const g = parseInt(hex.substring(3, 5), 16);
-        const b = parseInt(hex.substring(5, 7), 16);
-        setColor({ r, g, b });
-      }
-    });
-  }, [url]);
-  return (
-    <LinearGradient
-      colors={[
-        `rgba(${color.r}, ${color.g}, ${color.b}, 0.7)`,
-        `rgba(${color.r}, ${color.g}, ${color.b}, 0.1)`,
-      ]}
-      locations={[0, 0.9]}
-      start={[0, 0]}
-      end={[1, 0]}
-      style={{ width: 13, marginRight: 4 }}
-    />
   );
 }
 
