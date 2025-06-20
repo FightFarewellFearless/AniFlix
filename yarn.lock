@@ -2902,14 +2902,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-async-storage/async-storage@npm:2.1.2":
-  version: 2.1.2
-  resolution: "@react-native-async-storage/async-storage@npm:2.1.2"
+"@react-native-async-storage/async-storage@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@react-native-async-storage/async-storage@npm:2.2.0"
   dependencies:
     merge-options: ^3.0.4
   peerDependencies:
     react-native: ^0.0.0-0 || >=0.65 <1.0
-  checksum: a5c4d486e7e64067ab523b980b76cc2de5bf4b86ed410de09f2a95c3410e0c5b5be46c638a74cf5b7ed6dce10031ebac54350b498a2cb17f1a1c59347e671a73
+  checksum: efbb9c801fb7eecfad1568d6a5e9d247db420b8ba8f1789d5b783e679432567a53cf54c7e7b5e6f315276f33d1df297253549e0cefef2e683539df346d2a1f2d
   languageName: node
   linkType: hard
 
@@ -4098,7 +4098,7 @@ __metadata:
     "@domir/react-native-measure-text": ^0.1.8
     "@legendapp/list": ^1.1.0
     "@pirles/react-native-element-dropdown": ^2.15.0
-    "@react-native-async-storage/async-storage": 2.1.2
+    "@react-native-async-storage/async-storage": 2.2.0
     "@react-native-community/cli": ^18.0.0
     "@react-native-community/cli-platform-android": ^18.0.0
     "@react-native/babel-preset": 0.79.3
