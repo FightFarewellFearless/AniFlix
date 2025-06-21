@@ -35,9 +35,11 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import animeLocalAPI from '../../utils/animeLocalAPI';
 import { AnimeMovieWebView } from '../../utils/animeMovie';
 import {
+  DatabaseManager,
   hasMigratedFromAsyncStorage,
+  hasMigratedFromMMKV,
   migrateFromAsyncStorage,
-  storage,
+  migrateFromMMKV,
 } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 
@@ -84,25 +86,28 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
-    if (!hasMigratedFromAsyncStorage) {
-      await migrateFromAsyncStorage();
+    if (!hasMigratedFromMMKV) {
+      if (!hasMigratedFromAsyncStorage) {
+        await migrateFromAsyncStorage();
+      }
+      await migrateFromMMKV();
     }
 
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
-    const allKeys = storage.getAllKeys();
+    const allKeys = DatabaseManager.getAllKeysSync();
     for (const dataKey of arrOfDefaultData) {
-      const data = storage.getString(dataKey);
+      const data = DatabaseManager.get(dataKey);
       if (data === undefined) {
-        storage.set(dataKey, defaultDatabase[dataKey]);
+        DatabaseManager.setSync(dataKey, defaultDatabase[dataKey]);
         continue;
       }
     }
-    const isInDatabase = (value: string): value is SetDatabaseTarget => {
-      return (arrOfDefaultData as readonly string[]).includes(value);
+    const isInDatabase = (key: string): key is SetDatabaseTarget => {
+      return (arrOfDefaultData as readonly string[]).includes(key);
     };
     for (const dataKey of allKeys) {
       if (!isInDatabase(dataKey) && !dataKey.startsWith('IGNORE_DEFAULT_DB_')) {
-        storage.delete(dataKey);
+        DatabaseManager.delete(dataKey);
       }
     }
   }, []);

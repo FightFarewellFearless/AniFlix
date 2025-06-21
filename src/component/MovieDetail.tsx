@@ -18,12 +18,12 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 interface MovieEpisode {
   title: string;
@@ -44,9 +44,8 @@ function MovieDetail(props: Props) {
 
   const data = props.route.params.data;
 
-  const watchLaterListsJson = useSelectorIfFocused(
-    state => state.settings.watchLater,
-    true,
+  const watchLaterListsJson = useModifiedKeyValueIfFocused(
+    'watchLater',
     state => JSON.parse(state) as watchLaterJSON[],
   );
   const isInList = watchLaterListsJson.some(item => item.title === data.title);

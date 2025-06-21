@@ -18,13 +18,13 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
-import useSelectorIfFocused from '../hooks/useSelectorIfFocused';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { AniDetailEpsList } from '../types/anime';
+import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList =
@@ -41,9 +41,8 @@ function AniDetail(props: Props) {
 
   const data = props.route.params.data;
 
-  const watchLaterListsJson = useSelectorIfFocused(
-    state => state.settings.watchLater,
-    true,
+  const watchLaterListsJson = useModifiedKeyValueIfFocused(
+    'watchLater',
     state => JSON.parse(state) as watchLaterJSON[],
   );
   const isInList = watchLaterListsJson.some(

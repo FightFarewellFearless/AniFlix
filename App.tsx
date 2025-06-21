@@ -24,7 +24,7 @@ import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { Movies } from './src/utils/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
-import { storage } from './src/utils/DatabaseManager';
+import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
@@ -128,7 +128,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const colorSchemeValue = storage.getString('colorScheme');
+    const colorSchemeValue = DatabaseManager.getSync('colorScheme');
     if (
       colorSchemeValue !== 'auto' &&
       (colorSchemeValue === 'light' || colorSchemeValue === 'dark')

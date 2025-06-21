@@ -51,7 +51,6 @@ import setHistory from '../utils/historyControl';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useMMKVString } from 'react-native-mmkv';
 import WebView from 'react-native-webview';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
@@ -67,6 +66,7 @@ import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
 import VideoPlayer, { PlayerRef } from './VideoPlayer';
+import { useKeyValueIfFocused } from '../utils/DatabaseManager';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -89,8 +89,7 @@ function Video(props: Props) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
-  const [enableBatteryTimeInfo] = useMMKVString('enableBatteryTimeInfo');
-  const [history = '[]'] = useMMKVString('history');
+  const enableBatteryTimeInfo = useKeyValueIfFocused('enableBatteryTimeInfo');
 
   const historyData = useRef(props.route.params.historyData);
 
@@ -161,12 +160,7 @@ function Video(props: Props) {
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
   const updateHistory = useCallback(
-    (
-      currentTime: number,
-      stateData: RootStackNavigator['Video']['data'],
-      settContext: string,
-      isMovie?: boolean,
-    ) => {
+    (currentTime: number, stateData: RootStackNavigator['Video']['data'], isMovie?: boolean) => {
       if (Math.floor(currentTime) === 0) {
         return;
       }
@@ -174,7 +168,7 @@ function Video(props: Props) {
         resolution: stateData.resolution,
         lastDuration: currentTime,
       };
-      setHistory(stateData, currentLink.current, true, additionalData, settContext, isMovie);
+      setHistory(stateData, currentLink.current, true, additionalData, isMovie);
       historyData.current = additionalData;
     },
     [],
@@ -437,9 +431,9 @@ function Video(props: Props) {
   const handleProgress = useCallback(
     (currentTime: number) => {
       if (currentTime % 2 === 0) return; // to prevent too frequent updates
-      updateHistory(currentTime, data, history, props.route.params.isMovie);
+      updateHistory(currentTime, data, props.route.params.isMovie);
     },
-    [updateHistory, data, history, props.route.params.isMovie],
+    [updateHistory, data, props.route.params.isMovie],
   );
 
   const episodeDataControl = useCallback(
@@ -470,7 +464,7 @@ function Video(props: Props) {
           );
         } else {
           setData(result);
-          setHistory(result, dataLink, undefined, undefined, history, props.route.params.isMovie);
+          setHistory(result, dataLink, undefined, undefined, props.route.params.isMovie);
         }
       } else {
         const result = await AnimeAPI.fromUrl(
@@ -516,14 +510,14 @@ function Video(props: Props) {
         }
 
         setData(result);
-        setHistory(result, dataLink, undefined, undefined, history);
+        setHistory(result, dataLink, undefined, undefined);
       }
       setLoading(false);
       firstTimeLoad.current = false;
       historyData.current = undefined;
       currentLink.current = dataLink;
     },
-    [loading, history, props.route.params.isMovie],
+    [loading, props.route.params.isMovie],
   );
 
   const cancelLoading = useCallback(() => {

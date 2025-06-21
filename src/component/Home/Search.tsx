@@ -37,7 +37,6 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import useSelectorIfFocused from '../../hooks/useSelectorIfFocused';
 import { Movies, searchMovie } from '../../utils/animeMovie';
 import ImageLoading from '../ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
@@ -46,9 +45,9 @@ import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { TextInput as TextInputType } from 'react-native';
 import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
-import { storage } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { KomikuSearch, komikuSearch } from '../../utils/komiku';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
 
@@ -94,9 +93,8 @@ function Search(props: Props) {
 
   const [showSearchHistory, setShowSearchHistory] = useState(false);
 
-  const searchHistory = useSelectorIfFocused(
-    state => state.settings.searchHistory,
-    true,
+  const searchHistory = useModifiedKeyValueIfFocused(
+    'searchHistory',
     result => JSON.parse(result) as string[],
   );
 
@@ -142,7 +140,7 @@ function Search(props: Props) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
           }
           searchHistory.unshift(searchText);
-          storage.set('searchHistory', JSON.stringify(searchHistory));
+          DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
           setLoading(false);
         })
         .catch(err => {
@@ -164,7 +162,7 @@ function Search(props: Props) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
           }
           searchHistory.unshift(searchText);
-          storage.set('searchHistory', JSON.stringify(searchHistory));
+          DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
           setCurrentSearchQuery(searchText);
           setLoading(false);
         });
@@ -444,7 +442,7 @@ function HistoryList({
         <TouchableOpacity
           hitSlop={14}
           onPress={() => {
-            storage.set(
+            DatabaseManager.set(
               'searchHistory',
               JSON.stringify(searchHistory.filter((_, i) => i !== index)),
             );

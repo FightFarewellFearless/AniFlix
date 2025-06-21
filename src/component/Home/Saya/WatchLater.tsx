@@ -6,12 +6,12 @@ import { memo, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles from '../../../assets/style';
-import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import watchLaterJSON from '../../../types/watchLaterJSON';
 import DialogManager from '../../../utils/dialogManager';
 import controlWatchLater from '../../../utils/watchLaterControl';
 import ImageLoading from '../../ImageLoading';
+import { useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 
@@ -19,9 +19,8 @@ function WatchLater(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
 
-  const watchLaterLists = useSelectorIfFocused<watchLaterJSON[]>(
-    state => state.settings.watchLater,
-    true,
+  const watchLaterLists = useModifiedKeyValueIfFocused<watchLaterJSON[]>(
+    'watchLater',
     result => JSON.parse(result) as watchLaterJSON[],
   );
 

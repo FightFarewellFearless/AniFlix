@@ -18,12 +18,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
-import useSelectorIfFocused from '../../../hooks/useSelectorIfFocused';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
-import { storage } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,
@@ -34,11 +33,7 @@ type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
 function History(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
-  const data = useSelectorIfFocused(
-    state => state.settings.history,
-    true,
-    state => JSON.parse(state) as HistoryJSON[],
-  );
+  const data = useModifiedKeyValueIfFocused('history', state => JSON.parse(state) as HistoryJSON[]);
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const searchKeywordDeferred = useDeferredValue(searchKeyword);
@@ -106,7 +101,7 @@ function History(props: Props) {
       const historyData = [...data]; // clone the array
       historyData.splice(index, 1);
       const newValue = JSON.stringify(historyData);
-      storage.set('history', newValue);
+      DatabaseManager.set('history', newValue);
     },
     [data],
   );

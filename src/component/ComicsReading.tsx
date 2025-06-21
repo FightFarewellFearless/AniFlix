@@ -5,9 +5,8 @@ import { Button, Portal, ProgressBar, Snackbar } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
-import { getKomikuReading } from '../utils/komiku';
 import setHistory from '../utils/historyControl';
-import { storage } from '../utils/DatabaseManager';
+import { getKomikuReading } from '../utils/komiku';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
@@ -117,7 +116,6 @@ export default function ComicsReading(props: Props) {
       {
         lastDuration: visibleImageId,
       },
-      storage.getString('history') ?? '[]',
       false,
       true,
     );
