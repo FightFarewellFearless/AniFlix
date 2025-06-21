@@ -48,7 +48,9 @@ function MovieDetail(props: Props) {
     'watchLater',
     state => JSON.parse(state) as watchLaterJSON[],
   );
-  const isInList = watchLaterListsJson.some(item => item.title === data.title);
+  const isInList = watchLaterListsJson.some(
+    item => item.title === data.title.replace('Subtitle Indonesia', ''),
+  );
   const scrollOffset = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler(e => {
     scrollOffset.value = e.contentOffset.y;
@@ -163,7 +165,7 @@ function MovieDetail(props: Props) {
               mode="elevated"
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
-                  title: data.title,
+                  title: data.title.replace('Subtitle Indonesia', ''),
                   link: props.route.params.link,
                   rating: data.rating,
                   releaseYear: data.releaseDate,
