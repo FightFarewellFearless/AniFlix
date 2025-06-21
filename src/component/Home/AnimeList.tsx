@@ -7,7 +7,8 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { FlashList } from '@shopify/flash-list';
+import React, { memo, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -18,7 +19,7 @@ import {
   View,
 } from 'react-native';
 import { useBatteryLevel } from 'react-native-device-info';
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import { RefreshControl } from 'react-native-gesture-handler';
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -34,14 +35,14 @@ import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
-import { EpisodeBaruHome as EpisodeBaruType, NewAnimeList } from '../../types/anime';
+import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
+import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -145,29 +146,32 @@ function HomeList(props: HomeProps) {
     };
   });
 
-  const jadwalAnimeComponent = useMemo(() => {
-    return Object.keys(data?.jadwalAnime ?? {}).map(key => (
-      <View key={key} style={styles.scheduleContainer}>
-        <Text style={styles.scheduleDay}>{key}</Text>
-        {data?.jadwalAnime[key]!.map((item, index) => (
-          <TouchableOpacity
-            style={[
-              styles.scheduleItem,
-              index % 2 === 0 ? styles.scheduleItemEven : styles.scheduleItemOdd,
-            ]}
-            key={item.title}
-            onPress={() => {
-              props.navigation.dispatch(StackActions.push('FromUrl', { link: item.link }));
-            }}>
-            <Text style={styles.scheduleTitle}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    ));
-  }, [data?.jadwalAnime, props.navigation, styles]);
+  const renderJadwalAnime = useCallback(
+    ({ item }: { item: keyof JadwalAnime }) => {
+      return (
+        <View key={item} style={[styles.scheduleContainer, styles.scheduleSection]}>
+          <Text style={styles.scheduleDay}>{item}</Text>
+          {data?.jadwalAnime[item]!.map((x, index) => (
+            <TouchableOpacity
+              style={[
+                styles.scheduleItem,
+                index % 2 === 0 ? styles.scheduleItemEven : styles.scheduleItemOdd,
+              ]}
+              key={x.title}
+              onPress={() => {
+                props.navigation.dispatch(StackActions.push('FromUrl', { link: x.link }));
+              }}>
+              <Text style={styles.scheduleTitle}>{x.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    },
+    [data?.jadwalAnime, props.navigation, styles],
+  );
 
   return (
-    <ScrollView
+    <FlashList
       style={styles.container}
       refreshControl={
         <RefreshControl
@@ -176,43 +180,46 @@ function HomeList(props: HomeProps) {
           progressBackgroundColor={colorScheme === 'dark' ? '#121212' : '#f5f5f7'}
           colors={['#00a2ff', '#BB86FC']}
         />
-      }>
-      <View style={styles.headerCard}>
-        <View style={styles.headerInfo}>
-          <ReText style={styles.timeText} text={localTime} />
-          <Text style={styles.batteryText}>{Math.round((battery ?? 0) * 100)}%</Text>
-        </View>
+      }
+      ListHeaderComponent={
+        <>
+          <View style={styles.headerCard}>
+            <View style={styles.headerInfo}>
+              <ReText style={styles.timeText} text={localTime} />
+              <Text style={styles.batteryText}>{Math.round((battery ?? 0) * 100)}%</Text>
+            </View>
 
-        <View style={styles.appInfo}>
-          <Text style={styles.appName}>AniFlix</Text>
-          <Text style={styles.appVersion}>
-            {version}-JS_{OTAJSVersion}
-          </Text>
-        </View>
+            <View style={styles.appInfo}>
+              <Text style={styles.appName}>AniFlix</Text>
+              <Text style={styles.appVersion}>
+                {version}-JS_{OTAJSVersion}
+              </Text>
+            </View>
 
-        <View style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
-          <Reanimated.Text
-            onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
-            style={[styles.runningText, AnimationTextStyle]}>
-            {animationText}
-          </Reanimated.Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
-        <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
-        <Text style={styles.refreshText}>Refresh Data</Text>
-      </TouchableOpacity>
-
-      <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
-      <MovieList props={props} key={'anime_movie' + refreshingKey} />
-      <ComicList key={'comick' + refreshingKey} />
-
-      <View style={styles.scheduleSection}>
-        <Text style={styles.sectionTitle}>Jadwal Anime</Text>
-        {jadwalAnimeComponent}
-      </View>
-    </ScrollView>
+            <View
+              style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
+              <Reanimated.Text
+                onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
+                style={[styles.runningText, AnimationTextStyle]}>
+                {animationText}
+              </Reanimated.Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
+            <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
+            <Text style={styles.refreshText}>Refresh Data</Text>
+          </TouchableOpacity>
+          <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
+          <MovieList props={props} key={'anime_movie' + refreshingKey} />
+          <ComicList key={'comick' + refreshingKey} />
+          <View style={styles.scheduleSection}>
+            <Text style={styles.sectionTitle}>Jadwal Anime</Text>
+          </View>
+        </>
+      }
+      data={Object.keys(data?.jadwalAnime ?? {})}
+      renderItem={renderJadwalAnime}
+    />
   );
 }
 
