@@ -38,7 +38,7 @@ function WatchLater(props: Props) {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
                 link: item.link,
-                type: item.isMovie ? 'movie' : 'anime',
+                type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
               }),
             );
           }}>
@@ -48,8 +48,14 @@ function WatchLater(props: Props) {
             recyclingKey={item.thumbnailUrl}
           />
           <View style={styles.ratingContainer}>
-            <Text style={[globalStyles.text, styles.listRatingText]}>
-              <Icon name="star" /> {item.rating}
+            <Text
+              style={[
+                globalStyles.text,
+                styles.listRatingText,
+                item.isComics ? { backgroundColor: '#3e8bff' } : undefined,
+              ]}>
+              {/* For comics, We use rating as a fixed "Komik" string */}
+              <Icon name={item.isComics ? 'book' : 'star'} /> {item.rating}
             </Text>
           </View>
           <View style={styles.listInfoContainer}>

@@ -7,6 +7,7 @@ type watchLaterJSON = Required<
   }
 > & {
   isMovie?: boolean;
+  isComics?: boolean;
 };
 
 export default watchLaterJSON;

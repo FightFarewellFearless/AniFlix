@@ -2,7 +2,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -13,7 +20,10 @@ import Reanimated, {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
+import watchLaterJSON from '../types/watchLaterJSON';
+import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 import { KomikuDetail } from '../utils/komiku';
+import controlWatchLater from '../utils/watchLaterControl';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList =
@@ -62,6 +72,12 @@ export default function ComicsDetail(props: Props) {
       return chapter.chapter.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [data.chapters, searchQuery]);
+
+  const watchLaterListsJson = useModifiedKeyValueIfFocused(
+    'watchLater',
+    state => JSON.parse(state) as watchLaterJSON[],
+  );
+  const isInList = watchLaterListsJson.some(item => item.title === data.title);
 
   return (
     <ReanimatedFlashList
@@ -167,6 +183,28 @@ export default function ComicsDetail(props: Props) {
               <Text style={[globalStyles.text]}>{data.synopsis}</Text>
             </View>
             <View style={{ flexDirection: 'column', flex: 1 }}>
+              <Button
+                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                textColor={styles.additionalInfoText.color}
+                mode="elevated"
+                icon="playlist-plus"
+                disabled={isInList}
+                onPress={() => {
+                  const watchLaterJson: watchLaterJSON = {
+                    title: data.title,
+                    link: props.route.params.link,
+                    rating: 'Komik',
+                    releaseYear: data.chapters[data.chapters.length - 1].releaseDate,
+                    thumbnailUrl: data.thumbnailUrl,
+                    genre: data.genres,
+                    date: Date.now(),
+                    isComics: true,
+                  };
+                  controlWatchLater('add', watchLaterJson);
+                  ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+                }}>
+                {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
+              </Button>
               <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
               <View style={{ gap: 10 }}>
                 <Button
