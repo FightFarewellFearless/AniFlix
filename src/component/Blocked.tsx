@@ -17,7 +17,6 @@ import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
 import { JoinDiscord } from './Loading Screen/Connect';
 
-// @ts-expect-error
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Blocked'>;
