@@ -94,11 +94,11 @@ function Loading(props: Props) {
     }
 
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
-    const allKeys = DatabaseManager.getAllKeysSync();
+    const allKeys = await DatabaseManager.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
-      const data = DatabaseManager.get(dataKey);
+      const data = await DatabaseManager.get(dataKey);
       if (data === undefined) {
-        DatabaseManager.setSync(dataKey, defaultDatabase[dataKey]);
+        await DatabaseManager.set(dataKey, defaultDatabase[dataKey]);
         continue;
       }
     }
