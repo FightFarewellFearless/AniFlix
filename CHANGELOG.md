@@ -1,3 +1,19 @@
+# v1.0.0 (22-Juni-2025)
+
+**Versi 1.0.0 sudah rilis 🎉**
+Versi ini berisi peningkatan tampilan dan efisiensi penggunaan memori, peningkatan stabilitas aplikasi, dan yang paling penting: **Menambahkan komik ke dalam aplikasi (Manga, Manhwa, Manhua)**
+## Ditambahkan (Fitur baru)
+- Komik (Manga, Manhwa, Manhua)
+## Ditingkatkan
+- Tampilan aplikasi pada beberapa bagian
+- Efisiensi penggunaan memori
+- Stabilitas aplikasi
+- Dan masih banyak lagi...
+### Catatan penting
+Pastikan untuk segera memperbarui aplikasi ke versi terbaru. Versi ini tidak hanya menawarkan tampilan yang lebih baik, tetapi juga menyertakan pembaruan database yang kedua kali nya. Migrasi database akan berlangsung otomatis, dan Kamu tidak akan kehilangan data apa pun saat ini.
+
+Penting untuk diingat bahwa di versi mendatang, database lama akan **DIHAPUS** untuk menjaga efisiensi dan stabilitas aplikasi. Ini berarti jika Kamu masih menggunakan versi lama (di bawah v1) dan memperbarui nanti, Kamu berisiko kehilangan data aplikasi seperti riwayat, daftar tonton nanti, pengaturan, dan lainnya. **Jadi, segera perbarui sekarang!**
+
 # v0.9.0_JS-18 (9-Juni-2025)
 
 ## Diperbaiki
