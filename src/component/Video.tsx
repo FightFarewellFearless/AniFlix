@@ -733,8 +733,7 @@ function Video(props: Props) {
                   Perhatian!
                 </Text>
                 <Text style={{ color: lightText }}>
-                  Tipe data movie masih dalam tahap pengembangan dan eksperimental, jika kamu
-                  mengalami masalah menonton, silahkan ganti resolusi/server
+                  Jika kamu mengalami masalah menonton, silahkan ganti resolusi/server
                 </Text>
               </View>
             )}
