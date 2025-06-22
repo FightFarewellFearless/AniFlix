@@ -124,16 +124,16 @@ function Blocked(props: Props) {
             </View>
 
             <Text style={styles.modalDescription}>
-              Anda meminta anime{' '}
+              Anda meminta anime/komik{' '}
               <Text style={styles.highlightText}>{props.route.params.title}</Text> untuk dimasukkan
-              ke whitelist. Developer akan meninjau anime ini terlebih dahulu sebelum menyetujui
-              permintaan.
+              ke whitelist. Developer akan meninjau anime/komik ini terlebih dahulu sebelum
+              menyetujui permintaan.
             </Text>
 
             <Text style={styles.inputLabel}>Deskripsi Tambahan (opsional)</Text>
             <TextInput
               onChangeText={e => (textInputDescription.current = e)}
-              placeholder="Jelaskan alasan anime ini layak di-whitelist..."
+              placeholder="Jelaskan alasan anime/komik ini layak di-whitelist..."
               placeholderTextColor={'#8E8E93'}
               multiline
               style={styles.requestInput}
@@ -167,7 +167,7 @@ function Blocked(props: Props) {
         <Text style={styles.title}>Peringatan Konten</Text>
 
         <Text style={styles.subtitle}>
-          Anime ini mengandung genre yang masuk dalam daftar blacklist kebijakan konten kami.
+          Anime/komik ini mengandung genre yang masuk dalam daftar blacklist kebijakan konten kami.
         </Text>
 
         <View style={styles.card}>

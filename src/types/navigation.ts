@@ -65,7 +65,7 @@ type RootStackNavigator = {
   Blocked: {
     title: string;
     url: string;
-    data: AniDetail;
+    data: AniDetail | KomikuDetail;
   };
   FailedToConnect: undefined;
   Maintenance: {

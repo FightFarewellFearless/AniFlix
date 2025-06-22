@@ -132,7 +132,7 @@ function FromUrl(props: Props) {
               if (Anime_Whitelist.list.includes(props.route.params.link)) {
                 DialogManager.alert(
                   'Perhatian!',
-                  'Anime ini mungkin mengandung konten dewasa seperti ecchi. Namun telah di whitelist dan diizinkan tayang. Mohon bijak dalam menonton.',
+                  'Anime ini mengandung genre ecchi. Namun telah di tinjau dan di whitelist oleh developer karena masih dalam kategori aman. Mohon bijak dalam menonton.',
                 );
               }
               if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
@@ -177,6 +177,25 @@ function FromUrl(props: Props) {
         getKomikuDetailFromUrl(props.route.params.link, abort.signal)
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+            if (
+              result.genres.includes('Ecchi') &&
+              !Anime_Whitelist.list.includes(props.route.params.link)
+            ) {
+              props.navigation.dispatch(
+                StackActions.replace('Blocked', {
+                  title: result.title,
+                  url: props.route.params.link,
+                  data: result,
+                }),
+              );
+              return;
+            }
+            if (Anime_Whitelist.list.includes(props.route.params.link)) {
+              DialogManager.alert(
+                'Perhatian!',
+                'Komik ini mengandung genre ecchi. Namun telah di tinjau dan di whitelist oleh developer karena masih dalam kategori aman. Mohon bijak dalam membaca.',
+              );
+            }
             props.navigation.dispatch(
               StackActions.replace('ComicsDetail', {
                 data: result,
