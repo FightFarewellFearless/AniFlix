@@ -140,6 +140,18 @@ function Setting(_props: Props) {
     [],
   );
 
+  const restoreSearchHistory = useCallback(async (restoreData: string[]) => {
+    const currentSearchHistory: string[] = JSON.parse(
+      (await DatabaseManager.getDataForBackup()).searchHistory,
+    );
+    restoreData.forEach(val => {
+      if (!currentSearchHistory.includes(val)) {
+        currentSearchHistory.unshift(val);
+      }
+    });
+    DatabaseManager.set('searchHistory', JSON.stringify(currentSearchHistory));
+  }, []);
+
   const restoreData = useCallback(async () => {
     try {
       const doc = await DocumentPicker.getDocumentAsync({
@@ -163,11 +175,13 @@ function Setting(_props: Props) {
               restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
             } else {
               const restoredData = backupDataJSON[value];
-              if (value === 'colorScheme')
+              if (value === 'colorScheme') {
                 Appearance.setColorScheme(
                   restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
                 );
-              DatabaseManager.set(value, restoredData);
+              } else if (value === 'searchHistory') {
+                restoreSearchHistory(JSON.parse(restoredData));
+              } else DatabaseManager.set(value, restoredData);
             }
           });
         DialogManager.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
@@ -183,7 +197,7 @@ function Setting(_props: Props) {
     } finally {
       setModalVisible(false);
     }
-  }, [restoreHistoryOrWatchLater]);
+  }, [restoreHistoryOrWatchLater, restoreSearchHistory]);
 
   const deleteHistory = useCallback(() => {
     DialogManager.alert(
