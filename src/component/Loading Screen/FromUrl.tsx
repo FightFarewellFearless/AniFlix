@@ -187,7 +187,7 @@ function FromUrl(props: Props) {
           .catch(handleError);
       } else {
         getKomikuReading(props.route.params.link, abort.signal)
-          .then(result => {
+          .then(async result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             props.navigation.dispatch(
               StackActions.replace('ComicsReading', {
@@ -204,6 +204,16 @@ function FromUrl(props: Props) {
               false,
               true,
             );
+            const chapterIndex = result.title.toLowerCase().indexOf(' chapter');
+            const title = chapterIndex >= 0 ? result.title.slice(0, chapterIndex) : result.title;
+            const watchLater: watchLaterJSON[] = JSON.parse(
+              (await DatabaseManager.get('watchLater'))!,
+            );
+            const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
+            if (watchLaterIndex >= 0) {
+              controlWatchLater('delete', watchLaterIndex);
+              ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+            }
           })
           .catch(handleError);
       }
