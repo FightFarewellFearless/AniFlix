@@ -97,7 +97,7 @@ function Loading(props: Props) {
     const allKeys = await DatabaseManager.getAllKeys();
     for (const dataKey of arrOfDefaultData) {
       const data = await DatabaseManager.get(dataKey);
-      if (data === undefined) {
+      if (data === null || data === undefined) {
         await DatabaseManager.set(dataKey, defaultDatabase[dataKey]);
         continue;
       }
