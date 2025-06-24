@@ -15,7 +15,9 @@ async function setHistory(
   const episodeIndex = targetData.title.toLowerCase().indexOf(isComics ? 'chapter' : 'episode');
   const title = episodeIndex >= 0 ? targetData.title.slice(0, episodeIndex) : targetData.title;
   const episode = episodeIndex < 0 ? null : targetData.title.slice(episodeIndex);
-  const dataINDEX = data.findIndex(val => val.title === title);
+  const dataINDEX = data.findIndex(
+    val => val.title === title && val.isComics === isComics && val.isMovie === isMovie,
+  );
 
   const date = data[dataINDEX]?.date;
 
