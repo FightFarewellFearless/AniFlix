@@ -1,3 +1,10 @@
+# v1.0.0_JS-1 (24-Juni-2025)
+
+## Diperbaiki
+- Race condition pada saat menghapus histori pencarian
+- Histori pencarian yang terbalik ketika di restore dari backup
+- Histori anime yang tertimpa dengan histori komik dengan judul yang sama persis
+
 # v1.0.0 (22-Juni-2025)
 
 **Versi 1.0.0 sudah rilis 🎉**
