@@ -144,7 +144,7 @@ function Setting(_props: Props) {
     const currentSearchHistory: string[] = JSON.parse(
       (await DatabaseManager.getDataForBackup()).searchHistory,
     );
-    restoreData.forEach(val => {
+    restoreData.reverse().forEach(val => {
       if (!currentSearchHistory.includes(val)) {
         currentSearchHistory.unshift(val);
       }
