@@ -3017,11 +3017,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.3.19":
-  version: 7.3.19
-  resolution: "@react-navigation/native-stack@npm:7.3.19"
+"@react-navigation/elements@npm:^2.5.2":
+  version: 2.5.2
+  resolution: "@react-navigation/elements@npm:2.5.2"
   dependencies:
-    "@react-navigation/elements": ^2.5.0
+    color: ^4.2.3
+    use-latest-callback: ^0.2.4
+    use-sync-external-store: ^1.5.0
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.14
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 0b0d92574ba845b8d1ee3c4fe78a22b8aa8a3e69e27678d0daa45aae08d31488eee05128ede6b5a725bbdc4d4a3ef4990f85760a30b3d01ddb47a86d41be5593
+  languageName: node
+  linkType: hard
+
+"@react-navigation/native-stack@npm:^7.3.21":
+  version: 7.3.21
+  resolution: "@react-navigation/native-stack@npm:7.3.21"
+  dependencies:
+    "@react-navigation/elements": ^2.5.2
     warn-once: ^0.1.1
   peerDependencies:
     "@react-navigation/native": ^7.1.14
@@ -3029,7 +3049,7 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: f6860a7f03625c485212188bae660375860d1223fca7dc6f80a8b7513b97bd6b2ab430675a2018bb29889aa67ae4119be9ce9272f4a81792cfbdf2db36d31c69
+  checksum: 9b644951a0c230e812fdb314bec3841c2ca1db4a7898b5b55f3c3663d8956d8dc168a1d0151b1094216f009ccd562534ba2ae89c135a368dca8cb5ee719ea9ce
   languageName: node
   linkType: hard
 
@@ -3700,7 +3720,7 @@ __metadata:
     "@react-native/typescript-config": 0.79.4
     "@react-navigation/drawer": ^7.5.0
     "@react-navigation/native": ^7.1.14
-    "@react-navigation/native-stack": ^7.3.19
+    "@react-navigation/native-stack": ^7.3.21
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^2.0.0-rc.9
     "@types/jest": ^29.5.14
