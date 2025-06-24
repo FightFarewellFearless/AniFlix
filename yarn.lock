@@ -2977,11 +2977,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "@react-navigation/drawer@npm:7.5.0"
+"@react-navigation/drawer@npm:^7.5.2":
+  version: 7.5.2
+  resolution: "@react-navigation/drawer@npm:7.5.2"
   dependencies:
-    "@react-navigation/elements": ^2.5.0
+    "@react-navigation/elements": ^2.5.2
     color: ^4.2.3
     react-native-drawer-layout: ^4.1.11
     use-latest-callback: ^0.2.4
@@ -2993,7 +2993,7 @@ __metadata:
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 17a1cf7f2250eda0f5e392c260393009003d56c4eef6f8eaf2c5ba3aec19871452b4846616741e53f30342850b82dcfd1e8613afe0c4f6b759065b0aec6e1faa
+  checksum: 97a9fb23978371f1f4359a0daa6d8b28a314269434c83be4b9e18c218bf92ed61a95234e20ee628035d421f0ccea8c8c9f544bb309e997686733e8c43cd72330
   languageName: node
   linkType: hard
 
@@ -3014,6 +3014,26 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: 3e59d86ecdccc72c3720e6b9a2a58772e85824dbca5d10ede54a78850923b78908659397d4e8d4eadd85162a31e73388593bb6e574cc1d9cd5005b83ab507275
+  languageName: node
+  linkType: hard
+
+"@react-navigation/elements@npm:^2.5.2":
+  version: 2.5.2
+  resolution: "@react-navigation/elements@npm:2.5.2"
+  dependencies:
+    color: ^4.2.3
+    use-latest-callback: ^0.2.4
+    use-sync-external-store: ^1.5.0
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.14
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 0b0d92574ba845b8d1ee3c4fe78a22b8aa8a3e69e27678d0daa45aae08d31488eee05128ede6b5a725bbdc4d4a3ef4990f85760a30b3d01ddb47a86d41be5593
   languageName: node
   linkType: hard
 
@@ -3698,7 +3718,7 @@ __metadata:
     "@react-native/eslint-config": 0.79.4
     "@react-native/metro-config": 0.79.4
     "@react-native/typescript-config": 0.79.4
-    "@react-navigation/drawer": ^7.5.0
+    "@react-navigation/drawer": ^7.5.2
     "@react-navigation/native": ^7.1.14
     "@react-navigation/native-stack": ^7.3.19
     "@rnx-kit/align-deps": ^3.0.4
