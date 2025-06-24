@@ -173,14 +173,7 @@ function Search(props: Props) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
     };
-    return (
-      <HistoryList
-        index={index}
-        item={item}
-        data={searchHistory}
-        onChangeTextFunction={onChangeTextFunction}
-      />
-    );
+    return <HistoryList index={index} item={item} onChangeTextFunction={onChangeTextFunction} />;
   }
   const listAnimeRenderer = useCallback(
     ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
@@ -405,12 +398,10 @@ function HistoryList({
   index,
   item,
   onChangeTextFunction,
-  data: searchHistory,
 }: {
   index: number;
   item: string;
   onChangeTextFunction: (text: string) => void;
-  data: string[];
 }) {
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
@@ -441,10 +432,14 @@ function HistoryList({
         </View>
         <TouchableOpacity
           hitSlop={14}
-          onPress={() => {
+          onPress={async () => {
             DatabaseManager.set(
               'searchHistory',
-              JSON.stringify(searchHistory.filter((_, i) => i !== index)),
+              JSON.stringify(
+                (
+                  JSON.parse((await DatabaseManager.get('searchHistory')) ?? '[]') as string[]
+                ).filter((_, i) => i !== index),
+              ),
             );
           }}>
           <Icon name="times" size={25} style={{ color: '#ff0f0f' }} />
