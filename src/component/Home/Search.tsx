@@ -325,7 +325,7 @@ function Search(props: Props) {
               // estimatedItemSize={209}
               contentContainerStyle={{ gap: 6 }}
               data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
-              keyExtractor={(_, index) => index?.toString()}
+              keyExtractor={(_, index) => String(index)}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
             />
           ) : (
@@ -573,7 +573,7 @@ function SearchList({
 }
 
 function searchHistoryKeyExtractor(name: string, index: number) {
-  return name + index.toString();
+  return name + String(index);
 }
 
 function useStyles() {
