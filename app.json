@@ -19,6 +19,6 @@
     }]
   ],
   "experiments": {
-    "reactCompiler": false
+    "reactCompiler": true
   }
 }
