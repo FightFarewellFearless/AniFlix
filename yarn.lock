@@ -2433,15 +2433,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@legendapp/list@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@legendapp/list@npm:1.1.0"
+"@legendapp/list@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "@legendapp/list@npm:1.1.4"
   dependencies:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 22e47c1d84e8a4c41e0ca20fe6e70db9b39d6f3b02995e63db6723f650f31c2c186fd829a71180e6dbcaad2388af1062a00f3038aaf196e5998d5b9dd4101555
+  checksum: c4b08b0ab8298d3f4e98e83310266e65b2741300a480a8d103fc1af8f3a6b4e7f4439394c994658a18df7c3c23fccae81b2ecf7da47ed615c860100792d98190
   languageName: node
   linkType: hard
 
@@ -2977,11 +2977,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "@react-navigation/drawer@npm:7.5.0"
+"@react-navigation/drawer@npm:^7.5.2":
+  version: 7.5.2
+  resolution: "@react-navigation/drawer@npm:7.5.2"
   dependencies:
-    "@react-navigation/elements": ^2.5.0
+    "@react-navigation/elements": ^2.5.2
     color: ^4.2.3
     react-native-drawer-layout: ^4.1.11
     use-latest-callback: ^0.2.4
@@ -2993,13 +2993,13 @@ __metadata:
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 17a1cf7f2250eda0f5e392c260393009003d56c4eef6f8eaf2c5ba3aec19871452b4846616741e53f30342850b82dcfd1e8613afe0c4f6b759065b0aec6e1faa
+  checksum: 97a9fb23978371f1f4359a0daa6d8b28a314269434c83be4b9e18c218bf92ed61a95234e20ee628035d421f0ccea8c8c9f544bb309e997686733e8c43cd72330
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "@react-navigation/elements@npm:2.5.0"
+"@react-navigation/elements@npm:^2.5.2":
+  version: 2.5.2
+  resolution: "@react-navigation/elements@npm:2.5.2"
   dependencies:
     color: ^4.2.3
     use-latest-callback: ^0.2.4
@@ -3013,15 +3013,15 @@ __metadata:
   peerDependenciesMeta:
     "@react-native-masked-view/masked-view":
       optional: true
-  checksum: 3e59d86ecdccc72c3720e6b9a2a58772e85824dbca5d10ede54a78850923b78908659397d4e8d4eadd85162a31e73388593bb6e574cc1d9cd5005b83ab507275
+  checksum: 0b0d92574ba845b8d1ee3c4fe78a22b8aa8a3e69e27678d0daa45aae08d31488eee05128ede6b5a725bbdc4d4a3ef4990f85760a30b3d01ddb47a86d41be5593
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.3.19":
-  version: 7.3.19
-  resolution: "@react-navigation/native-stack@npm:7.3.19"
+"@react-navigation/native-stack@npm:^7.3.21":
+  version: 7.3.21
+  resolution: "@react-navigation/native-stack@npm:7.3.21"
   dependencies:
-    "@react-navigation/elements": ^2.5.0
+    "@react-navigation/elements": ^2.5.2
     warn-once: ^0.1.1
   peerDependencies:
     "@react-navigation/native": ^7.1.14
@@ -3029,7 +3029,7 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: f6860a7f03625c485212188bae660375860d1223fca7dc6f80a8b7513b97bd6b2ab430675a2018bb29889aa67ae4119be9ce9272f4a81792cfbdf2db36d31c69
+  checksum: 9b644951a0c230e812fdb314bec3841c2ca1db4a7898b5b55f3c3663d8956d8dc168a1d0151b1094216f009ccd562534ba2ae89c135a368dca8cb5ee719ea9ce
   languageName: node
   linkType: hard
 
@@ -3689,7 +3689,7 @@ __metadata:
     "@babel/runtime": ^7.27.0
     "@bottom-tabs/react-navigation": ^0.9.2
     "@domir/react-native-measure-text": ^0.1.8
-    "@legendapp/list": ^1.1.0
+    "@legendapp/list": ^1.1.4
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-async-storage/async-storage": 2.2.0
     "@react-native-community/cli": ^18.0.0
@@ -3698,9 +3698,9 @@ __metadata:
     "@react-native/eslint-config": 0.79.4
     "@react-native/metro-config": 0.79.4
     "@react-native/typescript-config": 0.79.4
-    "@react-navigation/drawer": ^7.5.0
+    "@react-navigation/drawer": ^7.5.2
     "@react-navigation/native": ^7.1.14
-    "@react-navigation/native-stack": ^7.3.19
+    "@react-navigation/native-stack": ^7.3.21
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^2.0.0-rc.9
     "@types/jest": ^29.5.14
@@ -3711,7 +3711,7 @@ __metadata:
     axios: ^1.8.4
     babel-jest: ^29.6.3
     babel-plugin-inline-import: ^3.0.0
-    babel-plugin-react-compiler: beta
+    babel-plugin-react-compiler: ^19.0.0-beta-af1b7da-20250417
     buffer: ^6.0.3
     cheerio: 1.0.0-rc.12
     depcheck: ^1.4.7
@@ -4153,12 +4153,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-react-compiler@npm:beta":
-  version: 19.0.0-beta-af1b7da-20250417
-  resolution: "babel-plugin-react-compiler@npm:19.0.0-beta-af1b7da-20250417"
+"babel-plugin-react-compiler@npm:^19.0.0-beta-af1b7da-20250417":
+  version: 19.0.0-beta-ebf51a3-20250411
+  resolution: "babel-plugin-react-compiler@npm:19.0.0-beta-ebf51a3-20250411"
   dependencies:
     "@babel/types": ^7.26.0
-  checksum: c8f9596735fde48e088598f3f987869b15caeaa9d191eb663126508d0f481d9fc749f5eb97bcb591e14910c0188156fb0678aaef9b7f24449331fdac1e7626ad
+  checksum: 3a5d60ee22847ecf6428221af1e87fb2780f0acb1e1890d45f73318ce9340abe3b2a421c930c74125bf92604cc367d4f3b5f7afdb347aa8ee122045340760f7c
   languageName: node
   linkType: hard
 
