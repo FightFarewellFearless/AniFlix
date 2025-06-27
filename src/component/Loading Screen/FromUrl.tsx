@@ -93,7 +93,9 @@ function FromUrl(props: Props) {
             const watchLater: watchLaterJSON[] = JSON.parse(
               (await DatabaseManager.get('watchLater'))!,
             );
-            const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
+            const watchLaterIndex = watchLater.findIndex(
+              z => z.title.trim() === title.trim() && z.isMovie === true,
+            );
             if (watchLaterIndex >= 0) {
               controlWatchLater('delete', watchLaterIndex);
               ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
@@ -160,7 +162,9 @@ function FromUrl(props: Props) {
               const watchLater: watchLaterJSON[] = JSON.parse(
                 (await DatabaseManager.get('watchLater'))!,
               );
-              const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
+              const watchLaterIndex = watchLater.findIndex(
+                z => z.title.trim() === title.trim() && z.isMovie === false && z.isComics === false,
+              );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
                 ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
@@ -228,7 +232,9 @@ function FromUrl(props: Props) {
             const watchLater: watchLaterJSON[] = JSON.parse(
               (await DatabaseManager.get('watchLater'))!,
             );
-            const watchLaterIndex = watchLater.findIndex(z => z.title.trim() === title.trim());
+            const watchLaterIndex = watchLater.findIndex(
+              z => z.title.trim() === title.trim() && z.isComics === true,
+            );
             if (watchLaterIndex >= 0) {
               controlWatchLater('delete', watchLaterIndex);
               ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
