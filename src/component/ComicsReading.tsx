@@ -133,6 +133,7 @@ export default function ComicsReading(props: Props) {
             link: url,
             historyData: undefined,
           });
+          setHistory(res, url, false, undefined, false, true);
         })
         .catch(err => {
           if (err.name === 'AbortError') return;
