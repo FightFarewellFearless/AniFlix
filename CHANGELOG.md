@@ -5,7 +5,6 @@
 - List watch later yang otomatis dihapus salah
 ## Perubahan lain-lain
 - Memperbarui waktu di histori ketika berganti chapter komik
-- (Dev) Menggunakan react-compiler untuk performa yang lebih optimal
 
 # v1.0.0_JS-1 (24-Juni-2025)
 
