@@ -38,10 +38,7 @@ function SeeMore(props: Props) {
     props.navigation.setOptions({
       headerTitle: props.route.params.type === 'MovieList' ? 'Movie terbaru' : 'Anime terbaru',
     });
-
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.navigation, props.route.params.type]);
 
   return (
     <View style={{ flex: 1 }}>

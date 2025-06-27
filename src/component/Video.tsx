@@ -254,9 +254,7 @@ function Video(props: Props) {
       willUnmountHandler();
       abortController.current?.abort();
     };
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [orientationDidChange, willUnmountHandler]);
 
   // set header title
   useEffect(() => {

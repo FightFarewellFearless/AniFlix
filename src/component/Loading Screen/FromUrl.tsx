@@ -27,6 +27,24 @@ function FromUrl(props: Props) {
     // eslint-disable-next-line no-bitwise
     randomTipsArray[~~(Math.random() * randomTipsArray.length)],
   ).current;
+  const handleError = useCallback(
+    (err: Error) => {
+      if (err.message === 'Silahkan selesaikan captcha') {
+        props.navigation.goBack();
+        return;
+      }
+      if (err.message === 'canceled' || err.message === 'Aborted') {
+        return;
+      }
+      const errMessage =
+        err.message === 'Network Error' || err.message === 'Network request failed'
+          ? 'Permintaan gagal: Jaringan Error\nPastikan kamu terhubung dengan internet'
+          : 'Error tidak diketahui: ' + err.message;
+      DialogManager.alert('Error', errMessage);
+      props.navigation.goBack();
+    },
+    [props.navigation],
+  );
   useEffect(() => {
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
@@ -246,28 +264,13 @@ function FromUrl(props: Props) {
     return () => {
       abort.abort();
     };
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleError = useCallback(
-    (err: Error) => {
-      if (err.message === 'Silahkan selesaikan captcha') {
-        props.navigation.goBack();
-        return;
-      }
-      if (err.message === 'canceled' || err.message === 'Aborted') {
-        return;
-      }
-      const errMessage =
-        err.message === 'Network Error' || err.message === 'Network request failed'
-          ? 'Permintaan gagal: Jaringan Error\nPastikan kamu terhubung dengan internet'
-          : 'Error tidak diketahui: ' + err.message;
-      DialogManager.alert('Error', errMessage);
-      props.navigation.goBack();
-    },
-    [props],
-  );
+  }, [
+    handleError,
+    props.navigation,
+    props.route.params.historyData,
+    props.route.params.link,
+    props.route.params.type,
+  ]);
 
   useEffect(() => {
     const dotsInterval = setInterval(() => {

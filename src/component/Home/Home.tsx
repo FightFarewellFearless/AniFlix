@@ -70,9 +70,7 @@ function BottomTabs(props: Props) {
     startTransition(() => {
       setAnimeData?.(props.route.params.data);
     });
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.route.params.data, setAnimeData]);
   useFocusEffect(
     useCallback(() => {
       AvoidSoftInput.setAdjustPan();
