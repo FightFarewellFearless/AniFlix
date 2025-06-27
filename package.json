@@ -76,7 +76,7 @@
     "@types/react-test-renderer": "^19.0.0",
     "babel-jest": "^29.6.3",
     "babel-plugin-inline-import": "^3.0.0",
-    "babel-plugin-react-compiler": "^19.0.0-beta-af1b7da-20250417",
+    "babel-plugin-react-compiler": "^19.0.0-beta-ebf51a3-20250411",
     "depcheck": "^1.4.7",
     "eslint": "^8.19.0",
     "eslint-plugin-prettier": "^5.2.3",

@@ -3711,7 +3711,7 @@ __metadata:
     axios: ^1.8.4
     babel-jest: ^29.6.3
     babel-plugin-inline-import: ^3.0.0
-    babel-plugin-react-compiler: ^19.0.0-beta-af1b7da-20250417
+    babel-plugin-react-compiler: ^19.0.0-beta-ebf51a3-20250411
     buffer: ^6.0.3
     cheerio: 1.0.0-rc.12
     depcheck: ^1.4.7
@@ -4153,7 +4153,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-react-compiler@npm:^19.0.0-beta-af1b7da-20250417":
+"babel-plugin-react-compiler@npm:^19.0.0-beta-ebf51a3-20250411":
   version: 19.0.0-beta-ebf51a3-20250411
   resolution: "babel-plugin-react-compiler@npm:19.0.0-beta-ebf51a3-20250411"
   dependencies:
