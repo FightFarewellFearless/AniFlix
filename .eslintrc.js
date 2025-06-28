@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   extends: ['@react-native', 'plugin:prettier/recommended'],
-  plugins: ['eslint-plugin-react-compiler'],
+  plugins: ['react-compiler'],
   rules: {
     'react-compiler/react-compiler': 'error',
     'react-native/no-inline-styles': 0,
