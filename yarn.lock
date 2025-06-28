@@ -3738,7 +3738,7 @@ __metadata:
     react-native-dotenv: ^3.4.11
     react-native-error-boundary: ^2.0.0
     react-native-gesture-handler: 2.26.0
-    react-native-marked: ^7.0.1
+    react-native-marked: ^7.0.2
     react-native-mmkv: ^3.3.0
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.5
@@ -10173,9 +10173,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-marked@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "react-native-marked@npm:7.0.1"
+"react-native-marked@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "react-native-marked@npm:7.0.2"
   dependencies:
     "@jsamr/counter-style": 2.0.2
     "@jsamr/react-native-li": 2.3.1
@@ -10188,7 +10188,7 @@ __metadata:
     react: ">=16.8.6"
     react-native: ">=0.76.0"
     react-native-svg: ">=12.3.0"
-  checksum: 3a2802dcebec356942e5987ca25bff3baa14443f4378662a6769ae33181dc37ec1bb42ce45cd5520168ebbdfb02841a5ddcea30ee69198bcccbbe912191c5cd4
+  checksum: 3f4d5985e30bdeb74fbf3f04390fa3458e8df41baec14e7d0f2b3302fabe6c373b4e446f0988800f84aa8ec3fdbb2ea2050d46ded70da124f6c293b7d5be2902
   languageName: node
   linkType: hard
 

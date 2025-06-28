@@ -43,7 +43,7 @@
     "react-native-device-info": "^14.0.4",
     "react-native-error-boundary": "^2.0.0",
     "react-native-gesture-handler": "2.26.0",
-    "react-native-marked": "^7.0.1",
+    "react-native-marked": "^7.0.2",
     "react-native-mmkv": "^3.3.0",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.14.5",
