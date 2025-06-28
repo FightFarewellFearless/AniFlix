@@ -1,3 +1,11 @@
+# v1.0.0_JS-3 (28-Juni-2025)
+
+## Diperbaiki
+- Tampilan tombol "Tambahkan ke tonton nanti" di mode terang
+## Perubahan lain-lain
+- Mengaktifkan react-compiler untuk performa yang lebih baik
+- Menambahkan efek bayangan pada gambar di bagian detail episode/chapter
+
 # v1.0.0_JS-2 (27-Juni-2025)
 
 ## Diperbaiki
