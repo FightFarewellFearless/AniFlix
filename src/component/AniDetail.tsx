@@ -12,9 +12,9 @@ import {
 import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
-  useAnimatedScrollHandler,
+  useAnimatedRef,
   useAnimatedStyle,
-  useSharedValue,
+  useScrollViewOffset,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
@@ -23,6 +23,7 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AniDetailEpsList } from '../types/anime';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
@@ -48,10 +49,8 @@ function AniDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
-  const scrollOffset = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler(e => {
-    scrollOffset.value = e.contentOffset.y;
-  });
+  const scrollRef = useAnimatedRef<FlashList<AniDetailEpsList>>();
+  const scrollOffset = useScrollViewOffset(scrollRef as any);
 
   const headerImageStyle = useAnimatedStyle(() => {
     return {
@@ -84,6 +83,20 @@ function AniDetail(props: Props) {
           style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
           source={{ uri: data.thumbnailUrl }}
           contentFit="cover"
+        />
+
+        <LinearGradient
+          colors={['transparent', 'black']}
+          style={{
+            width: '100%',
+            height: 80,
+            position: 'absolute',
+            transform: [
+              {
+                translateY: 165,
+              },
+            ],
+          }}
         />
 
         <View
@@ -184,7 +197,7 @@ function AniDetail(props: Props) {
             <Button
               buttonColor={styles.additionalInfoTextSurface.backgroundColor}
               textColor={styles.additionalInfoText.color}
-              mode="elevated"
+              mode="outlined"
               icon="playlist-plus"
               disabled={isInList}
               onPress={() => {
@@ -263,7 +276,7 @@ function AniDetail(props: Props) {
 
   return (
     <ReanimatedFlashList
-      onScroll={scrollHandler}
+      ref={scrollRef}
       data={filteredEpisodes}
       renderItem={({ item }) => (
         <TouchableOpacity

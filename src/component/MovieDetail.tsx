@@ -12,9 +12,9 @@ import {
 import { Button, Divider, Surface } from 'react-native-paper';
 import Reanimated, {
   interpolate,
-  useAnimatedScrollHandler,
+  useAnimatedRef,
   useAnimatedStyle,
-  useSharedValue,
+  useScrollViewOffset,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
@@ -23,6 +23,7 @@ import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 interface MovieEpisode {
@@ -51,10 +52,8 @@ function MovieDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
-  const scrollOffset = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler(e => {
-    scrollOffset.value = e.contentOffset.y;
-  });
+  const scrollRef = useAnimatedRef<FlashList<MovieEpisode>>();
+  const scrollOffset = useScrollViewOffset(scrollRef as any);
 
   const headerImageStyle = useAnimatedStyle(() => {
     return {
@@ -81,6 +80,20 @@ function MovieDetail(props: Props) {
           style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
           source={{ uri: data.thumbnailUrl }}
           contentFit="cover"
+        />
+
+        <LinearGradient
+          colors={['transparent', 'black']}
+          style={{
+            width: '100%',
+            height: 80,
+            position: 'absolute',
+            transform: [
+              {
+                translateY: 165,
+              },
+            ],
+          }}
         />
 
         <View
@@ -162,7 +175,7 @@ function MovieDetail(props: Props) {
               icon="playlist-plus"
               buttonColor={styles.additionalInfoTextSurface.backgroundColor}
               textColor={styles.additionalInfoText.color}
-              mode="elevated"
+              mode="outlined"
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
                   title: data.title.replace('Subtitle Indonesia', ''),
@@ -277,7 +290,7 @@ function MovieDetail(props: Props) {
 
   return (
     <ReanimatedFlashList
-      onScroll={scrollHandler}
+      ref={scrollRef}
       data={data.episodeList.length > 1 ? data.episodeList : []}
       renderItem={({ item }) => (
         <TouchableOpacity
@@ -413,9 +426,6 @@ function useStyles() {
           textAlign: 'center',
         },
         chapterButtonsContainer: {
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
           gap: 10,
           marginBottom: 15,
         },

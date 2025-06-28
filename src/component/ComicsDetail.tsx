@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
@@ -13,9 +14,9 @@ import {
 import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
-  useAnimatedScrollHandler,
+  useAnimatedRef,
   useAnimatedStyle,
-  useSharedValue,
+  useScrollViewOffset,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
@@ -35,10 +36,8 @@ export default function ComicsDetail(props: Props) {
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
-  const scrollOffset = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler(e => {
-    scrollOffset.value = e.contentOffset.y;
-  });
+  const scrollRef = useAnimatedRef<FlashList<KomikuDetail['chapters'][0]>>();
+  const scrollOffset = useScrollViewOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -81,7 +80,7 @@ export default function ComicsDetail(props: Props) {
 
   return (
     <ReanimatedFlashList
-      onScroll={scrollHandler}
+      ref={scrollRef}
       data={filteredChapters}
       ListEmptyComponent={() => (
         <View style={styles.mainContainer}>
@@ -114,6 +113,19 @@ export default function ComicsDetail(props: Props) {
           <ReanimatedImage
             style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
             source={{ uri: data.headerImageUrl }}
+          />
+          <LinearGradient
+            colors={['transparent', 'black']}
+            style={{
+              width: '100%',
+              height: 60,
+              position: 'absolute',
+              transform: [
+                {
+                  translateY: 155,
+                },
+              ],
+            }}
           />
           <View style={[styles.mainContainer, styles.mainContent]}>
             <View style={{ flexDirection: 'column', alignItems: 'center' }}>
@@ -186,7 +198,7 @@ export default function ComicsDetail(props: Props) {
               <Button
                 buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
-                mode="elevated"
+                mode="outlined"
                 icon="playlist-plus"
                 disabled={isInList}
                 onPress={() => {
