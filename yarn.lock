@@ -3718,7 +3718,7 @@ __metadata:
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: beta
-    expo: ^53.0.12
+    expo: ^53.0.13
     expo-document-picker: 13.1.6
     expo-image: ^2.3.0
     expo-linear-gradient: 14.1.5
@@ -6298,9 +6298,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:^53.0.12":
-  version: 53.0.12
-  resolution: "expo@npm:53.0.12"
+"expo@npm:^53.0.13":
+  version: 53.0.13
+  resolution: "expo@npm:53.0.13"
   dependencies:
     "@babel/runtime": ^7.20.0
     "@expo/cli": 0.24.15
@@ -6336,7 +6336,7 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: 45cfc2fb7e14d5d4d49a5a760d8bf80d0d72e55732bc264014430d99b122251d0f237d8aa6116a9b1d0cfcbb794d0b5eefab2b3f7350531bda04e514c4c8e2b9
+  checksum: 3b35877f6471ca5c6ca79a0c3507c15f9384173fe161bfe8f31c57388f667e1ac6c8efa9bbcdb7a79382dff34549142ba0b9c5907d0cbca971d6379ab25ec387
   languageName: node
   linkType: hard
 
