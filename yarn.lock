@@ -3067,9 +3067,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:^2.0.0-rc.9":
-  version: 2.0.0-rc.9
-  resolution: "@shopify/flash-list@npm:2.0.0-rc.9"
+"@shopify/flash-list@npm:^2.0.0-rc.10":
+  version: 2.0.0-rc.10
+  resolution: "@shopify/flash-list@npm:2.0.0-rc.10"
   dependencies:
     recyclerlistview: 4.2.3
     tslib: 2.8.1
@@ -3077,7 +3077,7 @@ __metadata:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: 6c47f19b01fa4d8f6cf93918c912faf3e5d48fef41937a26524e23976f911bc79cfe801f443aa46ee6bc9b67a48b8f7a6e7546f012e21acd45b8dc6fcd2edeb8
+  checksum: d9b2f9a9233dce7f2b1624a70fdf183531011237c43a1b4239fbfa8c665500de6aa153510cc978152a0310fd9ddec1b9f0e2f21456e56993155514a9a6b80d59
   languageName: node
   linkType: hard
 
@@ -3702,7 +3702,7 @@ __metadata:
     "@react-navigation/native": ^7.1.14
     "@react-navigation/native-stack": ^7.3.21
     "@rnx-kit/align-deps": ^3.0.4
-    "@shopify/flash-list": ^2.0.0-rc.9
+    "@shopify/flash-list": ^2.0.0-rc.10
     "@types/jest": ^29.5.14
     "@types/metro-config": ^0.76.3
     "@types/react": ^19.0.12
