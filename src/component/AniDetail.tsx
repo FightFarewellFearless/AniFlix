@@ -24,6 +24,7 @@ import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AniDetailEpsList } from '../types/anime';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
@@ -38,6 +39,7 @@ const IMG_HEADER_HEIGHT = 250;
 function AniDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
   const data = props.route.params.data;
@@ -293,7 +295,12 @@ function AniDetail(props: Props) {
       )}
       ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
       keyExtractor={item => item.title}
-      contentContainerStyle={{ backgroundColor: styles.mainContainer.backgroundColor }}
+      contentContainerStyle={{
+        backgroundColor: styles.mainContainer.backgroundColor,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: insets.bottom,
+      }}
       ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
       ListHeaderComponent={ListHeaderComponent}
       extraData={colorScheme}

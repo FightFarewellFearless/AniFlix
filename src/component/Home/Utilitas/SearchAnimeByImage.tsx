@@ -276,7 +276,7 @@ function useStyles() {
       StyleSheet.create({
         container: {
           flex: 1,
-          padding: 16,
+          paddingHorizontal: 16,
           backgroundColor: isDark ? '#121212' : '#f5f5f7',
         },
         card: {

@@ -30,6 +30,7 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
@@ -56,6 +57,7 @@ function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const insets = useSafeAreaInsets();
   const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
   const [refreshingKey, setRefreshingKey] = useState(0);
@@ -181,6 +183,12 @@ function HomeList(props: HomeProps) {
           colors={['#00a2ff', '#BB86FC']}
         />
       }
+      contentContainerStyle={{
+        paddingTop: insets.top,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: insets.bottom,
+      }}
       ListHeaderComponent={
         <>
           <View style={styles.headerCard}>

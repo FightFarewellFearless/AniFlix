@@ -3717,8 +3717,8 @@ __metadata:
     depcheck: ^1.4.7
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
-    eslint-plugin-react-compiler: beta
-    expo: ^53.0.12
+    eslint-plugin-react-compiler: ^19.0.0-beta-af1b7da-20250417
+    expo: ^53.0.13
     expo-document-picker: 13.1.6
     expo-image: ^2.3.0
     expo-linear-gradient: 14.1.5
@@ -3731,11 +3731,12 @@ __metadata:
     prettier: ^3.5.2
     react: 19.0.0
     react-native: 0.79.4
-    react-native-avoid-softinput: ^7.0.1
+    react-native-avoid-softinput: ^7.0.2
     react-native-blob-util: ^0.22.2
     react-native-bottom-tabs: ^0.9.2
     react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
+    react-native-edge-to-edge: ^1.6.2
     react-native-error-boundary: ^2.0.0
     react-native-gesture-handler: 2.26.0
     react-native-marked: ^7.0.2
@@ -5788,9 +5789,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-compiler@npm:beta":
-  version: 19.0.0-beta-af1b7da-20250417
-  resolution: "eslint-plugin-react-compiler@npm:19.0.0-beta-af1b7da-20250417"
+"eslint-plugin-react-compiler@npm:^19.0.0-beta-af1b7da-20250417":
+  version: 19.0.0-beta-ebf51a3-20250411
+  resolution: "eslint-plugin-react-compiler@npm:19.0.0-beta-ebf51a3-20250411"
   dependencies:
     "@babel/core": ^7.24.4
     "@babel/parser": ^7.24.4
@@ -5800,7 +5801,7 @@ __metadata:
     zod-validation-error: ^3.0.3
   peerDependencies:
     eslint: ">=7"
-  checksum: 21a0bff58a95f5d4d822d3c67e4742be08f7f2936294714186942fe7abe2c20407f7c60c4874ad36d00cc0b4796bf2488d29cd52026a64bac8efd21c29f807f8
+  checksum: 7b01a449d9be2c86e02b944b0b0db37a742e1cfefef8345a66804481a87e0e6a5a46a75ff1e4af9568377bf8e3458fef4cb72ff2bd99a0c91c451c3d6069a0c5
   languageName: node
   linkType: hard
 
@@ -6298,9 +6299,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:^53.0.12":
-  version: 53.0.12
-  resolution: "expo@npm:53.0.12"
+"expo@npm:^53.0.13":
+  version: 53.0.13
+  resolution: "expo@npm:53.0.13"
   dependencies:
     "@babel/runtime": ^7.20.0
     "@expo/cli": 0.24.15
@@ -6336,7 +6337,7 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: 45cfc2fb7e14d5d4d49a5a760d8bf80d0d72e55732bc264014430d99b122251d0f237d8aa6116a9b1d0cfcbb794d0b5eefab2b3f7350531bda04e514c4c8e2b9
+  checksum: 3b35877f6471ca5c6ca79a0c3507c15f9384173fe161bfe8f31c57388f667e1ac6c8efa9bbcdb7a79382dff34549142ba0b9c5907d0cbca971d6379ab25ec387
   languageName: node
   linkType: hard
 
@@ -10052,15 +10053,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-avoid-softinput@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "react-native-avoid-softinput@npm:7.0.1"
+"react-native-avoid-softinput@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "react-native-avoid-softinput@npm:7.0.2"
   dependencies:
     react-native-is-edge-to-edge: ^1.1.6
   peerDependencies:
-    react: ">=18.2.0"
-    react-native: ">=0.73.0"
-  checksum: 7ffd33d3d46da203cdc0249770bc89ef2f8d10d06c8dc7d1d03315825063ce821140d10499f3f022066c3a149d678b037fffc0af1d693bfb59a29a639aeb89e9
+    react: ">=18.3.1"
+    react-native: ">=0.76.0"
+  checksum: 6d0f643633c4341c27498970d1ba15b9c85659d8935119f3567bf69f0047d2da7e3df48b269f4d281d53ec303d112f83f974793fe22ce0d97c54be96ffe2b64e
   languageName: node
   linkType: hard
 
@@ -10132,6 +10133,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 624893661f8708b6924faafb0586edc1f42b3741930866efd2dd263c9592e5abc8a4615d7a3ee41e8aa4da9486bda56c84385bc35a168269f22ec0a8432aa5de
+  languageName: node
+  linkType: hard
+
+"react-native-edge-to-edge@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "react-native-edge-to-edge@npm:1.6.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: c1802da99f672dc5645dba401c8978541995c670f5fcd402f9e7aadf37099713264a3c821aa8aeba8b490cc8400d6f6302c66be6a061b0a0dca13a0129d9a692
   languageName: node
   linkType: hard
 

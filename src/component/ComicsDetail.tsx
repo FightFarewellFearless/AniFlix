@@ -18,6 +18,7 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollViewOffset,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
@@ -35,6 +36,7 @@ const IMG_HEIGHT = 200;
 export default function ComicsDetail(props: Props) {
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
+  const insets = useSafeAreaInsets();
   const styles = useStyles();
   const scrollRef = useAnimatedRef<FlashList<KomikuDetail['chapters'][0]>>();
   const scrollOffset = useScrollViewOffset(scrollRef as any);
@@ -106,7 +108,12 @@ export default function ComicsDetail(props: Props) {
       }}
       ItemSeparatorComponent={() => <Divider />}
       keyExtractor={item => item.chapter}
-      contentContainerStyle={{ backgroundColor: styles.mainContainer.backgroundColor }}
+      contentContainerStyle={{
+        backgroundColor: styles.mainContainer.backgroundColor,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: insets.bottom,
+      }}
       ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
       ListHeaderComponent={
         <>

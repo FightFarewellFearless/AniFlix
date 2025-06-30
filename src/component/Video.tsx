@@ -19,7 +19,6 @@ import {
   NativeModules,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -27,6 +26,7 @@ import {
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import { SystemBars } from 'react-native-edge-to-edge';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
   runOnJS,
@@ -62,11 +62,11 @@ import {
   getStreamingDetail,
   MovieDetail,
 } from '../utils/animeMovie';
+import { useKeyValueIfFocused } from '../utils/DatabaseManager';
 import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
 import VideoPlayer, { PlayerRef } from './VideoPlayer';
-import { useKeyValueIfFocused } from '../utils/DatabaseManager';
 
 function useBackHandler(handler: () => boolean) {
   useEffect(() => {
@@ -211,14 +211,14 @@ function Video(props: Props) {
       }
     }
     SystemNavigationBar.fullScreen(true);
-    StatusBar.setHidden(true);
+    SystemBars.setHidden(true);
     SystemNavigationBar.navigationHide();
     setFullscreen(true);
   }, []);
 
   const exitFullscreen = useCallback(() => {
     SystemNavigationBar.fullScreen(false);
-    StatusBar.setHidden(false);
+    SystemBars.setHidden(false);
     SystemNavigationBar.navigationShow();
     Orientation.lockToPortrait();
     setFullscreen(false);
@@ -241,7 +241,7 @@ function Video(props: Props) {
 
   const willUnmountHandler = useCallback(() => {
     Orientation.lockToPortrait();
-    StatusBar.setHidden(false);
+    SystemBars.setHidden(false);
     SystemNavigationBar.navigationShow();
   }, []);
 

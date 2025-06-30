@@ -24,6 +24,7 @@ import controlWatchLater from '../utils/watchLaterControl';
 
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 interface MovieEpisode {
@@ -41,6 +42,7 @@ const IMG_HEADER_HEIGHT = 250;
 function MovieDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
   const data = props.route.params.data;
@@ -308,7 +310,12 @@ function MovieDetail(props: Props) {
       )}
       ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
       keyExtractor={item => item.title}
-      contentContainerStyle={{ backgroundColor: styles.mainContainer.backgroundColor }}
+      contentContainerStyle={{
+        backgroundColor: styles.mainContainer.backgroundColor,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: insets.bottom,
+      }}
       ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
       ListHeaderComponent={ListHeaderComponent}
       extraData={colorScheme}

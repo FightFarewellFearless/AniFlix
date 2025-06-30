@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
@@ -30,6 +31,9 @@ function SeeMore(props: Props) {
       ? (animeData?.newAnime.length ?? 0) / 25
       : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
+
+  const insets = useSafeAreaInsets();
+
   let columnWidth = (dimensions.width * 120) / 200 / 1.9;
   columnWidth = Math.max(columnWidth, MIN_IMAGE_WIDTH);
   const numColumns = Math.floor(dimensions.width / columnWidth);
@@ -44,6 +48,11 @@ function SeeMore(props: Props) {
     <View style={{ flex: 1 }}>
       <LegendList
         recycleItems
+        contentContainerStyle={{
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom,
+        }}
         drawDistance={250}
         data={
           (props.route.params.type === 'MovieList' ? movieData : animeData?.newAnime) as (

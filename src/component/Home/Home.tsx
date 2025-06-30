@@ -9,7 +9,7 @@ import { useColorScheme } from 'react-native';
 import { AvoidSoftInput } from 'react-native-avoid-softinput';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import SuspenseLoading from '../misc/SuspenseLoading';
+import { withSuspenseAndSafeArea } from '../../../App';
 
 const EpisodeBaruHome = lazy(() => import('./AnimeList'));
 const Search = lazy(() => import('./Search'));
@@ -19,12 +19,6 @@ const Saya = lazy(() => import('./Saya'));
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createNativeBottomTabNavigator<HomeNavigator>();
 
-const withSuspense = (Component: React.ComponentType<any>) => (props: any) => (
-  <SuspenseLoading>
-    <Component {...props} />
-  </SuspenseLoading>
-);
-
 const tabScreens: {
   name: keyof HomeNavigator;
   component: (props: any) => React.JSX.Element;
@@ -32,7 +26,7 @@ const tabScreens: {
 }[] = [
   {
     name: 'AnimeList',
-    component: withSuspense(EpisodeBaruHome),
+    component: withSuspenseAndSafeArea(EpisodeBaruHome, false),
     options: {
       tabBarIcon: () => require('../../assets/icons/home.svg'),
       tabBarLabel: 'Beranda',
@@ -40,7 +34,7 @@ const tabScreens: {
   },
   {
     name: 'Search',
-    component: withSuspense(Search),
+    component: withSuspenseAndSafeArea(Search, true, false, true),
     options: {
       tabBarIcon: () => require('../../assets/icons/search.svg'),
       tabBarLabel: 'Pencarian',
@@ -48,7 +42,7 @@ const tabScreens: {
   },
   {
     name: 'Saya',
-    component: withSuspense(Saya),
+    component: withSuspenseAndSafeArea(Saya, false),
     options: {
       tabBarIcon: () => require('../../assets/icons/user.svg'),
       tabBarLabel: 'Saya',
@@ -56,7 +50,7 @@ const tabScreens: {
   },
   {
     name: 'Utilitas',
-    component: withSuspense(Utils),
+    component: withSuspenseAndSafeArea(Utils, false),
     options: {
       tabBarIcon: () => require('../../assets/icons/tools.svg'),
     },

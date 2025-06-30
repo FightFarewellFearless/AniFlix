@@ -5,14 +5,14 @@ import {
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Appearance, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Appearance, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Appbar, Button, Dialog, PaperProvider, Portal } from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import useGlobalStyles from './src/assets/style';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
@@ -47,7 +47,12 @@ enableScreens(true);
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 
-const withSuspenseAndSafeArea = (Component: React.ComponentType<any>, safeArea = true) => {
+export const withSuspenseAndSafeArea = (
+  Component: React.ComponentType<any>,
+  safeArea = true,
+  ignoreTop = false,
+  ignoreBottom = false,
+) => {
   const SuspenseComponent = (props: any) => (
     <SuspenseLoading>
       <Component {...props} />
@@ -55,7 +60,9 @@ const withSuspenseAndSafeArea = (Component: React.ComponentType<any>, safeArea =
   );
   return (props: any) =>
     safeArea ? (
-      <SafeAreaWrapper>{<SuspenseComponent {...props} />}</SafeAreaWrapper>
+      <SafeAreaWrapper ignoreTop={ignoreTop} ignoreBottom={ignoreBottom}>
+        {<SuspenseComponent {...props} />}
+      </SafeAreaWrapper>
     ) : (
       <SuspenseComponent {...props} />
     );
@@ -81,13 +88,21 @@ type Screens = {
 }[];
 
 const screens: Screens = [
-  { name: 'Home', component: withSuspenseAndSafeArea(Home), options: undefined },
-  { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail), options: undefined },
-  { name: 'MovieDetail', component: withSuspenseAndSafeArea(MovieDetail), options: undefined },
-  { name: 'ComicsDetail', component: withSuspenseAndSafeArea(ComicsDetail), options: undefined },
+  { name: 'Home', component: withSuspenseAndSafeArea(Home, false), options: undefined },
+  { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail, false), options: undefined },
+  {
+    name: 'MovieDetail',
+    component: withSuspenseAndSafeArea(MovieDetail, false),
+    options: undefined,
+  },
+  {
+    name: 'ComicsDetail',
+    component: withSuspenseAndSafeArea(ComicsDetail, false),
+    options: undefined,
+  },
   {
     name: 'ComicsReading',
-    component: withSuspenseAndSafeArea(ComicsReading),
+    component: withSuspenseAndSafeArea(ComicsReading, true, true),
     options: { headerShown: true },
   },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
@@ -100,7 +115,11 @@ const screens: Screens = [
     component: withSuspenseAndSafeArea(FailedToConnect),
     options: undefined,
   },
-  { name: 'SeeMore', component: withSuspenseAndSafeArea(SeeMore), options: { headerShown: true } },
+  {
+    name: 'SeeMore',
+    component: withSuspenseAndSafeArea(SeeMore, false),
+    options: { headerShown: true },
+  },
   {
     name: 'ErrorScreen',
     component: ErrorScreen,
@@ -135,14 +154,12 @@ function App() {
     ) {
       Appearance.setColorScheme(colorSchemeValue);
     }
-    StatusBar.setHidden(false);
+    SystemBars.setHidden(false);
     SplashScreen.hideAsync();
   }, []);
 
   useEffect(() => {
-    StatusBar.setBackgroundColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
-    StatusBar.setBarStyle(colorScheme === 'dark' ? 'light-content' : 'dark-content');
-    SystemNavigationBar.setNavigationColor(colorScheme === 'dark' ? '#0A0A0A' : '#FFFFFF');
+    SystemBars.setStyle(colorScheme === 'dark' ? 'light' : 'dark');
   }, [colorScheme]);
 
   // Dialog related
