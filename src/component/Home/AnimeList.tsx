@@ -549,7 +549,7 @@ function useStyles() {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#0aafcc',
+      backgroundColor: '#007ab3',
       paddingVertical: 4,
       borderRadius: 8,
       marginHorizontal: 16,
