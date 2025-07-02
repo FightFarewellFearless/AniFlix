@@ -7,15 +7,12 @@
 <h1 align="center">AniFlix</h1>
 
 <p align="center">
-  Aplikasi streaming anime gratis, tanpa iklan, dan <i>open source</i>!
+  <i>All-in-one!</i> Satu Aplikasi untuk nonton anime dan baca komik.
   <br />
   <strong><i>Written in TypeScript, built with React Native</i></strong> ❤️
 </p>
 
 <p align="center">
-  <a href="https://codeium.com/badges/main">
-    <img alt="built with Codeium" src="https://codeium.com/badges/main">
-  </a>
   <a href="https://github.com/FightFarewellFearless/aniflix/blob/main/LICENSE">
     <img alt="license" src="https://img.shields.io/github/license/FightFarewellFearless/AniFlix">
   </a>
@@ -36,7 +33,8 @@
 
 | Fitur | Deskripsi |
 | :--- | :--- |
-| ✨ **Lengkap dan Terbaru** | Tonton anime favoritmu dengan episode yang selalu <i>up-to-date</i>. |
+| ✨ **Lengkap dan Terbaru** | Tonton anime dan baca komik favoritmu dengan episode dan chapter yang selalu <i>up-to-date</i>. |
+| 📱 **Satu aplikasi untuk semua** | Mau nonton anime, movie, atau baca Manga/Manhwa/Manhua? AniFlix menyediakan semua nya! |
 | 🎨 **UI Simpel & Modern** | Antarmuka yang bersih dan intuitif untuk pengalaman menonton terbaik. |
 | 📥 **Download Sekali Klik** | Unduh episode favoritmu dan tonton secara offline tanpa ribet. |
 | 🚫 **Bebas Iklan** | Nikmati pengalaman menonton tanpa gangguan iklan dari kami. |
@@ -59,7 +57,7 @@ Dapatkan versi terbaru dari AniFlix dengan mudah:
 1.  Buka halaman **[Rilis Terbaru](https://github.com/FightFarewellFearless/AniFlix/releases)**.
 2.  Pilih rilis yang paling baru (ada di paling atas).
 3.  Klik pada bagian **Assets** untuk melihat file.
-4.  Unduh file `anime.apk` dan instal di perangkat Android Anda.
+4.  Unduh file `aniflix.apk` dan instal di perangkat Android Anda.
 
 * **Minimum OS**: Android 7.0 (Nougat) atau yang lebih baru.
 
@@ -98,7 +96,7 @@ AniFlix akan selalu gratis dan open-source. Jika Anda merasa aplikasi ini berman
 
 ## 📝 Catatan Penting
 
--   **Sumber Video**: Video yang ditampilkan dalam aplikasi ini berasal dari server pihak ketiga. Kami tidak memiliki kontrol atau akses sama sekali terhadap konten tersebut.
+-   **Sumber Video dan Data**: Video dan data apapun yang ditampilkan dalam aplikasi ini berasal dari server pihak ketiga. Kami tidak memiliki kontrol atau akses sama sekali terhadap konten tersebut.
 -   **Kebijakan Konten**: Kami tidak menyimpan file video apa pun di server kami. Aplikasi ini hanya berfungsi sebagai jembatan untuk mengakses konten yang sudah tersedia secara publik di internet.
 
 ---
