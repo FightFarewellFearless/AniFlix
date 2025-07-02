@@ -347,7 +347,23 @@ function Search(props: Props) {
           entering={FadeInUp.duration(700)}
           exiting={FadeOutDown}
           style={[styles.searchHistoryContainer, { height: '90%' }]}>
-          <View style={{ height: '100%' }}>
+          <View style={{ height: '95%' }}>
+            <SegmentedButtons
+              value={searchType}
+              onValueChange={setSearchType}
+              buttons={[
+                {
+                  value: 'anime',
+                  label: 'Cari anime/movie',
+                  icon: 'movie-search',
+                },
+                {
+                  value: 'comics',
+                  label: 'Cari komik',
+                  icon: 'book-search',
+                },
+              ]}
+            />
             <LegendList
               recycleItems
               drawDistance={250}
