@@ -68,8 +68,10 @@ function BottomTabs(props: Props) {
   useFocusEffect(
     useCallback(() => {
       AvoidSoftInput.setAdjustPan();
+      AvoidSoftInput.setEnabled(false);
       return () => {
         AvoidSoftInput.setAdjustResize();
+        AvoidSoftInput.setEnabled(true);
       };
     }, []),
   );
