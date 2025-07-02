@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import { AvoidSoftInput } from 'react-native-avoid-softinput';
+import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { withSuspenseAndSafeArea } from '../../../App';
@@ -67,11 +67,9 @@ function BottomTabs(props: Props) {
   }, [props.route.params.data, setAnimeData]);
   useFocusEffect(
     useCallback(() => {
-      AvoidSoftInput.setAdjustPan();
-      AvoidSoftInput.setEnabled(false);
+      KeyboardController.setDefaultMode();
       return () => {
-        AvoidSoftInput.setAdjustResize();
-        AvoidSoftInput.setEnabled(true);
+        KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE);
       };
     }, []),
   );

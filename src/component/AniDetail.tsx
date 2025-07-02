@@ -9,6 +9,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -277,34 +278,36 @@ function AniDetail(props: Props) {
   ]);
 
   return (
-    <ReanimatedFlashList
-      ref={scrollRef}
-      data={filteredEpisodes}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.episodeButton}
-          onPress={() => {
-            props.navigation.navigate('FromUrl', {
-              link: item.link,
-            });
-          }}>
-          <View style={styles.episodeTitleContainer}>
-            <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
-          </View>
-        </TouchableOpacity>
-      )}
-      ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
-      keyExtractor={item => item.title}
-      contentContainerStyle={{
-        backgroundColor: styles.mainContainer.backgroundColor,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        paddingBottom: insets.bottom,
-      }}
-      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-      ListHeaderComponent={ListHeaderComponent}
-      extraData={colorScheme}
-    />
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <ReanimatedFlashList
+        ref={scrollRef}
+        data={filteredEpisodes}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.episodeButton}
+            onPress={() => {
+              props.navigation.navigate('FromUrl', {
+                link: item.link,
+              });
+            }}>
+            <View style={styles.episodeTitleContainer}>
+              <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
+        keyExtractor={item => item.title}
+        contentContainerStyle={{
+          backgroundColor: styles.mainContainer.backgroundColor,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom,
+        }}
+        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+        ListHeaderComponent={ListHeaderComponent}
+        extraData={colorScheme}
+      />
+    </KeyboardAvoidingView>
   );
 }
 

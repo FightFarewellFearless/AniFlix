@@ -9,6 +9,7 @@ import { Appearance, StyleSheet, Text, useColorScheme, View } from 'react-native
 import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { Appbar, Button, Dialog, PaperProvider, Portal } from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -175,105 +176,107 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <ErrorBoundary FallbackComponent={FallbackComponent}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <EpisodeBaruHomeContext
-            value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
-            <MovieListHomeContext
-              value={useMemo(
-                () => ({
-                  paramsState: movieParamsState,
-                  setParamsState: setMovieParamsState,
-                }),
-                [movieParamsState],
-              )}>
-              <NavigationContainer
-                ref={navigationRef}
-                theme={
-                  colorScheme === 'dark'
-                    ? {
-                        ...DarkTheme,
-                        colors: {
-                          ...DarkTheme.colors,
-                          background: '#0A0A0A',
-                        },
-                      }
-                    : undefined
-                }>
-                <PaperProvider>
-                  <Portal>
-                    <Dialog
-                      visible={dialogVisible}
-                      dismissable={false}
-                      dismissableBackButton
-                      onDismiss={() => setDialogVisible(false)}>
-                      <Dialog.Title>{dialogContent.title}</Dialog.Title>
-                      <Dialog.Content>
-                        <Text style={globalStyles.text}>{dialogContent.message}</Text>
-                      </Dialog.Content>
-                      <Dialog.Actions>
-                        {dialogContent.buttons.map((button, index) => (
-                          <Button
-                            key={index}
-                            onPress={() => {
-                              button.onPress();
-                              setDialogVisible(false);
-                            }}>
-                            {button.text}
-                          </Button>
-                        ))}
-                      </Dialog.Actions>
-                    </Dialog>
-                  </Portal>
-                  <Stack.Navigator
-                    initialRouteName="connectToServer"
-                    screenOptions={{
-                      headerShown: false,
-                      header: props => (
-                        <Appbar.Header>
-                          {props.back && (
-                            <Appbar.BackAction
+      <KeyboardProvider>
+        <ErrorBoundary FallbackComponent={FallbackComponent}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <EpisodeBaruHomeContext
+              value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
+              <MovieListHomeContext
+                value={useMemo(
+                  () => ({
+                    paramsState: movieParamsState,
+                    setParamsState: setMovieParamsState,
+                  }),
+                  [movieParamsState],
+                )}>
+                <NavigationContainer
+                  ref={navigationRef}
+                  theme={
+                    colorScheme === 'dark'
+                      ? {
+                          ...DarkTheme,
+                          colors: {
+                            ...DarkTheme.colors,
+                            background: '#0A0A0A',
+                          },
+                        }
+                      : undefined
+                  }>
+                  <PaperProvider>
+                    <Portal>
+                      <Dialog
+                        visible={dialogVisible}
+                        dismissable={false}
+                        dismissableBackButton
+                        onDismiss={() => setDialogVisible(false)}>
+                        <Dialog.Title>{dialogContent.title}</Dialog.Title>
+                        <Dialog.Content>
+                          <Text style={globalStyles.text}>{dialogContent.message}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          {dialogContent.buttons.map((button, index) => (
+                            <Button
+                              key={index}
                               onPress={() => {
-                                props.navigation.goBack();
-                              }}
+                                button.onPress();
+                                setDialogVisible(false);
+                              }}>
+                              {button.text}
+                            </Button>
+                          ))}
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
+                    <Stack.Navigator
+                      initialRouteName="connectToServer"
+                      screenOptions={{
+                        headerShown: false,
+                        header: props => (
+                          <Appbar.Header>
+                            {props.back && (
+                              <Appbar.BackAction
+                                onPress={() => {
+                                  props.navigation.goBack();
+                                }}
+                              />
+                            )}
+                            <Appbar.Content
+                              titleStyle={{ fontWeight: 'bold' }}
+                              title={
+                                typeof props.options.headerTitle === 'string'
+                                  ? props.options.headerTitle
+                                  : ''
+                              }
                             />
-                          )}
-                          <Appbar.Content
-                            titleStyle={{ fontWeight: 'bold' }}
-                            title={
-                              typeof props.options.headerTitle === 'string'
-                                ? props.options.headerTitle
-                                : ''
-                            }
-                          />
-                        </Appbar.Header>
-                      ),
-                    }}>
-                    {screens.map(({ name, component, options }) => (
-                      <Stack.Screen key={name} name={name} options={options}>
-                        {component}
-                      </Stack.Screen>
-                    ))}
-                  </Stack.Navigator>
-                </PaperProvider>
-                <CFBypassIsOpenContext
-                  value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
-                  {isOpen && (
-                    <Suspense>
-                      <CFBypassWebView />
-                    </Suspense>
+                          </Appbar.Header>
+                        ),
+                      }}>
+                      {screens.map(({ name, component, options }) => (
+                        <Stack.Screen key={name} name={name} options={options}>
+                          {component}
+                        </Stack.Screen>
+                      ))}
+                    </Stack.Navigator>
+                  </PaperProvider>
+                  <CFBypassIsOpenContext
+                    value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                    {isOpen && (
+                      <Suspense>
+                        <CFBypassWebView />
+                      </Suspense>
+                    )}
+                  </CFBypassIsOpenContext>
+                  {__DEV__ && (
+                    <View style={styles.Dev} pointerEvents="none">
+                      <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                    </View>
                   )}
-                </CFBypassIsOpenContext>
-                {__DEV__ && (
-                  <View style={styles.Dev} pointerEvents="none">
-                    <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-                  </View>
-                )}
-              </NavigationContainer>
-            </MovieListHomeContext>
-          </EpisodeBaruHomeContext>
-        </GestureHandlerRootView>
-      </ErrorBoundary>
+                </NavigationContainer>
+              </MovieListHomeContext>
+            </EpisodeBaruHomeContext>
+          </GestureHandlerRootView>
+        </ErrorBoundary>
+      </KeyboardProvider>
     </SafeAreaProvider>
   );
 }

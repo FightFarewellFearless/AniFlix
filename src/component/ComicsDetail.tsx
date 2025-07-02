@@ -11,6 +11,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Button, Divider, Surface, TextInput } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -81,178 +82,181 @@ export default function ComicsDetail(props: Props) {
   const isInList = watchLaterListsJson.some(item => item.title === data.title);
 
   return (
-    <ReanimatedFlashList
-      ref={scrollRef}
-      data={filteredChapters}
-      ListEmptyComponent={() => (
-        <View style={styles.mainContainer}>
-          <Text style={globalStyles.text}>Tidak ada chapter</Text>
-        </View>
-      )}
-      renderItem={({ item }) => {
-        return (
-          <TouchableOpacity style={styles.chapterItem} onPress={() => readComic(item.chapterUrl)}>
-            <View style={styles.chapterTitleContainer}>
-              <Text style={[globalStyles.text, styles.chapterText]}>{item.chapter}</Text>
-            </View>
-            <View style={styles.chapterDetailsContainer}>
-              <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                <Icon name="calendar" size={12} /> {item.releaseDate}
-              </Text>
-              <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                <Icon name="eye" size={12} /> {item.views}x dilihat
-              </Text>
-            </View>
-          </TouchableOpacity>
-        );
-      }}
-      ItemSeparatorComponent={() => <Divider />}
-      keyExtractor={item => item.chapter}
-      contentContainerStyle={{
-        backgroundColor: styles.mainContainer.backgroundColor,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        paddingBottom: insets.bottom,
-      }}
-      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-      ListHeaderComponent={
-        <>
-          <ReanimatedImage
-            style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
-            source={{ uri: data.headerImageUrl }}
-          />
-          <LinearGradient
-            colors={['transparent', 'black']}
-            style={{
-              width: '100%',
-              height: 60,
-              position: 'absolute',
-              transform: [
-                {
-                  translateY: 155,
-                },
-              ],
-            }}
-          />
-          <View style={[styles.mainContainer, styles.mainContent]}>
-            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-              <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
-              <View style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
-                <Surface
-                  elevation={3}
-                  style={{
-                    backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
-                    borderRadius: 10,
-                  }}>
-                  <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
-                </Surface>
-                <Surface
-                  elevation={3}
-                  style={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: colorScheme === 'dark' ? 'white' : 'black',
-                  }}>
-                  <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
-                </Surface>
-              </View>
-            </View>
-            <View style={styles.infoContainer}>
-              <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
-              <Text style={[globalStyles.text, styles.title, styles.indonesianTitle]}>
-                {data.indonesianTitle}
-              </Text>
-              <Text style={[globalStyles.text, styles.author]}>By {data.author}</Text>
-              <View style={styles.genreContainer}>
-                {data.genres.map(z => {
-                  return (
-                    <Surface
-                      key={z}
-                      elevation={3}
-                      style={{
-                        borderRadius: 8,
-                      }}>
-                      <Text style={styles.genre} key={z}>
-                        {z}
-                      </Text>
-                    </Surface>
-                  );
-                })}
-              </View>
-            </View>
-            <View style={styles.secondaryInfoContainer}>
-              <View style={styles.additionalInfo}>
-                <Surface style={styles.additionalInfoTextSurface}>
-                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon name="check-circle" /> {data.minAge}
-                  </Text>
-                </Surface>
-                <Surface style={styles.additionalInfoTextSurface}>
-                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon name="map-signs" /> {data.readingDirection}
-                  </Text>
-                </Surface>
-                <Surface style={styles.additionalInfoTextSurface}>
-                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon name="tag" /> {data.concept}
-                  </Text>
-                </Surface>
-              </View>
-
-              <Text style={[globalStyles.text]}>{data.synopsis}</Text>
-            </View>
-            <View style={{ flexDirection: 'column', flex: 1 }}>
-              <Button
-                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                textColor={styles.additionalInfoText.color}
-                mode="outlined"
-                icon="playlist-plus"
-                disabled={isInList}
-                onPress={() => {
-                  const watchLaterJson: watchLaterJSON = {
-                    title: data.title,
-                    link: props.route.params.link,
-                    rating: 'Komik',
-                    releaseYear: data.chapters[data.chapters.length - 1].releaseDate,
-                    thumbnailUrl: data.thumbnailUrl,
-                    genre: data.genres,
-                    date: Date.now(),
-                    isComics: true,
-                  };
-                  controlWatchLater('add', watchLaterJson);
-                  ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
-                }}>
-                {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
-              </Button>
-              <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
-              <View style={{ gap: 10 }}>
-                <Button
-                  onPress={() => readComic(data.chapters[data.chapters.length - 1].chapterUrl)}
-                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                  textColor={styles.additionalInfoText.color}
-                  mode="elevated">
-                  Baca Chapter Pertama
-                </Button>
-                <Button
-                  onPress={() => readComic(data.chapters[0].chapterUrl)}
-                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                  textColor={styles.additionalInfoText.color}
-                  mode="elevated">
-                  Baca Chapter Terbaru
-                </Button>
-              </View>
-              <TextInput
-                onChangeText={setSearchQuery}
-                value={searchQuery}
-                style={{ margin: 10 }}
-                label="Cari chapter"
-                keyboardType="numeric"
-              />
-            </View>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <ReanimatedFlashList
+        ref={scrollRef}
+        data={filteredChapters}
+        ListEmptyComponent={() => (
+          <View style={styles.mainContainer}>
+            <Text style={globalStyles.text}>Tidak ada chapter</Text>
           </View>
-        </>
-      }
-    />
+        )}
+        renderItem={({ item }) => {
+          return (
+            <TouchableOpacity style={styles.chapterItem} onPress={() => readComic(item.chapterUrl)}>
+              <View style={styles.chapterTitleContainer}>
+                <Text style={[globalStyles.text, styles.chapterText]}>{item.chapter}</Text>
+              </View>
+              <View style={styles.chapterDetailsContainer}>
+                <Text style={[globalStyles.text, styles.chapterDetailText]}>
+                  <Icon name="calendar" size={12} /> {item.releaseDate}
+                </Text>
+                <Text style={[globalStyles.text, styles.chapterDetailText]}>
+                  <Icon name="eye" size={12} /> {item.views}x dilihat
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
+        ItemSeparatorComponent={() => <Divider />}
+        keyExtractor={item => item.chapter}
+        contentContainerStyle={{
+          backgroundColor: styles.mainContainer.backgroundColor,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom,
+        }}
+        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+        ListHeaderComponent={
+          <>
+            <ReanimatedImage
+              style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
+              source={{ uri: data.headerImageUrl }}
+            />
+            <LinearGradient
+              colors={['transparent', 'black']}
+              style={{
+                width: '100%',
+                height: 60,
+                position: 'absolute',
+                transform: [
+                  {
+                    translateY: 155,
+                  },
+                ],
+              }}
+            />
+            <View style={[styles.mainContainer, styles.mainContent]}>
+              <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
+                <View
+                  style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
+                  <Surface
+                    elevation={3}
+                    style={{
+                      backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+                      borderRadius: 10,
+                    }}>
+                    <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
+                  </Surface>
+                  <Surface
+                    elevation={3}
+                    style={{
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderColor: colorScheme === 'dark' ? 'white' : 'black',
+                    }}>
+                    <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+                  </Surface>
+                </View>
+              </View>
+              <View style={styles.infoContainer}>
+                <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
+                <Text style={[globalStyles.text, styles.title, styles.indonesianTitle]}>
+                  {data.indonesianTitle}
+                </Text>
+                <Text style={[globalStyles.text, styles.author]}>By {data.author}</Text>
+                <View style={styles.genreContainer}>
+                  {data.genres.map(z => {
+                    return (
+                      <Surface
+                        key={z}
+                        elevation={3}
+                        style={{
+                          borderRadius: 8,
+                        }}>
+                        <Text style={styles.genre} key={z}>
+                          {z}
+                        </Text>
+                      </Surface>
+                    );
+                  })}
+                </View>
+              </View>
+              <View style={styles.secondaryInfoContainer}>
+                <View style={styles.additionalInfo}>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon name="check-circle" /> {data.minAge}
+                    </Text>
+                  </Surface>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon name="map-signs" /> {data.readingDirection}
+                    </Text>
+                  </Surface>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon name="tag" /> {data.concept}
+                    </Text>
+                  </Surface>
+                </View>
+
+                <Text style={[globalStyles.text]}>{data.synopsis}</Text>
+              </View>
+              <View style={{ flexDirection: 'column', flex: 1 }}>
+                <Button
+                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                  textColor={styles.additionalInfoText.color}
+                  mode="outlined"
+                  icon="playlist-plus"
+                  disabled={isInList}
+                  onPress={() => {
+                    const watchLaterJson: watchLaterJSON = {
+                      title: data.title,
+                      link: props.route.params.link,
+                      rating: 'Komik',
+                      releaseYear: data.chapters[data.chapters.length - 1].releaseDate,
+                      thumbnailUrl: data.thumbnailUrl,
+                      genre: data.genres,
+                      date: Date.now(),
+                      isComics: true,
+                    };
+                    controlWatchLater('add', watchLaterJson);
+                    ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+                  }}>
+                  {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
+                </Button>
+                <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
+                <View style={{ gap: 10 }}>
+                  <Button
+                    onPress={() => readComic(data.chapters[data.chapters.length - 1].chapterUrl)}
+                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                    textColor={styles.additionalInfoText.color}
+                    mode="elevated">
+                    Baca Chapter Pertama
+                  </Button>
+                  <Button
+                    onPress={() => readComic(data.chapters[0].chapterUrl)}
+                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                    textColor={styles.additionalInfoText.color}
+                    mode="elevated">
+                    Baca Chapter Terbaru
+                  </Button>
+                </View>
+                <TextInput
+                  onChangeText={setSearchQuery}
+                  value={searchQuery}
+                  style={{ margin: 10 }}
+                  label="Cari chapter"
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </>
+        }
+      />
+    </KeyboardAvoidingView>
   );
 }
 
