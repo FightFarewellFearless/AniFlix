@@ -3789,7 +3789,7 @@ __metadata:
     react-native-dotenv: ^3.4.11
     react-native-edge-to-edge: ^1.6.2
     react-native-error-boundary: ^2.0.0
-    react-native-gesture-handler: 2.26.0
+    react-native-gesture-handler: 2.27.1
     react-native-keyboard-controller: ^1.17.5
     react-native-marked: ^7.0.2
     react-native-mmkv: ^3.3.0
@@ -10200,9 +10200,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.26.0":
-  version: 2.26.0
-  resolution: "react-native-gesture-handler@npm:2.26.0"
+"react-native-gesture-handler@npm:2.27.1":
+  version: 2.27.1
+  resolution: "react-native-gesture-handler@npm:2.27.1"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -10210,7 +10210,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: e01cc57598b1cd2b4bf2886906e0d3a03ef09a57ce7a8ab530ec7779853919bb8265dd9afc0f023a0418cf60f6762eb27d1d71f8e3e9416a78ab0ddd55c22bb9
+  checksum: 45a9ba24dd6fa370a4f4d6a58dcd58eaa9937a1fcc7db7e6b3c9020dcde41f335c1b80eb2eda0c73dc43e32cd5f151ebc5f90ae7179028e7c3490f4df4ef7817
   languageName: node
   linkType: hard
 
