@@ -12,6 +12,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Icon from 'react-native-vector-icons/Entypo';
 import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
@@ -114,7 +115,7 @@ function Blocked(props: Props) {
         transparent
         animationType="fade"
         onRequestClose={() => setIsRequestModalOpen(false)}>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView behavior="height" style={styles.modalOverlay}>
           <View style={styles.modalContentContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Permintaan Whitelist</Text>
@@ -152,7 +153,7 @@ function Blocked(props: Props) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <View style={styles.contentContainer}>
