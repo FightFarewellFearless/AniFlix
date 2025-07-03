@@ -69,9 +69,9 @@ function BottomTabs(props: Props) {
   }, [props.route.params.data, setAnimeData]);
   useFocusEffect(
     useCallback(() => {
-      KeyboardController.setDefaultMode();
+      KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN);
       return () => {
-        KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE);
+        KeyboardController.setDefaultMode();
       };
     }, []),
   );
