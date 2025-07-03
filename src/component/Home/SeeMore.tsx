@@ -3,13 +3,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
-  Text,
   ToastAndroid,
-  TouchableOpacity,
+  useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
@@ -31,7 +30,7 @@ function SeeMore(props: Props) {
       ? (animeData?.newAnime.length ?? 0) / 25
       : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
-
+  const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
 
   let columnWidth = (dimensions.width * 120) / 200 / 1.9;
@@ -49,6 +48,7 @@ function SeeMore(props: Props) {
       <LegendList
         recycleItems
         contentContainerStyle={{
+          gap: 6,
           paddingLeft: insets.left,
           paddingRight: insets.right,
           paddingBottom: insets.bottom,
@@ -60,7 +60,7 @@ function SeeMore(props: Props) {
             | Movies
           )[]
         }
-        extraData={styles}
+        extraData={colorScheme}
         keyExtractor={item => item.title}
         renderItem={({ item }) =>
           props.route.params.type === 'MovieList' ? (
@@ -82,8 +82,9 @@ function SeeMore(props: Props) {
           <>
             {isLoading && <ActivityIndicator />}
 
-            <TouchableOpacity
-              style={styles.seeMoreButton}
+            <Button
+              mode="contained-tonal"
+              style={{ marginTop: 6 }}
               onPress={async () => {
                 if (isLoading) {
                   return;
@@ -109,29 +110,13 @@ function SeeMore(props: Props) {
                 }
               }}
               disabled={isLoading}>
-              <Text style={{ color: '#fafafa' }}>Lihat lebih banyak</Text>
-            </TouchableOpacity>
+              Lihat lebih banyak
+            </Button>
           </>
         }
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  seeMoreButton: {
-    backgroundColor: '#007bff', // Bootstrap primary button color
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
-    elevation: 2, // for Android - adds a drop shadow
-    shadowColor: '#000', // for iOS - adds a drop shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    shadowOpacity: 0.1,
-    alignItems: 'center', // Center the text inside the button
-    justifyContent: 'center', // Center the text vertically
-  },
-});
 
 export default memo(SeeMore);

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
+import { useTheme } from 'react-native-paper';
 import {
   FadeInUp,
   FadeOutDown,
@@ -333,6 +334,7 @@ function Loading(props: Props) {
 }
 
 function useStyles() {
+  const theme = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   return useMemo(
@@ -341,7 +343,6 @@ function useStyles() {
         container: {
           flex: 1,
           flexShrink: 1,
-          backgroundColor: isDark ? '#121212' : '#f5f5f5',
           padding: 24,
           justifyContent: 'space-between',
         },
@@ -359,7 +360,7 @@ function useStyles() {
         appName: {
           fontSize: 32,
           fontWeight: 'bold',
-          color: isDark ? '#BB86FC' : '#6200EE',
+          color: theme.colors.primary,
           marginBottom: 8,
         },
         subtitle: {
@@ -374,7 +375,7 @@ function useStyles() {
           elevation: 2,
         },
         quoteIcon: {
-          color: isDark ? '#BB86FC' : '#6200EE',
+          color: theme.colors.primary,
           opacity: 0.6,
         },
         quoteCloseIcon: {
@@ -392,7 +393,7 @@ function useStyles() {
         quoteAuthor: {
           fontSize: 14,
           fontWeight: 'bold',
-          color: isDark ? '#BB86FC' : '#6200EE',
+          color: theme.colors.primary,
           textAlign: 'right',
           marginTop: 8,
         },
@@ -413,7 +414,7 @@ function useStyles() {
         },
         progressFill: {
           height: '100%',
-          backgroundColor: isDark ? '#BB86FC' : '#6200EE',
+          backgroundColor: theme.colors.primary,
           borderRadius: 4,
         },
         progressText: {
@@ -467,10 +468,10 @@ function useStyles() {
           marginBottom: 8,
         },
         loadingIndicator: {
-          color: isDark ? '#BB86FC' : '#6200EE',
+          color: theme.colors.primary,
         },
       }),
-    [isDark],
+    [isDark, theme.colors.primary],
   );
 }
 

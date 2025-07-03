@@ -3,15 +3,16 @@ import { StackActions } from '@react-navigation/native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import moment from 'moment';
 import { memo, useCallback, useMemo, useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles from '../../../assets/style';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import watchLaterJSON from '../../../types/watchLaterJSON';
+import { useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import controlWatchLater from '../../../utils/watchLaterControl';
 import ImageLoading from '../../ImageLoading';
-import { useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 
@@ -94,7 +95,7 @@ function WatchLater(props: Props) {
                   );
                 }}
                 style={styles.listDeleteContainer}>
-                <Icon name="delete-forever" size={20} color="#17e2af" />
+                <Icon name="delete-forever" size={20} style={styles.listDeleteIcon} />
               </TouchableOpacity>
             </View>
           </View>
@@ -108,6 +109,7 @@ function WatchLater(props: Props) {
       styles.listContainer,
       styles.listDateText,
       styles.listDeleteContainer,
+      styles.listDeleteIcon,
       styles.listGenreContainer,
       styles.listGenreText,
       styles.listInfoContainer,
@@ -158,14 +160,16 @@ function WatchLater(props: Props) {
 const extractKey = (item: watchLaterJSON) => item.date.toString();
 
 function useStyles() {
-  const colorScheme = useColorScheme();
+  const theme = useTheme();
   return useMemo(
     () =>
       StyleSheet.create({
         listContainer: {
           flexDirection: 'row',
           marginVertical: 5,
-          backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
+          backgroundColor: theme.colors.surface,
+          borderWidth: 0.2,
+          borderColor: theme.colors.onSurfaceVariant,
           borderRadius: 16,
           elevation: 5,
           height: 160,
@@ -202,7 +206,7 @@ function useStyles() {
           flex: 1,
         },
         listGenreText: {
-          color: colorScheme === 'dark' ? 'lightgreen' : 'darkgreen',
+          color: theme.colors.onSecondaryContainer,
           fontWeight: 'bold',
         },
         emptyList: {
@@ -224,13 +228,16 @@ function useStyles() {
         },
         listDeleteContainer: {
           justifyContent: 'flex-end',
-          backgroundColor: '#af461c',
+          backgroundColor: theme.colors.errorContainer,
           borderRadius: 5,
           padding: 3,
           marginHorizontal: 2,
         },
+        listDeleteIcon: {
+          color: theme.colors.onErrorContainer,
+        },
       }),
-    [colorScheme],
+    [theme],
   );
 }
 

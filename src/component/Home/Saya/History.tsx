@@ -10,19 +10,19 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useColorScheme,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native'; // RNGH
+import { useTheme } from 'react-native-paper';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 
 // const AnimatedFlashList = Animated.createAnimatedComponent(
 //   FlashList as typeof FlashList<HistoryJSON>,
@@ -146,7 +146,7 @@ function History(props: Props) {
               <View style={styles.deleteContainer}>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  hitSlop={10}
+                  hitSlop={5}
                   onPress={() => {
                     DialogManager.alert(
                       'Yakin?',
@@ -164,7 +164,7 @@ function History(props: Props) {
                       ],
                     );
                   }}>
-                  <Icon name="delete-forever" size={26} style={{ color: 'red' }} />
+                  <Icon name="delete-forever" size={21} style={styles.deleteIcon} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -348,7 +348,7 @@ function formatTimeFromSeconds(seconds: number) {
 }
 
 function useStyles() {
-  const colorScheme = useColorScheme();
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   return useMemo(
     () =>
@@ -367,7 +367,7 @@ function useStyles() {
           height: 50,
           width: 50,
           borderRadius: 100,
-          backgroundColor: '#0060af',
+          backgroundColor: 'rgb(0, 47, 109)',
           elevation: 3,
           shadowColor: 'white',
         },
@@ -379,7 +379,9 @@ function useStyles() {
         listContainerButton: {
           flexDirection: 'row',
           marginVertical: 5,
-          backgroundColor: colorScheme === 'dark' ? '#1f1e1e' : '#ffffff',
+          backgroundColor: theme.colors.surface,
+          borderWidth: 0.2,
+          borderColor: theme.colors.onSurfaceVariant,
           borderRadius: 16,
           elevation: 5,
         },
@@ -407,7 +409,7 @@ function useStyles() {
           flexShrink: 1,
         },
         listEpisode: {
-          color: '#1e6ab1',
+          color: theme.colors.secondary,
           fontSize: 13,
           fontWeight: 'bold',
         },
@@ -432,7 +434,14 @@ function useStyles() {
           fontWeight: 'bold',
         },
         deleteContainer: {},
-        deleteButton: {},
+        deleteButton: {
+          backgroundColor: theme.colors.errorContainer,
+          borderRadius: 5,
+          padding: 2,
+        },
+        deleteIcon: {
+          color: theme.colors.onErrorContainer,
+        },
         noHistory: {
           flex: 1,
           justifyContent: 'center',
@@ -459,7 +468,7 @@ function useStyles() {
           textDecorationColor: globalStyles.text.color,
         },
       }),
-    [colorScheme, globalStyles.text.color],
+    [globalStyles.text.color, theme],
   );
 }
 

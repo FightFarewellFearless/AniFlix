@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo';
 import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
@@ -147,9 +148,11 @@ function Blocked(props: Props) {
                 <Text style={styles.cancelButtonText}>Batal</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.submitButton]}
+                style={[styles.modalButton, styles.requestButton]}
                 onPress={sendRequest}>
-                <Text style={styles.submitButtonText}>Kirim Permintaan</Text>
+                <Text style={[styles.modalButtonText, styles.requestButtonText]}>
+                  Kirim Permintaan
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -191,7 +194,7 @@ function Blocked(props: Props) {
             onPress={() => setIsRequestModalOpen(true)}
             style={[styles.button, styles.requestButton]}>
             <Icon name="message" size={16} color={'white'} />
-            <Text style={styles.buttonText}>Ajukan Permintaan</Text>
+            <Text style={[styles.buttonText, styles.requestButtonText]}>Ajukan Permintaan</Text>
           </TouchableOpacity>
         </View>
 
@@ -202,13 +205,13 @@ function Blocked(props: Props) {
 }
 
 function useStyles() {
+  const theme = useTheme();
   const colorScheme = useColorScheme();
   return useMemo(
     () =>
       StyleSheet.create({
         container: {
           flex: 1,
-          backgroundColor: colorScheme === 'dark' ? '#121212' : '#F5F5F5',
         },
         contentContainer: {
           flex: 1,
@@ -277,7 +280,10 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#2C2C2E' : '#b4b4b4',
         },
         requestButton: {
-          backgroundColor: '#34C759',
+          backgroundColor: theme.colors.secondaryContainer,
+        },
+        requestButtonText: {
+          color: theme.colors.onSecondaryContainer,
         },
         buttonText: {
           color: 'white',
@@ -323,7 +329,7 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#2C2C2E' : '#F2F2F7',
           borderRadius: 8,
           padding: 12,
-          minHeight: 100,
+          height: 100,
           color: colorScheme === 'dark' ? 'white' : 'black',
           marginBottom: 20,
           textAlignVertical: 'top',
@@ -339,27 +345,31 @@ function useStyles() {
           flex: 1,
           marginHorizontal: 4,
           alignItems: 'center',
+          justifyContent: 'center',
+        },
+        modalButtonText: {
+          fontWeight: '500',
         },
         cancelButton: {
           backgroundColor: colorScheme === 'dark' ? '#2C2C2E' : '#F2F2F7',
-        },
-        submitButton: {
-          backgroundColor: '#34C759',
+          alignItems: 'center',
+          justifyContent: 'center',
         },
         cancelButtonText: {
           color: colorScheme === 'dark' ? 'white' : 'black',
           fontWeight: '500',
         },
-        submitButtonText: {
-          color: 'white',
-          fontWeight: '500',
-        },
         highlightText: {
-          color: '#34C759',
+          color: theme.colors.tertiary,
           fontWeight: '600',
         },
       }),
-    [colorScheme],
+    [
+      colorScheme,
+      theme.colors.onSecondaryContainer,
+      theme.colors.secondaryContainer,
+      theme.colors.tertiary,
+    ],
   );
 }
 

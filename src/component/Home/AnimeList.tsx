@@ -8,7 +8,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import { useBatteryLevel } from 'react-native-device-info';
 import { RefreshControl } from 'react-native-gesture-handler';
+import { useTheme } from 'react-native-paper';
 import Reanimated, {
   cancelAnimation,
   Easing,
@@ -270,7 +271,7 @@ function EpisodeBaruUNMEMO({
             props.navigation.dispatch(StackActions.push('SeeMore', { type: 'AnimeList' }));
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
-          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
         </TouchableOpacity>
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
@@ -336,7 +337,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
             props.navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
-          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
         </TouchableOpacity>
       </View>
 
@@ -414,7 +415,7 @@ function ComicListUNMEMO() {
             navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
-          <MaterialIcon name="chevron-right" size={20} color="#007db8" />
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
         </TouchableOpacity> */}
       </View>
 
@@ -493,153 +494,164 @@ function useLocalTime() {
 
 function useStyles() {
   const colorScheme = useColorScheme();
+  const theme = useTheme();
   const isDark = colorScheme === 'dark';
 
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: isDark ? '#121212' : '#f5f5f7',
-    },
-    headerCard: {
-      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-      borderRadius: 16,
-      padding: 5,
-      paddingBottom: 16,
-      margin: 16,
-      marginBottom: 12,
-      elevation: 4,
-    },
-    headerInfo: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 8,
-    },
-    timeText: {
-      fontSize: 14,
-      color: isDark ? '#BB86FC' : '#6200EE',
-      fontWeight: 'bold',
-    },
-    batteryText: {
-      fontSize: 14,
-      color: isDark ? '#BB86FC' : '#6200EE',
-      fontWeight: 'bold',
-    },
-    appInfo: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-      justifyContent: 'center',
-      marginBottom: 16,
-    },
-    appName: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: isDark ? '#E0E0E0' : '#333',
-      marginRight: 8,
-    },
-    appVersion: {
-      fontSize: 12,
-      color: isDark ? '#AAA' : '#777',
-    },
-    runningText: {
-      color: isDark ? '#BB86FC' : '#6200EE',
-      fontWeight: 'bold',
-      fontSize: 14,
-    },
-    refreshButton: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#007ab3',
-      paddingVertical: 4,
-      borderRadius: 8,
-      marginHorizontal: 16,
-      marginBottom: 16,
-    },
-    refreshIcon: {
-      marginRight: 8,
-    },
-    refreshText: {
-      color: '#FFFFFF',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-    sectionContainer: {
-      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-      borderRadius: 16,
-      paddingVertical: 8,
-      marginHorizontal: 3,
-      marginBottom: 16,
-      elevation: 2,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      marginBottom: 12,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: isDark ? '#E0E0E0' : '#333',
-    },
-    seeMoreButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    seeMoreText: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: '#007db8',
-      marginRight: 4,
-    },
-    scheduleSection: {
-      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-      borderRadius: 16,
-      padding: 16,
-      marginHorizontal: 16,
-      marginBottom: 16,
-      elevation: 2,
-    },
-    scheduleContainer: {
-      marginBottom: 16,
-    },
-    scheduleDay: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: isDark ? '#BB86FC' : '#6200EE',
-      marginBottom: 8,
-      textAlign: 'center',
-    },
-    scheduleItem: {
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-    },
-    scheduleItemEven: {
-      backgroundColor: isDark ? '#252525' : '#F5F5F5',
-    },
-    scheduleItemOdd: {
-      backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-    },
-    scheduleTitle: {
-      fontSize: 14,
-      color: isDark ? '#E0E0E0' : '#333',
-      textAlign: 'center',
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 16,
-      backgroundColor: isDark ? '#2A1E1E' : '#FFEBEE',
-      borderRadius: 8,
-      marginHorizontal: 16,
-    },
-    errorText: {
-      fontSize: 14,
-      color: '#d80000',
-      marginLeft: 8,
-      textAlign: 'center',
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: isDark ? '#121212' : '#f5f5f7',
+        },
+        headerCard: {
+          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+          borderRadius: 16,
+          padding: 5,
+          paddingBottom: 16,
+          margin: 16,
+          marginBottom: 12,
+          elevation: 4,
+        },
+        headerInfo: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginBottom: 8,
+        },
+        timeText: {
+          fontSize: 14,
+          color: theme.colors.primary,
+          fontWeight: 'bold',
+        },
+        batteryText: {
+          fontSize: 14,
+          color: theme.colors.primary,
+          fontWeight: 'bold',
+        },
+        appInfo: {
+          flexDirection: 'row',
+          alignItems: 'baseline',
+          justifyContent: 'center',
+          marginBottom: 16,
+        },
+        appName: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          color: isDark ? '#E0E0E0' : '#333',
+          marginRight: 8,
+        },
+        appVersion: {
+          fontSize: 12,
+          color: isDark ? '#AAA' : '#777',
+        },
+        runningText: {
+          color: theme.colors.primary,
+          fontWeight: 'bold',
+          fontSize: 14,
+        },
+        refreshButton: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: theme.colors.secondaryContainer,
+          paddingVertical: 4,
+          borderRadius: 8,
+          marginHorizontal: 16,
+          marginBottom: 16,
+        },
+        refreshIcon: {
+          color: theme.colors.onSecondaryContainer,
+          marginRight: 8,
+        },
+        refreshText: {
+          color: theme.colors.onSecondaryContainer,
+          fontWeight: 'bold',
+          fontSize: 16,
+        },
+        sectionContainer: {
+          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+          borderRadius: 16,
+          paddingVertical: 8,
+          marginHorizontal: 3,
+          marginBottom: 16,
+          elevation: 2,
+        },
+        sectionHeader: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          marginBottom: 12,
+        },
+        sectionTitle: {
+          fontSize: 18,
+          fontWeight: 'bold',
+          color: isDark ? '#E0E0E0' : '#333',
+        },
+        seeMoreButton: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        seeMoreText: {
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: theme.colors.primary,
+          marginRight: 4,
+        },
+        scheduleSection: {
+          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+          borderRadius: 16,
+          padding: 16,
+          marginHorizontal: 16,
+          marginBottom: 16,
+          elevation: 2,
+        },
+        scheduleContainer: {
+          marginBottom: 16,
+        },
+        scheduleDay: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: theme.colors.primary,
+          marginBottom: 8,
+          textAlign: 'center',
+        },
+        scheduleItem: {
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+        },
+        scheduleItemEven: {
+          backgroundColor: isDark ? '#252525' : '#F5F5F5',
+        },
+        scheduleItemOdd: {
+          backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
+        },
+        scheduleTitle: {
+          fontSize: 14,
+          color: isDark ? '#E0E0E0' : '#333',
+          textAlign: 'center',
+        },
+        errorContainer: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16,
+          backgroundColor: isDark ? '#2A1E1E' : '#FFEBEE',
+          borderRadius: 8,
+          marginHorizontal: 16,
+        },
+        errorText: {
+          fontSize: 14,
+          color: '#d80000',
+          marginLeft: 8,
+          textAlign: 'center',
+        },
+      }),
+    [
+      isDark,
+      theme.colors.onSecondaryContainer,
+      theme.colors.primary,
+      theme.colors.secondaryContainer,
+    ],
+  );
 }

@@ -10,14 +10,15 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/animeMovie';
-import ImageLoading from '../ImageLoading';
-import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 import { LatestKomikuRelease } from '../../utils/komiku';
-import useGlobalStyles from '../../assets/style';
+import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
+import ImageLoading from '../ImageLoading';
 
 export function ListAnimeComponent(
   props: (
@@ -95,7 +96,6 @@ export function ListAnimeComponent(
         style={[
           styles.listBackground,
           {
-            borderColor: 'orange',
             width:
               props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
             height:
@@ -157,6 +157,7 @@ export function ListAnimeComponent(
 
 function useStyles() {
   const dimensions = useWindowDimensions();
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
@@ -170,14 +171,15 @@ function useStyles() {
           overflow: 'hidden',
           elevation: 4,
           padding: 8,
-          backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#ececec',
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: theme.colors.onBackground,
+          backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#f3f3f3',
           borderRadius: 12,
         },
         listBackground: {
           overflow: 'hidden',
           width: LIST_BACKGROUND_WIDTH,
           height: LIST_BACKGROUND_HEIGHT,
-          borderWidth: 1,
           borderRadius: 7,
           alignSelf: 'center',
         },
@@ -211,7 +213,7 @@ function useStyles() {
         animeReleaseDayContainer: {},
         animeReleaseDay: {
           fontSize: 12,
-          color: globalStyles.text.color,
+          color: theme.colors.tertiary,
           opacity: 0.8,
           fontWeight: 'bold',
         },
@@ -222,6 +224,13 @@ function useStyles() {
           fontWeight: 'bold',
         },
       }),
-    [LIST_BACKGROUND_HEIGHT, LIST_BACKGROUND_WIDTH, globalStyles.text.color, colorScheme],
+    [
+      theme.colors.onBackground,
+      theme.colors.tertiary,
+      colorScheme,
+      LIST_BACKGROUND_WIDTH,
+      LIST_BACKGROUND_HEIGHT,
+      globalStyles.text.color,
+    ],
   );
 }

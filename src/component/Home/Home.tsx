@@ -7,9 +7,10 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
+import { useTheme } from 'react-native-paper';
+import { withSuspenseAndSafeArea } from '../../../App';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { withSuspenseAndSafeArea } from '../../../App';
 
 const EpisodeBaruHome = lazy(() => import('./AnimeList'));
 const Search = lazy(() => import('./Search'));
@@ -60,6 +61,7 @@ const tabScreens: {
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
   const colorScheme = useColorScheme();
+  const theme = useTheme();
   useEffect(() => {
     startTransition(() => {
       setAnimeData?.(props.route.params.data);
@@ -76,12 +78,12 @@ function BottomTabs(props: Props) {
   return (
     <Tab.Navigator
       tabBarStyle={{
-        backgroundColor: colorScheme === 'dark' ? '#181818' : '#fff',
+        backgroundColor: colorScheme === 'dark' ? '#181818' : '#f0f0f0',
       }}
       activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
       screenOptions={{
         freezeOnBlur: true,
-        tabBarActiveTintColor: colorScheme === 'dark' ? '#007bff' : '#0056b3',
+        tabBarActiveTintColor: theme.colors.primary,
       }}>
       {tabScreens.map(({ name, component: Component, options }) => (
         <Tab.Screen key={name} name={name} options={options}>

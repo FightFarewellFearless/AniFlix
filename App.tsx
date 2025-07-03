@@ -1,4 +1,8 @@
-import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DarkTheme as ReactNavigationDarkTheme,
+  DefaultTheme as ReactNavigationDefaultTheme,
+} from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -10,7 +14,14 @@ import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { Appbar, Button, Dialog, PaperProvider, Portal } from 'react-native-paper';
+import {
+  adaptNavigationTheme,
+  Appbar,
+  Button,
+  Dialog,
+  PaperProvider,
+  Portal,
+} from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
@@ -27,6 +38,29 @@ import { Movies } from './src/utils/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
+import { MDDark, MDLight } from './src/assets/MaterialTheme';
+
+const { DarkTheme, LightTheme } = adaptNavigationTheme({
+  reactNavigationLight: ReactNavigationDefaultTheme,
+  reactNavigationDark: ReactNavigationDarkTheme,
+});
+
+const CombinedDefaultTheme = {
+  ...MDLight,
+  ...LightTheme,
+  colors: {
+    ...LightTheme.colors,
+    ...MDLight.colors,
+  },
+};
+const CombinedDarkTheme = {
+  ...MDDark,
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    ...MDDark.colors,
+  },
+};
 
 const AniDetail = lazy(() => import('./src/component/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
@@ -189,20 +223,10 @@ function App() {
                   }),
                   [movieParamsState],
                 )}>
-                <NavigationContainer
-                  ref={navigationRef}
-                  theme={
-                    colorScheme === 'dark'
-                      ? {
-                          ...DarkTheme,
-                          colors: {
-                            ...DarkTheme.colors,
-                            background: '#0A0A0A',
-                          },
-                        }
-                      : undefined
-                  }>
-                  <PaperProvider>
+                <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
+                  <NavigationContainer
+                    ref={navigationRef}
+                    theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
                     <Portal>
                       <Dialog
                         visible={dialogVisible}
@@ -257,21 +281,21 @@ function App() {
                         </Stack.Screen>
                       ))}
                     </Stack.Navigator>
-                  </PaperProvider>
-                  <CFBypassIsOpenContext
-                    value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
-                    {isOpen && (
-                      <Suspense>
-                        <CFBypassWebView />
-                      </Suspense>
+                    <CFBypassIsOpenContext
+                      value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                      {isOpen && (
+                        <Suspense>
+                          <CFBypassWebView />
+                        </Suspense>
+                      )}
+                    </CFBypassIsOpenContext>
+                    {__DEV__ && (
+                      <View style={styles.Dev} pointerEvents="none">
+                        <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                      </View>
                     )}
-                  </CFBypassIsOpenContext>
-                  {__DEV__ && (
-                    <View style={styles.Dev} pointerEvents="none">
-                      <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-                    </View>
-                  )}
-                </NavigationContainer>
+                  </NavigationContainer>
+                </PaperProvider>
               </MovieListHomeContext>
             </EpisodeBaruHomeContext>
           </GestureHandlerRootView>

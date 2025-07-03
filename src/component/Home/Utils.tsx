@@ -1,5 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import { memo, useMemo } from 'react';
 import {
   ScrollView,
@@ -10,6 +9,7 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
+import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UtilsStackNavigator } from '../../types/navigation';
 import About from './Utilitas/About';
@@ -22,7 +22,29 @@ const Stack = createNativeStackNavigator<UtilsStackNavigator>();
 
 function Utils() {
   return (
-    <Stack.Navigator initialRouteName="ChooseScreen">
+    <Stack.Navigator
+      screenOptions={{
+        header: props => (
+          <Appbar.Header>
+            {props.back && (
+              <Appbar.BackAction
+                onPress={() => {
+                  props.navigation.goBack();
+                }}
+              />
+            )}
+            <Appbar.Content
+              titleStyle={{ fontWeight: 'bold' }}
+              title={
+                typeof props.options.headerTitle === 'string'
+                  ? props.options.headerTitle
+                  : (props.options.title ?? '')
+              }
+            />
+          </Appbar.Header>
+        ),
+      }}
+      initialRouteName="ChooseScreen">
       <Stack.Screen
         name="ChooseScreen"
         component={ChooseScreen}

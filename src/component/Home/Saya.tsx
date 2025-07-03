@@ -1,5 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { memo } from 'react';
+import { Appbar, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import useGlobalStyles from '../../assets/style';
@@ -11,13 +12,30 @@ const Drawer = createDrawerNavigator<SayaDrawerNavigator>();
 
 function Saya() {
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   return (
     <Drawer.Navigator
       screenOptions={{
+        header: props => (
+          <Appbar.Header style={{ flexDirection: 'row-reverse' }}>
+            <Appbar.Content
+              titleStyle={{ fontWeight: 'bold' }}
+              title={
+                typeof props.options.headerTitle === 'string'
+                  ? props.options.headerTitle
+                  : (props.options.title ?? '')
+              }
+            />
+            <Appbar.Action icon="view-headline" onPress={() => props.navigation.openDrawer()} />
+          </Appbar.Header>
+        ),
         headerTintColor: globalStyles.text.color,
         drawerType: 'front',
         drawerStyle: {
           width: '65%',
+        },
+        drawerContentStyle: {
+          backgroundColor: theme.colors.background,
         },
       }}>
       <Drawer.Screen

@@ -51,6 +51,7 @@ import setHistory from '../utils/historyControl';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Button } from 'react-native-paper';
 import WebView from 'react-native-webview';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
@@ -915,50 +916,30 @@ function Video(props: Props) {
             <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
               {data.episodeData && (
                 <View style={[styles.episodeDataControl]}>
-                  <TouchableOpacity
+                  <Button
+                    mode="contained-tonal"
+                    icon="arrow-left"
                     key="prev"
                     disabled={!data.episodeData.previous}
-                    style={[
-                      styles.episodeDataControlButton,
-                      {
-                        backgroundColor: data.episodeData.previous ? '#00ccff' : '#525252',
-                        marginRight: 5,
-                      },
-                    ]}
+                    style={[styles.episodeDataControlButton]}
                     onPress={async () => {
                       await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
                     }}>
-                    <Icon name="arrow-left" size={18} color="black" />
-                    <Text
-                      style={[
-                        globalStyles.text,
-                        { fontWeight: 'bold', color: 'black', textAlign: 'center' },
-                      ]}>
-                      Episode sebelumnya
-                    </Text>
-                  </TouchableOpacity>
+                    Sebelumnya
+                  </Button>
 
-                  <TouchableOpacity
+                  <Button
+                    mode="contained-tonal"
+                    icon="arrow-right"
                     key="next"
                     disabled={!data.episodeData.next}
-                    style={[
-                      styles.episodeDataControlButton,
-                      {
-                        backgroundColor: data.episodeData.next ? '#00ccff' : '#525252',
-                      },
-                    ]}
+                    style={[styles.episodeDataControlButton]}
+                    contentStyle={{ flexDirection: 'row-reverse' }}
                     onPress={async () => {
                       await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
                     }}>
-                    <Icon name="arrow-right" size={18} color="black" />
-                    <Text
-                      style={[
-                        globalStyles.text,
-                        { fontWeight: 'bold', color: 'black', textAlign: 'center' },
-                      ]}>
-                      Episode selanjutnya
-                    </Text>
-                  </TouchableOpacity>
+                    Selanjutnya
+                  </Button>
                 </View>
               )}
               <TouchableOpacity
@@ -1016,10 +997,9 @@ function Video(props: Props) {
               </Text>
             )}
 
-            <TouchableOpacity style={[styles.downloadButton]} onPress={downloadAnime}>
-              <Icon name="download" size={23} color={darkText} />
-              <Text style={{ color: darkText }}>Download</Text>
-            </TouchableOpacity>
+            <Button mode="contained" onPress={downloadAnime}>
+              <Icon name="download" size={23} /> Download
+            </Button>
           </ScrollView>
         )
       }
@@ -1235,21 +1215,7 @@ function useStyles() {
         },
         episodeDataControlButton: {
           flex: 1,
-          padding: 12,
-          borderRadius: 8,
-          backgroundColor: '#2196F3',
           alignItems: 'center',
-        },
-        downloadButton: {
-          backgroundColor: '#115f9e',
-          borderRadius: 8,
-          padding: 15,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 8,
-          marginHorizontal: 10,
-          marginVertical: 15,
         },
         dropdownStyle: {
           backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
@@ -1302,7 +1268,7 @@ function useStyles() {
           lineHeight: 18,
         },
       }),
-    [globalStyles, colorScheme],
+    [colorScheme, globalStyles.text.color],
   );
 }
 export default memo(Video);

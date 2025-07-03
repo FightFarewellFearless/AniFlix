@@ -9,7 +9,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Button, Divider, Surface } from 'react-native-paper';
+import { Button, Divider, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -325,6 +325,7 @@ function MovieDetail(props: Props) {
 }
 
 function useStyles() {
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   return useMemo(
@@ -400,10 +401,10 @@ function useStyles() {
           borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 4,
-          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#00a2ff',
+          backgroundColor: theme.colors.secondaryContainer,
         },
         additionalInfoText: {
-          color: globalStyles.text.color,
+          color: theme.colors.onSecondaryContainer,
           fontWeight: 'bold',
         },
         synopsisContainer: {},
@@ -457,7 +458,12 @@ function useStyles() {
           height: 0.8,
         },
       }),
-    [colorScheme, globalStyles.text.color],
+    [
+      colorScheme,
+      globalStyles.text.color,
+      theme.colors.onSecondaryContainer,
+      theme.colors.secondaryContainer,
+    ],
   );
 }
 

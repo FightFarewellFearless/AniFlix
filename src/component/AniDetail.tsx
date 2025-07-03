@@ -10,7 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { Button, Divider, Surface, TextInput } from 'react-native-paper';
+import { Button, Divider, Surface, TextInput, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -312,6 +312,7 @@ function AniDetail(props: Props) {
 }
 
 function useStyles() {
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   return useMemo(
@@ -397,10 +398,10 @@ function useStyles() {
         },
         additionalInfoTextSurface: {
           borderRadius: 8,
-          backgroundColor: colorScheme === 'dark' ? '#006dac' : '#0396eb',
+          backgroundColor: theme.colors.secondaryContainer,
         },
         additionalInfoText: {
-          color: globalStyles.text.color,
+          color: theme.colors.onSecondaryContainer,
           fontWeight: 'bold',
           paddingHorizontal: 8,
           paddingVertical: 4,
@@ -455,7 +456,12 @@ function useStyles() {
           height: 0.8,
         },
       }),
-    [colorScheme, globalStyles.text.color],
+    [
+      colorScheme,
+      globalStyles.text.color,
+      theme.colors.onSecondaryContainer,
+      theme.colors.secondaryContainer,
+    ],
   );
 }
 
