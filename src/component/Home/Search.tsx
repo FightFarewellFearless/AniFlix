@@ -20,7 +20,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Searchbar, SegmentedButtons } from 'react-native-paper';
+import { Searchbar, SegmentedButtons, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
@@ -419,6 +419,7 @@ function HistoryList({
   item: string;
   onChangeTextFunction: (text: string) => void;
 }) {
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
   return (
@@ -441,7 +442,7 @@ function HistoryList({
         }}>
         <View
           style={{ justifyContent: 'center', alignItems: 'center', flex: 1, flexDirection: 'row' }}>
-          <Icon name="history" size={20} style={{ color: '#00c7a6' }} />
+          <Icon name="history" size={20} style={{ color: theme.colors.tertiary }} />
           <Text style={[globalStyles.text, { fontWeight: 'bold', flex: 1, textAlign: 'center' }]}>
             {item}
           </Text>

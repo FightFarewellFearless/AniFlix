@@ -51,7 +51,7 @@ import setHistory from '../utils/historyControl';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
@@ -87,6 +87,7 @@ const defaultLoadingGif =
 function Video(props: Props) {
   const colorScheme = useColorScheme();
 
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
@@ -720,18 +721,23 @@ function Video(props: Props) {
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: insets.bottom }}>
             {/* movie information */}
             {props.route.params.isMovie && (
-              <View style={{ backgroundColor: '#fde24b', marginVertical: 5 }}>
-                <Icon name="film" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+              <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>
+                <Icon
+                  name="film"
+                  color={theme.colors.onSecondaryContainer}
+                  size={26}
+                  style={{ alignSelf: 'center' }}
+                />
                 <Text
                   style={{
-                    color: lightText,
+                    color: theme.colors.onSecondaryContainer,
                     textAlign: 'center',
                     fontSize: 14,
                     fontWeight: 'bold',
                   }}>
                   Perhatian!
                 </Text>
-                <Text style={{ color: lightText }}>
+                <Text style={{ color: theme.colors.onSecondaryContainer }}>
                   Jika kamu mengalami masalah menonton, silahkan ganti resolusi/server
                 </Text>
               </View>
@@ -739,18 +745,24 @@ function Video(props: Props) {
             {/* acefile embed information */}
             {(data.resolution?.includes('acefile') || data.resolution?.includes('video')) &&
               data.streamingType === 'embed' && (
-                <View style={{ backgroundColor: '#74fd4b', marginVertical: 5 }}>
-                  <Icon name="server" color={lightText} size={26} style={{ alignSelf: 'center' }} />
+                <View
+                  style={{ backgroundColor: theme.colors.tertiaryContainer, marginVertical: 5 }}>
+                  <Icon
+                    name="server"
+                    color={theme.colors.onTertiaryContainer}
+                    size={26}
+                    style={{ alignSelf: 'center' }}
+                  />
                   <Text
                     style={{
-                      color: lightText,
+                      color: theme.colors.onTertiaryContainer,
                       textAlign: 'center',
                       fontSize: 14,
                       fontWeight: 'bold',
                     }}>
                     AceFile
                   </Text>
-                  <Text style={{ color: lightText }}>
+                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
                     Tampaknya server AceFile untuk resolusi ini mengalami masalah. Terkadang server
                     membutuhkan beberapa waktu untuk memproses data, silahkan coba lagi. Jika
                     masalah berlanjut silahkan ganti server atau resolusi lain.
@@ -762,7 +774,7 @@ function Video(props: Props) {
               <View ref={embedInformationRef}>
                 <View
                   style={{
-                    backgroundColor: '#c9c900',
+                    backgroundColor: theme.colors.tertiaryContainer,
                     marginVertical: 5,
                   }}>
                   <TouchableOpacity
@@ -770,15 +782,15 @@ function Video(props: Props) {
                     onPress={() => {
                       embedInformationRef.current?.setNativeProps({ display: 'none' });
                     }}>
-                    <Icon name="close" color={lightText} size={26} />
+                    <Icon name="close" color={theme.colors.onTertiaryContainer} size={26} />
                   </TouchableOpacity>
                   <Icon
                     name="lightbulb-o"
-                    color={lightText}
+                    color={theme.colors.onTertiaryContainer}
                     size={26}
                     style={{ alignSelf: 'center' }}
                   />
-                  <Text style={{ color: lightText }}>
+                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
                     Kamu saat ini menggunakan video player pihak ketiga dikarenakan data dengan
                     format yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
                     Kamu mungkin akan melihat iklan di dalam video.{'\n'}
@@ -791,15 +803,15 @@ function Video(props: Props) {
                 <View
                   style={{
                     marginTop: 5,
-                    backgroundColor: '#c99a00',
+                    backgroundColor: theme.colors.tertiaryContainer,
                   }}>
                   <MaterialCommunityIcons
                     name="screen-rotation"
-                    color={lightText}
+                    color={theme.colors.onTertiaryContainer}
                     size={26}
                     style={{ alignSelf: 'center' }}
                   />
-                  <Text style={{ color: lightText }}>
+                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
                     Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape
                   </Text>
                 </View>
@@ -826,8 +838,15 @@ function Video(props: Props) {
                     };
                   });
                 }}>
-                <Icon name="refresh" color={darkText} size={15} style={{ alignSelf: 'center' }} />
-                <Text style={{ color: darkText }}>Reload video player</Text>
+                <Icon
+                  name="refresh"
+                  color={theme.colors.onSecondaryContainer}
+                  size={15}
+                  style={{ alignSelf: 'center' }}
+                />
+                <Text style={{ color: theme.colors.onSecondaryContainer }}>
+                  Reload video player
+                </Text>
               </TouchableOpacity>
             )}
             <Pressable
@@ -997,7 +1016,10 @@ function Video(props: Props) {
               </Text>
             )}
 
-            <Button mode="contained" onPress={downloadAnime}>
+            <Button
+              mode="contained"
+              style={{ marginTop: 12, marginHorizontal: 10 }}
+              onPress={downloadAnime}>
               <Icon name="download" size={23} /> Download
             </Button>
           </ScrollView>
@@ -1080,6 +1102,7 @@ function TimeInfo() {
 }
 
 function useStyles() {
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
 
@@ -1243,7 +1266,7 @@ function useStyles() {
           fontSize: 14,
         },
         reloadPlayer: {
-          backgroundColor: '#00756c',
+          backgroundColor: theme.colors.secondaryContainer,
           borderRadius: 8,
           padding: 12,
           flexDirection: 'row',
@@ -1268,7 +1291,7 @@ function useStyles() {
           lineHeight: 18,
         },
       }),
-    [colorScheme, globalStyles.text.color],
+    [colorScheme, globalStyles.text.color, theme],
   );
 }
 export default memo(Video);
