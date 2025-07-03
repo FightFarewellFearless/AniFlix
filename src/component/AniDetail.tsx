@@ -305,6 +305,11 @@ function AniDetail(props: Props) {
         }}
         ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
         ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={
+          <View style={[styles.mainContainer, { marginVertical: 6 }]}>
+            <Text style={globalStyles.text}>Tidak ada episode</Text>
+          </View>
+        }
         extraData={colorScheme}
       />
     </KeyboardAvoidingView>

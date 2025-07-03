@@ -87,7 +87,7 @@ export default function ComicsDetail(props: Props) {
         ref={scrollRef}
         data={filteredChapters}
         ListEmptyComponent={() => (
-          <View style={styles.mainContainer}>
+          <View style={[styles.mainContainer, { marginVertical: 6 }]}>
             <Text style={globalStyles.text}>Tidak ada chapter</Text>
           </View>
         )}
