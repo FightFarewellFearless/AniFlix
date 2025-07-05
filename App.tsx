@@ -103,14 +103,10 @@ export const withSuspenseAndSafeArea = (
     );
 };
 
-// TEMP|TODO|WORKAROUND: fix random crash "value is undefined expected an object"
+// Handle JavaScript Error globally
 if (!__DEV__) {
   ErrorUtils.setGlobalHandler((error, isFatal) => {
     if (error instanceof Error && isFatal) {
-      console.error('[Suppressed Error]:', error);
-      if (error.message.includes('Value is undefined, expected an Object')) {
-        return;
-      }
       replaceAllWith('ErrorScreen', { error });
     }
   });
