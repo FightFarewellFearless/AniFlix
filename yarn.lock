@@ -1693,9 +1693,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/cli@npm:0.24.18":
-  version: 0.24.18
-  resolution: "@expo/cli@npm:0.24.18"
+"@expo/cli@npm:0.24.19":
+  version: 0.24.19
+  resolution: "@expo/cli@npm:0.24.19"
   dependencies:
     "@0no-co/graphql.web": ^1.0.8
     "@babel/runtime": ^7.20.0
@@ -1760,7 +1760,7 @@ __metadata:
     ws: ^8.12.1
   bin:
     expo-internal: build/bin/cli
-  checksum: 0ae1f7b881f46723cd77c2faa910f1b1a8e420d9953f8617b53b72ee906b9764887b52bc4d1e2229d82d3fffe6b1741627a49bcc8d66cd0fdc31e2ecb5aa7326
+  checksum: 30cc14a649c7f2b6fa368d154fa516a713cf2f5e48dc308b30952c4215d8ea0910df1ce86671b4552a1982abef0bf0a6f13de47025d242cb5d2821ea5001f1f1
   languageName: node
   linkType: hard
 
@@ -3836,7 +3836,7 @@ __metadata:
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: ^19.0.0-beta-af1b7da-20250417
-    expo: ^53.0.17
+    expo: ^53.0.18
     expo-document-picker: 13.1.6
     expo-image: ^2.3.2
     expo-linear-gradient: 14.1.5
@@ -6314,9 +6314,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-modules-autolinking@npm:2.1.13":
-  version: 2.1.13
-  resolution: "expo-modules-autolinking@npm:2.1.13"
+"expo-modules-autolinking@npm:2.1.14":
+  version: 2.1.14
+  resolution: "expo-modules-autolinking@npm:2.1.14"
   dependencies:
     "@expo/spawn-async": ^1.7.2
     chalk: ^4.1.0
@@ -6327,7 +6327,7 @@ __metadata:
     resolve-from: ^5.0.0
   bin:
     expo-modules-autolinking: bin/expo-modules-autolinking.js
-  checksum: 5cd02a9a0cb0c9c6144b082cfd17d413398ac9140ec269822f0e19cde94e49f5f800aa974c02651a7de1d410ef746acd73216edc367b8a107bcb2b8ba1d4cbc1
+  checksum: 03b29331ef2bac098c6a7b0127e35bb81b49e990b8648785a74b172ef9842fd748ae7f9e5b70158023b6f327c82c4a35c123d8ad19ddc3094da0c642f6affa97
   languageName: node
   linkType: hard
 
@@ -6417,12 +6417,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:^53.0.17":
-  version: 53.0.17
-  resolution: "expo@npm:53.0.17"
+"expo@npm:^53.0.18":
+  version: 53.0.18
+  resolution: "expo@npm:53.0.18"
   dependencies:
     "@babel/runtime": ^7.20.0
-    "@expo/cli": 0.24.18
+    "@expo/cli": 0.24.19
     "@expo/config": ~11.0.12
     "@expo/config-plugins": ~10.1.1
     "@expo/fingerprint": 0.13.4
@@ -6434,7 +6434,7 @@ __metadata:
     expo-file-system: ~18.1.11
     expo-font: ~13.3.2
     expo-keep-awake: ~14.1.4
-    expo-modules-autolinking: 2.1.13
+    expo-modules-autolinking: 2.1.14
     expo-modules-core: 2.4.2
     react-native-edge-to-edge: 1.6.0
     whatwg-url-without-unicode: 8.0.0-3
@@ -6455,7 +6455,7 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: 5a27bb0951b4c4025495ed337c0f2ff855911b3f923f31962df84f4c285050f4f3c98173366acb896c658c557f072c1f8bac229bdc918d83fbcdb2dbd6f21e8d
+  checksum: 02e1dc9e08f30edbe24c12ebd06c9fb08c964db2371db5d18c7647210831528ffe568e29a24958198748aa9a508832522acfe5185f47b5ec45d56236378b2e13
   languageName: node
   linkType: hard
 
