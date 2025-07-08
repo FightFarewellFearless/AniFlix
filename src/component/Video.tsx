@@ -13,7 +13,6 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  BackHandler,
   EmitterSubscription,
   NativeEventEmitter,
   NativeModules,
@@ -53,6 +52,7 @@ import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
+import { useBackHandler } from '../hooks/useBackHandler';
 import { AniDetail } from '../types/anime';
 import { RootStackNavigator } from '../types/navigation';
 import Anime_Whitelist from '../utils/Anime_Whitelist';
@@ -68,16 +68,6 @@ import deviceUserAgent from '../utils/deviceUserAgent';
 import DialogManager from '../utils/dialogManager';
 import Skeleton from './misc/Skeleton';
 import VideoPlayer, { PlayerRef } from './VideoPlayer';
-
-function useBackHandler(handler: () => boolean) {
-  useEffect(() => {
-    const event = BackHandler.addEventListener('hardwareBackPress', handler);
-
-    return () => {
-      event.remove();
-    };
-  }, [handler]);
-}
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 

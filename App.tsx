@@ -134,7 +134,7 @@ const screens: Screens = [
   {
     name: 'ComicsReading',
     component: withSuspenseAndSafeArea(ComicsReading, true, true),
-    options: { headerShown: true },
+    options: undefined,
   },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
   { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },

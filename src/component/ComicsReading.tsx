@@ -1,8 +1,18 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { Button, Portal, ProgressBar, Snackbar } from 'react-native-paper';
+import {
+  Appbar,
+  Button,
+  IconButton,
+  Portal,
+  ProgressBar,
+  Snackbar,
+  useTheme,
+} from 'react-native-paper';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import { useBackHandler } from '../hooks/useBackHandler';
 import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
 import setHistory from '../utils/historyControl';
@@ -11,6 +21,106 @@ import { getKomikuReading } from '../utils/komiku';
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
 export default function ComicsReading(props: Props) {
+  const theme = useTheme();
+  const abortController = useRef<AbortController>(null);
+  abortController.current ??= new AbortController();
+  useEffect(() => {
+    return () => abortController.current?.abort();
+  }, []);
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    SystemNavigationBar.fullScreen(isFullscreen);
+    if (isFullscreen) SystemNavigationBar.navigationHide();
+    else SystemNavigationBar.navigationShow();
+  }, [isFullscreen]);
+  useEffect(() => {
+    return () => {
+      SystemNavigationBar.fullScreen(false);
+      SystemNavigationBar.navigationShow();
+    };
+  }, []);
+  useBackHandler(
+    useCallback(() => {
+      if (isFullscreen) {
+        setIsFullscreen(false);
+        return true;
+      } else return false;
+    }, [isFullscreen]),
+  );
+  useEffect(() => {
+    props.navigation.setOptions({
+      headerTitle: props.route.params.data.chapter,
+      headerShown: !isFullscreen,
+      header: headerProps => (
+        <Appbar.Header>
+          {headerProps.back && (
+            <Appbar.BackAction
+              onPress={() => {
+                headerProps.navigation.goBack();
+              }}
+            />
+          )}
+          <Appbar.Content
+            titleStyle={{ fontWeight: 'bold' }}
+            title={
+              typeof headerProps.options.headerTitle === 'string'
+                ? headerProps.options.headerTitle
+                : ''
+            }
+          />
+          <Appbar.Action
+            icon={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+            onPress={() => {
+              setIsFullscreen(f => !f);
+            }}
+          />
+        </Appbar.Header>
+      ),
+    });
+  }, [isFullscreen, props.navigation, props.route.params.data.chapter]);
+
+  const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    const visibleImageId = Number(event.nativeEvent.data);
+    setCurrentlyVisibleImageId(visibleImageId);
+    setHistory(
+      props.route.params.data,
+      props.route.params.link,
+      true,
+      {
+        lastDuration: visibleImageId,
+      },
+      false,
+      true,
+    );
+  };
+
+  const [moveChapterLoading, setMoveChapterLoading] = useState(false);
+  const moveChapter = useCallback(
+    (url: string) => {
+      if (moveChapterLoading) return;
+      setMoveChapterLoading(true);
+      getKomikuReading(url, abortController.current?.signal)
+        .then(res => {
+          props.navigation.setParams({
+            data: res,
+            link: url,
+            historyData: undefined,
+          });
+          setHistory(res, url, false, undefined, false, true);
+        })
+        .catch(err => {
+          if (err.name === 'AbortError') return;
+          DialogManager.alert('Gagal mengambil data', err.message);
+        })
+        .finally(() => setMoveChapterLoading(false));
+    },
+    [moveChapterLoading, props.navigation],
+  );
+
+  const { data } = props.route.params;
   const comicImages = props.route.params.data.comicImages;
   const errorIconUrl = `data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pjxzdmcgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxwYXRoIGQ9Ik0wIDBIMjRWMjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMTIgM2M0LjI4NCAwIDguMjIgMS40OTcgMTEuMzEgMy45OTZMMjIuNDk4IDhIMTh2NS41NzFMMTIgMjEgLjY5IDYuOTk3QzMuNzggNC40OTcgNy43MTQgMyAxMiAzem0xMCAxNnYyaC0ydi0yaDJ6bTAtOXY3aC0ydi03aDJ6Ii8+PC9nPjwvc3ZnPg==`;
 
@@ -92,62 +202,26 @@ export default function ComicsReading(props: Props) {
     });
   `;
 
-  const abortController = useRef<AbortController>(null);
-  abortController.current ??= new AbortController();
-  useEffect(() => {
-    return () => abortController.current?.abort();
-  }, []);
-
-  useEffect(() => {
-    props.navigation.setOptions({
-      headerTitle: props.route.params.data.chapter,
-    });
-  }, [props.navigation, props.route.params.data.chapter]);
-
-  const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
-
-  const handleMessage = (event: WebViewMessageEvent) => {
-    const visibleImageId = Number(event.nativeEvent.data);
-    setCurrentlyVisibleImageId(visibleImageId);
-    setHistory(
-      props.route.params.data,
-      props.route.params.link,
-      true,
-      {
-        lastDuration: visibleImageId,
-      },
-      false,
-      true,
-    );
-  };
-
-  const [moveChapterLoading, setMoveChapterLoading] = useState(false);
-  const moveChapter = useCallback(
-    (url: string) => {
-      if (moveChapterLoading) return;
-      setMoveChapterLoading(true);
-      getKomikuReading(url, abortController.current?.signal)
-        .then(res => {
-          props.navigation.setParams({
-            data: res,
-            link: url,
-            historyData: undefined,
-          });
-          setHistory(res, url, false, undefined, false, true);
-        })
-        .catch(err => {
-          if (err.name === 'AbortError') return;
-          DialogManager.alert('Gagal mengambil data', err.message);
-        })
-        .finally(() => setMoveChapterLoading(false));
-    },
-    [moveChapterLoading, props.navigation],
-  );
-
-  const { data } = props.route.params;
-
   return (
     <View style={{ flex: 1 }}>
+      <View
+        style={{
+          display: isFullscreen ? 'flex' : 'none',
+          position: 'absolute',
+          top: 5,
+          right: 5,
+          zIndex: 999,
+        }}>
+        <IconButton
+          onPress={() => {
+            setIsFullscreen(false);
+          }}
+          iconColor={theme.colors.primary}
+          icon="fullscreen-exit"
+          size={30}
+          mode="outlined"
+        />
+      </View>
       <Portal>
         <Snackbar
           wrapperStyle={{ bottom: 30 }}
@@ -166,6 +240,7 @@ export default function ComicsReading(props: Props) {
         </Snackbar>
       </Portal>
       <WebView
+        style={{ flex: 1 }}
         overScrollMode="never"
         cacheEnabled={false}
         source={{ html }}
@@ -174,7 +249,12 @@ export default function ComicsReading(props: Props) {
         webviewDebuggingEnabled
       />
       <View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            display: isFullscreen ? 'none' : 'flex',
+          }}>
           {data.prevChapter && (
             <Button
               icon="arrow-left"
@@ -195,7 +275,13 @@ export default function ComicsReading(props: Props) {
             </Button>
           )}
         </View>
-        <ProgressBar progress={currentlyVisibleImageId / (comicImages.length - 1)} />
+        <ProgressBar
+          style={{
+            marginBottom: isFullscreen ? 4 : 0,
+            height: 4,
+          }}
+          progress={currentlyVisibleImageId / (comicImages.length - 1)}
+        />
       </View>
     </View>
   );
