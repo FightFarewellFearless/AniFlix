@@ -10,7 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { Button, Divider, Surface, TextInput, useTheme } from 'react-native-paper';
+import { Button, Divider, Searchbar, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -74,8 +74,9 @@ function AniDetail(props: Props) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEpisodes = useMemo(() => {
-    return data.episodeList.filter(eps => {
-      return eps.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchQuery) return data.episodeList;
+    return data.episodeList.toReversed().filter(eps => {
+      return eps.title.toLowerCase().includes('episode ' + searchQuery.toLowerCase());
     });
   }, [data.episodeList, searchQuery]);
 
@@ -255,9 +256,9 @@ function AniDetail(props: Props) {
                 Tonton Episode Terbaru
               </Button>
             </View>
-            <TextInput
-              keyboardType="numeric"
-              label="Cari Episode"
+            <Searchbar
+              keyboardType="number-pad"
+              placeholder="Cari Episode"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -280,6 +281,9 @@ function AniDetail(props: Props) {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ReanimatedFlashList
+        maintainVisibleContentPosition={{
+          disabled: true,
+        }}
         ref={scrollRef}
         data={filteredEpisodes}
         renderItem={({ item }) => (

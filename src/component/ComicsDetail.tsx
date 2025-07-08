@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import { Button, Divider, Surface, TextInput, useTheme } from 'react-native-paper';
+import { Button, Divider, Searchbar, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -70,8 +70,9 @@ export default function ComicsDetail(props: Props) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredChapters = useMemo(() => {
-    return data.chapters.filter(chapter => {
-      return chapter.chapter.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchQuery) return data.chapters;
+    return data.chapters.toReversed().filter(chapter => {
+      return chapter.chapter.toLowerCase().includes('chapter ' + searchQuery.toLowerCase());
     });
   }, [data.chapters, searchQuery]);
 
@@ -84,6 +85,9 @@ export default function ComicsDetail(props: Props) {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ReanimatedFlashList
+        maintainVisibleContentPosition={{
+          disabled: true,
+        }}
         ref={scrollRef}
         data={filteredChapters}
         ListEmptyComponent={() => (
@@ -244,11 +248,11 @@ export default function ComicsDetail(props: Props) {
                     Baca Chapter Terbaru
                   </Button>
                 </View>
-                <TextInput
+                <Searchbar
                   onChangeText={setSearchQuery}
                   value={searchQuery}
                   style={{ margin: 10 }}
-                  label="Cari chapter"
+                  placeholder="Cari chapter"
                   keyboardType="numeric"
                 />
               </View>
