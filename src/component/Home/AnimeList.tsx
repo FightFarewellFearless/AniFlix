@@ -84,30 +84,43 @@ function HomeList(props: HomeProps) {
 
   useFocusEffect(
     useCallback(() => {
-      const setLayoutWidth = (quote: string) => {
-        const newWidth = MeasureText.measureWidth(quote, {
-          fontWeight: 'bold',
-          fontSize: 17,
-        });
-        textLayoutWidth.set(newWidth);
-        setAnimationText(quote);
-      };
-      function callback(finished?: boolean) {
+      const displayNewQuote = (finished?: boolean) => {
+        let layoutWidth = textLayoutWidth.get();
         if (finished) {
           textLayoutWidth.set(0);
           const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
           const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
-          runOnJS(setLayoutWidth)(quote);
+          const newWidth = measureQuoteTextWidth(quote);
+          textLayoutWidth.set(newWidth);
+          setAnimationText(quote);
+          layoutWidth = newWidth;
         }
         boxTextAnim.set(0);
         if (!finished) return;
         boxTextAnim.set(
-          withDelay(2000, withTiming(1, { duration: 15_000, easing: Easing.linear }, callback)),
+          withDelay(
+            2000,
+            withTiming(
+              1,
+              { duration: (layoutWidth / 200) * 3000, easing: Easing.linear },
+              callback,
+            ),
+          ),
         );
+      };
+      function callback(finished?: boolean) {
+        runOnJS(displayNewQuote)(finished);
       }
 
       boxTextAnim.set(
-        withDelay(1000, withTiming(1, { duration: 15_000, easing: Easing.linear }, callback)),
+        withDelay(
+          1000,
+          withTiming(
+            1,
+            { duration: (textLayoutWidth.get() / 200) * 3000, easing: Easing.linear },
+            callback,
+          ),
+        ),
       );
 
       return () => {
@@ -490,6 +503,14 @@ function useLocalTime() {
     }, [time]),
   );
   return time;
+}
+
+function measureQuoteTextWidth(quote: string) {
+  const width = MeasureText.measureWidth(quote, {
+    fontWeight: 'bold',
+    fontSize: 17,
+  });
+  return width;
 }
 
 function useStyles() {
