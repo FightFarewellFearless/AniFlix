@@ -3095,13 +3095,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.5.2":
-  version: 7.5.2
-  resolution: "@react-navigation/drawer@npm:7.5.2"
+"@react-navigation/drawer@npm:^7.5.3":
+  version: 7.5.3
+  resolution: "@react-navigation/drawer@npm:7.5.3"
   dependencies:
     "@react-navigation/elements": ^2.5.2
     color: ^4.2.3
-    react-native-drawer-layout: ^4.1.11
+    react-native-drawer-layout: ^4.1.12
     use-latest-callback: ^0.2.4
   peerDependencies:
     "@react-navigation/native": ^7.1.14
@@ -3111,7 +3111,7 @@ __metadata:
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 97a9fb23978371f1f4359a0daa6d8b28a314269434c83be4b9e18c218bf92ed61a95234e20ee628035d421f0ccea8c8c9f544bb309e997686733e8c43cd72330
+  checksum: 78e5655d9ff9df2e2d826c8ef883535991b2d1b1db06f265639e2975f361f2c21eb5af2be14650a3c460b4d5be26ce3fa32802ffbefea0ee2ada7a79a783d354
   languageName: node
   linkType: hard
 
@@ -3816,7 +3816,7 @@ __metadata:
     "@react-native/eslint-config": 0.79.4
     "@react-native/metro-config": 0.79.4
     "@react-native/typescript-config": 0.79.4
-    "@react-navigation/drawer": ^7.5.2
+    "@react-navigation/drawer": ^7.5.3
     "@react-navigation/native": ^7.1.14
     "@react-navigation/native-stack": ^7.3.21
     "@rnx-kit/align-deps": ^3.0.4
@@ -10211,9 +10211,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-drawer-layout@npm:^4.1.11":
-  version: 4.1.11
-  resolution: "react-native-drawer-layout@npm:4.1.11"
+"react-native-drawer-layout@npm:^4.1.12":
+  version: 4.1.12
+  resolution: "react-native-drawer-layout@npm:4.1.12"
   dependencies:
     use-latest-callback: ^0.2.4
   peerDependencies:
@@ -10221,7 +10221,7 @@ __metadata:
     react-native: "*"
     react-native-gesture-handler: ">= 2.0.0"
     react-native-reanimated: ">= 2.0.0"
-  checksum: d18de7166d04c9538561cd5d9a3e3328c6957cc2f61aae4dff61419b36ce803bb2eefca4f8300ab758f5cf8cfa7865194a10999af50a7ee9f10355d304fa4078
+  checksum: fd61fec9663e03caf3ac2a7a4cf031c6944f3841fb8af9dcd8c0a4dbe29c50cc869625b0648c85c36c76685b527a78f85efb37b2ddc0d1307bd56d6eddc8eec4
   languageName: node
   linkType: hard
 

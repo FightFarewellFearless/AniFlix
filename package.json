@@ -19,7 +19,7 @@
     "@legendapp/list": "^1.1.4",
     "@pirles/react-native-element-dropdown": "^2.15.0",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-navigation/drawer": "^7.5.2",
+    "@react-navigation/drawer": "^7.5.3",
     "@react-navigation/native": "^7.1.14",
     "@react-navigation/native-stack": "^7.3.21",
     "@shopify/flash-list": "^2.0.0-rc.10",
