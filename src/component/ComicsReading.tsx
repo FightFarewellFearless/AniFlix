@@ -17,6 +17,7 @@ import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
 import setHistory from '../utils/historyControl';
 import { getKomikuReading } from '../utils/komiku';
+import { SystemBars } from 'react-native-edge-to-edge';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
@@ -31,13 +32,19 @@ export default function ComicsReading(props: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   useEffect(() => {
     SystemNavigationBar.fullScreen(isFullscreen);
-    if (isFullscreen) SystemNavigationBar.navigationHide();
-    else SystemNavigationBar.navigationShow();
+    if (isFullscreen) {
+      SystemNavigationBar.navigationHide();
+      SystemBars.setHidden(true);
+    } else {
+      SystemNavigationBar.navigationShow();
+      SystemBars.setHidden(false);
+    }
   }, [isFullscreen]);
   useEffect(() => {
     return () => {
       SystemNavigationBar.fullScreen(false);
       SystemNavigationBar.navigationShow();
+      SystemBars.setHidden(false);
     };
   }, []);
   useBackHandler(
