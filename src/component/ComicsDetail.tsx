@@ -253,7 +253,7 @@ export default function ComicsDetail(props: Props) {
                   value={searchQuery}
                   style={{ margin: 10 }}
                   placeholder="Cari chapter"
-                  keyboardType="numeric"
+                  keyboardType="number-pad"
                 />
               </View>
             </View>
