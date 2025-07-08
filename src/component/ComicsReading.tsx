@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
+import { SystemBars } from 'react-native-edge-to-edge';
 import {
   Appbar,
   Button,
@@ -17,7 +18,6 @@ import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
 import setHistory from '../utils/historyControl';
 import { getKomikuReading } from '../utils/komiku';
-import { SystemBars } from 'react-native-edge-to-edge';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
