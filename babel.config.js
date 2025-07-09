@@ -1,8 +1,5 @@
 const ReactCompilerConfig = {
   target: '19', // '17' | '18' | '19'
-  sources: filename => {
-    return filename.includes('src/component');
-  },
 };
 
 module.exports = {
