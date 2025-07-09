@@ -1,3 +1,15 @@
+# v1.0.1 (9-Juli-2025)
+
+Update kali ini memperbaiki tampilan edge-to-edge sekaligus mengaktifkannya untuk seluruh versi android, serta beberapa perbaikan dan peningkatan tampilan.
+## Ditambahkan
+- Tombol fullscreen ketika membaca komik
+## Disesuaikan
+- Mengaktifkan tampilan edge-to-edge untuk semua versi android
+- Pewarnaan yang lebih konsisten
+- Kecepatan animasi quote disesuaikan agar sesuai dengan panjang teks
+## Diperbaiki
+- Beberapa perbaikan kecil...
+
 # v1.0.0_JS-3 (28-Juni-2025)
 
 ## Diperbaiki
