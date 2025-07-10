@@ -3924,7 +3924,7 @@ __metadata:
     react-native-paper: ^5.14.5
     react-native-reanimated: ^3.18.0
     react-native-saf-x: 2.2.3
-    react-native-safe-area-context: 5.5.1
+    react-native-safe-area-context: 5.5.2
     react-native-screens: 4.11.1
     react-native-svg: ^15.12.0
     react-native-system-navigation-bar: ^2.6.4
@@ -10469,13 +10469,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:5.5.1":
-  version: 5.5.1
-  resolution: "react-native-safe-area-context@npm:5.5.1"
+"react-native-safe-area-context@npm:5.5.2":
+  version: 5.5.2
+  resolution: "react-native-safe-area-context@npm:5.5.2"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 57d27eac29288a906e97055512cde656369fe3bdc2bc9f26ca078bd0b340e5535d7619d6bcc0f10b68630fe7e721099fcd64d15eb8101b146ddb660ae36e1d64
+  checksum: 694e293b474b0738899c6e09da9f001d8087b382b5a40b8b227765c861a8137f0ff0209f1c9d8ae94337bc9c170eb114a9b897a8661b8181f48759a21baeb265
   languageName: node
   linkType: hard
 
