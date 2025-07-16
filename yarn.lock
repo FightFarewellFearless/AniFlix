@@ -3925,7 +3925,7 @@ __metadata:
     react-native-reanimated: ^3.18.0
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.5.1
-    react-native-screens: 4.11.1
+    react-native-screens: 4.12.0
     react-native-svg: ^15.12.0
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.2.0
@@ -10479,9 +10479,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:4.11.1":
-  version: 4.11.1
-  resolution: "react-native-screens@npm:4.11.1"
+"react-native-screens@npm:4.12.0":
+  version: 4.12.0
+  resolution: "react-native-screens@npm:4.12.0"
   dependencies:
     react-freeze: ^1.0.0
     react-native-is-edge-to-edge: ^1.1.7
@@ -10489,7 +10489,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 22d3c302ef90a1cb20eed8c130b32e53d49288a19eba844f506a5e38342ef2add0d4f7a2ff5501cc05052aef6bf7f180db26a067b01f70f3cc12d3e1497329d6
+  checksum: 7be1daed721b1e3078fc57bf5e3d55df382d94f6a3fe770d95a4a76c7de9a63226873bff5097ffc71c81fb231baba512560653baad4fbcefdf76cca277b42a15
   languageName: node
   linkType: hard
 
