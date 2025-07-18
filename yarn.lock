@@ -3899,7 +3899,7 @@ __metadata:
     eslint-plugin-react-compiler: ^19.0.0-beta-ebf51a3-20250411
     expo: ^53.0.19
     expo-document-picker: 13.1.6
-    expo-image: ^2.3.2
+    expo-image: ^2.4.0
     expo-linear-gradient: 14.1.5
     expo-splash-screen: 0.30.10
     expo-sqlite: ^15.2.14
@@ -6320,9 +6320,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-image@npm:^2.3.2":
-  version: 2.3.2
-  resolution: "expo-image@npm:2.3.2"
+"expo-image@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "expo-image@npm:2.4.0"
   peerDependencies:
     expo: "*"
     react: "*"
@@ -6331,7 +6331,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-web:
       optional: true
-  checksum: 0830764df3ef5dcdb05442baf6c5d9bdba159f3dd6edf61935d697a7e9aaff76f602a1f3449e667e7ad67de4a9d6a08cd7c0149ab9981c29f50cfc2ad84a9123
+  checksum: 76b78fe5ca6952bac9c38f4fff3e4fd62951142735c07d2322dfb05c2c96b6753a13abd25fe52b3ad70d0f8b7e20d1b345a3c4b051d7c2e7a2418e3c37f459c6
   languageName: node
   linkType: hard
 

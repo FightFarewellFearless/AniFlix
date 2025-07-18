@@ -28,7 +28,7 @@
     "cheerio": "1.0.0-rc.12",
     "expo": "^53.0.19",
     "expo-document-picker": "13.1.6",
-    "expo-image": "^2.3.2",
+    "expo-image": "^2.4.0",
     "expo-linear-gradient": "14.1.5",
     "expo-splash-screen": "0.30.10",
     "expo-sqlite": "^15.2.14",
