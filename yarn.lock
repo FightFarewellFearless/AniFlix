@@ -3897,7 +3897,7 @@ __metadata:
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
     eslint-plugin-react-compiler: ^19.0.0-beta-ebf51a3-20250411
-    expo: ^53.0.19
+    expo: ^53.0.20
     expo-document-picker: 13.1.6
     expo-image: ^2.3.2
     expo-linear-gradient: 14.1.5
@@ -6392,12 +6392,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-modules-core@npm:2.4.2":
-  version: 2.4.2
-  resolution: "expo-modules-core@npm:2.4.2"
+"expo-modules-core@npm:2.5.0":
+  version: 2.5.0
+  resolution: "expo-modules-core@npm:2.5.0"
   dependencies:
     invariant: ^2.2.4
-  checksum: d78392bc3f3ccf5d1e1f081e01149dc7b3d81e8c4736e08e691c81a24c9143b2239474772723c1e3ef65a8a89e4aa19d7ece2143f076750d014d9d1d75051684
+  checksum: 7a405f20f0bc056c7409be6d00bf9ad5203cb461301b1ecf0a03380138965ea4fa8e1e2456035a2ea3cb6adb44eac3b40cb2e3a5328a4b91054911982029ad15
   languageName: node
   linkType: hard
 
@@ -6478,9 +6478,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:^53.0.19":
-  version: 53.0.19
-  resolution: "expo@npm:53.0.19"
+"expo@npm:^53.0.20":
+  version: 53.0.20
+  resolution: "expo@npm:53.0.20"
   dependencies:
     "@babel/runtime": ^7.20.0
     "@expo/cli": 0.24.20
@@ -6496,7 +6496,7 @@ __metadata:
     expo-font: ~13.3.2
     expo-keep-awake: ~14.1.4
     expo-modules-autolinking: 2.1.14
-    expo-modules-core: 2.4.2
+    expo-modules-core: 2.5.0
     react-native-edge-to-edge: 1.6.0
     whatwg-url-without-unicode: 8.0.0-3
   peerDependencies:
@@ -6516,7 +6516,7 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: 40281e12e9e8d65c33cc0f4ec8313508ea47fce145ee26d6b670f33d301eb55169a246b714688d3fad7f89abf24d7bc25ae59aba47c77ca8d98aa0776498af98
+  checksum: 54f70106122aeab1e067e0dc2957fb845884861e303d02f20f496a5c4010d946f070b4a1b9ac9045ecd448006f426351dd564185603e366c1d0d258b3eb348fe
   languageName: node
   linkType: hard
 
