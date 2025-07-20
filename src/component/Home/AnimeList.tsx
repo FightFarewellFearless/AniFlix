@@ -7,6 +7,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -186,8 +187,7 @@ function HomeList(props: HomeProps) {
   );
 
   return (
-    <LegendList
-      recycleItems
+    <FlashList
       style={styles.container}
       refreshControl={
         <RefreshControl
@@ -240,7 +240,6 @@ function HomeList(props: HomeProps) {
       }
       data={Object.keys(data?.jadwalAnime ?? {})}
       renderItem={renderJadwalAnime}
-      keyExtractor={(item, index) => item + index}
     />
   );
 }
