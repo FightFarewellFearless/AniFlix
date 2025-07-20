@@ -181,7 +181,7 @@ function FromUrl(props: Props) {
                 (await DatabaseManager.get('watchLater'))!,
               );
               const watchLaterIndex = watchLater.findIndex(
-                z => z.title.trim() === title.trim() && z.isMovie === false && z.isComics === false,
+                z => z.link === result.episodeData.animeDetail && !z.isMovie && !z.isComics,
               );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
