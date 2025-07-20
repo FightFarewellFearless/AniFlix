@@ -1,8 +1,3 @@
-# v1.0.1_JS-2 (20-Juli-2025)
-
-## Diperbaiki
-- Crash di beranda
-
 # v1.0.1_JS-1 (20-Juli-2025)
 
 ## Diperbaiki
