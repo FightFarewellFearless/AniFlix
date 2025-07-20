@@ -1,3 +1,11 @@
+# v1.0.1_JS-1 (20-Juli-2025)
+
+## Diperbaiki
+- Masalah tonton nanti yang tidak secara otomatis dihapus pada tipe anime
+- Typo di error anime movie
+- Padding bawah ekstra di Beranda
+- Tampilan fullscreen yang tidak kembali normal setelah aplikasi restart
+
 # v1.0.1 (9-Juli-2025)
 
 Update kali ini memperbaiki tampilan edge-to-edge sekaligus mengaktifkannya untuk seluruh versi android, serta beberapa perbaikan dan peningkatan tampilan.
