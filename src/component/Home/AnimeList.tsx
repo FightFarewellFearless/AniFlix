@@ -241,6 +241,7 @@ function HomeList(props: HomeProps) {
       }
       data={Object.keys(data?.jadwalAnime ?? {})}
       renderItem={renderJadwalAnime}
+      keyExtractor={(item, index) => item + index}
     />
   );
 }
