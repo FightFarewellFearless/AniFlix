@@ -25,6 +25,8 @@ import {
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableFreeze, enableScreens } from 'react-native-screens';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
+import { MDDark, MDLight } from './src/assets/MaterialTheme';
 import useGlobalStyles from './src/assets/style';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
@@ -38,7 +40,6 @@ import { Movies } from './src/utils/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
-import { MDDark, MDLight } from './src/assets/MaterialTheme';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
   reactNavigationLight: ReactNavigationDefaultTheme,
@@ -186,6 +187,8 @@ function App() {
       Appearance.setColorScheme(colorSchemeValue);
     }
     SystemBars.setHidden(false);
+    SystemNavigationBar.fullScreen(false);
+    SystemNavigationBar.navigationShow();
     SplashScreen.hideAsync();
   }, []);
 
