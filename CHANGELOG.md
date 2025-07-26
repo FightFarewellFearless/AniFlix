@@ -1,4 +1,4 @@
-# v1.0.2 (26-Juli-2025)
+# v1.0.2 (27-Juli-2025)
 
 ## Peningkatan
 - Loading list anime yang lebih cepat dengan multi-thread
