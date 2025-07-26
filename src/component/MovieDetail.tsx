@@ -64,12 +64,12 @@ function MovieDetail(props: Props) {
           translateY: interpolate(
             scrollOffset.value,
             [0, IMG_HEADER_HEIGHT * 2],
-            [0, IMG_HEADER_HEIGHT * 0.85],
+            [0, IMG_HEADER_HEIGHT],
             'clamp',
           ),
         },
       ],
-      opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT * 0.85], [1, 0], 'clamp'),
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT], [1, 0], 'clamp'),
     };
   });
 

@@ -48,12 +48,12 @@ export default function ComicsDetail(props: Props) {
           translateY: interpolate(
             scrollOffset.value,
             [0, IMG_HEIGHT * 2],
-            [0, IMG_HEIGHT * 0.85],
+            [0, IMG_HEIGHT],
             'clamp',
           ),
         },
       ],
-      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT * 0.85], [1, 0], 'clamp'),
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT], [1, 0], 'clamp'),
     };
   });
   const { data } = props.route.params;
