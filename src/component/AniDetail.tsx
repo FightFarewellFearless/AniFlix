@@ -15,7 +15,7 @@ import Reanimated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
-  useScrollViewOffset,
+  useScrollOffset,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
@@ -53,7 +53,7 @@ function AniDetail(props: Props) {
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
   const scrollRef = useAnimatedRef<FlashList<AniDetailEpsList>>();
-  const scrollOffset = useScrollViewOffset(scrollRef as any);
+  const scrollOffset = useScrollOffset(scrollRef as any);
 
   const headerImageStyle = useAnimatedStyle(() => {
     return {

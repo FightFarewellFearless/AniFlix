@@ -17,7 +17,7 @@ import Reanimated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
-  useScrollViewOffset,
+  useScrollOffset,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -40,7 +40,7 @@ export default function ComicsDetail(props: Props) {
   const insets = useSafeAreaInsets();
   const styles = useStyles();
   const scrollRef = useAnimatedRef<FlashList<KomikuDetail['chapters'][0]>>();
-  const scrollOffset = useScrollViewOffset(scrollRef as any);
+  const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
     return {
       transform: [

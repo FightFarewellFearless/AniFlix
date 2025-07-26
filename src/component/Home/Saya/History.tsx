@@ -61,18 +61,10 @@ function History(props: Props) {
   });
 
   const showScrollToTopButton = useCallback(() => {
-    scrollToTopButtonScale.set(
-      withSpring(1, {
-        damping: 12,
-      }),
-    );
+    scrollToTopButtonScale.set(withSpring(1));
   }, [scrollToTopButtonScale]);
   const hideScrollToTopButton = useCallback(() => {
-    scrollToTopButtonScale.set(
-      withSpring(0, {
-        damping: 12,
-      }),
-    );
+    scrollToTopButtonScale.set(withSpring(0));
   }, [scrollToTopButtonScale]);
 
   const scrollHandler = useCallback(

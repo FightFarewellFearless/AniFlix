@@ -1,12 +1,8 @@
 import { useMemo } from 'react';
 import { StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector, Pressable } from 'react-native-gesture-handler';
-import {
-  default as Reanimated,
-  runOnJS,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { default as Reanimated, useSharedValue, withTiming } from 'react-native-reanimated';
+import { runOnJS } from 'react-native-worklets';
 
 type Props = {
   children: React.ReactNode;

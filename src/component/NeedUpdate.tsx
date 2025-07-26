@@ -15,12 +15,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
 import RNFetchBlob from 'react-native-blob-util';
 import Animated, {
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { runOnJS } from 'react-native-worklets';
 import { version as appVersion, OTAJSVersion } from '../../package.json';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';

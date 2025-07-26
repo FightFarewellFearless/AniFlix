@@ -28,7 +28,6 @@ import DeviceInfo from 'react-native-device-info';
 import { SystemBars } from 'react-native-edge-to-edge';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
-  runOnJS,
   StretchInX,
   StretchOutX,
   useAnimatedRef,
@@ -40,6 +39,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { runOnJS } from 'react-native-worklets';
 import url from 'url';
 import { TouchableOpacity } from './misc/TouchableOpacityRNGH';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);

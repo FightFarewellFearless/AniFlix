@@ -16,17 +16,17 @@ import {
 } from 'react-native';
 import Reanimated, {
   SharedValue,
-  runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import { runOnJS } from 'react-native-worklets';
+import { useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
-import { useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 
 export type PlayerRef = {
   skipTo: (duration: number) => void;

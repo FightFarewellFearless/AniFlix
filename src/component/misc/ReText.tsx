@@ -1,21 +1,20 @@
 /*
-This code is from react-native-redash
+This code is from react-native-redash with small modification
 */
 import { useLayoutEffect, useState } from 'react';
 import type { TextProps as RNTextProps } from 'react-native';
 import { StyleSheet, TextInput } from 'react-native';
-import Animated, { useAnimatedProps } from 'react-native-reanimated';
+import Animated, { AnimatedProps, SharedValue, useAnimatedProps } from 'react-native-reanimated';
 
 const styles = StyleSheet.create({
   baseStyle: {
     color: 'black',
   },
 });
-Animated.addWhitelistedNativeProps({ text: true });
 
 interface TextProps {
-  text: Animated.SharedValue<string>;
-  style?: Animated.AnimateProps<RNTextProps>['style'];
+  text: SharedValue<string>;
+  style?: AnimatedProps<RNTextProps>['style'];
 }
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);

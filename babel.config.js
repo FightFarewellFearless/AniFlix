@@ -8,6 +8,7 @@ module.exports = {
       'babel-preset-expo',
       {
         'react-compiler': ReactCompilerConfig,
+        reanimated: false,
       },
     ],
   ],
@@ -24,6 +25,6 @@ module.exports = {
         extensions: ['.md', '.txt'],
       },
     ],
-    'react-native-reanimated/plugin',
+    'react-native-worklets/plugin',
   ],
 };

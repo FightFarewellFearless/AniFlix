@@ -25,7 +25,6 @@ import Reanimated, {
   cancelAnimation,
   Easing,
   interpolate,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -33,6 +32,7 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { runOnJS } from 'react-native-worklets';
 import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
