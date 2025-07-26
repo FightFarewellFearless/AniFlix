@@ -1,3 +1,11 @@
+# v1.0.2 (26-Juli-2025)
+
+## Peningkatan
+- Loading list anime yang lebih cepat dengan multi-thread
+## Perubahan lain
+- Bump dependencies
+- Upgrade react-native-reanimated ke versi 4
+
 # v1.0.1_JS-1 (20-Juli-2025)
 
 ## Diperbaiki
