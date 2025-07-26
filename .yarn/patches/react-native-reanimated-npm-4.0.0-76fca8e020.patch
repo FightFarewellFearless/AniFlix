@@ -1,0 +1,431 @@
+diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
+index 5eaf366d32a8666d1fcb1e9ebd166c4906651b92..a4fee814df8138e643d1062f66b1a6d82fbb44b2 100644
+--- a/android/CMakeLists.txt
++++ b/android/CMakeLists.txt
+@@ -49,7 +49,6 @@ file(GLOB_RECURSE REANIMATED_ANDROID_CPP_SOURCES CONFIGURE_DEPENDS
+ 
+ find_package(fbjni REQUIRED CONFIG)
+ find_package(ReactAndroid REQUIRED CONFIG)
+-find_package(react-native-worklets REQUIRED CONFIG)
+ 
+ add_library(reanimated SHARED ${REANIMATED_COMMON_CPP_SOURCES}
+                               ${REANIMATED_ANDROID_CPP_SOURCES})
+@@ -65,13 +64,30 @@ target_include_directories(
+           "${REACT_NATIVE_DIR}/ReactCommon/runtimeexecutor"
+           "${REACT_NATIVE_DIR}/ReactCommon/jsiexecutor"
+           "${REACT_NATIVE_DIR}/ReactCommon/react/renderer/graphics/platform/cxx"
+-)
++          "${REACT_NATIVE_WORKLETS_DIR}/Common/cpp"
++          "${REACT_NATIVE_WORKLETS_DIR}/android/src/main/cpp")
+ 
+ set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
+ 
+-target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android)
++if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
++  set(BUILD_TYPE "debug")
++else()
++  set(BUILD_TYPE "release")
++endif()
++
++add_library(worklets SHARED IMPORTED)
++
++set_target_properties(
++  worklets
++  PROPERTIES
++    IMPORTED_LOCATION
++    "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}/libworklets.so"
++)
++
++set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
+ 
+-target_link_libraries(reanimated react-native-worklets::worklets)
++target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android
++                      worklets)
+ 
+ if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
+   target_link_libraries(reanimated ReactAndroid::reactnative)
+diff --git a/android/build.gradle b/android/build.gradle
+index d10163586ef5d1c8cc1bf28883aa45558f06e715..332567820165877de9d036de757eb90429f31548 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -42,6 +42,28 @@ def resolveReactNativeDirectory() {
+     )
+ }
+ 
++def resolveReactNativeWorkletsDirectory() {
++    def reactNativeWorkletsLocation = safeAppExtGet("REACT_NATIVE_WORKLETS_NODE_MODULES_DIR", null)
++    if (reactNativeWorkletsLocation != null) {
++        return file(reactNativeWorkletsLocation)
++    }
++
++    // Fallback to node resolver for custom directory structures like monorepos.
++    def reactNativeWorkletsPackage = file(
++        providers.exec {
++            workingDir(rootDir)
++            commandLine("node", "--print", "require.resolve('react-native-worklets/package.json')")
++        }.standardOutput.asText.get().trim()
++    )
++    if (reactNativeWorkletsPackage.exists()) {
++        return reactNativeWorkletsPackage.parentFile
++    }
++
++    throw new GradleException(
++        "[Reanimated] Unable to resolve react-native-worklets location in node_modules. You should set project extension property (in `app/build.gradle`) named `REACT_NATIVE_WORKLETS_NODE_MODULES_DIR` with the path to react-native-worklets in node_modules."
++    )
++}
++
+ def getReactNativeMinorVersion() {
+     def reactNativeRootDir = resolveReactNativeDirectory()
+     def reactProperties = new Properties()
+@@ -102,6 +124,7 @@ if (isNewArchitectureEnabled()) {
+ }
+ 
+ def reactNativeRootDir = resolveReactNativeDirectory()
++def reactNativeWorkletsRootDir = resolveReactNativeWorkletsDirectory()
+ def REACT_NATIVE_MINOR_VERSION = getReactNativeMinorVersion()
+ def REANIMATED_VERSION = getReanimatedVersion()
+ def IS_NEW_ARCHITECTURE_ENABLED = isNewArchitectureEnabled()
+@@ -181,6 +204,7 @@ android {
+                         "-DREACT_NATIVE_MINOR_VERSION=${REACT_NATIVE_MINOR_VERSION}",
+                         "-DANDROID_TOOLCHAIN=clang",
+                         "-DREACT_NATIVE_DIR=${toPlatformFileString(reactNativeRootDir.path)}",
++                        "-DREACT_NATIVE_WORKLETS_DIR=${toPlatformFileString(reactNativeWorkletsRootDir.path)}",
+                         "-DIS_REANIMATED_EXAMPLE_APP=${IS_REANIMATED_EXAMPLE_APP}",
+                         "-DREANIMATED_PROFILING=${REANIMATED_PROFILING}",
+                         "-DREANIMATED_VERSION=${REANIMATED_VERSION}",
+@@ -324,3 +348,12 @@ dependencies {
+ }
+ 
+ preBuild.dependsOn(prepareReanimatedHeadersForPrefabs)
++
++if (project != rootProject) {
++    evaluationDependsOn(":react-native-worklets")
++
++    afterEvaluate {
++        tasks.getByName("externalNativeBuildDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildDebug"))
++        tasks.getByName("externalNativeBuildRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildRelease"))
++    }
++}
+diff --git a/rn.patch b/rn.patch
+new file mode 100644
+index 0000000000000000000000000000000000000000..16b85e449fb10c31509133d6190ac6c2d53fbf0e
+--- /dev/null
++++ b/rn.patch
+@@ -0,0 +1,317 @@
++From 678e281b79c2051a1340036ccd804791dc9fdc59 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 13:12:05 +0200
++Subject: [PATCH 1/9] Fix linking error after Gradle clean project on Android
++
++---
++ .../android/CMakeLists.txt                    | 20 ++++++++++++----
++ .../android/build.gradle                      | 24 +++++++++++++++++++
++ 2 files changed, 40 insertions(+), 4 deletions(-)
++
++diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
++index 5eaf366d32a8..2a9d0eae8e3f 100644
++--- a/android/CMakeLists.txt
+++++ b/android/CMakeLists.txt
++@@ -49,7 +49,6 @@ file(GLOB_RECURSE REANIMATED_ANDROID_CPP_SOURCES CONFIGURE_DEPENDS
++ 
++ find_package(fbjni REQUIRED CONFIG)
++ find_package(ReactAndroid REQUIRED CONFIG)
++-find_package(react-native-worklets REQUIRED CONFIG)
++ 
++ add_library(reanimated SHARED ${REANIMATED_COMMON_CPP_SOURCES}
++                               ${REANIMATED_ANDROID_CPP_SOURCES})
++@@ -65,13 +64,26 @@ target_include_directories(
++           "${REACT_NATIVE_DIR}/ReactCommon/runtimeexecutor"
++           "${REACT_NATIVE_DIR}/ReactCommon/jsiexecutor"
++           "${REACT_NATIVE_DIR}/ReactCommon/react/renderer/graphics/platform/cxx"
+++          "${REACT_NATIVE_WORKLETS_DIR}/Common/cpp"
+++          "${REACT_NATIVE_WORKLETS_DIR}/android/src/main/cpp"
++ )
++ 
++-set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
+++if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+++  set(BUILD_TYPE "debug")
+++else()
+++  set(BUILD_TYPE "release")
+++endif()
++ 
++-target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android)
+++find_library(
+++  LIBWORKLETS
+++  worklets
+++  PATHS "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}"
+++  NO_DEFAULT_PATH
+++  NO_CMAKE_FIND_ROOT_PATH)
+++
+++set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
++ 
++-target_link_libraries(reanimated react-native-worklets::worklets)
+++target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android ${LIBWORKLETS})
++ 
++ if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
++   target_link_libraries(reanimated ReactAndroid::reactnative)
++diff --git a/android/build.gradle b/android/build.gradle
++index d10163586ef5..16818f24c555 100644
++--- a/android/build.gradle
+++++ b/android/build.gradle
++@@ -42,6 +42,28 @@ def resolveReactNativeDirectory() {
++     )
++ }
++ 
+++def resolveReactNativeWorkletsDirectory() {
+++    def reactNativeWorkletsLocation = safeAppExtGet("REACT_NATIVE_WORKLETS_NODE_MODULES_DIR", null)
+++    if (reactNativeWorkletsLocation != null) {
+++        return file(reactNativeWorkletsLocation)
+++    }
+++
+++    // Fallback to node resolver for custom directory structures like monorepos.
+++    def reactNativeWorkletsPackage = file(
+++        providers.exec {
+++            workingDir(rootDir)
+++            commandLine("node", "--print", "require.resolve('react-native-worklets/package.json')")
+++        }.standardOutput.asText.get().trim()
+++    )
+++    if (reactNativeWorkletsPackage.exists()) {
+++        return reactNativeWorkletsPackage.parentFile
+++    }
+++
+++    throw new GradleException(
+++        "[Reanimated] Unable to resolve react-native-worklets location in node_modules. You should set project extension property (in `app/build.gradle`) named `REACT_NATIVE_WORKLETS_NODE_MODULES_DIR` with the path to react-native-worklets in node_modules."
+++    )
+++}
+++
++ def getReactNativeMinorVersion() {
++     def reactNativeRootDir = resolveReactNativeDirectory()
++     def reactProperties = new Properties()
++@@ -102,6 +124,7 @@ if (isNewArchitectureEnabled()) {
++ }
++ 
++ def reactNativeRootDir = resolveReactNativeDirectory()
+++def reactNativeWorkletsRootDir = resolveReactNativeWorkletsDirectory()
++ def REACT_NATIVE_MINOR_VERSION = getReactNativeMinorVersion()
++ def REANIMATED_VERSION = getReanimatedVersion()
++ def IS_NEW_ARCHITECTURE_ENABLED = isNewArchitectureEnabled()
++@@ -181,6 +204,7 @@ android {
++                         "-DREACT_NATIVE_MINOR_VERSION=${REACT_NATIVE_MINOR_VERSION}",
++                         "-DANDROID_TOOLCHAIN=clang",
++                         "-DREACT_NATIVE_DIR=${toPlatformFileString(reactNativeRootDir.path)}",
+++                        "-DREACT_NATIVE_WORKLETS_DIR=${toPlatformFileString(reactNativeWorkletsRootDir.path)}",
++                         "-DIS_REANIMATED_EXAMPLE_APP=${IS_REANIMATED_EXAMPLE_APP}",
++                         "-DREANIMATED_PROFILING=${REANIMATED_PROFILING}",
++                         "-DREANIMATED_VERSION=${REANIMATED_VERSION}",
++
++From 34124e507b3e32aa5b6aad5b296ad7618e4cbb67 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 13:20:55 +0200
++Subject: [PATCH 2/9] Restore `set_target_properties`
++
++---
++ android/CMakeLists.txt | 2 ++
++ 1 file changed, 2 insertions(+)
++
++diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
++index 2a9d0eae8e3f..fb0e2760b160 100644
++--- a/android/CMakeLists.txt
+++++ b/android/CMakeLists.txt
++@@ -68,6 +68,8 @@ target_include_directories(
++           "${REACT_NATIVE_WORKLETS_DIR}/android/src/main/cpp"
++ )
++ 
+++set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
+++
++ if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
++   set(BUILD_TYPE "debug")
++ else()
++
++From 235b85206708ab547b95aa8eb31137d6987fd045 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 13:22:43 +0200
++Subject: [PATCH 3/9] Reformat files
++
++---
++ .../android/CMakeLists.txt                        | 15 +++++++--------
++ 1 file changed, 7 insertions(+), 8 deletions(-)
++
++diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
++index fb0e2760b160..2a0a21c6999b 100644
++--- a/android/CMakeLists.txt
+++++ b/android/CMakeLists.txt
++@@ -65,8 +65,7 @@ target_include_directories(
++           "${REACT_NATIVE_DIR}/ReactCommon/jsiexecutor"
++           "${REACT_NATIVE_DIR}/ReactCommon/react/renderer/graphics/platform/cxx"
++           "${REACT_NATIVE_WORKLETS_DIR}/Common/cpp"
++-          "${REACT_NATIVE_WORKLETS_DIR}/android/src/main/cpp"
++-)
+++          "${REACT_NATIVE_WORKLETS_DIR}/android/src/main/cpp")
++ 
++ set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
++ 
++@@ -77,15 +76,15 @@ else()
++ endif()
++ 
++ find_library(
++-  LIBWORKLETS
++-  worklets
++-  PATHS "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}"
++-  NO_DEFAULT_PATH
++-  NO_CMAKE_FIND_ROOT_PATH)
+++  LIBWORKLETS worklets
+++  PATHS
+++    "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}"
+++  NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
++ 
++ set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
++ 
++-target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android ${LIBWORKLETS})
+++target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android
+++                      ${LIBWORKLETS})
++ 
++ if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
++   target_link_libraries(reanimated ReactAndroid::reactnative)
++
++From 124134bd503d74d5d5b6ad8103908bc1ff246305 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 14:24:01 +0200
++Subject: [PATCH 4/9] Add dependency between tasks
++
++---
++ android/build.gradle | 7 +++++++
++ 1 file changed, 7 insertions(+)
++
++diff --git a/android/build.gradle b/android/build.gradle
++index 16818f24c555..09a2bfbf1f76 100644
++--- a/android/build.gradle
+++++ b/android/build.gradle
++@@ -348,3 +348,10 @@ dependencies {
++ }
++ 
++ preBuild.dependsOn(prepareReanimatedHeadersForPrefabs)
+++
+++evaluationDependsOn(":react-native-worklets")
+++
+++afterEvaluate {
+++    tasks.getByName("configureCMakeDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("configureCMakeDebug"))
+++    tasks.getByName("configureCMakeRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("configureCMakeRelease"))
+++}
++
++From 4a715a06854999cf35c508d9c22943529c0f6afb Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 14:27:58 +0200
++Subject: [PATCH 5/9] Change task name
++
++---
++ android/build.gradle | 4 ++--
++ 1 file changed, 2 insertions(+), 2 deletions(-)
++
++diff --git a/android/build.gradle b/android/build.gradle
++index 09a2bfbf1f76..7426452b2b2a 100644
++--- a/android/build.gradle
+++++ b/android/build.gradle
++@@ -352,6 +352,6 @@ preBuild.dependsOn(prepareReanimatedHeadersForPrefabs)
++ evaluationDependsOn(":react-native-worklets")
++ 
++ afterEvaluate {
++-    tasks.getByName("configureCMakeDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("configureCMakeDebug"))
++-    tasks.getByName("configureCMakeRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("configureCMakeRelease"))
+++    tasks.getByName("externalNativeBuildDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildDebug"))
+++    tasks.getByName("externalNativeBuildRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildRelease"))
++ }
++
++From 44f057168fd6bca80f33112074364abf84988334 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Wed, 23 Jul 2025 14:29:37 +0200
++Subject: [PATCH 6/9] Fix spotless check
++
++---
++ android/build.gradle | 10 ++++++----
++ 1 file changed, 6 insertions(+), 4 deletions(-)
++
++diff --git a/android/build.gradle b/android/build.gradle
++index 7426452b2b2a..332567820165 100644
++--- a/android/build.gradle
+++++ b/android/build.gradle
++@@ -349,9 +349,11 @@ dependencies {
++ 
++ preBuild.dependsOn(prepareReanimatedHeadersForPrefabs)
++ 
++-evaluationDependsOn(":react-native-worklets")
+++if (project != rootProject) {
+++    evaluationDependsOn(":react-native-worklets")
++ 
++-afterEvaluate {
++-    tasks.getByName("externalNativeBuildDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildDebug"))
++-    tasks.getByName("externalNativeBuildRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildRelease"))
+++    afterEvaluate {
+++        tasks.getByName("externalNativeBuildDebug").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildDebug"))
+++        tasks.getByName("externalNativeBuildRelease").dependsOn(findProject(":react-native-worklets").tasks.getByName("externalNativeBuildRelease"))
+++    }
++ }
++
++From f1d34d05092d4ea7c803b7f0770f013acae95182 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Fri, 25 Jul 2025 16:41:44 +0200
++Subject: [PATCH 8/9] Use `add_library` instead of `find_library`
++
++---
++ .../react-native-reanimated/android/CMakeLists.txt    | 11 ++++-------
++ 1 file changed, 4 insertions(+), 7 deletions(-)
++
++diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
++index 2a0a21c6999b..1646ff996282 100644
++--- a/android/CMakeLists.txt
+++++ b/android/CMakeLists.txt
++@@ -75,16 +75,13 @@ else()
++   set(BUILD_TYPE "release")
++ endif()
++ 
++-find_library(
++-  LIBWORKLETS worklets
++-  PATHS
++-    "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}"
++-  NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+++add_library(worklets SHARED IMPORTED)
+++
+++set_target_properties(worklets PROPERTIES IMPORTED_LOCATION "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}/libworklets.so")
++ 
++ set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
++ 
++-target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android
++-                      ${LIBWORKLETS})
+++target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android worklets)
++ 
++ if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
++   target_link_libraries(reanimated ReactAndroid::reactnative)
++
++From 1b1e4192a9ef641e9a0b848816faf59bc3f46079 Mon Sep 17 00:00:00 2001
++From: Tomek Zawadzki <tomekzawadzki98@gmail.com>
++Date: Fri, 25 Jul 2025 16:52:37 +0200
++Subject: [PATCH 9/9] Reformat file
++
++---
++ .../react-native-reanimated/android/CMakeLists.txt     | 10 ++++++++--
++ 1 file changed, 8 insertions(+), 2 deletions(-)
++
++diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
++index 1646ff996282..a4fee814df81 100644
++--- a/android/CMakeLists.txt
+++++ b/android/CMakeLists.txt
++@@ -77,11 +77,17 @@ endif()
++ 
++ add_library(worklets SHARED IMPORTED)
++ 
++-set_target_properties(worklets PROPERTIES IMPORTED_LOCATION "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}/libworklets.so")
+++set_target_properties(
+++  worklets
+++  PROPERTIES
+++    IMPORTED_LOCATION
+++    "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}/libworklets.so"
+++)
++ 
++ set_target_properties(reanimated PROPERTIES LINKER_LANGUAGE CXX)
++ 
++-target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android worklets)
+++target_link_libraries(reanimated log ReactAndroid::jsi fbjni::fbjni android
+++                      worklets)
++ 
++ if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
++   target_link_libraries(reanimated ReactAndroid::reactnative)

@@ -97,5 +97,8 @@
     "autolinking": {
       "exclude": []
     }
+  },
+  "resolutions": {
+    "react-native-reanimated@^4.0.0": "patch:react-native-reanimated@npm%3A4.0.0#./.yarn/patches/react-native-reanimated-npm-4.0.0-76fca8e020.patch"
   }
 }
