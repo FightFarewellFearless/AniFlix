@@ -3236,19 +3236,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.3.22":
-  version: 7.3.22
-  resolution: "@react-navigation/native-stack@npm:7.3.22"
+"@react-navigation/elements@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "@react-navigation/elements@npm:2.6.1"
   dependencies:
-    "@react-navigation/elements": ^2.6.0
+    color: ^4.2.3
+    use-latest-callback: ^0.2.4
+    use-sync-external-store: ^1.5.0
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.16
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 4613f01b8fca9a23a97be9b4bb6176d8206f2ab1fff1686920b961b62a054f712b9c26ed119737c7c3be8536b24e8ca00e63b069818010b2b03303eea34f7fe4
+  languageName: node
+  linkType: hard
+
+"@react-navigation/native-stack@npm:^7.3.23":
+  version: 7.3.23
+  resolution: "@react-navigation/native-stack@npm:7.3.23"
+  dependencies:
+    "@react-navigation/elements": ^2.6.1
     warn-once: ^0.1.1
   peerDependencies:
-    "@react-navigation/native": ^7.1.15
+    "@react-navigation/native": ^7.1.16
     react: ">= 18.2.0"
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: fc4a6c0c5ca88273aada0c5d2972b4e4124ed3f7c354a3b2502ae661ec5d7bbcca91d4328d6b7b6fcf2cc0e875f216a336036843f662cb52da57c769a24551f0
+  checksum: bfbed36f60f43e85c95743afd8a86440c9ff40b4f48e3bcf485a1b80da5ae3ac6639ba6c07c8546b8b53290cd5045851f33ebc4234d6ab02304dfec437b2b4bb
   languageName: node
   linkType: hard
 
@@ -3919,7 +3939,7 @@ __metadata:
     "@react-native/typescript-config": 0.79.4
     "@react-navigation/drawer": ^7.5.4
     "@react-navigation/native": ^7.1.15
-    "@react-navigation/native-stack": ^7.3.22
+    "@react-navigation/native-stack": ^7.3.23
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^2.0.0-rc.12
     "@types/jest": ^29.5.14
