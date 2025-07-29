@@ -43,7 +43,7 @@
     "react-native-edge-to-edge": "^1.6.2",
     "react-native-error-boundary": "^2.0.0",
     "react-native-gesture-handler": "2.27.2",
-    "react-native-keyboard-controller": "^1.18.1",
+    "react-native-keyboard-controller": "^1.18.2",
     "react-native-marked": "^7.0.2",
     "react-native-mmkv": "^3.3.0",
     "react-native-orientation-locker": "^1.7.0",
