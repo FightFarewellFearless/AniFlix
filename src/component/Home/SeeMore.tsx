@@ -1,5 +1,5 @@
-import { LegendList } from '@legendapp/list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList } from '@shopify/flash-list';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -45,10 +45,8 @@ function SeeMore(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <LegendList
-        recycleItems
+      <FlashList
         contentContainerStyle={{
-          gap: 6,
           paddingLeft: insets.left,
           paddingRight: insets.right,
           paddingBottom: insets.bottom,
@@ -65,12 +63,14 @@ function SeeMore(props: Props) {
         renderItem={({ item }) =>
           props.route.params.type === 'MovieList' ? (
             <ListAnimeComponent
+              gap
               type="movie"
               newAnimeData={item as Movies}
               navigationProp={props.navigation}
             />
           ) : (
             <ListAnimeComponent
+              gap
               type="anime"
               newAnimeData={item as NewAnimeList}
               navigationProp={props.navigation}
