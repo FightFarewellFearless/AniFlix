@@ -98,7 +98,10 @@ function History(props: Props) {
     [data],
   );
 
-  const keyExtractor = useCallback((item: HistoryJSON) => item.title, []);
+  const keyExtractor = useCallback(
+    (item: HistoryJSON) => item.title + item.episode + item.lastDuration,
+    [],
+  );
 
   const renderFlatList = useCallback(
     ({ item }: ListRenderItemInfo<HistoryJSON>) => {
