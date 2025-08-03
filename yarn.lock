@@ -3930,13 +3930,13 @@ __metadata:
     axios: ^1.11.0
     babel-jest: ^29.6.3
     babel-plugin-inline-import: ^3.0.0
-    babel-plugin-react-compiler: ^19.0.0-beta-ebf51a3-20250411
+    babel-plugin-react-compiler: ^19.1.0-rc.2
     buffer: ^6.0.3
     cheerio: 1.0.0-rc.12
     depcheck: ^1.4.7
     eslint: ^8.19.0
     eslint-plugin-prettier: ^5.2.3
-    eslint-plugin-react-compiler: ^19.0.0-beta-ebf51a3-20250411
+    eslint-plugin-react-compiler: ^19.1.0-rc.2
     expo: ^53.0.20
     expo-document-picker: 13.1.6
     expo-image: ^2.4.0
@@ -3973,7 +3973,7 @@ __metadata:
     react-native-worklets: ^0.4.0
     react-test-renderer: 19.0.0
     recyclerlistview: ^4.2.3
-    typescript: 5.8.2
+    typescript: 5.9.2
     url: ^0.11.3
   languageName: unknown
   linkType: soft
@@ -4374,12 +4374,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-react-compiler@npm:^19.0.0-beta-ebf51a3-20250411":
-  version: 19.0.0-beta-ebf51a3-20250411
-  resolution: "babel-plugin-react-compiler@npm:19.0.0-beta-ebf51a3-20250411"
+"babel-plugin-react-compiler@npm:^19.1.0-rc.2":
+  version: 19.1.0-rc.2
+  resolution: "babel-plugin-react-compiler@npm:19.1.0-rc.2"
   dependencies:
     "@babel/types": ^7.26.0
-  checksum: 3a5d60ee22847ecf6428221af1e87fb2780f0acb1e1890d45f73318ce9340abe3b2a421c930c74125bf92604cc367d4f3b5f7afdb347aa8ee122045340760f7c
+  checksum: cfb156ee8c5f18dda947e42139ccd6951c8d37a1d3ad88fed25e2dfd84bc90d19758e9763ba3b3a3cb92c5a49ee19eceaf936a4d1e280979ace5f0630e824e04
   languageName: node
   linkType: hard
 
@@ -6009,9 +6009,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-compiler@npm:^19.0.0-beta-ebf51a3-20250411":
-  version: 19.0.0-beta-ebf51a3-20250411
-  resolution: "eslint-plugin-react-compiler@npm:19.0.0-beta-ebf51a3-20250411"
+"eslint-plugin-react-compiler@npm:^19.1.0-rc.2":
+  version: 19.1.0-rc.2
+  resolution: "eslint-plugin-react-compiler@npm:19.1.0-rc.2"
   dependencies:
     "@babel/core": ^7.24.4
     "@babel/parser": ^7.24.4
@@ -6021,7 +6021,7 @@ __metadata:
     zod-validation-error: ^3.0.3
   peerDependencies:
     eslint: ">=7"
-  checksum: 7b01a449d9be2c86e02b944b0b0db37a742e1cfefef8345a66804481a87e0e6a5a46a75ff1e4af9568377bf8e3458fef4cb72ff2bd99a0c91c451c3d6069a0c5
+  checksum: bfa9bcf1e95311c14d7021833dbf7b933082942c16fbaada4f34de74e01bffc5c0bdbc2e5b1aceb8eab17efe935bff64b88251378363bc9505241259ac66868d
   languageName: node
   linkType: hard
 
@@ -12065,23 +12065,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.8.2":
-  version: 5.8.2
-  resolution: "typescript@npm:5.8.2"
+"typescript@npm:5.9.2":
+  version: 5.9.2
+  resolution: "typescript@npm:5.9.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 7f9e3d7ac15da6df713e439e785e51facd65d6450d5f51fab3e8d2f2e3f4eb317080d895480b8e305450cdbcb37e17383e8bf521e7395f8b556e2f2a4730ed86
+  checksum: f619cf6773cfe31409279711afd68cdf0859780006c50bc2a7a0c3227f85dea89a3b97248846326f3a17dad72ea90ec27cf61a8387772c680b2252fd02d8497b
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.8.2#~builtin<compat/typescript>":
-  version: 5.8.2
-  resolution: "typescript@patch:typescript@npm%3A5.8.2#~builtin<compat/typescript>::version=5.8.2&hash=b45daf"
+"typescript@patch:typescript@5.9.2#~builtin<compat/typescript>":
+  version: 5.9.2
+  resolution: "typescript@patch:typescript@npm%3A5.9.2#~builtin<compat/typescript>::version=5.9.2&hash=b45daf"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: a58d19ff9811c1764a299dd83ca20ed8020f0ab642906dafc880121b710751227201531fdc99878158205c356ac79679b0b61ac5b42eda0e28bfb180947a258d
+  checksum: e42a701947325500008334622321a6ad073f842f5e7d5e7b588a6346b31fdf51d56082b9ce5cef24312ecd3e48d6c0d4d44da7555f65e2feec18cf62ec540385
   languageName: node
   linkType: hard
 
