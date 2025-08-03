@@ -1,3 +1,13 @@
+# v1.0.2_JS-1 (03-Agustus-2025)
+
+HBD TO ME!! :)
+## Penambahan
+- Mengintegrasikan data history dengan detail episode
+## Peningkatan
+- Mengaktifkan kembali react-compiler untuk performa aplikasi yang maksimal
+- Scrolling yang lebih mulus
+- Tampilan loading yang sedikit lebih baik
+
 # v1.0.2 (27-Juli-2025)
 
 ## Peningkatan
