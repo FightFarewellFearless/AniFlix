@@ -27,6 +27,7 @@ import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AniDetailEpsList } from '../types/anime';
+import { HistoryJSON } from '../types/historyJSON';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
@@ -49,9 +50,22 @@ function AniDetail(props: Props) {
     'watchLater',
     state => JSON.parse(state) as watchLaterJSON[],
   );
-  const isInList = watchLaterListsJson.some(
-    item => item.title === data.title.replace('Subtitle Indonesia', ''),
+  const isInList = useMemo(
+    () =>
+      watchLaterListsJson.some(item => item.title === data.title.replace('Subtitle Indonesia', '')),
+    [data.title, watchLaterListsJson],
   );
+
+  const historyListsJson = useModifiedKeyValueIfFocused(
+    'history',
+    state => JSON.parse(state) as HistoryJSON[],
+  );
+  const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
+  const lastWatched = useMemo(
+    () => historyListsJson.find(z => z.title.trim() === historyTitle),
+    [historyListsJson, historyTitle],
+  );
+
   // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<AniDetailEpsList>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
@@ -140,9 +154,7 @@ function AniDetail(props: Props) {
           </View>
 
           <View style={styles.infoContainer}>
-            <Text style={[globalStyles.text, styles.title]}>
-              {data.title.replace('Subtitle Indonesia', '').trim()}
-            </Text>
+            <Text style={[globalStyles.text, styles.title]}>{historyTitle}</Text>
             {data.alternativeTitle && (
               <Text style={[globalStyles.text, styles.title, styles.indonesianTitle]}>
                 {data.alternativeTitle}
@@ -226,6 +238,29 @@ function AniDetail(props: Props) {
             </View>
 
             <View style={styles.chapterButtonsContainer}>
+              {lastWatched && lastWatched.episode && (
+                <Button
+                  mode="elevated"
+                  icon="play"
+                  onPress={() => {
+                    if (data.episodeList.length > 0) {
+                      props.navigation.navigate('FromUrl', {
+                        title: props.route.params.data.title,
+                        link: lastWatched.link,
+                        historyData: lastWatched
+                          ? {
+                              lastDuration: lastWatched.lastDuration ?? 0,
+                              resolution: lastWatched.resolution ?? '',
+                            }
+                          : undefined,
+                      });
+                    } else {
+                      ToastAndroid.show('Tidak ada episode untuk ditonton', ToastAndroid.SHORT);
+                    }
+                  }}>
+                  Terakhir Ditonton ({lastWatched.episode.replace('Subtitle Indonesia', '').trim()})
+                </Button>
+              )}
               <Button
                 buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
@@ -296,7 +331,6 @@ function AniDetail(props: Props) {
     data.thumbnailUrl,
     data.animeType,
     data.status,
-    data.title,
     data.alternativeTitle,
     data.studio,
     data.genres,
@@ -306,9 +340,12 @@ function AniDetail(props: Props) {
     data.episodeList,
     data.epsTotal,
     data.synopsis,
+    data.title,
     colorScheme,
     globalStyles.text,
+    historyTitle,
     isInList,
+    lastWatched,
     searchQuery,
     props.route.params.link,
     props.route.params.data.title,
@@ -331,10 +368,24 @@ function AniDetail(props: Props) {
               props.navigation.navigate('FromUrl', {
                 title: props.route.params.data.title,
                 link: item.link,
+                historyData: lastWatched
+                  ? {
+                      lastDuration: lastWatched.lastDuration ?? 0,
+                      resolution: lastWatched.resolution ?? '',
+                    }
+                  : undefined,
               });
             }}>
             <View style={styles.episodeTitleContainer}>
-              <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+              <Text style={[globalStyles.text, styles.episodeText]}>
+                {item.title.replace('Subtitle Indonesia', '').trim()}
+              </Text>
+              {lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode) && (
+                <View style={styles.lastWatchedContainer}>
+                  <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
+                  <Icon name="film" size={16} style={styles.lastWatchedIcon} />
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         )}
@@ -492,12 +543,30 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
         },
         episodeTitleContainer: {
-          flex: 2,
+          flex: 1,
+          flexWrap: 'wrap',
+          flexDirection: 'row',
         },
         episodeText: {
+          flex: 1,
           fontSize: 16,
           fontWeight: '600',
           color: colorScheme === 'dark' ? '#ffffff' : '#333333',
+        },
+        lastWatchedContainer: {
+          flex: 0.5,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        lastWatchedText: {
+          fontSize: 16,
+          fontWeight: '600',
+          textAlign: 'center',
+          color: theme.colors.onPrimaryContainer,
+        },
+        lastWatchedIcon: {
+          color: theme.colors.onPrimaryContainer,
         },
         chapterDivider: {
           backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#e0e0e0',
@@ -507,6 +576,7 @@ function useStyles() {
     [
       colorScheme,
       globalStyles.text.color,
+      theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
     ],

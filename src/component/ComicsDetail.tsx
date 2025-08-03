@@ -22,6 +22,7 @@ import Reanimated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
+import { HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
@@ -59,11 +60,17 @@ export default function ComicsDetail(props: Props) {
   });
   const { data } = props.route.params;
   const readComic = useCallback(
-    (link: string) => {
+    (link: string, fromHistory?: HistoryJSON) => {
       props.navigation.navigate('FromUrl', {
         title: props.route.params.data.title,
         link,
         type: 'comics',
+        historyData: fromHistory
+          ? {
+              lastDuration: fromHistory.lastDuration ?? 0,
+              resolution: fromHistory.resolution ?? '',
+            }
+          : undefined,
       });
     },
     [props.navigation, props.route.params.data.title],
@@ -82,7 +89,19 @@ export default function ComicsDetail(props: Props) {
     'watchLater',
     state => JSON.parse(state) as watchLaterJSON[],
   );
-  const isInList = watchLaterListsJson.some(item => item.title === data.title);
+  const isInList = useMemo(
+    () => watchLaterListsJson.some(item => item.title === data.title),
+    [data.title, watchLaterListsJson],
+  );
+
+  const historyListsJson = useModifiedKeyValueIfFocused(
+    'history',
+    state => JSON.parse(state) as HistoryJSON[],
+  );
+  const lastReaded = useMemo(
+    () => historyListsJson.find(z => z.title.trim() === data.title),
+    [historyListsJson, data.title],
+  );
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
@@ -99,8 +118,12 @@ export default function ComicsDetail(props: Props) {
           </View>
         )}
         renderItem={({ item }) => {
+          const isLastReaded =
+            lastReaded && lastReaded.episode && item.chapter.includes(lastReaded.episode);
           return (
-            <TouchableOpacity style={styles.chapterItem} onPress={() => readComic(item.chapterUrl)}>
+            <TouchableOpacity
+              style={styles.chapterItem}
+              onPress={() => readComic(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
               <View style={styles.chapterTitleContainer}>
                 <Text style={[globalStyles.text, styles.chapterText]}>{item.chapter}</Text>
               </View>
@@ -111,6 +134,12 @@ export default function ComicsDetail(props: Props) {
                 <Text style={[globalStyles.text, styles.chapterDetailText]}>
                   <Icon name="eye" size={12} /> {item.views}x dilihat
                 </Text>
+                {isLastReaded && (
+                  <Text
+                    style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
+                    <Icon name="book" size={12} /> Terakhir dibaca
+                  </Text>
+                )}
               </View>
             </TouchableOpacity>
           );
@@ -236,6 +265,16 @@ export default function ComicsDetail(props: Props) {
                 </Button>
                 <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
                 <View style={{ gap: 10 }}>
+                  {lastReaded && lastReaded.episode && (
+                    <Button
+                      mode="elevated"
+                      icon="book-open"
+                      onPress={() => {
+                        readComic(lastReaded.link, lastReaded);
+                      }}>
+                      Terakhir Dibaca ({lastReaded.episode})
+                    </Button>
+                  )}
                   <Button
                     onPress={() => readComic(data.chapters[data.chapters.length - 1].chapterUrl)}
                     buttonColor={styles.additionalInfoTextSurface.backgroundColor}
@@ -394,6 +433,10 @@ function useStyles() {
           color: colorScheme === 'dark' ? '#cccccc' : '#666666',
           marginBottom: 3,
         },
+        lastReadedText: {
+          color: theme.colors.onPrimaryContainer,
+          fontWeight: 'bold',
+        },
         chapterDivider: {
           backgroundColor: 'transparent',
           height: 0,
@@ -402,6 +445,7 @@ function useStyles() {
     [
       colorScheme,
       globalStyles.text.color,
+      theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
     ],

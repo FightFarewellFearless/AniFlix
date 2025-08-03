@@ -25,6 +25,7 @@ import controlWatchLater from '../utils/watchLaterControl';
 import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HistoryJSON } from '../types/historyJSON';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 interface MovieEpisode {
@@ -54,6 +55,17 @@ function MovieDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
+
+  const historyListsJson = useModifiedKeyValueIfFocused(
+    'history',
+    state => JSON.parse(state) as HistoryJSON[],
+  );
+  const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
+  const lastWatched = useMemo(
+    () => historyListsJson.find(z => z.title.trim() === historyTitle),
+    [historyListsJson, historyTitle],
+  );
+
   // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<MovieEpisode>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
@@ -123,7 +135,9 @@ function MovieDetail(props: Props) {
           </View>
 
           <View style={styles.infoContainer}>
-            <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
+            <Text style={[globalStyles.text, styles.title]}>
+              {data.title.replace('Subtitle Indonesia', '').trim()}
+            </Text>
             <Text style={[globalStyles.text, styles.author]}>
               <Icon name="building" /> {data.studio}
             </Text>
@@ -206,6 +220,30 @@ function MovieDetail(props: Props) {
             <View style={styles.chapterButtonsContainer}>
               {hasMultipleEpisodes ? (
                 <>
+                  {lastWatched && lastWatched.episode && (
+                    <Button
+                      mode="elevated"
+                      icon="play"
+                      onPress={() => {
+                        if (data.episodeList.length > 0) {
+                          props.navigation.navigate('FromUrl', {
+                            title: props.route.params.data.title,
+                            link: lastWatched.link,
+                            historyData: lastWatched
+                              ? {
+                                  lastDuration: lastWatched.lastDuration ?? 0,
+                                  resolution: lastWatched.resolution ?? '',
+                                }
+                              : undefined,
+                          });
+                        } else {
+                          ToastAndroid.show('Tidak ada episode untuk ditonton', ToastAndroid.SHORT);
+                        }
+                      }}>
+                      Terakhir Ditonton (
+                      {lastWatched.episode.replace('Subtitle Indonesia', '').trim()})
+                    </Button>
+                  )}
                   <Button
                     buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                     textColor={styles.additionalInfoText.color}
@@ -245,6 +283,12 @@ function MovieDetail(props: Props) {
                       title: props.route.params.data.title,
                       link: data.streamingUrl,
                       type: 'movie',
+                      historyData: lastWatched
+                        ? {
+                            lastDuration: lastWatched.lastDuration ?? 0,
+                            resolution: lastWatched.resolution ?? '',
+                          }
+                        : undefined,
                     });
                   }}>
                   Tonton Sekarang
@@ -290,6 +334,7 @@ function MovieDetail(props: Props) {
     colorScheme,
     globalStyles.text,
     isInList,
+    lastWatched,
     props.route.params.link,
     props.route.params.data.title,
     props.navigation,
@@ -307,11 +352,23 @@ function MovieDetail(props: Props) {
             props.navigation.navigate('FromUrl', {
               title: props.route.params.data.title,
               link: item.url,
+              historyData: lastWatched
+                ? {
+                    lastDuration: lastWatched.lastDuration ?? 0,
+                    resolution: lastWatched.resolution ?? '',
+                  }
+                : undefined,
               type: 'movie',
             });
           }}>
           <View style={styles.episodeTitleContainer}>
             <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+            {lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode) && (
+              <View style={styles.lastWatchedContainer}>
+                <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
+                <Icon name="film" size={16} style={styles.lastWatchedIcon} />
+              </View>
+            )}
           </View>
         </TouchableOpacity>
       )}
@@ -453,12 +510,27 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
         },
         episodeTitleContainer: {
-          flex: 2,
+          flex: 1,
         },
         episodeText: {
           fontSize: 16,
           fontWeight: '600',
           color: colorScheme === 'dark' ? '#ffffff' : '#333333',
+        },
+        lastWatchedContainer: {
+          flex: 0.5,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        lastWatchedText: {
+          fontSize: 16,
+          fontWeight: '600',
+          textAlign: 'center',
+          color: theme.colors.onPrimaryContainer,
+        },
+        lastWatchedIcon: {
+          color: theme.colors.onPrimaryContainer,
         },
         chapterDivider: {
           backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#e0e0e0',
@@ -468,6 +540,7 @@ function useStyles() {
     [
       colorScheme,
       globalStyles.text.color,
+      theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
     ],
