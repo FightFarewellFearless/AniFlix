@@ -560,12 +560,13 @@ function useStyles() {
         },
         lastWatchedContainer: {
           flex: 0.5,
+          gap: 4,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
         },
         lastWatchedText: {
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: '600',
           textAlign: 'center',
           color: theme.colors.onPrimaryContainer,
