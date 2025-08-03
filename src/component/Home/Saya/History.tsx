@@ -263,27 +263,13 @@ function History(props: Props) {
       </View>
       <View style={styles.historyContainer}>
         <FlashList
-          // TODO: this is a temporary fix for unresponsive RNGH's button remove when fixed
-          // showsVerticalScrollIndicator={false}
-          // drawDistance={250}
           data={filteredData}
-          estimatedItemSize={160}
-          // getItemLayout={(_, index) => {
-          //   return {
-          //     length: 160,
-          //     offset: 160 * index,
-          //     index,
-          //   };
-          // }}
-
           // fix: weird flashlist crash (undefined) (might be related to concurrent render)
           key={searchKeywordDeferred}
           ref={flatListRef}
           keyExtractor={keyExtractor}
           onScroll={scrollHandler}
           removeClippedSubviews={true}
-          // windowSize={3}
-          // initialNumToRender={0}
           extraData={styles}
           renderItem={renderFlatList}
           ListHeaderComponent={() =>
