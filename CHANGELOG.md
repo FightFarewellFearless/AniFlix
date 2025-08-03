@@ -1,3 +1,11 @@
+# v1.0.2_JS-2 (03-Agustus-2025)
+
+HBD TO ME!! part 2 hehe :) (Perbaikan tambahan untuk versi JS-1 di hari yang sama)
+## Perbaikan
+- Masalah integrasi dengan history dan tonton nanti pada judul yang sama antara komik dan anime
+## Penyesuaian
+- Ukuran font "Terakhir di tonton" pada detail anime
+
 # v1.0.2_JS-1 (03-Agustus-2025)
 
 HBD TO ME!! :)
