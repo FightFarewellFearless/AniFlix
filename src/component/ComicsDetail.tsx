@@ -145,7 +145,7 @@ export default function ComicsDetail(props: Props) {
           );
         }}
         ItemSeparatorComponent={() => <Divider />}
-        keyExtractor={item => item.chapter}
+        keyExtractor={(item, index) => item.chapter + index}
         contentContainerStyle={{
           backgroundColor: styles.mainContainer.backgroundColor,
           paddingLeft: insets.left,
