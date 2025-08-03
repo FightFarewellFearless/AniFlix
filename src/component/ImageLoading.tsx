@@ -1,6 +1,6 @@
 import { useIsFocused } from '@react-navigation/native';
 import { Image, ImageProps } from 'expo-image';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
@@ -41,7 +41,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setLoading(false);
     setError(false);
   }, [source]);
@@ -68,10 +68,12 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
         />
       )}
       {children}
-      <View style={styles.overlay}>
-        {loading && <LoadingIndicator size={15} />}
-        {error && <Icon name="exclamation-circle" color="red" size={18} />}
-      </View>
+      {isFocused && (
+        <View style={styles.overlay}>
+          {loading && <LoadingIndicator size={15} />}
+          {error && <Icon name="exclamation-circle" color="red" size={18} />}
+        </View>
+      )}
     </View>
   );
 };
