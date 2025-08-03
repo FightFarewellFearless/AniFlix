@@ -52,7 +52,12 @@ function AniDetail(props: Props) {
   );
   const isInList = useMemo(
     () =>
-      watchLaterListsJson.some(item => item.title === data.title.replace('Subtitle Indonesia', '')),
+      watchLaterListsJson.some(
+        item =>
+          item.title === data.title.replace('Subtitle Indonesia', '') &&
+          !item.isComics &&
+          !item.isMovie,
+      ),
     [data.title, watchLaterListsJson],
   );
 
@@ -62,7 +67,7 @@ function AniDetail(props: Props) {
   );
   const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
   const lastWatched = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === historyTitle),
+    () => historyListsJson.find(z => z.title.trim() === historyTitle && !z.isComics && !z.isMovie),
     [historyListsJson, historyTitle],
   );
 

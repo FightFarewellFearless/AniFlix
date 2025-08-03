@@ -90,7 +90,7 @@ export default function ComicsDetail(props: Props) {
     state => JSON.parse(state) as watchLaterJSON[],
   );
   const isInList = useMemo(
-    () => watchLaterListsJson.some(item => item.title === data.title),
+    () => watchLaterListsJson.some(item => item.title === data.title && item.isComics),
     [data.title, watchLaterListsJson],
   );
 
@@ -99,7 +99,7 @@ export default function ComicsDetail(props: Props) {
     state => JSON.parse(state) as HistoryJSON[],
   );
   const lastReaded = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === data.title),
+    () => historyListsJson.find(z => z.title.trim() === data.title && z.isComics),
     [historyListsJson, data.title],
   );
 

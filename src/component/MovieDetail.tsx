@@ -53,7 +53,7 @@ function MovieDetail(props: Props) {
     state => JSON.parse(state) as watchLaterJSON[],
   );
   const isInList = watchLaterListsJson.some(
-    item => item.title === data.title.replace('Subtitle Indonesia', ''),
+    item => item.title === data.title.replace('Subtitle Indonesia', '') && item.isMovie,
   );
 
   const historyListsJson = useModifiedKeyValueIfFocused(
@@ -62,7 +62,7 @@ function MovieDetail(props: Props) {
   );
   const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
   const lastWatched = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === historyTitle),
+    () => historyListsJson.find(z => z.title.trim() === historyTitle && z.isMovie),
     [historyListsJson, historyTitle],
   );
 
