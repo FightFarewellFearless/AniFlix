@@ -7,7 +7,6 @@ module.exports = {
     [
       'babel-preset-expo',
       {
-        'react-compiler': ReactCompilerConfig,
         reanimated: false,
       },
     ],
@@ -18,6 +17,8 @@ module.exports = {
     },
   },
   plugins: [
+    ['babel-plugin-react-compiler', ReactCompilerConfig], // must run first!
+    'react-native-worklets/plugin',
     ['module:react-native-dotenv'],
     [
       'babel-plugin-inline-import',
@@ -25,6 +26,5 @@ module.exports = {
         extensions: ['.md', '.txt'],
       },
     ],
-    'react-native-worklets/plugin',
   ],
 };

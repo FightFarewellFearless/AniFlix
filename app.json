@@ -17,8 +17,5 @@
     ["expo-video", {
       "supportsPictureInPicture": true
     }]
-  ],
-  "experiments": {
-    "reactCompiler": false
-  }
+  ]
 }
