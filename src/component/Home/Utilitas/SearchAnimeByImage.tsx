@@ -260,7 +260,6 @@ function SearchAnimeByImage() {
             )}
           </TouchableOpacity>
         )}
-        estimatedItemSize={220}
         contentContainerStyle={styles.listContent}
       />
     </View>

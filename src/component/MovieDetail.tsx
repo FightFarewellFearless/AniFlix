@@ -22,7 +22,7 @@ import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
 import controlWatchLater from '../utils/watchLaterControl';
 
-import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
@@ -54,7 +54,8 @@ function MovieDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
-  const scrollRef = useAnimatedRef<FlashList<MovieEpisode>>();
+// @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
+  const scrollRef = useAnimatedRef<FlashListRef<MovieEpisode>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
 
   const headerImageStyle = useAnimatedStyle(() => {
@@ -292,6 +293,7 @@ function MovieDetail(props: Props) {
 
   return (
     <ReanimatedFlashList
+      // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
       ref={scrollRef}
       data={data.episodeList.length > 1 ? data.episodeList : []}
       renderItem={({ item }) => (

@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlashList, FlashListProps } from '@shopify/flash-list';
+import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
@@ -39,7 +39,8 @@ export default function ComicsDetail(props: Props) {
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
   const styles = useStyles();
-  const scrollRef = useAnimatedRef<FlashList<KomikuDetail['chapters'][0]>>();
+// @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
+  const scrollRef = useAnimatedRef<FlashListRef<KomikuDetail['chapters'][0]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
     return {
@@ -88,6 +89,7 @@ export default function ComicsDetail(props: Props) {
         maintainVisibleContentPosition={{
           disabled: true,
         }}
+        // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
         ref={scrollRef}
         data={filteredChapters}
         ListEmptyComponent={() => (

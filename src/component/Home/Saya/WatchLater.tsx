@@ -1,6 +1,6 @@
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import { FlashList, FlashListRef, ListRenderItem } from '@shopify/flash-list';
 import moment from 'moment';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -25,7 +25,7 @@ function WatchLater(props: Props) {
     result => JSON.parse(result) as watchLaterJSON[],
   );
 
-  const flashlistRef = useRef<FlashList<watchLaterJSON>>(null);
+  const flashlistRef = useRef<FlashListRef<watchLaterJSON>>(null);
 
   const renderItem = useCallback<ListRenderItem<watchLaterJSON>>(
     ({ item, index }) => {
@@ -132,7 +132,6 @@ function WatchLater(props: Props) {
           ref={flashlistRef}
           data={watchLaterLists}
           extraData={styles}
-          estimatedItemSize={169}
           renderItem={renderItem}
           keyExtractor={extractKey}
           ListHeaderComponent={() => (
