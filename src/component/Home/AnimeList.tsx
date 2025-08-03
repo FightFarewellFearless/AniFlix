@@ -175,7 +175,12 @@ function HomeList(props: HomeProps) {
               ]}
               key={x.title}
               onPress={() => {
-                props.navigation.dispatch(StackActions.push('FromUrl', { link: x.link }));
+                props.navigation.dispatch(
+                  StackActions.push('FromUrl', {
+                    title: x.title,
+                    link: x.link,
+                  }),
+                );
               }}>
               <Text style={styles.scheduleTitle}>{x.title}</Text>
             </TouchableOpacity>

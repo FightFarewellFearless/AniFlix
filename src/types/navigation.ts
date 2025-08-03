@@ -35,6 +35,7 @@ type RootStackNavigator = {
   };
   FromUrl: {
     link: string;
+    title: string;
     type?: 'comics' | 'anime' | 'movie';
     historyData?: {
       resolution: string;

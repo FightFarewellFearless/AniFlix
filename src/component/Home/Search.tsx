@@ -183,6 +183,7 @@ function Search(props: Props) {
             onPress={() => {
               props.navigation.dispatch(
                 StackActions.push('FromUrl', {
+                  title: item.title,
                   link: item.streamingLink,
                 }),
               );
@@ -493,6 +494,7 @@ function SearchList({
       onPress={() => {
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
+            title: z.title,
             link: isMovie(z) ? z.url : isComic(z) ? z.detailUrl : z.animeUrl,
             type: isMovie(z) ? 'movie' : isComic(z) ? 'comics' : 'anime',
           }),

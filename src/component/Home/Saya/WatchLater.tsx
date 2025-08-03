@@ -38,6 +38,7 @@ function WatchLater(props: Props) {
           onPress={() => {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
+                title: item.title,
                 link: item.link,
                 type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
               }),

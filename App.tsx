@@ -137,7 +137,7 @@ const screens: Screens = [
     component: withSuspenseAndSafeArea(ComicsReading, true, true),
     options: undefined,
   },
-  { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: undefined },
+  { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: { headerShown: true } },
   { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },
   { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },
   { name: 'NeedUpdate', component: withSuspenseAndSafeArea(NeedUpdate), options: undefined },

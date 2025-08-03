@@ -1,7 +1,7 @@
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Text, ToastAndroid, View } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Text, ToastAndroid, View } from 'react-native';
 import randomTipsArray from '../../assets/loadingTips.json';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
@@ -13,15 +13,15 @@ import controlWatchLater from '../../utils/watchLaterControl';
 
 import URL from 'url';
 import { getMovieDetail, getStreamingDetail } from '../../utils/animeMovie';
+import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/komiku';
-import { DatabaseManager } from '../../utils/DatabaseManager';
+import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
-  const [dots, setDots] = useState<string>('');
 
   const randomTips = useRef<string>(
     // eslint-disable-next-line no-bitwise
@@ -46,6 +46,7 @@ function FromUrl(props: Props) {
     [props.navigation],
   );
   useEffect(() => {
+    props.navigation.setOptions({ headerTitle: props.route.params.title });
     const abort: AbortController = new AbortController();
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
     if (props.route.params.link.includes('nanimex')) {
@@ -269,21 +270,9 @@ function FromUrl(props: Props) {
     props.navigation,
     props.route.params.historyData,
     props.route.params.link,
+    props.route.params.title,
     props.route.params.type,
   ]);
-
-  useEffect(() => {
-    const dotsInterval = setInterval(() => {
-      if (dots === '...') {
-        setDots('');
-        return;
-      }
-      setDots(dots + '.');
-    }, 250);
-    return () => {
-      clearInterval(dotsInterval);
-    };
-  }, [dots]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -293,8 +282,10 @@ function FromUrl(props: Props) {
           alignItems: 'center',
           flex: 1,
         }}>
-        <ActivityIndicator size="large" />
-        <Text style={globalStyles.text}>Loading{dots}</Text>
+        <LoadingIndicator size={15} />
+        <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
+          Mengambil data... Mohon tunggu sebentar!
+        </Text>
       </View>
       {/* tips */}
       <View style={{ alignItems: 'center' }}>

@@ -111,6 +111,7 @@ function History(props: Props) {
           onPress={() => {
             props.navigation.dispatch(
               StackActions.push('FromUrl', {
+                title: item.title,
                 link: item.link,
                 historyData: item,
                 type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',

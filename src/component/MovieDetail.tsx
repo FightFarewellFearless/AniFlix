@@ -54,7 +54,7 @@ function MovieDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
-// @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
+  // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<MovieEpisode>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
 
@@ -212,6 +212,7 @@ function MovieDetail(props: Props) {
                     mode="elevated"
                     onPress={() => {
                       props.navigation.navigate('FromUrl', {
+                        title: props.route.params.data.title,
                         link: data.episodeList[data.episodeList.length - 1].url,
                         type: 'movie',
                       });
@@ -224,6 +225,7 @@ function MovieDetail(props: Props) {
                     mode="elevated"
                     onPress={() => {
                       props.navigation.navigate('FromUrl', {
+                        title: props.route.params.data.title,
                         link: data.episodeList[0].url,
                         type: 'movie',
                       });
@@ -240,6 +242,7 @@ function MovieDetail(props: Props) {
                   style={{ flex: 1 }}
                   onPress={() => {
                     props.navigation.navigate('FromUrl', {
+                      title: props.route.params.data.title,
                       link: data.streamingUrl,
                       type: 'movie',
                     });
@@ -288,6 +291,7 @@ function MovieDetail(props: Props) {
     globalStyles.text,
     isInList,
     props.route.params.link,
+    props.route.params.data.title,
     props.navigation,
   ]);
 
@@ -301,6 +305,7 @@ function MovieDetail(props: Props) {
           style={styles.episodeButton}
           onPress={() => {
             props.navigation.navigate('FromUrl', {
+              title: props.route.params.data.title,
               link: item.url,
               type: 'movie',
             });

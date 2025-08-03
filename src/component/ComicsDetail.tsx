@@ -39,7 +39,7 @@ export default function ComicsDetail(props: Props) {
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
   const styles = useStyles();
-// @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
+  // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<KomikuDetail['chapters'][0]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
@@ -61,11 +61,12 @@ export default function ComicsDetail(props: Props) {
   const readComic = useCallback(
     (link: string) => {
       props.navigation.navigate('FromUrl', {
+        title: props.route.params.data.title,
         link,
         type: 'comics',
       });
     },
-    [props.navigation],
+    [props.navigation, props.route.params.data.title],
   );
 
   const [searchQuery, setSearchQuery] = useState('');

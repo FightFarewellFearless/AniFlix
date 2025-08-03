@@ -52,7 +52,7 @@ function AniDetail(props: Props) {
   const isInList = watchLaterListsJson.some(
     item => item.title === data.title.replace('Subtitle Indonesia', ''),
   );
-// @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
+  // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<AniDetailEpsList>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
 
@@ -233,6 +233,7 @@ function AniDetail(props: Props) {
                 onPress={() => {
                   if (data.episodeList.length > 0) {
                     props.navigation.navigate('FromUrl', {
+                      title: props.route.params.data.title,
                       link: data.episodeList[data.episodeList.length - 1].link,
                     });
                   } else {
@@ -248,6 +249,7 @@ function AniDetail(props: Props) {
                 onPress={() => {
                   if (data.episodeList.length > 0) {
                     props.navigation.navigate('FromUrl', {
+                      title: props.route.params.data.title,
                       link: data.episodeList[0].link,
                     });
                   } else {
@@ -268,15 +270,49 @@ function AniDetail(props: Props) {
       </View>
     );
   }, [
-    data,
-    isInList,
-    styles,
-    globalStyles,
+    styles.mainContainer,
+    styles.mainContent,
+    styles.thumbnail,
+    styles.type,
+    styles.status,
+    styles.infoContainer,
+    styles.title,
+    styles.indonesianTitle,
+    styles.author,
+    styles.genreContainer,
+    styles.secondaryInfoContainer,
+    styles.additionalInfo,
+    styles.additionalInfoTextSurface,
+    styles.additionalInfoText,
+    styles.synopsisContainer,
+    styles.synopsisTitle,
+    styles.synopsisView,
+    styles.synopsisText,
+    styles.listChapterTextContainer,
+    styles.listChapterText,
+    styles.chapterButtonsContainer,
+    styles.genre,
     headerImageStyle,
-    props.navigation,
-    props.route.params.link,
+    data.thumbnailUrl,
+    data.animeType,
+    data.status,
+    data.title,
+    data.alternativeTitle,
+    data.studio,
+    data.genres,
+    data.rating,
+    data.releaseYear,
+    data.minutesPerEp,
+    data.episodeList,
+    data.epsTotal,
+    data.synopsis,
     colorScheme,
+    globalStyles.text,
+    isInList,
     searchQuery,
+    props.route.params.link,
+    props.route.params.data.title,
+    props.navigation,
   ]);
 
   return (
@@ -293,6 +329,7 @@ function AniDetail(props: Props) {
             style={styles.episodeButton}
             onPress={() => {
               props.navigation.navigate('FromUrl', {
+                title: props.route.params.data.title,
                 link: item.link,
               });
             }}>

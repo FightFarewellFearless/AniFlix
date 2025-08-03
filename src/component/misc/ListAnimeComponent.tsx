@@ -34,7 +34,7 @@ export function ListAnimeComponent(
       | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
       | NativeBottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | NativeBottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
-  },
+  } & { gap?: boolean },
 ) {
   const styles = useStyles();
   const z = props.newAnimeData;
@@ -69,6 +69,7 @@ export function ListAnimeComponent(
     <TouchableOpacity
       style={[
         {
+          margin: props.gap ? 3 : 0,
           minWidth:
             props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
           gap: 6,
@@ -78,6 +79,7 @@ export function ListAnimeComponent(
       onPress={() => {
         navigation.dispatch(
           StackActions.push('FromUrl', {
+            title: props.newAnimeData.title,
             link:
               props.type === 'movie'
                 ? props.newAnimeData.url
