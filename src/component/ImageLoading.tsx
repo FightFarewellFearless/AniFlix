@@ -1,10 +1,11 @@
 import { useIsFocused } from '@react-navigation/native';
 import { Image, ImageProps } from 'expo-image';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
+import LoadingIndicator from './misc/LoadingIndicator';
 
 const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   const { source, style, children, ...restProps } = props;
@@ -67,12 +68,10 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
         />
       )}
       {children}
-      {(loading || error) && (
-        <View style={styles.overlay}>
-          {loading && <ActivityIndicator size={25} />}
-          {error && <Icon name="exclamation-circle" color="red" size={18} />}
-        </View>
-      )}
+      <View style={styles.overlay}>
+        {loading && <LoadingIndicator size={15} />}
+        {error && <Icon name="exclamation-circle" color="red" size={18} />}
+      </View>
     </View>
   );
 };
