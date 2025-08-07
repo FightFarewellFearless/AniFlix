@@ -1,3 +1,14 @@
+# v1.0.2_JS-3 (07-Agustus-2025)
+
+## Diperbaiki
+- Crash pada history
+- Tombol tidak dapat ditekan pada beberapa kasus
+- Judul yang tidak konsisten menyebabkan penghapusan list tonton nanti dan fitur `terakhir ditonton` tidak bekerja dengan benar
+- Terakhir dibaca pada komik dengan chapter < 10
+## Ditingkatkan
+- Potensi performa yang lebih baik
+- Pewarnaan pada menu `Dukung developer` dan `Tentang aplikasi`
+
 # v1.0.2_JS-2 (03-Agustus-2025)
 
 HBD TO ME!! part 2 hehe :) (Perbaikan tambahan untuk versi JS-1 di hari yang sama)
