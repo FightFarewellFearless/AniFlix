@@ -3179,11 +3179,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.12.2":
-  version: 7.12.2
-  resolution: "@react-navigation/core@npm:7.12.2"
+"@react-navigation/core@npm:^7.12.4":
+  version: 7.12.4
+  resolution: "@react-navigation/core@npm:7.12.4"
   dependencies:
-    "@react-navigation/routers": ^7.5.0
+    "@react-navigation/routers": ^7.5.1
     escape-string-regexp: ^4.0.0
     nanoid: ^3.3.11
     query-string: ^7.1.3
@@ -3192,7 +3192,7 @@ __metadata:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: ">= 18.2.0"
-  checksum: dbbd494e3bdb4be560867f933fea06ae6fe37c38a40a03de491ca6ae1e40a25738a2f8c37eb4bc3e36756b0c55ab70f987b71392f4eb195533f1b97b59db250e
+  checksum: 84eb6d003d09c271e9e5e8f34c4a440447a82d81df7bd2f87dc4d56f851a5c74b1ec6e488cc2702cf16fde7d33bb55a58fe1dbd14e6cbdd513583b33227c2471
   languageName: node
   linkType: hard
 
@@ -3252,11 +3252,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.1.15":
-  version: 7.1.15
-  resolution: "@react-navigation/native@npm:7.1.15"
+"@react-navigation/native@npm:^7.1.17":
+  version: 7.1.17
+  resolution: "@react-navigation/native@npm:7.1.17"
   dependencies:
-    "@react-navigation/core": ^7.12.2
+    "@react-navigation/core": ^7.12.4
     escape-string-regexp: ^4.0.0
     fast-deep-equal: ^3.1.3
     nanoid: ^3.3.11
@@ -3264,16 +3264,16 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
     react-native: "*"
-  checksum: 7185c94197ce0ccb3ef2dd0c9105cbc163c8489f4935f6b0c859829df0da3a1761a063d5b21d88e9f51b2bbe9b28e87b5c463d66e4bf5aebd57bded645e5f89d
+  checksum: f0caa70f777c32861ce23a834d3afe6891c7829016649bf1491ba6b540fd4443dd6c5e6d8b44f58b92efed6074ea986e04b88ff84e9e19c09d68d9302ebd977a
   languageName: node
   linkType: hard
 
-"@react-navigation/routers@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "@react-navigation/routers@npm:7.5.0"
+"@react-navigation/routers@npm:^7.5.1":
+  version: 7.5.1
+  resolution: "@react-navigation/routers@npm:7.5.1"
   dependencies:
     nanoid: ^3.3.11
-  checksum: 62adfbc20f9cdce2e0b7d9c9433b47b0f0a0996da67c827439f6172578677aab93379459d170b67b8e93cd02d289f8f34852d0e96063b796bfc094a1658eadf8
+  checksum: 49f04894f7e8b8e2c16abb96bbc1a9775a02341bb00fb9c0d9ce97f8d82613c27570921f2b854f8fd1639c29309df05345aa734124d48bdbcb5a934055b8af12
   languageName: node
   linkType: hard
 
@@ -3917,7 +3917,7 @@ __metadata:
     "@react-native/metro-config": 0.79.4
     "@react-native/typescript-config": 0.79.4
     "@react-navigation/drawer": ^7.5.4
-    "@react-navigation/native": ^7.1.15
+    "@react-navigation/native": ^7.1.17
     "@react-navigation/native-stack": ^7.3.22
     "@rnx-kit/align-deps": ^3.0.4
     "@shopify/flash-list": ^2.0.2
