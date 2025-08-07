@@ -119,7 +119,10 @@ export default function ComicsDetail(props: Props) {
         )}
         renderItem={({ item }) => {
           const isLastReaded =
-            lastReaded && lastReaded.episode && item.chapter.includes(lastReaded.episode);
+            lastReaded &&
+            lastReaded.episode &&
+            item.chapter.toLowerCase().replace('chapter ', '') ===
+              lastReaded.episode.toLowerCase().replace('chapter 0', '').replace('chapter ', '');
           return (
             <TouchableOpacity
               style={styles.chapterItem}
