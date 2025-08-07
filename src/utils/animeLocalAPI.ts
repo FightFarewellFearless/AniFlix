@@ -33,10 +33,10 @@ import { Buffer } from 'buffer/';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
 import runtime from '../misc/AniFlixRuntime';
 
-let BASE_DOMAIN = 'otakudesu.cloud';
+let BASE_DOMAIN = 'otakudesu.best';
 let BASE_URL = 'https://' + BASE_DOMAIN;
 
-const BASE = {
+export const BASE = {
   domain: BASE_DOMAIN,
   url: BASE_URL,
 };

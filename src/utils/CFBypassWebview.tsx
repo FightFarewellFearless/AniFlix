@@ -1,6 +1,7 @@
 import { useContext, useRef } from 'react';
 import { Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { BASE } from './animeLocalAPI';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 
@@ -33,7 +34,7 @@ function CFBypassWebView() {
               // console.log(event.title, lastTitle.current)
               if (
                 (event.title === 'about:blank' ||
-                  event.title.startsWith('otakudesu.cloud/') ||
+                  event.title.startsWith(BASE.domain + '/') ||
                   event.title === '') &&
                 lastTitle.current !== 'Just a moment...'
               ) {
