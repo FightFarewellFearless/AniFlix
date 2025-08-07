@@ -17,6 +17,7 @@ import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/komiku';
 import LoadingIndicator from '../misc/LoadingIndicator';
+import { replaceLast } from '../../utils/replaceLast';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -181,8 +182,19 @@ function FromUrl(props: Props) {
               const watchLater: watchLaterJSON[] = JSON.parse(
                 (await DatabaseManager.get('watchLater'))!,
               );
+              const normalizeWatchLaterTitle = (str: string) => {
+                let resultString = str.split('(Episode')[0].trim();
+                if (resultString.endsWith('BD')) {
+                  return replaceLast(resultString, 'BD', '');
+                }
+                return resultString;
+              };
               const watchLaterIndex = watchLater.findIndex(
-                z => z.link === result.episodeData.animeDetail && !z.isMovie && !z.isComics,
+                z =>
+                  (z.link === result.episodeData.animeDetail ||
+                    normalizeWatchLaterTitle(z.title.trim()) === title.trim()) &&
+                  !z.isMovie &&
+                  !z.isComics,
               );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
