@@ -1,3 +1,8 @@
+# v1.0.2_JS-4 (07-Agustus-2025)
+
+## Diperbaiki
+- Update domain
+
 # v1.0.2_JS-3 (07-Agustus-2025)
 
 ## Diperbaiki
