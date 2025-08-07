@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AniDetailEpsList } from '../types/anime';
 import { HistoryJSON } from '../types/historyJSON';
 import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
+import { replaceLast } from '../utils/replaceLast';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList =
@@ -65,7 +66,10 @@ function AniDetail(props: Props) {
     'history',
     state => JSON.parse(state) as HistoryJSON[],
   );
-  const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
+  let historyTitle = data.title.replace('Subtitle Indonesia', '').split('(Episode')[0].trim();
+  if (historyTitle.endsWith('BD') && !data.episodeList.at(-1)?.title.endsWith('BD')) {
+    historyTitle = replaceLast(historyTitle, 'BD', '').trim();
+  }
   const lastWatched = useMemo(
     () => historyListsJson.find(z => z.title.trim() === historyTitle && !z.isComics && !z.isMovie),
     [historyListsJson, historyTitle],
