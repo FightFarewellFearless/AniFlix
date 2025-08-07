@@ -16,6 +16,7 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  TouchableOpacity as TouchableOpacityReactNative,
   View,
   useColorScheme,
 } from 'react-native';
@@ -425,7 +426,7 @@ function HistoryList({
       pointerEvents="box-none"
       onStartShouldSetResponder={() => true}>
       {/* I wrap the component with "View" because somehow "keyboardShouldPersistTaps" ignores the RNGH's Touchables */}
-      <TouchableOpacity
+      <TouchableOpacityReactNative
         style={[
           {
             padding: 6,
@@ -444,7 +445,7 @@ function HistoryList({
             {item}
           </Text>
         </View>
-        <TouchableOpacity
+        <TouchableOpacityReactNative
           hitSlop={14}
           onPress={async () => {
             DatabaseManager.set(
@@ -457,8 +458,8 @@ function HistoryList({
             );
           }}>
           <Icon name="times" size={25} style={{ color: '#ff0f0f' }} />
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </TouchableOpacityReactNative>
+      </TouchableOpacityReactNative>
     </View>
   );
 }
