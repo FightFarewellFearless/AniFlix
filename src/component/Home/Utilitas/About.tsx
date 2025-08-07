@@ -1,12 +1,14 @@
 import { LazyLegendList } from '@legendapp/list';
 import { ImageBackground } from 'expo-image';
 import { memo, useMemo } from 'react';
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appPackage from '../../../../package.json';
 import { darkText } from '../../../assets/style';
 import { JoinDiscord } from '../../Loading Screen/Connect';
 import DarkOverlay from '../../misc/DarkOverlay';
+import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 
 const tokyo = require('../../../assets/tokyo.jpg');
 
@@ -93,15 +95,24 @@ function About() {
 
 function Button({ title, onPress, icon }: { title: string; onPress: () => void; icon?: string }) {
   const styles = useStyles();
+  const theme = useTheme();
   return (
     <TouchableOpacity onPress={onPress} style={styles.button}>
-      {icon && <Icon name={icon} size={14} style={{ alignSelf: 'center' }} color={'black'} />}
+      {icon && (
+        <Icon
+          name={icon}
+          size={14}
+          style={{ alignSelf: 'center' }}
+          color={theme.colors.onPrimary}
+        />
+      )}
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
 }
 
 function useStyles() {
+  const theme = useTheme();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -120,7 +131,7 @@ function useStyles() {
         },
         button: {
           gap: 4,
-          backgroundColor: '#0084ff',
+          backgroundColor: theme.colors.primary,
           flexDirection: 'row',
           padding: 10,
           margin: 2,
@@ -129,10 +140,10 @@ function useStyles() {
         buttonText: {
           fontWeight: 'bold',
           fontSize: 17,
-          color: 'black',
+          color: theme.colors.onPrimary,
         },
       }),
-    [],
+    [theme.colors.onPrimary, theme.colors.primary],
   );
 }
 

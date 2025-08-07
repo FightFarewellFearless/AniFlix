@@ -1,13 +1,6 @@
 import { memo, useMemo } from 'react';
-import {
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default memo(SupportDev);
@@ -84,17 +77,17 @@ function SupportDev() {
 }
 
 function useStyles() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const theme = useTheme();
   return useMemo(() => {
     return StyleSheet.create({
       container: {
         flex: 1,
+        backgroundColor: theme.colors.background,
       },
       header: {
         paddingVertical: 25,
         paddingHorizontal: 10,
-        backgroundColor: '#633697',
+        backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         margin: 20,
@@ -105,23 +98,23 @@ function useStyles() {
             offsetY: -2,
             blurRadius: '10px',
             spreadDistance: '2px',
-            color: 'rgb(112, 32, 204)',
+            color: theme.colors.primary,
           },
         ],
       },
       headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: 'white',
+        color: theme.colors.onPrimary,
         textAlign: 'center',
       },
       headerDesc: {
-        color: 'white',
+        color: theme.colors.onPrimary,
         textAlign: 'justify',
       },
       headerIcon: {
-        color: 'white',
-        backgroundColor: '#dddddd96',
+        color: theme.colors.onPrimaryContainer,
+        backgroundColor: theme.colors.onPrimary,
         padding: 15,
         borderRadius: 150,
       },
@@ -129,14 +122,14 @@ function useStyles() {
         flex: 0.5,
       },
       partTitle: {
-        color: !isDark ? 'black' : 'white',
+        color: theme.colors.onBackground,
         fontSize: 18,
         fontWeight: 'bold',
         textDecorationStyle: 'dashed',
         textDecorationLine: 'underline',
       },
       donationButton: {
-        backgroundColor: !isDark ? '#fff' : '#333',
+        backgroundColor: theme.colors.primary,
         borderRadius: 10,
         width: '45%',
         padding: 20,
@@ -148,17 +141,17 @@ function useStyles() {
             offsetY: -2,
             blurRadius: '10px',
             spreadDistance: '1px',
-            color: 'rgb(158, 161, 193)',
+            color: theme.colors.primaryContainer,
           },
         ],
         elevation: 3,
       },
       donationButtonText: {
         fontWeight: 'bold',
-        color: isDark ? '#ffffff' : 'black',
+        color: theme.colors.onPrimary,
       },
       card: {
-        backgroundColor: !isDark ? '#fff' : '#333',
+        backgroundColor: theme.colors.primary,
         borderRadius: 10,
         padding: 15,
         marginTop: 10,
@@ -168,17 +161,17 @@ function useStyles() {
             offsetY: -2,
             blurRadius: '10px',
             spreadDistance: '1px',
-            color: 'rgb(158, 161, 193)',
+            color: theme.colors.primary,
           },
         ],
         elevation: 3,
       },
       cardDesc: {
-        color: isDark ? '#ffffff' : 'black',
+        color: theme.colors.onPrimary,
         marginBottom: 10,
       },
       cardButton: {
-        backgroundColor: '#633697',
+        backgroundColor: theme.colors.primaryContainer,
         borderRadius: 10,
         paddingVertical: 10,
         paddingHorizontal: 15,
@@ -187,14 +180,21 @@ function useStyles() {
         marginBottom: 10,
       },
       cardButtonText: {
-        color: '#fff',
+        color: theme.colors.onPrimaryContainer,
         fontWeight: 'bold',
       },
       cardAuthor: {
         textAlign: 'center',
-        color: isDark ? '#ffffff' : 'black',
+        color: theme.colors.onPrimary,
         fontStyle: 'italic',
       },
     });
-  }, [isDark]);
+  }, [
+    theme.colors.background,
+    theme.colors.onBackground,
+    theme.colors.onPrimary,
+    theme.colors.onPrimaryContainer,
+    theme.colors.primary,
+    theme.colors.primaryContainer,
+  ]);
 }
