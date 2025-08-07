@@ -16,7 +16,6 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   useColorScheme,
 } from 'react-native';
@@ -27,7 +26,6 @@ import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
-import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
 import Reanimated, {
   FadeInRight,
   FadeInUp,
@@ -44,12 +42,12 @@ import DarkOverlay from '../misc/DarkOverlay';
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { TextInput as TextInputType } from 'react-native';
-import { FlatList, TouchableOpacity as TouchableOpacityRNGH } from 'react-native-gesture-handler';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { KomikuSearch, komikuSearch } from '../../utils/komiku';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
+import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 
-const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacityRNGH);
+const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacity);
 
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
@@ -169,7 +167,7 @@ function Search(props: Props) {
     }
   }, [searchHistory, searchText, searchType]);
 
-  function renderSearchHistory({ item, index }: LegendListRenderItemProps<string>) {
+  function renderSearchHistory({ item, index }: ListRenderItemInfo<string>) {
     const onChangeTextFunction = (text: string) => {
       onChangeText(text);
     };
@@ -247,8 +245,9 @@ function Search(props: Props) {
         ]}
       />
 
+      {/* TODO: Replace this long check condition with a better alternative */}
       {listAnime?.length === 0 ||
-        (listAnimeLoading && (
+        (listAnimeLoading && data === null && movieData === null && comicsData === null && (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
             <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
@@ -322,9 +321,8 @@ function Search(props: Props) {
           {(data?.result?.length ?? 0) > 0 ||
           (movieData && movieData.length > 0) ||
           (comicsData && comicsData.length > 0) ? (
-            <FlatList
-              // estimatedItemSize={209}
-              contentContainerStyle={{ gap: 6 }}
+            <FlashList
+              ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
               data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
               keyExtractor={(_, index) => String(index)}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
@@ -365,8 +363,7 @@ function Search(props: Props) {
                 },
               ]}
             />
-            <LegendList
-              recycleItems
+            <FlashList
               drawDistance={250}
               keyboardShouldPersistTaps="always"
               contentContainerStyle={styles.searchHistoryScrollBox}
@@ -374,7 +371,6 @@ function Search(props: Props) {
               keyExtractor={searchHistoryKeyExtractor}
               extraData={styles}
               renderItem={renderSearchHistory}
-              estimatedItemSize={47}
               ItemSeparatorComponent={() => (
                 <View
                   pointerEvents="none"
@@ -396,7 +392,7 @@ function Search(props: Props) {
       )}
       {(data !== null || comicsData !== null) && (
         <TouchableOpacityAnimated
-          containerStyle={styles.closeSearchResult} //rngh - containerStyle
+          style={styles.closeSearchResult} //rngh - containerStyle
           onPress={() => {
             setData(null);
             setMovieData(null);

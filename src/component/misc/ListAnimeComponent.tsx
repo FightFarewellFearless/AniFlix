@@ -2,14 +2,7 @@ import { NativeBottomTabNavigationProp } from '@bottom-tabs/react-navigation';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../../assets/style';
@@ -19,6 +12,7 @@ import { Movies } from '../../utils/animeMovie';
 import { LatestKomikuRelease } from '../../utils/komiku';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 import ImageLoading from '../ImageLoading';
+import { TouchableOpacity } from './TouchableOpacityRNGH';
 
 export function ListAnimeComponent(
   props: (

@@ -13,7 +13,6 @@ import {
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   useColorScheme,
   useWindowDimensions,
   View,
@@ -45,6 +44,7 @@ import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
+import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
