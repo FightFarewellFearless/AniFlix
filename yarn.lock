@@ -3286,16 +3286,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@shopify/flash-list@npm:2.0.1"
+"@shopify/flash-list@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@shopify/flash-list@npm:2.0.2"
   dependencies:
     tslib: 2.8.1
   peerDependencies:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: 00e1222163f5ca2317279534cd2f0747a0c654fb3749899f6474a9e6ac3ab6cff393b67bec92aff76b58f32e604ee0427ceae610e2377bb446ba5662cad61162
+  checksum: cfb3a6528eb123632218b68ecea881a2866d56183427a91a5454e57cd053ef28a4d40c8a6c9fc2d36ad3d1af997eaad0e4fcd632de538c3b335065cf4f3dd8dc
   languageName: node
   linkType: hard
 
@@ -3920,7 +3920,7 @@ __metadata:
     "@react-navigation/native": ^7.1.15
     "@react-navigation/native-stack": ^7.3.22
     "@rnx-kit/align-deps": ^3.0.4
-    "@shopify/flash-list": ^2.0.1
+    "@shopify/flash-list": ^2.0.2
     "@types/jest": ^29.5.14
     "@types/metro-config": ^0.76.3
     "@types/react": ^19.0.12
