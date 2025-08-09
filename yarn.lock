@@ -3956,7 +3956,7 @@ __metadata:
     react-native-edge-to-edge: ^1.6.2
     react-native-error-boundary: ^2.0.0
     react-native-gesture-handler: 2.27.2
-    react-native-keyboard-controller: ^1.18.1
+    react-native-keyboard-controller: ^1.18.3
     react-native-marked: ^7.0.2
     react-native-mmkv: ^3.3.0
     react-native-orientation-locker: ^1.7.0
@@ -10384,16 +10384,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-keyboard-controller@npm:^1.18.1":
-  version: 1.18.1
-  resolution: "react-native-keyboard-controller@npm:1.18.1"
+"react-native-keyboard-controller@npm:^1.18.3":
+  version: 1.18.3
+  resolution: "react-native-keyboard-controller@npm:1.18.3"
   dependencies:
     react-native-is-edge-to-edge: ^1.2.1
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=3.0.0"
-  checksum: b2f59af84ed422c2af088c9abde07be11cb88489e3aa34c26d08262fb5092f2ae1df6a2db785d506ec61c4b159b54fda4fa3dc11a6a035c7645524e0931610bb
+  checksum: 5e8881d4cd5f698eb25b512956124d823dd8cc1e0ff5fc638b3ce7e40d3d3633f586baf592a287d2aa3d6a19e43b9676a1c31d067b7e606f320611a5ba35abb4
   languageName: node
   linkType: hard
 
