@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import { ToastAndroid } from 'react-native';
 import deviceUserAgent from './deviceUserAgent';
 
 const DOMAIN = 'komiku.org';
@@ -182,6 +183,21 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
     })
     .toArray();
   const title = tableInfo.find(z => z.key === 'Judul')?.value ?? 'Data tidak tersedia';
+  let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
+  if (!thumbnailUrl) {
+    const coverUrl = data
+      .split('const data = [')[1]
+      ?.split('];')[0]
+      ?.split(',')
+      .filter(a => a.trim() !== '')
+      .at(-1)
+      ?.trim()
+      ?.replace(new RegExp('\'|"', 'g'), '');
+    if (!coverUrl) {
+      ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
+      thumbnailUrl = '';
+    } else thumbnailUrl = coverUrl;
+  }
   const releaseDate =
     tableInfo.find(z => z.key === 'Tanggal Rilis')?.value ?? 'Data tidak tersedia';
   const readingDirection =
@@ -197,7 +213,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
 
   return {
     title,
-    thumbnailUrl: data.split("data[5] = '")[1].split("'")[0],
+    thumbnailUrl,
     releaseDate,
     readingDirection,
     chapter,
