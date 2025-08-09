@@ -1,3 +1,8 @@
+# v1.0.2_JS-5 (09-Agustus-2025)
+
+## Diperbaiki
+- Memperbaiki error thumbnail komik
+
 # v1.0.2_JS-4 (07-Agustus-2025)
 
 ## Diperbaiki
