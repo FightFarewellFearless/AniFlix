@@ -3961,7 +3961,7 @@ __metadata:
     react-native-mmkv: ^3.3.0
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.5
-    react-native-reanimated: ^4.0.0
+    react-native-reanimated: ^4.0.2
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.5.2
     react-native-screens: 4.13.1
@@ -10465,9 +10465,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.0.0":
-  version: 4.0.0
-  resolution: "react-native-reanimated@npm:4.0.0"
+"react-native-reanimated@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "react-native-reanimated@npm:4.0.2"
   dependencies:
     react-native-is-edge-to-edge: ^1.2.1
     semver: 7.7.2
@@ -10475,23 +10475,8 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-    react-native-worklets: ">=0.3.0"
-  checksum: e1a3c8797b32f9e98b0f16a35ffc93ce9cf01021d6d58cc728f77e33103ac388806c86c29dc26705847aa6270eb064dd2fac0fb91a022676d3e4d2e1b8910f1d
-  languageName: node
-  linkType: hard
-
-"react-native-reanimated@patch:react-native-reanimated@npm%3A4.0.0#./.yarn/patches/react-native-reanimated-npm-4.0.0-76fca8e020.patch::locator=aniflix%40workspace%3A.":
-  version: 4.0.0
-  resolution: "react-native-reanimated@patch:react-native-reanimated@npm%3A4.0.0#./.yarn/patches/react-native-reanimated-npm-4.0.0-76fca8e020.patch::version=4.0.0&hash=e46ae4&locator=aniflix%40workspace%3A."
-  dependencies:
-    react-native-is-edge-to-edge: ^1.2.1
-    semver: 7.7.2
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-    react-native-worklets: ">=0.3.0"
-  checksum: 49e65d5aa57e422aa1a1b84d7500798cf6eb0302919eda82f85ad73413ad9963cca8ebb0d878ae9afef94c0faab83dc718ca98352117c798519170ee5553ed8b
+    react-native-worklets: ">=0.4.0"
+  checksum: 8394194df230d2173bc08e2208946c5bc6bd0715831a82a7826edd07a071c681808fae305e50e80d3258eb0f1d3268c1ac4eb692fefaf48f8e803dc4555119bc
   languageName: node
   linkType: hard
 
