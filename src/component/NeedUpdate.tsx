@@ -1,6 +1,5 @@
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -8,7 +7,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { useMarkdown } from 'react-native-marked';
+import Markdown from 'react-native-marked';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -32,11 +31,7 @@ const MB = 1000;
 
 function NeedUpdate(props: Props) {
   const globalStyles = useGlobalStyles();
-  const colorScheme = useColorScheme();
   const styles = useStyles();
-  const markdownElement = useMarkdown(props.route.params.changelog, {
-    colorScheme: colorScheme,
-  });
 
   const [isDownloadStart, setIsDownloadStart] = useState(false);
   const downloadProgress = useSharedValue(0);
@@ -171,11 +166,7 @@ function NeedUpdate(props: Props) {
             {props.route.params.nativeUpdate ? props.route.params.latestVersion : 'OTA Update'}
           </Text>
         </View>
-        <ScrollView>
-          {markdownElement.map((el, i) => (
-            <Fragment key={`changelog_${i}`}>{el}</Fragment>
-          ))}
-        </ScrollView>
+        <Markdown value={props.route.params.changelog} />
         {!isDownloadStart ? (
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
             <Icon name="file-download" color={styles.buttonText.color} size={20} />
