@@ -1,3 +1,9 @@
+# v1.0.2_JS-6 (15-Agustus-2025)
+
+## Diperbaiki
+- Gagal mendapatkan Thumbnail/Cover komik
+- Masalah performa pada layar Update aplikasi
+
 # v1.0.2_JS-5 (09-Agustus-2025)
 
 ## Diperbaiki
