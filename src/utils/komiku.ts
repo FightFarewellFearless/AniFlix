@@ -194,8 +194,14 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       ?.trim()
       ?.replace(new RegExp('\'|"', 'g'), '');
     if (!coverUrl) {
-      ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
-      thumbnailUrl = '';
+      thumbnailUrl = data
+        .split('thumbnail: "')[1]
+        ?.split('"')[0]
+        ?.replace(new RegExp('\\\\', 'g'), '');
+      if (!thumbnailUrl) {
+        ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
+        thumbnailUrl = '';
+      }
     } else thumbnailUrl = coverUrl;
   }
   const releaseDate =
