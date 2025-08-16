@@ -345,33 +345,37 @@ function MovieDetail(props: Props) {
       // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
       ref={scrollRef}
       data={data.episodeList.length > 1 ? data.episodeList : []}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.episodeButton}
-          onPress={() => {
-            props.navigation.navigate('FromUrl', {
-              title: props.route.params.data.title,
-              link: item.url,
-              historyData: lastWatched
-                ? {
-                    lastDuration: lastWatched.lastDuration ?? 0,
-                    resolution: lastWatched.resolution ?? '',
-                  }
-                : undefined,
-              type: 'movie',
-            });
-          }}>
-          <View style={styles.episodeTitleContainer}>
-            <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
-            {lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode) && (
-              <View style={styles.lastWatchedContainer}>
-                <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
-                <Icon name="film" size={16} style={styles.lastWatchedIcon} />
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      )}
+      renderItem={({ item }) => {
+        const isLastWatched =
+          lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
+        return (
+          <TouchableOpacity
+            style={styles.episodeButton}
+            onPress={() => {
+              props.navigation.navigate('FromUrl', {
+                title: props.route.params.data.title,
+                link: item.url,
+                historyData: isLastWatched
+                  ? {
+                      lastDuration: lastWatched.lastDuration ?? 0,
+                      resolution: lastWatched.resolution ?? '',
+                    }
+                  : undefined,
+                type: 'movie',
+              });
+            }}>
+            <View style={styles.episodeTitleContainer}>
+              <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+              {isLastWatched && (
+                <View style={styles.lastWatchedContainer}>
+                  <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
+                  <Icon name="film" size={16} style={styles.lastWatchedIcon} />
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        );
+      }}
       ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
       keyExtractor={item => item.title}
       contentContainerStyle={{
