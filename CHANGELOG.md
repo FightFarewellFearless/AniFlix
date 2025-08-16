@@ -1,3 +1,8 @@
+# v1.0.2_JS-7 (16-Agustus-2025)
+
+## Diperbaiki
+- Terakhir ditonton dipicu oleh semua episode anime di layar detail anime
+
 # v1.0.2_JS-6 (15-Agustus-2025)
 
 ## Diperbaiki
