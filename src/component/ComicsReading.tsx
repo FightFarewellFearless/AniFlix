@@ -231,7 +231,7 @@ export default function ComicsReading(props: Props) {
       </View>
       <Portal>
         <Snackbar
-          wrapperStyle={{ bottom: 30 }}
+          duration={Infinity}
           onDismiss={() => {
             setMoveChapterLoading(false);
           }}
