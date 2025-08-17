@@ -46,6 +46,7 @@ function SeeMore(props: Props) {
   return (
     <View style={{ flex: 1 }}>
       <LegendList
+        estimatedItemSize={270}
         recycleItems
         contentContainerStyle={{
           paddingLeft: insets.left,

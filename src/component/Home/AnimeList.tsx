@@ -7,8 +7,17 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { FlashList } from '@shopify/flash-list';
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { FlashList, useMappingHelper } from '@shopify/flash-list';
+import React, {
+  memo,
+  use,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -164,31 +173,9 @@ function HomeList(props: HomeProps) {
 
   const renderJadwalAnime = useCallback(
     ({ item }: { item: keyof JadwalAnime }) => {
-      return (
-        <View key={item} style={[styles.scheduleContainer, styles.scheduleSection]}>
-          <Text style={styles.scheduleDay}>{item}</Text>
-          {data?.jadwalAnime[item]!.map((x, index) => (
-            <TouchableOpacity
-              style={[
-                styles.scheduleItem,
-                index % 2 === 0 ? styles.scheduleItemEven : styles.scheduleItemOdd,
-              ]}
-              key={x.title}
-              onPress={() => {
-                props.navigation.dispatch(
-                  StackActions.push('FromUrl', {
-                    title: x.title,
-                    link: x.link,
-                  }),
-                );
-              }}>
-              <Text style={styles.scheduleTitle}>{x.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
+      return <JadwalComponent item={item} props={props} />;
     },
-    [data?.jadwalAnime, props.navigation, styles],
+    [props],
   );
 
   return (
@@ -244,6 +231,7 @@ function HomeList(props: HomeProps) {
         </>
       }
       data={Object.keys(data?.jadwalAnime ?? {})}
+      keyExtractor={z => z}
       renderItem={renderJadwalAnime}
     />
   );
@@ -485,6 +473,35 @@ function ShowSkeletonLoading() {
             <Skeleton key={index + 'info2'} width={LIST_BACKGROUND_WIDTH / 2} height={20} />
           </View>
         </View>
+      ))}
+    </View>
+  );
+}
+
+function JadwalComponent({ item, props }: { item: keyof JadwalAnime; props: HomeProps }) {
+  const styles = useStyles();
+  const { paramsState: data } = use(EpisodeBaruHomeContext);
+  const { getMappingKey } = useMappingHelper();
+  return (
+    <View style={[styles.scheduleContainer, styles.scheduleSection]}>
+      <Text style={styles.scheduleDay}>{item}</Text>
+      {data?.jadwalAnime[item]!.map((x, index) => (
+        <TouchableOpacity
+          style={[
+            styles.scheduleItem,
+            index % 2 === 0 ? styles.scheduleItemEven : styles.scheduleItemOdd,
+          ]}
+          key={getMappingKey(x.title, index)}
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('FromUrl', {
+                title: x.title,
+                link: x.link,
+              }),
+            );
+          }}>
+          <Text style={styles.scheduleTitle}>{x.title}</Text>
+        </TouchableOpacity>
       ))}
     </View>
   );
