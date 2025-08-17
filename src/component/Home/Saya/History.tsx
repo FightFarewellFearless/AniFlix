@@ -5,8 +5,6 @@ import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   StyleSheet,
   Text,
   TextInput,
@@ -14,7 +12,13 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedProps,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
@@ -24,9 +28,9 @@ import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/Da
 import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
 
-// const AnimatedFlashList = Animated.createAnimatedComponent(
-//   FlashList as typeof FlashList<HistoryJSON>,
-// );
+const AnimatedFlashList = Animated.createAnimatedComponent(
+  FlashList as typeof FlashList<HistoryJSON>,
+);
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
 
@@ -50,7 +54,7 @@ function History(props: Props) {
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
   const scrollToTopButtonScale = useSharedValue(0);
 
-const scrollToTopButtonProps = useAnimatedProps(() => ({
+  const scrollToTopButtonProps = useAnimatedProps(() => ({
     pointerEvents: scrollToTopButtonScale.get() <= 0.3 ? ('none' as const) : ('auto' as const),
   }));
   const buttonTransformStyle = useAnimatedStyle(() => {
@@ -64,15 +68,17 @@ const scrollToTopButtonProps = useAnimatedProps(() => ({
   });
 
   const showScrollToTopButton = useCallback(() => {
+    'worklet';
     scrollToTopButtonScale.set(withSpring(1));
   }, [scrollToTopButtonScale]);
   const hideScrollToTopButton = useCallback(() => {
+    'worklet';
     scrollToTopButtonScale.set(withSpring(0));
   }, [scrollToTopButtonScale]);
 
-  const scrollHandler = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const value = event.nativeEvent.contentOffset.y;
+  const scrollHandler = useAnimatedScrollHandler(
+    event => {
+      const value = event.contentOffset.y;
       if (value <= 100) {
         if (scrollToTopButtonState.get() === 'show') {
           hideScrollToTopButton();
@@ -269,7 +275,7 @@ const scrollToTopButtonProps = useAnimatedProps(() => ({
         </TouchableOpacity>
       </View>
       <View style={styles.historyContainer}>
-        <FlashList
+        <AnimatedFlashList
           data={filteredData}
           // fix: weird flashlist crash (undefined) (might be related to concurrent render)
           key={searchKeywordDeferred}
@@ -309,7 +315,7 @@ const scrollToTopButtonProps = useAnimatedProps(() => ({
           )}
         />
         <Animated.View
-style={[styles.scrollToTopView, buttonTransformStyle]}
+          style={[styles.scrollToTopView, buttonTransformStyle]}
           animatedProps={scrollToTopButtonProps}>
           <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
             <View style={styles.scrollToTopIcon}>
