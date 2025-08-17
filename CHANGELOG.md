@@ -1,3 +1,12 @@
+# v1.0.2_JS-8 (17-Agustus-2025)
+
+## Ditingkatkan
+- Beberapa peningkatan kecil termasuk list yang sedikit lebih mulus dan pewarnaan pada layar `Dukung developer`
+## Disesuaikan
+- Posisi dan durasi SnackBar pada `ComicsReading`
+## Diperbaiki
+- Memperbaiki tombol `scroll to top` yang tersembunyi mengakibatkan list tidak bisa di scroll pada layar `History`
+
 # v1.0.2_JS-7 (16-Agustus-2025)
 
 ## Diperbaiki
