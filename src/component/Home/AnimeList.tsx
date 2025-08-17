@@ -177,6 +177,7 @@ function HomeList(props: HomeProps) {
     },
     [props],
   );
+  const jadwalDataArray = useMemo(() => Object.keys(data?.jadwalAnime ?? {}), [data?.jadwalAnime]);
 
   return (
     <FlashList
@@ -230,7 +231,7 @@ function HomeList(props: HomeProps) {
           </View>
         </>
       }
-      data={Object.keys(data?.jadwalAnime ?? {})}
+      data={jadwalDataArray}
       keyExtractor={z => z}
       renderItem={renderJadwalAnime}
     />
