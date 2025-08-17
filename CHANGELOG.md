@@ -1,3 +1,8 @@
+# v1.0.2_JS-9 (17-Agustus-2025)
+
+## Diperbaiki
+- Crash pada layar awal anime
+
 # v1.0.2_JS-8 (17-Agustus-2025)
 
 ## Ditingkatkan
