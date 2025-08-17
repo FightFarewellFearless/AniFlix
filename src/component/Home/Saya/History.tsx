@@ -50,6 +50,9 @@ function History(props: Props) {
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
   const scrollToTopButtonScale = useSharedValue(0);
 
+const scrollToTopButtonProps = useAnimatedProps(() => ({
+    pointerEvents: scrollToTopButtonScale.get() <= 0.3 ? ('none' as const) : ('auto' as const),
+  }));
   const buttonTransformStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -305,7 +308,9 @@ function History(props: Props) {
             </View>
           )}
         />
-        <Animated.View style={[styles.scrollToTopView, buttonTransformStyle]}>
+        <Animated.View
+style={[styles.scrollToTopView, buttonTransformStyle]}
+          animatedProps={scrollToTopButtonProps}>
           <TouchableOpacity style={styles.scrollToTop} onPress={scrollToTop}>
             <View style={styles.scrollToTopIcon}>
               <Icon name="arrow-up" color={darkText} size={25} />
