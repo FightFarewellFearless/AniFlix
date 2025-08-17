@@ -232,7 +232,7 @@ function HomeList(props: HomeProps) {
         </>
       }
       data={jadwalDataArray}
-      keyExtractor={z => z}
+      // keyExtractor={z => z}
       renderItem={renderJadwalAnime}
     />
   );
