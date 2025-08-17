@@ -33,7 +33,7 @@ export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Press
         .maxDuration(Infinity)
         .enabled(!props.disabled)
         .onBegin(() => {
-          opacity.set(withTiming(0.3, { duration: 100 }));
+          opacity.set(withTiming(0.3, { duration: 50 }));
         })
         .onFinalize(() => {
           opacity.set(withTiming(1, { duration: 200 }));
