@@ -87,7 +87,7 @@ function useStyles() {
       header: {
         paddingVertical: 25,
         paddingHorizontal: 10,
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.onPrimary,
         justifyContent: 'center',
         alignItems: 'center',
         margin: 20,
@@ -105,16 +105,16 @@ function useStyles() {
       headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: theme.colors.onPrimary,
+        color: theme.colors.primary,
         textAlign: 'center',
       },
       headerDesc: {
-        color: theme.colors.onPrimary,
+        color: theme.colors.primary,
         textAlign: 'justify',
       },
       headerIcon: {
-        color: theme.colors.onPrimaryContainer,
-        backgroundColor: theme.colors.onPrimary,
+        color: theme.colors.primaryContainer,
+        backgroundColor: theme.colors.primary,
         padding: 15,
         borderRadius: 150,
       },
@@ -129,7 +129,7 @@ function useStyles() {
         textDecorationLine: 'underline',
       },
       donationButton: {
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.onPrimary,
         borderRadius: 10,
         width: '45%',
         padding: 20,
@@ -141,17 +141,17 @@ function useStyles() {
             offsetY: -2,
             blurRadius: '10px',
             spreadDistance: '1px',
-            color: theme.colors.primaryContainer,
+            color: theme.colors.primary,
           },
         ],
         elevation: 3,
       },
       donationButtonText: {
         fontWeight: 'bold',
-        color: theme.colors.onPrimary,
+        color: theme.colors.primary,
       },
       card: {
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.onPrimary,
         borderRadius: 10,
         padding: 15,
         marginTop: 10,
@@ -167,11 +167,11 @@ function useStyles() {
         elevation: 3,
       },
       cardDesc: {
-        color: theme.colors.onPrimary,
+        color: theme.colors.primary,
         marginBottom: 10,
       },
       cardButton: {
-        backgroundColor: theme.colors.primaryContainer,
+        backgroundColor: theme.colors.onPrimaryContainer,
         borderRadius: 10,
         paddingVertical: 10,
         paddingHorizontal: 15,
@@ -180,12 +180,12 @@ function useStyles() {
         marginBottom: 10,
       },
       cardButtonText: {
-        color: theme.colors.onPrimaryContainer,
+        color: theme.colors.primaryContainer,
         fontWeight: 'bold',
       },
       cardAuthor: {
         textAlign: 'center',
-        color: theme.colors.onPrimary,
+        color: theme.colors.primary,
         fontStyle: 'italic',
       },
     });
