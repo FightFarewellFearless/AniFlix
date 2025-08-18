@@ -1,6 +1,11 @@
 import { DrawerScreenProps } from '@react-navigation/drawer';
-import { StackActions } from '@react-navigation/native';
-import { FlashList, FlashListRef, ListRenderItemInfo } from '@shopify/flash-list';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
+import {
+  FlashList,
+  FlashListRef,
+  ListRenderItemInfo,
+  useRecyclingState,
+} from '@shopify/flash-list';
 import moment from 'moment';
 import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
@@ -22,14 +27,19 @@ import Animated, {
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
+import { HistoryItemKey } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
+import Skeleton from '../../misc/Skeleton';
+
+export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
+const HISTORY_CACHE_SIZE = 35;
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
-  FlashList as typeof FlashList<HistoryJSON>,
+  FlashList as typeof FlashList<HistoryItemKey>,
 );
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
@@ -37,18 +47,27 @@ type Props = DrawerScreenProps<SayaDrawerNavigator, 'History'>;
 function History(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
-  const data = useModifiedKeyValueIfFocused('history', state => JSON.parse(state) as HistoryJSON[]);
+  const data = useModifiedKeyValueIfFocused(
+    'historyKeyCollectionsOrder',
+    state => JSON.parse(state) as HistoryItemKey[],
+  );
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const searchKeywordDeferred = useDeferredValue(searchKeyword);
 
   const filteredData = useMemo(
     () =>
-      data.filter(item => item.title.toLowerCase().includes(searchKeywordDeferred.toLowerCase())),
+      data.filter(item =>
+        item
+          .split(':')
+          .slice(1, -2)
+          .join(':')
+          .toLowerCase()
+          .includes(searchKeywordDeferred.toLowerCase()),
+      ),
     [searchKeywordDeferred, data],
   );
-
-  const flatListRef = useRef<FlashListRef<HistoryJSON>>(null);
+  const flatListRef = useRef<FlashListRef<HistoryItemKey>>(null);
 
   const scrollLastValue = useSharedValue(0);
   const scrollToTopButtonState = useSharedValue<'hide' | 'show'>('hide');
@@ -96,154 +115,34 @@ function History(props: Props) {
     [hideScrollToTopButton, scrollLastValue, scrollToTopButtonState, showScrollToTopButton],
   );
 
-  const deleteHistory = useCallback(
-    async (index: number) => {
-      // const time = Date.now();
-      const historyData = [...data]; // clone the array
-      historyData.splice(index, 1);
-      const newValue = JSON.stringify(historyData);
-      DatabaseManager.set('history', newValue);
-    },
-    [data],
-  );
+  const deleteHistory = useCallback(async (key: HistoryItemKey) => {
+    const keyOrder: HistoryItemKey[] = JSON.parse(
+      DatabaseManager.getSync('historyKeyCollectionsOrder') ?? '[]',
+    );
+    const keyIndex = keyOrder.findIndex(z => z === key);
+    if (keyIndex !== -1) {
+      keyOrder.splice(keyIndex, 1);
+      DatabaseManager.set('historyKeyCollectionsOrder', JSON.stringify(keyOrder));
+      DatabaseManager.delete(key);
+      HistoryDatabaseCache.delete(key);
+    }
+  }, []);
 
-  const keyExtractor = useCallback(
-    (item: HistoryJSON) => item.title + item.episode + item.lastDuration,
-    [],
-  );
+  const keyExtractor = useCallback((item: HistoryItemKey, _index: number) => item, []);
 
   const renderFlatList = useCallback(
-    ({ item }: ListRenderItemInfo<HistoryJSON>) => {
+    ({ item }: ListRenderItemInfo<HistoryItemKey>) => {
       return (
-        <TouchableOpacity
-          // entering={FadeInRight}
-          // exiting={FadeOutLeft}
-          // layout={LinearTransition}
-          style={styles.listContainerButton}
-          onPress={() => {
-            props.navigation.dispatch(
-              StackActions.push('FromUrl', {
-                title: item.title,
-                link: item.link,
-                historyData: item,
-                type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
-              }),
-            );
-          }}>
-          <ImageLoading
-            contentFit="fill"
-            source={{ uri: item.thumbnailUrl }}
-            recyclingKey={item.thumbnailUrl}
-            style={styles.listImage}
-          />
-
-          <View style={styles.listInfoContainer}>
-            <View style={{ flexDirection: 'row' }}>
-              <View style={styles.listWatchTime}>
-                <Text style={[globalStyles.text, styles.listDateText]}>
-                  {moment
-                    .duration(moment(Date.now()).diff(item.date, 'seconds'), 'seconds')
-                    .humanize() + ' '}
-                  yang lalu pukul {moment(item.date).format('HH:mm')}
-                </Text>
-              </View>
-
-              <View style={styles.deleteContainer}>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  hitSlop={5}
-                  onPress={() => {
-                    DialogManager.alert(
-                      'Yakin?',
-                      'Yakin kamu ingin menghapus "' + item.title.trim() + '" dari histori?',
-                      [
-                        {
-                          text: 'Tidak',
-                          onPress: () => null,
-                        },
-                        {
-                          text: 'Ya',
-                          onPress: () =>
-                            deleteHistory(data.findIndex(val => val.title === item.title)),
-                        },
-                      ],
-                    );
-                  }}>
-                  <Icon name="delete-forever" size={21} style={styles.deleteIcon} />
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={styles.listTitle}>
-              <Text style={[{ flexShrink: 1 }, globalStyles.text]}>{item.title}</Text>
-            </View>
-
-            <View style={{ flexDirection: 'row' }}>
-              <View style={styles.listEpisodeAndPart}>
-                <Text style={styles.listEpisode}>
-                  {item.isComics && (
-                    <View
-                      style={{
-                        backgroundColor: '#00586e',
-                        borderRadius: 4,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                      }}>
-                      <Text
-                        style={[
-                          styles.listEpisode,
-                          { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
-                        ]}>
-                        Komik
-                      </Text>
-                    </View>
-                  )}{' '}
-                  {item.isMovie && (
-                    <View
-                      style={{
-                        backgroundColor: '#ff7300',
-                        borderRadius: 4,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                      }}>
-                      <Text
-                        style={[
-                          styles.listEpisode,
-                          { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
-                        ]}>
-                        Movie
-                      </Text>
-                    </View>
-                  )}{' '}
-                  {item.episode}
-                </Text>
-                {/* this commented code is keep for historical reason (nostalgic lmao) */}
-                {/* {item.part !== undefined && (
-                  <Text style={styles.listPart}>
-                    {' Part ' + (item.part + 1)}
-                  </Text>
-                )} */}
-              </View>
-
-              {item.lastDuration !== undefined && (
-                <View style={styles.lastDuration}>
-                  <Text style={[globalStyles.text, styles.lastDurationText]}>
-                    <FontAwesomeIcon
-                      name={item.isComics ? 'book' : 'clock-o'}
-                      size={16}
-                      color={globalStyles.text.color}
-                    />{' '}
-                    {item.isComics
-                      ? 'Halaman ' + (item.lastDuration + 1)
-                      : formatTimeFromSeconds(item.lastDuration)}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </TouchableOpacity>
+        <RenderList
+          keyItem={item}
+          deleteHistory={deleteHistory}
+          globalStyles={globalStyles}
+          props={props}
+          styles={styles}
+        />
       );
     },
-    [data, deleteHistory, globalStyles.text, props.navigation, styles],
+    [deleteHistory, globalStyles, props, styles],
   );
 
   const scrollToTop = useCallback(() => {
@@ -296,14 +195,6 @@ function History(props: Props) {
                 <Text style={[globalStyles.text, { margin: 10 }]}>
                   Jumlah histori tontonan kamu:{' '}
                   <Text style={{ fontWeight: 'bold' }}>{data.length}</Text>
-                  {'\n'}
-                  <Text
-                    style={[
-                      globalStyles.text,
-                      { margin: 10, fontWeight: 'bold', fontSize: 12, color: 'gray' },
-                    ]}>
-                    Sejak {moment(data.at(-1)!.date).format('DD MMMM YYYY')}
-                  </Text>
                 </Text>
               </View>
             )
@@ -325,6 +216,175 @@ function History(props: Props) {
         </Animated.View>
       </View>
     </View>
+  );
+}
+
+function RenderList({
+  keyItem,
+  styles,
+  globalStyles,
+  props,
+  deleteHistory,
+}: {
+  keyItem: HistoryItemKey;
+  props: Props;
+  styles: ReturnType<typeof useStyles>;
+  globalStyles: ReturnType<typeof useGlobalStyles>;
+  deleteHistory: (key: HistoryItemKey) => Promise<void>;
+}) {
+  const [item, setItem] = useRecyclingState<HistoryJSON | undefined>(
+    () => HistoryDatabaseCache.get(keyItem),
+    [keyItem],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      DatabaseManager.get(keyItem).then(value => {
+        const historyDb = JSON.parse(value ?? '{}');
+        setItem(historyDb);
+        if (HistoryDatabaseCache.size > HISTORY_CACHE_SIZE) {
+          const key = HistoryDatabaseCache.keys().next().value;
+          if (key) HistoryDatabaseCache.delete(key);
+        }
+        HistoryDatabaseCache.set(keyItem, historyDb);
+      });
+    }, [keyItem, setItem]),
+  );
+
+  if (!item) {
+    return (
+      <View style={styles.listContainerButton}>
+        <Skeleton height={styles.listImage.height} width={styles.listImage.width} />
+      </View>
+    );
+  }
+
+  return (
+    <TouchableOpacity
+      // entering={FadeInRight}
+      // exiting={FadeOutLeft}
+      // layout={LinearTransition}
+      style={styles.listContainerButton}
+      onPress={() => {
+        props.navigation.dispatch(
+          StackActions.push('FromUrl', {
+            title: item.title,
+            link: item.link,
+            historyData: item,
+            type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
+          }),
+        );
+      }}>
+      <ImageLoading
+        contentFit="fill"
+        source={{ uri: item.thumbnailUrl }}
+        recyclingKey={item.thumbnailUrl}
+        style={styles.listImage}
+      />
+
+      <View style={styles.listInfoContainer}>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={styles.listWatchTime}>
+            <Text style={[globalStyles.text, styles.listDateText]}>
+              {moment
+                .duration(moment(Date.now()).diff(item.date, 'seconds'), 'seconds')
+                .humanize() + ' '}
+              yang lalu pukul {moment(item.date).format('HH:mm')}
+            </Text>
+          </View>
+
+          <View style={styles.deleteContainer}>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              hitSlop={5}
+              onPress={() => {
+                DialogManager.alert(
+                  'Yakin?',
+                  'Yakin kamu ingin menghapus "' + item.title?.trim() + '" dari histori?',
+                  [
+                    {
+                      text: 'Tidak',
+                      onPress: () => null,
+                    },
+                    {
+                      text: 'Ya',
+                      onPress: () => deleteHistory(keyItem),
+                    },
+                  ],
+                );
+              }}>
+              <Icon name="delete-forever" size={21} style={styles.deleteIcon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.listTitle}>
+          <Text style={[{ flexShrink: 1 }, globalStyles.text]}>{item.title}</Text>
+        </View>
+
+        <View style={{ flexDirection: 'row' }}>
+          <View style={styles.listEpisodeAndPart}>
+            <Text style={styles.listEpisode}>
+              {item.isComics && (
+                <View
+                  style={{
+                    backgroundColor: '#00586e',
+                    borderRadius: 4,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                  }}>
+                  <Text
+                    style={[
+                      styles.listEpisode,
+                      { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                    ]}>
+                    Komik
+                  </Text>
+                </View>
+              )}{' '}
+              {item.isMovie && (
+                <View
+                  style={{
+                    backgroundColor: '#ff7300',
+                    borderRadius: 4,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                  }}>
+                  <Text
+                    style={[
+                      styles.listEpisode,
+                      { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                    ]}>
+                    Movie
+                  </Text>
+                </View>
+              )}{' '}
+              {item.episode}
+            </Text>
+            {/* this commented code is keep for historical reason (nostalgic lmao) */}
+            {/* {item.part !== undefined && (
+                  <Text style={styles.listPart}>
+                    {' Part ' + (item.part + 1)}
+                  </Text>
+                )} */}
+          </View>
+
+          {item.lastDuration !== undefined && (
+            <View style={styles.lastDuration}>
+              <Text style={[globalStyles.text, styles.lastDurationText]}>
+                <FontAwesomeIcon
+                  name={item.isComics ? 'book' : 'clock-o'}
+                  size={16}
+                  color={globalStyles.text.color}
+                />{' '}
+                {item.isComics
+                  ? 'Halaman ' + (item.lastDuration + 1)
+                  : formatTimeFromSeconds(item.lastDuration)}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 }
 

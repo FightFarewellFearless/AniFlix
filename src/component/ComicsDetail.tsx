@@ -22,10 +22,11 @@ import Reanimated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles from '../assets/style';
+import { HistoryItemKey } from '../types/databaseTarget';
 import { HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
-import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 import { KomikuDetail } from '../utils/komiku';
 import controlWatchLater from '../utils/watchLaterControl';
 
@@ -95,13 +96,17 @@ export default function ComicsDetail(props: Props) {
   );
 
   const historyListsJson = useModifiedKeyValueIfFocused(
-    'history',
-    state => JSON.parse(state) as HistoryJSON[],
+    'historyKeyCollectionsOrder',
+    state => JSON.parse(state) as HistoryItemKey[],
   );
-  const lastReaded = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === data.title && z.isComics),
-    [historyListsJson, data.title],
-  );
+  const lastReaded = useMemo(() => {
+    const isLastReaded = historyListsJson.find(
+      z => z === `historyItem:${data.title.trim()}:true:false`,
+    );
+    if (isLastReaded) {
+      return JSON.parse(DatabaseManager.getSync(isLastReaded)!) as HistoryJSON;
+    } else return undefined;
+  }, [historyListsJson, data.title]);
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">

@@ -2,7 +2,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
 import { JSX, memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Appearance,
   ColorSchemeName,
   FlatList,
@@ -18,7 +17,6 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
-import { SetDatabaseTarget } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
 import { UtilsStackNavigator } from '../../../types/navigation';
 import watchLaterJSON from '../../../types/watchLaterJSON';
@@ -28,16 +26,25 @@ import { Buffer } from 'buffer/';
 import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
+import { useTheme } from 'react-native-paper';
 import { createDocument } from 'react-native-saf-x';
-import DialogManager from '../../../utils/dialogManager';
-import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
+import { HistoryItemKey } from '../../../types/databaseTarget';
 import {
+  DANGER_MIGRATE_OLD_HISTORY,
   DatabaseManager,
   useKeyValueIfFocused,
   useModifiedKeyValueIfFocused,
 } from '../../../utils/DatabaseManager';
+import DialogManager from '../../../utils/dialogManager';
+import LoadingIndicator from '../../misc/LoadingIndicator';
+import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
+import { HistoryDatabaseCache } from '../Saya/History';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
+
+type BackupJSON = Omit<typeof defaultDatabaseValue, 'historyKeyCollectionsOrder'> & {
+  history: string;
+};
 
 interface SettingsData {
   title: string;
@@ -126,7 +133,7 @@ function Setting(_props: Props) {
       for (const result of restoreDataFromBackup) {
         const dataINDEX = currentData.findIndex(
           val =>
-            val.title === result.title &&
+            val.title?.trim() === result.title?.trim() &&
             val.isComics === result.isComics &&
             val.isMovie === result.isMovie,
         );
@@ -140,7 +147,11 @@ function Setting(_props: Props) {
         currentData.push(result);
       }
       currentData.sort((a, b) => b.date - a.date);
-      DatabaseManager.set(target, JSON.stringify(currentData));
+      if (target === 'history') {
+        await DANGER_MIGRATE_OLD_HISTORY(currentData as HistoryJSON[]);
+      } else {
+        await DatabaseManager.set('watchLater', JSON.stringify(currentData));
+      }
     },
     [],
   );
@@ -154,7 +165,7 @@ function Setting(_props: Props) {
         currentSearchHistory.unshift(val);
       }
     });
-    DatabaseManager.set('searchHistory', JSON.stringify(currentSearchHistory));
+    await DatabaseManager.set('searchHistory', JSON.stringify(currentSearchHistory));
   }, []);
 
   const restoreData = useCallback(async () => {
@@ -168,27 +179,33 @@ function Setting(_props: Props) {
 
       // RNFS.readFile(doc.fileCopyUri).then(console.log);
       const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
-      const backupDataJSON: typeof defaultDatabaseValue = JSON.parse(
-        Buffer.from(data, 'base64').toString('utf8'),
-      );
+      const backupDataJSON: BackupJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
       await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
+      setModalText('Memulihkan data kamu mohon tunggu...');
+      setModalVisible(true);
       try {
-        (Object.keys(backupDataJSON) as SetDatabaseTarget[])
-          .filter(value => defaultDatabaseValueKeys.includes(value))
-          .forEach(value => {
+        for (const value of Object.keys(backupDataJSON) as (keyof BackupJSON)[]) {
+          if (defaultDatabaseValueKeys.includes(value) || value === 'history') {
             if (value === 'history' || value === 'watchLater') {
-              restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
+              setModalText('Memulihkan daftar tonton nanti dan histori tontonan');
+              await restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
             } else {
               const restoredData = backupDataJSON[value];
               if (value === 'colorScheme') {
+                setModalText('Memulihkan tema aplikasi');
                 Appearance.setColorScheme(
                   restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
                 );
               } else if (value === 'searchHistory') {
-                restoreSearchHistory(JSON.parse(restoredData));
-              } else DatabaseManager.set(value, restoredData);
+                setModalText('Memulihkan histori pencarian');
+                await restoreSearchHistory(JSON.parse(restoredData));
+              } else {
+                setModalText('Memulihkan ' + value);
+                await DatabaseManager.set(value, restoredData);
+              }
             }
-          });
+          }
+        }
         DialogManager.alert('Restore berhasil!', 'Kamu berhasil kembali ke backup sebelumnya!');
       } catch (e: any) {
         DialogManager.alert('Restore gagal!', e.message);
@@ -204,7 +221,7 @@ function Setting(_props: Props) {
     }
   }, [restoreHistoryOrWatchLater, restoreSearchHistory]);
 
-  const deleteHistory = useCallback(() => {
+  const clearHistory = useCallback(() => {
     DialogManager.alert(
       'Peringatan!!!',
       'Ini akan menghapus semua histori tontonan kamu.\nApakah kamu yakin ingin lanjut?',
@@ -219,7 +236,14 @@ function Setting(_props: Props) {
             setModalVisible(true);
             await new Promise(res => setTimeout(res, 1));
             try {
-              DatabaseManager.set('history', '[]');
+              const keyOrder: HistoryItemKey[] = JSON.parse(
+                DatabaseManager.getSync('historyKeyCollectionsOrder') ?? '[]',
+              );
+              for (const key of keyOrder) {
+                await DatabaseManager.delete(key);
+              }
+              DatabaseManager.set('historyKeyCollectionsOrder', '[]');
+              HistoryDatabaseCache.clear();
               DialogManager.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
             } catch (e: any) {
               DialogManager.alert('Gagal menghapus histori!', e.message);
@@ -312,7 +336,7 @@ function Setting(_props: Props) {
       title: 'Hapus histori tontonan',
       description: 'Menghapus semua histori tontonan kamu',
       icon: <Icon name="trash" style={{ color: 'red' }} size={iconSize} />,
-      handler: deleteHistory,
+      handler: clearHistory,
     },
     {
       title: 'Reload aplikasi',
@@ -339,7 +363,7 @@ function Setting(_props: Props) {
       <Modal transparent visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <ActivityIndicator size="large" />
+            <LoadingIndicator size={16} />
             <Text style={globalStyles.text}>{modalText}</Text>
           </View>
         </View>
@@ -399,6 +423,7 @@ function SettingList({ item }: { item: SettingsData }) {
 function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+  const theme = useTheme();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -455,8 +480,10 @@ function useStyles() {
         },
         modalContent: {
           flex: 0.15,
-          backgroundColor: colorScheme === 'dark' ? '#202020' : '#e9e9e9',
+          backgroundColor: theme.colors.surface,
           borderWidth: 1,
+          borderRadius: 12,
+          padding: 12,
           borderColor: '#525252',
           justifyContent: 'center',
           alignItems: 'center',
@@ -499,7 +526,7 @@ function useStyles() {
           textAlign: 'center',
         },
       }),
-    [colorScheme, globalStyles.text.color],
+    [colorScheme, globalStyles.text.color, theme.colors.surface],
   );
 }
 

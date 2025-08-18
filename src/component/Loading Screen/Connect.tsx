@@ -36,6 +36,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import animeLocalAPI from '../../utils/animeLocalAPI';
 import { AnimeMovieWebView } from '../../utils/animeMovie';
 import {
+  DANGER_MIGRATE_OLD_HISTORY,
   DatabaseManager,
   hasMigratedFromAsyncStorage,
   hasMigratedFromMMKV,
@@ -103,11 +104,22 @@ function Loading(props: Props) {
         continue;
       }
     }
+    // History migration to individual key per item
+    // @ts-expect-error
+    const history = await DatabaseManager.get('history');
+    if (history) {
+      ToastAndroid.show('Mengoptimalkan data history...', ToastAndroid.SHORT);
+      await DANGER_MIGRATE_OLD_HISTORY(JSON.parse(history));
+    }
     const isInDatabase = (key: string): key is SetDatabaseTarget => {
       return (arrOfDefaultData as readonly string[]).includes(key);
     };
     for (const dataKey of allKeys) {
-      if (!isInDatabase(dataKey) && !dataKey.startsWith('IGNORE_DEFAULT_DB_')) {
+      if (
+        !isInDatabase(dataKey) &&
+        !dataKey.startsWith('IGNORE_DEFAULT_DB_') &&
+        !dataKey.startsWith('historyItem:')
+      ) {
         DatabaseManager.delete(dataKey);
       }
     }

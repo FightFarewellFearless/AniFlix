@@ -25,8 +25,9 @@ import controlWatchLater from '../utils/watchLaterControl';
 import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HistoryItemKey } from '../types/databaseTarget';
 import { HistoryJSON } from '../types/historyJSON';
-import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 
 interface MovieEpisode {
   title: string;
@@ -57,14 +58,18 @@ function MovieDetail(props: Props) {
   );
 
   const historyListsJson = useModifiedKeyValueIfFocused(
-    'history',
-    state => JSON.parse(state) as HistoryJSON[],
+    'historyKeyCollectionsOrder',
+    state => JSON.parse(state) as HistoryItemKey[],
   );
   const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
-  const lastWatched = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === historyTitle && z.isMovie),
-    [historyListsJson, historyTitle],
-  );
+  const lastWatched = useMemo(() => {
+    const isLastWatched = historyListsJson.find(
+      z => z === `historyItem:${historyTitle}:false:false`,
+    );
+    if (isLastWatched) {
+      return JSON.parse(DatabaseManager.getSync(isLastWatched)!) as HistoryJSON;
+    } else return undefined;
+  }, [historyListsJson, historyTitle]);
 
   // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<MovieEpisode>>();

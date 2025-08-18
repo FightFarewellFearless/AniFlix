@@ -3,10 +3,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { EventEmitter } from 'expo';
 import SQLiteKV from 'expo-sqlite/kv-store';
 import { useCallback, useRef, useState } from 'react';
-import defaultDatabase from '../misc/defaultDatabaseValue.json';
 import { MMKV } from 'react-native-mmkv';
+import { HistoryItemKey, SetDatabaseTarget } from '../types/databaseTarget';
+import { HistoryJSON } from '../types/historyJSON';
 
-export type DataKey = keyof typeof defaultDatabase;
+export type DataKey = SetDatabaseTarget | HistoryItemKey;
 
 export type AppDatabase = {
   history: string;
@@ -98,8 +99,13 @@ export class DatabaseManager {
   }
 
   static async getDataForBackup(): Promise<AppDatabase> {
+    const historyKeyOrder: HistoryItemKey[] = JSON.parse(
+      (await this.get('historyKeyCollectionsOrder')) ?? '[]',
+    );
+    const history = await toOldHistoryStructure(historyKeyOrder);
+
     return {
-      history: (await this.get('history'))!,
+      history: JSON.stringify(history),
       enableBatteryTimeInfo: (await this.get('enableBatteryTimeInfo'))!,
       enableNowPlayingNotification: (await this.get('enableNowPlayingNotification'))!,
       watchLater: (await this.get('watchLater'))!,
@@ -143,4 +149,40 @@ export function useModifiedKeyValueIfFocused<T>(
     }, [value]),
   );
   return modifiedValue;
+}
+
+export function toNewHistoryStructure(oldHistory: HistoryJSON[]): {
+  keyCollectionsOrder: HistoryItemKey[];
+  newHistory: { key: HistoryItemKey; data: HistoryJSON }[];
+} {
+  return {
+    keyCollectionsOrder: oldHistory.map(
+      x =>
+        `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}` as const,
+    ),
+    newHistory: oldHistory.map(x => ({
+      key: `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}`,
+      data: x,
+    })),
+  };
+}
+export async function toOldHistoryStructure(keyCollectionsOrder: HistoryItemKey[]) {
+  const history: HistoryJSON[] = [];
+  for (const key of keyCollectionsOrder) {
+    const data = await DatabaseManager.get(key);
+    if (!data) continue;
+    const dataJson = JSON.parse(data) as HistoryJSON;
+    history.push(dataJson);
+  }
+  return history;
+}
+export async function DANGER_MIGRATE_OLD_HISTORY(oldHistoryString: HistoryJSON[]) {
+  const newHistory = toNewHistoryStructure(oldHistoryString);
+  await DatabaseManager.set(
+    'historyKeyCollectionsOrder',
+    JSON.stringify(newHistory.keyCollectionsOrder),
+  );
+  for (const data of newHistory.newHistory) {
+    await DatabaseManager.set(data.key, JSON.stringify(data.data));
+  }
 }

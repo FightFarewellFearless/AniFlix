@@ -28,8 +28,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AniDetailEpsList } from '../types/anime';
 import { HistoryJSON } from '../types/historyJSON';
-import { useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
 import { replaceLast } from '../utils/replaceLast';
+import { HistoryItemKey } from '../types/databaseTarget';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList =
@@ -63,17 +64,21 @@ function AniDetail(props: Props) {
   );
 
   const historyListsJson = useModifiedKeyValueIfFocused(
-    'history',
-    state => JSON.parse(state) as HistoryJSON[],
+    'historyKeyCollectionsOrder',
+    state => JSON.parse(state) as HistoryItemKey[],
   );
   let historyTitle = data.title.replace('Subtitle Indonesia', '').split('(Episode')[0].trim();
   if (historyTitle.endsWith('BD') && !data.episodeList.at(-1)?.title.endsWith('BD')) {
     historyTitle = replaceLast(historyTitle, 'BD', '').trim();
   }
-  const lastWatched = useMemo(
-    () => historyListsJson.find(z => z.title.trim() === historyTitle && !z.isComics && !z.isMovie),
-    [historyListsJson, historyTitle],
-  );
+  const lastWatched = useMemo(() => {
+    const isLastWatched = historyListsJson.find(
+      z => z === `historyItem:${historyTitle}:false:false`,
+    );
+    if (isLastWatched) {
+      return JSON.parse(DatabaseManager.getSync(isLastWatched)!) as HistoryJSON;
+    } else return undefined;
+  }, [historyListsJson, historyTitle]);
 
   // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<AniDetailEpsList>>();
