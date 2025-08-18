@@ -124,7 +124,12 @@ function Setting(_props: Props) {
       );
 
       for (const result of restoreDataFromBackup) {
-        const dataINDEX = currentData.findIndex(val => val.title === result.title);
+        const dataINDEX = currentData.findIndex(
+val =>
+val.title === result.title &&
+            val.isComics === result.isComics &&
+            val.isMovie === result.isMovie,
+);
 
         if (dataINDEX >= 0) {
           if (currentData[dataINDEX].date > result.date) {
