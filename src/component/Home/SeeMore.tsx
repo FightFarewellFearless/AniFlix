@@ -16,7 +16,7 @@ import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/animeMovie';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
-import { MIN_IMAGE_WIDTH } from './AnimeList';
+import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
 
@@ -46,6 +46,7 @@ function SeeMore(props: Props) {
   return (
     <View style={{ flex: 1 }}>
       <LegendList
+        renderScrollComponent={RenderScrollComponent}
         estimatedItemSize={270}
         recycleItems
         contentContainerStyle={{
