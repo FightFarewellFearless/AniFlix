@@ -36,7 +36,6 @@ import ImageLoading from '../../ImageLoading';
 import Skeleton from '../../misc/Skeleton';
 
 export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
-const HISTORY_CACHE_SIZE = 35;
 
 const AnimatedFlashList = Animated.createAnimatedComponent(
   FlashList as typeof FlashList<HistoryItemKey>,
@@ -232,6 +231,8 @@ function RenderList({
   globalStyles: ReturnType<typeof useGlobalStyles>;
   deleteHistory: (key: HistoryItemKey) => Promise<void>;
 }) {
+  const currentItem = useRef(keyItem);
+  currentItem.current = keyItem;
   const [item, setItem] = useRecyclingState<HistoryJSON | undefined>(
     () => HistoryDatabaseCache.get(keyItem),
     [keyItem],
@@ -240,12 +241,9 @@ function RenderList({
   useFocusEffect(
     useCallback(() => {
       DatabaseManager.get(keyItem).then(value => {
+        if (currentItem.current !== keyItem) return;
         const historyDb = JSON.parse(value ?? '{}');
         setItem(historyDb);
-        if (HistoryDatabaseCache.size > HISTORY_CACHE_SIZE) {
-          const key = HistoryDatabaseCache.keys().next().value;
-          if (key) HistoryDatabaseCache.delete(key);
-        }
         HistoryDatabaseCache.set(keyItem, historyDb);
       });
     }, [keyItem, setItem]),
