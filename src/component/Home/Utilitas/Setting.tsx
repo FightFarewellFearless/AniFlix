@@ -104,10 +104,13 @@ function Setting(_props: Props) {
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
+        setModalText('Membuat Backup Data...');
+        setModalVisible(true);
         const data = Buffer.from(
           JSON.stringify(await DatabaseManager.getDataForBackup()),
           'utf8',
         ).toString('base64');
+        setModalVisible(false);
         const backupFile = await createDocument(data, {
           initialName: fileuri,
           mimeType: 'text/plain',
