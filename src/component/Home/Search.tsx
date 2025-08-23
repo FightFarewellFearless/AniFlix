@@ -47,6 +47,7 @@ import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/Datab
 import DialogManager from '../../utils/dialogManager';
 import { KomikuSearch, komikuSearch } from '../../utils/komiku';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+import { RenderScrollComponent } from './AnimeList';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacity);
 
@@ -323,6 +324,7 @@ function Search(props: Props) {
           (movieData && movieData.length > 0) ||
           (comicsData && comicsData.length > 0) ? (
             <FlashList
+              renderScrollComponent={RenderScrollComponent}
               ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
               data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
               keyExtractor={(_, index) => String(index)}

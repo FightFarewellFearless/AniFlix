@@ -19,6 +19,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  ScrollViewProps,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -27,7 +28,7 @@ import {
   View,
 } from 'react-native';
 import { useBatteryLevel } from 'react-native-device-info';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
 import Reanimated, {
   cancelAnimation,
@@ -181,6 +182,7 @@ function HomeList(props: HomeProps) {
 
   return (
     <FlashList
+      renderScrollComponent={RenderScrollComponent}
       style={styles.container}
       refreshControl={
         <RefreshControl
@@ -282,6 +284,7 @@ function EpisodeBaruUNMEMO({
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
         <LegendList
+          renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
@@ -363,6 +366,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
 
       {data?.length !== 0 ? (
         <LegendList
+          renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
@@ -436,6 +440,7 @@ function ComicListUNMEMO() {
 
       {data?.length !== 0 ? (
         <LegendList
+          renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
@@ -533,6 +538,10 @@ function measureQuoteTextWidth(quote: string) {
     fontSize: 17,
   });
   return width;
+}
+
+export function RenderScrollComponent(renderProps: ScrollViewProps) {
+  return <ScrollView {...renderProps} />;
 }
 
 function useStyles() {
