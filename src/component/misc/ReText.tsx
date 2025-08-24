@@ -37,6 +37,7 @@ const ReText = (props: TextProps) => {
       editable={false}
       value={defaultValue}
       style={[styles.baseStyle, style]}
+      multiline
       {...{ animatedProps }}
     />
   );
