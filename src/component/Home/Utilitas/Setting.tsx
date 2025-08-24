@@ -27,6 +27,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { useTheme } from 'react-native-paper';
+import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
 import { HistoryItemKey } from '../../../types/databaseTarget';
 import {
@@ -37,6 +38,7 @@ import {
 } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import LoadingIndicator from '../../misc/LoadingIndicator';
+import ReText from '../../misc/ReText';
 import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 import { HistoryDatabaseCache } from '../Saya/History';
 
@@ -80,7 +82,7 @@ function Setting(_props: Props) {
   }, [nowPlayingNotificationSwitch]);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalText, setModalText] = useState('');
+  const modalText = useSharedValue('');
 
   const backupData = useCallback(async () => {
     try {
@@ -104,7 +106,7 @@ function Setting(_props: Props) {
       }
       async function backup() {
         const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        setModalText('Membuat Backup Data...');
+        modalText.set('Membuat Backup Data...');
         setModalVisible(true);
         const data = Buffer.from(
           JSON.stringify(await DatabaseManager.getDataForBackup()),
@@ -122,7 +124,7 @@ function Setting(_props: Props) {
     } catch (e: any) {
       DialogManager.alert('Error', e.message);
     }
-  }, []);
+  }, [modalText]);
 
   const restoreHistoryOrWatchLater = useCallback(
     async (
@@ -184,26 +186,26 @@ function Setting(_props: Props) {
       const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
       const backupDataJSON: BackupJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
       await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
-      setModalText('Memulihkan data kamu mohon tunggu...');
+      modalText.set('Memulihkan data kamu mohon tunggu...');
       setModalVisible(true);
       try {
         for (const value of Object.keys(backupDataJSON) as (keyof BackupJSON)[]) {
           if (defaultDatabaseValueKeys.includes(value) || value === 'history') {
             if (value === 'history' || value === 'watchLater') {
-              setModalText('Memulihkan daftar tonton nanti dan histori tontonan');
+              modalText.set('Memulihkan daftar ' + value);
               await restoreHistoryOrWatchLater(JSON.parse(backupDataJSON[value]), value);
             } else {
               const restoredData = backupDataJSON[value];
               if (value === 'colorScheme') {
-                setModalText('Memulihkan tema aplikasi');
+                modalText.set('Memulihkan tema aplikasi');
                 Appearance.setColorScheme(
                   restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
                 );
               } else if (value === 'searchHistory') {
-                setModalText('Memulihkan histori pencarian');
+                modalText.set('Memulihkan histori pencarian');
                 await restoreSearchHistory(JSON.parse(restoredData));
               } else {
-                setModalText('Memulihkan ' + value);
+                modalText.set('Memulihkan ' + value);
                 await DatabaseManager.set(value, restoredData);
               }
             }
@@ -222,7 +224,7 @@ function Setting(_props: Props) {
     } finally {
       setModalVisible(false);
     }
-  }, [restoreHistoryOrWatchLater, restoreSearchHistory]);
+  }, [modalText, restoreHistoryOrWatchLater, restoreSearchHistory]);
 
   const clearHistory = useCallback(() => {
     DialogManager.alert(
@@ -235,7 +237,7 @@ function Setting(_props: Props) {
         {
           text: 'Lanjut dan hapus',
           onPress: async () => {
-            setModalText('Menghapus histori tontonan kamu...');
+            modalText.set('Menghapus histori tontonan kamu...');
             setModalVisible(true);
             await new Promise(res => setTimeout(res, 1));
             try {
@@ -243,6 +245,7 @@ function Setting(_props: Props) {
                 DatabaseManager.getSync('historyKeyCollectionsOrder') ?? '[]',
               );
               for (const key of keyOrder) {
+                modalText.set(`Menghapus\n${key.split(':').slice(1, -2).join(':')}`);
                 await DatabaseManager.delete(key);
               }
               DatabaseManager.set('historyKeyCollectionsOrder', '[]');
@@ -257,7 +260,7 @@ function Setting(_props: Props) {
         },
       ],
     );
-  }, []);
+  }, [modalText]);
 
   const iconSize = 18;
 
@@ -367,7 +370,10 @@ function Setting(_props: Props) {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <LoadingIndicator size={16} />
-            <Text style={globalStyles.text}>{modalText}</Text>
+            <ReText
+              style={[globalStyles.text, { textAlign: 'center', fontWeight: 'bold' }]}
+              text={modalText}
+            />
           </View>
         </View>
       </Modal>
