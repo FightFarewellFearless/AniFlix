@@ -3969,7 +3969,7 @@ __metadata:
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.3.0
     react-native-webview: 13.15.0
-    react-native-worklets: ^0.4.0
+    react-native-worklets: ^0.4.1
     react-test-renderer: 19.0.0
     recyclerlistview: ^4.2.3
     typescript: 5.9.2
@@ -10581,9 +10581,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "react-native-worklets@npm:0.4.0"
+"react-native-worklets@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "react-native-worklets@npm:0.4.1"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -10599,7 +10599,7 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 4b338be8b17dbb974980f318278d72bb0b579d7f1d48f5197c8af0f0d634a7eba0e8d6b9840d38b9a444919ba0adc68b7b98c48f4f7dcdc83d0bb4ada5fe8e7d
+  checksum: c6b0f0598ddc9eb7a6053b72bb86a374fc4b159fbc9dd740dde900fccdfb87bb7439a354d309618511c20bef4b4ab72ca31507b414fb8bd306b78bd31e1c507b
   languageName: node
   linkType: hard
 
