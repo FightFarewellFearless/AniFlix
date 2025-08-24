@@ -1,3 +1,11 @@
+# v1.0.2_JS-10 (24-Agustus-2025)
+
+## Ditingkatkan
+- Struktur data riwayat tontonan lebih efisien
+## Diperbaiki
+- Tombol yang tidak bekerja dengan benar
+- ...Dan beberapa perubahan kecil lainnya
+
 # v1.0.2_JS-9 (17-Agustus-2025)
 
 ## Diperbaiki
