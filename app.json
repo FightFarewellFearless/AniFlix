@@ -14,8 +14,12 @@
     "runtimeVersion": "1.0.2"
   },
   "plugins": [
-    ["expo-video", {
-      "supportsPictureInPicture": true
-    }]
+    [
+      "expo-video",
+      {
+        "supportsPictureInPicture": true
+      }
+    ],
+    "expo-sqlite"
   ]
 }
