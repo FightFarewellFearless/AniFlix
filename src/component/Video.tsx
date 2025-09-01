@@ -176,6 +176,7 @@ function Video(props: Props) {
   const initialInfoContainerHeight = useRef<number>(null);
   const isInfoPressed = useRef(false);
   const [synopsisTextLength, setSynopsisTextLength] = useState(0);
+  const [hadSynopsisMeasured, setHadSynopsisMeasured] = useState(false);
   const synopsisHeight = useRef(0);
   const infoContainerHeight = useSharedValue(0);
   const infoContainerOpacity = useSharedValue(1);
@@ -554,11 +555,58 @@ function Video(props: Props) {
     [enterFullscreen, exitFullscreen],
   );
 
+  const measureAndUpdateSynopsisLayout = useCallback(
+    (fromFullscreen = false) => {
+      if (fromFullscreen) {
+        if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
+          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+            initialInfoContainerHeight.current = height;
+          });
+        } else if (!hadSynopsisMeasured) {
+          // delay the measurement because if the layout is from fullscreen the width would be wrong
+          return setTimeout(() => {
+            synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+              setSynopsisTextLength(height / 20); // 20: lineheight
+              synopsisHeight.current = height;
+              setHadSynopsisMeasured(true);
+            });
+          }, 1000);
+        }
+      } else {
+        if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
+          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+            initialInfoContainerHeight.current = height;
+          });
+        } else if (!hadSynopsisMeasured) {
+          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+            setSynopsisTextLength(height / 20); // 20: lineheight
+            synopsisHeight.current = height;
+            setHadSynopsisMeasured(true);
+          });
+        }
+      }
+    },
+    [hadSynopsisMeasured, synopsisTextRef],
+  );
+  const initialRender = useRef(true);
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+    const mightBeTimeoutID = measureAndUpdateSynopsisLayout(true);
+    return () => {
+      clearTimeout(mightBeTimeoutID);
+    };
+  }, [fullscreen, measureAndUpdateSynopsisLayout]);
   useLayoutEffect(() => {
-    synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
-      initialInfoContainerHeight.current = height;
-    });
-  }, [animeDetail?.synopsis, animeDetail?.rating, animeDetail?.genres, synopsisTextRef]);
+    measureAndUpdateSynopsisLayout();
+  }, [
+    animeDetail?.synopsis,
+    animeDetail?.rating,
+    animeDetail?.genres,
+    measureAndUpdateSynopsisLayout,
+  ]);
 
   const onSynopsisPress = useCallback(async () => {
     if (!isInfoPressed.current) {
@@ -845,25 +893,30 @@ function Video(props: Props) {
               onPressOut={onSynopsisPressOut}
               // onLayout={onSynopsisLayout}
               onPress={onSynopsisPress}
-              disabled={synopsisTextLength <= 2}>
+              disabled={synopsisTextLength < 3}>
               <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
 
-              <ReAnimated.Text
-                ref={synopsisTextRef}
-                style={[globalStyles.text, styles.infoSinopsis, infoContainerStyle]}
-                numberOfLines={!showSynopsis ? 2 : undefined}
-                onTextLayout={e => {
-                  setSynopsisTextLength(e.nativeEvent.lines.length);
-                  synopsisHeight.current = e.nativeEvent.lines
-                    // .slice(2)
-                    .reduce((prev, curr) => prev + curr.height, 0);
-                }}>
-                {animeDetail === undefined ? (
-                  <Skeleton stopOnBlur={false} width={150} height={20} />
-                ) : (
-                  animeDetail?.synopsis || 'Tidak ada sinopsis'
-                )}
-              </ReAnimated.Text>
+              {animeDetail !== undefined ? (
+                <ReAnimated.Text
+                  ref={synopsisTextRef}
+                  style={[
+                    globalStyles.text,
+                    styles.infoSinopsis,
+                    infoContainerStyle,
+                    {
+                      position: hadSynopsisMeasured ? 'relative' : 'absolute',
+                      opacity: hadSynopsisMeasured ? undefined : 0,
+                    },
+                  ]}
+                  numberOfLines={!showSynopsis && hadSynopsisMeasured ? 2 : undefined}>
+                  {animeDetail?.synopsis || 'Tidak ada sinopsis'}
+                </ReAnimated.Text>
+              ) : (
+                <Skeleton stopOnBlur={false} width={150} height={20} />
+              )}
+              {!hadSynopsisMeasured && animeDetail !== undefined && (
+                <Skeleton stopOnBlur={false} width={150} height={20} />
+              )}
 
               <View style={[styles.infoGenre]}>
                 {animeDetail === undefined ? (
@@ -903,7 +956,7 @@ function Video(props: Props) {
                 </Text>
               </View>
 
-              {synopsisTextLength > 2 && (
+              {synopsisTextLength >= 3 && (
                 <View style={{ alignItems: 'center', marginTop: 3 }}>
                   {showSynopsis ? (
                     <Icon

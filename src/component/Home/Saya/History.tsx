@@ -7,7 +7,14 @@ import {
   useRecyclingState,
 } from '@shopify/flash-list';
 import moment from 'moment';
-import React, { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
+import React, {
+  startTransition,
+  useCallback,
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -243,8 +250,10 @@ function RenderList({
       DatabaseManager.get(keyItem).then(value => {
         if (currentItem.current !== keyItem) return;
         const historyDb = JSON.parse(value ?? '{}');
-        setItem(historyDb);
         HistoryDatabaseCache.set(keyItem, historyDb);
+        // startTransition(() => {
+          setItem(historyDb);
+        // });
       });
     }, [keyItem, setItem]),
   );

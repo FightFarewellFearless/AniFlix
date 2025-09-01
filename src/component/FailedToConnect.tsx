@@ -2,6 +2,7 @@ import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
@@ -81,7 +82,7 @@ function FailedToConnect(props: Props) {
               Linking.openURL('https://discord.gg/sbTwxHb9NM');
             }}
             style={styles.bottomCreditButton}>
-            <Icon name="discord" size={30} color="#7289d9" />
+            <Fontisto name="discord" size={30} color="#7289d9" />
             <Text style={[styles.bottomCreditText, globalStyles.text]}>Gabung Discord</Text>
           </TouchableOpacity>
         </View>

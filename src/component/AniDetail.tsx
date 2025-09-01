@@ -425,6 +425,7 @@ function AniDetail(props: Props) {
           </View>
         }
         extraData={colorScheme}
+        showsVerticalScrollIndicator={false}
       />
     </KeyboardAvoidingView>
   );

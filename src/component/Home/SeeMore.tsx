@@ -48,6 +48,7 @@ function SeeMore(props: Props) {
       <LegendList
         renderScrollComponent={RenderScrollComponent}
         estimatedItemSize={270}
+        maintainVisibleContentPosition={false}
         recycleItems
         contentContainerStyle={{
           paddingLeft: insets.left,

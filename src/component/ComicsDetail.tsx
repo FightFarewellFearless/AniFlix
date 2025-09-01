@@ -309,6 +309,7 @@ export default function ComicsDetail(props: Props) {
             </View>
           </>
         }
+        showsVerticalScrollIndicator={false}
       />
     </KeyboardAvoidingView>
   );

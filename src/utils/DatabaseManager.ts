@@ -1,9 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { EventEmitter } from 'expo';
 import SQLiteKV from 'expo-sqlite/kv-store';
 import { useCallback, useRef, useState } from 'react';
-import { MMKV } from 'react-native-mmkv';
 import { HistoryItemKey, SetDatabaseTarget } from '../types/databaseTarget';
 import { HistoryJSON } from '../types/historyJSON';
 
@@ -17,54 +15,6 @@ export type AppDatabase = {
   searchHistory: string;
   colorScheme: string;
 };
-
-const storage = new MMKV();
-
-// TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
-export const hasMigratedFromAsyncStorage = storage.getBoolean(
-  'IGNORE_DEFAULT_DB_hasMigratedFromAsyncStorage',
-);
-
-// TODO: Remove `hasMigratedFromAsyncStorage` after a while (when everyone has migrated)
-export async function migrateFromAsyncStorage(): Promise<void> {
-  const keys = await AsyncStorage.getAllKeys();
-
-  for (const key of keys) {
-    try {
-      const value = await AsyncStorage.getItem(key);
-
-      if (value != null) {
-        storage.set(key, value);
-        AsyncStorage.removeItem(key);
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  storage.set('IGNORE_DEFAULT_DB_hasMigratedFromAsyncStorage', true);
-}
-
-export const hasMigratedFromMMKV =
-  SQLiteKV.getItemSync('IGNORE_DEFAULT_DB_hasMigratedFromMMKV') === 'true';
-export async function migrateFromMMKV(): Promise<void> {
-  const keys = storage.getAllKeys();
-
-  for (const key of keys) {
-    try {
-      const value = storage.getString(key);
-
-      if (value != null) {
-        await SQLiteKV.setItem(key, value);
-        storage.delete(key);
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  SQLiteKV.setItemSync('IGNORE_DEFAULT_DB_hasMigratedFromMMKV', 'true');
-}
 
 export class DatabaseManager {
   static #event = new EventEmitter<Record<string, (value: string) => void>>();

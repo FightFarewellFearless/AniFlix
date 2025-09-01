@@ -236,6 +236,7 @@ function HomeList(props: HomeProps) {
       data={jadwalDataArray}
       // keyExtractor={z => z}
       renderItem={renderJadwalAnime}
+      showsVerticalScrollIndicator={false}
     />
   );
 }

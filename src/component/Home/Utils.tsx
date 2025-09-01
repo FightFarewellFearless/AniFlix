@@ -4,11 +4,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableNativeFeedback,
   View,
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
+import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import { Appbar } from 'react-native-paper';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UtilsStackNavigator } from '../../types/navigation';
@@ -145,6 +145,7 @@ function useStyles() {
           elevation: 5,
           width: devidedWidth < 150 ? '100%' : devidedWidth,
           minWidth: 150,
+          minHeight: 150,
         },
         titleText: {
           color: colorScheme === 'dark' ? '#ffffff' : '#000000',

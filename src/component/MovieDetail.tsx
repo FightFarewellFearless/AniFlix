@@ -393,6 +393,7 @@ function MovieDetail(props: Props) {
       ListHeaderComponent={ListHeaderComponent}
       extraData={colorScheme}
       estimatedItemSize={60}
+      showsVerticalScrollIndicator={false}
     />
   );
 }

@@ -13,6 +13,9 @@
   "android": {
     "runtimeVersion": "1.0.2"
   },
+  "experiments": {
+    "reactCompiler": true
+  },
   "plugins": [
     [
       "expo-video",

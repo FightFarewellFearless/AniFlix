@@ -119,15 +119,15 @@ const styles = StyleSheet.create({
   },
   coveredArea: {
     position: 'absolute',
-    height: 5,
+    height: 4,
     backgroundColor: '#b10202',
     borderRadius: 5,
     zIndex: 2,
   },
   circle: {
     position: 'absolute',
-    height: 12,
-    width: 12,
+    height: 10,
+    width: 10,
     backgroundColor: '#ff0000',
     borderRadius: 5,
     overflow: 'visible',
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   availableArea: {
     position: 'absolute',
     backgroundColor: '#dbd8d8',
-    height: 5,
+    height: 4,
     width: '100%',
     borderRadius: 5,
     zIndex: 1,

@@ -2547,15 +2547,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@legendapp/list@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@legendapp/list@npm:1.1.4"
+"@legendapp/list@npm:2.0.0-beta.5":
+  version: 2.0.0-beta.5
+  resolution: "@legendapp/list@npm:2.0.0-beta.5"
   dependencies:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: c4b08b0ab8298d3f4e98e83310266e65b2741300a480a8d103fc1af8f3a6b4e7f4439394c994658a18df7c3c23fccae81b2ecf7da47ed615c860100792d98190
+  checksum: 1fc4b65cd9307c0a9a852d41a04794b1d5dad32a829b70c23c7cab19433e68b3be5f0c53f450ace27ec37b5c5d0dcc57ed858f3d678ea94d078b049fcb649753
   languageName: node
   linkType: hard
 
@@ -2640,17 +2640,6 @@ __metadata:
   version: 0.2.7
   resolution: "@pkgr/core@npm:0.2.7"
   checksum: b16959878940f3d3016b79a4b2c23fd518aaec6b47295baa3154fbcf6574fee644c51023bb69069fa3ea9cdcaca40432818f54695f11acc0ae326cf56676e4d1
-  languageName: node
-  linkType: hard
-
-"@react-native-async-storage/async-storage@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@react-native-async-storage/async-storage@npm:2.2.0"
-  dependencies:
-    merge-options: ^3.0.4
-  peerDependencies:
-    react-native: ^0.0.0-0 || >=0.65 <1.0
-  checksum: efbb9c801fb7eecfad1568d6a5e9d247db420b8ba8f1789d5b783e679432567a53cf54c7e7b5e6f315276f33d1df297253549e0cefef2e683539df346d2a1f2d
   languageName: node
   linkType: hard
 
@@ -3799,9 +3788,8 @@ __metadata:
     "@babel/runtime": ^7.27.0
     "@bottom-tabs/react-navigation": ^0.11.1
     "@domir/react-native-measure-text": ^0.1.8
-    "@legendapp/list": ^1.1.4
+    "@legendapp/list": 2.0.0-beta.5
     "@pirles/react-native-element-dropdown": ^2.15.0
-    "@react-native-async-storage/async-storage": 2.2.0
     "@react-native-community/cli": ^20.0.1
     "@react-native-community/cli-platform-android": ^20.0.1
     "@react-native/babel-preset": 0.81.1
@@ -3850,10 +3838,9 @@ __metadata:
     react-native-gesture-handler: 2.28.0
     react-native-keyboard-controller: ^1.18.5
     react-native-marked: ^7.0.2
-    react-native-mmkv: ^3.3.0
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.5
-    react-native-reanimated: ~4.1.0
+    react-native-reanimated: 4.0.3
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.6.1
     react-native-screens: 4.15.4
@@ -3861,7 +3848,7 @@ __metadata:
     react-native-system-navigation-bar: ^2.6.4
     react-native-vector-icons: ^10.3.0
     react-native-webview: 13.16.0
-    react-native-worklets: ~0.5.0
+    react-native-worklets: 0.4.2
     react-test-renderer: 19.1.0
     recyclerlistview: ^4.2.3
     typescript: 5.9.2
@@ -7583,13 +7570,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-obj@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "is-plain-obj@npm:2.1.0"
-  checksum: cec9100678b0a9fe0248a81743041ed990c2d4c99f893d935545cfbc42876cbe86d207f3b895700c690ad2fa520e568c44afc1605044b535a7820c1d40e38daa
-  languageName: node
-  linkType: hard
-
 "is-regex@npm:^1.2.1":
   version: 1.2.1
   resolution: "is-regex@npm:1.2.1"
@@ -8784,15 +8764,6 @@ __metadata:
   version: 5.2.1
   resolution: "memoize-one@npm:5.2.1"
   checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
-  languageName: node
-  linkType: hard
-
-"merge-options@npm:^3.0.4":
-  version: 3.0.4
-  resolution: "merge-options@npm:3.0.4"
-  dependencies:
-    is-plain-obj: ^2.1.0
-  checksum: d86ddb3dd6e85d558dbf25dc944f3527b6bacb944db3fdda6e84a3f59c4e4b85231095f58b835758b9a57708342dee0f8de0dffa352974a48221487fe9f4584f
   languageName: node
   linkType: hard
 
@@ -10562,16 +10533,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-mmkv@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "react-native-mmkv@npm:3.3.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 2544e4a2d37429a17fba14bc12140b45d8da3e2b4a3d4cf884c355cca8d57dd425fd45160c5552e4b725978b037f3dfadd408db05735bb21341eea92e0c2a869
-  languageName: node
-  linkType: hard
-
 "react-native-orientation-locker@npm:^1.7.0":
   version: 1.7.0
   resolution: "react-native-orientation-locker@npm:1.7.0"
@@ -10611,9 +10572,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:~4.1.0":
-  version: 4.1.0
-  resolution: "react-native-reanimated@npm:4.1.0"
+"react-native-reanimated@npm:4.0.3":
+  version: 4.0.3
+  resolution: "react-native-reanimated@npm:4.0.3"
   dependencies:
     react-native-is-edge-to-edge: ^1.2.1
     semver: 7.7.2
@@ -10621,8 +10582,8 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-    react-native-worklets: ">=0.5.0"
-  checksum: 72ef1ff148f49bc1d60f772e2969c4583ef98262eccd5bfbcc6dfb9ff8a556d2ec6ad784bf06266d61bc0c4689fc8e928605a038851b077b0e554e3b5565fbe2
+    react-native-worklets: ">=0.4.0"
+  checksum: 2b45e7adfedf34b37649dc006ffb3a4b77facffb2233be9551a2d09798b69e072d725213f906d25f309eff03c228890baf1f424eaaa8ec95248098435763ea81
   languageName: node
   linkType: hard
 
@@ -10712,9 +10673,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:~0.5.0":
-  version: 0.5.0
-  resolution: "react-native-worklets@npm:0.5.0"
+"react-native-worklets@npm:0.4.2":
+  version: 0.4.2
+  resolution: "react-native-worklets@npm:0.4.2"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.0.0-0
     "@babel/plugin-transform-class-properties": ^7.0.0-0
@@ -10726,12 +10687,11 @@ __metadata:
     "@babel/plugin-transform-unicode-regex": ^7.0.0-0
     "@babel/preset-typescript": ^7.16.7
     convert-source-map: ^2.0.0
-    semver: 7.7.2
   peerDependencies:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 31dc943e210d917ed6443e28ac88cb595800ebba581ad452a687956056fcb22f9984576417d195744a4cfea1ea83d0364f1d2dd8d094ecb9ff4760ccf31422ee
+  checksum: 2259a11afdf3d480b69e96ce4630869a9131bf01242bd1cf599365cbcde87eab234c3e4827313b63e90675213eed3f2267ee4d1c970b3929befdf9b93732b7e7
   languageName: node
   linkType: hard
 

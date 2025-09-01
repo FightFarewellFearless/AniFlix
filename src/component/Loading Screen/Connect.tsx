@@ -24,6 +24,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
@@ -35,14 +36,7 @@ import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import animeLocalAPI from '../../utils/animeLocalAPI';
 import { AnimeMovieWebView } from '../../utils/animeMovie';
-import {
-  DANGER_MIGRATE_OLD_HISTORY,
-  DatabaseManager,
-  hasMigratedFromAsyncStorage,
-  hasMigratedFromMMKV,
-  migrateFromAsyncStorage,
-  migrateFromMMKV,
-} from '../../utils/DatabaseManager';
+import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 
 export const JoinDiscord = () => {
@@ -51,7 +45,7 @@ export const JoinDiscord = () => {
     <TouchableOpacity
       onPress={() => Linking.openURL('https://discord.gg/sbTwxHb9NM')}
       style={styles.socialButton}>
-      <MaterialIcon name="discord" size={24} color={'#7289d9'} />
+      <Fontisto name="discord" size={24} color={'#7289d9'} />
       <Text style={styles.socialButtonText}>Join Discord</Text>
     </TouchableOpacity>
   );
@@ -88,13 +82,6 @@ function Loading(props: Props) {
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
-    if (!hasMigratedFromMMKV) {
-      if (!hasMigratedFromAsyncStorage) {
-        await migrateFromAsyncStorage();
-      }
-      await migrateFromMMKV();
-    }
-
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
     const allKeys = await DatabaseManager.getAllKeys();
     for (const dataKey of arrOfDefaultData) {

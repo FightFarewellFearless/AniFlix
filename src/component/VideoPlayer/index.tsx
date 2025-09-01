@@ -287,7 +287,7 @@ function VideoPlayer({
         <Reanimated.View
           pointerEvents="box-none"
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
-          <Top title={title} />
+          <Top title={title} videoRef={videoRef} />
           <CenterControl
             isBuffering={isBuffering}
             isError={isError}
@@ -302,7 +302,6 @@ function VideoPlayer({
             onLoad={onLoad}
           />
           <BottomControl
-            videoRef={videoRef}
             currentDurationSecond={currentDurationSecond}
             totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen}
@@ -339,16 +338,33 @@ function VideoPlayer({
   );
 }
 
-function Top({ title }: { title: string }) {
+function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<VideoView | null> }) {
+  const requestPiP = useCallback(() => {
+    videoRef?.current?.startPictureInPicture();
+  }, [videoRef]);
   return (
     <View
       style={{
         width: '100%',
         height: 50,
-        justifyContent: 'center',
+        flexDirection: 'row',
         alignItems: 'center',
       }}>
-      <Text style={{ color: 'white', fontWeight: 'bold' }} numberOfLines={2}>
+      <TouchableOpacity
+        style={{
+          justifyContent: 'center',
+          marginLeft: 6,
+          backgroundColor: '#00000062',
+          padding: 5,
+          borderRadius: 5,
+        }}
+        /* //rngh - containerStyle */ onPress={requestPiP}
+        hitSlop={2}>
+        <Icons name={'picture-in-picture'} size={20} color={'white'} />
+      </TouchableOpacity>
+      <Text
+        style={{ color: '#dadada', fontWeight: 'bold', textAlign: 'center', flex: 1 }}
+        numberOfLines={2}>
         {title}
       </Text>
     </View>
@@ -434,7 +450,6 @@ function CenterControl({
 
 function BottomControl({
   seekBarProgress,
-  videoRef,
   onProgressChange,
   onProgressChangeEnd,
   onFullScreenButtonPressed,
@@ -443,7 +458,6 @@ function BottomControl({
   totalDurationSecond,
 }: {
   seekBarProgress: SharedValue<number>;
-  videoRef?: React.RefObject<VideoView | null>;
   onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
   onFullScreenButtonPressed: () => void;
@@ -451,9 +465,6 @@ function BottomControl({
   currentDurationSecond: SharedValue<number>;
   totalDurationSecond: SharedValue<number>;
 }) {
-  const requestPiP = useCallback(() => {
-    videoRef?.current?.startPictureInPicture();
-  }, [videoRef]);
   const totalSecond = useDerivedValue(() => {
     'worklet';
     const sec = Math.floor(totalDurationSecond.get() % 60);
@@ -479,25 +490,32 @@ function BottomControl({
   return (
     <Pressable
       style={{
-        flexDirection: 'row',
-
         position: 'absolute',
         bottom: 0,
         alignSelf: 'center',
         width: '100%',
-        paddingHorizontal: 5,
+        paddingHorizontal: 15,
+        marginBottom: 2,
       }}>
-      <View style={{ width: '95%', flexDirection: 'row', flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 1, flex: 1 }}>
-          <ReText
-            style={{ color: 'white', zIndex: 1, fontWeight: 'bold', fontSize: 13 }}
-            text={currentSecond}
-          />
-          <Text style={{ color: 'white', zIndex: 1, fontWeight: 'bold' }}>/</Text>
-          <ReText
-            style={{ color: 'white', zIndex: 1, fontWeight: 'bold', fontSize: 13 }}
-            text={totalSecond}
-          />
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ReText style={{ color: 'white', zIndex: 1, fontSize: 12 }} text={currentSecond} />
+            <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
+            <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
+          </View>
+          <TouchableOpacity
+            style={{ justifyContent: 'center' }}
+            /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
+            hitSlop={2}>
+            <Icons
+              name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+              size={24}
+              color={'white'}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={{ width: '100%' }}>
           <SeekBar
             progress={seekBarProgress}
             style={{ flex: 1, zIndex: 0 }}
@@ -505,20 +523,6 @@ function BottomControl({
             onProgressChangeEnd={onProgressChangeEnd}
           />
         </View>
-      </View>
-      <View style={{ flexDirection: 'row', gap: 2 }}>
-        <TouchableOpacity
-          style={{ justifyContent: 'center', marginLeft: 6 }}
-          /* //rngh - containerStyle */ onPress={requestPiP}
-          hitSlop={2}>
-          <Icons name={'picture-in-picture'} size={22} color={'white'} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ justifyContent: 'center' }}
-          /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
-          hitSlop={2}>
-          <Icons name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'} size={28} color={'white'} />
-        </TouchableOpacity>
       </View>
     </Pressable>
   );

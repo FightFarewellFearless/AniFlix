@@ -10,11 +10,11 @@ import {
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableNativeFeedback,
   TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
+import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import useGlobalStyles from '../../../assets/style';
