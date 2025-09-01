@@ -3,7 +3,7 @@ import { ImageBackground } from 'expo-image';
 import { memo, useMemo } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
 import appPackage from '../../../../package.json';
 import { darkText } from '../../../assets/style';
 import { JoinDiscord } from '../../Loading Screen/Connect';
@@ -93,7 +93,7 @@ function About() {
   );
 }
 
-function Button({ title, onPress, icon }: { title: string; onPress: () => void; icon?: string }) {
+function Button({ title, onPress, icon }: { title: string; onPress: () => void; icon?: FontAwesomeIconName }) {
   const styles = useStyles();
   const theme = useTheme();
   return (

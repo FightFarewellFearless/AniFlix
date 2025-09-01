@@ -31,8 +31,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesomeIcon from '@react-native-vector-icons/fontawesome';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import { HistoryItemKey } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';

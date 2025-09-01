@@ -2,8 +2,8 @@ import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useMemo } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Fontisto from '@react-native-vector-icons/fontisto';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 

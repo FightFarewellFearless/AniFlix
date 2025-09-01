@@ -14,7 +14,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
 import { HistoryJSON } from '../../../types/historyJSON';

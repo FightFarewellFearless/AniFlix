@@ -23,9 +23,9 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from '@react-native-vector-icons/fontawesome';
+import Fontisto from '@react-native-vector-icons/fontisto';
+import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';

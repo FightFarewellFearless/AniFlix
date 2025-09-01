@@ -1,8 +1,8 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { memo } from 'react';
 import { Appbar, useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import useGlobalStyles from '../../assets/style';
 import { SayaDrawerNavigator } from '../../types/navigation';
 import History from './Saya/History';

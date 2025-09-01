@@ -16,7 +16,7 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../assets/style';
 import { RootStackNavigator } from '../types/navigation';
 import watchLaterJSON from '../types/watchLaterJSON';
@@ -144,7 +144,7 @@ function MovieDetail(props: Props) {
               {data.title.replace('Subtitle Indonesia', '').trim()}
             </Text>
             <Text style={[globalStyles.text, styles.author]}>
-              <Icon name="building" /> {data.studio}
+              <Icon color={styles.author.color} name="building" /> {data.studio}
             </Text>
             <View style={styles.genreContainer}>
               {data.genres.map(genre => (
@@ -162,23 +162,23 @@ function MovieDetail(props: Props) {
             <View style={styles.additionalInfo}>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="star" /> {data.rating === '' ? '-' : data.rating}
+                  <Icon color={styles.additionalInfoText.color} name="star" /> {data.rating === '' ? '-' : data.rating}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="calendar" /> {data.releaseDate}
+                  <Icon color={styles.additionalInfoText.color} name="calendar" /> {data.releaseDate}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon name="refresh" /> {data.updateDate}
+                  <Icon color={styles.additionalInfoText.color} name="refresh" /> {data.updateDate}
                 </Text>
               </Surface>
               {hasMultipleEpisodes && (
                 <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                   <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon name="list" /> {data.episodeList.length} Episode
+                    <Icon color={styles.additionalInfoText.color} name="list" /> {data.episodeList.length} Episode
                   </Text>
                 </Surface>
               )}
@@ -374,7 +374,7 @@ function MovieDetail(props: Props) {
               {isLastWatched && (
                 <View style={styles.lastWatchedContainer}>
                   <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
-                  <Icon name="film" size={16} style={styles.lastWatchedIcon} />
+                  <Icon name="film" size={16} color={styles.lastWatchedIcon.color} />
                 </View>
               )}
             </View>

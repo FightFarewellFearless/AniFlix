@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import { Appbar } from 'react-native-paper';
-import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcon from '@react-native-vector-icons/material-design-icons';
 import { UtilsStackNavigator } from '../../types/navigation';
 import About from './Utilitas/About';
 import Changelog from './Utilitas/Changelog';

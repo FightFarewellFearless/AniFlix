@@ -15,8 +15,8 @@ import {
   View,
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialIcon from '@react-native-vector-icons/material-icons';
 import useGlobalStyles from '../../../assets/style';
 
 interface SearchResult {

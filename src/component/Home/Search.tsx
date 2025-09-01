@@ -21,7 +21,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { Searchbar, SegmentedButtons, useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';

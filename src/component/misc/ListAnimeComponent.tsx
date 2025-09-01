@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -125,6 +125,7 @@ export function ListAnimeComponent(
         <View style={styles.animeReleaseDayContainer}>
           <Text style={styles.animeReleaseDay}>
             <Icon
+              color={styles.animeReleaseDay.color}
               name={
                 props.type === 'movie' ? 'check' : props.type === 'comics' ? 'book' : 'calendar'
               }

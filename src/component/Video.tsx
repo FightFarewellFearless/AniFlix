@@ -37,8 +37,8 @@ import ReAnimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { runOnJS } from 'react-native-worklets';
 import url from 'url';
 import { TouchableOpacity } from './misc/TouchableOpacityRNGH';
@@ -387,12 +387,11 @@ function Video(props: Props) {
     } else {
       iconName += '0';
     }
+    type BattNumber = '0' | '1' | '2' | '3' | '4'
     return (
       <Icon
-        name={iconName}
-        style={{
-          color: iconName === 'battery-0' ? 'red' : darkText,
-        }}
+        name={iconName as `battery-${BattNumber}`}
+        color={iconName === 'battery-0' ? 'red' : darkText}
       />
     );
   }, [batteryLevel]);
@@ -949,7 +948,7 @@ function Video(props: Props) {
                   {animeDetail?.status}
                 </Text>
                 <Text style={[{ color: lightText }, styles.releaseYear]}>
-                  <Icon name="calendar" color={lightText} /> {animeDetail?.releaseYear}
+                  <Icon name="calendar" color={styles.releaseYear.color} /> {animeDetail?.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
                   <Icon name="star" color="black" /> {animeDetail?.rating}
@@ -1111,7 +1110,7 @@ function LoadingModal({
             onPress={cancelLoading}
             style={{ position: 'absolute', top: 5, right: 5 }} //rngh
           >
-            <Icon name="close" size={28} style={{ color: 'red' }} />
+            <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
           <ActivityIndicator size={'large'} />
           <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>

@@ -21,7 +21,7 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Icons from 'react-native-vector-icons/MaterialIcons';
+import Icons from '@react-native-vector-icons/material-icons';
 import { runOnJS } from 'react-native-worklets';
 import { useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';

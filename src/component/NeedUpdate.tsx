@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import Markdown from 'react-native-marked';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from '@react-native-vector-icons/fontawesome5';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';

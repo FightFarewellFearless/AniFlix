@@ -40,7 +40,7 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import MaterialIcon from '@react-native-vector-icons/material-icons';
 import { runOnJS } from 'react-native-worklets';
 import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';

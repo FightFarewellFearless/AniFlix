@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/Entypo';
+import Icon from '@react-native-vector-icons/entypo';
 import { RootStackNavigator } from '../types/navigation';
 import DialogManager from '../utils/dialogManager';
 import { JoinDiscord } from './Loading Screen/Connect';

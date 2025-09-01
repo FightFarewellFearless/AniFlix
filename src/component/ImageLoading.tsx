@@ -2,7 +2,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { Image, ImageProps } from 'expo-image';
 import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from '@react-native-vector-icons/fontawesome';
 import URL from 'url';
 import AnimeLocal from '../utils/animeLocalAPI';
 import LoadingIndicator from './misc/LoadingIndicator';
