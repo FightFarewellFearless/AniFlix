@@ -3918,7 +3918,7 @@ __metadata:
     expo: ^54.0.0-preview.11
     expo-document-picker: ~14.0.4
     expo-image: ~3.0.4
-    expo-linear-gradient: ~15.0.4
+    expo-linear-gradient: ~15.0.6
     expo-splash-screen: ~31.0.6
     expo-sqlite: ~16.0.5
     expo-updates: ~29.0.6
@@ -6384,14 +6384,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-linear-gradient@npm:~15.0.4":
-  version: 15.0.4
-  resolution: "expo-linear-gradient@npm:15.0.4"
+"expo-linear-gradient@npm:~15.0.6":
+  version: 15.0.6
+  resolution: "expo-linear-gradient@npm:15.0.6"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 7d67286396972ecf597e36f548b5a1617ae78cb719e06a9e55a21922157ee7da41f024ab07f3ec565c43df4d8f689da2a5625fa017e25d2f2ba58ff83d096e7e
+  checksum: 28c2c31761b5412f413ca0fee77509e34fc2959ae8c6931b0556dbd45bab3b3ef35afda54a1ffa9e805865ed4e373d6884b71643268e2356999b99d7b034cc11
   languageName: node
   linkType: hard
 
