@@ -33,7 +33,7 @@
     "buffer": "^6.0.3",
     "cheerio": "1.0.0-rc.12",
     "expo": "^54.0.0-preview.11",
-    "expo-document-picker": "~14.0.4",
+    "expo-document-picker": "~14.0.6",
     "expo-image": "~3.0.4",
     "expo-linear-gradient": "~15.0.4",
     "expo-splash-screen": "~31.0.6",
