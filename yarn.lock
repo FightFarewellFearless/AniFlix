@@ -2547,15 +2547,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@legendapp/list@npm:2.0.0-beta.5":
-  version: 2.0.0-beta.5
-  resolution: "@legendapp/list@npm:2.0.0-beta.5"
+"@legendapp/list@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@legendapp/list@npm:2.0.0"
   dependencies:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 1fc4b65cd9307c0a9a852d41a04794b1d5dad32a829b70c23c7cab19433e68b3be5f0c53f450ace27ec37b5c5d0dcc57ed858f3d678ea94d078b049fcb649753
+  checksum: 43ea0faeb68a35ff817cb660af9646842c53a3adf82388cb13840076106c22f7d43a57848c0072beb9d8864828abb8bfd0e6877e852375b127f30ab0dfe42e36
   languageName: node
   linkType: hard
 
@@ -3880,7 +3880,7 @@ __metadata:
     "@babel/runtime": ^7.27.0
     "@bottom-tabs/react-navigation": ^0.11.1
     "@domir/react-native-measure-text": ^0.1.8
-    "@legendapp/list": 2.0.0-beta.5
+    "@legendapp/list": 2.0.0
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@react-native-community/cli": ^20.0.1
     "@react-native-community/cli-platform-android": ^20.0.1
