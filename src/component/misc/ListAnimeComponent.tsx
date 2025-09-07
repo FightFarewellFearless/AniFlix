@@ -121,8 +121,11 @@ export function ListAnimeComponent(
         style={[
           styles.infoContainer,
           {
-            maxWidth:
-              props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
+            maxWidth: props.fromSeeMore
+              ? undefined
+              : props.type === 'comics'
+                ? styles.listBackground.height
+                : styles.listBackground.width,
           },
         ]}>
         <View style={styles.animeReleaseDayContainer}>
@@ -142,8 +145,9 @@ export function ListAnimeComponent(
           style={[
             styles.animeDescription,
             {
-              maxWidth:
-                props.type === 'comics'
+              maxWidth: props.fromSeeMore
+                ? undefined
+                : props.type === 'comics'
                   ? styles.listBackground.height
                   : styles.listBackground.width,
             },
