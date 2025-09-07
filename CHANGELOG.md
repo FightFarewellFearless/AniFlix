@@ -1,3 +1,8 @@
+# v1.1.0_JS-1 (07-September-2025)
+
+## Diperbaiki
+- Error pada beberapa anime
+
 # v1.1.0 (07-September-2025)
 
 ## Ditambahkan
