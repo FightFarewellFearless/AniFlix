@@ -137,15 +137,18 @@ export default function ComicsDetail(props: Props) {
               </View>
               <View style={styles.chapterDetailsContainer}>
                 <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                  <Icon color={styles.chapterDetailText.color} name="calendar" size={12} /> {item.releaseDate}
+                  <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
+                  {item.releaseDate}
                 </Text>
                 <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                  <Icon color={styles.chapterDetailText.color} name="eye" size={12} /> {item.views}x dilihat
+                  <Icon color={styles.chapterDetailText.color} name="eye" size={12} /> {item.views}x
+                  dilihat
                 </Text>
                 {isLastReaded && (
                   <Text
                     style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
-                    <Icon color={styles.lastReadedText.color} name="book" size={12} /> Terakhir dibaca
+                    <Icon color={styles.lastReadedText.color} name="book" size={12} /> Terakhir
+                    dibaca
                   </Text>
                 )}
               </View>
@@ -231,12 +234,14 @@ export default function ComicsDetail(props: Props) {
                 <View style={styles.additionalInfo}>
                   <Surface style={styles.additionalInfoTextSurface}>
                     <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="check-circle" /> {data.minAge}
+                      <Icon color={styles.additionalInfoText.color} name="check-circle" />{' '}
+                      {data.minAge}
                     </Text>
                   </Surface>
                   <Surface style={styles.additionalInfoTextSurface}>
                     <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="map-signs" /> {data.readingDirection}
+                      <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
+                      {data.readingDirection}
                     </Text>
                   </Surface>
                   <Surface style={styles.additionalInfoTextSurface}>

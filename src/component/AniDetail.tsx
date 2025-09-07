@@ -196,22 +196,26 @@ function AniDetail(props: Props) {
             <View style={styles.additionalInfo}>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="star" /> {data.rating === '' ? '-' : data.rating}
+                  <Icon color={styles.additionalInfoText.color} name="star" />{' '}
+                  {data.rating === '' ? '-' : data.rating}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="calendar" /> {data.releaseYear}
+                  <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
+                  {data.releaseYear}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="play-circle" /> {data.minutesPerEp}
+                  <Icon color={styles.additionalInfoText.color} name="play-circle" />{' '}
+                  {data.minutesPerEp}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="eye" /> {data.episodeList.length + '/' + data.epsTotal + ' Episode'}
+                  <Icon color={styles.additionalInfoText.color} name="eye" />{' '}
+                  {data.episodeList.length + '/' + data.epsTotal + ' Episode'}
                 </Text>
               </Surface>
             </View>

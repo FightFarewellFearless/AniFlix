@@ -93,7 +93,15 @@ function About() {
   );
 }
 
-function Button({ title, onPress, icon }: { title: string; onPress: () => void; icon?: FontAwesomeIconName }) {
+function Button({
+  title,
+  onPress,
+  icon,
+}: {
+  title: string;
+  onPress: () => void;
+  icon?: FontAwesomeIconName;
+}) {
   const styles = useStyles();
   const theme = useTheme();
   return (

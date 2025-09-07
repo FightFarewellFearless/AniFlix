@@ -169,7 +169,12 @@ function NeedUpdate(props: Props) {
         <Markdown value={props.route.params.changelog} />
         {!isDownloadStart ? (
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
-            <Icon name="file-download" color={styles.buttonText.color} size={20} />
+            <Icon
+              name="file-download"
+              iconStyle="solid"
+              color={styles.buttonText.color}
+              size={20}
+            />
             <Text style={[globalStyles.text, styles.buttonText]}>Download update</Text>
           </TouchableOpacity>
         ) : isProgress100 === true ? (
@@ -177,11 +182,16 @@ function NeedUpdate(props: Props) {
             <TouchableOpacity
               style={[styles.download, { backgroundColor: '#1d1d66' }, { flex: 1 }]}
               onPress={installUpdate}>
-              <Icon name="download" color={styles.buttonText.color} size={20} />
+              <Icon name="download" color={styles.buttonText.color} size={20} iconStyle="solid" />
               <Text style={[globalStyles.text, styles.buttonText]}>Instal update</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.download, { flex: 1 }]} onPress={downloadUpdate}>
-              <Icon name="file-download" color={styles.buttonText.color} size={20} />
+              <Icon
+                name="file-download"
+                color={styles.buttonText.color}
+                size={20}
+                iconStyle="solid"
+              />
               <Text style={[globalStyles.text, styles.buttonText, { textAlign: 'center' }]}>
                 Download ulang update
               </Text>

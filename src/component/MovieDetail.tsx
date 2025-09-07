@@ -162,12 +162,14 @@ function MovieDetail(props: Props) {
             <View style={styles.additionalInfo}>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="star" /> {data.rating === '' ? '-' : data.rating}
+                  <Icon color={styles.additionalInfoText.color} name="star" />{' '}
+                  {data.rating === '' ? '-' : data.rating}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                  <Icon color={styles.additionalInfoText.color} name="calendar" /> {data.releaseDate}
+                  <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
+                  {data.releaseDate}
                 </Text>
               </Surface>
               <Surface elevation={3} style={styles.additionalInfoTextSurface}>
@@ -178,7 +180,8 @@ function MovieDetail(props: Props) {
               {hasMultipleEpisodes && (
                 <Surface elevation={3} style={styles.additionalInfoTextSurface}>
                   <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon color={styles.additionalInfoText.color} name="list" /> {data.episodeList.length} Episode
+                    <Icon color={styles.additionalInfoText.color} name="list" />{' '}
+                    {data.episodeList.length} Episode
                   </Text>
                 </Surface>
               )}
