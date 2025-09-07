@@ -1,5 +1,5 @@
-import { LegendList } from '@legendapp/list';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList } from '@shopify/flash-list';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -45,11 +45,11 @@ function SeeMore(props: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <LegendList
+      <FlashList
         renderScrollComponent={RenderScrollComponent}
-        estimatedItemSize={270}
-        maintainVisibleContentPosition={false}
-        recycleItems
+        // estimatedItemSize={270}
+        // maintainVisibleContentPosition={false}
+        // recycleItems
         contentContainerStyle={{
           paddingLeft: insets.left,
           paddingRight: insets.right,
