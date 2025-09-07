@@ -368,7 +368,7 @@ function Setting(_props: Props) {
     <View style={{ flex: 1 }}>
       <Modal transparent visible={modalVisible}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { width: '95%' }]}>
             <LoadingIndicator size={16} />
             <ReText
               style={[globalStyles.text, { textAlign: 'center', fontWeight: 'bold' }]}
