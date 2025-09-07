@@ -51,7 +51,7 @@ type BackupJSON = Omit<typeof defaultDatabaseValue, 'historyKeyCollectionsOrder'
 interface SettingsData {
   title: string;
   description: string;
-  icon: ReactElement<Icon>;
+  icon: ReactElement<typeof Icon>;
   rightComponent?: JSX.Element;
   handler: () => any;
 }
