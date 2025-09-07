@@ -1,4 +1,6 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
@@ -28,8 +30,8 @@ import DeviceInfo from 'react-native-device-info';
 import { SystemBars } from 'react-native-edge-to-edge';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
-  StretchInX,
-  StretchOutX,
+  FadeInUp,
+  FadeOutDown,
   useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
@@ -37,8 +39,6 @@ import ReAnimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import Icon from '@react-native-vector-icons/fontawesome';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { runOnJS } from 'react-native-worklets';
 import url from 'url';
 import { TouchableOpacity } from './misc/TouchableOpacityRNGH';
@@ -387,7 +387,7 @@ function Video(props: Props) {
     } else {
       iconName += '0';
     }
-    type BattNumber = '0' | '1' | '2' | '3' | '4'
+    type BattNumber = '0' | '1' | '2' | '3' | '4';
     return (
       <Icon
         name={iconName as `battery-${BattNumber}`}
@@ -948,7 +948,8 @@ function Video(props: Props) {
                   {animeDetail?.status}
                 </Text>
                 <Text style={[{ color: lightText }, styles.releaseYear]}>
-                  <Icon name="calendar" color={styles.releaseYear.color} /> {animeDetail?.releaseYear}
+                  <Icon name="calendar" color={styles.releaseYear.color} />{' '}
+                  {animeDetail?.releaseYear}
                 </Text>
                 <Text style={[globalStyles.text, styles.rating]}>
                   <Icon name="star" color="black" /> {animeDetail?.rating}
@@ -1099,8 +1100,8 @@ function LoadingModal({
     }
   }, [isLoading, setIsPaused]);
 
-  const entering = useMemo(() => StretchInX.duration(300), []);
-  const exiting = useMemo(() => StretchOutX.duration(300), []);
+  const entering = useMemo(() => FadeInUp.duration(300), []);
+  const exiting = useMemo(() => FadeOutDown.duration(300), []);
 
   return (
     isLoading && (
@@ -1229,6 +1230,8 @@ function useStyles() {
           flexWrap: 'wrap',
           marginVertical: 10,
           gap: 8,
+          alignContent: 'center',
+          alignItems: 'center',
         },
         genre: {
           backgroundColor: colorScheme === 'dark' ? '#333333' : '#F0F0F0',

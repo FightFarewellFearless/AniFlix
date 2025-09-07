@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/fontawesome';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ImageBackground } from 'expo-image';
@@ -21,18 +22,17 @@ import {
   useColorScheme,
 } from 'react-native';
 import { Searchbar, SegmentedButtons, useTheme } from 'react-native-paper';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 
 import Reanimated, {
+  FadeInDown,
   FadeInRight,
   FadeInUp,
   FadeOutDown,
-  SlideInDown,
-  SlideOutDown,
+  FadeOutUp,
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
@@ -338,7 +338,7 @@ function Search(props: Props) {
         </>
       )}
       {loading && (
-        <Reanimated.View entering={SlideInDown} exiting={SlideOutDown} style={styles.loadingView}>
+        <Reanimated.View entering={FadeInDown} exiting={FadeOutUp} style={styles.loadingView}>
           <Text style={[globalStyles.text, styles.loadingText]}>Memuat info...</Text>
         </Reanimated.View>
       )}
@@ -442,7 +442,7 @@ function HistoryList({
         }}>
         <View
           style={{ justifyContent: 'center', alignItems: 'center', flex: 1, flexDirection: 'row' }}>
-          <Icon name="history" size={20} style={{ color: theme.colors.tertiary }} />
+          <Icon name="history" size={20} color={theme.colors.tertiary} />
           <Text style={[globalStyles.text, { fontWeight: 'bold', flex: 1, textAlign: 'center' }]}>
             {item}
           </Text>
@@ -459,7 +459,7 @@ function HistoryList({
               ),
             );
           }}>
-          <Icon name="times" size={25} style={{ color: '#ff0f0f' }} />
+          <Icon name="times" size={25} color="#ff0f0f" />
         </TouchableOpacityReactNative>
       </TouchableOpacityReactNative>
     </View>
@@ -521,13 +521,13 @@ function SearchList({
         )}
       </ImageLoading>
 
-      <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={10} style={{ flex: 1 }}>
-        <DarkOverlay transparent={0.7} />
+      <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={5} style={{ flex: 1 }}>
+        <DarkOverlay transparent={0.8} />
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
             {isAnime(z) && (
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                <Icon name="star" style={{ color: 'gold' }} /> {z.rating}
+                <Icon name="star" color="gold" /> {z.rating}
               </Text>
             )}
           </View>
@@ -580,7 +580,8 @@ function SearchList({
                   },
                 ]}
                 numberOfLines={1}>
-                <Icon name="tags" /> {isAnime(z) ? z.genres.join(', ') : z.concept}
+                <Icon name="tags" color={styles.animeSearchListDetailText.color} />{' '}
+                {isAnime(z) ? z.genres.join(', ') : z.concept}
               </Text>
             </View>
           )}
