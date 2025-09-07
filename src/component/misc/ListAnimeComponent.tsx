@@ -28,7 +28,7 @@ export function ListAnimeComponent(
       | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
       | NativeBottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | NativeBottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
-  } & { gap?: boolean },
+  } & { gap?: boolean; fromSeeMore?: boolean },
 ) {
   const styles = useStyles();
   const z = props.newAnimeData;
@@ -106,8 +106,11 @@ export function ListAnimeComponent(
         style={[
           styles.animeTitleContainer,
           {
-            maxWidth:
-              props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
+            maxWidth: props.fromSeeMore
+              ? undefined
+              : props.type === 'comics'
+                ? styles.listBackground.height
+                : styles.listBackground.width,
           },
         ]}>
         <Text numberOfLines={1} style={styles.animeTitle}>

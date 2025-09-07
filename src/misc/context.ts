@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, createContext } from 'react';
 import { EpisodeBaruHome } from '../types/anime';
 import { Movies } from '../utils/animeMovie';
+import { LatestKomikuRelease } from '../utils/komiku';
 
 export const EpisodeBaruHomeContext = createContext<{
   paramsState?: EpisodeBaruHome;
@@ -10,4 +11,9 @@ export const EpisodeBaruHomeContext = createContext<{
 export const MovieListHomeContext = createContext<{
   paramsState?: Movies[];
   setParamsState?: Dispatch<SetStateAction<Movies[]>>;
+}>({ paramsState: undefined, setParamsState: undefined });
+
+export const ComicsListContext = createContext<{
+  paramsState?: LatestKomikuRelease[];
+  setParamsState?: Dispatch<SetStateAction<LatestKomikuRelease[]>>;
 }>({ paramsState: undefined, setParamsState: undefined });

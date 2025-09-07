@@ -45,7 +45,11 @@ import { runOnJS } from 'react-native-worklets';
 import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
-import { EpisodeBaruHomeContext, MovieListHomeContext } from '../../misc/context';
+import {
+  ComicsListContext,
+  EpisodeBaruHomeContext,
+  MovieListHomeContext,
+} from '../../misc/context';
 import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
@@ -390,17 +394,20 @@ function ComicListUNMEMO() {
   const [isError, setIsError] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackNavigator, 'AnimeDetail'>>();
 
-  const [data, setData] = useState<LatestKomikuRelease[]>([]);
+  const { paramsState: data, setParamsState: setData } = useContext(ComicsListContext);
 
   useEffect(() => {
     queueMicrotask(() => {
       getLatestKomikuReleases()
         .then(z => {
-          setData(z);
+          setData?.(z);
         })
         .catch(() => setIsError(true));
     });
-  }, []);
+    return () => {
+      setData?.([]);
+    };
+  }, [setData]);
 
   const renderComics = useCallback(
     ({ item }: LegendListRenderItemProps<LatestKomikuRelease>) => (
@@ -419,15 +426,15 @@ function ComicListUNMEMO() {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Komik Terbaru</Text>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={styles.seeMoreButton}
           disabled={data?.length === 0}
           onPress={() => {
-            navigation.dispatch(StackActions.push('SeeMore', { type: 'MovieList' }));
+            navigation.dispatch(StackActions.push('SeeMore', { type: 'ComicsList' }));
           }}>
           <Text style={styles.seeMoreText}>Lihat Semua</Text>
           <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
 
       {isError && (
@@ -439,13 +446,13 @@ function ComicListUNMEMO() {
         </View>
       )}
 
-      {data?.length !== 0 ? (
+      {data && data?.length !== 0 ? (
         <LegendList
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 6 }}
           recycleItems
           horizontal
-          data={data.slice(0, 25)}
+          data={data.slice(0, 10)}
           renderItem={renderComics}
           keyExtractor={z => z.title}
           extraData={styles}

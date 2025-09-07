@@ -73,7 +73,7 @@ type RootStackNavigator = {
     message?: string;
   };
   SeeMore: {
-    type: 'AnimeList' | 'MovieList';
+    type: 'AnimeList' | 'MovieList' | 'ComicsList';
   };
   ErrorScreen: { error: Error };
 };
