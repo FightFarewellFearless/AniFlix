@@ -7,14 +7,7 @@ import {
   useRecyclingState,
 } from '@shopify/flash-list';
 import moment from 'moment';
-import React, {
-  startTransition,
-  useCallback,
-  useDeferredValue,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -225,7 +218,7 @@ function History(props: Props) {
   );
 }
 
-function RenderList({
+const RenderList = memo(function RenderList({
   keyItem,
   styles,
   globalStyles,
@@ -251,9 +244,7 @@ function RenderList({
         if (currentItem.current !== keyItem) return;
         const historyDb = JSON.parse(value ?? '{}');
         HistoryDatabaseCache.set(keyItem, historyDb);
-        // startTransition(() => {
-          setItem(historyDb);
-        // });
+        setItem(historyDb);
       });
     }, [keyItem, setItem]),
   );
@@ -393,7 +384,7 @@ function RenderList({
       </View>
     </TouchableOpacity>
   );
-}
+});
 
 function formatTimeFromSeconds(seconds: number) {
   const duration = moment.duration(seconds, 'seconds');
@@ -532,4 +523,4 @@ function useStyles() {
   );
 }
 
-export default React.memo(History);
+export default memo(History);
