@@ -1,3 +1,20 @@
+# v1.1.0 (07-September-2025)
+
+## Ditambahkan
+- Lihat semua komik terbaru
+## Dihapus
+- Migrasi database lama
+## Ditingkatkan
+- Tampilan video player
+- Performa animasi dan scrolling (pada History)
+## Diperbaiki
+- Error saat ingin menonton anime
+## Perubahan lainnya
+- Upgrade react-native ke versi 0.81 beserta Expo SDK 54 beta
+- Menghilangkan scroll indicator di halaman Beranda detail komik,anime, dan movie
+- Mengaktifkan react-native experimental release level agar animasi semakin mulus
+- Beberapa perubahan kecil...
+
 # v1.0.2_JS-10 (24-Agustus-2025)
 
 ## Ditingkatkan
