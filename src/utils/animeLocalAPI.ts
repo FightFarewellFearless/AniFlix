@@ -391,21 +391,33 @@ const getStreamLink = async (
 
     const ondesuORupdesu = data.split("sources: [{'file':'")[1];
     if (ondesuORupdesu === undefined) {
-      //odstream
-      return data.split('{id:"playerjs", file:"')[1].split('"')[0];
+      if (data.includes('{id:"playerjs", file:"')) {
+        //odstream
+        return data.split('{id:"playerjs", file:"')[1].split('"')[0];
+      } else if (data.includes('blogger.com/video.g')) {
+        return await getBloggerVideo(
+          'https://www.blogger.com/video.g?' +
+            data.split('src="https://www.blogger.com/video.g?')[1].split('"')[0],
+        );
+      } else {
+        throw new Error(
+          'Gagal mendapatkan link streaming, tidak ada data yang cocok, ' +
+            'jika terus berlanjut segera lapor developer (lewat discord atau github) agar cepat di perbaiki',
+        );
+      }
     }
     return ondesuORupdesu.split("',")[0];
   }
 };
 
-// async function getBloggerVideo(url: string) {
-//     const data = await axios.get(url, {
-//         headers: {
-//             'User-Agent': deviceUserAgent,
-//         }
-//     });
-//     return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
-// }
+async function getBloggerVideo(url: string) {
+  const data = await axios.get(url, {
+    headers: {
+      'User-Agent': deviceUserAgent,
+    },
+  });
+  return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+}
 
 const listAnime = async (
   signal?: AbortSignal,
