@@ -1,3 +1,5 @@
+import FontAwesomeIcon from '@react-native-vector-icons/fontawesome';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import {
@@ -24,8 +26,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import FontAwesomeIcon from '@react-native-vector-icons/fontawesome';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import { HistoryItemKey } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
@@ -33,7 +33,6 @@ import { SayaDrawerNavigator } from '../../../types/navigation';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import ImageLoading from '../../ImageLoading';
-import Skeleton from '../../misc/Skeleton';
 
 export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
 
@@ -249,34 +248,27 @@ const RenderList = memo(function RenderList({
     }, [keyItem, setItem]),
   );
 
-  if (!item) {
-    return (
-      <View style={styles.listContainerButton}>
-        <Skeleton height={styles.listImage.height} width={styles.listImage.width} />
-      </View>
-    );
-  }
-
   return (
     <TouchableOpacity
       // entering={FadeInRight}
       // exiting={FadeOutLeft}
       // layout={LinearTransition}
       style={styles.listContainerButton}
+      disabled={!item}
       onPress={() => {
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
-            title: item.title,
-            link: item.link,
+            title: item?.title,
+            link: item?.link,
             historyData: item,
-            type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
+            type: item?.isMovie ? 'movie' : item?.isComics ? 'comics' : 'anime',
           }),
         );
       }}>
       <ImageLoading
         contentFit="fill"
-        source={{ uri: item.thumbnailUrl }}
-        recyclingKey={item.thumbnailUrl}
+        source={{ uri: item?.thumbnailUrl }}
+        recyclingKey={item?.thumbnailUrl}
         style={styles.listImage}
       />
 
@@ -285,20 +277,21 @@ const RenderList = memo(function RenderList({
           <View style={styles.listWatchTime}>
             <Text style={[globalStyles.text, styles.listDateText]}>
               {moment
-                .duration(moment(Date.now()).diff(item.date, 'seconds'), 'seconds')
+                .duration(moment(Date.now()).diff(item?.date, 'seconds'), 'seconds')
                 .humanize() + ' '}
-              yang lalu pukul {moment(item.date).format('HH:mm')}
+              yang lalu pukul {moment(item?.date).format('HH:mm')}
             </Text>
           </View>
 
           <View style={styles.deleteContainer}>
             <TouchableOpacity
+              disabled={!item}
               style={styles.deleteButton}
               hitSlop={5}
               onPress={() => {
                 DialogManager.alert(
                   'Yakin?',
-                  'Yakin kamu ingin menghapus "' + item.title?.trim() + '" dari histori?',
+                  'Yakin kamu ingin menghapus "' + item?.title?.trim() + '" dari histori?',
                   [
                     {
                       text: 'Tidak',
@@ -316,13 +309,13 @@ const RenderList = memo(function RenderList({
           </View>
         </View>
         <View style={styles.listTitle}>
-          <Text style={[{ flexShrink: 1 }, globalStyles.text]}>{item.title}</Text>
+          <Text style={[{ flexShrink: 1 }, globalStyles.text]}>{item?.title}</Text>
         </View>
 
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.listEpisodeAndPart}>
             <Text style={styles.listEpisode}>
-              {item.isComics && (
+              {item?.isComics && (
                 <View
                   style={{
                     backgroundColor: '#00586e',
@@ -339,7 +332,7 @@ const RenderList = memo(function RenderList({
                   </Text>
                 </View>
               )}{' '}
-              {item.isMovie && (
+              {item?.isMovie && (
                 <View
                   style={{
                     backgroundColor: '#ff7300',
@@ -356,27 +349,27 @@ const RenderList = memo(function RenderList({
                   </Text>
                 </View>
               )}{' '}
-              {item.episode}
+              {item?.episode}
             </Text>
             {/* this commented code is keep for historical reason (nostalgic lmao) */}
-            {/* {item.part !== undefined && (
+            {/* {item?.part !== undefined && (
                   <Text style={styles.listPart}>
-                    {' Part ' + (item.part + 1)}
+                    {' Part ' + (item?.part + 1)}
                   </Text>
                 )} */}
           </View>
 
-          {item.lastDuration !== undefined && (
+          {item?.lastDuration !== undefined && (
             <View style={styles.lastDuration}>
               <Text style={[globalStyles.text, styles.lastDurationText]}>
                 <FontAwesomeIcon
-                  name={item.isComics ? 'book' : 'clock-o'}
+                  name={item?.isComics ? 'book' : 'clock-o'}
                   size={16}
                   color={globalStyles.text.color}
                 />{' '}
-                {item.isComics
-                  ? 'Halaman ' + (item.lastDuration + 1)
-                  : formatTimeFromSeconds(item.lastDuration)}
+                {item?.isComics
+                  ? 'Halaman ' + (item?.lastDuration + 1)
+                  : formatTimeFromSeconds(item?.lastDuration)}
               </Text>
             </View>
           )}
