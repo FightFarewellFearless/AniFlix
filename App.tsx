@@ -24,7 +24,6 @@ import {
 } from 'react-native-paper';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { enableFreeze, enableScreens } from 'react-native-screens';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { MDDark, MDLight } from './src/assets/MaterialTheme';
 import useGlobalStyles from './src/assets/style';
@@ -78,8 +77,6 @@ const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
 const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
 
 SplashScreen.preventAutoHideAsync();
-enableFreeze(true);
-enableScreens(true);
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
 

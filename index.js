@@ -3,12 +3,11 @@
  */
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
-import { Text } from 'react-native';
+import { enableFreeze, enableScreens } from 'react-native-screens';
+enableFreeze(true);
+enableScreens(true);
 import App from './App';
 
 require('moment/locale/id');
-
-Text.defaultProps = Text.defaultProps || {};
-Text.defaultProps.allowFontScaling = false;
 
 registerRootComponent(App);
