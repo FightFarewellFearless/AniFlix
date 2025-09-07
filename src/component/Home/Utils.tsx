@@ -1,16 +1,16 @@
+import MaterialCommunityIcon from '@react-native-vector-icons/material-design-icons';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import { memo, useMemo } from 'react';
 import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableNativeFeedback,
   View,
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
-import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import { Appbar } from 'react-native-paper';
-import MaterialCommunityIcon from '@react-native-vector-icons/material-design-icons';
 import { UtilsStackNavigator } from '../../types/navigation';
 import About from './Utilitas/About';
 import Changelog from './Utilitas/Changelog';
@@ -110,21 +110,26 @@ const Screens = [
 function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();
   return (
-    <ScrollView>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 4 }}>
-        {Screens.map((screen, index) => (
-          <TouchableNativeFeedback
-            key={index}
-            onPress={() => props.navigation.navigate(screen.screen)}
-            background={TouchableNativeFeedback.Ripple('#ffffff', false)}>
-            <View style={styles.buttonContainer}>
-              <MaterialCommunityIcon name={screen.icon} size={30} color={screen.color} />
-              <Text style={styles.titleText}>{screen.title}</Text>
-              <Text style={styles.descText}>{screen.desc}</Text>
-            </View>
-          </TouchableNativeFeedback>
-        ))}
-      </View>
+    <ScrollView
+      contentContainerStyle={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: 4,
+      }}>
+      {Screens.map((screen, index) => (
+        <TouchableNativeFeedback
+          key={index}
+          onPress={() => props.navigation.navigate(screen.screen)}
+          useForeground
+          background={TouchableNativeFeedback.Ripple('#ffffff', false)}>
+          <View style={styles.buttonContainer}>
+            <MaterialCommunityIcon name={screen.icon} size={30} color={screen.color} />
+            <Text style={styles.titleText}>{screen.title}</Text>
+            <Text style={styles.descText}>{screen.desc}</Text>
+          </View>
+        </TouchableNativeFeedback>
+      ))}
     </ScrollView>
   );
 }
