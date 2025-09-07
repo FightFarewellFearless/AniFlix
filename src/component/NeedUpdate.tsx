@@ -43,6 +43,19 @@ function NeedUpdate(props: Props) {
   const [netSpeed, setNetSpeed] = useState('0 MB/s');
   const [progressPercent, setProgressPercent] = useState(0); // new state
 
+  const OTAUpdateStatus = Updates.useUpdates();
+
+  useEffect(() => {
+    if (!props.route.params.nativeUpdate && OTAUpdateStatus.isDownloading) {
+      downloadProgress.set((OTAUpdateStatus.downloadProgress ?? 0) * 100);
+    }
+  }, [
+    OTAUpdateStatus.downloadProgress,
+    OTAUpdateStatus.isDownloading,
+    downloadProgress,
+    props.route.params.nativeUpdate,
+  ]);
+
   useAnimatedReaction(
     () => downloadProgress.get(),
     value => {
