@@ -394,11 +394,8 @@ const getStreamLink = async (
       if (data.includes('{id:"playerjs", file:"')) {
         //odstream
         return data.split('{id:"playerjs", file:"')[1].split('"')[0];
-      } else if (data.includes('blogger.com/video.g')) {
-        return await getBloggerVideo(
-          'https://www.blogger.com/video.g?' +
-            data.split('src="https://www.blogger.com/video.g?')[1].split('"')[0],
-        );
+      } else if (data.includes('blogger.com/video.g') && data.includes('iframe')) {
+        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '');
       } else {
         throw new Error(
           'Gagal mendapatkan link streaming, tidak ada data yang cocok, ' +
