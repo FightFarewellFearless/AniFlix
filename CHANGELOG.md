@@ -1,3 +1,9 @@
+# v1.1.0_JS-2 (08-September-2025)
+
+## Diperbaiki
+- Error pada beberapa resolusi anime
+- Progress bar pada OTA update
+
 # v1.1.0_JS-1 (07-September-2025)
 
 ## Diperbaiki
