@@ -47,7 +47,9 @@ function NeedUpdate(props: Props) {
 
   useEffect(() => {
     if (!props.route.params.nativeUpdate && OTAUpdateStatus.isDownloading) {
-      downloadProgress.set((OTAUpdateStatus.downloadProgress ?? 0) * 100);
+      const percent = (OTAUpdateStatus.downloadProgress ?? 0) * 100;
+      downloadProgress.set(percent);
+      setProgressPercent(Math.floor(percent));
     }
   }, [
     OTAUpdateStatus.downloadProgress,
