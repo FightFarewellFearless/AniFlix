@@ -36,7 +36,7 @@
     "expo-image": "~3.0.7",
     "expo-linear-gradient": "~15.0.6",
     "expo-splash-screen": "~31.0.8",
-    "expo-sqlite": "~16.0.7",
+    "expo-sqlite": "~16.0.8",
     "expo-updates": "~29.0.8",
     "expo-video": "~3.0.10",
     "moment": "^2.30.1",

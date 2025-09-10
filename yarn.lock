@@ -3919,7 +3919,7 @@ __metadata:
     expo-image: ~3.0.7
     expo-linear-gradient: ~15.0.6
     expo-splash-screen: ~31.0.8
-    expo-sqlite: ~16.0.7
+    expo-sqlite: ~16.0.8
     expo-updates: ~29.0.8
     expo-video: ~3.0.10
     jest: ^29.6.3
@@ -6445,16 +6445,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-sqlite@npm:~16.0.7":
-  version: 16.0.7
-  resolution: "expo-sqlite@npm:16.0.7"
+"expo-sqlite@npm:~16.0.8":
+  version: 16.0.8
+  resolution: "expo-sqlite@npm:16.0.8"
   dependencies:
     await-lock: ^2.2.2
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 513c5c5485dfd2a73784c2fd872935b6b1997e8d340df9b0b90f4969c48afedd8849ccccd5ffe2762fe2f389a0fd561d996aeb7c8a538ee60f184dfb15d976ea
+  checksum: c08c5027866b4ebd5181b9e045163b3944259f7221e3463545d3f21c7b05c891375e2765b81fc1fa04fe872b0187160783225d82b80a21f0742e2a4fb04e8712
   languageName: node
   linkType: hard
 
