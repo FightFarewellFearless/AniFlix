@@ -6,7 +6,6 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
-import com.swmansion.rnscreens.fragment.restoration.RNScreensFragmentFactory
 import android.content.Intent
 import android.content.res.Configuration
 
@@ -22,8 +21,7 @@ class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     SplashScreenManager.registerOnActivity(this)
-    supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
-    super.onCreate(savedInstanceState)
+    super.onCreate(null)
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
