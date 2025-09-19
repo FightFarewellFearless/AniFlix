@@ -284,25 +284,23 @@ const fromUrl = async (
       .split('processData:!0,cache:!0,data:{...e,nonce:window.__x__nonce,action:"')[1]
       .split('"')[0];
 
+    const isValidResolution = (el: Element) =>
+      $(el).text().trim().startsWith('o') ||
+      $(el).text().trim().includes('desu') ||
+      $(el).text().trim().includes('pdrain');
     const mirrorStream = aniDetail.find('div.mirrorstream ul');
     const m360p = mirrorStream
       .filter((i, el) => $(el).hasClass('m360p'))
       .find('a')
-      .filter(
-        (i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'),
-      );
+      .filter((i, el) => isValidResolution(el));
     const m480p = mirrorStream
       .filter((i, el) => $(el).hasClass('m480p'))
       .find('a')
-      .filter(
-        (i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'),
-      );
+      .filter((i, el) => isValidResolution(el));
     const m720p = mirrorStream
       .filter((i, el) => $(el).hasClass('m720p'))
       .find('a')
-      .filter(
-        (i, el) => $(el).text().trim().startsWith('o') || $(el).text().trim().includes('desu'),
-      );
+      .filter((i, el) => isValidResolution(el));
 
     const resolutionRaw: AniStreaming['resolutionRaw'] = [
       ...m360p.toArray().map(el => ({
@@ -406,6 +404,27 @@ const getStreamLink = async (
       }
     }
     return ondesuORupdesu.split("',")[0];
+  } else if (downLink.includes('pixeldrain')) {
+    let err: boolean = false;
+    let errorObj: Error | null = null;
+    const response = await axios
+      .get(downLink, {
+        timeout: 40_000,
+        headers: {
+          'User-Agent': deviceUserAgent,
+        },
+        signal,
+      })
+      .catch(e => {
+        err = true;
+        errorObj = e;
+      });
+    if (err) {
+      throw errorObj;
+    }
+    const data = response!.data;
+    const $ = cheerio.load(data);
+    return $('meta[property="og:video:secure_url"]').attr('content');
   }
 };
 
