@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
 import { JSX, memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
@@ -14,7 +15,6 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
 import { HistoryJSON } from '../../../types/historyJSON';
@@ -24,6 +24,7 @@ import watchLaterJSON from '../../../types/watchLaterJSON';
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import { Buffer } from 'buffer/';
 import * as DocumentPicker from 'expo-document-picker';
+import { AudioMixingMode } from 'expo-video';
 import moment from 'moment';
 import RNFetchBlob from 'react-native-blob-util';
 import { useTheme } from 'react-native-paper';
@@ -65,6 +66,9 @@ function Setting(_props: Props) {
 
   const appTheme = useKeyValueIfFocused('colorScheme');
   const appThemeDropdown = useRef<IDropdownRef>(null);
+
+  const audioMixingMode = useKeyValueIfFocused('audioMixingMode');
+  const AMMDropdown = useRef<IDropdownRef>(null);
 
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const batteryTimeSwitchHandler = useCallback(() => {
@@ -286,14 +290,8 @@ function Setting(_props: Props) {
           valueField={'value'}
           maxHeight={300}
           style={styles.dropdownStyle}
-          containerStyle={{
-            maxWidth: '50%',
-          }}
-          itemTextStyle={{
-            color: globalStyles.text.color,
-            fontSize: 15,
-            textAlign: 'center',
-          }}
+          containerStyle={styles.dropdownContainerStyle}
+          itemTextStyle={styles.dropdownItemTextStyle}
           itemContainerStyle={styles.dropdownItemContainerStyle}
           activeColor="#0f8eb4"
           selectedTextStyle={styles.dropdownSelectedTextStyle}
@@ -302,6 +300,35 @@ function Setting(_props: Props) {
       ),
       handler: () => {
         appThemeDropdown.current?.open();
+      },
+    },
+    {
+      title: 'Mode mixing audio',
+      description:
+        'Tentukan apa yang harus dilakukan aplikasi ketika menonton sambil mendengarkan - contoh: lagu',
+      icon: <Icon name="music" style={globalStyles.text} size={iconSize} />,
+      rightComponent: (
+        <Dropdown
+          data={DROPDOWN_AUDIOMIXING_DATA}
+          onChange={data => {
+            DatabaseManager.set('audioMixingMode', data.value);
+          }}
+          ref={AMMDropdown}
+          value={audioMixingMode}
+          labelField={'label'}
+          valueField={'value'}
+          maxHeight={300}
+          style={styles.dropdownStyle}
+          containerStyle={styles.dropdownContainerStyle}
+          itemTextStyle={styles.dropdownItemTextStyle}
+          itemContainerStyle={styles.dropdownItemContainerStyle}
+          activeColor="#0f8eb4"
+          selectedTextStyle={styles.dropdownSelectedTextStyle}
+          placeholderStyle={{ color: globalStyles.text.color }}
+        />
+      ),
+      handler: () => {
+        AMMDropdown.current?.open();
       },
     },
     {
@@ -436,14 +463,6 @@ function useStyles() {
   return useMemo(
     () =>
       StyleSheet.create({
-        dropdownStyle: {
-          width: 150,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#e9e9e9',
-          padding: 5,
-          borderRadius: 4,
-          borderWidth: 1,
-          borderColor: 'black',
-        },
         settingListContainer: {
           flex: 1,
           paddingVertical: 10,
@@ -517,22 +536,31 @@ function useStyles() {
           fontWeight: 'bold',
           fontSize: 17,
         },
+        dropdownStyle: {
+          width: 150,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          padding: 10,
+          borderRadius: 8,
+          borderWidth: 0,
+        },
         dropdownContainerStyle: {
-          width: 120,
+          borderRadius: 8,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
+          borderWidth: 0,
+          elevation: 5,
         },
         dropdownItemTextStyle: {
           color: globalStyles.text.color,
-          fontSize: 15,
+          fontSize: 14,
           textAlign: 'center',
         },
         dropdownItemContainerStyle: {
-          borderColor: colorScheme !== 'dark' ? '#2c2c2c' : '#ccc9c9',
-          borderWidth: StyleSheet.hairlineWidth,
-          backgroundColor: colorScheme === 'dark' ? '#2c2c2c' : '#ccc9c9',
+          borderRadius: 6,
+          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
         },
         dropdownSelectedTextStyle: {
           color: globalStyles.text.color,
-          textAlign: 'center',
+          fontSize: 14,
         },
       }),
     [colorScheme, globalStyles.text.color, theme.colors.surface],
@@ -543,6 +571,12 @@ const DROPDOWN_THEME_DATA = [
   { label: 'Mengikuti sistem', value: 'auto' },
   { label: 'Tema terang', value: 'light' },
   { label: 'Tema gelap', value: 'dark' },
+];
+const DROPDOWN_AUDIOMIXING_DATA: { label: string; value: AudioMixingMode }[] = [
+  { label: 'Otomatis', value: 'auto' },
+  { label: 'Jangan campur', value: 'doNotMix' },
+  { label: 'Campur dengan audio lain', value: 'mixWithOthers' },
+  { label: 'Kecilkan audio lain', value: 'duckOthers' },
 ];
 
 export default memo(Setting);

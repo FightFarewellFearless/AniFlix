@@ -1,9 +1,23 @@
 /* eslint-disable react-compiler/react-compiler */
-import { VideoPlayer as ExpoVideoPlayer, VideoView, useVideoPlayer } from 'expo-video';
+import {
+  AudioMixingMode,
+VideoPlayer as ExpoVideoPlayer,
+VideoView,
+useVideoPlayer,
+} from 'expo-video';
 
+import Icons from '@react-native-vector-icons/material-icons';
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
-import React, { memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+memo,
+useCallback,
+useEffect,
+useImperativeHandle,
+  useLayoutEffect,
+useRef,
+useState,
+} from 'react';
 import {
   ActivityIndicator,
   AppState,
@@ -21,9 +35,8 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Icons from '@react-native-vector-icons/material-icons';
 import { runOnJS } from 'react-native-worklets';
-import { useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
@@ -88,7 +101,7 @@ function VideoPlayer({
       },
     },
     initialPlayer => {
-      initialPlayer.audioMixingMode = 'doNotMix';
+      initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
       initialPlayer.timeUpdateEventInterval = 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },

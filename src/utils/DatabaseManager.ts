@@ -7,14 +7,10 @@ import { HistoryJSON } from '../types/historyJSON';
 
 export type DataKey = SetDatabaseTarget | HistoryItemKey;
 
-export type AppDatabase = {
-  history: string;
-  enableBatteryTimeInfo: string;
-  enableNowPlayingNotification: string;
-  watchLater: string;
-  searchHistory: string;
-  colorScheme: string;
-};
+export type AppDatabase = Omit<
+  Record<SetDatabaseTarget | 'history', string>,
+  'historyKeyCollectionsOrder'
+>;
 
 export class DatabaseManager {
   static #event = new EventEmitter<Record<string, (value: string) => void>>();
@@ -55,12 +51,13 @@ export class DatabaseManager {
     const history = await toOldHistoryStructure(historyKeyOrder);
 
     return {
-      history: JSON.stringify(history),
+      audioMixingMode: (await this.get('audioMixingMode'))!,
+      colorScheme: (await this.get('colorScheme'))!,
       enableBatteryTimeInfo: (await this.get('enableBatteryTimeInfo'))!,
       enableNowPlayingNotification: (await this.get('enableNowPlayingNotification'))!,
-      watchLater: (await this.get('watchLater'))!,
+      history: JSON.stringify(history),
       searchHistory: (await this.get('searchHistory'))!,
-      colorScheme: (await this.get('colorScheme'))!,
+      watchLater: (await this.get('watchLater'))!,
     };
   }
 

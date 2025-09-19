@@ -1,8 +1,9 @@
 {
-    "historyKeyCollectionsOrder": "[]",
+    "audioMixingMode": "auto",
+    "colorScheme": "auto",
     "enableBatteryTimeInfo": "false",
     "enableNowPlayingNotification": "false",
-    "watchLater": "[]",
+    "historyKeyCollectionsOrder": "[]",
     "searchHistory": "[]",
-    "colorScheme": "auto"
+    "watchLater": "[]"
 }
