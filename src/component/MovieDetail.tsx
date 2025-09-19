@@ -373,12 +373,16 @@ function MovieDetail(props: Props) {
               });
             }}>
             <View style={styles.episodeTitleContainer}>
-              <Text style={[globalStyles.text, styles.episodeText]}>{item.title}</Text>
+              <Text
+                style={[
+                  globalStyles.text,
+                  styles.episodeText,
+                  isLastWatched ? styles.lastWatchedTextColor : undefined,
+                ]}>
+                {item.title}
+              </Text>
               {isLastWatched && (
-                <View style={styles.lastWatchedContainer}>
-                  <Text style={[globalStyles.text, styles.lastWatchedText]}>Terakhir ditonton</Text>
-                  <Icon name="film" size={16} color={styles.lastWatchedIcon.color} />
-                </View>
+                <Icon name="film" size={16} color={styles.lastWatchedTextColor.color} />
               )}
             </View>
           </TouchableOpacity>
@@ -524,25 +528,15 @@ function useStyles() {
         },
         episodeTitleContainer: {
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
         },
         episodeText: {
           fontSize: 16,
           fontWeight: '600',
           color: colorScheme === 'dark' ? '#ffffff' : '#333333',
         },
-        lastWatchedContainer: {
-          flex: 0.5,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        lastWatchedText: {
-          fontSize: 16,
-          fontWeight: '600',
-          textAlign: 'center',
-          color: theme.colors.onPrimaryContainer,
-        },
-        lastWatchedIcon: {
+        lastWatchedTextColor: {
           color: theme.colors.onPrimaryContainer,
         },
         chapterDivider: {

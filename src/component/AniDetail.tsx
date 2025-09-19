@@ -398,16 +398,16 @@ function AniDetail(props: Props) {
                 });
               }}>
               <View style={styles.episodeTitleContainer}>
-                <Text style={[globalStyles.text, styles.episodeText]}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.episodeText,
+                    isLastWatched ? styles.lastWatchedTextColor : undefined,
+                  ]}>
                   {item.title.replace('Subtitle Indonesia', '').trim()}
                 </Text>
                 {isLastWatched && (
-                  <View style={styles.lastWatchedContainer}>
-                    <Text style={[globalStyles.text, styles.lastWatchedText]}>
-                      Terakhir ditonton
-                    </Text>
-                    <Icon color={styles.lastWatchedIcon.color} name="film" size={16} />
-                  </View>
+                  <Icon name="film" color={styles.lastWatchedTextColor.color} size={16} />
                 )}
               </View>
             </TouchableOpacity>
@@ -571,6 +571,8 @@ function useStyles() {
           flex: 1,
           flexWrap: 'wrap',
           flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
         },
         episodeText: {
           flex: 1,
@@ -578,20 +580,7 @@ function useStyles() {
           fontWeight: '600',
           color: colorScheme === 'dark' ? '#ffffff' : '#333333',
         },
-        lastWatchedContainer: {
-          flex: 0.5,
-          gap: 4,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        lastWatchedText: {
-          fontSize: 14,
-          fontWeight: '600',
-          textAlign: 'center',
-          color: theme.colors.onPrimaryContainer,
-        },
-        lastWatchedIcon: {
+        lastWatchedTextColor: {
           color: theme.colors.onPrimaryContainer,
         },
         chapterDivider: {
