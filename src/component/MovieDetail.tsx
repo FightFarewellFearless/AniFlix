@@ -64,7 +64,7 @@ function MovieDetail(props: Props) {
   const historyTitle = data.title.replace('Subtitle Indonesia', '').trim();
   const lastWatched = useMemo(() => {
     const isLastWatched = historyListsJson.find(
-      z => z === `historyItem:${historyTitle}:false:false`,
+      z => z === `historyItem:${historyTitle}:false:true`,
     );
     if (isLastWatched) {
       return JSON.parse(DatabaseManager.getSync(isLastWatched)!) as HistoryJSON;
