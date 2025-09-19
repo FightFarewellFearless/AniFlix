@@ -250,7 +250,7 @@ function Video(props: Props) {
   }, [orientationDidChange, willUnmountHandler]);
 
   // set header title
-  useEffect(() => {
+  useLayoutEffect(() => {
     props.navigation.setOptions({
       headerTitle: data.title,
       headerShown: !fullscreen,
