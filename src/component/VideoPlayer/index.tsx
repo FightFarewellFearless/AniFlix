@@ -1,22 +1,22 @@
 /* eslint-disable react-compiler/react-compiler */
 import {
   AudioMixingMode,
-VideoPlayer as ExpoVideoPlayer,
-VideoView,
-useVideoPlayer,
+  VideoPlayer as ExpoVideoPlayer,
+  VideoView,
+  useVideoPlayer,
 } from 'expo-video';
 
 import Icons from '@react-native-vector-icons/material-icons';
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
 import React, {
-memo,
-useCallback,
-useEffect,
-useImperativeHandle,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
   useLayoutEffect,
-useRef,
-useState,
+  useRef,
+  useState,
 } from 'react';
 import {
   ActivityIndicator,
@@ -132,7 +132,7 @@ function VideoPlayer({
   const [showControls, setShowControls] = useState(true);
   const showControlsOpacity = useSharedValue(1);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
 

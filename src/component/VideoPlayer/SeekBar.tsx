@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { LayoutChangeEvent, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   SharedValue,
@@ -87,15 +87,15 @@ export default function SeekBar({
     [parentWidth],
   );
 
-  // const { width } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
-  // // useLayoutEffect(() => {
-  // //   viewRef.current?.measure((_x, _y, measuredWidth) => {
-  // //     if (measuredWidth > 1) {
-  // //       parentWidth.set(width);
-  // //     }
-  // //   });
-  // // }, [parentWidth, width]);
+  useLayoutEffect(() => {
+    viewRef.current?.measure((_x, _y, measuredWidth) => {
+      if (measuredWidth > 1) {
+        parentWidth.set(width);
+      }
+    });
+  }, [parentWidth, width]);
 
   return (
     <View style={[style]} onLayout={onLayout} ref={viewRef}>
