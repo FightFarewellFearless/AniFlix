@@ -1,3 +1,17 @@
+# v1.1.1 (21-September-2025)
+Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukuran aplikasi secara drastis
+## Ditambahkan
+- Dukungan untuk server `pdrain` pada data anime
+- Mengizinkan untuk mengubah mode audio mixing saat streaming melalui pengaturan
+## Ditingkatkan
+- Tampilan informasi terakhir ditonton
+- Data `terakhir ditonton` movie
+- Sedikit pengurangan delay pada hide/show header dan ukuran panjang seek bar pada saat berganti orientasi di video player
+## Diperbaiki
+- Crash acak yang terjadi ketika aplikasi di background
+## Perubahan lain
+- Mulai versi ini aplikasi hanya mendukung ponsel dengan arsitektur ARM
+
 # v1.1.0_JS-2 (08-September-2025)
 
 ## Diperbaiki
