@@ -52,7 +52,6 @@ function CFBypassWebView() {
               }
               lastTitle.current = event.title;
             }}
-            incognito
             sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={true}
             setSupportMultipleWindows={false}
