@@ -1,3 +1,7 @@
+# v1.1.1_JS-2 (25-September-2025)
+## Diperbaiki
+- Masalah data movie setelah bypass anti bot anime
+
 # v1.1.1_JS-1 (25-September-2025)
 ## Diperbaiki
 - Bypass anti bot di pencarian anime
