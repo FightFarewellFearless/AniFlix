@@ -1,3 +1,7 @@
+# v1.1.1_JS-1 (25-September-2025)
+## Diperbaiki
+- Bypass anti bot di pencarian anime
+
 # v1.1.1 (21-September-2025)
 Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukuran aplikasi secara drastis
 ## Ditambahkan
@@ -13,13 +17,11 @@ Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukur
 - Mulai versi ini aplikasi hanya mendukung ponsel dengan arsitektur ARM
 
 # v1.1.0_JS-2 (08-September-2025)
-
 ## Diperbaiki
 - Error pada beberapa resolusi anime
 - Progress bar pada OTA update
 
 # v1.1.0_JS-1 (07-September-2025)
-
 ## Diperbaiki
 - Error pada beberapa anime
 
@@ -41,7 +43,6 @@ Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukur
 - Beberapa perubahan kecil...
 
 # v1.0.2_JS-10 (24-Agustus-2025)
-
 ## Ditingkatkan
 - Struktur data riwayat tontonan lebih efisien
 ## Diperbaiki
@@ -49,12 +50,10 @@ Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukur
 - ...Dan beberapa perubahan kecil lainnya
 
 # v1.0.2_JS-9 (17-Agustus-2025)
-
 ## Diperbaiki
 - Crash pada layar awal anime
 
 # v1.0.2_JS-8 (17-Agustus-2025)
-
 ## Ditingkatkan
 - Beberapa peningkatan kecil termasuk list yang sedikit lebih mulus dan pewarnaan pada layar `Dukung developer`
 ## Disesuaikan
@@ -63,28 +62,23 @@ Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukur
 - Memperbaiki tombol `scroll to top` yang tersembunyi mengakibatkan list tidak bisa di scroll pada layar `History`
 
 # v1.0.2_JS-7 (16-Agustus-2025)
-
 ## Diperbaiki
 - Terakhir ditonton dipicu oleh semua episode anime di layar detail anime
 
 # v1.0.2_JS-6 (15-Agustus-2025)
-
 ## Diperbaiki
 - Gagal mendapatkan Thumbnail/Cover komik
 - Masalah performa pada layar Update aplikasi
 
 # v1.0.2_JS-5 (09-Agustus-2025)
-
 ## Diperbaiki
 - Memperbaiki error thumbnail komik
 
 # v1.0.2_JS-4 (07-Agustus-2025)
-
 ## Diperbaiki
 - Update domain
 
 # v1.0.2_JS-3 (07-Agustus-2025)
-
 ## Diperbaiki
 - Crash pada history
 - Tombol tidak dapat ditekan pada beberapa kasus
@@ -95,7 +89,6 @@ Mulai di versi ini, aplikasi hanya mendukung arsitektur ARM demi mengurangi ukur
 - Pewarnaan pada menu `Dukung developer` dan `Tentang aplikasi`
 
 # v1.0.2_JS-2 (03-Agustus-2025)
-
 HBD TO ME!! part 2 hehe :) (Perbaikan tambahan untuk versi JS-1 di hari yang sama)
 ## Perbaikan
 - Masalah integrasi dengan history dan tonton nanti pada judul yang sama antara komik dan anime
@@ -103,7 +96,6 @@ HBD TO ME!! part 2 hehe :) (Perbaikan tambahan untuk versi JS-1 di hari yang sam
 - Ukuran font "Terakhir di tonton" pada detail anime
 
 # v1.0.2_JS-1 (03-Agustus-2025)
-
 HBD TO ME!! :)
 ## Penambahan
 - Mengintegrasikan data history dengan detail episode
@@ -121,7 +113,6 @@ HBD TO ME!! :)
 - Upgrade react-native-reanimated ke versi 4
 
 # v1.0.1_JS-1 (20-Juli-2025)
-
 ## Diperbaiki
 - Masalah tonton nanti yang tidak secara otomatis dihapus pada tipe anime
 - Typo di error anime movie
@@ -141,7 +132,6 @@ Update kali ini memperbaiki tampilan edge-to-edge sekaligus mengaktifkannya untu
 - Beberapa perbaikan kecil...
 
 # v1.0.0_JS-3 (28-Juni-2025)
-
 ## Diperbaiki
 - Tampilan tombol "Tambahkan ke tonton nanti" di mode terang
 ## Perubahan lain-lain
@@ -149,7 +139,6 @@ Update kali ini memperbaiki tampilan edge-to-edge sekaligus mengaktifkannya untu
 - Menambahkan efek bayangan pada gambar di bagian detail episode/chapter
 
 # v1.0.0_JS-2 (27-Juni-2025)
-
 ## Diperbaiki
 - Crash pada pencarian
 - List watch later yang otomatis dihapus salah
@@ -157,7 +146,6 @@ Update kali ini memperbaiki tampilan edge-to-edge sekaligus mengaktifkannya untu
 - Memperbarui waktu di histori ketika berganti chapter komik
 
 # v1.0.0_JS-1 (24-Juni-2025)
-
 ## Diperbaiki
 - Race condition pada saat menghapus histori pencarian
 - Histori pencarian yang terbalik ketika di restore dari backup
@@ -180,25 +168,21 @@ Pastikan untuk segera memperbarui aplikasi ke versi terbaru. Versi ini tidak han
 Penting untuk diingat bahwa di versi mendatang, database lama akan **DIHAPUS** untuk menjaga efisiensi dan stabilitas aplikasi. Ini berarti jika Kamu masih menggunakan versi lama (di bawah v1) dan memperbarui nanti, Kamu berisiko kehilangan data aplikasi seperti riwayat, daftar tonton nanti, pengaturan, dan lainnya. **Jadi, segera perbarui sekarang!**
 
 # v0.9.0_JS-18 (9-Juni-2025)
-
 ## Diperbaiki
 - Memperbaiki seek bar pada video player yang delay setelah melanjutkan dari history tontonan (Silent update pada JS-17)
 - Warna background pada `AniDetail` yang tidak konsisten antara dark mode dan light mode
 
 # v0.9.0_JS-17 (9-Juni-2025)
-
 ## Diperbaiki
 - Interval history update
 
 # v0.9.0_JS-16 (9-Juni-2025)
-
 ## Diperbaiki
 - Race condition pada data histori
 ## Ditingkatkan
 - UI/UX pada layar episode anime
 
 # v0.9.0_JS-15 (8-Juni-2025)
-
 ## Ditambahkan
 - Dukungan untuk banyak episode pada data movie (seperti pada `Kaguya-sama` special episode)
 ## Diperbaiki
@@ -209,18 +193,15 @@ Penting untuk diingat bahwa di versi mendatang, database lama akan **DIHAPUS** u
 - Menjalankan garbage-collector pada saat keluar dari layar `Video` untuk free-up RAM
 
 # v0.9.0_JS-14 (7-Juni-2025)
-
 ## Diperbaiki
 - Ukuran hit rect pada tombol pilih resolusi
 - Crash ketika spam keyboard dan tombol pencarian
 - Feedback (alert) yang tidak muncul ketika melaporkan crash
 
 # v0.9.0_JS-13 (6-Juni-2025)
-
 Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi sistem
 
 # v0.9.0_JS-12 (6-Juni-2025)
-
 ## Ditambahkan 
 - Konfirmasi saat ingin menghapus daftar tonton nanti
 ## Diperbaiki
@@ -229,7 +210,6 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 - styling pada bagian `History` dan `WatchLater`
 
 # v0.9.0_JS-11 (5-Juni-2025)
-
 ## Diperbaiki
 - Tampilan edge-to-edge pada saat streaming (tombol download yang tertutup navigasi sistem)
 - Masalah layout pada list anime
@@ -240,22 +220,18 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 - Data fetching pada saat refresh data di beranda
 
 # v0.9.0_JS-10 (30-Mei-2025)
-
 ## Diperbaiki
 - Pesan error tidak muncul
 
 # v0.9.0_JS-9 (30-Mei-2025)
-
 ## Diperbaiki
 - Masalah beberapa tombol yang tidak bisa ditekan pada kasus tertentu
 
 # v0.9.0_JS-8 (29-Mei-2025)
-
 ## Perubahan lain
 - Memaksa render ulang video player setiap ada perubahan streaming link
 
 # v0.9.0_JS-7 (29-Mei-2025)
-
 ## Ditingkatkan
 - Tampilan pada menu utilitas
 - Tampilan dialog yang lebih baik
@@ -263,35 +239,29 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 - Tampilan "Cari anime berdasarkan gambar"
 
 # v0.9.0_JS-6 (10-Mei-2025)
-
 ## Diperbaiki
 - Extra padding pada bagian bawah ketika navigasi.
   > Terlihat lebih sering pada perangkat lawas
 
 # v0.9.0_JS-5 (5-Mei-2025)
-
 ## Diperbaiki
 - Tampilan edge-to-edge pada bagian pemutaran
 - "Jumping layout" saat mengganti quotes di Beranda
 - Improvisasi list anime
 
 # v0.9.0_JS-4 (1-Mei-2025)
-
 ## Diperbaiki
 - Tampilan fullscreen
 
 # v0.9.0_JS-3 (28-April-2025)
-
 ## Diperbaiki
 - Tampilan edge-to-edge pada android 15
 
 # v0.9.0_JS-2 (27-April-2025)
-
 ## Diperbaiki
 - Episode list yang tidak bisa di scroll pada detail anime
 
 # v0.9.0_JS-1 (25-April-2025)
-
 ## Perubahan
 - Sekarang, notifikasi "now playing" dimatikan secara bawaan. Kamu bisa mengaktifkan nya di menu pengaturan
 ## Diperbaiki
@@ -302,7 +272,6 @@ Versi ini memperbaiki masalah styling pada animasi skeleton dan warna navigasi s
 - list anime yang lebih efisien
 
 # v0.9.0 (18-April-2025)
-
 Versi ini berisi optimasi yang cukup besar untuk kode aplikasi dan pengalaman menggunakan aplikasi termasuk design ulang beberapa antarmuka aplikasi.
 Migrasi database ke MMKV agar performa aplikasi semakin meningkat. Serta eliminasi beberapa kode yang dirasa tidak terlalu penting (penggunaan redux, dll..), ini meningkatkan performa aplikasi terutama untuk perangkat lawas.
 Fun fact: Update kali ini berisi lebih dari 140 commits di github
@@ -330,13 +299,11 @@ Fun fact: Update kali ini berisi lebih dari 140 commits di github
 - Dan masih banyak perubahan lainnya...
 
 # v0.8.3-JS_3 (23-Maret-2025)
-
 ## Diperbaiki
 - Animasi dropdown yang salah ukuran ketika data berubah
 - Tema aplikasi yang tidak berubah setelah pemulihan backup
 
 # v0.8.3-JS_2 (19-Maret-2025)
-
 ## Ditambahkan
 - Opsi mengganti tema aplikasi (gelap/terang) di pengaturan
 - Animasi dropdown (Pilih resolusi)
@@ -344,18 +311,15 @@ Fun fact: Update kali ini berisi lebih dari 140 commits di github
 - Improvisasi lazy loading
 
 # v0.8.3-JS_1 (15-Maret-2025)
-
 ## Diperbaiki
 - Salah pengukuran tinggi pada animasi sinopsis
 ## Ditingkatkan
 - Mengimplementasi inline-requires
 
 # v0.8.3 (13-Maret-2025)
-
 Upgrade banyak library yang digunakan. Ini mungkin akan memperbaiki beberapa masalah termasuk masalah crash dan masalah lainnya...
 
 # v0.8.2-JS_23 (13-Maret-2025)
-
 ## Diperbaiki
 - Memperbaiki animasi sinopsis yang "jumping"
 
@@ -370,12 +334,10 @@ Update kali ini menerapkan lazy-loading pada aplikasi, ini berarti penggunaan me
 - Meningkatkan `drawDistance` pada list anime di pencarian
 
 # v0.8.2-JS_21 (12-Maret-2025)
-
 ## Diperbaiki
 - Masalah animasi sinopsis
 
 # v0.8.2-JS_20 (05-Maret-2025)
-
 Update kali ini memberikan opsi donasi kepada kamu yang ingin mendukung pengembangan aplikasi.
 
 ## Ditambahkan
@@ -385,11 +347,9 @@ Update kali ini memberikan opsi donasi kepada kamu yang ingin mendukung pengemba
   > untuk saat ini belum ada reward khusus untuk donator, baik dari aplikasi maupun server discord, namun jika kamu ingin request sesuatu, kamu bisa join server discord [di sini](https://discord.gg/sbTwxHb9NM) walaupun kamu bukan donator ❤️
 
 # v0.8.2-JS_19 (05-Maret-2025)
-
 Update ini sedikit mengoptimasi kode
 
 # v0.8.2-JS_18 (05-Maret-2025)
-
 Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu utilitas
 
 ## Diperbaiki
@@ -398,19 +358,16 @@ Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu util
 - Chat AI. Karena sudah tidak berfungsi dan tidak relevan
 
 # v0.8.2-JS_17 (03-Maret-2025)
-
 ## Diperbaiki
 - Animasi sinopsis
 - Error deteksi anti bot di server `lokal` (movie)
 
 # v0.8.2-JS_16 (03-Maret-2025)
-
 ## Diperbaiki:
 - Memperbaiki masalah animasi yang tidak mulus saat memperpanjang sinopsis
 - Memperbaiki ukuran estimasi list di daftar anime > pencarian
 
 # v0.8.2-JS_15 (02-Maret-2025)
-
 ## Ditingkatkan:
 - Sedikit mengurangi penggunaan RAM
 - Mengembalikan perubahan scrolling list di pencarian pada versi JS_13
@@ -420,39 +377,32 @@ Update kali ini menghapus fitur yang tidak lagi terpakai: Chat AI pada menu util
 Update kali ini menambahkan dukungan untuk menambahkan movie ke dalam daftar tonton nanti
 
 # v0.8.2-JS_13 (26-Februari-2025)
-
 ## Peningkatan
 
 - Potensi peningkatan performa scrolling list di pencarian(Eksperimental)
 - Meningkatkan animasi memperpanjang sinopsis anime saat menonton
 
 # v0.8.2-JS_12 (23-Februari-2025)
-
 Berisi banyak perubahan kode (Bukan fix bug ataupun fitur, hanya perubahan pada format penulisan kode).
 Di update ini juga terdapat peningkatan untuk privasi, dengan menambahkan user-agent tetap, seperti yang dilakukan chrome-based browser.
 
 ## Peningkatan
-
 - Potensi peningkatan performa
 - Meningkatkan keterbacaan kode dengan ESLint
 - Meningkatkan privasi dengan mengubah user-agent menjadi static
   > Ini artinya, mulai versi ini, model hp dan informasi lainnya yang terdapat pada user-agent tidak lagi dikirim pada setiap permintaan ke server
 
 # v0.8.2-JS_11 (20-Februari-2025)
-
 Perubahan kode untuk menambahkan memoization di Beranda agar performa navigasi lebih baik
 
 # v0.8.2-JS_10 (20-Februari-2025)
-
 ## Perbaikan
 - Memperbaiki masalah tombol "Cari" tidak muncul setelah navigasi ke layar lain (kemungkinan masalah di react-freeze atau react-native-reanimated, diperbaiki dengan menggunakan component Animated bawaan react-native)
 
 # v0.8.2-JS_9 (20-Februari-2025)
-
 Perubahan kecil di kode dengan harapan peningkatan performa
 
 # v0.8.2-JS_8 (20-Februari-2025)
-
 ## Penambahan
 - Memperlihatkan versi JS di menu update aplikasi
 ## Perubahan
@@ -460,37 +410,30 @@ Perubahan kecil di kode dengan harapan peningkatan performa
 - Mengurangi draw distance di list untuk menghindari lag saat render ulang
 
 # v0.8.2-JS_7 (20-Februari-2025)
-
 Mencegah komponen di render ulang menggunakan react-freeze
 
 # v0.8.2-JS_6 (18-Februari-2025)
-
 ## Perbaikan
 - Memperbaiki pull-to-refresh tidak bekerja pada Beranda
 ## Peningkatan
 - Sedikit mengubah tampilan beranda
 
 # v0.8.2-JS_5 (16-Februari-2025)
-
 ## Perbaikan
 - Memperbaiki pengambilan data resolusi tetap terjadi meski pengguna sudah membatalkan permintaan
 
 # v0.8.2-JS_4 (16-Februari-2025)
-
 ## Perbaikan
 - Memperbaiki masalah performa ketika menghapus search history
 
 # v0.8.2-JS_3 (16-Februari-2025)
-
 ## Peningkatan
 - Meningkatkan pengalaman scrolling pada hampir semua list di aplikasi
 
 # v0.8.2-JS_2 (16-Februari-2025)
-
 (Update ini sama seperti versi JS 1 namun berisi sedikit perbaikan pada kesalahan penulisan kode paga bagian peningkatan pengalaman scrolling di list history)
 
 # v0.8.2-JS_1 (16-Februari-2025)
-
 ## Penambahan
 - Menambahkan quotes pada loading screen awal aplikasi
 ## Peningkatan
@@ -499,11 +442,9 @@ Mencegah komponen di render ulang menggunakan react-freeze
 - Memperbaiki masalah styling pada tombol tutup di bagian Search ketika tidak ada anime yang ditemukan
 
 # v0.8.2 (09-Februari-2025)
-
 Rilis ini berisi peningkatan performa scrolling list (dan mungkin performa animasi) dan peningkatan desain UI pada beberapa bagian (Update, Search, dan layar loading awal). Juga perbaikan untuk crash pada beberapa anime movie.
 
 Perubahan lainnya meliputi tapi tidak terbatas pada: Upgrade library yang digunakan termasuk react-native 0.77 yang mungkin akan memperbaiki beberapa masalah lain termasuk masalah text yang terpotong pada beberapa device (Berdasarkan RN 0.77 Changelog)
-
 ## Peningkatan
 - Memperbagus tampilan/UI pada bagian:
    - Update
@@ -518,12 +459,10 @@ Perubahan lainnya meliputi tapi tidak terbatas pada: Upgrade library yang diguna
   > Dengan alasan performa
 
 # v0.8.1 (23-Januari-2025)
-
 ## Perbaikan
 - Memperbaiki masalah pewarnaan saat mengaktifkan dark mode di beberapa perangkat Xiaomi
 
 # v0.8.0-JS_2 (10-Januari-2025)
-
 ## Penambahan dan pengoptimalan
 - Menambahkan tombol untuk menghapus input pencarian pada menu Histori
 - Mengoptimalkan performa ketika mencari judul histori dengan menggunakan deferred value untuk mencegah terlalu banyak render ulang ketika sedang mengetik
@@ -531,12 +470,10 @@ Perubahan lainnya meliputi tapi tidak terbatas pada: Upgrade library yang diguna
 - Memperbaiki loading indicator menyebabkan list berubah posisi pada menu Search->List anime
 
 # v0.8.0-JS_1 (05-Januari-2025)
-
 ## Perbaikan
 - Memperbaiki masalah seek bar pada video player
 
 # v0.8.0 (05-Januari-2025)
-
 **New Architecture is finally here!**
 Update kali ini merupakan migrasi aplikasi ke react-native New Architecture.
 Ini merupakan salah satu update terbesar yang dilakukan developer di balik layar, karena menstabilkan aplikasi di new architecture butuh effort yang cukup besar.
