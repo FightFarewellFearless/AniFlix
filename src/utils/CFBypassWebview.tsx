@@ -1,5 +1,6 @@
 import { useContext, useRef } from 'react';
 import { Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
 import { BASE } from './animeLocalAPI';
 import { CFBypassIsOpenContext } from './CFBypass';
@@ -7,6 +8,7 @@ import deviceUserAgent from './deviceUserAgent';
 
 export default CFBypassWebView;
 function CFBypassWebView() {
+  const theme = useTheme();
   const bypassContext = useContext(CFBypassIsOpenContext);
   const webView = useRef<WebView>(null);
   const lastTitle = useRef('');
@@ -57,13 +59,19 @@ function CFBypassWebView() {
           />
           <TouchableOpacity
             style={{
-              backgroundColor: '#ff8800',
+              backgroundColor: theme.colors.primary,
               padding: 7,
               borderRadius: 10,
               alignSelf: 'center',
             }}
             onPress={() => bypassContext.setIsOpen(false)}>
-            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 15, textAlign: 'center' }}>
+            <Text
+              style={{
+                color: theme.colors.onPrimary,
+                fontWeight: 'bold',
+                fontSize: 15,
+                textAlign: 'center',
+              }}>
               Tutup Dan Batalkan
             </Text>
           </TouchableOpacity>

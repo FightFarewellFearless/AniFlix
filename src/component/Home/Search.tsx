@@ -17,6 +17,7 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity as TouchableOpacityReactNative,
   View,
   useColorScheme,
@@ -144,6 +145,9 @@ function Search(props: Props) {
           setLoading(false);
         })
         .catch(err => {
+          if (err.message === 'Silahkan selesaikan captcha') {
+            return ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
+          }
           const errMessage =
             err.message === 'Network Error'
               ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'

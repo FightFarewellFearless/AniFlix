@@ -7,7 +7,7 @@ import {
   NewAnimeList,
   SearchAnime,
 } from '../types/anime';
-import Anime from './animeLocalAPI';
+import Anime, { BASE } from './animeLocalAPI';
 import { setWebViewOpen } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 
@@ -61,7 +61,17 @@ class AnimeAPI {
     //   },
     // );
     // return await (data.json() as Promise<SearchAnime>);
-
+    const { status } = await fetch(BASE.url + `/?s=${query}&post_type=anime`, {
+      method: 'HEAD',
+      signal,
+      headers: {
+        'User-Agent': deviceUserAgent,
+      },
+    });
+    if (status === 403) {
+      setWebViewOpen.openWebViewCF(true, BASE.url + `/?s=${query}&post_type=anime`);
+      throw new Error('Silahkan selesaikan captcha');
+    }
     return {
       result: await Anime.searchAnime(query, signal),
     };
@@ -97,7 +107,7 @@ class AnimeAPI {
         headers: {
           'User-Agent': deviceUserAgent,
         },
-        method: 'GET',
+        method: 'HEAD',
         signal,
       }).catch(err => {
         if (err instanceof Error && err.message.includes('Aborted')) throw new Error('canceled');
@@ -106,10 +116,7 @@ class AnimeAPI {
       if (statusCode instanceof Error) {
         throw statusCode;
       }
-      const html = await statusCode.text();
-      const regex = /<title>(.*?)<\/title>/;
-      const title = html.match(regex)?.[1];
-      if (statusCode.status === 403 && title === 'Just a moment...') {
+      if (statusCode.status === 403) {
         setWebViewOpen.openWebViewCF(true, link);
         throw new Error('Silahkan selesaikan captcha');
       }
