@@ -1,7 +1,10 @@
+import Icon from '@react-native-vector-icons/fontawesome';
+import Fontisto from '@react-native-vector-icons/fontisto';
+import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -16,16 +19,11 @@ import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
 import { useTheme } from 'react-native-paper';
 import {
-  FadeInUp,
-  FadeOutDown,
   default as Reanimated,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Icon from '@react-native-vector-icons/fontawesome';
-import Fontisto from '@react-native-vector-icons/fontisto';
-import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
@@ -73,12 +71,15 @@ function Loading(props: Props) {
   const [progressValue, setProgressValue] = useState(0);
   const progressValueAnimation = useSharedValue(0);
 
-  const connectToServer = useCallback(async () => {
+  const fetchAnimeData = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
       props.navigation.dispatch(StackActions.replace('FailedToConnect'));
     });
-    if (jsondata === undefined) return;
-    props.navigation.dispatch(StackActions.replace('Home', { data: jsondata }));
+    setLoadStatus(old => ({
+      ...old,
+      'Menghubungkan ke server': true,
+    }));
+    return jsondata;
   }, [props.navigation]);
 
   const prepareData = useCallback(async () => {
@@ -157,14 +158,29 @@ function Loading(props: Props) {
     return data[0];
   }, []);
 
+  const moviePromiseResolve = useRef<(val?: unknown) => void>(null);
+  const [animeMoviePromise] = useState(
+    () => new Promise(res => (moviePromiseResolve.current = res)),
+  );
   const onAnimeMovieReady = useCallback(() => {
     setLoadStatus(old => ({
       ...old,
       'Mempersiapkan data anime movie': true,
     }));
     setIsAnimeMovieWebViewOpen(false);
-    connectToServer();
-  }, [connectToServer]);
+    moviePromiseResolve.current?.();
+  }, []);
+
+  const connectToServers = useCallback(async () => {
+    setIsAnimeMovieWebViewOpen(true);
+    const animeData = await fetchAnimeData();
+    Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
+      if (anime === undefined) {
+        return;
+      }
+      props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
+    });
+  }, [animeMoviePromise, fetchAnimeData, props.navigation]);
 
   useEffect(() => {
     (async () => {
@@ -215,7 +231,7 @@ function Loading(props: Props) {
           ...old,
           'Mendapatkan domain terbaru': true,
         }));
-        setIsAnimeMovieWebViewOpen(true);
+        connectToServers();
       } else {
         const latestVersion = nativeAppVersion.tag_name;
         const changelog = nativeAppVersion.body;
@@ -232,12 +248,13 @@ function Loading(props: Props) {
       }
     })();
   }, [
-    connectToServer,
+    fetchAnimeData,
     prepareData,
     checkNativeAppVersion,
     props.navigation,
     deleteUnnecessaryUpdate,
     fetchDomain,
+    connectToServers,
   ]);
 
   useEffect(() => {
@@ -292,25 +309,16 @@ function Loading(props: Props) {
         </View>
 
         <View style={styles.statusContainer}>
-          {(() => {
-            const currentLoading = Object.entries(loadStatus).find(a => a[1] === false)!;
-            const key = currentLoading[0];
-            const value = currentLoading[1];
-            return (
-              <Reanimated.View
-                entering={FadeInUp}
-                exiting={FadeOutDown}
-                style={styles.statusItem}
-                key={key}>
-                {value ? (
-                  <MaterialIcon name="check-circle" size={20} color="#4CAF50" />
-                ) : (
-                  <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
-                )}
-                <Text style={styles.statusText}>{key}</Text>
-              </Reanimated.View>
-            );
-          })()}
+          {Object.entries(loadStatus).map(([key, value]) => (
+            <View style={styles.statusItem} key={key}>
+              {value ? (
+                <MaterialIcon name="check-circle" size={20} color="#4CAF50" />
+              ) : (
+                <ActivityIndicator size="small" color={styles.loadingIndicator.color} />
+              )}
+              <Text style={styles.statusText}>{key}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
