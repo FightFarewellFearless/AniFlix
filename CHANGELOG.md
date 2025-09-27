@@ -1,3 +1,11 @@
+# v1.1.2 (27-September-2025)
+## Ditingkatkan
+- Kecepatan loading awal aplikasi
+- Durasi animasi teks quote di beranda
+- Performa fullscreen saat streaming
+## Diperbaiki
+- Video tidak menampilkan control saat di mode Picture-in-Picture atau notifikasi meski sudah di aktifkan di pengaturan
+
 # v1.1.1_JS-2 (25-September-2025)
 ## Diperbaiki
 - Masalah data movie setelah bypass anti bot anime
