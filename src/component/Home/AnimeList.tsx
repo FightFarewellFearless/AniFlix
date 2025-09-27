@@ -85,25 +85,20 @@ function HomeList(props: HomeProps) {
   const battery = useBatteryLevel();
 
   const [animationText, setAnimationText] = useState(() => {
-    const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
-    const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
-    textLayoutWidth.set(
-      MeasureText.measureWidth(quote, {
-        fontWeight: 'bold',
-        fontSize: 17,
-      }),
-    );
+    const quote = randomQuote();
+    textLayoutWidth.set(measureQuoteTextWidth(quote));
     return quote;
   });
 
   useFocusEffect(
     useCallback(() => {
+      const baseDurationPer100px = 2000; // 2000ms per 100px
+      const minimumAnimationDuration = 8000;
       const displayNewQuote = (finished?: boolean) => {
         let layoutWidth = textLayoutWidth.get();
         if (finished) {
           textLayoutWidth.set(0);
-          const randomQuote = runningText[Math.floor(Math.random() * runningText.length)];
-          const quote = `"${randomQuote.quote}" - ${randomQuote.by}`;
+          const quote = randomQuote();
           const newWidth = measureQuoteTextWidth(quote);
           textLayoutWidth.set(newWidth);
           setAnimationText(quote);
@@ -111,29 +106,26 @@ function HomeList(props: HomeProps) {
         }
         boxTextAnim.set(0);
         if (!finished) return;
+        const duration = Math.max(
+          minimumAnimationDuration,
+          (layoutWidth / 100) * baseDurationPer100px,
+        );
+
         boxTextAnim.set(
-          withDelay(
-            2000,
-            withTiming(
-              1,
-              { duration: (layoutWidth / 200) * 3000, easing: Easing.linear },
-              callback,
-            ),
-          ),
+          withDelay(2000, withTiming(1, { duration, easing: Easing.linear }, callback)),
         );
       };
       function callback(finished?: boolean) {
         runOnJS(displayNewQuote)(finished);
       }
-
+      const initialDuration = Math.max(
+        minimumAnimationDuration,
+        (textLayoutWidth.get() / 100) * baseDurationPer100px,
+      );
       boxTextAnim.set(
         withDelay(
           1000,
-          withTiming(
-            1,
-            { duration: (textLayoutWidth.get() / 200) * 3000, easing: Easing.linear },
-            callback,
-          ),
+          withTiming(1, { duration: initialDuration, easing: Easing.linear }, callback),
         ),
       );
 
@@ -540,6 +532,11 @@ function useLocalTime() {
   return time;
 }
 
+function randomQuote() {
+  const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)];
+  const quote = `"${randomizeQuote.quote}" - ${randomizeQuote.by}`;
+  return quote;
+}
 function measureQuoteTextWidth(quote: string) {
   const width = MeasureText.measureWidth(quote, {
     fontWeight: 'bold',
