@@ -188,7 +188,7 @@ function Video(props: Props) {
   });
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
-    // videoRef.current?.presentFullscreenPlayer();
+    dropdownResolutionRef.current?.close();
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -751,323 +751,319 @@ function Video(props: Props) {
         {data.streamingType === 'embed' && batteryAndClock}
       </View>
       {/* END OF VIDEO ELEMENT */}
-      {
-        // mengecek apakah sedang dalam keadaan fullscreen atau tidak
-        // jika ya, maka hanya menampilkan video saja
-        !fullscreen && (
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: insets.bottom }}>
-            {/* movie information */}
-            {props.route.params.isMovie && (
-              <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>
-                <Icon
-                  name="film"
-                  color={theme.colors.onSecondaryContainer}
-                  size={26}
-                  style={{ alignSelf: 'center' }}
-                />
-                <Text
-                  style={{
-                    color: theme.colors.onSecondaryContainer,
-                    textAlign: 'center',
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                  }}>
-                  Perhatian!
-                </Text>
-                <Text style={{ color: theme.colors.onSecondaryContainer }}>
-                  Jika kamu mengalami masalah menonton, silahkan ganti resolusi/server
-                </Text>
-              </View>
-            )}
-            {/* acefile embed information */}
-            {(data.resolution?.includes('acefile') || data.resolution?.includes('video')) &&
-              data.streamingType === 'embed' && (
-                <View
-                  style={{ backgroundColor: theme.colors.tertiaryContainer, marginVertical: 5 }}>
-                  <Icon
-                    name="server"
-                    color={theme.colors.onTertiaryContainer}
-                    size={26}
-                    style={{ alignSelf: 'center' }}
-                  />
-                  <Text
-                    style={{
-                      color: theme.colors.onTertiaryContainer,
-                      textAlign: 'center',
-                      fontSize: 14,
-                      fontWeight: 'bold',
-                    }}>
-                    AceFile
-                  </Text>
-                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                    Tampaknya server AceFile untuk resolusi ini mengalami masalah. Terkadang server
-                    membutuhkan beberapa waktu untuk memproses data, silahkan coba lagi. Jika
-                    masalah berlanjut silahkan ganti server atau resolusi lain.
-                  </Text>
-                </View>
-              )}
-            {/* embed player information */}
-            {data.streamingType === 'embed' && (
-              <View ref={embedInformationRef}>
-                <View
-                  style={{
-                    backgroundColor: theme.colors.tertiaryContainer,
-                    marginVertical: 5,
-                  }}>
-                  <TouchableOpacity
-                    style={{ alignSelf: 'flex-end' }}
-                    onPress={() => {
-                      embedInformationRef.current?.setNativeProps({ display: 'none' });
-                    }}>
-                    <Icon name="close" color={theme.colors.onTertiaryContainer} size={26} />
-                  </TouchableOpacity>
-                  <Icon
-                    name="lightbulb-o"
-                    color={theme.colors.onTertiaryContainer}
-                    size={26}
-                    style={{ alignSelf: 'center' }}
-                  />
-                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                    Kamu saat ini menggunakan video player pihak ketiga dikarenakan data dengan
-                    format yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
-                    Kamu mungkin akan melihat iklan di dalam video.{'\n'}
-                    Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal.
-                    {'\n'}
-                    Jika menemui masalah seperti video berubah menjadi putih, silahkan reload video
-                    player!
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    marginTop: 5,
-                    backgroundColor: theme.colors.tertiaryContainer,
-                  }}>
-                  <MaterialCommunityIcons
-                    name="screen-rotation"
-                    color={theme.colors.onTertiaryContainer}
-                    size={26}
-                    style={{ alignSelf: 'center' }}
-                  />
-                  <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                    Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape
-                  </Text>
-                </View>
-              </View>
-            )}
-            {/* embed reload button */}
-            {data.streamingType === 'embed' && (
-              <TouchableOpacity
-                style={styles.reloadPlayer}
-                onPress={async () => {
-                  if (data.streamingLink === '') return;
-                  const streamingLink = data.streamingLink;
-                  setData(datas => {
-                    return {
-                      ...datas,
-                      streamingLink: '',
-                    };
-                  });
-                  await new Promise(res => setTimeout(res, 500));
-                  setData(datas => {
-                    return {
-                      ...datas,
-                      streamingLink,
-                    };
-                  });
+      {/* 
+        mengecek apakah sedang dalam keadaan fullscreen atau tidak
+        jika ya, maka hanya menampilkan video saja 
+       */}
+      <ScrollView
+        style={{ flex: 1, display: fullscreen ? 'none' : 'flex' }}
+        contentContainerStyle={{ paddingBottom: insets.bottom }}>
+        {/* movie information */}
+        {props.route.params.isMovie && (
+          <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>
+            <Icon
+              name="film"
+              color={theme.colors.onSecondaryContainer}
+              size={26}
+              style={{ alignSelf: 'center' }}
+            />
+            <Text
+              style={{
+                color: theme.colors.onSecondaryContainer,
+                textAlign: 'center',
+                fontSize: 14,
+                fontWeight: 'bold',
+              }}>
+              Perhatian!
+            </Text>
+            <Text style={{ color: theme.colors.onSecondaryContainer }}>
+              Jika kamu mengalami masalah menonton, silahkan ganti resolusi/server
+            </Text>
+          </View>
+        )}
+        {/* acefile embed information */}
+        {(data.resolution?.includes('acefile') || data.resolution?.includes('video')) &&
+          data.streamingType === 'embed' && (
+            <View style={{ backgroundColor: theme.colors.tertiaryContainer, marginVertical: 5 }}>
+              <Icon
+                name="server"
+                color={theme.colors.onTertiaryContainer}
+                size={26}
+                style={{ alignSelf: 'center' }}
+              />
+              <Text
+                style={{
+                  color: theme.colors.onTertiaryContainer,
+                  textAlign: 'center',
+                  fontSize: 14,
+                  fontWeight: 'bold',
                 }}>
-                <Icon
-                  name="refresh"
-                  color={theme.colors.onSecondaryContainer}
-                  size={15}
-                  style={{ alignSelf: 'center' }}
-                />
-                <Text style={{ color: theme.colors.onSecondaryContainer }}>
-                  Reload video player
-                </Text>
-              </TouchableOpacity>
-            )}
-            <Pressable
-              style={[styles.container]}
-              onPressIn={onSynopsisPressIn}
-              onPressOut={onSynopsisPressOut}
-              // onLayout={onSynopsisLayout}
-              onPress={onSynopsisPress}
-              disabled={synopsisTextLength < 3}>
-              <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
-
-              {animeDetail !== undefined ? (
-                <ReAnimated.Text
-                  ref={synopsisTextRef}
-                  style={[
-                    globalStyles.text,
-                    styles.infoSinopsis,
-                    infoContainerStyle,
-                    {
-                      position: hadSynopsisMeasured ? 'relative' : 'absolute',
-                      opacity: hadSynopsisMeasured ? undefined : 0,
-                    },
-                  ]}
-                  numberOfLines={!showSynopsis && hadSynopsisMeasured ? 2 : undefined}>
-                  {animeDetail?.synopsis || 'Tidak ada sinopsis'}
-                </ReAnimated.Text>
-              ) : (
-                <Skeleton stopOnBlur={false} width={150} height={20} />
-              )}
-              {!hadSynopsisMeasured && animeDetail !== undefined && (
-                <Skeleton stopOnBlur={false} width={150} height={20} />
-              )}
-
-              <View style={[styles.infoGenre]}>
-                {animeDetail === undefined ? (
-                  <View style={{ gap: 5, flexDirection: 'row' }}>
-                    <Skeleton stopOnBlur={false} width={50} height={20} />
-                    <Skeleton stopOnBlur={false} width={50} height={20} />
-                    <Skeleton stopOnBlur={false} width={50} height={20} />
-                  </View>
-                ) : (
-                  animeDetail.genres.map(genre => (
-                    <Text key={genre} style={[globalStyles.text, styles.genre]}>
-                      {genre}
-                    </Text>
-                  ))
-                )}
-              </View>
-
-              <View style={styles.infoData}>
-                <Text
-                  style={[
-                    globalStyles.text,
-                    styles.status,
-                    {
-                      backgroundColor:
-                        animeDetail?.status === 'Completed' || animeDetail?.status === 'Movie'
-                          ? 'green'
-                          : 'red',
-                    },
-                  ]}>
-                  {animeDetail?.status}
-                </Text>
-                <Text style={[{ color: lightText }, styles.releaseYear]}>
-                  <Icon name="calendar" color={styles.releaseYear.color} />{' '}
-                  {animeDetail?.releaseYear}
-                </Text>
-                <Text style={[globalStyles.text, styles.rating]}>
-                  <Icon name="star" color="black" /> {animeDetail?.rating}
-                </Text>
-              </View>
-
-              {synopsisTextLength >= 3 && (
-                <View style={{ alignItems: 'center', marginTop: 3 }}>
-                  {showSynopsis ? (
-                    <Icon
-                      name="chevron-up"
-                      size={20}
-                      color={colorScheme === 'dark' ? 'white' : 'black'}
-                    />
-                  ) : (
-                    <Icon
-                      name="chevron-down"
-                      size={20}
-                      color={colorScheme === 'dark' ? 'white' : 'black'}
-                    />
-                  )}
-                </View>
-              )}
-            </Pressable>
-
-            <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
-              {data.episodeData && (
-                <View style={[styles.episodeDataControl]}>
-                  <Button
-                    mode="contained-tonal"
-                    icon="arrow-left"
-                    key="prev"
-                    disabled={!data.episodeData.previous}
-                    style={[styles.episodeDataControlButton]}
-                    onPress={async () => {
-                      await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
-                    }}>
-                    Sebelumnya
-                  </Button>
-
-                  <Button
-                    mode="contained-tonal"
-                    icon="arrow-right"
-                    key="next"
-                    disabled={!data.episodeData.next}
-                    style={[styles.episodeDataControlButton]}
-                    contentStyle={{ flexDirection: 'row-reverse' }}
-                    onPress={async () => {
-                      await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
-                    }}>
-                    Selanjutnya
-                  </Button>
-                </View>
-              )}
-              <TouchableOpacity
-                style={{ maxWidth: '50%' }}
-                onPress={() => {
-                  dropdownResolutionRef.current?.open();
-                }}>
-                <View pointerEvents="box-only">
-                  <Dropdown
-                    ref={dropdownResolutionRef}
-                    value={{
-                      label: data.resolution,
-                      value:
-                        data.resolutionRaw?.[
-                          data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                        ],
-                    }}
-                    placeholder="Pilih resolusi"
-                    data={resolutionDropdownData}
-                    valueField="value"
-                    labelField="label"
-                    onChange={async val => {
-                      await setResolution(val.value.dataContent, val.label);
-                    }}
-                    style={styles.dropdownStyle}
-                    containerStyle={styles.dropdownContainerStyle}
-                    itemTextStyle={styles.dropdownItemTextStyle}
-                    itemContainerStyle={styles.dropdownItemContainerStyle}
-                    activeColor="#16687c"
-                    selectedTextStyle={styles.dropdownSelectedTextStyle}
-                    placeholderStyle={{ color: globalStyles.text.color }}
-                    autoScroll
-                    dropdownPosition="top"
-                  />
-                </View>
-              </TouchableOpacity>
+                AceFile
+              </Text>
+              <Text style={{ color: theme.colors.onTertiaryContainer }}>
+                Tampaknya server AceFile untuk resolusi ini mengalami masalah. Terkadang server
+                membutuhkan beberapa waktu untuk memproses data, silahkan coba lagi. Jika masalah
+                berlanjut silahkan ganti server atau resolusi lain.
+              </Text>
             </View>
-
-            {data.resolution?.includes('pogo') && (
-              <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
-                Kamu menggunakan server pogo!, sangat tidak disarankan untuk skip/seek/menggeser
-                menit dikarenakan akan menyebabkan loading yang sangat lama dan kemungkinan akan
-                menghabiskan kuota data kamu. Disarankan untuk mengunduh/download video ini lewat
-                tombol dibawah dan menontonnya saat proses download sudah selesai secara offline!
+          )}
+        {/* embed player information */}
+        {data.streamingType === 'embed' && (
+          <View ref={embedInformationRef}>
+            <View
+              style={{
+                backgroundColor: theme.colors.tertiaryContainer,
+                marginVertical: 5,
+              }}>
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end' }}
+                onPress={() => {
+                  embedInformationRef.current?.setNativeProps({ display: 'none' });
+                }}>
+                <Icon name="close" color={theme.colors.onTertiaryContainer} size={26} />
+              </TouchableOpacity>
+              <Icon
+                name="lightbulb-o"
+                color={theme.colors.onTertiaryContainer}
+                size={26}
+                style={{ alignSelf: 'center' }}
+              />
+              <Text style={{ color: theme.colors.onTertiaryContainer }}>
+                Kamu saat ini menggunakan video player pihak ketiga dikarenakan data dengan format
+                yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
+                Kamu mungkin akan melihat iklan di dalam video.{'\n'}
+                Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal.
+                {'\n'}
+                Jika menemui masalah seperti video berubah menjadi putih, silahkan reload video
+                player!
               </Text>
-            )}
-
-            {data.resolution?.includes('lokal') && (
-              <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
-                Kamu menggunakan server "lokal". Perlu di ingat server ini tidak mendukung pemutaran
-                melalui aplikasi dan akan menggunakan WebView untuk memutar video melalui server
-                ini, jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu
-                menggunakan server "lokal".{'\n'}
-                Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
+            </View>
+            <View
+              style={{
+                marginTop: 5,
+                backgroundColor: theme.colors.tertiaryContainer,
+              }}>
+              <MaterialCommunityIcons
+                name="screen-rotation"
+                color={theme.colors.onTertiaryContainer}
+                size={26}
+                style={{ alignSelf: 'center' }}
+              />
+              <Text style={{ color: theme.colors.onTertiaryContainer }}>
+                Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape
               </Text>
-            )}
+            </View>
+          </View>
+        )}
+        {/* embed reload button */}
+        {data.streamingType === 'embed' && (
+          <TouchableOpacity
+            style={styles.reloadPlayer}
+            onPress={async () => {
+              if (data.streamingLink === '') return;
+              const streamingLink = data.streamingLink;
+              setData(datas => {
+                return {
+                  ...datas,
+                  streamingLink: '',
+                };
+              });
+              await new Promise(res => setTimeout(res, 500));
+              setData(datas => {
+                return {
+                  ...datas,
+                  streamingLink,
+                };
+              });
+            }}>
+            <Icon
+              name="refresh"
+              color={theme.colors.onSecondaryContainer}
+              size={15}
+              style={{ alignSelf: 'center' }}
+            />
+            <Text style={{ color: theme.colors.onSecondaryContainer }}>Reload video player</Text>
+          </TouchableOpacity>
+        )}
+        <Pressable
+          style={[styles.container]}
+          onPressIn={onSynopsisPressIn}
+          onPressOut={onSynopsisPressOut}
+          // onLayout={onSynopsisLayout}
+          onPress={onSynopsisPress}
+          disabled={synopsisTextLength < 3}>
+          <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
 
-            <Button
-              mode="contained"
-              style={{ marginTop: 12, marginHorizontal: 10 }}
-              onPress={downloadAnime}>
-              <Icon name="download" size={23} /> Download
-            </Button>
-          </ScrollView>
-        )
-      }
+          {animeDetail !== undefined ? (
+            <ReAnimated.Text
+              ref={synopsisTextRef}
+              style={[
+                globalStyles.text,
+                styles.infoSinopsis,
+                infoContainerStyle,
+                {
+                  position: hadSynopsisMeasured ? 'relative' : 'absolute',
+                  opacity: hadSynopsisMeasured ? undefined : 0,
+                },
+              ]}
+              numberOfLines={!showSynopsis && hadSynopsisMeasured ? 2 : undefined}>
+              {animeDetail?.synopsis || 'Tidak ada sinopsis'}
+            </ReAnimated.Text>
+          ) : (
+            <Skeleton stopOnBlur={false} width={150} height={20} />
+          )}
+          {!hadSynopsisMeasured && animeDetail !== undefined && (
+            <Skeleton stopOnBlur={false} width={150} height={20} />
+          )}
+
+          <View style={[styles.infoGenre]}>
+            {animeDetail === undefined ? (
+              <View style={{ gap: 5, flexDirection: 'row' }}>
+                <Skeleton stopOnBlur={false} width={50} height={20} />
+                <Skeleton stopOnBlur={false} width={50} height={20} />
+                <Skeleton stopOnBlur={false} width={50} height={20} />
+              </View>
+            ) : (
+              animeDetail.genres.map(genre => (
+                <Text key={genre} style={[globalStyles.text, styles.genre]}>
+                  {genre}
+                </Text>
+              ))
+            )}
+          </View>
+
+          <View style={styles.infoData}>
+            <Text
+              style={[
+                globalStyles.text,
+                styles.status,
+                {
+                  backgroundColor:
+                    animeDetail?.status === 'Completed' || animeDetail?.status === 'Movie'
+                      ? 'green'
+                      : 'red',
+                },
+              ]}>
+              {animeDetail?.status}
+            </Text>
+            <Text style={[{ color: lightText }, styles.releaseYear]}>
+              <Icon name="calendar" color={styles.releaseYear.color} /> {animeDetail?.releaseYear}
+            </Text>
+            <Text style={[globalStyles.text, styles.rating]}>
+              <Icon name="star" color="black" /> {animeDetail?.rating}
+            </Text>
+          </View>
+
+          {synopsisTextLength >= 3 && (
+            <View style={{ alignItems: 'center', marginTop: 3 }}>
+              {showSynopsis ? (
+                <Icon
+                  name="chevron-up"
+                  size={20}
+                  color={colorScheme === 'dark' ? 'white' : 'black'}
+                />
+              ) : (
+                <Icon
+                  name="chevron-down"
+                  size={20}
+                  color={colorScheme === 'dark' ? 'white' : 'black'}
+                />
+              )}
+            </View>
+          )}
+        </Pressable>
+
+        <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
+          {data.episodeData && (
+            <View style={[styles.episodeDataControl]}>
+              <Button
+                mode="contained-tonal"
+                icon="arrow-left"
+                key="prev"
+                disabled={!data.episodeData.previous}
+                style={[styles.episodeDataControlButton]}
+                onPress={async () => {
+                  await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                }}>
+                Sebelumnya
+              </Button>
+
+              <Button
+                mode="contained-tonal"
+                icon="arrow-right"
+                key="next"
+                disabled={!data.episodeData.next}
+                style={[styles.episodeDataControlButton]}
+                contentStyle={{ flexDirection: 'row-reverse' }}
+                onPress={async () => {
+                  await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                }}>
+                Selanjutnya
+              </Button>
+            </View>
+          )}
+          <TouchableOpacity
+            style={{ maxWidth: '50%' }}
+            onPress={() => {
+              dropdownResolutionRef.current?.open();
+            }}>
+            <View pointerEvents="box-only">
+              <Dropdown
+                ref={dropdownResolutionRef}
+                value={{
+                  label: data.resolution,
+                  value:
+                    data.resolutionRaw?.[
+                      data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
+                    ],
+                }}
+                placeholder="Pilih resolusi"
+                data={resolutionDropdownData}
+                valueField="value"
+                labelField="label"
+                onChange={async val => {
+                  await setResolution(val.value.dataContent, val.label);
+                }}
+                style={styles.dropdownStyle}
+                containerStyle={styles.dropdownContainerStyle}
+                itemTextStyle={styles.dropdownItemTextStyle}
+                itemContainerStyle={styles.dropdownItemContainerStyle}
+                activeColor="#16687c"
+                selectedTextStyle={styles.dropdownSelectedTextStyle}
+                placeholderStyle={{ color: globalStyles.text.color }}
+                autoScroll
+                dropdownPosition="top"
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {data.resolution?.includes('pogo') && (
+          <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
+            Kamu menggunakan server pogo!, sangat tidak disarankan untuk skip/seek/menggeser menit
+            dikarenakan akan menyebabkan loading yang sangat lama dan kemungkinan akan menghabiskan
+            kuota data kamu. Disarankan untuk mengunduh/download video ini lewat tombol dibawah dan
+            menontonnya saat proses download sudah selesai secara offline!
+          </Text>
+        )}
+
+        {data.resolution?.includes('lokal') && (
+          <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
+            Kamu menggunakan server "lokal". Perlu di ingat server ini tidak mendukung pemutaran
+            melalui aplikasi dan akan menggunakan WebView untuk memutar video melalui server ini,
+            jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu menggunakan
+            server "lokal".{'\n'}
+            Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
+          </Text>
+        )}
+
+        <Button
+          mode="contained"
+          style={{ marginTop: 12, marginHorizontal: 10 }}
+          onPress={downloadAnime}>
+          <Icon name="download" size={23} /> Download
+        </Button>
+      </ScrollView>
     </View>
   );
 }
