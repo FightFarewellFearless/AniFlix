@@ -192,7 +192,11 @@ export default function ComicsReading(props: Props) {
         img.style.minHeight = 'auto';
       };
       img.onerror = () => {
-        img.classList.add('error');
+        if (img.src?.includes('cdn1')) {
+          img.src = img.src.replace('cdn1', 'img');
+        } else {
+          img.classList.add('error');
+        }
       };
       observer.observe(img);
     });
