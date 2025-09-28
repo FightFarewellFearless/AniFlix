@@ -1,3 +1,7 @@
+# v1.1.2_JS-1 (28-September-2025)
+## Diperbaiki
+- Gambar komik yang tidak ter-load
+
 # v1.1.2 (27-September-2025)
 ## Ditingkatkan
 - Kecepatan loading awal aplikasi
