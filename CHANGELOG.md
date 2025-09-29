@@ -1,3 +1,6 @@
+# v1.1.2_JS-2 (29-September-2025)
+## Diperbaiki
+- Fitur lapor error dan request whitelist
 # v1.1.2_JS-1 (28-September-2025)
 ## Diperbaiki
 - Gambar komik yang tidak ter-load
