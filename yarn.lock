@@ -3934,7 +3934,7 @@ __metadata:
     expo-linear-gradient: ~15.0.7
     expo-splash-screen: ~31.0.10
     expo-sqlite: ~16.0.8
-    expo-updates: ~29.0.11
+    expo-updates: ~29.0.12
     expo-video: ~3.0.11
     jest: ^29.6.3
     moment: ^2.30.1
@@ -6511,9 +6511,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-updates@npm:~29.0.11":
-  version: 29.0.11
-  resolution: "expo-updates@npm:29.0.11"
+"expo-updates@npm:~29.0.12":
+  version: 29.0.12
+  resolution: "expo-updates@npm:29.0.12"
   dependencies:
     "@expo/code-signing-certificates": 0.0.5
     "@expo/plist": ^0.4.7
@@ -6535,7 +6535,7 @@ __metadata:
     react-native: "*"
   bin:
     expo-updates: bin/cli.js
-  checksum: 5186e220d25225be03aee2cd93d442a27cfde89eaf782747f26a06442c8ca9a05baa1cc0d7051674c2d9948b91f0589362f33ec3317a8d9b90313877e732d255
+  checksum: 15d5f5ffcf567f3703fb72c50a75c3fd9c3e8cc87aa8a870b37c54805ae4c80cbfdec17adb2715c78f80d957ceb246bee48ab82864c3e52d660e915b59c2ceaf
   languageName: node
   linkType: hard
 
