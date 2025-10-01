@@ -1625,9 +1625,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bottom-tabs/react-navigation@npm:^0.11.2":
-  version: 0.11.2
-  resolution: "@bottom-tabs/react-navigation@npm:0.11.2"
+"@bottom-tabs/react-navigation@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "@bottom-tabs/react-navigation@npm:0.12.0"
   dependencies:
     color: ^5.0.0
   peerDependencies:
@@ -1635,7 +1635,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-bottom-tabs: "*"
-  checksum: 4666027cf42c0d82458d6e52e02547ad3c1ebbaa00aa06640cce98616d623cf1a634580fcd79dcd2dedf1b35b618ffc93d0ff1dd48b53879279385515c7d49ce
+  checksum: fbfd8a0572e162808809bb5c533acf1fe1d361675e87726fab0dff4d00e7c0d5f9ed5c0594327cae6cb279965d9f7d7539b4666f10c60a88eafbdf2fcef65b00
   languageName: node
   linkType: hard
 
@@ -3892,7 +3892,7 @@ __metadata:
     "@babel/core": ^7.26.10
     "@babel/preset-env": ^7.26.9
     "@babel/runtime": ^7.27.0
-    "@bottom-tabs/react-navigation": ^0.11.2
+    "@bottom-tabs/react-navigation": ^0.12.0
     "@domir/react-native-measure-text": ^0.1.8
     "@legendapp/list": 2.0.9
     "@pirles/react-native-element-dropdown": ^2.15.0
