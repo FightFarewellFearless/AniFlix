@@ -3942,7 +3942,7 @@ __metadata:
     react: 19.1.0
     react-native: 0.81.4
     react-native-blob-util: ^0.22.2
-    react-native-bottom-tabs: ^0.11.2
+    react-native-bottom-tabs: ^0.12.2
     react-native-device-info: ^14.1.1
     react-native-dotenv: ^3.4.11
     react-native-edge-to-edge: ^1.7.0
@@ -10583,9 +10583,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-bottom-tabs@npm:^0.11.2":
-  version: 0.11.2
-  resolution: "react-native-bottom-tabs@npm:0.11.2"
+"react-native-bottom-tabs@npm:^0.12.2":
+  version: 0.12.2
+  resolution: "react-native-bottom-tabs@npm:0.12.2"
   dependencies:
     react-freeze: ^1.0.0
     sf-symbols-typescript: ^2.0.0
@@ -10593,7 +10593,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 26db6a2a3a728f340e0840d088d81911443bbfb6a861e1c58a8423bbcf5497fb078271ec33a15c96eeeb0cbba96ec572d29f91ac7ce78a52e8c3a05afdbeae0f
+  checksum: 179168b9c1f9fdfb585ce7446cc782779bfe0be0e2109c8190f81733133be117e8126ee5cc6dfc4a413265636593a0202491fcc3f61755c154523cf053e87e9f
   languageName: node
   linkType: hard
 
