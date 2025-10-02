@@ -3502,12 +3502,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.1.12":
-  version: 19.1.12
-  resolution: "@types/react@npm:19.1.12"
+"@types/react@npm:^19.2.0":
+  version: 19.2.0
+  resolution: "@types/react@npm:19.2.0"
   dependencies:
     csstype: ^3.0.2
-  checksum: da3affb60344c8868076e73bf92474faceef814ad3097a240ea533d80950431078f1bc41bdca771287acafe4488a98d5ac1b083c2ca914ee7f748acb4d849efb
+  checksum: 1bfef433bb4d237487835423eaf4789bad94bcf96d4106f5c53f3109dc8451edea6b04be3f6e9d374f1a76672bb66e58d68e64f45535f0b6c804930a731dd19e
   languageName: node
   linkType: hard
 
@@ -3915,7 +3915,7 @@ __metadata:
     "@shopify/flash-list": 2.1.0
     "@types/jest": ^29.5.14
     "@types/metro-config": ^0.76.3
-    "@types/react": ^19.1.12
+    "@types/react": ^19.2.0
     "@types/react-native-vector-icons": ^6.4.18
     "@types/react-test-renderer": ^19.1.0
     axios: ^1.11.0
@@ -3939,7 +3939,7 @@ __metadata:
     jest: ^29.6.3
     moment: ^2.30.1
     prettier: ^3.5.2
-    react: 19.1.0
+    react: 19.2.0
     react-native: 0.81.4
     react-native-blob-util: ^0.22.2
     react-native-bottom-tabs: ^0.11.2
@@ -10927,10 +10927,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react@npm:19.1.0"
-  checksum: c0905f8cfb878b0543a5522727e5ed79c67c8111dc16ceee135b7fe19dce77b2c1c19293513061a8934e721292bfc1517e0487e262d1906f306bdf95fa54d02f
+"react@npm:19.2.0":
+  version: 19.2.0
+  resolution: "react@npm:19.2.0"
+  checksum: 33dd01bf699e1c5040eb249e0f552519adf7ee90b98c49d702a50bf23af6852ea46023a5f7f93966ab10acd7a45428fa0f193c686ecdaa7a75a03886e53ec3fe
   languageName: node
   linkType: hard
 
