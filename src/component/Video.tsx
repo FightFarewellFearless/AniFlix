@@ -708,43 +708,43 @@ function Video(props: Props) {
               batteryAndClock={batteryAndClock}
             />
           ) : data.streamingType === 'embed' ? (
-            <>
-              {/* TEMP|TODO|WORKAROUND: Temporary fix for webview layout not working properly when using native-stack */}
-              <VideoPlayer title="" streamingURL="" style={{ display: 'none' }} />
-              <WebView
-                style={{ flex: 1, zIndex: 1 }}
-                ref={webviewRef}
-                key={data.streamingLink}
-                setSupportMultipleWindows={false}
-                onShouldStartLoadWithRequest={navigator => {
-                  const res =
-                    navigator.url.includes(url.parse(data.streamingLink).host as string) ||
-                    navigator.url.includes(defaultLoadingGif);
-                  if (!res) {
-                    webviewRef.current?.stopLoading();
-                  }
-                  return res;
-                }}
-                source={{
-                  ...(data.resolution?.includes('lokal')
-                    ? {
-                        html: `<iframe src="${data.streamingLink}" style="width: 100vw; height: 100vh;" allowFullScreen>`,
-                      }
-                    : { uri: data.streamingLink }),
-                  baseUrl: `https://${url.parse(data.streamingLink).host}`,
-                }}
-                userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
-                originWhitelist={['*']}
-                allowsFullscreenVideo={true}
-                injectedJavaScript={`
+            // <>
+            //   {/* TEMP|TODO|WORKAROUND: Temporary fix for webview layout not working properly when using native-stack */}
+            //   <VideoPlayer title="" streamingURL="" style={{ display: 'none' }} />
+            <WebView
+              style={{ flex: 1, zIndex: 1 }}
+              ref={webviewRef}
+              key={data.streamingLink}
+              setSupportMultipleWindows={false}
+              onShouldStartLoadWithRequest={navigator => {
+                const res =
+                  navigator.url.includes(url.parse(data.streamingLink).host as string) ||
+                  navigator.url.includes(defaultLoadingGif);
+                if (!res) {
+                  webviewRef.current?.stopLoading();
+                }
+                return res;
+              }}
+              source={{
+                ...(data.resolution?.includes('lokal')
+                  ? {
+                      html: `<iframe src="${data.streamingLink}" style="width: 100vw; height: 100vh;" allowFullScreen>`,
+                    }
+                  : { uri: data.streamingLink }),
+                baseUrl: `https://${url.parse(data.streamingLink).host}`,
+              }}
+              userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
+              originWhitelist={['*']}
+              allowsFullscreenVideo={true}
+              injectedJavaScript={`
                 window.alert = function() {}; // Disable alerts
                 window.confirm = function() {}; // Disable confirms
                 window.prompt = function() {}; // Disable prompts
                 window.open = function() {}; // Disable opening new windows
               `}
-              />
-            </>
+            />
           ) : (
+            // </>
             <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
         }
