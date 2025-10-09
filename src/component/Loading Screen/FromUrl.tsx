@@ -12,10 +12,10 @@ import setHistory from '../../utils/historyControl';
 import controlWatchLater from '../../utils/watchLaterControl';
 
 import URL from 'url';
-import { getMovieDetail, getStreamingDetail } from '../../utils/scraper/animeMovie';
+import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scraper/komiku';
+import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
 import LoadingIndicator from '../misc/LoadingIndicator';
 import { replaceLast } from '../../utils/replaceLast';
 

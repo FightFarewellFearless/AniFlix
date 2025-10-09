@@ -62,7 +62,7 @@ import {
   getRawDataIfAvailable,
   getStreamingDetail,
   MovieDetail,
-} from '../../utils/scraper/animeMovie';
+} from '../../utils/scrapers/animeMovie';
 import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import DialogManager from '../../utils/dialogManager';

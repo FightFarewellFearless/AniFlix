@@ -27,7 +27,7 @@ import { HistoryJSON } from '../../types/historyJSON';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { KomikuDetail } from '../../utils/scraper/komiku';
+import { KomikuDetail } from '../../utils/scrapers/komiku';
 import controlWatchLater from '../../utils/watchLaterControl';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);

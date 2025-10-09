@@ -39,11 +39,11 @@ import {
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
-import { Movies } from './src/utils/scraper/animeMovie';
+import { Movies } from './src/utils/scrapers/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
-import { LatestKomikuRelease } from './src/utils/scraper/komiku';
+import { LatestKomikuRelease } from './src/utils/scrapers/komiku';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
   reactNavigationLight: ReactNavigationDefaultTheme,

@@ -17,7 +17,7 @@ import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
 import DialogManager from '../../utils/dialogManager';
 import setHistory from '../../utils/historyControl';
-import { getKomikuReading } from '../../utils/scraper/komiku';
+import { getKomikuReading } from '../../utils/scrapers/komiku';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, createContext } from 'react';
 import { EpisodeBaruHome } from '../types/anime';
-import { Movies } from '../utils/scraper/animeMovie';
-import { LatestKomikuRelease } from '../utils/scraper/komiku';
+import { Movies } from '../utils/scrapers/animeMovie';
+import { LatestKomikuRelease } from '../utils/scrapers/komiku';
 
 export const EpisodeBaruHomeContext = createContext<{
   paramsState?: EpisodeBaruHome;
