@@ -89,7 +89,7 @@ function FailedToConnect(props: Props) {
       </View>
 
       <Text style={[styles.versionText, globalStyles.text]}>
-        Versi: {require('../../package.json').version}
+        Versi: {require('../../../package.json').version}
       </Text>
     </View>
   );
