@@ -1,3 +1,5 @@
+# v1.1.2_JS-3 (09-Oktober-2025)
+Beberapa perubahan kecil pada kode... (Tidak banyak perubahan yang terlihat pada pengguna)
 # v1.1.2_JS-2 (29-September-2025)
 ## Diperbaiki
 - Fitur lapor error dan request whitelist
