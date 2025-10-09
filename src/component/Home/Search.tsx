@@ -182,25 +182,23 @@ function Search(props: Props) {
   const listAnimeRenderer = useCallback(
     ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
       return (
-        <>
-          <TouchableOpacity
-            onPress={() => {
-              props.navigation.dispatch(
-                StackActions.push('FromUrl', {
-                  title: item.title,
-                  link: item.streamingLink,
-                }),
-              );
-            }}
-            style={styles.animeList}>
-            <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
-            <Text
-              numberOfLines={1}
-              style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
-              {item?.title}
-            </Text>
-          </TouchableOpacity>
-        </>
+        <TouchableOpacity
+          onPress={() => {
+            props.navigation.dispatch(
+              StackActions.push('FromUrl', {
+                title: item.title,
+                link: item.streamingLink,
+              }),
+            );
+          }}
+          style={styles.animeList}>
+          <Text style={[globalStyles.text, styles.animeListIndex]}>{index + 1}.</Text>
+          <Text
+            numberOfLines={1}
+            style={[globalStyles.text, { textAlign: 'center', flex: 1, fontWeight: 'bold' }]}>
+            {item?.title}
+          </Text>
+        </TouchableOpacity>
       );
     },
     [globalStyles.text, props.navigation, styles],
@@ -601,6 +599,7 @@ function searchHistoryKeyExtractor(name: string, index: number) {
 
 function useStyles() {
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const colorScheme = useColorScheme();
   return useMemo(
     () =>
@@ -646,7 +645,7 @@ function useStyles() {
           marginLeft: 4,
           fontWeight: 'bold',
           fontSize: 12,
-          color: colorScheme === 'light' ? '#000769' : '#007e00',
+          color: theme.colors.onPrimaryContainer,
         },
         animeSearchListDetailText: {
           fontWeight: 'bold',
@@ -723,7 +722,7 @@ function useStyles() {
           zIndex: 1,
         },
       }),
-    [globalStyles, colorScheme],
+    [globalStyles.text.color, colorScheme, theme.colors.onPrimaryContainer],
   );
 }
 
