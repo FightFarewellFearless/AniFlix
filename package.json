@@ -4,7 +4,7 @@
   "OTAJSVersion": "2",
   "private": true,
   "scripts": {
-    "android": "react-native run-android --active-arch-only",
+    "android": "react-native run-android --active-arch-only --mode debugOptimized",
     "lint": "eslint .",
     "start": "expo start -d",
     "release": "cd android && ./gradlew assembleRelease",
