@@ -52,7 +52,7 @@
     "react-native-marked": "^7.0.2",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.14.5",
-    "react-native-reanimated": "4.0.3",
+    "react-native-reanimated": "4.1.3",
     "react-native-saf-x": "2.2.3",
     "react-native-safe-area-context": "5.6.1",
     "react-native-screens": "4.16.0",
