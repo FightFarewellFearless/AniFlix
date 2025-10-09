@@ -12,7 +12,7 @@ import watchLaterJSON from '../../../types/watchLaterJSON';
 import { useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
 import controlWatchLater from '../../../utils/watchLaterControl';
-import ImageLoading from '../../ImageLoading';
+import ImageLoading from '../../misc/ImageLoading';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 

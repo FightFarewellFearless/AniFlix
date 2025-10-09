@@ -32,7 +32,7 @@ import { HistoryJSON } from '../../../types/historyJSON';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
-import ImageLoading from '../../ImageLoading';
+import ImageLoading from '../../misc/ImageLoading';
 
 export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
 

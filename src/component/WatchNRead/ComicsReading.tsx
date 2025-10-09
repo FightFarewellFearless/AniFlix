@@ -13,11 +13,11 @@ import {
 } from 'react-native-paper';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import { useBackHandler } from '../hooks/useBackHandler';
-import { RootStackNavigator } from '../types/navigation';
-import DialogManager from '../utils/dialogManager';
-import setHistory from '../utils/historyControl';
-import { getKomikuReading } from '../utils/komiku';
+import { useBackHandler } from '../../hooks/useBackHandler';
+import { RootStackNavigator } from '../../types/navigation';
+import DialogManager from '../../utils/dialogManager';
+import setHistory from '../../utils/historyControl';
+import { getKomikuReading } from '../../utils/scraper/komiku';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 

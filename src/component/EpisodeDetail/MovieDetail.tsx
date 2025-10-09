@@ -17,17 +17,17 @@ import Reanimated, {
   useScrollOffset,
 } from 'react-native-reanimated';
 import Icon from '@react-native-vector-icons/fontawesome';
-import useGlobalStyles from '../assets/style';
-import { RootStackNavigator } from '../types/navigation';
-import watchLaterJSON from '../types/watchLaterJSON';
-import controlWatchLater from '../utils/watchLaterControl';
+import useGlobalStyles from '../../assets/style';
+import { RootStackNavigator } from '../../types/navigation';
+import watchLaterJSON from '../../types/watchLaterJSON';
+import controlWatchLater from '../../utils/watchLaterControl';
 
 import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HistoryItemKey } from '../types/databaseTarget';
-import { HistoryJSON } from '../types/historyJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
+import { HistoryItemKey } from '../../types/databaseTarget';
+import { HistoryJSON } from '../../types/historyJSON';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 
 interface MovieEpisode {
   title: string;

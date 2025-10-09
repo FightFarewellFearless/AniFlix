@@ -8,10 +8,10 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { Movies } from '../../utils/animeMovie';
-import { LatestKomikuRelease } from '../../utils/komiku';
+import { Movies } from '../../utils/scraper/animeMovie';
+import { LatestKomikuRelease } from '../../utils/scraper/komiku';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
-import ImageLoading from '../ImageLoading';
+import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
 
 export function ListAnimeComponent(

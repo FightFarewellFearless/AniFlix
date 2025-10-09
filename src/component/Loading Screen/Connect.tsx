@@ -32,8 +32,8 @@ import { EpisodeBaruHome } from '../../types/anime';
 import { SetDatabaseTarget } from '../../types/databaseTarget';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-import animeLocalAPI from '../../utils/animeLocalAPI';
-import { AnimeMovieWebView } from '../../utils/animeMovie';
+import animeLocalAPI from '../../utils/scraper/animeSeries';
+import { AnimeMovieWebView } from '../../utils/scraper/animeMovie';
 import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 

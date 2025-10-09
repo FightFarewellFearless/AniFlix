@@ -4,8 +4,8 @@ import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
 import URL from 'url';
-import AnimeLocal from '../utils/animeLocalAPI';
-import LoadingIndicator from './misc/LoadingIndicator';
+import AnimeLocal from '../../utils/scraper/animeSeries';
+import LoadingIndicator from './LoadingIndicator';
 
 const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   const { source, style, children, ...restProps } = props;

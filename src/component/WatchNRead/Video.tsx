@@ -41,33 +41,33 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { runOnJS } from 'react-native-worklets';
 import url from 'url';
-import { TouchableOpacity } from './misc/TouchableOpacityRNGH';
+import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 
-import useGlobalStyles, { darkText, lightText } from '../assets/style';
-import useDownloadAnimeFunction from '../utils/downloadAnime';
-import setHistory from '../utils/historyControl';
+import useGlobalStyles, { darkText, lightText } from '../../assets/style';
+import useDownloadAnimeFunction from '../../utils/downloadAnime';
+import setHistory from '../../utils/historyControl';
 
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
-import { useBackHandler } from '../hooks/useBackHandler';
-import { AniDetail } from '../types/anime';
-import { RootStackNavigator } from '../types/navigation';
-import Anime_Whitelist from '../utils/Anime_Whitelist';
-import AnimeAPI from '../utils/AnimeAPI';
+import { useBackHandler } from '../../hooks/useBackHandler';
+import { AniDetail } from '../../types/anime';
+import { RootStackNavigator } from '../../types/navigation';
+import Anime_Whitelist from '../../utils/Anime_Whitelist';
+import AnimeAPI from '../../utils/AnimeAPI';
 import {
   getMovieDetail,
   getRawDataIfAvailable,
   getStreamingDetail,
   MovieDetail,
-} from '../utils/animeMovie';
-import { useKeyValueIfFocused } from '../utils/DatabaseManager';
-import deviceUserAgent from '../utils/deviceUserAgent';
-import DialogManager from '../utils/dialogManager';
-import Skeleton from './misc/Skeleton';
-import VideoPlayer, { PlayerRef } from './VideoPlayer';
+} from '../../utils/scraper/animeMovie';
+import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
+import deviceUserAgent from '../../utils/deviceUserAgent';
+import DialogManager from '../../utils/dialogManager';
+import Skeleton from '../misc/Skeleton';
+import VideoPlayer, { PlayerRef } from '../VideoPlayer';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 

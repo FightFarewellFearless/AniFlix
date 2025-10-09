@@ -2,7 +2,7 @@ import { useContext, useRef } from 'react';
 import { Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
-import { BASE } from './animeLocalAPI';
+import { BASE } from './scraper/animeSeries';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 

@@ -20,10 +20,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { runOnJS } from 'react-native-worklets';
-import { version as appVersion, OTAJSVersion } from '../../package.json';
-import useGlobalStyles from '../assets/style';
-import { RootStackNavigator } from '../types/navigation';
-import DialogManager from '../utils/dialogManager';
+import { version as appVersion, OTAJSVersion } from '../../../package.json';
+import useGlobalStyles from '../../assets/style';
+import { RootStackNavigator } from '../../types/navigation';
+import DialogManager from '../../utils/dialogManager';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 

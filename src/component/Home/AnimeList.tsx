@@ -53,8 +53,8 @@ import {
 import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/animeMovie';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku';
+import { getLatestMovie, Movies } from '../../utils/scraper/animeMovie';
+import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scraper/komiku';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';

@@ -3,11 +3,11 @@ import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import { Buffer } from 'buffer/';
-import deviceUserAgent from './deviceUserAgent';
+import deviceUserAgent from '../deviceUserAgent';
 
 import cheerio from 'cheerio';
 
-import { unpack } from './unpacker';
+import { unpack } from '../unpacker';
 
 export interface Movies {
   title: string;

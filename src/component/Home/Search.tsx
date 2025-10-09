@@ -37,8 +37,8 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import { Movies, searchMovie } from '../../utils/animeMovie';
-import ImageLoading from '../ImageLoading';
+import { Movies, searchMovie } from '../../utils/scraper/animeMovie';
+import ImageLoading from '../misc/ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
 
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
@@ -46,7 +46,7 @@ import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { TextInput as TextInputType } from 'react-native';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-import { KomikuSearch, komikuSearch } from '../../utils/komiku';
+import { KomikuSearch, komikuSearch } from '../../utils/scraper/komiku';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 import { RenderScrollComponent } from './AnimeList';
 

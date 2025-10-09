@@ -1,6 +1,6 @@
 import cheerio from 'cheerio';
 import { ToastAndroid } from 'react-native';
-import deviceUserAgent from './deviceUserAgent';
+import deviceUserAgent from '../deviceUserAgent';
 
 const DOMAIN = 'komiku.org';
 const BASE_URL = `https://${DOMAIN}`;

@@ -26,12 +26,12 @@ import {
   NewAnimeList,
   SearchAnimeList,
   listAnimeTypeList,
-} from '../types/anime';
-import deviceUserAgent from './deviceUserAgent';
+} from '../../types/anime';
+import deviceUserAgent from '../deviceUserAgent';
 
 import { Buffer } from 'buffer/';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
-import runtime from '../misc/AniFlixRuntime';
+import runtime from '../../misc/AniFlixRuntime';
 
 let BASE_DOMAIN = 'otakudesu.best';
 let BASE_URL = 'https://' + BASE_DOMAIN;

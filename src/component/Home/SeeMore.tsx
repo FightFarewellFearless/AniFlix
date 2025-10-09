@@ -18,8 +18,8 @@ import {
 import { NewAnimeList } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/animeMovie';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/komiku';
+import { getLatestMovie, Movies } from '../../utils/scraper/animeMovie';
+import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scraper/komiku';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 

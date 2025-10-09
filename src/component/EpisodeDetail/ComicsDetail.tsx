@@ -21,14 +21,14 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '@react-native-vector-icons/fontawesome';
-import useGlobalStyles from '../assets/style';
-import { HistoryItemKey } from '../types/databaseTarget';
-import { HistoryJSON } from '../types/historyJSON';
-import { RootStackNavigator } from '../types/navigation';
-import watchLaterJSON from '../types/watchLaterJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../utils/DatabaseManager';
-import { KomikuDetail } from '../utils/komiku';
-import controlWatchLater from '../utils/watchLaterControl';
+import useGlobalStyles from '../../assets/style';
+import { HistoryItemKey } from '../../types/databaseTarget';
+import { HistoryJSON } from '../../types/historyJSON';
+import { RootStackNavigator } from '../../types/navigation';
+import watchLaterJSON from '../../types/watchLaterJSON';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
+import { KomikuDetail } from '../../utils/scraper/komiku';
+import controlWatchLater from '../../utils/watchLaterControl';
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList =

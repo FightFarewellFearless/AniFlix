@@ -7,7 +7,7 @@ import {
   NewAnimeList,
   SearchAnime,
 } from '../types/anime';
-import Anime, { BASE } from './animeLocalAPI';
+import Anime, { BASE } from './scraper/animeSeries';
 import { setWebViewOpen } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 

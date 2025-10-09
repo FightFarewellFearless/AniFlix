@@ -2,7 +2,7 @@ import { HistoryItemKey } from '../types/databaseTarget';
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
 import { DatabaseManager } from './DatabaseManager';
-import { KomikuReading } from './komiku';
+import { KomikuReading } from './scraper/komiku';
 
 async function setHistory(
   targetData: RootStackNavigator['Video']['data'] | KomikuReading,

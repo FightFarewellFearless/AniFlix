@@ -1,5 +1,5 @@
-import { MovieDetail, MovieStreamingDetail } from '../utils/animeMovie';
-import { KomikuDetail, KomikuReading } from '../utils/komiku';
+import { MovieDetail, MovieStreamingDetail } from '../utils/scraper/animeMovie';
+import { KomikuDetail, KomikuReading } from '../utils/scraper/komiku';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {

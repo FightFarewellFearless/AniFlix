@@ -39,11 +39,11 @@ import {
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
-import { Movies } from './src/utils/animeMovie';
+import { Movies } from './src/utils/scraper/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
-import { LatestKomikuRelease } from './src/utils/komiku';
+import { LatestKomikuRelease } from './src/utils/scraper/komiku';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
   reactNavigationLight: ReactNavigationDefaultTheme,
@@ -67,15 +67,15 @@ const CombinedDarkTheme = {
   },
 };
 
-const AniDetail = lazy(() => import('./src/component/AniDetail'));
+const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
-const Video = lazy(() => import('./src/component/Video'));
-const Blocked = lazy(() => import('./src/component/Blocked'));
-const FailedToConnect = lazy(() => import('./src/component/FailedToConnect'));
-const NeedUpdate = lazy(() => import('./src/component/NeedUpdate'));
-const MovieDetail = lazy(() => import('./src/component/MovieDetail'));
-const ComicsDetail = lazy(() => import('./src/component/ComicsDetail'));
-const ComicsReading = lazy(() => import('./src/component/ComicsReading'));
+const Video = lazy(() => import('./src/component/WatchNRead/Video'));
+const Blocked = lazy(() => import('./src/component/NeedAttention/Blocked'));
+const FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
+const NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
+const MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
+const ComicsDetail = lazy(() => import('./src/component/EpisodeDetail/ComicsDetail'));
+const ComicsReading = lazy(() => import('./src/component/WatchNRead/ComicsReading'));
 const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
 const Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
 const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
