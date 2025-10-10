@@ -71,7 +71,6 @@ function MovieDetail(props: Props) {
     } else return undefined;
   }, [historyListsJson, historyTitle]);
 
-  // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<MovieEpisode>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
 

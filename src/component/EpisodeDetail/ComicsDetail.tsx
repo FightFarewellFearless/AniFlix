@@ -41,7 +41,6 @@ export default function ComicsDetail(props: Props) {
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
   const styles = useStyles();
-  // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
   const scrollRef = useAnimatedRef<FlashListRef<KomikuDetail['chapters'][0]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
