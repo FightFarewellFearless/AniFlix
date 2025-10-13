@@ -3278,9 +3278,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.3.27":
-  version: 7.3.27
-  resolution: "@react-navigation/native-stack@npm:7.3.27"
+"@react-navigation/native-stack@npm:^7.3.28":
+  version: 7.3.28
+  resolution: "@react-navigation/native-stack@npm:7.3.28"
   dependencies:
     "@react-navigation/elements": ^2.6.5
     warn-once: ^0.1.1
@@ -3290,7 +3290,7 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 7719e78b86e3465a8a51ef302a54c059aa0e7ff38d671c898f71e91265a71843f6fc17ef783ff08e80b00c4f16902cba58f41fdd06efbc735b11a090d7f371d0
+  checksum: 7cefd3b10f531de8abacb77e5152727a320e5d68e41c721bb82bb8202184fe0850f17416dd1be2229bc513577f8dbcfd6f3c131f92ce7f3f62842c76995bfe6b
   languageName: node
   linkType: hard
 
@@ -3963,7 +3963,7 @@ __metadata:
     "@react-native/typescript-config": 0.81.4
     "@react-navigation/drawer": ^7.5.9
     "@react-navigation/native": ^7.1.18
-    "@react-navigation/native-stack": ^7.3.27
+    "@react-navigation/native-stack": ^7.3.28
     "@rnx-kit/align-deps": ^3.2.1
     "@shopify/flash-list": 2.1.0
     "@types/jest": ^29.5.14
