@@ -3238,9 +3238,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/drawer@npm:^7.5.9":
-  version: 7.5.9
-  resolution: "@react-navigation/drawer@npm:7.5.9"
+"@react-navigation/drawer@npm:^7.5.10":
+  version: 7.5.10
+  resolution: "@react-navigation/drawer@npm:7.5.10"
   dependencies:
     "@react-navigation/elements": ^2.6.5
     color: ^4.2.3
@@ -3254,7 +3254,7 @@ __metadata:
     react-native-reanimated: ">= 2.0.0"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 26aad5eff1575cda5f80b271853b2436d797050c80ebae474a3432d0fadfa5889b0236ac461cff86241cd3bf44ea4bd527908ea98ba30ddee31417f268fcb44e
+  checksum: 67d49c3a29a10191f0dfc8d71b9c4b90e14a6592e1af3a9d87d5c2d2d5aa56bc8022326ccaffe1b21f2cd46cd31aeb53a852843d01c347ec455752e108affa5b
   languageName: node
   linkType: hard
 
@@ -3961,7 +3961,7 @@ __metadata:
     "@react-native/eslint-config": 0.81.4
     "@react-native/metro-config": 0.81.4
     "@react-native/typescript-config": 0.81.4
-    "@react-navigation/drawer": ^7.5.9
+    "@react-navigation/drawer": ^7.5.10
     "@react-navigation/native": ^7.1.18
     "@react-navigation/native-stack": ^7.3.27
     "@rnx-kit/align-deps": ^3.2.1
