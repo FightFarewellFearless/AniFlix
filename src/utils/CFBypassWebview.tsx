@@ -2,7 +2,6 @@ import { useContext, useRef } from 'react';
 import { Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
-import { BASE } from './scrapers/animeSeries';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 
@@ -11,7 +10,6 @@ function CFBypassWebView() {
   const theme = useTheme();
   const bypassContext = useContext(CFBypassIsOpenContext);
   const webView = useRef<WebView>(null);
-  const lastTitle = useRef('');
   return (
     <Modal
       onRequestClose={() => bypassContext.setIsOpen(false)}
@@ -33,21 +31,10 @@ function CFBypassWebView() {
               },
             }}
             onNavigationStateChange={event => {
-              // console.log(event.title, lastTitle.current, event.loading, event.navigationType);
-              if (!event.title || event.loading) return;
-              if (
-                (event.title === 'about:blank' ||
-                  event.title.startsWith(BASE.domain + '/') ||
-                  event.title === '') &&
-                lastTitle.current !== 'Just a moment...'
-              ) {
-                return;
-              }
-              if (event.title !== 'Just a moment...') {
+              if (event.title.includes('Otaku Desu')) {
                 bypassContext.setIsOpen(false);
                 ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
               }
-              lastTitle.current = event.title;
             }}
             sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={true}

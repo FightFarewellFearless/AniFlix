@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "expo start -d",
     "release": "cd android && ./gradlew assembleRelease",
-    "installapk": "yarn rename && adb install android/app/build/outputs/apk/release/aniflix.apk",
+    "installapk": "adb install android/app/build/outputs/apk/release/aniflix.apk",
     "clean": "cd android && ./gradlew clean",
     "test": "jest",
     "rename": "mv android/app/build/outputs/apk/release/anime-release.apk android/app/build/outputs/apk/release/aniflix.apk"

@@ -83,7 +83,7 @@ function BottomTabs(props: Props) {
       // activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
       // getFreezeOnBlur={() => true}
       screenOptions={{
-        animation: 'shift',
+        // animation: 'shift',
         freezeOnBlur: true,
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
