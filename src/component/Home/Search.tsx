@@ -38,10 +38,10 @@ import Reanimated, {
   ZoomOut,
 } from 'react-native-reanimated';
 import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
-import ImageLoading from '../misc/ImageLoading';
 import DarkOverlay from '../misc/DarkOverlay';
+import ImageLoading from '../misc/ImageLoading';
 
-import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { TextInput as TextInputType } from 'react-native';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
@@ -55,7 +55,7 @@ const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpa
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
-  NativeBottomTabScreenProps<HomeNavigator, 'Search'>,
+  BottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
 >;
 

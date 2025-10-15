@@ -1,7 +1,7 @@
-import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import * as MeasureText from '@domir/react-native-measure-text';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import MaterialIcon, { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {
   NavigationProp,
   StackActions,
@@ -63,7 +63,7 @@ import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
 
-type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
 const Home = memo(HomeList);
 export default Home;

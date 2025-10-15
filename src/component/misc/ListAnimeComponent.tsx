@@ -1,10 +1,10 @@
-import { NativeBottomTabNavigationProp } from '@bottom-tabs/react-navigation';
+import Icon from '@react-native-vector-icons/fontawesome';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -26,8 +26,8 @@ export function ListAnimeComponent(
     navigationProp:
       | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
-      | NativeBottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
-      | NativeBottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
+      | BottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | BottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
   } & { gap?: boolean; fromSeeMore?: boolean },
 ) {
   const styles = useStyles();

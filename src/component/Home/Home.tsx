@@ -1,13 +1,13 @@
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import {
-  createNativeBottomTabNavigator,
-  NativeBottomTabNavigationOptions,
-} from '@bottom-tabs/react-navigation';
-import { useFocusEffect } from '@react-navigation/native';
+  BottomTabNavigationOptions,
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs';
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
-import { useTheme } from 'react-native-paper';
+import { BottomNavigation, useTheme } from 'react-native-paper';
 import { withSuspenseAndSafeArea } from '../../../App';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -18,18 +18,18 @@ const Utils = lazy(() => import('./Utils'));
 const Saya = lazy(() => import('./Saya'));
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
-const Tab = createNativeBottomTabNavigator<HomeNavigator>();
+const Tab = createBottomTabNavigator<HomeNavigator>();
 
 const tabScreens: {
   name: keyof HomeNavigator;
   component: (props: any) => React.JSX.Element;
-  options: NativeBottomTabNavigationOptions;
+  options: BottomTabNavigationOptions;
 }[] = [
   {
     name: 'AnimeList',
     component: withSuspenseAndSafeArea(EpisodeBaruHome, false),
     options: {
-      tabBarIcon: () => require('../../assets/icons/home.svg'),
+      tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
       tabBarLabel: 'Beranda',
     },
   },
@@ -37,7 +37,7 @@ const tabScreens: {
     name: 'Search',
     component: withSuspenseAndSafeArea(Search, true, false, true),
     options: {
-      tabBarIcon: () => require('../../assets/icons/search.svg'),
+      tabBarIcon: ({ color, size }) => <MaterialIcons name="search" size={size} color={color} />,
       tabBarLabel: 'Pencarian',
     },
   },
@@ -45,7 +45,7 @@ const tabScreens: {
     name: 'Saya',
     component: withSuspenseAndSafeArea(Saya, false),
     options: {
-      tabBarIcon: () => require('../../assets/icons/user.svg'),
+      tabBarIcon: ({ color, size }) => <MaterialIcons name="person" size={size} color={color} />,
       tabBarLabel: 'Saya',
     },
   },
@@ -53,14 +53,14 @@ const tabScreens: {
     name: 'Utilitas',
     component: withSuspenseAndSafeArea(Utils, false),
     options: {
-      tabBarIcon: () => require('../../assets/icons/tools.svg'),
+      tabBarIcon: ({ color, size }) => <MaterialIcons name="build" size={size} color={color} />,
     },
   },
 ];
 
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
   const theme = useTheme();
   useEffect(() => {
     startTransition(() => {
@@ -77,14 +77,57 @@ function BottomTabs(props: Props) {
   );
   return (
     <Tab.Navigator
-      tabBarStyle={{
-        backgroundColor: colorScheme === 'dark' ? '#181818' : '#f0f0f0',
-      }}
-      activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
+      // tabBarStyle={{
+      //   backgroundColor: colorScheme === 'dark' ? '#181818' : '#f0f0f0',
+      // }}
+      // activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
+      // getFreezeOnBlur={() => true}
       screenOptions={{
+        animation: 'shift',
         freezeOnBlur: true,
+        headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
-      }}>
+      }}
+      tabBar={({ navigation, state, descriptors, insets }) => (
+        <BottomNavigation.Bar
+          navigationState={state}
+          safeAreaInsets={insets}
+          onTabPress={({ route, preventDefault }) => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (event.defaultPrevented) {
+              preventDefault();
+            } else {
+              navigation.dispatch({
+                ...CommonActions.navigate(route.name, route.params),
+                target: state.key,
+              });
+            }
+          }}
+          renderIcon={({ route, focused, color }) =>
+            descriptors[route.key].options.tabBarIcon?.({
+              focused,
+              color,
+              size: 24,
+            }) || null
+          }
+          getLabelText={({ route }) => {
+            const { options } = descriptors[route.key];
+            const label =
+              typeof options.tabBarLabel === 'string'
+                ? options.tabBarLabel
+                : typeof options.title === 'string'
+                  ? options.title
+                  : route.name;
+
+            return label;
+          }}
+        />
+      )}>
       {tabScreens.map(({ name, component: Component, options }) => (
         <Tab.Screen key={name} name={name} options={options}>
           {Component}
