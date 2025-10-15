@@ -1,13 +1,14 @@
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import * as MeasureText from '@domir/react-native-measure-text';
-import { LegendList, LegendListRenderItemProps } from '@legendapp/list';
+import { LegendList, LegendListRef } from '@legendapp/list';
+import MaterialIcon, { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import {
   NavigationProp,
   StackActions,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { FlashList, useMappingHelper } from '@shopify/flash-list';
+import { FlashList, ListRenderItemInfo, useMappingHelper } from '@shopify/flash-list';
 import React, {
   memo,
   use,
@@ -40,7 +41,6 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MaterialIcon from '@react-native-vector-icons/material-icons';
 import { runOnJS } from 'react-native-worklets';
 import { OTAJSVersion, version } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
@@ -174,10 +174,30 @@ function HomeList(props: HomeProps) {
     },
     [props],
   );
-  const jadwalDataArray = useMemo(() => Object.keys(data?.jadwalAnime ?? {}), [data?.jadwalAnime]);
+
+  const listRef = useRef<LegendListRef>(null);
+  const [jadwalHidden, setJadwalHidden] = useState(true);
+  const toggleJadwal = useCallback(() => {
+    setJadwalHidden(x => !x);
+  }, []);
+  useEffect(() => {
+    if (!jadwalHidden) {
+      listRef.current?.scrollToIndex({
+        index: 0,
+        animated: true,
+        viewPosition: 0.5,
+      });
+    }
+  }, [jadwalHidden]);
+  const jadwalDataArray = useMemo(
+    () => (jadwalHidden ? [] : Object.keys(data?.jadwalAnime ?? {})),
+    [data?.jadwalAnime, jadwalHidden],
+  );
 
   return (
-    <FlashList
+    <LegendList
+      ref={listRef}
+      recycleItems
       renderScrollComponent={RenderScrollComponent}
       style={styles.container}
       refreshControl={
@@ -224,13 +244,23 @@ function HomeList(props: HomeProps) {
           <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
           <MovieList props={props} key={'anime_movie' + refreshingKey} />
           <ComicList key={'comick' + refreshingKey} />
-          <View style={styles.scheduleSection}>
+          <TouchableOpacity
+            onPress={toggleJadwal}
+            style={[
+              styles.scheduleSection,
+              { flexDirection: 'row', justifyContent: 'space-between' },
+            ]}>
             <Text style={styles.sectionTitle}>Jadwal Anime</Text>
-          </View>
+            <MaterialIcons
+              name={jadwalHidden ? 'arrow-downward' : 'arrow-upward'}
+              size={20}
+              color={styles.sectionTitle.color}
+            />
+          </TouchableOpacity>
         </>
       }
       data={jadwalDataArray}
-      // keyExtractor={z => z}
+      keyExtractor={z => z?.toString()}
       renderItem={renderJadwalAnime}
       showsVerticalScrollIndicator={false}
     />
@@ -256,8 +286,9 @@ function EpisodeBaruUNMEMO({
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
   const renderNewAnime = useCallback(
-    ({ item }: LegendListRenderItemProps<NewAnimeList>) => (
+    ({ item }: ListRenderItemInfo<NewAnimeList>) => (
       <ListAnimeComponent
+        gap
         newAnimeData={item}
         key={'btn' + item.title + item.episode}
         navigationProp={props.navigation}
@@ -280,10 +311,9 @@ function EpisodeBaruUNMEMO({
         </TouchableOpacity>
       </View>
       {(data?.newAnime.length || 0) > 0 ? (
-        <LegendList
+        <FlashList
           renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 6 }}
-          recycleItems
+          contentContainerStyle={{ gap: 3 }}
           horizontal
           data={(data?.newAnime ?? []).slice(0, 25)}
           keyExtractor={z => z.title}
@@ -306,8 +336,9 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
   const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
-    ({ item }: LegendListRenderItemProps<Movies>) => (
+    ({ item }: ListRenderItemInfo<Movies>) => (
       <ListAnimeComponent
+        gap
         newAnimeData={item}
         type="movie"
         key={'btn' + item.title}
@@ -362,10 +393,9 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
       )}
 
       {data?.length !== 0 ? (
-        <LegendList
+        <FlashList
           renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 6 }}
-          recycleItems
+          contentContainerStyle={{ gap: 3 }}
           horizontal
           data={data?.slice(0, 25) ?? []}
           renderItem={renderMovie}
@@ -402,8 +432,9 @@ function ComicListUNMEMO() {
   }, [setData]);
 
   const renderComics = useCallback(
-    ({ item }: LegendListRenderItemProps<LatestKomikuRelease>) => (
+    ({ item }: ListRenderItemInfo<LatestKomikuRelease>) => (
       <ListAnimeComponent
+        gap
         newAnimeData={item}
         type="comics"
         key={'btn' + item.title}
@@ -439,10 +470,9 @@ function ComicListUNMEMO() {
       )}
 
       {data && data?.length !== 0 ? (
-        <LegendList
+        <FlashList
           renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 6 }}
-          recycleItems
+          contentContainerStyle={{ gap: 3 }}
           horizontal
           data={data.slice(0, 10)}
           renderItem={renderComics}
@@ -466,7 +496,7 @@ function ShowSkeletonLoading() {
   return (
     <View style={{ flexDirection: 'row', gap: 12 }}>
       {[1, 2, 3].map((_, index) => (
-        <View key={index} style={{ gap: 6 }}>
+        <View key={index} style={{ gap: 3 }}>
           <Skeleton
             key={index + 'image'}
             width={LIST_BACKGROUND_WIDTH}
