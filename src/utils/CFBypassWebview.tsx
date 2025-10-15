@@ -33,7 +33,8 @@ function CFBypassWebView() {
               },
             }}
             onNavigationStateChange={event => {
-              // console.log(event.title, lastTitle.current)
+              // console.log(event.title, lastTitle.current, event.loading, event.navigationType);
+              if (!event.title || event.loading) return;
               if (
                 (event.title === 'about:blank' ||
                   event.title.startsWith(BASE.domain + '/') ||
@@ -44,11 +45,7 @@ function CFBypassWebView() {
               }
               if (event.title !== 'Just a moment...') {
                 bypassContext.setIsOpen(false);
-                ToastAndroid.showWithGravity(
-                  'Bypass berhasil, silahkan lanjutkan!',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER,
-                );
+                ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
               }
               lastTitle.current = event.title;
             }}
