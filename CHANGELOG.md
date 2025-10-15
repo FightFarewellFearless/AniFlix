@@ -1,3 +1,14 @@
+# v1.1.3 (05-Oktober-2025)
+## Ditambahkan
+- Daftar jadwal anime pada beranda sekarang bisa di sembunyikan
+## Ditingkatkan
+- Rendering list lebih cepat di beranda
+## Diperbaiki
+- Potensi perbaikan untuk blank screen pada beberapa device
+- Potensi perbaikan bypass cloudflare tidak bekerja pada beberapa device
+## Perubahan lain
+- Pengoptimalan ukuran aplikasi
+
 # v1.1.2_JS-3 (09-Oktober-2025)
 Beberapa perubahan kecil pada kode... (Tidak banyak perubahan yang terlihat pada pengguna)
 # v1.1.2_JS-2 (29-September-2025)
