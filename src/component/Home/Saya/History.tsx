@@ -243,7 +243,9 @@ const RenderList = memo(function RenderList({
         if (currentItem.current !== keyItem) return;
         const historyDb = JSON.parse(value ?? '{}');
         HistoryDatabaseCache.set(keyItem, historyDb);
+        // startTransition(() => {
         setItem(historyDb);
+        // });
       });
     }, [keyItem, setItem]),
   );
@@ -276,10 +278,11 @@ const RenderList = memo(function RenderList({
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.listWatchTime}>
             <Text style={[globalStyles.text, styles.listDateText]}>
-              {moment
-                .duration(moment(Date.now()).diff(item?.date, 'seconds'), 'seconds')
-                .humanize() + ' '}
-              yang lalu pukul {moment(item?.date).format('HH:mm')}
+              {item?.date &&
+                moment
+                  .duration(moment(Date.now()).diff(item.date, 'seconds'), 'seconds')
+                  .humanize() +
+                  moment(item.date).format('[ yang lalu] [\n]DD-MMMM-YYYY [pukul] HH:mm')}
             </Text>
           </View>
 
@@ -473,7 +476,8 @@ function useStyles() {
           flex: 1,
         },
         listDateText: {
-          color: '#a0a0a0',
+          color: theme.colors.onSecondaryContainer,
+          opacity: 0.8,
           fontSize: 12,
           fontWeight: 'bold',
         },
