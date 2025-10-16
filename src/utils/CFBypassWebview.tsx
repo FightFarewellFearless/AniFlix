@@ -36,7 +36,7 @@ function CFBypassWebView() {
                 bypassContext.setIsOpen(false);
                 ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
               }
-              if (!event.loading) {
+              if (!event.loading && event.title === 'Just a moment...') {
                 lastTitle.current = event.title;
               }
             }}
