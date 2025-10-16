@@ -1,4 +1,9 @@
-# v1.1.3_JS-1 (15-Oktober-2025)
+# v1.1.3_JS-2 (16-Oktober-2025)
+## Ditambahkan
+- Animasi transisi layar bottom tabs
+## Ditingkatkan
+- Kecepatan bypass CloudFlare
+# v1.1.3_JS-1 (16-Oktober-2025)
 ## Diperbaiki
 - Animasi menyebabkan utilitas blank screen
 - Bypass CloudFlare webview
