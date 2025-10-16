@@ -82,9 +82,10 @@ function BottomTabs(props: Props) {
       // }}
       // activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
       // getFreezeOnBlur={() => true}
+      // TODO: Remove this when the blank screen issue is fixed
+      detachInactiveScreens={false}
       screenOptions={{
-        // animation: 'shift',
-        freezeOnBlur: true,
+        animation: 'shift',
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
       }}
