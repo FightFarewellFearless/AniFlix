@@ -10,6 +10,7 @@ function CFBypassWebView() {
   const theme = useTheme();
   const bypassContext = useContext(CFBypassIsOpenContext);
   const webView = useRef<WebView>(null);
+  const lastTitle = useRef<string>('');
   return (
     <Modal
       onRequestClose={() => bypassContext.setIsOpen(false)}
@@ -31,9 +32,12 @@ function CFBypassWebView() {
               },
             }}
             onNavigationStateChange={event => {
-              if (event.title.includes('Otaku Desu')) {
+              if (lastTitle.current === 'Just a moment...' && event.title !== 'Just a moment...') {
                 bypassContext.setIsOpen(false);
                 ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
+              }
+              if (!event.loading) {
+                lastTitle.current = event.title;
               }
             }}
             sharedCookiesEnabled={true}
