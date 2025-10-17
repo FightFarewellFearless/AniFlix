@@ -1,3 +1,8 @@
+# v1.1.3_JS-3 (17-Oktober-2025)
+## Ditingkatkan
+- Tampilan bypass cloudflare
+## Diperbaiki
+- Bypass CloudFlare pada sistem berbahasa indonesia
 # v1.1.3_JS-2 (16-Oktober-2025)
 ## Ditambahkan
 - Animasi transisi layar bottom tabs
