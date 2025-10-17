@@ -29,14 +29,16 @@ function CFBypassWebView() {
               uri: bypassContext.url,
               headers: {
                 'User-Agent': deviceUserAgent,
+                'Accept-Language': 'en-US,en;q=0.9',
               },
             }}
             onNavigationStateChange={event => {
-              if (lastTitle.current === 'Just a moment...' && event.title !== 'Just a moment...') {
+              const lastTitleLang = ['Just a moment...', 'Tunggu sebentar...'];
+              if (lastTitle.current === 'Just a moment...' && lastTitleLang.includes(event.title)) {
                 bypassContext.setIsOpen(false);
                 ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
               }
-              if (!event.loading && event.title === 'Just a moment...') {
+              if (!event.loading && lastTitleLang.includes(event.title)) {
                 lastTitle.current = event.title;
               }
             }}
