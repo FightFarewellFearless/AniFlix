@@ -41,7 +41,7 @@
     "expo-video": "~3.0.11",
     "moment": "^2.30.1",
     "react": "19.1.0",
-    "react-native": "0.81.4",
+    "react-native": "0.82.0",
     "react-native-blob-util": "^0.22.2",
     "react-native-device-info": "^14.1.1",
     "react-native-edge-to-edge": "^1.7.0",
