@@ -73,14 +73,21 @@ function Loading(props: Props) {
 
   const fetchAnimeData = useCallback(async () => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
-      props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+      // props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+      ToastAndroid.show('Gagal menghubungkan ke server anime', ToastAndroid.SHORT);
     });
     setLoadStatus(old => ({
       ...old,
       'Menghubungkan ke server': true,
     }));
+    if (jsondata === undefined) {
+      return {
+        newAnime: [],
+        jadwalAnime: [],
+      };
+    }
     return jsondata;
-  }, [props.navigation]);
+  }, []);
 
   const prepareData = useCallback(async () => {
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];

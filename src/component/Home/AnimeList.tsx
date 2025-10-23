@@ -246,7 +246,13 @@ function HomeList(props: HomeProps) {
             <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
             <Text style={styles.refreshText}>Refresh Data</Text>
           </TouchableOpacity>
-          <EpisodeBaru styles={styles} globalStyles={globalStyles} data={data} props={props} />
+          <EpisodeBaru
+            isRefreshing={refresh}
+            styles={styles}
+            globalStyles={globalStyles}
+            data={data}
+            props={props}
+          />
           <MovieList props={props} key={'anime_movie' + refreshingKey} />
           <ComicList key={'comick' + refreshingKey} />
           <TouchableOpacity
@@ -276,6 +282,7 @@ const EpisodeBaru = memo(
   EpisodeBaruUNMEMO,
   (prev, next) =>
     prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
+    prev.isRefreshing === next.isRefreshing &&
     prev.styles === next.styles &&
     prev.globalStyles.text === next.globalStyles.text,
 );
@@ -284,9 +291,11 @@ function EpisodeBaruUNMEMO({
   styles,
   data,
   props,
+  isRefreshing,
 }: {
   data: EpisodeBaruType | undefined;
   props: HomeProps;
+  isRefreshing?: boolean;
   styles: ReturnType<typeof useStyles>;
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
@@ -326,8 +335,15 @@ function EpisodeBaruUNMEMO({
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
-      ) : (
+      ) : isRefreshing ? (
         <ShowSkeletonLoading />
+      ) : (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
       )}
     </View>
   );

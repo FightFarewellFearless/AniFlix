@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
+import React, { lazy, memo, useCallback, useContext, useEffect } from 'react';
 import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 import { BottomNavigation, useTheme } from 'react-native-paper';
 import { withSuspenseAndSafeArea } from '../../../App';
@@ -63,9 +63,7 @@ function BottomTabs(props: Props) {
   // const colorScheme = useColorScheme();
   const theme = useTheme();
   useEffect(() => {
-    startTransition(() => {
-      setAnimeData?.(props.route.params.data);
-    });
+    setAnimeData?.(props.route.params.data);
   }, [props.route.params.data, setAnimeData]);
   useFocusEffect(
     useCallback(() => {
