@@ -88,7 +88,6 @@ function CFBypassWebView() {
                 marginTop: 10,
               }}
               onPress={() => {
-                ToastAndroid.show('Proses dibatalkan.', ToastAndroid.SHORT);
                 bypassContext.setIsOpen(false);
               }}>
               <Text style={styles.closeButtonText}>Batalkan & Tutup</Text>
