@@ -33,7 +33,7 @@
     "cheerio": "1.0.0-rc.12",
     "expo": "^54.0.13",
     "expo-document-picker": "~14.0.7",
-    "expo-image": "~3.0.9",
+    "expo-image": "~3.0.10",
     "expo-linear-gradient": "~15.0.7",
     "expo-splash-screen": "~31.0.10",
     "expo-sqlite": "~16.0.8",
