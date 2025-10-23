@@ -116,11 +116,11 @@ function HomeList(props: HomeProps) {
         );
       };
       function callback(finished?: boolean) {
-        runOnJS(displayNewQuote)(finished);
+        if (finished) runOnJS(displayNewQuote)(finished);
       }
       const initialDuration = Math.max(
         minimumAnimationDuration,
-        (textLayoutWidth.get() / 100) * baseDurationPer100px,
+        (measureQuoteTextWidth(animationText) / 100) * baseDurationPer100px,
       );
       boxTextAnim.set(
         withDelay(
@@ -128,11 +128,16 @@ function HomeList(props: HomeProps) {
           withTiming(1, { duration: initialDuration, easing: Easing.linear }, callback),
         ),
       );
+    }, [animationText, boxTextAnim, textLayoutWidth]),
+  );
 
+  useFocusEffect(
+    useCallback(() => {
       return () => {
         cancelAnimation(boxTextAnim);
+        boxTextAnim.set(0);
       };
-    }, [boxTextAnim, textLayoutWidth]),
+    }, [boxTextAnim]),
   );
 
   const refreshing = useCallback(() => {
