@@ -181,7 +181,10 @@ function NeedUpdate(props: Props) {
             {props.route.params.nativeUpdate ? props.route.params.latestVersion : 'OTA Update'}
           </Text>
         </View>
-        <Markdown value={props.route.params.changelog} />
+        <Markdown
+          flatListProps={{ style: { backgroundColor: styles.updateInfo.backgroundColor } }}
+          value={props.route.params.changelog}
+        />
         {!isDownloadStart ? (
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
             <Icon

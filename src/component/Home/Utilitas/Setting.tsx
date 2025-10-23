@@ -61,6 +61,7 @@ type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const styles = useStyles();
   const enableBatteryTimeInfo = useKeyValueIfFocused('enableBatteryTimeInfo');
 
@@ -406,6 +407,7 @@ function Setting(_props: Props) {
       </Modal>
 
       <FlatList
+        style={{ backgroundColor: theme.colors.background }}
         data={settingsData}
         keyExtractor={keyExtractor}
         renderItem={({ item }) => {
