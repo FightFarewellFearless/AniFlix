@@ -207,6 +207,7 @@ function HomeList(props: HomeProps) {
       style={styles.container}
       refreshControl={
         <RefreshControl
+          style={{ zIndex: 1 }}
           refreshing={refresh}
           onRefresh={refreshing}
           progressBackgroundColor={colorScheme === 'dark' ? '#121212' : '#f5f5f7'}
