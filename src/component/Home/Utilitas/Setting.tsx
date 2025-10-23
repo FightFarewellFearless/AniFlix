@@ -342,8 +342,8 @@ function Setting(_props: Props) {
       handler: batteryTimeSwitchHandler,
     },
     {
-      title: 'Tampilkan notifikasi saat menonton',
-      description: 'Tampilkan notifkasi "now playing" saat sedang menonton',
+      title: 'Picture-in-Picture dan notifikasi "now playing"',
+      description: 'Tampilkan notifkasi "now playing" saat menonton dan aktifkan fitur PiP',
       icon: <Icon name="bell" style={globalStyles.text} size={iconSize} />,
       rightComponent: (
         <Switch

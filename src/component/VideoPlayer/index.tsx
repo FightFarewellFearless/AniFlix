@@ -355,6 +355,10 @@ function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<Vi
   const requestPiP = useCallback(() => {
     videoRef?.current?.startPictureInPicture();
   }, [videoRef]);
+  const isPiPEnabled = useModifiedKeyValueIfFocused(
+    'enableNowPlayingNotification',
+    res => res === 'true',
+  );
   return (
     <View
       style={{
@@ -365,6 +369,7 @@ function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<Vi
       }}>
       <TouchableOpacity
         style={{
+          display: isPiPEnabled ? 'flex' : 'none',
           justifyContent: 'center',
           marginLeft: 6,
           backgroundColor: '#00000062',
