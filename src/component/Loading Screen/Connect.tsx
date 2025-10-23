@@ -195,10 +195,31 @@ function Loading(props: Props) {
       if (nativeAppVersion === null) {
         props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       } else if (nativeAppVersion === true || __DEV__) {
+        let isOtaDone = false;
+        async function OTADone() {
+          if (isOtaDone) return;
+          setLoadStatus(old => ({
+            ...old,
+            'Mengecek versi aplikasi': true,
+          }));
+          await fetchDomain();
+          setLoadStatus(old => ({
+            ...old,
+            'Mendapatkan domain terbaru': true,
+          }));
+          connectToServers();
+          isOtaDone = true;
+        }
         const OTAUpdate = await Updates.checkForUpdateAsync().catch(() => {
-          ToastAndroid.show('Gagal mengecek update', ToastAndroid.SHORT);
+          ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
           return null;
         });
+
+        setTimeout(() => {
+          if (isOtaDone) return;
+          ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
+          OTADone();
+        }, 6_000);
 
         if (OTAUpdate !== null && OTAUpdate.isAvailable) {
           const changelog = await fetch(
@@ -221,17 +242,7 @@ function Loading(props: Props) {
           );
           return;
         }
-
-        setLoadStatus(old => ({
-          ...old,
-          'Mengecek versi aplikasi': true,
-        }));
-        await fetchDomain();
-        setLoadStatus(old => ({
-          ...old,
-          'Mendapatkan domain terbaru': true,
-        }));
-        connectToServers();
+        await OTADone();
       } else {
         const latestVersion = nativeAppVersion.tag_name;
         const changelog = nativeAppVersion.body;
