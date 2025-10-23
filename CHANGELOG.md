@@ -1,3 +1,13 @@
+# v1.1.3_JS-4 (23-Oktober-2025)
+Kemungkinan update terakhir di bulan ini (mungkin sampai pertengahan november) karena dev akan melaksanakan ujian TKA, jadi pengembagan aplikasi untuk sementara di tunda agar dev dapat fokus belajar. Versi ini memperbaiki beberapa masalah kecil pada aplikasi
+## Perubahan
+- Mengizinkan masuk ke beranda meskipun fetch data anime gagal
+- Fitur Picture-in-Picture sekarang harus mengaktifkan pengaturan "notifikasi player" di bagian Utilitas -> Pengaturan
+- Warna latar changelog
+## Diperbaiki
+- Refresh indicator yang tersembunyi di beranda
+- Cek versi aplikasi stuck
+- Durasi teks animasi di beranda
 # v1.1.3_JS-3 (17-Oktober-2025)
 ## Ditingkatkan
 - Tampilan bypass cloudflare
