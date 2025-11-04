@@ -160,9 +160,7 @@ export async function getKomikuDetailFromUrl(
 export interface KomikuReading {
   title: string;
   thumbnailUrl: string;
-  chapter: string;
   releaseDate: string;
-  readingDirection: string;
   comicImages: string[];
   nextChapter: string | undefined;
   prevChapter: string | undefined;
@@ -174,15 +172,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
     xmlMode: true,
     decodeEntities: false,
   });
-  const tableInfo = $('table.tbl tr')
-    .map((_i, el) => {
-      const row = $(el).find('td');
-      const key = row.eq(0).text().trim();
-      const value = row.eq(1).text().trim();
-      return { key, value };
-    })
-    .toArray();
-  const title = tableInfo.find(z => z.key === 'Judul')?.value ?? 'Data tidak tersedia';
+  const title = $('header > h1').text().trim() || 'Data tidak tersedia';
   let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
   if (!thumbnailUrl) {
     const coverUrl = data
@@ -204,11 +194,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       }
     } else thumbnailUrl = coverUrl;
   }
-  const releaseDate =
-    tableInfo.find(z => z.key === 'Tanggal Rilis')?.value ?? 'Data tidak tersedia';
-  const readingDirection =
-    tableInfo.find(z => z.key === 'Arah Baca')?.value ?? 'Data tidak tersedia';
-  const chapter = $('header > h1').text().trim();
+  const releaseDate = $('time[property="datePublished"]').text().trim() || 'Data tidak tersedia';
   const comicImages = $('div#Baca_Komik img')
     .map((_i, el) => {
       return $(el).attr('src');
@@ -221,8 +207,6 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
     title,
     thumbnailUrl,
     releaseDate,
-    readingDirection,
-    chapter,
     comicImages,
     nextChapter: nextChapter === '' ? undefined : nextChapter,
     prevChapter: prevChapter === '' ? undefined : prevChapter,
