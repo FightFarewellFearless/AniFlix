@@ -1,3 +1,6 @@
+# v1.1.3_JS-5 (5-November-2025)
+## Diperbaiki
+- Judul komik tidak tersedia di history
 # v1.1.3_JS-4 (23-Oktober-2025)
 Kemungkinan update terakhir di bulan ini (mungkin sampai pertengahan november) karena dev akan melaksanakan ujian TKA, jadi pengembagan aplikasi untuk sementara di tunda agar dev dapat fokus belajar. Versi ini memperbaiki beberapa masalah kecil pada aplikasi
 ## Perubahan
