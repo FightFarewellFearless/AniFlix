@@ -57,7 +57,7 @@ export default function ComicsReading(props: Props) {
   );
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: props.route.params.data.title,
+      headerTitle: props.route.params.data.chapter,
       headerShown: !isFullscreen,
       header: headerProps => (
         <Appbar.Header>
@@ -85,7 +85,7 @@ export default function ComicsReading(props: Props) {
         </Appbar.Header>
       ),
     });
-  }, [isFullscreen, props.navigation, props.route.params.data.title]);
+  }, [isFullscreen, props.navigation, props.route.params.data.chapter]);
 
   const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
 

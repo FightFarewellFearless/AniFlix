@@ -159,6 +159,7 @@ export async function getKomikuDetailFromUrl(
 
 export interface KomikuReading {
   title: string;
+  chapter: string;
   thumbnailUrl: string;
   releaseDate: string;
   comicImages: string[];
@@ -173,6 +174,8 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
     decodeEntities: false,
   });
   const title = $('header > h1').text().trim() || 'Data tidak tersedia';
+  const chapter =
+    $('div[data-chapter-title]').attr('data-chapter-title')?.trim() || 'Data tidak tersedia';
   let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
   if (!thumbnailUrl) {
     const coverUrl = data
@@ -205,6 +208,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
 
   return {
     title,
+    chapter,
     thumbnailUrl,
     releaseDate,
     comicImages,
