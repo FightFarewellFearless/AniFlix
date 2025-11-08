@@ -1,3 +1,6 @@
+# v1.1.3_JS-6 (8-November-2025)
+## Diperbaiki
+- Menampilkan chapter alih-alih judul di layar baca komik
 # v1.1.3_JS-5 (5-November-2025)
 ## Diperbaiki
 - Judul komik tidak tersedia di history
