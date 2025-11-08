@@ -3280,21 +3280,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "@react-navigation/native-stack@npm:7.5.0"
+"@react-navigation/elements@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "@react-navigation/elements@npm:2.8.0"
   dependencies:
-    "@react-navigation/elements": ^2.7.0
+    color: ^4.2.3
+    use-latest-callback: ^0.2.4
+    use-sync-external-store: ^1.5.0
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.19
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 4db9f77bc749fb45664358706c9fe197cd4607c64172db340faf3f2be033e18997423c277f31fc649701c4436eec6e2ec4fb5dba2c62bd20193c9e8b8372a8ba
+  languageName: node
+  linkType: hard
+
+"@react-navigation/native-stack@npm:^7.6.1":
+  version: 7.6.1
+  resolution: "@react-navigation/native-stack@npm:7.6.1"
+  dependencies:
+    "@react-navigation/elements": ^2.8.0
     color: ^4.2.3
     sf-symbols-typescript: ^2.1.0
     warn-once: ^0.1.1
   peerDependencies:
-    "@react-navigation/native": ^7.1.18
+    "@react-navigation/native": ^7.1.19
     react: ">= 18.2.0"
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: af39c7da450723a7af2eaf6cb13e9ba6d1f6401e600cad0038c36ba78d37226b2c5dff0e07b7718945f82eb9ab01b24bbdec602721c38ee867578fcb0e34d20d
+  checksum: 5b3f2b4b989cf3a668df84c2d91ef620e5d650ec333d0f46c275dad40f1ef6e4798f9b4395562a15078f7df40a0190e7781c494ba1f282302b0da9543ad9f18e
   languageName: node
   linkType: hard
 
@@ -3967,7 +3987,7 @@ __metadata:
     "@react-navigation/bottom-tabs": ^7.5.0
     "@react-navigation/drawer": ^7.6.0
     "@react-navigation/native": ^7.1.18
-    "@react-navigation/native-stack": ^7.5.0
+    "@react-navigation/native-stack": ^7.6.1
     "@rnx-kit/align-deps": ^3.2.1
     "@shopify/flash-list": 2.1.0
     "@types/jest": ^29.5.14
