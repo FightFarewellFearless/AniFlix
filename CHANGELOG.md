@@ -1,3 +1,6 @@
+# v1.1.3_JS-8 (22-November-2025)
+## Diperbaiki
+- Auto scroll komik yang lebih mulus
 # v1.1.3_JS-7 (22-November-2025)
 ## Ditambahkan
 - Fitur auto scroll untuk komik, paling cocok digunakan ketika membaca manhwa atau manhua!
