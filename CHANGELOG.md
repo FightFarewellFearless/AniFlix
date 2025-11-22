@@ -1,3 +1,9 @@
+# v1.1.3_JS-7 (22-November-2025)
+## Ditambahkan
+- Fitur auto scroll untuk komik, paling cocok digunakan ketika membaca manhwa atau manhua!
+## Diperbaiki
+- Progress komik tidak berubah ketika ukuran layar terlalu kecil
+- Layout di bagian Connect keluar dari tampilan ketika ukuran layar terlalu kecil
 # v1.1.3_JS-6 (8-November-2025)
 ## Diperbaiki
 - Menampilkan chapter alih-alih judul di layar baca komik
