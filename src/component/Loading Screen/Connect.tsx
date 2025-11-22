@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  ScrollView,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
@@ -290,7 +291,7 @@ function Loading(props: Props) {
   const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
         {isAnimeMovieWebViewOpen && (
           <Suspense>
@@ -354,7 +355,7 @@ function Loading(props: Props) {
           {appVersion}-JS_{OTAJSVersion}
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -366,14 +367,11 @@ function useStyles() {
     () =>
       StyleSheet.create({
         container: {
-          flex: 1,
-          flexShrink: 1,
+          flexGrow: 1,
           padding: 24,
           justifyContent: 'space-between',
         },
         content: {
-          flexWrap: 'wrap',
-          flexShrink: 1,
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
@@ -468,6 +466,7 @@ function useStyles() {
           paddingTop: 16,
         },
         socialButtons: {
+          flexWrap: 'wrap',
           flexDirection: 'row',
           justifyContent: 'center',
           marginBottom: 16,
