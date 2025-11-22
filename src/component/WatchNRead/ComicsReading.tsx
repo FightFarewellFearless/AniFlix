@@ -196,39 +196,45 @@ export default function ComicsReading(props: Props) {
   const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body style="margin: 0;">${body}</body>`;
 
   const injectedJavaScript = `
-    window.autoScrollFrame = null;
-    window.scrollSpeed = 1;
-    window.scrollBuffer = 0;
+  const PIXELS_PER_SECOND = 60;
+  window.autoScrollFrame = null;
+  window.scrollSpeed = PIXELS_PER_SECOND;
 
-    window.updateScrollSpeed = (speed) => {
-      window.scrollSpeed = speed;
-    };
+  window.updateScrollSpeed = (speed) => {
+    window.scrollSpeed = speed * PIXELS_PER_SECOND;
+  };
 
-    window.startAutoScroll = () => {
-      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
-      
-      function step() {
-        window.scrollBuffer += window.scrollSpeed;
-        
-        if (window.scrollBuffer >= 1) {
-           const pixelsToScroll = Math.floor(window.scrollBuffer);
-           window.scrollBy(0, pixelsToScroll);
-           window.scrollBuffer -= pixelsToScroll;
-        }
-        
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-             window.stopAutoScroll();
-        } else {
-             window.autoScrollFrame = requestAnimationFrame(step);
-        }
+  window.startAutoScroll = () => {
+    if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+
+    let lastTime = null;
+
+    function step(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+
+      const deltaTime = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      const pixelsToScroll = window.scrollSpeed * deltaTime;
+
+      if (pixelsToScroll > 0) {
+          window.scrollBy(0, pixelsToScroll);
       }
-      window.autoScrollFrame = requestAnimationFrame(step);
-    };
 
-    window.stopAutoScroll = () => {
-      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
-      window.autoScrollFrame = null;
-    };
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1) {
+           window.stopAutoScroll();
+      } else {
+          window.autoScrollFrame = requestAnimationFrame(step);
+      }
+    }
+  
+    window.autoScrollFrame = requestAnimationFrame(step);
+  };
+
+window.stopAutoScroll = () => {
+  if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+  window.autoScrollFrame = null;
+};
 
     ${
       props.route.params.historyData
