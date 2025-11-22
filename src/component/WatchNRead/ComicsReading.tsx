@@ -173,7 +173,7 @@ export default function ComicsReading(props: Props) {
             }
     const options = {
       root: null,
-      rootMargin: '20px 0px -500px 0px',
+      rootMargin: '20px 0px -50% 0px',
       threshold: 0.01
     };
 
