@@ -8,13 +8,13 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import {
   ActivityIndicator,
   Linking,
+  ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
   useColorScheme,
   View,
-  ScrollView,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
@@ -33,10 +33,10 @@ import { EpisodeBaruHome } from '../../types/anime';
 import { SetDatabaseTarget } from '../../types/databaseTarget';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
-import animeLocalAPI from '../../utils/scrapers/animeSeries';
-import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
 import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
+import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
+import animeLocalAPI from '../../utils/scrapers/animeSeries';
 
 export const JoinDiscord = () => {
   const styles = useStyles();
