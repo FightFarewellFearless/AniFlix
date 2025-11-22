@@ -9,6 +9,7 @@ import {
   Portal,
   ProgressBar,
   Snackbar,
+  Text,
   useTheme,
 } from 'react-native-paper';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
@@ -23,13 +24,20 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
 export default function ComicsReading(props: Props) {
   const theme = useTheme();
+  const webViewRef = useRef<WebView>(null);
+
   const abortController = useRef<AbortController>(null);
   abortController.current ??= new AbortController();
+
   useEffect(() => {
     return () => abortController.current?.abort();
   }, []);
 
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState(1.0);
+
   const [isFullscreen, setIsFullscreen] = useState(false);
+
   useEffect(() => {
     SystemNavigationBar.fullScreen(isFullscreen);
     if (isFullscreen) {
@@ -40,6 +48,7 @@ export default function ComicsReading(props: Props) {
       SystemBars.setHidden(false);
     }
   }, [isFullscreen]);
+
   useEffect(() => {
     return () => {
       SystemNavigationBar.fullScreen(false);
@@ -47,6 +56,7 @@ export default function ComicsReading(props: Props) {
       SystemBars.setHidden(false);
     };
   }, []);
+
   useBackHandler(
     useCallback(() => {
       if (isFullscreen) {
@@ -55,6 +65,7 @@ export default function ComicsReading(props: Props) {
       } else return false;
     }, [isFullscreen]),
   );
+
   useEffect(() => {
     props.navigation.setOptions({
       headerTitle: props.route.params.data.chapter,
@@ -90,24 +101,53 @@ export default function ComicsReading(props: Props) {
   const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    const visibleImageId = Number(event.nativeEvent.data);
-    setCurrentlyVisibleImageId(visibleImageId);
-    setHistory(
-      props.route.params.data,
-      props.route.params.link,
-      true,
-      {
-        lastDuration: visibleImageId,
-      },
-      false,
-      true,
-    );
+    if (!isNaN(Number(event.nativeEvent.data))) {
+      const visibleImageId = Number(event.nativeEvent.data);
+      setCurrentlyVisibleImageId(visibleImageId);
+      setHistory(
+        props.route.params.data,
+        props.route.params.link,
+        true,
+        {
+          lastDuration: visibleImageId,
+        },
+        false,
+        true,
+      );
+    }
+  };
+
+  const toggleAutoScroll = useCallback(() => {
+    const newState = !isAutoScrolling;
+    setIsAutoScrolling(newState);
+
+    if (newState) {
+      webViewRef.current?.injectJavaScript(`
+        window.updateScrollSpeed(${scrollSpeed});
+        window.startAutoScroll();
+        true;
+      `);
+    } else {
+      webViewRef.current?.injectJavaScript(`window.stopAutoScroll(); true;`);
+    }
+  }, [isAutoScrolling, scrollSpeed]);
+
+  const changeSpeed = (delta: number) => {
+    setScrollSpeed(prev => {
+      const newSpeed = Math.max(0.2, parseFloat((prev + delta).toFixed(1)));
+      if (isAutoScrolling) {
+        webViewRef.current?.injectJavaScript(`window.updateScrollSpeed(${newSpeed}); true;`);
+      }
+      return newSpeed;
+    });
   };
 
   const [moveChapterLoading, setMoveChapterLoading] = useState(false);
   const moveChapter = useCallback(
     (url: string) => {
       if (moveChapterLoading) return;
+      if (isAutoScrolling) toggleAutoScroll();
+
       setMoveChapterLoading(true);
       getKomikuReading(url, abortController.current?.signal)
         .then(res => {
@@ -124,7 +164,7 @@ export default function ComicsReading(props: Props) {
         })
         .finally(() => setMoveChapterLoading(false));
     },
-    [moveChapterLoading, props.navigation],
+    [moveChapterLoading, isAutoScrolling, toggleAutoScroll, props.navigation],
   );
 
   const { data } = props.route.params;
@@ -156,21 +196,55 @@ export default function ComicsReading(props: Props) {
   const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body style="margin: 0;">${body}</body>`;
 
   const injectedJavaScript = `
-            ${
-              props.route.params.historyData
-                ? `
+    window.autoScrollFrame = null;
+    window.scrollSpeed = 1;
+    window.scrollBuffer = 0;
 
-  const lastDuration = '${props.route.params.historyData.lastDuration}';
-  const target = document.getElementById(lastDuration);
-  if (target) {
-    target.scrollIntoView({ behavior: 'instant' });
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }, 1000);
-  };
-`
-                : ''
-            }
+    window.updateScrollSpeed = (speed) => {
+      window.scrollSpeed = speed;
+    };
+
+    window.startAutoScroll = () => {
+      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+      
+      function step() {
+        window.scrollBuffer += window.scrollSpeed;
+        
+        if (window.scrollBuffer >= 1) {
+           const pixelsToScroll = Math.floor(window.scrollBuffer);
+           window.scrollBy(0, pixelsToScroll);
+           window.scrollBuffer -= pixelsToScroll;
+        }
+        
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+             window.stopAutoScroll();
+        } else {
+             window.autoScrollFrame = requestAnimationFrame(step);
+        }
+      }
+      window.autoScrollFrame = requestAnimationFrame(step);
+    };
+
+    window.stopAutoScroll = () => {
+      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+      window.autoScrollFrame = null;
+    };
+
+    ${
+      props.route.params.historyData
+        ? `
+          const lastDuration = '${props.route.params.historyData.lastDuration}';
+          const target = document.getElementById(lastDuration);
+          if (target) {
+            target.scrollIntoView({ behavior: 'instant' });
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+          };
+          `
+        : ''
+    }
+    
     const options = {
       root: null,
       rootMargin: '20px 0px -50% 0px',
@@ -250,42 +324,85 @@ export default function ComicsReading(props: Props) {
           Mengambil data...
         </Snackbar>
       </Portal>
+
       <WebView
+        ref={webViewRef}
         style={{ flex: 1 }}
         overScrollMode="never"
         cacheEnabled={false}
         source={{ html }}
         injectedJavaScript={injectedJavaScript}
         onMessage={handleMessage}
-        webviewDebuggingEnabled
+        showsVerticalScrollIndicator={false}
       />
+
       <View>
         <View
           style={{
-            flexDirection: 'row',
+            backgroundColor: theme.colors.elevation.level1,
             justifyContent: 'space-around',
             display: isFullscreen ? 'none' : 'flex',
           }}>
-          {data.prevChapter && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <Button
-              icon="arrow-left"
-              onPress={() => {
-                moveChapter(data.prevChapter!);
-              }}>
-              Sebelumnya
+              mode={isAutoScrolling ? 'contained-tonal' : 'text'}
+              icon={isAutoScrolling ? 'pause' : 'play'}
+              onPress={toggleAutoScroll}
+              compact>
+              {isAutoScrolling ? 'Stop' : 'Auto Scroll'}
             </Button>
-          )}
-          {data.nextChapter && (
-            <Button
-              icon="arrow-right"
-              onPress={() => {
-                moveChapter(data.nextChapter!);
-              }}
-              contentStyle={{ flexDirection: 'row-reverse' }}>
-              Selanjutnya
-            </Button>
-          )}
+
+            <View style={{ width: 16 }} />
+
+            <IconButton
+              icon="minus"
+              size={20}
+              onPress={() => changeSpeed(-0.2)}
+              disabled={scrollSpeed <= 0.2}
+            />
+            <Text variant="labelLarge" style={{ marginHorizontal: 4 }}>
+              {scrollSpeed.toFixed(1)}x
+            </Text>
+            <IconButton
+              icon="plus"
+              size={20}
+              onPress={() => changeSpeed(0.2)}
+              disabled={scrollSpeed >= 10}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+            }}>
+            {data.prevChapter && (
+              <Button
+                icon="arrow-left"
+                onPress={() => {
+                  moveChapter(data.prevChapter!);
+                }}>
+                Sebelumnya
+              </Button>
+            )}
+            {data.nextChapter && (
+              <Button
+                icon="arrow-right"
+                onPress={() => {
+                  moveChapter(data.nextChapter!);
+                }}
+                contentStyle={{ flexDirection: 'row-reverse' }}>
+                Selanjutnya
+              </Button>
+            )}
+          </View>
         </View>
+
         <ProgressBar
           style={{
             marginBottom: isFullscreen ? 4 : 0,
