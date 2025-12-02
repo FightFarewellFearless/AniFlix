@@ -29,8 +29,8 @@ async function setHistory(
     const keyIndex = keyOrder.findIndex(z => z === dataKey);
     if (keyIndex !== -1) {
       keyOrder.splice(keyIndex, 1);
-      keyOrder.splice(0, 0, dataKey);
     }
+    keyOrder.splice(0, 0, dataKey);
   }
   const historyData: HistoryJSON = JSON.parse(isDataExist ?? '{}');
 
