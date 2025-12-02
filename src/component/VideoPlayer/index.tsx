@@ -60,6 +60,8 @@ type VideoPlayerProps = {
   batteryAndClock?: React.JSX.Element;
 };
 
+const ICON_SIZE = 45;
+
 export default memo(VideoPlayer);
 
 function VideoPlayer({
@@ -422,21 +424,17 @@ function CenterControl({
         alignSelf: 'center',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 30,
       }}>
       {/* Im wrapping the TouchableOpacity in "View" with onStartShouldSetResponder because RNGH's Touchables still execute the parent "Pressable" pressIn/Out */}
-      <TouchableOpacity
-        onPress={onRewind}
-        style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
-        <Icons name="replay-5" size={40} color={'white'} />
+      <TouchableOpacity onPress={onRewind} style={{ padding: 5, borderRadius: 50 }}>
+        <Icons name="replay-5" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
       {isBuffering ? (
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator color="white" size={'large'} />
       ) : !isError ? (
-        <TouchableOpacity
-          onPress={onPlayPausePressed}
-          style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
-          <Icons name={!paused ? 'pause' : 'play-arrow'} size={40} color={'white'} />
+        <TouchableOpacity onPress={onPlayPausePressed} style={{ padding: 5, borderRadius: 50 }}>
+          <Icons name={!paused ? 'pause' : 'play-arrow'} size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -453,14 +451,12 @@ function CenterControl({
             if (lastTime > 0) player.currentTime = lastTime;
             else onLoad?.();
           }}
-          style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
-          <Icons name="refresh" size={40} color={'white'} />
+          style={{ padding: 5, borderRadius: 50 }}>
+          <Icons name="refresh" size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       )}
-      <TouchableOpacity
-        onPress={onForward}
-        style={{ backgroundColor: '#00000069', padding: 5, borderRadius: 50 }}>
-        <Icons name="forward-10" size={40} color={'white'} />
+      <TouchableOpacity onPress={onForward} style={{ padding: 5, borderRadius: 50 }}>
+        <Icons name="forward-10" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
     </View>
   );
@@ -528,7 +524,7 @@ function BottomControl({
             hitSlop={2}>
             <Icons
               name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-              size={24}
+              size={28}
               color={'white'}
             />
           </TouchableOpacity>

@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   SharedValue,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -25,10 +26,16 @@ type SeekBarProps = {
     | 'marginTop'
   >;
 };
+
+const THUMB_SIZE = 14;
+const TRACK_HEIGHT = 4;
+const TOUCH_AREA_HEIGHT = 40;
+
 function clampNumber(num: number, a: number, b: number) {
   'worklet';
   return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 }
+
 export default function SeekBar({
   progress,
   onProgressChange,
@@ -36,50 +43,52 @@ export default function SeekBar({
   style,
 }: SeekBarProps) {
   const parentWidth = useSharedValue(0);
-  const circleScale = useSharedValue(1);
+  const isScrubbing = useSharedValue(false);
 
-  const viewRef = useRef<View>(null);
+  const thumbScale = useDerivedValue(() => {
+    return withTiming(isScrubbing.value ? 1.5 : 1, { duration: 100 });
+  });
 
   const gesture = useMemo(
     () =>
       Gesture.Pan()
         .onBegin(e => {
           'worklet';
-          if (e.x > parentWidth.get()) {
-            onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
-          } else {
-            onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
-          }
-          circleScale.set(withTiming(1.3));
+          isScrubbing.value = true;
+          const width = parentWidth.get();
+          const newProgress = clampNumber(e.x / width, 0, 1);
+          onProgressChange(newProgress);
         })
         .onUpdate(e => {
           'worklet';
-          if (e.x > parentWidth.get()) {
-            onProgressChange(clampNumber(parentWidth.get() / parentWidth.get(), 0, 1));
-          } else {
-            onProgressChange(clampNumber(e.x / parentWidth.get(), 0, 1));
-          }
+          const width = parentWidth.get();
+          const newProgress = clampNumber(e.x / width, 0, 1);
+          onProgressChange(newProgress);
         })
         .onFinalize(e => {
           'worklet';
-          onProgressChangeEnd(clampNumber(e.x / parentWidth.get(), 0, 1));
-          circleScale.set(withTiming(1));
+          isScrubbing.value = false;
+          const width = parentWidth.get();
+          const newProgress = clampNumber(e.x / width, 0, 1);
+          onProgressChangeEnd(newProgress);
         }),
-    [circleScale, onProgressChange, onProgressChangeEnd, parentWidth],
+    [isScrubbing, onProgressChange, onProgressChangeEnd, parentWidth],
   );
+
   const coveredAreaStyles = useAnimatedStyle(() => ({
-    width: progress.get() * parentWidth.get(),
+    width: `${progress.get() * 100}%`,
   }));
-  const circleStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: clampNumber(progress.get() * parentWidth.get() - 5, 0, parentWidth.get() - 12),
-      },
-      {
-        scale: circleScale.get(),
-      },
-    ],
-  }));
+
+  const thumbStyle = useAnimatedStyle(() => {
+    const centerX = progress.get() * parentWidth.get();
+    return {
+      transform: [
+        { translateX: clampNumber(centerX - THUMB_SIZE / 2, 0, parentWidth.get() - THUMB_SIZE) },
+        { scale: thumbScale.value },
+      ],
+    };
+  });
+
   const onLayout = useCallback(
     (e: LayoutChangeEvent) => {
       parentWidth.set(e.nativeEvent.layout.width);
@@ -98,12 +107,14 @@ export default function SeekBar({
   // }, [parentWidth, width]);
 
   return (
-    <View style={[style]} onLayout={onLayout} ref={viewRef}>
+    <View style={[style, styles.container]} onLayout={onLayout}>
       <GestureDetector gesture={gesture}>
-        <View style={[styles.gestureContainer]}>
-          <Reanimated.View style={[coveredAreaStyles, styles.coveredArea]} />
-          <Reanimated.View style={[styles.circle, circleStyle]} />
-          <View style={[styles.availableArea]} />
+        <View style={styles.touchableArea}>
+          <View style={styles.trackBackground} />
+
+          <Reanimated.View style={[styles.trackFill, coveredAreaStyles]} />
+
+          <Reanimated.View style={[styles.thumb, thumbStyle]} />
         </View>
       </GestureDetector>
     </View>
@@ -111,34 +122,39 @@ export default function SeekBar({
 }
 
 const styles = StyleSheet.create({
-  gestureContainer: {
-    width: '100%',
-    height: 12,
-    borderRadius: 5,
-    justifyContent: 'center',
+  container: {
+    overflow: 'visible',
   },
-  coveredArea: {
+  touchableArea: {
+    width: '100%',
+    height: TOUCH_AREA_HEIGHT,
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  trackBackground: {
     position: 'absolute',
-    height: 4,
-    backgroundColor: '#b10202',
-    borderRadius: 5,
+    left: 0,
+    right: 0,
+    height: TRACK_HEIGHT,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: TRACK_HEIGHT / 2,
+  },
+  trackFill: {
+    position: 'absolute',
+    left: 0,
+    height: TRACK_HEIGHT,
+    backgroundColor: '#FF0000',
+    borderRadius: TRACK_HEIGHT / 2,
     zIndex: 2,
   },
-  circle: {
+  thumb: {
     position: 'absolute',
-    height: 10,
-    width: 10,
-    backgroundColor: '#ff0000',
-    borderRadius: 5,
-    overflow: 'visible',
+    left: 0,
+    height: THUMB_SIZE,
+    width: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2,
+    backgroundColor: '#FFFFFF',
     zIndex: 3,
-  },
-  availableArea: {
-    position: 'absolute',
-    backgroundColor: '#dbd8d8',
-    height: 4,
-    width: '100%',
-    borderRadius: 5,
-    zIndex: 1,
+    elevation: 4,
   },
 });
