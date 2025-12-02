@@ -1,3 +1,10 @@
+# v1.1.3_JS-9 (2-Desember-2025)
+## Ditingkatkan
+- UI Video Player yang lebih modern
+- Versi dependencies
+## Diperbaiki
+- Bug langka dimana item di history tidak muncul
+- Otomatis menonaktifkan auto-scroll pada Komik ketika sampai pada akhir gambar atau ketika aplikasi di background
 # v1.1.3_JS-8 (22-November-2025)
 ## Diperbaiki
 - Auto scroll komik yang lebih mulus
