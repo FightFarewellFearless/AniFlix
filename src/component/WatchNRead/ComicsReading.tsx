@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { AppState, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import {
   Appbar,
@@ -30,7 +30,14 @@ export default function ComicsReading(props: Props) {
   abortController.current ??= new AbortController();
 
   useEffect(() => {
-    return () => abortController.current?.abort();
+    const appState = AppState.addEventListener('blur', () => {
+      webViewRef.current?.injectJavaScript(`window.stopAutoScroll(); true;`);
+      setIsAutoScrolling(false);
+    });
+    return () => {
+      appState.remove();
+      abortController.current?.abort();
+    };
   }, []);
 
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
@@ -114,6 +121,8 @@ export default function ComicsReading(props: Props) {
         false,
         true,
       );
+    } else if (event.nativeEvent.data === 'endReached') {
+      setIsAutoScrolling(false);
     }
   };
 
@@ -223,6 +232,7 @@ export default function ComicsReading(props: Props) {
 
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1) {
            window.stopAutoScroll();
+           window.ReactNativeWebView.postMessage('endReached');
       } else {
           window.autoScrollFrame = requestAnimationFrame(step);
       }
