@@ -1,3 +1,14 @@
+# v1.1.4 (7-Desember-2025)
+Versi ini berisi update rutin dependencies, peningkatan stabilitas aplikasi, perbaikan beberapa masalah, serta dukungan untuk server resolusi baru `filedon`.
+## Ditambahkan
+- Server resolusi baru yang lebih cepat `filedon` untuk episode anime baru.
+## Ditingkatkan
+- Performa animasi ketika scrolling
+## Diperbaiki
+- Control di video player bergeser ketika loading<->play
+- Isu terkait tampilan persentase baterai
+- Memperbaiki value dropdown yang berubah terlalu cepat
+
 # v1.1.3_JS-9 (2-Desember-2025)
 ## Ditingkatkan
 - UI Video Player yang lebih modern
