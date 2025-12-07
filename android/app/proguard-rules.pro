@@ -9,7 +9,5 @@
 
 # Add any project specific keep options here:
 
--keep class com.android.installreferrer.api.** {
-  *;
-}
+-dontwarn com.google.android.gms.common.GoogleApiAvailability
 -keep class com.google.android.gms.common.** {*;}
