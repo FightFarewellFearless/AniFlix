@@ -355,7 +355,8 @@ function Video(props: Props) {
         .then(response => {
           return !(
             response?.headers.get('content-type')?.includes('video') ||
-            response?.headers.get('content-type')?.includes('octet-stream')
+            response?.headers.get('content-type')?.includes('octet-stream') ||
+            resultData.includes('filedon')
           );
         });
       if (signal?.aborted) return;

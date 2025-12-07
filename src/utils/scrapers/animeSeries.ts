@@ -287,7 +287,8 @@ const fromUrl = async (
     const isValidResolution = (el: Element) =>
       $(el).text().trim().startsWith('o') ||
       $(el).text().trim().includes('desu') ||
-      $(el).text().trim().includes('pdrain');
+      $(el).text().trim().includes('pdrain') ||
+      $(el).text().trim().includes('filedon');
     const mirrorStream = aniDetail.find('div.mirrorstream ul');
     const m360p = mirrorStream
       .filter((i, el) => $(el).hasClass('m360p'))
@@ -425,9 +426,27 @@ const getStreamLink = async (
     const data = response!.data;
     const $ = cheerio.load(data);
     return $('meta[property="og:video:secure_url"]').attr('content');
+  } else if (downLink.includes('filedon')) {
+    return await getFiledonVideo(downLink);
   }
 };
 
+async function getFiledonVideo(url: string) {
+  const data = await axios.get(url, {
+    headers: {
+      'User-Agent': deviceUserAgent,
+    },
+  });
+  const videoLink = data.data.split('&quot;url&quot;:&quot;')[3].split('&quot;')[0];
+  return (
+    'https://' +
+    decodeURIComponent(videoLink)
+      .replaceAll('\\', '')
+      .replaceAll('&amp;', '&')
+      .replace('https://', '')
+      .replaceAll('//', '/')
+  );
+}
 async function getBloggerVideo(url: string) {
   const data = await axios.get(url, {
     headers: {
