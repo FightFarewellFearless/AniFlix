@@ -427,13 +427,13 @@ function CenterControl({
         gap: 30,
       }}>
       {/* Im wrapping the TouchableOpacity in "View" with onStartShouldSetResponder because RNGH's Touchables still execute the parent "Pressable" pressIn/Out */}
-      <TouchableOpacity onPress={onRewind} style={{ padding: 5, borderRadius: 50 }}>
+      <TouchableOpacity onPress={onRewind} style={{ borderRadius: 50 }}>
         <Icons name="replay-5" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
       {isBuffering ? (
-        <ActivityIndicator color="white" size={'large'} />
+        <ActivityIndicator color="white" size={ICON_SIZE} />
       ) : !isError ? (
-        <TouchableOpacity onPress={onPlayPausePressed} style={{ padding: 5, borderRadius: 50 }}>
+        <TouchableOpacity onPress={onPlayPausePressed} style={{ borderRadius: 50 }}>
           <Icons name={!paused ? 'pause' : 'play-arrow'} size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       ) : (
@@ -451,11 +451,11 @@ function CenterControl({
             if (lastTime > 0) player.currentTime = lastTime;
             else onLoad?.();
           }}
-          style={{ padding: 5, borderRadius: 50 }}>
+          style={{ borderRadius: 50 }}>
           <Icons name="refresh" size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       )}
-      <TouchableOpacity onPress={onForward} style={{ padding: 5, borderRadius: 50 }}>
+      <TouchableOpacity onPress={onForward} style={{ borderRadius: 50 }}>
         <Icons name="forward-10" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
     </View>
