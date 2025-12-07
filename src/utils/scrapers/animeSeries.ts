@@ -437,15 +437,28 @@ async function getFiledonVideo(url: string) {
       'User-Agent': deviceUserAgent,
     },
   });
-  const videoLink = data.data.split('&quot;url&quot;:&quot;')[3].split('&quot;')[0];
-  return (
-    'https://' +
-    decodeURIComponent(videoLink)
-      .replaceAll('\\', '')
-      .replaceAll('&amp;', '&')
-      .replace('https://', '')
-      .replaceAll('//', '/')
-  );
+  const convertToValidJson = (jsonString: string) => {
+    let sanitizedString = jsonString.replace(/&quot;/g, '"');
+    sanitizedString = sanitizedString.replace(/&#039;/g, "'");
+
+    if (!sanitizedString.startsWith('{')) {
+      sanitizedString = `{${sanitizedString}`;
+    }
+    if (!sanitizedString.endsWith('}')) {
+      sanitizedString = `${sanitizedString}}`;
+    }
+
+    try {
+      const jsonObject = JSON.parse(sanitizedString);
+      return jsonObject;
+    } catch (e) {
+      console.error('Failed to parse JSON string:', e);
+      throw new Error('Invalid JSON structure after sanitization.');
+    }
+  };
+  const $ = cheerio.load(data.data);
+  const link = convertToValidJson($('div#app').attr('data-page')!);
+  return link.props.url;
 }
 async function getBloggerVideo(url: string) {
   const data = await axios.get(url, {
