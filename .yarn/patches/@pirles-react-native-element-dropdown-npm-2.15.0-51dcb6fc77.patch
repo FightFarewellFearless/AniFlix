@@ -1,0 +1,13 @@
+diff --git a/src/components/Dropdown/index.tsx b/src/components/Dropdown/index.tsx
+index 219292f0d7d51877d947a70542d3ccc422406fe8..3fc8a8903e5a1f1b339b39ff8042d1b60423d203 100644
+--- a/src/components/Dropdown/index.tsx
++++ b/src/components/Dropdown/index.tsx
+@@ -451,7 +451,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
+           return onConfirmSelectItem(item);
+         }
+ 
+-        setCurrentValue(item);
++        // setCurrentValue(item);
+         onChange(item);
+ 
+         if (closeModalWhenSelectedItem) {

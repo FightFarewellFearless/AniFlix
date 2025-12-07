@@ -106,5 +106,8 @@
       "ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS": false,
       "USE_COMMIT_HOOK_ONLY_FOR_REACT_COMMITS": true
     }
+  },
+  "resolutions": {
+    "@pirles/react-native-element-dropdown@^2.15.0": "patch:@pirles/react-native-element-dropdown@npm%3A2.15.0#./.yarn/patches/@pirles-react-native-element-dropdown-npm-2.15.0-51dcb6fc77.patch"
   }
 }
