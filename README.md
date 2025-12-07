@@ -115,13 +115,9 @@ cd AniFlix
 ```
 You will also need to create your own keystore. [Follow these steps in the React Native documentation](https://reactnative.dev/docs/signed-apk-android#generating-an-upload-key)
 
-Now you are ready to build! Just one last step remains. Install the required npm dependencies:
+Now you are ready to build! Just one last step remains. Install the required npm dependencies (required of using yarn):
 ```bash
-npm install
-```
-or add `legacy-peer-deps` flag if installation fail
-```bash
-npm install --legacy-peer-deps
+yarn install
 ```
 
 :tada: You're all set up! It's time to build. Run the following command:
