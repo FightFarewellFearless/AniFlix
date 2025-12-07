@@ -4091,14 +4091,15 @@ __metadata:
     prettier: ^3.5.2
     react: 19.1.0
     react-native: 0.81.4
-    react-native-blob-util: ^0.24.4
-    react-native-device-info: ^15.0.1
+    react-native-blob-util: ^0.24.5
     react-native-dotenv: ^3.4.11
     react-native-edge-to-edge: ^1.7.0
     react-native-error-boundary: ^3.1.0
     react-native-gesture-handler: 2.29.1
     react-native-keyboard-controller: ^1.20.1
-    react-native-marked: ^7.0.2
+    react-native-marked: ^7.1.0
+    react-native-nitro-device-info: ^1.4.2
+    react-native-nitro-modules: ^0.31.10
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.14.5
     react-native-reanimated: 4.2.0
@@ -4106,7 +4107,7 @@ __metadata:
     react-native-safe-area-context: 5.6.2
     react-native-screens: 4.18.0
     react-native-svg: ^15.15.1
-    react-native-system-navigation-bar: ^2.6.4
+    react-native-system-navigation-bar: ^2.8.0
     react-native-webview: 13.16.0
     react-native-worklets: 0.7.1
     react-test-renderer: 19.1.0
@@ -9042,12 +9043,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:15.0.12":
-  version: 15.0.12
-  resolution: "marked@npm:15.0.12"
+"marked@npm:17.0.1":
+  version: 17.0.1
+  resolution: "marked@npm:17.0.1"
   bin:
     marked: bin/marked.js
-  checksum: 2ac72fc0bc7ecb47de246e396c7054d311f55379957e4e01796c12d196cb84480e8d53e54948f957a078f9166692fea8b0309fc597f26f855573e7ba5c1ec7eb
+  checksum: c8387a3a1e0b4aa547b73f62eb946ee473861a62205f0a0e977276bda02738bf07de10bcc17fcf97a44fa017bce7b78d85290f0b478c1a8a4cc47054ac202f4e
   languageName: node
   linkType: hard
 
@@ -11005,25 +11006,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-blob-util@npm:^0.24.4":
-  version: 0.24.4
-  resolution: "react-native-blob-util@npm:0.24.4"
+"react-native-blob-util@npm:^0.24.5":
+  version: 0.24.5
+  resolution: "react-native-blob-util@npm:0.24.5"
   dependencies:
     base-64: 0.1.0
     glob: 13.0.0
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 8f7cb67bf319d7a8477081b00e5083d7862dd6824c020a3704d25f6eaa36e6fe3b054598bc12d487e98dd3fb40e630814b3a47e6239f28c26ecb0d7cf7e111be
-  languageName: node
-  linkType: hard
-
-"react-native-device-info@npm:^15.0.1":
-  version: 15.0.1
-  resolution: "react-native-device-info@npm:15.0.1"
-  peerDependencies:
-    react-native: "*"
-  checksum: e7c20006db07758fcf820e891b979b9d7e87c10b6a38066402d60d85ff1dc8e1ac47e8b57209bf394f20516fb49600cde6688cd6f7cfe7210f285555960a74e4
+  checksum: 76dd0b3c679651bf6bbb9321665ec614f95399ea542b99e46f18c861151e131f50a0bc47023e4a834b9976c29e552a55dcc5f73c2ee579f2dcbcba37774f6af5
   languageName: node
   linkType: hard
 
@@ -11111,22 +11103,43 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-marked@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "react-native-marked@npm:7.0.2"
+"react-native-marked@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "react-native-marked@npm:7.1.0"
   dependencies:
     "@jsamr/counter-style": 2.0.2
     "@jsamr/react-native-li": 2.3.1
     github-slugger: 2.0.0
     html-entities: 2.6.0
-    marked: 15.0.12
+    marked: 17.0.1
     react-native-reanimated-table: 0.0.2
     svg-parser: 2.0.4
   peerDependencies:
     react: ">=16.8.6"
     react-native: ">=0.76.0"
     react-native-svg: ">=12.3.0"
-  checksum: 3f4d5985e30bdeb74fbf3f04390fa3458e8df41baec14e7d0f2b3302fabe6c373b4e446f0988800f84aa8ec3fdbb2ea2050d46ded70da124f6c293b7d5be2902
+  checksum: af70fe8c20d0f0d405bb14fbbfbb14dd6ca3bc50d5dd469f55141faeba8fe808e72dfe60a9614eae926c2e0e868f3271d67b94a8f4cc88b7ff839d137cb9ae7f
+  languageName: node
+  linkType: hard
+
+"react-native-nitro-device-info@npm:^1.4.2":
+  version: 1.4.2
+  resolution: "react-native-nitro-device-info@npm:1.4.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-nitro-modules: ^0.31.2
+  checksum: 0ce93a510d4421d7655bd8df34b13cb2b0b93601fa53477bae738196a96b08d5523263f701c2dabd8e42ac25b0264247f3d700b9565576ef069e5ab7f7fcdc70
+  languageName: node
+  linkType: hard
+
+"react-native-nitro-modules@npm:^0.31.10":
+  version: 0.31.10
+  resolution: "react-native-nitro-modules@npm:0.31.10"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 1c8d2f12ff29b6733c784c5fd0dedcbec4ceec9f82eb49f49e7734f31b9367346938010dcacf69bf695a352e36fec5aa23fd57b8091f6acd78c3d9a61e14ea7f
   languageName: node
   linkType: hard
 
@@ -11230,13 +11243,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-system-navigation-bar@npm:^2.6.4":
-  version: 2.6.4
-  resolution: "react-native-system-navigation-bar@npm:2.6.4"
+"react-native-system-navigation-bar@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "react-native-system-navigation-bar@npm:2.8.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: b0fe20a00c5640ec98efb80c4441c0b38ea9fd7c87289be588bd27ff2553f4e5e2d3c9df9e4c752c7f6bcc135c7a848eea37c94e97259dd3f4e47de8e84d0de5
+  checksum: 786257eeeb1a7c8486c4c4b6029ef8696ad84c42c2ba23e62622c4829351aef6d4ce4e6f70751d2c231c48abcd548839c6ca3fb04c5197557950c5e1f449c84c
   languageName: node
   linkType: hard
 

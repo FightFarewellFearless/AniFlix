@@ -1,16 +1,9 @@
 import { WEBHOOK_REPORT_ERROR } from '@env';
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
-import {
-  Alert,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import { Alert, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { DeviceInfoModule } from 'react-native-nitro-device-info';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import useGlobalStyles from '../../assets/style';
 
 export type Props = { error: Error };
@@ -100,19 +93,19 @@ function reportToDev(error: Error) {
           fields: [
             {
               name: 'System version',
-              value: DeviceInfo.getSystemVersion(),
+              value: DeviceInfoModule.systemVersion,
             },
             {
               name: 'Brand',
-              value: DeviceInfo.getBrand(),
+              value: DeviceInfoModule.brand,
             },
             {
               name: 'Manufacturer name',
-              value: DeviceInfo.getManufacturerSync(),
+              value: DeviceInfoModule.manufacturer,
             },
             {
               name: 'Product',
-              value: DeviceInfo.getProductSync(),
+              value: DeviceInfoModule.product,
             },
           ],
         },

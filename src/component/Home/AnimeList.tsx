@@ -28,7 +28,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useBatteryLevel } from 'react-native-device-info';
+import { useBatteryLevel } from 'react-native-nitro-device-info';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import { useTheme } from 'react-native-paper';
 import Reanimated, {

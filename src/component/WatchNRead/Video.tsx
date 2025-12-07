@@ -15,9 +15,6 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
-  EmitterSubscription,
-  NativeEventEmitter,
-  NativeModules,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -26,7 +23,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import { DeviceInfoModule } from 'react-native-nitro-device-info';
 import { SystemBars } from 'react-native-edge-to-edge';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import ReAnimated, {
@@ -42,7 +39,6 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { runOnJS } from 'react-native-worklets';
 import url from 'url';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
-const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo);
 
 import useGlobalStyles, { darkText, lightText } from '../../assets/style';
 import useDownloadAnimeFunction from '../../utils/downloadAnime';
@@ -259,21 +255,18 @@ function Video(props: Props) {
 
   // Battery level
   useEffect(() => {
-    let _batteryEvent: EmitterSubscription | null;
+    let _batteryEvent: NodeJS.Timeout | null;
     if (enableBatteryTimeInfo === 'true') {
-      DeviceInfo.getBatteryLevel().then(async currentLevel => {
-        setBatteryLevel(currentLevel);
-        _batteryEvent = deviceInfoEmitter.addListener(
-          'RNDeviceInfo_batteryLevelDidChange',
-          async levelChanged => {
-            setBatteryLevel(levelChanged);
-          },
-        );
-        setBatteryTimeEnable(true);
-      });
+      const updateLevel = () => {
+        const currentLevel = DeviceInfoModule.getBatteryLevel();
+        setBatteryLevel(prev => (prev === currentLevel ? prev : currentLevel));
+      };
+      updateLevel();
+      _batteryEvent = setInterval(updateLevel, 5000);
+      setBatteryTimeEnable(true);
     }
     return () => {
-      _batteryEvent && _batteryEvent.remove();
+      _batteryEvent && clearInterval(_batteryEvent);
       _batteryEvent = null;
     };
   }, [enableBatteryTimeInfo]);
