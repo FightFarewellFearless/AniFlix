@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { memo, useMemo } from 'react';
@@ -16,13 +17,13 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import controlWatchLater from '../../utils/watchLaterControl';
 
-import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HistoryItemKey } from '../../types/databaseTarget';
@@ -33,9 +34,14 @@ interface MovieEpisode {
   title: string;
   url: string;
 }
+
+type RecyclerViewType = (
+  props: RecyclerViewProps<MovieEpisode> & {
+    ref?: React.Ref<FlashListRef<MovieEpisode>>;
+  },
+) => React.JSX.Element;
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
-const ReanimatedFlashList =
-  Reanimated.createAnimatedComponent<FlashListProps<MovieEpisode>>(FlashList);
+const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
 
@@ -349,7 +355,6 @@ function MovieDetail(props: Props) {
 
   return (
     <ReanimatedFlashList
-      // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
       ref={scrollRef}
       data={data.episodeList.length > 1 ? data.episodeList : []}
       renderItem={({ item }) => {
@@ -398,7 +403,7 @@ function MovieDetail(props: Props) {
       ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
       ListHeaderComponent={ListHeaderComponent}
       extraData={colorScheme}
-      estimatedItemSize={60}
+      // estimatedItemSize={60}
       showsVerticalScrollIndicator={false}
     />
   );

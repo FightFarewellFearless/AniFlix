@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { memo, useMemo, useState } from 'react';
@@ -17,24 +18,26 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import controlWatchLater from '../../utils/watchLaterControl';
 
-import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AniDetailEpsList } from '../../types/anime';
+import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import { replaceLast } from '../../utils/replaceLast';
-import { HistoryItemKey } from '../../types/databaseTarget';
 
+type RecyclerViewType = (
+  props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },
+) => React.JSX.Element;
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
-const ReanimatedFlashList =
-  Reanimated.createAnimatedComponent<FlashListProps<AniDetailEpsList>>(FlashList);
+const ReanimatedFlashList = Reanimated.createAnimatedComponent(FlashList as RecyclerViewType);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 
@@ -375,7 +378,6 @@ function AniDetail(props: Props) {
         maintainVisibleContentPosition={{
           disabled: true,
         }}
-        // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
         ref={scrollRef}
         data={filteredEpisodes}
         renderItem={({ item }) => {

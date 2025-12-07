@@ -1,8 +1,10 @@
+import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlashList, FlashListProps, FlashListRef } from '@shopify/flash-list';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -20,7 +22,6 @@ import Reanimated, {
   useScrollOffset,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Icon from '@react-native-vector-icons/fontawesome';
 import useGlobalStyles from '../../assets/style';
 import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
@@ -30,9 +31,13 @@ import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/Datab
 import { KomikuDetail } from '../../utils/scrapers/komiku';
 import controlWatchLater from '../../utils/watchLaterControl';
 
+type RecyclerViewType = (
+  props: RecyclerViewProps<KomikuDetail['chapters'][0]> & {
+    ref?: React.Ref<FlashListRef<KomikuDetail['chapters'][0]>>;
+  },
+) => React.JSX.Element;
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
-const ReanimatedFlashList =
-  Reanimated.createAnimatedComponent<FlashListProps<KomikuDetail['chapters'][0]>>(FlashList);
+const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
 const IMG_HEIGHT = 200;
@@ -113,7 +118,6 @@ export default function ComicsDetail(props: Props) {
         maintainVisibleContentPosition={{
           disabled: true,
         }}
-        // @ts-expect-error : FlashListRef type seems to not compatible with useAnimatedRef
         ref={scrollRef}
         data={filteredChapters}
         ListEmptyComponent={() => (
