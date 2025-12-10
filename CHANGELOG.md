@@ -1,3 +1,8 @@
+# v1.1.4_JS-1 (10-Desember-2025)
+## Perubahan
+- List anime tidak otomatis ter load di pencarian, ini mengurangi komputasi yang mungkin tidak diperlukan
+## Diperbaiki
+- Posisi seek bar yang "jumping" ketika berganti orientasi
 # v1.1.4 (7-Desember-2025)
 Versi ini berisi update rutin dependencies, peningkatan stabilitas aplikasi, perbaikan beberapa masalah, serta dukungan untuk server resolusi baru `filedon`.
 ## Ditambahkan
