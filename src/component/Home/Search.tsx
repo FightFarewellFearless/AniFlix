@@ -1,33 +1,23 @@
 import Icon from '@react-native-vector-icons/fontawesome';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { ImageBackground } from 'expo-image';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState, useTransition } from 'react';
 import {
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  TextInput as TextInputType,
   ToastAndroid,
   TouchableOpacity as TouchableOpacityReactNative,
   View,
   useColorScheme,
 } from 'react-native';
 import { Searchbar, SegmentedButtons, useTheme } from 'react-native-paper';
-import useGlobalStyles from '../../assets/style';
-import { SearchAnime, listAnimeTypeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-
 import Reanimated, {
   FadeInDown,
   FadeInRight,
@@ -37,21 +27,20 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
-import DarkOverlay from '../misc/DarkOverlay';
-import ImageLoading from '../misc/ImageLoading';
-
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
-import { TextInput as TextInputType } from 'react-native';
+import useGlobalStyles from '../../assets/style';
+import { SearchAnime, listAnimeTypeList } from '../../types/anime';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
+import AnimeAPI from '../../utils/AnimeAPI';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
+import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
 import { KomikuSearch, komikuSearch } from '../../utils/scrapers/komiku';
+import DarkOverlay from '../misc/DarkOverlay';
+import ImageLoading from '../misc/ImageLoading';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 import { RenderScrollComponent } from './AnimeList';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacity);
-
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
@@ -61,13 +50,12 @@ type Props = CompositeScreenProps<
 
 function Search(props: Props) {
   const [isPending, startTransition] = useTransition();
-
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const theme = useTheme();
 
   const [searchType, setSearchType] = useState<'anime' | 'comics'>('anime');
-
   const textInputRef = useRef<TextInputType>(null);
 
   useFocusEffect(
@@ -84,14 +72,14 @@ function Search(props: Props) {
   );
 
   const [searchText, setSearchText] = useState<string>('');
-  const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>([]);
+  const [listAnime, setListAnime] = useState<listAnimeTypeList[] | null>(null);
   const [listAnimeLoading, setListAnimeLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [comicsData, setComicsData] = useState<null | KomikuSearch[]>(null);
   const [loading, setLoading] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
-
   const [showSearchHistory, setShowSearchHistory] = useState(false);
 
   const searchHistory = useModifiedKeyValueIfFocused(
@@ -99,8 +87,11 @@ function Search(props: Props) {
     result => JSON.parse(result) as string[],
   );
 
-  useEffect(() => {
+  const loadAnimeList = useCallback(() => {
     setListAnimeLoading(true);
+    setIsError(false);
+    setListAnime([]);
+
     AnimeAPI.listAnime(undefined, animeData => {
       startTransition(() => {
         setListAnime(animeData);
@@ -108,10 +99,13 @@ function Search(props: Props) {
     })
       .then(animeData => {
         setListAnime(animeData);
-        setListAnimeLoading(false);
       })
       .catch(() => {
         setListAnime(null);
+        setIsError(true);
+        ToastAndroid.show('Gagal memuat daftar anime', ToastAndroid.SHORT);
+      })
+      .finally(() => {
         setListAnimeLoading(false);
       });
   }, []);
@@ -121,6 +115,16 @@ function Search(props: Props) {
   }, []);
 
   const submit = useCallback(() => {
+    const handleError = (err: Error) => {
+      if (err.message === 'Silahkan selesaikan captcha') {
+        return ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
+      }
+      const errMessage =
+        err.message === 'Network Error'
+          ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+          : 'Error tidak diketahui: ' + err.message;
+      DialogManager.alert('Error', errMessage);
+    };
     if (searchText === '') {
       return;
     }
@@ -144,16 +148,7 @@ function Search(props: Props) {
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
           setLoading(false);
         })
-        .catch(err => {
-          if (err.message === 'Silahkan selesaikan captcha') {
-            return ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
-          }
-          const errMessage =
-            err.message === 'Network Error'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + err.message;
-          DialogManager.alert('Error', errMessage);
-        });
+        .catch(handleError);
     } else {
       komikuSearch(searchText)
         .then(result => {
@@ -161,6 +156,7 @@ function Search(props: Props) {
           setMovieData(null);
           setComicsData(result);
         })
+        .catch(handleError)
         .finally(() => {
           if (searchHistory.includes(searchText)) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
@@ -179,6 +175,7 @@ function Search(props: Props) {
     };
     return <HistoryList index={index} item={item} onChangeTextFunction={onChangeTextFunction} />;
   }
+
   const listAnimeRenderer = useCallback(
     ({ index, item }: ListRenderItemInfo<listAnimeTypeList>) => {
       return (
@@ -211,14 +208,23 @@ function Search(props: Props) {
     setShowSearchHistory(false);
   }, []);
 
+  const hasSearchResults =
+    (data?.result?.length ?? 0) > 0 ||
+    (movieData && movieData.length > 0) ||
+    (comicsData && comicsData.length > 0);
+  const isSearchEmpty = !hasSearchResults && (data !== null || comicsData !== null);
+  const isLoading = listAnimeLoading || isPending;
+  const showDefaultList =
+    !hasSearchResults && !isSearchEmpty && listAnime !== null && listAnime.length > 0;
+  const shouldShowManualLoad =
+    !hasSearchResults &&
+    !isLoading &&
+    (listAnime === null || listAnime.length === 0) &&
+    data === null &&
+    comicsData === null;
+
   return (
     <View style={[{ flex: 1 }]}>
-      {/* {data !== null && (
-          <TouchableOpacity>
-            <Icon name="close" />
-          </TouchableOpacity>
-        )} */}
-      {/* Replace animated components: */}
       <Searchbar
         onSubmitEditing={submit}
         onIconPress={submit}
@@ -249,102 +255,129 @@ function Search(props: Props) {
         ]}
       />
 
-      {/* TODO: Replace this long check condition with a better alternative */}
-      {listAnime?.length === 0 ||
-        (listAnimeLoading && data === null && movieData === null && comicsData === null && (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator color={colorScheme === 'dark' ? 'white' : 'black'} />
-            <Text style={[globalStyles.text]}>Sedang mengambil data... Mohon tunggu</Text>
-          </View>
-        ))}
+      {isLoading && (
+        <View
+          style={[
+            styles.center,
+            {
+              flex: 0,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 10,
+            },
+          ]}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+          <Text style={[globalStyles.text, { opacity: 0.8 }]}>Sedang mengambil data...</Text>
+        </View>
+      )}
 
-      {data === null && movieData === null && comicsData === null && listAnime !== null ? (
-        <View style={{ flex: listAnime?.length === 0 || listAnimeLoading ? 0 : 1 }}>
+      {shouldShowManualLoad && (
+        <Reanimated.View entering={FadeInUp} style={styles.center}>
+          <View style={styles.emptyStateContainer}>
+            <Icon
+              name={isError ? 'warning' : 'list-alt'}
+              size={60}
+              color={isError ? theme.colors.error : theme.colors.outline}
+              style={{ marginBottom: 15 }}
+            />
+            <Text style={[globalStyles.text, styles.emptyStateTitle]}>
+              {isError ? 'Gagal Memuat Data' : 'Jelajahi Anime'}
+            </Text>
+            <Text style={[globalStyles.text, styles.emptyStateSubtitle]}>
+              {isError
+                ? 'Terjadi kesalahan koneksi. Silahkan coba lagi.'
+                : 'Tekan tombol di bawah untuk melihat daftar anime terbaru.'}
+            </Text>
+
+            <TouchableOpacityReactNative
+              onPress={loadAnimeList}
+              activeOpacity={0.7}
+              style={[
+                styles.loadButton,
+                {
+                  backgroundColor: isError
+                    ? theme.colors.errorContainer
+                    : theme.colors.primaryContainer,
+                },
+              ]}>
+              <Icon
+                name={isError ? 'refresh' : 'cloud-download'}
+                size={18}
+                color={isError ? theme.colors.onErrorContainer : theme.colors.onPrimaryContainer}
+              />
+              <Text
+                style={[
+                  globalStyles.text,
+                  styles.loadButtonText,
+                  {
+                    color: isError
+                      ? theme.colors.onErrorContainer
+                      : theme.colors.onPrimaryContainer,
+                  },
+                ]}>
+                {isError ? 'Coba Lagi' : 'Muat Daftar Anime'}
+              </Text>
+            </TouchableOpacityReactNative>
+          </View>
+        </Reanimated.View>
+      )}
+
+      {showDefaultList && (
+        <View style={{ flex: 1 }}>
           <Text
             style={[globalStyles.text, { textAlign: 'center', marginTop: 10, fontWeight: 'bold' }]}>
-            Total anime: {listAnime.length} (belum termasuk movie)
+            Total anime: {listAnime?.length} (belum termasuk movie)
           </Text>
-          {(isPending || listAnimeLoading) && (
-            <ActivityIndicator
-              style={{ position: 'absolute' }}
-              color={colorScheme === 'dark' ? 'white' : 'black'}
-            />
-          )}
-          {listAnime.length > 0 && !listAnimeLoading && (
-            <FlashList
-              // recycleItems
-              // waitForInitialLayout
-              // drawDistance={500}
-              data={listAnime}
-              key={listAnimeLoading.toString()}
-              renderItem={listAnimeRenderer}
-              ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
-              keyExtractor={item => item.title}
-              extraData={styles}
-            />
-          )}
+
+          <FlashList
+            data={listAnime}
+            renderItem={listAnimeRenderer}
+            ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
+            keyExtractor={item => item.title}
+            extraData={styles}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
         </View>
-      ) : data === null && comicsData === null ? (
-        <TouchableOpacity
-          onPress={() => {
-            setListAnime([]);
-            setListAnimeLoading(true);
-            AnimeAPI.listAnime(undefined, animeData => {
-              startTransition(() => {
-                setListAnime(animeData);
-              });
-            })
-              .then(animeData => {
-                setListAnime(animeData);
-                setListAnimeLoading(false);
-              })
-              .catch(() => {
-                setListAnime(null);
-                setListAnimeLoading(false);
-              });
-          }}
-          style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-          <Text style={[globalStyles.text, { fontWeight: 'bold', fontSize: 16 }]}>
-            Gagal memuat list, tekan disini untuk mencoba lagi
-          </Text>
-          <Icon name="exclamation-circle" size={30} color={'red'} />
-        </TouchableOpacity>
-      ) : (
+      )}
+
+      {(hasSearchResults || isSearchEmpty) && (
         <>
           <Text
             style={[
               globalStyles.text,
               { fontWeight: 'bold', fontSize: 13, marginVertical: 2, textAlign: 'center' },
             ]}>
-            Hasil pencarian untuk: {currentSearchQuery}
-            {movieData &&
+            {isSearchEmpty
+              ? 'Tidak ada hasil pencarian yang ditemukan!'
+              : `Hasil pencarian untuk: ${currentSearchQuery}`}
+
+            {!isSearchEmpty &&
+              movieData &&
               movieData.length > 0 &&
               (data?.result?.length ?? 0) > 0 &&
               '\n(Movie di tempatkan di urutan atas)'}
           </Text>
-          {(data?.result?.length ?? 0) > 0 ||
-          (movieData && movieData.length > 0) ||
-          (comicsData && comicsData.length > 0) ? (
+
+          {hasSearchResults && (
             <FlashList
               renderScrollComponent={RenderScrollComponent}
               ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
               data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
               keyExtractor={(_, index) => String(index)}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
+              contentContainerStyle={{ paddingBottom: 20 }}
             />
-          ) : (
-            <Text style={[globalStyles.text, { textAlign: 'center' }]}>
-              Tidak ada hasil pencarian yang ditemukan!
-            </Text>
           )}
         </>
       )}
+
       {loading && (
         <Reanimated.View entering={FadeInDown} exiting={FadeOutUp} style={styles.loadingView}>
           <Text style={[globalStyles.text, styles.loadingText]}>Memuat info...</Text>
         </Reanimated.View>
       )}
-      {/* SEARCH HISTORY VIEW */}
+
       {showSearchHistory && (
         <Reanimated_KeyboardAvoidingView
           behavior="height"
@@ -397,7 +430,7 @@ function Search(props: Props) {
       )}
       {(data !== null || comicsData !== null) && (
         <TouchableOpacityAnimated
-          style={styles.closeSearchResult} //rngh - containerStyle
+          style={styles.closeSearchResult}
           onPress={() => {
             setData(null);
             setMovieData(null);
@@ -429,7 +462,6 @@ function HistoryList({
       style={styles.searchHistoryItemContainer}
       pointerEvents="box-none"
       onStartShouldSetResponder={() => true}>
-      {/* I wrap the component with "View" because somehow "keyboardShouldPersistTaps" ignores the RNGH's Touchables */}
       <TouchableOpacityReactNative
         style={[
           {
@@ -609,6 +641,35 @@ function useStyles() {
           alignItems: 'center',
           flex: 1,
         },
+        emptyStateContainer: {
+          alignItems: 'center',
+          paddingHorizontal: 40,
+        },
+        emptyStateTitle: {
+          fontSize: 20,
+          fontWeight: 'bold',
+          marginBottom: 8,
+          textAlign: 'center',
+        },
+        emptyStateSubtitle: {
+          fontSize: 14,
+          textAlign: 'center',
+          opacity: 0.6,
+          marginBottom: 24,
+        },
+        loadButton: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 12,
+          paddingHorizontal: 24,
+          borderRadius: 25,
+          elevation: 2,
+        },
+        loadButtonText: {
+          fontWeight: 'bold',
+          marginLeft: 10,
+          fontSize: 15,
+        },
         nullDataText: {
           color: globalStyles.text.color,
           fontWeight: 'bold',
@@ -722,7 +783,7 @@ function useStyles() {
           zIndex: 1,
         },
       }),
-    [globalStyles.text.color, colorScheme, theme.colors.onPrimaryContainer],
+    [globalStyles.text.color, colorScheme, theme],
   );
 }
 
