@@ -80,11 +80,16 @@ export default function SeekBar({
   }));
 
   const thumbStyle = useAnimatedStyle(() => {
-    const centerX = progress.get() * parentWidth.get();
+    return {
+      transform: [{ scale: thumbScale.value }],
+    };
+  });
+  const thumbPositionStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { translateX: clampNumber(centerX - THUMB_SIZE / 2, 0, parentWidth.get() - THUMB_SIZE) },
-        { scale: thumbScale.value },
+        {
+          translateX: `${progress.get() * 100}%`,
+        },
       ],
     };
   });
@@ -113,8 +118,19 @@ export default function SeekBar({
           <View style={styles.trackBackground} />
 
           <Reanimated.View style={[styles.trackFill, coveredAreaStyles]} />
-
-          <Reanimated.View style={[styles.thumb, thumbStyle]} />
+          <Reanimated.View
+            style={[
+              {
+                position: 'absolute',
+                width: '100%',
+                height: THUMB_SIZE,
+                left: -THUMB_SIZE / 2,
+                zIndex: 3,
+              },
+              thumbPositionStyle,
+            ]}>
+            <Reanimated.View style={[styles.thumb, thumbStyle]} />
+          </Reanimated.View>
         </View>
       </GestureDetector>
     </View>
