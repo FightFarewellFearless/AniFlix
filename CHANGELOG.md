@@ -1,3 +1,12 @@
+# v1.1.4_JS-2 (17-Desember-2025)
+Dikarenakan keterbatsan waktu dev dalam memverifikasi setiap request whitelist yang masuk, versi ini menghapus blacklist pada semua genre ecchi, mohon bijak dalam menonton/membaca.
+## Diperbaiki
+- List histori yang terbuka secara tidak terduga pada pencarian
+- Ukuran tinggi item di list histori pencarian
+## Ditingkatkan
+- Context handling pada menu "lihat semua"
+## Dihapus
+- Blacklist genre ecchi
 # v1.1.4_JS-1 (10-Desember-2025)
 ## Perubahan
 - List anime tidak otomatis ter load di pencarian, ini mengurangi komputasi yang mungkin tidak diperlukan
