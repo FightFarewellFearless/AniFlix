@@ -58,15 +58,22 @@ function Search(props: Props) {
   const [searchType, setSearchType] = useState<'anime' | 'comics'>('anime');
   const textInputRef = useRef<TextInputType>(null);
 
+  const isFocus = useRef(true);
+
   useFocusEffect(
     useCallback(() => {
+      const timeout = setTimeout(() => {
+        isFocus.current = true;
+      }, 200);
       const keyboardEvent = Keyboard.addListener('keyboardDidHide', () => {
         if (textInputRef.current) {
           textInputRef.current.blur();
         }
       });
       return () => {
+        isFocus.current = false;
         keyboardEvent.remove();
+        clearTimeout(timeout);
       };
     }, []),
   );
@@ -202,6 +209,11 @@ function Search(props: Props) {
   );
 
   const onTextInputFocus = useCallback(() => {
+    if (!isFocus.current) {
+      textInputRef.current?.blur();
+      isFocus.current = true;
+      return;
+    }
     setShowSearchHistory(true);
   }, []);
   const onTextInputBlur = useCallback(() => {
