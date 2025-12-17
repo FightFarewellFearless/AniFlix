@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useContext, useEffect, useState } from 'react';
+import React, { memo, useContext, useEffect, useState, useCallback } from 'react';
 import {
   ActivityIndicator,
   ToastAndroid,
@@ -24,145 +24,104 @@ import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
+type ItemType = NewAnimeList | Movies | LatestKomikuRelease;
 
-function SeeMore(props: Props) {
-  // TODO: Optimize these context
-  const { paramsState: animeData, setParamsState: setAnimeData } =
-    useContext(EpisodeBaruHomeContext);
-  const { paramsState: movieData, setParamsState: setMovieData } = useContext(MovieListHomeContext);
-  const { paramsState: comicsData, setParamsState: setComicsData } = useContext(ComicsListContext);
+interface SeeMoreUIProps {
+  data: ItemType[];
+  type: 'AnimeList' | 'MovieList' | 'ComicsList';
+  onLoadMore: () => Promise<void>;
+  navigation: Props['navigation'];
+}
+
+const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const page =
-    props.route.params.type === 'AnimeList'
-      ? (animeData?.newAnime.length ?? 0) / 25
-      : props.route.params.type === 'ComicsList'
-        ? (comicsData?.length ?? 0) / 10
-        : (movieData?.length ?? 0) / 20;
   const dimensions = useWindowDimensions();
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
 
   let columnWidth = (dimensions.width * 120) / 200 / 1.9;
   columnWidth = Math.max(columnWidth, MIN_IMAGE_WIDTH);
-  const numColumns =
-    props.route.params.type === 'ComicsList' ? 1 : Math.floor(dimensions.width / columnWidth);
+  const numColumns = type === 'ComicsList' ? 1 : Math.floor(dimensions.width / columnWidth);
 
   useEffect(() => {
-    props.navigation.setOptions({
+    navigation.setOptions({
       headerTitle:
-        props.route.params.type === 'MovieList'
+        type === 'MovieList'
           ? 'Movie terbaru'
-          : props.route.params.type === 'ComicsList'
+          : type === 'ComicsList'
             ? 'Komik terbaru'
             : 'Anime terbaru',
     });
-  }, [props.navigation, props.route.params.type]);
+  }, [navigation, type]);
+
+  const handlePressLoadMore = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onLoadMore();
+    } catch (e) {
+      ToastAndroid.show('Error loading more items', ToastAndroid.SHORT);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: ItemType }) => {
+      if (type === 'MovieList') {
+        return (
+          <ListAnimeComponent
+            gap
+            type="movie"
+            newAnimeData={item as Movies}
+            navigationProp={navigation}
+          />
+        );
+      }
+      if (type === 'ComicsList') {
+        return (
+          <ListAnimeComponent
+            gap
+            fromSeeMore
+            type="comics"
+            newAnimeData={item as LatestKomikuRelease}
+            navigationProp={navigation}
+          />
+        );
+      }
+      return (
+        <ListAnimeComponent
+          gap
+          type="anime"
+          newAnimeData={item as NewAnimeList}
+          navigationProp={navigation}
+        />
+      );
+    },
+    [type, navigation],
+  );
 
   return (
     <View style={{ flex: 1 }}>
       <FlashList
         renderScrollComponent={RenderScrollComponent}
-        // estimatedItemSize={270}
-        // maintainVisibleContentPosition={false}
-        // recycleItems
         contentContainerStyle={{
           paddingLeft: insets.left,
           paddingRight: insets.right,
           paddingBottom: insets.bottom,
         }}
-        data={
-          (props.route.params.type === 'MovieList'
-            ? movieData
-            : props.route.params.type === 'ComicsList'
-              ? comicsData
-              : animeData?.newAnime) as (NewAnimeList | Movies | LatestKomikuRelease)[]
-        }
+        data={data}
         extraData={colorScheme}
         keyExtractor={item => item.title}
-        renderItem={({ item }) =>
-          props.route.params.type === 'MovieList' ? (
-            <ListAnimeComponent
-              gap
-              type="movie"
-              newAnimeData={item as Movies}
-              navigationProp={props.navigation}
-            />
-          ) : props.route.params.type === 'ComicsList' ? (
-            <ListAnimeComponent
-              gap
-              fromSeeMore
-              type="comics"
-              newAnimeData={item as LatestKomikuRelease}
-              navigationProp={props.navigation}
-            />
-          ) : (
-            <ListAnimeComponent
-              gap
-              type="anime"
-              newAnimeData={item as NewAnimeList}
-              navigationProp={props.navigation}
-            />
-          )
-        }
+        renderItem={renderItem}
         numColumns={numColumns}
         ListFooterComponent={
           <>
-            {isLoading && <ActivityIndicator />}
-
+            {isLoading && <ActivityIndicator style={{ marginTop: 10 }} />}
             <Button
               mode="contained-tonal"
               style={{ marginTop: 6 }}
-              onPress={async () => {
-                if (isLoading) {
-                  return;
-                }
-                setIsLoading(true);
-                try {
-                  if (props.route.params.type === 'MovieList') {
-                    const newdata = await getLatestMovie(undefined, page + 1);
-                    if ('isError' in newdata) {
-                      ToastAndroid.show('Error', ToastAndroid.SHORT);
-                      return;
-                    }
-                    setMovieData?.(prev => [...prev, ...newdata]);
-                    setMovieData?.(prev =>
-                      prev.filter(
-                        (item, index, self) =>
-                          index === self.findIndex(a => a.title === item.title),
-                      ),
-                    );
-                    return;
-                  }
-                  if (props.route.params.type === 'ComicsList') {
-                    const newdata = await getLatestKomikuReleases(page + 1);
-                    if ('isError' in newdata) {
-                      ToastAndroid.show('Error', ToastAndroid.SHORT);
-                      return;
-                    }
-                    setComicsData?.(prev => [...prev, ...newdata]);
-                    setComicsData?.(prev =>
-                      prev.filter(
-                        (item, index, self) =>
-                          index === self.findIndex(a => a.title === item.title),
-                      ),
-                    );
-                    return;
-                  }
-                  const newdata = await AnimeAPI.newAnime(page + 1);
-                  setAnimeData?.(prev => ({
-                    ...prev,
-                    newAnime: [...prev.newAnime, ...newdata],
-                  }));
-                  setAnimeData?.(prev => ({
-                    ...prev,
-                    newAnime: prev.newAnime.filter(
-                      (item, index, self) => index === self.findIndex(a => a.title === item.title),
-                    ),
-                  }));
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
+              onPress={handlePressLoadMore}
               disabled={isLoading}>
               Lihat lebih banyak
             </Button>
@@ -171,6 +130,98 @@ function SeeMore(props: Props) {
       />
     </View>
   );
+});
+
+const AnimeContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(EpisodeBaruHomeContext);
+  const data = paramsState?.newAnime || [];
+
+  const handleLoadMore = async () => {
+    const page = (data.length ?? 0) / 25;
+    const newData = await AnimeAPI.newAnime(page + 1);
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev.newAnime, ...newData];
+        // Filter unique
+        const unique = combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+        return { ...prev, newAnime: unique };
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="AnimeList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
+const MovieContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(MovieListHomeContext);
+  const data = paramsState || [];
+
+  const handleLoadMore = async () => {
+    const page = (data.length ?? 0) / 20;
+    const newData = await getLatestMovie(undefined, page + 1);
+
+    if ('isError' in newData) {
+      throw new Error('API Error');
+    }
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev, ...newData];
+        return combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="MovieList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
+const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(ComicsListContext);
+  const data = paramsState || [];
+
+  const handleLoadMore = async () => {
+    const page = (data.length ?? 0) / 10;
+    const newData = await getLatestKomikuReleases(page + 1);
+
+    if ('isError' in newData) {
+      throw new Error('API Error');
+    }
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev, ...newData];
+        return combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="ComicsList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
+function SeeMore(props: Props) {
+  const { type } = props.route.params;
+  switch (type) {
+    case 'MovieList':
+      return <MovieContainer navigation={props.navigation} />;
+    case 'ComicsList':
+      return <ComicsContainer navigation={props.navigation} />;
+    case 'AnimeList':
+    default:
+      return <AnimeContainer navigation={props.navigation} />;
+  }
 }
 
 export default memo(SeeMore);
