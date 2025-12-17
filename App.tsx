@@ -70,7 +70,6 @@ const CombinedDarkTheme = {
 const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
 const Video = lazy(() => import('./src/component/WatchNRead/Video'));
-const Blocked = lazy(() => import('./src/component/NeedAttention/Blocked'));
 const FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
 const NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
 const MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
@@ -143,7 +142,6 @@ const screens: Screens = [
   { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },
   { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },
   { name: 'NeedUpdate', component: withSuspenseAndSafeArea(NeedUpdate), options: undefined },
-  { name: 'Blocked', component: withSuspenseAndSafeArea(Blocked), options: undefined },
   {
     name: 'FailedToConnect',
     component: withSuspenseAndSafeArea(FailedToConnect),

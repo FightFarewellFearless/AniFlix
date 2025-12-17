@@ -44,14 +44,12 @@ import useGlobalStyles, { darkText, lightText } from '../../assets/style';
 import useDownloadAnimeFunction from '../../utils/downloadAnime';
 import setHistory from '../../utils/historyControl';
 
-import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { AniDetail } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
-import Anime_Whitelist from '../../utils/Anime_Whitelist';
 import AnimeAPI from '../../utils/AnimeAPI';
 import {
   getMovieDetail,
@@ -127,18 +125,11 @@ function Video(props: Props) {
     AnimeAPI.fromUrl(data.episodeData.animeDetail, undefined, undefined, true).then(detail => {
       if (detail === 'Unsupported') return;
       if (detail.type === 'animeDetail') {
-        if (
-          detail.genres.includes('') &&
-          !Anime_Whitelist.list.includes(data.episodeData.animeDetail)
-        ) {
-          props.navigation.dispatch(
-            StackActions.replace('Blocked', {
-              title: detail.title,
-              url: data.episodeData.animeDetail,
-              data: detail,
-            }),
+        if (detail.genres.includes('')) {
+          DialogManager.alert(
+            'Perhatian!',
+            'Anime ini mengandung genre ecchi. Mohon bijak dalam menonton.',
           );
-          return;
         }
         setAnimeDetail(detail);
       }

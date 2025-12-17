@@ -45,6 +45,7 @@ export default function ComicsDetail(props: Props) {
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
   const styles = useStyles();
   const scrollRef = useAnimatedRef<FlashListRef<KomikuDetail['chapters'][0]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
@@ -224,6 +225,8 @@ export default function ComicsDetail(props: Props) {
                         elevation={3}
                         style={{
                           borderRadius: 8,
+                          backgroundColor:
+                            z === 'Ecchi' ? 'rgba(255, 0, 0, 0.5)' : theme.colors.elevation.level3,
                         }}>
                         <Text style={styles.genre} key={z}>
                           {z}

@@ -6,7 +6,6 @@ import randomTipsArray from '../../assets/loadingTips.json';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
-import Anime_Whitelist from '../../utils/Anime_Whitelist';
 import AnimeAPI from '../../utils/AnimeAPI';
 import setHistory from '../../utils/historyControl';
 import controlWatchLater from '../../utils/watchLaterControl';
@@ -136,25 +135,10 @@ function FromUrl(props: Props) {
           }
           try {
             if (result.type === 'animeDetail') {
-              if (
-                result.genres.includes('') &&
-                !Anime_Whitelist.list.includes(props.route.params.link)
-              ) {
-                // Ecchi
-                if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
-                props.navigation.dispatch(
-                  StackActions.replace('Blocked', {
-                    title: result.title,
-                    url: props.route.params.link,
-                    data: result,
-                  }),
-                );
-                return;
-              }
-              if (Anime_Whitelist.list.includes(props.route.params.link)) {
+              if (result.genres.includes('')) {
                 DialogManager.alert(
                   'Perhatian!',
-                  'Anime ini mengandung genre ecchi. Namun telah di tinjau dan di whitelist oleh developer karena masih dalam kategori aman. Mohon bijak dalam menonton.',
+                  'Anime ini mengandung genre ecchi. Mohon bijak dalam menonton.',
                 );
               }
               if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
@@ -212,23 +196,10 @@ function FromUrl(props: Props) {
         getKomikuDetailFromUrl(props.route.params.link, abort.signal)
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
-            if (
-              result.genres.includes('Ecchi') &&
-              !Anime_Whitelist.list.includes(props.route.params.link)
-            ) {
-              props.navigation.dispatch(
-                StackActions.replace('Blocked', {
-                  title: result.title,
-                  url: props.route.params.link,
-                  data: result,
-                }),
-              );
-              return;
-            }
-            if (Anime_Whitelist.list.includes(props.route.params.link)) {
+            if (result.genres.includes('Ecchi')) {
               DialogManager.alert(
                 'Perhatian!',
-                'Komik ini mengandung genre ecchi. Namun telah di tinjau dan di whitelist oleh developer karena masih dalam kategori aman. Mohon bijak dalam membaca.',
+                'Komik ini mengandung genre ecchi. Mohon bijak dalam membaca.',
               );
             }
             props.navigation.dispatch(
