@@ -20,7 +20,7 @@
     <img alt="Versi terbaru" src="https://img.shields.io/github/v/tag/FightFarewellFearless/aniflix?label=Versi%20terbaru">
   </a>
   <a href="https://reactnative.dev/">
-    <img alt="Built with react-native" src="https://img.shields.io/badge/React%20Native-v0.79-blue.svg?style=flat&logo=react">
+    <img alt="Built with react-native" src="https://img.shields.io/badge/React%20Native-v0.81-blue.svg?style=flat&logo=react">
   </a>
   <a href="https://github.com/FightFarewellFearless/aniflix/languages/top">
     <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/FightFarewellFearless/aniflix">
