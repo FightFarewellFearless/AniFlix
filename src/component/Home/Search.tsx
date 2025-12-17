@@ -468,7 +468,7 @@ function HistoryList({
             padding: 6,
             flexDirection: 'row',
             justifyContent: 'space-between',
-            height: 40,
+            minHeight: 40,
           },
         ]}
         onPress={() => {
