@@ -178,89 +178,232 @@ export default function ComicsReading(props: Props) {
 
   const { data } = props.route.params;
   const comicImages = props.route.params.data.comicImages;
-  const errorIconUrl = `data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pjxzdmcgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxwYXRoIGQ9Ik0wIDBIMjRWMjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMTIgM2M0LjI4NCAwIDguMjIgMS40OTcgMTEuMzEgMy45OTZMMjIuNDk4IDhIMTh2NS41NzFMMTIgMjEgLjY5IDYuOTk3QzMuNzggNC40OTcgNy43MTQgMyAxMiAzem0xMCAxNnYyaC0ydi0yaDJ6bTAtOXY3aC0ydi03aDJ6Ii8+PC9nPjwvc3ZnPg==`;
+
+  const bgColor = theme.dark ? '#121212' : '#ffffff';
+  const shimmerBase = theme.dark ? '#333333' : '#e0e0e0';
+  const shimmerHighlight = theme.dark ? '#444444' : '#f0f0f0';
+  const errorTextColor = theme.dark ? '#ffb4ab' : '#ba1a1a'; // Material Design Error colors
+
+  const errorSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${errorTextColor}"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+  const errorIconUrl = `data:image/svg+xml;base64,${btoa(errorSvg)}`;
 
   const styles = `
     <style>
-      img {
-        min-height: 250px;
+      body {
+        margin: 0;
+        background-color: ${bgColor};
+      }
+      
+      .img-wrapper {
+        min-height: 300px;
         width: 100%;
-        background-color: #f0f0f0;
+        position: relative;
+        background-color: ${shimmerBase};
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Skeleton Loading Animation */
+      .img-wrapper::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, ${shimmerBase} 25%, ${shimmerHighlight} 50%, ${shimmerBase} 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        z-index: 1;
+      }
+
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      img {
+        width: 100%;
+        display: block;
+        opacity: 0; /* Hidden by default for fade-in */
+        transition: opacity 0.4s ease-in;
+        position: relative;
+        z-index: 2;
+        min-height: 50px; /* Prevent total collapse */
+      }
+
+      img.loaded {
+        opacity: 1;
+        min-height: auto;
+        background-color: transparent;
+      }
+
+      /* Saat gambar sudah load, hilangkan skeleton wrapper */
+      .img-wrapper.has-loaded {
+        min-height: auto;
+        background: none;
+      }
+      .img-wrapper.has-loaded::before {
+        display: none;
+      }
+
+      /* Error State Styling */
+      .img-wrapper.is-error {
+        min-height: 250px;
+        background-color: ${theme.dark ? '#2a2a2a' : '#ffebee'};
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+      .img-wrapper.is-error::before {
+        display: none; /* Hide shimmer */
+      }
+      
+      .img-wrapper.is-error::after {
+        content: "Gagal memuat gambar. Ketuk untuk ulangi.";
+        font-family: sans-serif;
+        color: ${errorTextColor};
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .img-wrapper.is-error .error-icon {
+        width: 48px;
+        height: 48px;
+        background-image: url('${errorIconUrl}');
         background-repeat: no-repeat;
         background-position: center;
-        background-size: 48px 48px;
+        display: block;
       }
-      img.error {
-        background-image: url('${errorIconUrl}');
+      
+      .img-wrapper.is-error img {
+        display: none;
       }
     </style>
   `;
 
   const body = comicImages
     .map((link, index) => {
-      return `<img loading="lazy" src="${link}" style="width: 100%; display: block;" id="${index}" />`;
+      return `
+        <div class="img-wrapper" id="wrap-${index}">
+           <div class="error-icon" style="display:none"></div>
+           <img 
+              loading="lazy" 
+              src="${link}" 
+              id="${index}"
+              onload="onImageLoad(this)"
+              onerror="onImageError(this)"
+           />
+        </div>
+      `;
     })
     .join('\n');
 
-  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body style="margin: 0;">${body}</body>`;
+  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body>${body}</body>`;
 
   const injectedJavaScript = `
-  const PIXELS_PER_SECOND = 60;
-  window.autoScrollFrame = null;
-  window.scrollSpeed = PIXELS_PER_SECOND;
+    window.onImageLoad = (img) => {
+      img.classList.add('loaded');
+      const wrapper = document.getElementById('wrap-' + img.id);
+      if(wrapper) wrapper.classList.add('has-loaded');
+    };
 
-  window.updateScrollSpeed = (speed) => {
-    window.scrollSpeed = speed * PIXELS_PER_SECOND;
-  };
+    window.onImageError = (img) => {
+       if (img.src && img.src.includes('cdn1')) {
+         img.src = img.src.replace('cdn1', 'img');
+         return;
+       }
 
-  window.startAutoScroll = () => {
-    if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+       const wrapper = document.getElementById('wrap-' + img.id);
+       if(wrapper) {
+         wrapper.classList.add('is-error');
+         const icon = wrapper.querySelector('.error-icon');
+         if(icon) icon.style.display = 'block';
+       }
+    };
 
-    let lastTime = null;
+    document.addEventListener('click', (e) => {
+      const wrapper = e.target.closest('.img-wrapper.is-error');
+      
+      if (wrapper) {
+        const img = wrapper.querySelector('img');
+        if (img) {
+          wrapper.classList.remove('is-error');
+          const icon = wrapper.querySelector('.error-icon');
+          if(icon) icon.style.display = 'none';
+          img.style.display = 'block';
 
-    function step(timestamp) {
-      if (!lastTime) lastTime = timestamp;
-
-      const deltaTime = (timestamp - lastTime) / 1000;
-      lastTime = timestamp;
-
-      const pixelsToScroll = window.scrollSpeed * deltaTime;
-
-      if (pixelsToScroll > 0) {
-          window.scrollBy(0, pixelsToScroll);
+          const currentSrc = img.src;
+          img.src = ''; 
+          img.src = currentSrc;
+        }
       }
+    });
 
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1) {
-           window.stopAutoScroll();
-           window.ReactNativeWebView.postMessage('endReached');
-      } else {
-          window.autoScrollFrame = requestAnimationFrame(step);
+    const PIXELS_PER_SECOND = 60;
+    window.autoScrollFrame = null;
+    window.scrollSpeed = PIXELS_PER_SECOND;
+
+    window.updateScrollSpeed = (speed) => {
+      window.scrollSpeed = speed * PIXELS_PER_SECOND;
+    };
+
+    window.startAutoScroll = () => {
+      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+
+      let lastTime = null;
+
+      function step(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+
+        const deltaTime = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const pixelsToScroll = window.scrollSpeed * deltaTime;
+
+        if (pixelsToScroll > 0) {
+            window.scrollBy(0, pixelsToScroll);
+        }
+
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1) {
+             window.stopAutoScroll();
+             window.ReactNativeWebView.postMessage('endReached');
+        } else {
+           window.autoScrollFrame = requestAnimationFrame(step);
+        }
       }
-    }
-  
-    window.autoScrollFrame = requestAnimationFrame(step);
-  };
+      
+      window.autoScrollFrame = requestAnimationFrame(step);
+    };
 
-window.stopAutoScroll = () => {
-  if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
-  window.autoScrollFrame = null;
-};
+    window.stopAutoScroll = () => {
+      if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
+      window.autoScrollFrame = null;
+    };
 
     ${
       props.route.params.historyData
         ? `
-          const lastDuration = '${props.route.params.historyData.lastDuration}';
-          const target = document.getElementById(lastDuration);
-          if (target) {
-            target.scrollIntoView({ behavior: 'instant' });
-            setTimeout(() => {
-              target.scrollIntoView({ behavior: 'smooth' });
-            }, 1000);
-          };
+          setTimeout(() => {
+             const lastDuration = '${props.route.params.historyData.lastDuration}';
+             const target = document.getElementById(lastDuration);
+             if (target) {
+               target.scrollIntoView({ behavior: 'instant' });
+               setTimeout(() => {
+                 target.scrollIntoView({ behavior: 'smooth' });
+               }, 500);
+             };
+          }, 300);
           `
         : ''
     }
-    
+
     const options = {
       root: null,
       rootMargin: '20px 0px -50% 0px',
@@ -277,29 +420,7 @@ window.stopAutoScroll = () => {
     }, options);
 
     document.querySelectorAll('img').forEach(img => {
-      img.onload = () => {
-        img.classList.remove('error');
-        img.style.minHeight = 'auto';
-      };
-      img.onerror = () => {
-        if (img.src?.includes('cdn1')) {
-          img.src = img.src.replace('cdn1', 'img');
-        } else {
-          img.classList.add('error');
-        }
-      };
       observer.observe(img);
-    });
-
-    document.addEventListener('click', (e) => {
-      if (e.target && e.target.tagName === 'IMG' && e.target.classList.contains('error')) {
-        const src = e.target.getAttribute('src');
-        if (src) {
-          e.target.classList.remove('error');
-          e.target.setAttribute('src', '');
-          e.target.setAttribute('src', src);
-        }
-      }
     });
   `;
 
@@ -343,13 +464,14 @@ window.stopAutoScroll = () => {
 
       <WebView
         ref={webViewRef}
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: bgColor }}
         overScrollMode="never"
         cacheEnabled={false}
         source={{ html }}
         injectedJavaScript={injectedJavaScript}
         onMessage={handleMessage}
         showsVerticalScrollIndicator={false}
+        androidLayerType="hardware"
       />
 
       <View>
