@@ -195,7 +195,7 @@ export default function ComicsReading(props: Props) {
       }
       
       .img-wrapper {
-        min-height: 300px;
+        min-height: 140vw;
         width: 100%;
         position: relative;
         background-color: ${shimmerBase};
@@ -240,7 +240,6 @@ export default function ComicsReading(props: Props) {
         background-color: transparent;
       }
 
-      /* Saat gambar sudah load, hilangkan skeleton wrapper */
       .img-wrapper.has-loaded {
         min-height: auto;
         background: none;
