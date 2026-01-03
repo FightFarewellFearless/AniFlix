@@ -127,6 +127,7 @@ export default function ComicsDetail(props: Props) {
           </View>
         )}
         renderItem={({ item }) => {
+          if (!item) return null;
           const isLastReaded =
             lastReaded &&
             lastReaded.episode &&
