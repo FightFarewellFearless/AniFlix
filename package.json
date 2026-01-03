@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@domir/react-native-measure-text": "0.1.8",
-    "@legendapp/list": "2.0.18",
+    "@legendapp/list": "2.0.19",
     "@pirles/react-native-element-dropdown": "^2.15.0",
     "@react-native-vector-icons/entypo": "^12.4.0",
     "@react-native-vector-icons/fontawesome": "^12.4.0",
