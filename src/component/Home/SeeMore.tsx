@@ -60,7 +60,7 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
     try {
       await onLoadMore();
     } catch (e) {
-      ToastAndroid.show('Error loading more items', ToastAndroid.SHORT);
+      ToastAndroid.show('Error saat memuat item', ToastAndroid.SHORT);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +137,7 @@ const AnimeContainer = ({ navigation }: { navigation: Props['navigation'] }) => 
   const data = paramsState?.newAnime || [];
 
   const handleLoadMore = async () => {
-    const page = (data.length ?? 0) / 25;
+    const page = Math.round((data.length ?? 0) / 25);
     const newData = await AnimeAPI.newAnime(page + 1);
 
     if (setParamsState) {
@@ -162,7 +162,7 @@ const MovieContainer = ({ navigation }: { navigation: Props['navigation'] }) => 
   const data = paramsState || [];
 
   const handleLoadMore = async () => {
-    const page = (data.length ?? 0) / 20;
+    const page = Math.round((data.length ?? 0) / 20);
     const newData = await getLatestMovie(undefined, page + 1);
 
     if ('isError' in newData) {
@@ -189,7 +189,7 @@ const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) =>
   const data = paramsState || [];
 
   const handleLoadMore = async () => {
-    const page = (data.length ?? 0) / 10;
+    const page = Math.round((data.length ?? 0) / 10);
     const newData = await getLatestKomikuReleases(page + 1);
 
     if ('isError' in newData) {
