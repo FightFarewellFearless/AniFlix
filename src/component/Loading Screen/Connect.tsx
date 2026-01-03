@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  ViewStyle,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
@@ -38,14 +39,43 @@ import deviceUserAgent from '../../utils/deviceUserAgent';
 import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
 import animeLocalAPI from '../../utils/scrapers/animeSeries';
 
-export const JoinDiscord = () => {
+export const JoinDiscord = ({
+  buttonColor,
+  size = 24,
+  style,
+}: {
+  buttonColor?: string;
+  size?: number;
+  style?: ViewStyle;
+}) => {
   const styles = useStyles();
   return (
     <TouchableOpacity
       onPress={() => Linking.openURL('https://discord.gg/sbTwxHb9NM')}
-      style={styles.socialButton}>
-      <Fontisto name="discord" size={24} color={'#7289d9'} />
+      style={[styles.socialButton, buttonColor ? { backgroundColor: buttonColor } : {}, style]}>
+      <Fontisto name="discord" size={size} color={'#7289d9'} />
       <Text style={styles.socialButtonText}>Join Discord</Text>
+    </TouchableOpacity>
+  );
+};
+
+export const Github = ({
+  buttonColor,
+  size = 24,
+  style,
+}: {
+  buttonColor?: string;
+  size?: number;
+  style?: ViewStyle;
+}) => {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
+  return (
+    <TouchableOpacity
+      onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
+      style={[styles.socialButton, buttonColor ? { backgroundColor: buttonColor } : {}, style]}>
+      <Icon name="github" size={size} color={globalStyles.text.color} />
+      <Text style={styles.socialButtonText}>GitHub</Text>
     </TouchableOpacity>
   );
 };
@@ -54,7 +84,6 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
 function Loading(props: Props) {
   const styles = useStyles();
-  const globalStyles = useGlobalStyles();
 
   useEffect(() => {
     Orientation.lockToPortrait();
@@ -343,12 +372,7 @@ function Loading(props: Props) {
 
       <View style={styles.footer}>
         <View style={styles.socialButtons}>
-          <TouchableOpacity
-            onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
-            style={styles.socialButton}>
-            <Icon name="github" size={24} color={globalStyles.text.color} />
-            <Text style={styles.socialButtonText}>GitHub</Text>
-          </TouchableOpacity>
+          <Github />
           <JoinDiscord />
         </View>
         <Text style={styles.versionText}>

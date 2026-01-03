@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Text, ToastAndroid, View } from 'react-native';
 import randomTipsArray from '../../assets/loadingTips.json';
+import runningTextArray from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
@@ -11,12 +12,12 @@ import setHistory from '../../utils/historyControl';
 import controlWatchLater from '../../utils/watchLaterControl';
 
 import URL from 'url';
-import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
+import { replaceLast } from '../../utils/replaceLast';
+import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
 import LoadingIndicator from '../misc/LoadingIndicator';
-import { replaceLast } from '../../utils/replaceLast';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -27,6 +28,12 @@ function FromUrl(props: Props) {
     // eslint-disable-next-line no-bitwise
     randomTipsArray[~~(Math.random() * randomTipsArray.length)],
   ).current;
+
+  const randomQuote = useRef(
+    // eslint-disable-next-line no-bitwise
+    runningTextArray[~~(Math.random() * runningTextArray.length)],
+  ).current;
+
   const handleError = useCallback(
     (err: Error) => {
       if (err.message === 'Silahkan selesaikan captcha') {
@@ -264,13 +271,20 @@ function FromUrl(props: Props) {
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
+          paddingHorizontal: 24,
         }}>
         <LoadingIndicator size={15} />
-        <Text style={[globalStyles.text, { fontWeight: 'bold' }]}>
+        <Text style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20 }]}>
           Mengambil data... Mohon tunggu sebentar!
         </Text>
+        <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>
+          "{randomQuote.quote}"
+        </Text>
+        <Text
+          style={[globalStyles.text, { textAlign: 'center', marginTop: 5, fontWeight: 'bold' }]}>
+          — {randomQuote.by}
+        </Text>
       </View>
-      {/* tips */}
       <View style={{ alignItems: 'center' }}>
         <View style={{ position: 'absolute', bottom: 10 }}>
           <Text style={[{ textAlign: 'center' }, globalStyles.text]}>{randomTips}</Text>

@@ -28,8 +28,8 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useBatteryLevel } from 'react-native-nitro-device-info';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import { useBatteryLevel } from 'react-native-nitro-device-info';
 import { useTheme } from 'react-native-paper';
 import Reanimated, {
   cancelAnimation,
@@ -55,6 +55,7 @@ import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
 import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scrapers/komiku';
+import { Github, JoinDiscord } from '../Loading Screen/Connect';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
@@ -72,6 +73,7 @@ function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const styles = useStyles();
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
@@ -232,6 +234,19 @@ function HomeList(props: HomeProps) {
               <Text style={styles.appVersion}>
                 {version}-JS_{OTAJSVersion}
               </Text>
+            </View>
+
+            <View style={styles.socialButtons}>
+              <JoinDiscord
+                buttonColor={theme.colors.surfaceVariant}
+                size={20}
+                style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
+              />
+              <Github
+                buttonColor={theme.colors.surfaceVariant}
+                size={20}
+                style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
+              />
             </View>
 
             <View
@@ -652,6 +667,13 @@ function useStyles() {
         appVersion: {
           fontSize: 12,
           color: isDark ? '#AAA' : '#777',
+        },
+        socialButtons: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'space-around',
+          gap: 16,
+          marginBottom: 8,
         },
         runningText: {
           color: theme.colors.primary,
