@@ -1,36 +1,39 @@
-import Icon from '@react-native-vector-icons/fontawesome';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { reloadAppAsync } from 'expo';
-import { JSX, memo, ReactElement, useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Appearance,
-  ColorSchemeName,
-  FlatList,
-  Modal,
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Switch,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-import useGlobalStyles, { darkText } from '../../../assets/style';
-import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
-import { HistoryJSON } from '../../../types/historyJSON';
-import { UtilsStackNavigator } from '../../../types/navigation';
-import watchLaterJSON from '../../../types/watchLaterJSON';
-
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
+import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Buffer } from 'buffer/';
+import { reloadAppAsync } from 'expo';
 import * as DocumentPicker from 'expo-document-picker';
 import { AudioMixingMode } from 'expo-video';
 import moment from 'moment';
+import { JSX, memo, useCallback, useRef, useState } from 'react';
+import {
+  Appearance,
+  ColorSchemeName,
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  View,
+} from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
-import { useTheme } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Divider,
+  List,
+  Modal,
+  Portal,
+  Surface,
+  Switch,
+  TouchableRipple,
+  useTheme,
+} from 'react-native-paper';
 import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
+import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
 import { HistoryItemKey } from '../../../types/databaseTarget';
+import { HistoryJSON } from '../../../types/historyJSON';
+import { UtilsStackNavigator } from '../../../types/navigation';
+import watchLaterJSON from '../../../types/watchLaterJSON';
 import {
   DANGER_MIGRATE_OLD_HISTORY,
   DatabaseManager,
@@ -38,9 +41,7 @@ import {
   useModifiedKeyValueIfFocused,
 } from '../../../utils/DatabaseManager';
 import DialogManager from '../../../utils/dialogManager';
-import LoadingIndicator from '../../misc/LoadingIndicator';
 import ReText from '../../misc/ReText';
-import { TouchableOpacity } from '../../misc/TouchableOpacityRNGH';
 import { HistoryDatabaseCache } from '../Saya/History';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
@@ -52,7 +53,8 @@ type BackupJSON = Omit<typeof defaultDatabaseValue, 'historyKeyCollectionsOrder'
 interface SettingsData {
   title: string;
   description: string;
-  icon: ReactElement<typeof Icon>;
+  iconName: FontAwesomeIconName;
+  iconColor?: string;
   rightComponent?: JSX.Element;
   handler: () => any;
 }
@@ -60,9 +62,7 @@ interface SettingsData {
 type Props = NativeStackScreenProps<UtilsStackNavigator, 'Setting'>;
 
 function Setting(_props: Props) {
-  const globalStyles = useGlobalStyles();
   const theme = useTheme();
-  const styles = useStyles();
   const enableBatteryTimeInfo = useKeyValueIfFocused('enableBatteryTimeInfo');
 
   const appTheme = useKeyValueIfFocused('colorScheme');
@@ -187,7 +187,6 @@ function Setting(_props: Props) {
 
       if (!doc.assets) return;
 
-      // RNFS.readFile(doc.fileCopyUri).then(console.log);
       const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
       const backupDataJSON: BackupJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
       await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
@@ -267,13 +266,38 @@ function Setting(_props: Props) {
     );
   }, [modalText]);
 
-  const iconSize = 18;
+  const dropdownStyles = {
+    style: {
+      width: 140,
+      backgroundColor: theme.colors.elevation.level2,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 0,
+    },
+    containerStyle: {
+      borderRadius: 8,
+      backgroundColor: theme.colors.elevation.level2,
+      borderWidth: 0,
+    },
+    itemTextStyle: {
+      color: theme.colors.onSurface,
+      fontSize: 13,
+    },
+    itemContainerStyle: {
+      backgroundColor: theme.colors.elevation.level2,
+    },
+    selectedTextStyle: {
+      color: theme.colors.onSurface,
+      fontSize: 13,
+    },
+  };
 
   const settingsData: SettingsData[] = [
     {
       title: 'Tema aplikasi',
       description: 'Beralih ke tema gelap atau terang',
-      icon: <Icon name="paint-brush" style={globalStyles.text} size={iconSize} />,
+      iconName: 'paint-brush',
       rightComponent: (
         <Dropdown
           data={DROPDOWN_THEME_DATA}
@@ -290,13 +314,9 @@ function Setting(_props: Props) {
           labelField={'label'}
           valueField={'value'}
           maxHeight={300}
-          style={styles.dropdownStyle}
-          containerStyle={styles.dropdownContainerStyle}
-          itemTextStyle={styles.dropdownItemTextStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          activeColor="#0f8eb4"
-          selectedTextStyle={styles.dropdownSelectedTextStyle}
-          placeholderStyle={{ color: globalStyles.text.color }}
+          activeColor={theme.colors.primaryContainer}
+          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
+          {...dropdownStyles}
         />
       ),
       handler: () => {
@@ -305,9 +325,8 @@ function Setting(_props: Props) {
     },
     {
       title: 'Mode mixing audio',
-      description:
-        'Tentukan apa yang harus dilakukan aplikasi ketika menonton sambil mendengarkan - contoh: lagu',
-      icon: <Icon name="music" style={globalStyles.text} size={iconSize} />,
+      description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
+      iconName: 'music',
       rightComponent: (
         <Dropdown
           data={DROPDOWN_AUDIOMIXING_DATA}
@@ -319,13 +338,9 @@ function Setting(_props: Props) {
           labelField={'label'}
           valueField={'value'}
           maxHeight={300}
-          style={styles.dropdownStyle}
-          containerStyle={styles.dropdownContainerStyle}
-          itemTextStyle={styles.dropdownItemTextStyle}
-          itemContainerStyle={styles.dropdownItemContainerStyle}
-          activeColor="#0f8eb4"
-          selectedTextStyle={styles.dropdownSelectedTextStyle}
-          placeholderStyle={{ color: globalStyles.text.color }}
+          activeColor={theme.colors.primaryContainer}
+          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
+          {...dropdownStyles}
         />
       ),
       handler: () => {
@@ -333,19 +348,18 @@ function Setting(_props: Props) {
       },
     },
     {
-      title: 'Nyalakan informasi baterai dan waktu saat menonton',
-      description:
-        'Beri tahu saya persentase baterai dan waktu, saat sedang menonton dalam mode fullscreen',
-      icon: <Icon name="battery" style={globalStyles.text} size={iconSize} />,
+      title: 'Info baterai & waktu',
+      description: 'Tampilkan persentase baterai dan jam saat mode layar penuh',
+      iconName: 'battery-3',
       rightComponent: (
         <Switch value={batteryTimeInfoSwitch} onValueChange={batteryTimeSwitchHandler} />
       ),
       handler: batteryTimeSwitchHandler,
     },
     {
-      title: 'Picture-in-Picture dan notifikasi "now playing"',
-      description: 'Tampilkan notifkasi "now playing" saat menonton dan aktifkan fitur PiP',
-      icon: <Icon name="bell" style={globalStyles.text} size={iconSize} />,
+      title: 'Notifikasi & PiP',
+      description: 'Aktifkan notifikasi "Now Playing" dan fitur Picture-in-Picture',
+      iconName: 'bell',
       rightComponent: (
         <Switch
           value={nowPlayingNotificationSwitch}
@@ -356,26 +370,27 @@ function Setting(_props: Props) {
     },
     {
       title: 'Cadangkan data',
-      description: 'Cadangkan seluruh data aplikasi',
-      icon: <Icon name="cloud-upload" style={globalStyles.text} size={iconSize} />,
+      description: 'Simpan seluruh data aplikasi ke file',
+      iconName: 'cloud-upload',
       handler: backupData,
     },
     {
       title: 'Pulihkan data',
-      description: 'Pulihkan seluruh data aplikasi',
-      icon: <Icon name="history" style={globalStyles.text} size={iconSize} />,
+      description: 'Kembalikan data aplikasi dari file backup',
+      iconName: 'history',
       handler: restoreData,
     },
     {
-      title: 'Hapus histori tontonan',
-      description: 'Menghapus semua histori tontonan kamu',
-      icon: <Icon name="trash" style={{ color: 'red' }} size={iconSize} />,
+      title: 'Hapus histori',
+      description: 'Hapus permanen semua riwayat tontonan',
+      iconName: 'trash',
+      iconColor: theme.colors.error,
       handler: clearHistory,
     },
     {
-      title: 'Reload aplikasi',
-      description: 'Muat ulang aplikasi',
-      icon: <Icon name="refresh" style={globalStyles.text} size={iconSize} />,
+      title: 'Muat ulang',
+      description: 'Restart aplikasi secara manual',
+      iconName: 'refresh',
       handler: () => {
         DialogManager.alert('Reload aplikasi', 'Aplikasi akan di muat ulang', [
           {
@@ -390,195 +405,96 @@ function Setting(_props: Props) {
         ]);
       },
     },
-  ];
+  ] as const;
 
   return (
-    <View style={{ flex: 1 }}>
-      <Modal transparent visible={modalVisible}>
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { width: '95%' }]}>
-            <LoadingIndicator size={16} />
-            <ReText
-              style={[globalStyles.text, { textAlign: 'center', fontWeight: 'bold' }]}
-              text={modalText}
-            />
-          </View>
-        </View>
-      </Modal>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          contentContainerStyle={{
+            backgroundColor: theme.colors.surface,
+            margin: 20,
+            padding: 24,
+            borderRadius: 16,
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator size={24} style={{ marginBottom: 16 }} />
+          <ReText
+            style={{
+              color: theme.colors.onSurface,
+              textAlign: 'center',
+              fontWeight: 'bold',
+            }}
+            text={modalText}
+          />
+        </Modal>
+      </Portal>
 
-      <FlatList
-        style={{ backgroundColor: theme.colors.background }}
-        data={settingsData}
-        keyExtractor={keyExtractor}
-        renderItem={({ item }) => {
-          return <SettingList item={item} />;
-        }}
-        extraData={styles}
-        ItemSeparatorComponent={() => <ItemSeparator />}
-      />
+      <ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
+        {settingsData.map((item, index) => (
+          <Surface
+            key={item.title}
+            elevation={0}
+            style={{ backgroundColor: theme.colors.background }}>
+            <TouchableRipple
+              onPress={item.handler}
+              rippleColor={theme.colors.primaryContainer}
+              background={{ color: theme.colors.primaryContainer, foreground: true }}>
+              <View>
+                <List.Item
+                  title={item.title}
+                  description={item.description}
+                  titleStyle={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: item.iconColor || theme.colors.onSurface,
+                  }}
+                  descriptionStyle={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                  descriptionNumberOfLines={3}
+                  left={() => (
+                    <View style={{ justifyContent: 'center', paddingLeft: 8, paddingRight: 8 }}>
+                      <Icon
+                        name={item.iconName}
+                        size={20}
+                        color={item.iconColor || theme.colors.primary}
+                      />
+                    </View>
+                  )}
+                  right={() =>
+                    item.rightComponent ? (
+                      <View style={{ justifyContent: 'center', paddingRight: 8 }}>
+                        {item.rightComponent}
+                      </View>
+                    ) : null
+                  }
+                />
+                {index < settingsData.length - 1 && <Divider style={{ marginLeft: 56 }} />}
+              </View>
+            </TouchableRipple>
+          </Surface>
+        ))}
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </View>
   );
 }
 
-function ItemSeparator() {
-  const colorScheme = useColorScheme();
-  return (
-    <View
-      style={{
-        width: '100%',
-        borderBottomWidth: 0.5,
-        borderColor: colorScheme === 'dark' ? 'white' : 'black',
-      }}
-    />
-  );
-}
-
-function keyExtractor(item: SettingsData) {
-  return item.title;
-}
-
-function SettingList({ item }: { item: SettingsData }) {
-  const globalStyles = useGlobalStyles();
-  const styles = useStyles();
-  const icon = item.icon;
-  const title = item.title;
-  const description = item.description;
-  const handler = item.handler;
-  const rightComponent = item.rightComponent;
-
-  return (
-    <TouchableOpacity style={styles.settingListContainer} onPress={handler}>
-      <View style={styles.settingListIcon}>{icon}</View>
-      <View style={styles.settingListText}>
-        <Text style={[globalStyles.text, styles.settingListTextTitle]}>{title}</Text>
-        <Text style={styles.settingListTextDescription}>{description}</Text>
-      </View>
-      <View style={styles.settingListRightComponent}>{rightComponent}</View>
-    </TouchableOpacity>
-  );
-}
-
-function useStyles() {
-  const globalStyles = useGlobalStyles();
-  const colorScheme = useColorScheme();
-  const theme = useTheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        settingListContainer: {
-          flex: 1,
-          paddingVertical: 10,
-          flexDirection: 'row',
-          alignItems: 'center',
-          alignContent: 'center',
-        },
-        settingListIcon: {
-          padding: 5,
-          width: '10%',
-          maxWidth: 50,
-          alignItems: 'center',
-          borderRightWidth: 1,
-          borderRightColor: colorScheme === 'dark' ? 'white' : 'black',
-          marginRight: 5,
-        },
-        settingListText: {
-          flex: 1,
-          alignItems: 'center',
-          flexDirection: 'column',
-        },
-        settingListTextTitle: {
-          fontWeight: 'bold',
-          textAlign: 'center',
-        },
-        settingListTextDescription: {
-          textAlign: 'center',
-          color: 'gray',
-        },
-        settingListRightComponent: {
-          alignItems: 'flex-end',
-        },
-        waktuServer: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          backgroundColor: colorScheme === 'dark' ? '#aa6f00' : '#ce8600',
-        },
-        modalContainer: {
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#0000008a',
-        },
-        modalContent: {
-          flex: 0.15,
-          backgroundColor: theme.colors.surface,
-          borderWidth: 1,
-          borderRadius: 12,
-          padding: 12,
-          borderColor: '#525252',
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        modalRestoreButtonText: {
-          fontWeight: 'bold',
-          color: darkText,
-        },
-        acceptRestoreModalButton: {
-          backgroundColor: '#005300',
-          padding: 7,
-          borderRadius: 3,
-        },
-        cancelRestoreModalButton: {
-          backgroundColor: '#b40000',
-          padding: 7,
-          marginRight: 2,
-          borderRadius: 3,
-        },
-        modalRestorePart: { flex: 1 },
-        modalRestoreText: {
-          fontWeight: 'bold',
-          fontSize: 17,
-        },
-        dropdownStyle: {
-          width: 150,
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-          padding: 10,
-          borderRadius: 8,
-          borderWidth: 0,
-        },
-        dropdownContainerStyle: {
-          borderRadius: 8,
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-          borderWidth: 0,
-          elevation: 5,
-        },
-        dropdownItemTextStyle: {
-          color: globalStyles.text.color,
-          fontSize: 14,
-          textAlign: 'center',
-        },
-        dropdownItemContainerStyle: {
-          borderRadius: 6,
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-        },
-        dropdownSelectedTextStyle: {
-          color: globalStyles.text.color,
-          fontSize: 14,
-        },
-      }),
-    [colorScheme, globalStyles.text.color, theme.colors.surface],
-  );
-}
-
 const DROPDOWN_THEME_DATA = [
-  { label: 'Mengikuti sistem', value: 'auto' },
-  { label: 'Tema terang', value: 'light' },
-  { label: 'Tema gelap', value: 'dark' },
+  { label: 'Sistem', value: 'auto' },
+  { label: 'Terang', value: 'light' },
+  { label: 'Gelap', value: 'dark' },
 ];
+
 const DROPDOWN_AUDIOMIXING_DATA: { label: string; value: AudioMixingMode }[] = [
   { label: 'Otomatis', value: 'auto' },
-  { label: 'Jangan campur', value: 'doNotMix' },
-  { label: 'Campur dengan audio lain', value: 'mixWithOthers' },
-  { label: 'Kecilkan audio lain', value: 'duckOthers' },
+  { label: 'Mute Lain', value: 'doNotMix' },
+  { label: 'Campur', value: 'mixWithOthers' },
+  { label: 'Kecilkan Lain', value: 'duckOthers' },
 ];
 
 export default memo(Setting);

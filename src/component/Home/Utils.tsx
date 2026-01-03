@@ -1,16 +1,8 @@
-import MaterialCommunityIcon from '@react-native-vector-icons/material-design-icons';
-import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableNativeFeedback,
-  View,
-  useColorScheme,
-  useWindowDimensions,
-} from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Appbar, Surface, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UtilsStackNavigator } from '../../types/navigation';
 import About from './Utilitas/About';
 import Changelog from './Utilitas/Changelog';
@@ -109,26 +101,39 @@ const Screens = [
 
 function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'ChooseScreen'>) {
   const styles = useStyles();
+  const theme = useTheme();
+
   return (
     <ScrollView
-      contentContainerStyle={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: 4,
-      }}>
+      contentContainerStyle={[styles.container, { backgroundColor: theme.colors.background }]}>
       {Screens.map((screen, index) => (
-        <TouchableNativeFeedback
-          key={index}
-          onPress={() => props.navigation.navigate(screen.screen)}
-          useForeground
-          background={TouchableNativeFeedback.Ripple('#ffffff', false)}>
-          <View style={styles.buttonContainer}>
-            <MaterialCommunityIcon name={screen.icon} size={30} color={screen.color} />
-            <Text style={styles.titleText}>{screen.title}</Text>
-            <Text style={styles.descText}>{screen.desc}</Text>
-          </View>
-        </TouchableNativeFeedback>
+        <Surface key={index} style={styles.surface} elevation={2}>
+          <TouchableRipple
+            background={{ color: 'white', foreground: true }}
+            onPress={() => props.navigation.navigate(screen.screen as any)}
+            style={styles.touchable}
+            rippleColor={theme.colors.primaryContainer}>
+            <View style={styles.content}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: theme.colors.secondaryContainer },
+                ]}>
+                <MaterialCommunityIcons name={screen.icon} size={32} color={screen.color} />
+              </View>
+              <Text
+                variant="titleMedium"
+                style={[styles.titleText, { color: theme.colors.onSurface }]}>
+                {screen.title}
+              </Text>
+              <Text
+                variant="bodySmall"
+                style={[styles.descText, { color: theme.colors.onSurfaceVariant }]}>
+                {screen.desc}
+              </Text>
+            </View>
+          </TouchableRipple>
+        </Surface>
       ))}
     </ScrollView>
   );
@@ -136,33 +141,53 @@ function ChooseScreen(props: NativeStackScreenProps<UtilsStackNavigator, 'Choose
 
 function useStyles() {
   const dimensions = useWindowDimensions();
-  const colorScheme = useColorScheme();
-  const GAP = 4;
-  const devidedWidth = (dimensions.width - GAP) / 2;
+  const theme = useTheme();
+  const GAP = 12;
+  const devidedWidth = (dimensions.width - GAP * 3) / 2;
+
   return useMemo(
     () =>
       StyleSheet.create({
-        buttonContainer: {
-          backgroundColor: colorScheme === 'dark' ? '#313131' : '#f1f1f1',
+        container: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          padding: GAP,
+          gap: GAP,
+          paddingBottom: 24,
+        },
+        surface: {
+          borderRadius: 16,
+          overflow: 'hidden',
+          backgroundColor: theme.colors.surface,
+          width: devidedWidth < 150 ? '100%' : devidedWidth,
+          minHeight: 160,
+        },
+        touchable: {
+          flex: 1,
+        },
+        content: {
+          padding: 16,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+        },
+        iconContainer: {
+          width: 56,
+          height: 56,
+          borderRadius: 28,
           justifyContent: 'center',
           alignItems: 'center',
-          padding: 20,
-          elevation: 5,
-          width: devidedWidth < 150 ? '100%' : devidedWidth,
-          minWidth: 150,
-          minHeight: 150,
+          marginBottom: 12,
         },
         titleText: {
-          color: colorScheme === 'dark' ? '#ffffff' : '#000000',
           textAlign: 'center',
           fontWeight: 'bold',
-          fontSize: 17,
+          marginBottom: 4,
         },
         descText: {
-          color: colorScheme === 'dark' ? '#ffffff' : '#000000',
           textAlign: 'center',
         },
       }),
-    [colorScheme, devidedWidth],
+    [theme.colors.surface, devidedWidth],
   );
 }
