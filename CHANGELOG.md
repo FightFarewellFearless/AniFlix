@@ -1,13 +1,3 @@
-# v1.1.4_JS-3 (03-Januari-2026)
-Update pertama di 2026!! hehe...
-## Ditambahkan
-- Quote pada saat loading pengambilan data
-- Tombol Join discord dan Github di beranda
-## Ditingkatkan
-- UI/UX pada bagian: Loading gambar komik, Utilitas, Pengaturan, Tentang aplikasi, Dukung pengembang
-## Diperbaiki
-- Crash pada detail komik
-- Tombol "lihat lebih banyak" pada menu "lihat semua chapter" terkadang tidak bekerja
 # v1.1.4_JS-2 (17-Desember-2025)
 Dikarenakan keterbatsan waktu dev dalam memverifikasi setiap request whitelist yang masuk, versi ini menghapus blacklist pada semua genre ecchi, mohon bijak dalam menonton/membaca.
 ## Diperbaiki
