@@ -20,8 +20,8 @@ function SupportDev() {
       </View>
       <View style={styles.partContainer}>
         <Text style={styles.partTitle}>
-          <MaterialCommunityIcon name="wallet-giftcard" size={20} /> Melalui donasi (via Saweria
-          atau Trakteer)
+          <MaterialCommunityIcon name="wallet-giftcard" size={20} color="#f54f02" /> Melalui donasi
+          (via Saweria atau Trakteer)
         </Text>
         <View
           style={{
@@ -52,8 +52,8 @@ function SupportDev() {
 
       <View style={[styles.partContainer, { marginTop: 10 }]}>
         <Text style={styles.partTitle}>
-          <MaterialCommunityIcon name="microsoft-visual-studio-code" size={20} /> Melalui kontribusi
-          kode sumber
+          <MaterialCommunityIcon name="microsoft-visual-studio-code" size={20} color="#f54f02" />{' '}
+          Melalui kontribusi kode sumber
         </Text>
         <View style={styles.card}>
           <Text style={styles.cardDesc}>
