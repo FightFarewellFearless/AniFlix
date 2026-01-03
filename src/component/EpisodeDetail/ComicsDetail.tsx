@@ -268,6 +268,10 @@ export default function ComicsDetail(props: Props) {
                   icon="playlist-plus"
                   disabled={isInList}
                   onPress={() => {
+                    if (!data.chapters[data.chapters.length - 1]) {
+                      ToastAndroid.show('Data chapter tidak ditemukan', ToastAndroid.SHORT);
+                      return;
+                    }
                     const watchLaterJson: watchLaterJSON = {
                       title: data.title,
                       link: props.route.params.link,
@@ -296,14 +300,28 @@ export default function ComicsDetail(props: Props) {
                     </Button>
                   )}
                   <Button
-                    onPress={() => readComic(data.chapters[data.chapters.length - 1].chapterUrl)}
+                    onPress={() => {
+                      const chapterData = data.chapters[data.chapters.length - 1];
+                      if (!chapterData?.chapterUrl) {
+                        ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                        return;
+                      }
+                      readComic(chapterData.chapterUrl);
+                    }}
                     buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                     textColor={styles.additionalInfoText.color}
                     mode="elevated">
                     Baca Chapter Pertama
                   </Button>
                   <Button
-                    onPress={() => readComic(data.chapters[0].chapterUrl)}
+                    onPress={() => {
+                      const chapterData = data.chapters[0];
+                      if (!chapterData?.chapterUrl) {
+                        ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                        return;
+                      }
+                      readComic(chapterData?.chapterUrl);
+                    }}
                     buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                     textColor={styles.additionalInfoText.color}
                     mode="elevated">
