@@ -300,7 +300,7 @@ async function getFilmDetails(filmUrl: string) {
   const html = await fetchPage(filmUrl);
   const $ = cheerio.load(html);
   const isSeasonNEpisode = $('div#serie_contenido').length > 0;
-  const isSeasons = $('div#seasons se-q').length > 0;
+  const isSeasons = $('div#seasons .se-q').length > 0;
   if (isSeasonNEpisode) {
     let info: FilmInfo;
     const seasonData: FilmSeason[] = [];
