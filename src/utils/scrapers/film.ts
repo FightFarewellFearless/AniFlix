@@ -114,6 +114,13 @@ async function decryptUrl(url: string) {
   return eval(`${decrypted}`);
 }
 
+async function decryptHtml(html: string, url: string) {
+  const encryptedData = await getEncryptedUrl(html, url);
+  const realKey = reconstructKey(encryptedData.key, encryptedData.embed_url);
+  const decrypted = CryptoJSAesJson.decrypt(encryptedData.embed_url, realKey);
+  return eval(`${decrypted}`);
+}
+
 interface JeniusReturnData {
   hls: boolean;
   videoImage: null;
@@ -236,7 +243,7 @@ type FilmSeason = {
   episodes: FilmEpisode[];
 };
 
-async function getFilmSeasons($: CheerioAPI) {
+function getFilmSeasons($: CheerioAPI) {
   const seasonsItem = $('div#serie_contenido > div#seasons div.se-c');
   const seasons: FilmSeason[] = [];
   seasonsItem.each((i, el) => {
@@ -257,7 +264,7 @@ async function getFilmSeasons($: CheerioAPI) {
   return seasons;
 }
 
-async function getFilmEpisode($: CheerioAPI) {
+function getFilmEpisode($: CheerioAPI) {
   const episode = $('div#serie_contenido > div#seasons div.se-a ul li');
   const episodes: FilmEpisode[] = [];
   episode.each((i, el) => {
@@ -271,7 +278,7 @@ async function getFilmEpisode($: CheerioAPI) {
   return episodes;
 }
 
-async function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
+function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
   const title = episode$
     ? episode$('div.data > h1').text().trim()
     : $('div.data > h1').text().trim();
@@ -296,7 +303,23 @@ async function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
   return { title, genres, releaseDate, coverImage, backgroundImage, synopsis, additionalInfo };
 }
 
-async function getFilmDetails(filmUrl: string) {
+type FilmDetails =
+  | {
+      type: 'detail';
+      info: FilmInfo;
+      seasonData: FilmSeason[];
+    }
+  | {
+      type: 'stream';
+      streamingLink: string;
+      subtitleLink: string;
+      title: string;
+      releaseDate: string;
+      rating: string;
+      genres: string[];
+      synopsis: string;
+    };
+async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
   const html = await fetchPage(filmUrl);
   const $ = cheerio.load(html);
   const isSeasonNEpisode = $('div#serie_contenido').length > 0;
@@ -305,16 +328,37 @@ async function getFilmDetails(filmUrl: string) {
     let info: FilmInfo;
     const seasonData: FilmSeason[] = [];
     if (isSeasons) {
-      const seasons = await getFilmSeasons($);
-      info = await getFilmInfo($);
+      const seasons = getFilmSeasons($);
+      info = getFilmInfo($);
       seasonData.push(...seasons);
     } else {
       const season = await fetchPage($('div.sgeneros > a').attr('href')!);
-      const episode = await getFilmEpisode($);
+      const episode = getFilmEpisode($);
       seasonData.push({ season: '', episodes: episode });
       const $$ = cheerio.load(season);
-      info = await getFilmInfo($$, $);
+      info = getFilmInfo($$, $);
     }
-    return { info, seasonData };
+    return { type: 'detail', info, seasonData };
+  } else {
+    const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
+    const title = $('div.data > h1').text().trim();
+    const releaseDate = $('.extra span.date').text().trim();
+    const rating = $('div[data-rating]').attr('data-rating')!?.trim();
+    const genres = $('div.sgeneros a[rel="tag"]')
+      .map((i, el) => $(el).text().trim())
+      .get();
+    const synopsis = $('div[itemprop="description"]').text().trim();
+    return {
+      type: 'stream',
+      streamingLink: streamingData.securedLink,
+      subtitleLink: streamingData.subtitleTrackUrl,
+      title,
+      releaseDate,
+      rating,
+      genres,
+      synopsis,
+    };
   }
 }
+
+export { getFeatured, getLatest, searchFilm, getFilmDetails };
