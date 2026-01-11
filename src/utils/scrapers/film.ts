@@ -318,11 +318,14 @@ type FilmDetails =
       rating: string;
       genres: string[];
       synopsis: string;
+      next?: string;
+      prev?: string;
     };
 async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
   const html = await fetchPage(filmUrl);
   const $ = cheerio.load(html);
-  const isSeasonNEpisode = $('div#serie_contenido').length > 0;
+  const isSeasonNEpisode =
+    $('div#serie_contenido').length > 0 && $('li:contains("HLS")').length === 0;
   const isSeasons = $('div#seasons .se-q').length > 0;
   if (isSeasonNEpisode) {
     let info: FilmInfo;
@@ -340,24 +343,53 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
     }
     return { type: 'detail', info, seasonData };
   } else {
-    const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
-    const title = $('div.data > h1').text().trim();
-    const releaseDate = $('.extra span.date').text().trim();
-    const rating = $('div[data-rating]').attr('data-rating')!?.trim();
-    const genres = $('div.sgeneros a[rel="tag"]')
-      .map((i, el) => $(el).text().trim())
-      .get();
-    const synopsis = $('div[itemprop="description"]').text().trim();
-    return {
-      type: 'stream',
-      streamingLink: streamingData.securedLink,
-      subtitleLink: streamingData.subtitleTrackUrl,
-      title,
-      releaseDate,
-      rating,
-      genres,
-      synopsis,
-    };
+    if (filmUrl.includes('/movie/')) {
+      const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
+      const title = $('div.data > h1').text().trim();
+      const releaseDate = $('.extra span.date').text().trim();
+      const rating = $('div[data-rating]').attr('data-rating')!?.trim();
+      const genres = $('div.sgeneros a[rel="tag"]')
+        .map((i, el) => $(el).text().trim())
+        .get();
+      const synopsis = $('div[itemprop="description"]').text().trim();
+      return {
+        type: 'stream',
+        streamingLink: streamingData.securedLink,
+        subtitleLink: streamingData.subtitleTrackUrl,
+        title,
+        releaseDate,
+        rating,
+        genres,
+        synopsis,
+      };
+    } else {
+      const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
+      const episodeLink = $('span:contains("ALL")').parent().attr('href')!;
+      const episodeHtml = await fetchPage(episodeLink);
+      const episodeInfo = getFilmInfo(cheerio.load(episodeHtml));
+      const title = $('h1.epih1').text().trim();
+      const releaseDate = $('span.date').first().text().trim();
+      const rating =
+        Object.entries(episodeInfo.additionalInfo).find(([key]) => {
+          return key.toLowerCase().includes('rating');
+        })?.[1] || 'Tidak tersedia';
+      const genres = episodeInfo.genres;
+      const synopsis = episodeInfo.synopsis;
+      const prev = $('span:contains("PREV")').parent().attr('href');
+      const next = $('span:contains("NEXT")').parent().attr('href');
+      return {
+        type: 'stream',
+        streamingLink: streamingData.securedLink,
+        subtitleLink: streamingData.subtitleTrackUrl,
+        title,
+        releaseDate,
+        rating,
+        genres,
+        synopsis,
+        next: next === '#' ? undefined : next,
+        prev: prev === '#' ? undefined : prev,
+      };
+    }
   }
 }
 
