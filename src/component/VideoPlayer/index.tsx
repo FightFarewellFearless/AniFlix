@@ -48,6 +48,7 @@ type VideoPlayerProps = {
   title: string;
   thumbnailURL?: string;
   streamingURL: string;
+  subtitleURL?: string;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView | null>;
   ref?: React.Ref<PlayerRef>;
@@ -68,6 +69,7 @@ function VideoPlayer({
   title,
   thumbnailURL,
   streamingURL,
+  subtitleURL,
   style,
   videoRef,
   ref,
@@ -104,7 +106,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
-      initialPlayer.timeUpdateEventInterval = 1;
+      initialPlayer.timeUpdateEventInterval = subtitleURL ? 45 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
@@ -133,6 +135,18 @@ function VideoPlayer({
 
   const [showControls, setShowControls] = useState(true);
   const showControlsOpacity = useSharedValue(1);
+
+  const [subtitles, setSubtitles] = useState<ReturnType<typeof parseSubtitles>>([]);
+  const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchSubtitles(url: string) {
+      const subtitleText = await fetch(url).then(res => res.text());
+      const subtitle = parseSubtitles(subtitleText);
+      setSubtitles(subtitle);
+    }
+    subtitleURL && fetchSubtitles(subtitleURL);
+  }, [subtitleURL]);
 
   useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);
@@ -175,6 +189,13 @@ function VideoPlayer({
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
     onDurationChange?.(e.currentTime);
+
+    const currentSub = subtitles.find(subtitle => {
+      const start = Number(subtitle.startTime);
+      const end = Number(subtitle.endTime);
+      return e.currentTime >= start && e.currentTime <= end;
+    });
+    setCurrentSubtitle(currentSub?.text || '');
   });
   useImperativeHandle(
     ref,
@@ -299,6 +320,32 @@ function VideoPlayer({
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
         {batteryAndClock}
 
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 15,
+            zIndex: 10,
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            alignSelf: 'flex-start',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text
+            style={{
+              marginHorizontal: 20,
+              backgroundColor: currentSubtitle === '' ? undefined : '#0000006b',
+              fontSize: isFullscreen ? 24 : 14,
+              textAlign: 'center',
+              color: 'white',
+              textShadowColor: 'black',
+              textShadowOffset: { width: -1, height: 1 },
+              textShadowRadius: 1,
+            }}>
+            {currentSubtitle}
+          </Text>
+        </View>
         <Reanimated.View
           pointerEvents="box-none"
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
@@ -541,3 +588,34 @@ function BottomControl({
     </Pressable>
   );
 }
+
+const parseTimeToSeconds = (time: string) => {
+  const [hours, minutes, rest] = time.split(':');
+  const [seconds, milliseconds] = rest.split(',');
+  return (
+    parseInt(hours, 10) * 3600 +
+    parseInt(minutes, 10) * 60 +
+    parseInt(seconds, 10) +
+    parseInt(milliseconds, 10) / 1000
+  );
+};
+const parseSubtitles = (rawText: string) => {
+  const subtitleRegex =
+    /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3})(?:[^\n]*)?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+  const htmlRegex = /<\/?[^>]+(>|$)/g;
+
+  const results = [];
+  let match;
+
+  while ((match = subtitleRegex.exec(rawText)) !== null) {
+    let cleanText = match[3].replace(htmlRegex, '').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+    results.push({
+      startTime: parseTimeToSeconds(match[1].replace('.', ',')),
+      endTime: parseTimeToSeconds(match[2].replace('.', ',')),
+      text: cleanText,
+    });
+  }
+
+  return results;
+};

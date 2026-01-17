@@ -1,8 +1,4 @@
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { Buffer } from 'buffer/';
-import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
 import React, {
   memo,
@@ -37,42 +33,26 @@ import ReAnimated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { runOnJS } from 'react-native-worklets';
-import url from 'url';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 
 import useGlobalStyles, { darkText, lightText } from '../../assets/style';
-import useDownloadAnimeFunction from '../../utils/downloadAnime';
 import setHistory from '../../utils/historyControl';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, useTheme } from 'react-native-paper';
-import WebView from 'react-native-webview';
 import { useBackHandler } from '../../hooks/useBackHandler';
-import { AniDetail } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
 import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
-import deviceUserAgent from '../../utils/deviceUserAgent';
 import DialogManager from '../../utils/dialogManager';
-import {
-  getMovieDetail,
-  getRawDataIfAvailable,
-  getStreamingDetail,
-  MovieDetail,
-} from '../../utils/scrapers/animeMovie';
+import { getFilmDetails } from '../../utils/scrapers/film';
 import { throttle } from '../../utils/throttle';
 import Skeleton from '../misc/Skeleton';
 import VideoPlayer, { PlayerRef } from '../VideoPlayer';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
-const defaultLoadingGif =
-  'https://cdn.dribbble.com/users/2973561/screenshots/5757826/loading__.gif';
-
-function Video(props: Props) {
+function Video_Film(props: Props) {
   const colorScheme = useColorScheme();
-
-  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
 
@@ -88,77 +68,28 @@ function Video(props: Props) {
   const [data, setData] = useState(props.route.params.data);
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
 
-  const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
   const videoRef = useRef<VideoView>(null);
   const playerRef = useRef<PlayerRef>(null);
-  const webviewRef = useRef<WebView>(null);
-  const dropdownResolutionRef = useRef<IDropdownRef>(null);
-  const embedInformationRef = useRef<View>(null);
 
   const synopsisTextRef = useAnimatedRef<View>();
 
-  const [animeDetail, setAnimeDetail] = useState<
-    | ((MovieDetail & { status: 'Movie'; releaseYear: string }) | Omit<AniDetail, 'episodeList'>)
-    | undefined
-  >(undefined);
-
-  useEffect(() => {
-    if (props.route.params.isMovie) {
-      getMovieDetail(data.episodeData.animeDetail).then(detail => {
-        if ('isError' in detail) {
-          DialogManager.alert(
-            'Error',
-            'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
-          );
-          return;
-        }
-        setAnimeDetail({
-          ...detail,
-          rating: detail.rating,
-          releaseYear: detail.updateDate,
-          status: 'Movie',
-        });
-      });
-      return;
-    }
-    AnimeAPI.fromUrl(data.episodeData.animeDetail, undefined, undefined, true).then(detail => {
-      if (detail === 'Unsupported') return;
-      if (detail.type === 'animeDetail') {
-        if (detail.genres.includes('')) {
-          DialogManager.alert(
-            'Perhatian!',
-            'Anime ini mengandung genre ecchi. Mohon bijak dalam menonton.',
-          );
-        }
-        setAnimeDetail(detail);
-      }
-    });
-  }, [data.episodeData.animeDetail, props.navigation, props.route.params.isMovie]);
-
-  const downloadAnimeFunction = useDownloadAnimeFunction();
+  const animeDetail = props.route.params.data;
 
   const updateHistory = useMemo(
     () =>
-      throttle(
-        (
-          currentTime: number,
-          stateData: RootStackNavigator['Video']['data'],
-          isMovie?: boolean,
-        ) => {
-          if (Math.floor(currentTime) === 0) {
-            return;
-          }
-          const additionalData = {
-            resolution: stateData.resolution,
-            lastDuration: currentTime,
-          };
-          setHistory(stateData, currentLink.current, true, additionalData, isMovie);
-          historyData.current = additionalData;
-        },
-        2000,
-      ),
+      throttle((currentTime: number, stateData: RootStackNavigator['Video_Film']['data']) => {
+        if (Math.floor(currentTime) === 0) {
+          return;
+        }
+        const additionalData = {
+          resolution: undefined,
+          lastDuration: currentTime,
+        };
+        setHistory(stateData, currentLink.current, true, additionalData, true);
+        historyData.current = additionalData;
+      }, 2000),
     [],
   );
 
@@ -184,7 +115,6 @@ function Video(props: Props) {
   });
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
-    dropdownResolutionRef.current?.close();
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -284,89 +214,6 @@ function Video(props: Props) {
     }, [exitFullscreen, fullscreen, willUnmountHandler]),
   );
 
-  const setResolution = useCallback(
-    async (res: string, resolution: string) => {
-      if (loading) {
-        return;
-      }
-      setLoading(true);
-      let resultData: string | undefined | { canceled: boolean } | { error: boolean };
-      const signal = abortController.current?.signal;
-      if ('type' in data) {
-        resultData = await AnimeAPI.reqResolution(
-          res,
-          data.reqNonceAction,
-          data.reqResolutionWithNonceAction,
-          signal,
-        ).catch(err => {
-          if (err.message === 'canceled') {
-            return { canceled: true };
-          }
-          const errMessage =
-            err.message === 'Network Error'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + err.message;
-          DialogManager.alert('Error', errMessage);
-          setLoading(false);
-          return { error: true };
-        });
-      } else {
-        const rawData = await getRawDataIfAvailable({ title: resolution, url: res }, signal).catch(
-          err => {
-            if (err.message === 'canceled') {
-              return { canceled: true };
-            } else {
-              throw err;
-            }
-          },
-        );
-        if (rawData === false) {
-          resultData = cheerio
-            .load(Buffer.from(res, 'base64').toString('utf8'))('iframe')
-            .attr('src')!;
-        } else {
-          resultData = rawData;
-        }
-      }
-      if (resultData === undefined) {
-        setLoading(false);
-        DialogManager.alert('Ganti resolusi gagal', 'Gagal mengganti resolusi karena data kosong!');
-        return;
-      }
-      if (typeof resultData !== 'string' && ('canceled' in resultData || 'error' in resultData)) {
-        return;
-      }
-      const isWebviewNeeded = await fetch(resultData, {
-        headers: {
-          'User-Agent': deviceUserAgent,
-          ...(resultData.includes('mp4upload') ? { Referer: 'https://www.mp4upload.com/' } : {}),
-        },
-        method: 'HEAD',
-        signal,
-      })
-        .catch(() => {})
-        .then(response => {
-          return !(
-            response?.headers.get('content-type')?.includes('video') ||
-            response?.headers.get('content-type')?.includes('octet-stream') ||
-            resultData.includes('filedon')
-          );
-        });
-      if (signal?.aborted) return;
-      setData(old => {
-        return {
-          ...old,
-          streamingType: isWebviewNeeded ? 'embed' : 'raw',
-          streamingLink: resultData,
-          resolution,
-        };
-      });
-      setLoading(false);
-      firstTimeLoad.current = true;
-    },
-    [data, loading],
-  );
-
   const getBatteryIconComponent = useCallback(() => {
     let iconName = 'battery-';
     const batteryLevelPercentage = Math.round(batteryLevel * 100);
@@ -390,33 +237,11 @@ function Video(props: Props) {
     );
   }, [batteryLevel]);
 
-  const downloadAnime = useCallback(async () => {
-    if (data.streamingType === 'embed') {
-      return ToastAndroid.show(
-        'Jenis format ini tidak mendukung fitur download',
-        ToastAndroid.SHORT,
-      );
-    }
-    const source = data.streamingLink;
-    const resolution = data.resolution;
-    await downloadAnimeFunction(
-      source,
-      downloadSource.current,
-      data.title,
-      resolution ?? '',
-      undefined,
-      () => {
-        downloadSource.current = [...downloadSource.current, source];
-        ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
-      },
-    );
-  }, [data, downloadAnimeFunction]);
-
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistory(currentTime, data, props.route.params.isMovie);
+      updateHistory(currentTime, data);
     },
-    [updateHistory, data, props.route.params.isMovie],
+    [updateHistory, data],
   );
 
   const episodeDataControl = useCallback(
@@ -425,82 +250,35 @@ function Video(props: Props) {
         return;
       }
       setLoading(true);
-      if (props.route.params.isMovie) {
-        const result = await getStreamingDetail(dataLink, abortController.current?.signal).catch(
-          err => {
-            if (err.message === 'canceled') {
-              return;
-            }
-            const errMessage =
-              err.message === 'Network Error'
-                ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-                : 'Error tidak diketahui: ' + err.message;
-            DialogManager.alert('Error', errMessage);
-            setLoading(false);
-          },
+      const result = await getFilmDetails(dataLink, abortController.current?.signal).catch(err => {
+        if (err.message === 'canceled') {
+          return;
+        }
+        const errMessage =
+          err.message === 'Network Error'
+            ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
+            : 'Error tidak diketahui: ' + err.message;
+        DialogManager.alert('Error', errMessage);
+        setLoading(false);
+      });
+      if (result === undefined) return;
+      if (result.type === 'detail')
+        return DialogManager.alert('Error', 'Data episode dalam bentuk tidak terduga');
+      if ('isError' in result) {
+        DialogManager.alert(
+          'Error',
+          'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
         );
-        if (result === undefined) return;
-        if ('isError' in result) {
-          DialogManager.alert(
-            'Error',
-            'Inisialisasi data movie gagal! Silahkan buka ulang aplikasi/reload/ketuk teks merah pada beranda untuk mencoba mengambil data yang diperlukan',
-          );
-        } else {
-          setData(result);
-          setHistory(result, dataLink, undefined, undefined, props.route.params.isMovie);
-        }
       } else {
-        const result = await AnimeAPI.fromUrl(
-          dataLink,
-          undefined,
-          undefined,
-          undefined,
-          abortController.current?.signal,
-        ).catch(err => {
-          if (err.message === 'Silahkan selesaikan captcha') {
-            setLoading(false);
-            return;
-          }
-          if (err.message === 'canceled') {
-            return;
-          }
-          const errMessage =
-            err.message === 'Network Error'
-              ? 'Permintaan gagal.\nPastikan kamu terhubung dengan internet'
-              : 'Error tidak diketahui: ' + err.message;
-          DialogManager.alert('Error', errMessage);
-          setLoading(false);
-        });
-        if (result === undefined) {
-          return;
-        }
-        if (result === 'Unsupported') {
-          DialogManager.alert(
-            'Tidak didukung!',
-            'Anime yang kamu tuju tidak memiliki data yang didukung!',
-          );
-          setLoading(false);
-          return;
-        }
-
-        if (result.type !== 'animeStreaming') {
-          setLoading(false);
-          DialogManager.alert(
-            'Kesalahan!!',
-            'Hasil perminataan tampaknya bukan data yang diharapkan, sepertinya ada kesalahan yang tidak diketahui.',
-          );
-          return;
-        }
-
         setData(result);
-        setHistory(result, dataLink, undefined, undefined);
+        setHistory(result, dataLink, undefined, undefined, true);
       }
       setLoading(false);
       firstTimeLoad.current = false;
       historyData.current = undefined;
       currentLink.current = dataLink;
     },
-    [loading, props.route.params.isMovie],
+    [loading],
   );
 
   const cancelLoading = useCallback(() => {
@@ -653,14 +431,6 @@ function Video(props: Props) {
     </>
   );
 
-  const resolutionDropdownData = useMemo(() => {
-    return Object.entries(data.resolutionRaw)
-      .filter(z => z[1] !== undefined)
-      .map(z => {
-        return { label: z[1].resolution, value: z[1] };
-      });
-  }, [data.resolutionRaw]);
-
   const insets = useSafeAreaInsets();
 
   return (
@@ -678,82 +448,21 @@ function Video(props: Props) {
             position: 'absolute',
           }}
         />
-        {
-          // mengecek apakah video tersedia
-          data.streamingType === 'raw' ? (
-            <VideoPlayer
-              // key={data.streamingLink}
-              title={data.title}
-              thumbnailURL={data.thumbnailUrl}
-              streamingURL={data.streamingLink}
-              style={{ flex: 1, zIndex: 1 }}
-              videoRef={videoRef}
-              ref={playerRef}
-              fullscreen={fullscreen}
-              onFullscreenUpdate={fullscreenUpdate}
-              onDurationChange={handleProgress}
-              onLoad={handleVideoLoad}
-              headers={
-                props.route.params.isMovie && data.streamingLink.includes('mp4upload')
-                  ? { Referer: 'https://www.mp4upload.com/' }
-                  : undefined
-              }
-              batteryAndClock={batteryAndClock}
-            />
-          ) : data.streamingType === 'embed' ? (
-            // <>
-            //   {/* TEMP|TODO|WORKAROUND: Temporary fix for webview layout not working properly when using native-stack */}
-            //   <VideoPlayer title="" streamingURL="" style={{ display: 'none' }} />
-            <WebView
-              style={{ flex: 1, zIndex: 1 }}
-              ref={webviewRef}
-              key={data.streamingLink}
-              setSupportMultipleWindows={false}
-              onShouldStartLoadWithRequest={navigator => {
-                const res =
-                  navigator.url.includes(url.parse(data.streamingLink).host as string) ||
-                  navigator.url.includes(defaultLoadingGif);
-                if (!res) {
-                  webviewRef.current?.stopLoading();
-                }
-                return res;
-              }}
-              source={{
-                ...(data.resolution?.includes('lokal')
-                  ? {
-                      html: `
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-</head>
-<body>
-  <iframe
-    src="${data.streamingLink}"
-    style="width: 100vw; height: 100vh;"
-    allowFullScreen
-  ></iframe>
-</body>`,
-                    }
-                  : { uri: data.streamingLink }),
-                baseUrl: `https://${url.parse(data.streamingLink).host}`,
-              }}
-              userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
-              originWhitelist={['*']}
-              allowsFullscreenVideo={true}
-              injectedJavaScript={`
-                window.alert = function() {}; // Disable alerts
-                window.confirm = function() {}; // Disable confirms
-                window.prompt = function() {}; // Disable prompts
-                window.open = function() {}; // Disable opening new windows
-              `}
-            />
-          ) : (
-            // </>
-            <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
-          )
-        }
-        {data.streamingType === 'embed' && batteryAndClock}
+        <VideoPlayer
+          // key={data.streamingLink}
+          title={data.title}
+          thumbnailURL={data.thumbnailUrl}
+          streamingURL={data.streamingLink}
+          subtitleURL={data.subtitleLink}
+          style={{ flex: 1, zIndex: 1 }}
+          videoRef={videoRef}
+          ref={playerRef}
+          fullscreen={fullscreen}
+          onFullscreenUpdate={fullscreenUpdate}
+          onDurationChange={handleProgress}
+          onLoad={handleVideoLoad}
+          batteryAndClock={batteryAndClock}
+        />
       </View>
       {/* END OF VIDEO ELEMENT */}
       {/* 
@@ -763,133 +472,6 @@ function Video(props: Props) {
       <ScrollView
         style={{ flex: 1, display: fullscreen ? 'none' : 'flex' }}
         contentContainerStyle={{ paddingBottom: insets.bottom }}>
-        {/* movie information */}
-        {props.route.params.isMovie && (
-          <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>
-            <Icon
-              name="film"
-              color={theme.colors.onSecondaryContainer}
-              size={26}
-              style={{ alignSelf: 'center' }}
-            />
-            <Text
-              style={{
-                color: theme.colors.onSecondaryContainer,
-                textAlign: 'center',
-                fontSize: 14,
-                fontWeight: 'bold',
-              }}>
-              Perhatian!
-            </Text>
-            <Text style={{ color: theme.colors.onSecondaryContainer }}>
-              Jika kamu mengalami masalah menonton, silahkan ganti resolusi/server
-            </Text>
-          </View>
-        )}
-        {/* acefile embed information */}
-        {(data.resolution?.includes('acefile') || data.resolution?.includes('video')) &&
-          data.streamingType === 'embed' && (
-            <View style={{ backgroundColor: theme.colors.tertiaryContainer, marginVertical: 5 }}>
-              <Icon
-                name="server"
-                color={theme.colors.onTertiaryContainer}
-                size={26}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text
-                style={{
-                  color: theme.colors.onTertiaryContainer,
-                  textAlign: 'center',
-                  fontSize: 14,
-                  fontWeight: 'bold',
-                }}>
-                AceFile
-              </Text>
-              <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                Tampaknya server AceFile untuk resolusi ini mengalami masalah. Terkadang server
-                membutuhkan beberapa waktu untuk memproses data, silahkan coba lagi. Jika masalah
-                berlanjut silahkan ganti server atau resolusi lain.
-              </Text>
-            </View>
-          )}
-        {/* embed player information */}
-        {data.streamingType === 'embed' && (
-          <View ref={embedInformationRef}>
-            <View
-              style={{
-                backgroundColor: theme.colors.tertiaryContainer,
-                marginVertical: 5,
-              }}>
-              <TouchableOpacity
-                style={{ alignSelf: 'flex-end' }}
-                onPress={() => {
-                  embedInformationRef.current?.setNativeProps({ display: 'none' });
-                }}>
-                <Icon name="close" color={theme.colors.onTertiaryContainer} size={26} />
-              </TouchableOpacity>
-              <Icon
-                name="lightbulb-o"
-                color={theme.colors.onTertiaryContainer}
-                size={26}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                Kamu saat ini menggunakan video player pihak ketiga dikarenakan data dengan format
-                yang biasa digunakan tidak tersedia. Fitur ini masih eksperimental.{'\n'}
-                Kamu mungkin akan melihat iklan di dalam video.{'\n'}
-                Fitur download, ganti resolusi, dan fullscreen tidak akan bekerja dengan normal.
-                {'\n'}
-                Jika menemui masalah seperti video berubah menjadi putih, silahkan reload video
-                player!
-              </Text>
-            </View>
-            <View
-              style={{
-                marginTop: 5,
-                backgroundColor: theme.colors.tertiaryContainer,
-              }}>
-              <MaterialCommunityIcons
-                name="screen-rotation"
-                color={theme.colors.onTertiaryContainer}
-                size={26}
-                style={{ alignSelf: 'center' }}
-              />
-              <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape
-              </Text>
-            </View>
-          </View>
-        )}
-        {/* embed reload button */}
-        {data.streamingType === 'embed' && (
-          <TouchableOpacity
-            style={styles.reloadPlayer}
-            onPress={async () => {
-              if (data.streamingLink === '') return;
-              const streamingLink = data.streamingLink;
-              setData(datas => {
-                return {
-                  ...datas,
-                  streamingLink: '',
-                };
-              });
-              await new Promise(res => setTimeout(res, 500));
-              setData(datas => {
-                return {
-                  ...datas,
-                  streamingLink,
-                };
-              });
-            }}>
-            <Icon
-              name="refresh"
-              color={theme.colors.onSecondaryContainer}
-              size={15}
-              style={{ alignSelf: 'center' }}
-            />
-            <Text style={{ color: theme.colors.onSecondaryContainer }}>Reload video player</Text>
-          </TouchableOpacity>
-        )}
         <Pressable
           style={[styles.container]}
           onPressIn={onSynopsisPressIn}
@@ -943,16 +525,13 @@ function Video(props: Props) {
                 globalStyles.text,
                 styles.status,
                 {
-                  backgroundColor:
-                    animeDetail?.status === 'Completed' || animeDetail?.status === 'Movie'
-                      ? 'green'
-                      : 'red',
+                  backgroundColor: animeDetail?.next || animeDetail?.prev ? 'green' : 'red',
                 },
               ]}>
-              {animeDetail?.status}
+              {animeDetail?.next || animeDetail?.prev ? 'TV Series' : 'Film'}
             </Text>
             <Text style={[{ color: lightText }, styles.releaseYear]}>
-              <Icon name="calendar" color={styles.releaseYear.color} /> {animeDetail?.releaseYear}
+              <Icon name="calendar" color={styles.releaseYear.color} /> {animeDetail?.releaseDate}
             </Text>
             <Text style={[globalStyles.text, styles.rating]}>
               <Icon name="star" color="black" /> {animeDetail?.rating}
@@ -978,17 +557,17 @@ function Video(props: Props) {
           )}
         </Pressable>
 
-        <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
-          {data.episodeData && (
+        {(data.next || data.prev) && (
+          <View style={[styles.container, { marginTop: 10, gap: 10 }]}>
             <View style={[styles.episodeDataControl]}>
               <Button
                 mode="contained-tonal"
                 icon="arrow-left"
                 key="prev"
-                disabled={!data.episodeData.previous}
+                disabled={!data.prev}
                 style={[styles.episodeDataControlButton]}
                 onPress={async () => {
-                  await episodeDataControl(data.episodeData?.previous as string); // ignoring the undefined type because we already have the button disabled
+                  await episodeDataControl(data.prev as string); // ignoring the undefined type because we already have the button disabled
                 }}>
                 Sebelumnya
               </Button>
@@ -997,77 +576,17 @@ function Video(props: Props) {
                 mode="contained-tonal"
                 icon="arrow-right"
                 key="next"
-                disabled={!data.episodeData.next}
+                disabled={!data.next}
                 style={[styles.episodeDataControlButton]}
                 contentStyle={{ flexDirection: 'row-reverse' }}
                 onPress={async () => {
-                  await episodeDataControl(data.episodeData?.next as string); // ignoring the undefined type because we already have the button disabled
+                  await episodeDataControl(data.next as string); // ignoring the undefined type because we already have the button disabled
                 }}>
                 Selanjutnya
               </Button>
             </View>
-          )}
-          <TouchableOpacity
-            style={{ maxWidth: '50%' }}
-            onPress={() => {
-              dropdownResolutionRef.current?.open();
-            }}>
-            <View pointerEvents="box-only">
-              <Dropdown
-                ref={dropdownResolutionRef}
-                value={{
-                  label: data.resolution,
-                  value:
-                    data.resolutionRaw?.[
-                      data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                    ],
-                }}
-                placeholder="Pilih resolusi"
-                data={resolutionDropdownData}
-                valueField="value"
-                labelField="label"
-                onChange={async val => {
-                  await setResolution(val.value.dataContent, val.label);
-                }}
-                style={styles.dropdownStyle}
-                containerStyle={styles.dropdownContainerStyle}
-                itemTextStyle={styles.dropdownItemTextStyle}
-                itemContainerStyle={styles.dropdownItemContainerStyle}
-                activeColor="#16687c"
-                selectedTextStyle={styles.dropdownSelectedTextStyle}
-                placeholderStyle={{ color: globalStyles.text.color }}
-                autoScroll
-                dropdownPosition="top"
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {data.resolution?.includes('pogo') && (
-          <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
-            Kamu menggunakan server pogo!, sangat tidak disarankan untuk skip/seek/menggeser menit
-            dikarenakan akan menyebabkan loading yang sangat lama dan kemungkinan akan menghabiskan
-            kuota data kamu. Disarankan untuk mengunduh/download video ini lewat tombol dibawah dan
-            menontonnya saat proses download sudah selesai secara offline!
-          </Text>
+          </View>
         )}
-
-        {data.resolution?.includes('lokal') && (
-          <Text style={[globalStyles.text, { color: '#ff6600', fontWeight: 'bold' }]}>
-            Kamu menggunakan server "lokal". Perlu di ingat server ini tidak mendukung pemutaran
-            melalui aplikasi dan akan menggunakan WebView untuk memutar video melalui server ini,
-            jadi fitur download dan "lanjut dari histori" tidak akan bekerja ketika kamu menggunakan
-            server "lokal".{'\n'}
-            Harap gunakan server ini sebagai alternatif akhir jika server lain tidak berfungsi.
-          </Text>
-        )}
-
-        <Button
-          mode="contained"
-          style={{ marginTop: 12, marginHorizontal: 10 }}
-          onPress={downloadAnime}>
-          <Icon name="download" size={23} /> Download
-        </Button>
       </ScrollView>
     </View>
   );
@@ -1115,7 +634,10 @@ function LoadingModal({
             <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
           <ActivityIndicator size={'large'} />
-          <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
+          <Text style={globalStyles.text}>
+            Tunggu sebentar, sedang mengambil data...{'\n'}Pengambilan data Film lebih lama dari
+            biasanya...
+          </Text>
         </ReAnimated.View>
       </View>
     )
@@ -1340,4 +862,4 @@ function useStyles() {
     [colorScheme, globalStyles.text.color, theme],
   );
 }
-export default memo(Video);
+export default memo(Video_Film);

@@ -54,6 +54,7 @@ import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '.
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
+import { FilmHomePage, getFeatured, getLatest } from '../../utils/scrapers/film';
 import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scrapers/komiku';
 import { Github, JoinDiscord } from '../Loading Screen/Connect';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
@@ -269,6 +270,8 @@ function HomeList(props: HomeProps) {
             data={data}
             props={props}
           />
+          <FeaturedFilmList props={props} key={'film_featured' + refreshingKey} />
+          <LatestFilmList props={props} key={'film_latest' + refreshingKey} />
           <MovieList props={props} key={'anime_movie' + refreshingKey} />
           <ComicList key={'comick' + refreshingKey} />
           <TouchableOpacity
@@ -291,6 +294,154 @@ function HomeList(props: HomeProps) {
       renderItem={renderJadwalAnime}
       showsVerticalScrollIndicator={false}
     />
+  );
+}
+
+const FeaturedFilmList = memo(FeaturedFilmListUNMEMO);
+function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
+  const styles = useStyles();
+  const [data, setData] = useState<FilmHomePage>([]);
+  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const [isError, setIsError] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
+
+  const renderMovie = useCallback(
+    ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
+      <ListAnimeComponent
+        gap
+        newAnimeData={item}
+        type="film"
+        key={'btn' + item.title}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  useEffect(() => {
+    setData?.([]); // so the skeleton loading show
+    queueMicrotask(() => {
+      getFeatured()
+        .then(movieData => {
+          if ('isError' in movieData) {
+            setIsError(true);
+          } else {
+            setData?.(movieData);
+          }
+        })
+        .catch(() => setIsError(true));
+    });
+  }, [setData]);
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Featured Film</Text>
+      </View>
+
+      {isError && (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'connectToServer' }],
+            });
+          }}
+          style={styles.errorContainer}>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
+        </TouchableOpacity>
+      )}
+
+      {data?.length !== 0 ? (
+        <FlashList
+          renderScrollComponent={RenderScrollComponent}
+          contentContainerStyle={{ gap: 3 }}
+          horizontal
+          data={data?.slice(0, 25) ?? []}
+          renderItem={renderMovie}
+          keyExtractor={z => 'featured' + z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
+  );
+}
+
+const LatestFilmList = memo(LatestFilmListUNMEMO);
+function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
+  const styles = useStyles();
+  const [data, setData] = useState<FilmHomePage>([]);
+  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const [isError, setIsError] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
+
+  const renderMovie = useCallback(
+    ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
+      <ListAnimeComponent
+        gap
+        newAnimeData={item}
+        type="film"
+        key={'btn' + item.title}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  useEffect(() => {
+    setData?.([]); // so the skeleton loading show
+    queueMicrotask(() => {
+      getLatest()
+        .then(movieData => {
+          if ('isError' in movieData) {
+            setIsError(true);
+          } else {
+            setData?.(movieData);
+          }
+        })
+        .catch(() => setIsError(true));
+    });
+  }, [setData]);
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Film Terbaru</Text>
+      </View>
+
+      {isError && (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'connectToServer' }],
+            });
+          }}
+          style={styles.errorContainer}>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
+        </TouchableOpacity>
+      )}
+
+      {data?.length !== 0 ? (
+        <FlashList
+          renderScrollComponent={RenderScrollComponent}
+          contentContainerStyle={{ gap: 3 }}
+          horizontal
+          data={data?.slice(0, 25) ?? []}
+          renderItem={renderMovie}
+          keyExtractor={z => 'latest' + z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
   );
 }
 
@@ -330,7 +481,7 @@ function EpisodeBaruUNMEMO({
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Episode Terbaru</Text>
+        <Text style={styles.sectionTitle}>Episode Anime Terbaru</Text>
         <TouchableOpacity
           style={styles.seeMoreButton}
           onPress={() => {

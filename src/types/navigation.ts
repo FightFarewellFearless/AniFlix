@@ -1,4 +1,5 @@
 import { MovieDetail, MovieStreamingDetail } from '../utils/scrapers/animeMovie';
+import { FilmDetail_Stream, FilmDetails_Detail } from '../utils/scrapers/film';
 import { KomikuDetail, KomikuReading } from '../utils/scrapers/komiku';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
@@ -22,6 +23,10 @@ type RootStackNavigator = {
     data: MovieDetail;
     link: string;
   };
+  FilmDetail: {
+    data: FilmDetails_Detail;
+    link: string;
+  };
   ComicsDetail: {
     data: KomikuDetail;
     link: string;
@@ -36,7 +41,7 @@ type RootStackNavigator = {
   FromUrl: {
     link: string;
     title: string;
-    type?: 'comics' | 'anime' | 'movie';
+    type?: 'comics' | 'anime' | 'movie' | 'film';
     historyData?: {
       resolution: string;
       lastDuration: number;
@@ -50,6 +55,14 @@ type RootStackNavigator = {
       lastDuration: number;
     };
     isMovie?: boolean;
+  };
+  Video_Film: {
+    data: FilmDetail_Stream;
+    historyData?: {
+      resolution: string | undefined;
+      lastDuration: number;
+    };
+    link: string;
   };
   NeedUpdate:
     | {

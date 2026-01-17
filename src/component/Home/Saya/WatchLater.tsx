@@ -6,6 +6,7 @@ import { memo, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
+import URL from 'url';
 import useGlobalStyles from '../../../assets/style';
 import { SayaDrawerNavigator } from '../../../types/navigation';
 import watchLaterJSON from '../../../types/watchLaterJSON';
@@ -40,7 +41,13 @@ function WatchLater(props: Props) {
               StackActions.push('FromUrl', {
                 title: item.title,
                 link: item.link,
-                type: item.isMovie ? 'movie' : item.isComics ? 'comics' : 'anime',
+                type: URL.parse(item.link).hostname!?.includes('idlix')
+                  ? 'film'
+                  : item.isMovie
+                    ? 'movie'
+                    : item.isComics
+                      ? 'comics'
+                      : 'anime',
               }),
             );
           }}>
@@ -54,10 +61,14 @@ function WatchLater(props: Props) {
               style={[
                 globalStyles.text,
                 styles.listRatingText,
-                item.isComics ? { backgroundColor: '#3e8bff' } : undefined,
+                item.rating === 'Film'
+                  ? { backgroundColor: '#ff5252' }
+                  : item.isComics
+                    ? { backgroundColor: '#3e8bff' }
+                    : undefined,
               ]}>
-              {/* For comics, We use rating as a fixed "Komik" string */}
-              <Icon name={item.isComics ? 'book' : 'star'} /> {item.rating}
+              <Icon name={item.rating === 'Film' ? 'movie' : item.isComics ? 'book' : 'star'} />{' '}
+              {item.rating}
             </Text>
           </View>
           <View style={styles.listInfoContainer}>

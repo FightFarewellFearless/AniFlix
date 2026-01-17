@@ -26,6 +26,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import URL from 'url';
 import useGlobalStyles, { darkText } from '../../../assets/style';
 import { HistoryItemKey } from '../../../types/databaseTarget';
 import { HistoryJSON } from '../../../types/historyJSON';
@@ -263,7 +264,13 @@ const RenderList = memo(function RenderList({
             title: item?.title,
             link: item?.link,
             historyData: item,
-            type: item?.isMovie ? 'movie' : item?.isComics ? 'comics' : 'anime',
+            type: URL.parse(item?.link ?? '').hostname!?.includes('idlix')
+              ? 'film'
+              : item?.isMovie
+                ? 'movie'
+                : item?.isComics
+                  ? 'comics'
+                  : 'anime',
           }),
         );
       }}>

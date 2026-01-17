@@ -39,6 +39,7 @@ import DarkOverlay from '../misc/DarkOverlay';
 import ImageLoading from '../misc/ImageLoading';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 import { RenderScrollComponent } from './AnimeList';
+import { searchFilm, SearchResult } from '../../utils/scrapers/film';
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacity);
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
@@ -55,7 +56,7 @@ function Search(props: Props) {
   const styles = useStyles();
   const theme = useTheme();
 
-  const [searchType, setSearchType] = useState<'anime' | 'comics'>('anime');
+  const [searchType, setSearchType] = useState<'anime' | 'comics' | 'film'>('anime');
   const textInputRef = useRef<TextInputType>(null);
 
   const isFocus = useRef(true);
@@ -84,6 +85,7 @@ function Search(props: Props) {
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
+  const [filmData, setFilmData] = useState<null | SearchResult>(null);
   const [comicsData, setComicsData] = useState<null | KomikuSearch[]>(null);
   const [loading, setLoading] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
@@ -156,11 +158,30 @@ function Search(props: Props) {
           setLoading(false);
         })
         .catch(handleError);
+    } else if (searchType === 'film') {
+      searchFilm(searchText)
+        .then(result => {
+          setData(null);
+          setMovieData(null);
+          setComicsData(null);
+          setFilmData(result);
+        })
+        .catch(handleError)
+        .finally(() => {
+          if (searchHistory.includes(searchText)) {
+            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          }
+          searchHistory.unshift(searchText);
+          DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
+          setCurrentSearchQuery(searchText);
+          setLoading(false);
+        });
     } else {
       komikuSearch(searchText)
         .then(result => {
           setData(null);
           setMovieData(null);
+          setFilmData(null);
           setComicsData(result);
         })
         .catch(handleError)
@@ -223,8 +244,10 @@ function Search(props: Props) {
   const hasSearchResults =
     (data?.result?.length ?? 0) > 0 ||
     (movieData && movieData.length > 0) ||
-    (comicsData && comicsData.length > 0);
-  const isSearchEmpty = !hasSearchResults && (data !== null || comicsData !== null);
+    (comicsData && comicsData.length > 0) ||
+    (filmData && filmData.length > 0);
+  const isSearchEmpty =
+    !hasSearchResults && (data !== null || comicsData !== null || filmData !== null);
   const isLoading = listAnimeLoading || isPending;
   const showDefaultList =
     !hasSearchResults && !isSearchEmpty && listAnime !== null && listAnime.length > 0;
@@ -233,7 +256,8 @@ function Search(props: Props) {
     !isLoading &&
     (listAnime === null || listAnime.length === 0) &&
     data === null &&
-    comicsData === null;
+    comicsData === null &&
+    filmData === null;
 
   return (
     <View style={[{ flex: 1 }]}>
@@ -263,6 +287,11 @@ function Search(props: Props) {
             value: 'comics',
             label: 'Cari komik',
             icon: 'book-search',
+          },
+          {
+            value: 'film',
+            label: 'Cari film',
+            icon: 'movie',
           },
         ]}
       />
@@ -375,7 +404,12 @@ function Search(props: Props) {
             <FlashList
               renderScrollComponent={RenderScrollComponent}
               ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
-              data={[...(movieData ?? []), ...(data?.result ?? []), ...(comicsData ?? [])]}
+              data={[
+                ...(movieData ?? []),
+                ...(data?.result ?? []),
+                ...(comicsData ?? []),
+                ...(filmData ?? []),
+              ]}
               keyExtractor={(_, index) => String(index)}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
               contentContainerStyle={{ paddingBottom: 20 }}
@@ -440,13 +474,14 @@ function Search(props: Props) {
           </View>
         </Reanimated_KeyboardAvoidingView>
       )}
-      {(data !== null || comicsData !== null) && (
+      {(data !== null || comicsData !== null || filmData !== null) && (
         <TouchableOpacityAnimated
           style={styles.closeSearchResult}
           onPress={() => {
             setData(null);
             setMovieData(null);
             setComicsData(null);
+            setFilmData(null);
           }}
           entering={ZoomIn}
           exiting={ZoomOut}>
@@ -518,17 +553,28 @@ function SearchList({
   item: z,
   parentProps: props,
 }: {
-  item: Movies | SearchAnimeResult | KomikuSearch;
+  item: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number];
   parentProps: Props;
 }) {
-  const isMovie = (data: Movies | SearchAnimeResult | KomikuSearch): data is Movies => {
-    return !('animeUrl' in data) && !('detailUrl' in data);
+  const isMovie = (
+    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
+  ): data is Movies => {
+    return !('animeUrl' in data) && !('detailUrl' in data) && !('synopsis' in data);
   };
-  const isComic = (data: Movies | SearchAnimeResult | KomikuSearch): data is KomikuSearch => {
+  const isComic = (
+    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
+  ): data is KomikuSearch => {
     return 'additionalInfo' in data;
   };
-  const isAnime = (data: Movies | SearchAnimeResult | KomikuSearch): data is SearchAnimeResult => {
+  const isAnime = (
+    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
+  ): data is SearchAnimeResult => {
     return 'animeUrl' in data;
+  };
+  const isFilm = (
+    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
+  ): data is SearchResult[number] => {
+    return 'synopsis' in data;
   };
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
@@ -540,8 +586,8 @@ function SearchList({
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
             title: z.title,
-            link: isMovie(z) ? z.url : isComic(z) ? z.detailUrl : z.animeUrl,
-            type: isMovie(z) ? 'movie' : isComic(z) ? 'comics' : 'anime',
+            link: isFilm(z) ? z.url : isMovie(z) ? z.url : isComic(z) ? z.detailUrl : z.animeUrl,
+            type: isFilm(z) ? 'film' : isMovie(z) ? 'movie' : isComic(z) ? 'comics' : 'anime',
           }),
         );
       }}>
@@ -571,11 +617,12 @@ function SearchList({
         <DarkOverlay transparent={0.8} />
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
-            {isAnime(z) && (
-              <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                <Icon name="star" color="gold" /> {z.rating}
-              </Text>
-            )}
+            {isAnime(z) ||
+              (isFilm(z) && (
+                <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+                  <Icon name="star" color="gold" /> {z.rating}
+                </Text>
+              ))}
           </View>
           <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
             <View
@@ -591,7 +638,7 @@ function SearchList({
                 },
               ]}>
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                {isMovie(z) ? 'Movie' : isComic(z) ? z.type : z.status}
+                {isMovie(z) ? 'Movie' : isComic(z) || isFilm(z) ? z.type : z.status}
               </Text>
             </View>
           </View>
@@ -606,7 +653,12 @@ function SearchList({
         </View>
 
         <View style={styles.releaseInfo}>
-          {!isMovie(z) && (
+          {isFilm(z) && (
+            <Text style={styles.synopsisFilmText} numberOfLines={2}>
+              {z.synopsis}
+            </Text>
+          )}
+          {!isMovie(z) && !isFilm(z) && (
             <View
               style={{
                 flexDirection: 'row',
@@ -749,6 +801,10 @@ function useStyles() {
         statusInfo: {
           padding: 4,
           borderRadius: 6,
+        },
+        synopsisFilmText: {
+          color: 'gray',
+          fontWeight: 'bold',
         },
         releaseInfo: {
           justifyContent: 'flex-end',

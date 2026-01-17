@@ -18,6 +18,7 @@ import { replaceLast } from '../../utils/replaceLast';
 import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
 import LoadingIndicator from '../misc/LoadingIndicator';
+import { getFilmDetails } from '../../utils/scrapers/film';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -195,6 +196,47 @@ function FromUrl(props: Props) {
           } catch (e: any) {
             DialogManager.alert('Error', e.message);
             props.navigation.goBack();
+          }
+        })
+        .catch(handleError);
+    } else if (props.route.params.type === 'film') {
+      getFilmDetails(props.route.params.link, abort.signal)
+        .then(async data => {
+          if (data.type === 'detail') {
+            props.navigation.dispatch(
+              StackActions.replace('FilmDetail', {
+                data,
+                link: props.route.params.link,
+              }),
+            );
+          } else {
+            props.navigation.dispatch(
+              StackActions.replace('Video_Film', {
+                data,
+                link: props.route.params.link,
+                historyData: props.route.params.historyData,
+              }),
+            );
+            const isFilm =
+              URL.parse(props.route.params.link).host!?.includes('idlix') &&
+              props.route.params.link.includes('/episode/');
+            const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
+            const title = (
+              episodeIndex >= 0
+                ? data.title.slice(0, isFilm ? episodeIndex - 3 : episodeIndex)
+                : data.title
+            ).trim();
+            const watchLater: watchLaterJSON[] = JSON.parse(
+              (await DatabaseManager.get('watchLater'))!,
+            );
+            const watchLaterIndex = watchLater.findIndex(
+              z => z.title.trim() === title.trim() && z.isMovie === true,
+            );
+            if (watchLaterIndex >= 0) {
+              controlWatchLater('delete', watchLaterIndex);
+              ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+            }
+            setHistory(data, props.route.params.link, false, props.route.params.historyData, true);
           }
         })
         .catch(handleError);

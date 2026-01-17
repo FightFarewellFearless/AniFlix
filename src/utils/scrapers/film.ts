@@ -7,7 +7,7 @@ import { unpack } from '../unpacker';
 type FilmHomePage = Array<{
   title: string;
   url: string;
-  img: string;
+  thumbnailUrl: string;
   year: string;
   rating: string;
 }>;
@@ -68,16 +68,19 @@ function reconstructKey(rawKey: string, embedUrl: string) {
   return n;
 }
 
-const BASE_URL = 'https://tv12.idlixku.com';
+export const FILM_BASE_URL = 'https://tv12.idlixku.com';
+const BASE_URL = FILM_BASE_URL;
 async function fetchPage(url: string, opt?: RequestInit) {
   const response = await fetch(url, opt);
   return await response.text();
 }
 
-async function getEncryptedUrl(html: string, url: string) {
+async function getEncryptedUrl(html: string, url: string, signal?: AbortSignal) {
   const $ = cheerio.load(html);
   const playerOptSul = $('ul#playeroptionsul');
-  const HLS = playerOptSul.find("li:contains('HLS')");
+  const HLS = playerOptSul.find('li').filter((i, el) => {
+    return $(el).text().trim().includes('HLS') || $(el).text().trim().endsWith('p');
+  });
   const dataType = HLS.attr('data-type');
   const dataPost = HLS.attr('data-post');
   const dataNume = HLS.attr('data-nume');
@@ -101,21 +104,14 @@ async function getEncryptedUrl(html: string, url: string) {
     credentials: 'include',
     body: `action=doo_player_ajax&post=${dataPost}&nume=${dataNume}&type=${dataType}`,
     method: 'POST',
+    signal,
   });
   const postData = JSON.parse(postResponse);
   return postData;
 }
 
-async function decryptUrl(url: string) {
-  const html = await fetchPage(url);
-  const encryptedData = await getEncryptedUrl(html, url);
-  const realKey = reconstructKey(encryptedData.key, encryptedData.embed_url);
-  const decrypted = CryptoJSAesJson.decrypt(encryptedData.embed_url, realKey);
-  return eval(`${decrypted}`);
-}
-
-async function decryptHtml(html: string, url: string) {
-  const encryptedData = await getEncryptedUrl(html, url);
+async function decryptHtml(html: string, url: string, signal?: AbortSignal) {
+  const encryptedData = await getEncryptedUrl(html, url, signal);
   const realKey = reconstructKey(encryptedData.key, encryptedData.embed_url);
   const decrypted = CryptoJSAesJson.decrypt(encryptedData.embed_url, realKey);
   return eval(`${decrypted}`);
@@ -132,11 +128,12 @@ interface JeniusReturnData {
   subtitleTrackUrl: string;
 }
 
-async function jeniusPlayGetHLS(url: string): Promise<JeniusReturnData> {
+async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<JeniusReturnData> {
   const html: string = await fetchPage(url, {
     headers: {
       referer: 'https://jeniusplay.com/',
     },
+    signal,
   });
   const packedScript =
     'eval(function(p,a,c,k,e,d)' +
@@ -180,10 +177,10 @@ async function getFeatured() {
   featuredElements.each((i, el) => {
     const title = $(el).find('h3').text().trim();
     const url = $(el).find('a').attr('href') || '';
-    const img = $(el).find('img').attr('src') || '';
+    const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.data.dfeatur > span').text().trim();
     const rating = $(el).find('div.poster > div.rating').text().trim();
-    featured.push({ title, url, img, year, rating });
+    featured.push({ title, url, thumbnailUrl, year, rating });
   });
   return featured;
 }
@@ -195,29 +192,29 @@ async function getLatest() {
   latestElements.each((i, el) => {
     const title = $(el).find('h3').text().trim();
     const url = $(el).find('a').attr('href') || '';
-    const img = $(el).find('img').attr('src') || '';
+    const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.data > span').text().trim();
     const rating = $(el).find('div.poster > div.rating').text().trim();
-    latest.push({ title, url, img, year, rating });
+    latest.push({ title, url, thumbnailUrl, year, rating });
   });
   return latest;
 }
 
-async function searchFilm(query: string) {
+async function searchFilm(query: string, signal?: AbortSignal) {
   const searchUrl = `${BASE_URL}/search/${encodeURIComponent(query)}`;
-  const html = await fetchPage(searchUrl);
+  const html = await fetchPage(searchUrl, { signal });
   const $ = cheerio.load(html);
   const results: SearchResult = [];
   const resultElements = $('div.search-page div.result-item');
   resultElements.each((i, el) => {
     const title = $(el).find('div.title').text().trim();
     const url = $(el).find('a').attr('href') || '';
-    const img = $(el).find('img').attr('src') || '';
+    const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.meta > .year').text().trim();
     const rating = $(el).find('div.meta > .rating').text().trim();
     const synopsis = $(el).find('div.contenido').text().trim();
     const type = $(el).find('div.thumbnail.animation-2 > a > span').text().trim();
-    results.push({ title, url, img, year, rating, synopsis, type });
+    results.push({ title, url, thumbnailUrl, year, rating, synopsis, type });
   });
   return results;
 }
@@ -303,29 +300,33 @@ function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
   return { title, genres, releaseDate, coverImage, backgroundImage, synopsis, additionalInfo };
 }
 
-type FilmDetails =
-  | {
-      type: 'detail';
-      info: FilmInfo;
-      seasonData: FilmSeason[];
-    }
-  | {
-      type: 'stream';
-      streamingLink: string;
-      subtitleLink: string;
-      title: string;
-      releaseDate: string;
-      rating: string;
-      genres: string[];
-      synopsis: string;
-      next?: string;
-      prev?: string;
-    };
-async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
-  const html = await fetchPage(filmUrl);
+type FilmDetails_Detail = {
+  type: 'detail';
+  info: FilmInfo;
+  seasonData: FilmSeason[];
+};
+type FilmDetail_Stream = {
+  type: 'stream';
+  streamingLink: string;
+  subtitleLink: string;
+  title: string;
+  releaseDate: string;
+  rating: string;
+  genres: string[];
+  synopsis: string;
+  thumbnailUrl: string;
+  next?: string;
+  prev?: string;
+};
+type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
+async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<FilmDetails> {
+  const html = await fetchPage(filmUrl, { signal });
   const $ = cheerio.load(html);
   const isSeasonNEpisode =
-    $('div#serie_contenido').length > 0 && $('li:contains("HLS")').length === 0;
+    $('div#serie_contenido').length > 0 &&
+    $('li').filter((i, el) => {
+      return $(el).text().trim().includes('HLS') || $(el).text().trim().endsWith('p');
+    }).length === 0;
   const isSeasons = $('div#seasons .se-q').length > 0;
   if (isSeasonNEpisode) {
     let info: FilmInfo;
@@ -335,7 +336,7 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
       info = getFilmInfo($);
       seasonData.push(...seasons);
     } else {
-      const season = await fetchPage($('div.sgeneros > a').attr('href')!);
+      const season = await fetchPage($('div.sgeneros > a').attr('href')!, { signal });
       const episode = getFilmEpisode($);
       seasonData.push({ season: '', episodes: episode });
       const $$ = cheerio.load(season);
@@ -344,8 +345,11 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
     return { type: 'detail', info, seasonData };
   } else {
     if (filmUrl.includes('/movie/')) {
-      const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
+      const streamingData = await decryptHtml($.html(), filmUrl, signal).then(z =>
+        jeniusPlayGetHLS(z, signal),
+      );
       const title = $('div.data > h1').text().trim();
+      const thumbnailUrl = $('div.poster > img').attr('src')!;
       const releaseDate = $('.extra span.date').text().trim();
       const rating = $('div[data-rating]').attr('data-rating')!?.trim();
       const genres = $('div.sgeneros a[rel="tag"]')
@@ -357,15 +361,18 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
         streamingLink: streamingData.securedLink,
         subtitleLink: streamingData.subtitleTrackUrl,
         title,
+        thumbnailUrl,
         releaseDate,
         rating,
         genres,
         synopsis,
       };
     } else {
-      const streamingData = await decryptHtml($.html(), filmUrl).then(jeniusPlayGetHLS);
+      const streamingData = await decryptHtml($.html(), filmUrl, signal).then(z =>
+        jeniusPlayGetHLS(z, signal),
+      );
       const episodeLink = $('span:contains("ALL")').parent().attr('href')!;
-      const episodeHtml = await fetchPage(episodeLink);
+      const episodeHtml = await fetchPage(episodeLink, { signal });
       const episodeInfo = getFilmInfo(cheerio.load(episodeHtml));
       const title = $('h1.epih1').text().trim();
       const releaseDate = $('span.date').first().text().trim();
@@ -381,6 +388,7 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
         type: 'stream',
         streamingLink: streamingData.securedLink,
         subtitleLink: streamingData.subtitleTrackUrl,
+        thumbnailUrl: episodeInfo.coverImage,
         title,
         releaseDate,
         rating,
@@ -394,3 +402,13 @@ async function getFilmDetails(filmUrl: string): Promise<FilmDetails> {
 }
 
 export { getFeatured, getLatest, searchFilm, getFilmDetails };
+export type {
+  SearchResult,
+  FilmHomePage,
+  FilmDetails,
+  FilmEpisode,
+  FilmInfo,
+  FilmSeason,
+  FilmDetail_Stream,
+  FilmDetails_Detail,
+};

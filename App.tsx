@@ -27,6 +27,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { MDDark, MDLight } from './src/assets/MaterialTheme';
 import useGlobalStyles from './src/assets/style';
+import FilmDetail from './src/component/EpisodeDetail/FilmDetail';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
 import SafeAreaWrapper from './src/component/misc/SafeAreaWrapper';
@@ -39,10 +40,10 @@ import {
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
-import { Movies } from './src/utils/scrapers/animeMovie';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
+import { Movies } from './src/utils/scrapers/animeMovie';
 import { LatestKomikuRelease } from './src/utils/scrapers/komiku';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
@@ -70,6 +71,7 @@ const CombinedDarkTheme = {
 const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
 const Video = lazy(() => import('./src/component/WatchNRead/Video'));
+const Video_Film = lazy(() => import('./src/component/WatchNRead/Video_Film'));
 const FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
 const NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
 const MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
@@ -129,6 +131,11 @@ const screens: Screens = [
     options: undefined,
   },
   {
+    name: 'FilmDetail',
+    component: withSuspenseAndSafeArea(FilmDetail, false),
+    options: undefined,
+  },
+  {
     name: 'ComicsDetail',
     component: withSuspenseAndSafeArea(ComicsDetail, false),
     options: undefined,
@@ -140,6 +147,7 @@ const screens: Screens = [
   },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: { headerShown: true } },
   { name: 'Video', component: withSuspenseAndSafeArea(Video, false), options: undefined },
+  { name: 'Video_Film', component: withSuspenseAndSafeArea(Video_Film, false), options: undefined },
   { name: 'connectToServer', component: withSuspenseAndSafeArea(Connecting), options: undefined },
   { name: 'NeedUpdate', component: withSuspenseAndSafeArea(NeedUpdate), options: undefined },
   {
