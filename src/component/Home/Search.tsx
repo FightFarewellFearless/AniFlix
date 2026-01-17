@@ -445,6 +445,11 @@ function Search(props: Props) {
                   label: 'Cari komik',
                   icon: 'book-search',
                 },
+                {
+                  value: 'film',
+                  label: 'Cari film',
+                  icon: 'movie',
+                },
               ]}
             />
             <FlashList
