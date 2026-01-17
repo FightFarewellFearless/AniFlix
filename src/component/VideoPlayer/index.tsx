@@ -134,6 +134,7 @@ function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [showControls, setShowControls] = useState(true);
+  const controlsHiddenCzOfLag = useRef(false);
   const showControlsOpacity = useSharedValue(1);
 
   const [subtitles, setSubtitles] = useState<ReturnType<typeof parseSubtitles>>([]);
@@ -181,6 +182,12 @@ function VideoPlayer({
     setPaused(!e.isPlaying);
     if (!e.isPlaying) {
       setShowControls(true);
+      controlsHiddenCzOfLag.current = player.status === 'loading';
+    } else {
+      if (controlsHiddenCzOfLag.current) {
+        setShowControls(false);
+      }
+      controlsHiddenCzOfLag.current = false;
     }
   });
   useEventListener(player, 'timeUpdate', e => {
@@ -226,6 +233,7 @@ function VideoPlayer({
       Math.abs(e.nativeEvent.locationX - pressableShowControlsLocation.current.x) < 10 &&
       Math.abs(e.nativeEvent.locationY - pressableShowControlsLocation.current.y) < 10
     ) {
+      controlsHiddenCzOfLag.current = false;
       setShowControls(a => !a);
     }
   }, []);
