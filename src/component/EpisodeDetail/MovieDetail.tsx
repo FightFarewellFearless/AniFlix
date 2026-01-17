@@ -10,7 +10,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import { Button, Divider, Surface, useTheme } from 'react-native-paper';
+import { Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -356,49 +356,65 @@ function MovieDetail(props: Props) {
   return (
     <ReanimatedFlashList
       ref={scrollRef}
-      data={data.episodeList.length > 1 ? data.episodeList : []}
-      renderItem={({ item }) => {
+      data={data.episodeList.length > 1 ? data.episodeList.toReversed() : []}
+      renderItem={({ item, index }) => {
         const isLastWatched =
           lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
         return (
-          <TouchableOpacity
-            style={styles.episodeButton}
-            onPress={() => {
-              props.navigation.navigate('FromUrl', {
-                title: props.route.params.data.title,
-                link: item.url,
-                historyData: isLastWatched
-                  ? {
-                      lastDuration: lastWatched.lastDuration ?? 0,
-                      resolution: lastWatched.resolution ?? '',
-                    }
-                  : undefined,
-                type: 'movie',
-              });
-            }}>
-            <View style={styles.episodeTitleContainer}>
-              <Text
-                style={[
-                  globalStyles.text,
-                  styles.episodeText,
-                  isLastWatched ? styles.lastWatchedTextColor : undefined,
-                ]}>
-                {item.title}
-              </Text>
-              {isLastWatched && (
-                <Icon name="film" size={16} color={styles.lastWatchedTextColor.color} />
-              )}
-            </View>
-          </TouchableOpacity>
+          <View style={styles.episodeListContainer}>
+            <TouchableOpacity
+              style={[styles.episodeButton, isLastWatched && styles.lastWatchedButton]}
+              onPress={() => {
+                props.navigation.navigate('FromUrl', {
+                  title: props.route.params.data.title,
+                  link: item.url,
+                  historyData: isLastWatched
+                    ? {
+                        lastDuration: lastWatched.lastDuration ?? 0,
+                        resolution: lastWatched.resolution ?? '',
+                      }
+                    : undefined,
+                  type: 'movie',
+                });
+              }}>
+              <View style={styles.episodeMainContent}>
+                <View style={styles.episodeNumberBox}>
+                  <Text style={styles.episodeNumberText}>{index + 1}</Text>
+                </View>
+                <View style={styles.episodeTitleWrapper}>
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      globalStyles.text,
+                      styles.episodeText,
+                      isLastWatched ? styles.lastWatchedTextColor : undefined,
+                    ]}>
+                    {item.title}
+                  </Text>
+                  {isLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
+                </View>
+                <Icon
+                  name={isLastWatched ? 'history' : 'play-circle'}
+                  size={20}
+                  color={
+                    isLastWatched
+                      ? styles.lastWatchedTextColor.color
+                      : colorScheme === 'dark'
+                        ? '#5ddfff'
+                        : '#00608d'
+                  }
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
         );
       }}
-      ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
       keyExtractor={item => item.title}
       contentContainerStyle={{
         backgroundColor: styles.mainContainer.backgroundColor,
         paddingLeft: insets.left,
         paddingRight: insets.right,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 20,
       }}
       ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
       ListHeaderComponent={ListHeaderComponent}
@@ -418,7 +434,7 @@ function useStyles() {
       StyleSheet.create({
         mainContainer: {
           flex: 1,
-          backgroundColor: colorScheme === 'dark' ? '#0c0c0c' : '#ebebeb',
+          backgroundColor: colorScheme === 'dark' ? '#0c0c0c' : '#f5f5f5',
         },
         mainContent: {
           gap: 15,
@@ -510,42 +526,79 @@ function useStyles() {
           opacity: 0.9,
         },
         listChapterTextContainer: {
-          paddingVertical: 10,
+          paddingVertical: 15,
+          borderBottomWidth: 1,
+          borderBottomColor: colorScheme === 'dark' ? '#222' : '#ddd',
+          marginBottom: 10,
         },
         listChapterText: {
           fontWeight: 'bold',
-          fontSize: 22,
+          fontSize: 20,
           color: globalStyles.text.color,
-          textAlign: 'center',
+          textAlign: 'left',
+          letterSpacing: 0.5,
         },
         chapterButtonsContainer: {
           gap: 10,
           marginBottom: 15,
         },
-        episodeButton: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingVertical: 15,
-          paddingHorizontal: 20,
-          backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
+        episodeListContainer: {
+          paddingHorizontal: 15,
+          marginBottom: 10,
         },
-        episodeTitleContainer: {
-          flex: 1,
+        episodeButton: {
+          backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#ffffff',
+          borderRadius: 12,
+          padding: 12,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+        },
+        lastWatchedButton: {
+          backgroundColor: theme.colors.primaryContainer,
+          borderWidth: 1,
+          borderColor: theme.colors.primary,
+        },
+        episodeMainContent: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        episodeNumberBox: {
+          width: 35,
+          height: 35,
+          backgroundColor: colorScheme === 'dark' ? '#333' : '#f0f0f0',
+          borderRadius: 8,
           justifyContent: 'center',
           alignItems: 'center',
+          marginRight: 12,
+        },
+        episodeNumberText: {
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: colorScheme === 'dark' ? '#fff' : '#333',
+        },
+        episodeTitleWrapper: {
+          flex: 1,
+          justifyContent: 'center',
         },
         episodeText: {
-          fontSize: 16,
+          fontSize: 15,
           fontWeight: '600',
           color: colorScheme === 'dark' ? '#ffffff' : '#333333',
+        },
+        watchingNowTag: {
+          fontSize: 10,
+          fontWeight: 'bold',
+          color: theme.colors.primary,
+          marginTop: 2,
         },
         lastWatchedTextColor: {
           color: theme.colors.onPrimaryContainer,
         },
         chapterDivider: {
-          backgroundColor: colorScheme === 'dark' ? '#2b2b2b' : '#e0e0e0',
-          height: 0.8,
+          display: 'none',
         },
       }),
     [
@@ -554,6 +607,8 @@ function useStyles() {
       theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
+      theme.colors.primary,
+      theme.colors.primaryContainer,
     ],
   );
 }
