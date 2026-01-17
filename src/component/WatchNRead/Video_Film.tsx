@@ -251,7 +251,7 @@ function Video_Film(props: Props) {
       }
       setLoading(true);
       const result = await getFilmDetails(dataLink, abortController.current?.signal).catch(err => {
-        if (err.message === 'canceled') {
+        if (err.message === 'Aborted') {
           return;
         }
         const errMessage =
@@ -634,10 +634,7 @@ function LoadingModal({
             <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
           <ActivityIndicator size={'large'} />
-          <Text style={globalStyles.text}>
-            Tunggu sebentar, sedang mengambil data...{'\n'}Pengambilan data Film lebih lama dari
-            biasanya...
-          </Text>
+          <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
         </ReAnimated.View>
       </View>
     )
