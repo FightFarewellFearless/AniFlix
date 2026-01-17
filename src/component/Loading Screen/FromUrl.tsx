@@ -202,6 +202,7 @@ function FromUrl(props: Props) {
     } else if (props.route.params.type === 'film') {
       getFilmDetails(props.route.params.link, abort.signal)
         .then(async data => {
+          if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
           if (data.type === 'detail') {
             props.navigation.dispatch(
               StackActions.replace('FilmDetail', {

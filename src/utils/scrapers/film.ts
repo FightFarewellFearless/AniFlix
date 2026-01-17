@@ -164,13 +164,14 @@ async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<Jeni
         origin: 'https://jeniusplay.com',
       },
       body: params.toString(),
+      signal,
     },
   ).then(a => JSON.parse(a));
   return { ...response, subtitleTrackUrl };
 }
 
-async function getFeatured() {
-  const html = await fetchPage(BASE_URL);
+async function getFeatured(signal?: AbortSignal) {
+  const html = await fetchPage(BASE_URL, { signal });
   const $ = cheerio.load(html);
   const featured: FilmHomePage = [];
   const featuredElements = $('div.items.featured article');
@@ -184,8 +185,8 @@ async function getFeatured() {
   });
   return featured;
 }
-async function getLatest() {
-  const html = await fetchPage(BASE_URL);
+async function getLatest(signal?: AbortSignal) {
+  const html = await fetchPage(BASE_URL, { signal });
   const $ = cheerio.load(html);
   const latest: FilmHomePage = [];
   const latestElements = $('div#dt-movies article');
