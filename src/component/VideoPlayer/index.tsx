@@ -601,33 +601,33 @@ function BottomControl({
   );
 }
 
-const parseTimeToSeconds = (time: string) => {
-  const [hours, minutes, rest] = time.split(':');
-  const [seconds, milliseconds] = rest.split(',');
-  return (
-    parseInt(hours, 10) * 3600 +
-    parseInt(minutes, 10) * 60 +
-    parseInt(seconds, 10) +
-    parseInt(milliseconds, 10) / 1000
-  );
+const RE_BLOCK =
+  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3}).*?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
+const RE_ASS_NL = /\\N/g;
+const RE_SPACE = /\s+/g;
+const RE_SPLIT = /[:.,]/;
+
+const toSec = (t: string) => {
+  const d = t.split(RE_SPLIT);
+  return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
 };
-const parseSubtitles = (rawText: string) => {
-  const subtitleRegex =
-    /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3})(?:[^\n]*)?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
-  const htmlRegex = /<\/?[^>]+(>|$)/g;
 
-  const results = [];
-  let match;
+export const parseSubtitles = (raw: string) => {
+  const res = [];
+  let m;
+  RE_BLOCK.lastIndex = 0;
 
-  while ((match = subtitleRegex.exec(rawText)) !== null) {
-    let cleanText = match[3].replace(htmlRegex, '').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+  while ((m = RE_BLOCK.exec(raw)) !== null) {
+    const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
 
-    results.push({
-      startTime: parseTimeToSeconds(match[1].replace('.', ',')),
-      endTime: parseTimeToSeconds(match[2].replace('.', ',')),
-      text: cleanText,
-    });
+    if (txt) {
+      res.push({
+        startTime: toSec(m[1]),
+        endTime: toSec(m[2]),
+        text: txt,
+      });
+    }
   }
-
-  return results;
+  return res;
 };
