@@ -223,9 +223,11 @@ function FromUrl(props: Props) {
               props.route.params.link.includes('/episode/');
             const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
             const title = (
-              episodeIndex >= 0
-                ? data.title.slice(0, isFilm ? episodeIndex - 3 : episodeIndex)
-                : data.title
+              isFilm
+                ? data.title.split(': ').slice(0, -1).join(': ')
+                : episodeIndex >= 0
+                  ? data.title.slice(0, episodeIndex)
+                  : data.title
             ).trim();
             const watchLater: watchLaterJSON[] = JSON.parse(
               (await DatabaseManager.get('watchLater'))!,

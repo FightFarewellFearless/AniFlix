@@ -143,6 +143,7 @@ function Search(props: Props) {
       Promise.all([AnimeAPI.search(searchText), searchMovie(searchText)])
         .then(([animeResult, movieResult]) => {
           setCurrentSearchQuery(searchText);
+          setFilmData(null);
           setComicsData(null);
           if (!('isError' in movieResult)) {
             setMovieData(movieResult);

@@ -1,4 +1,3 @@
-/* eslint-disable no-eval */
 import { Buffer } from 'buffer/';
 import cheerio, { CheerioAPI } from 'cheerio';
 import CryptoJS from 'crypto-js';
@@ -173,7 +172,7 @@ async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<Jeni
 
 async function getFeatured(signal?: AbortSignal) {
   const html = await fetchPage(BASE_URL, { signal });
-  const $ = cheerio.load(html, { xmlMode: true, decodeEntities: false });
+  const $ = cheerio.load(html, { xmlMode: true });
   const featured: FilmHomePage = [];
   const featuredElements = $('div.items.featured article');
   featuredElements.each((i, el) => {
@@ -188,7 +187,7 @@ async function getFeatured(signal?: AbortSignal) {
 }
 async function getLatest(signal?: AbortSignal) {
   const html = await fetchPage(BASE_URL, { signal });
-  const $ = cheerio.load(html, { xmlMode: true, decodeEntities: false });
+  const $ = cheerio.load(html, { xmlMode: true });
   const latest: FilmHomePage = [];
   const latestElements = $('div#dt-movies article');
   latestElements.each((i, el) => {
@@ -205,7 +204,7 @@ async function getLatest(signal?: AbortSignal) {
 async function searchFilm(query: string, signal?: AbortSignal) {
   const searchUrl = `${BASE_URL}/search/${encodeURIComponent(query)}`;
   const html = await fetchPage(searchUrl, { signal });
-  const $ = cheerio.load(html, { xmlMode: true, decodeEntities: false });
+  const $ = cheerio.load(html, { xmlMode: true });
   const results: SearchResult = [];
   const resultElements = $('div.search-page div.result-item');
   resultElements.each((i, el) => {
@@ -285,7 +284,7 @@ function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
     .map((i, el) => $(el).text().trim())
     .get();
   const releaseDate = $('.extra span.date').text().trim();
-  const coverImage = $('.poster > img').attr('src') || '';
+  const coverImage = (episode$ ?? $)('.poster img').attr('src') || '';
   const backgroundImage = $('#dt_galery > div:nth-child(1) > a > img').attr('src') || '';
   const synopsis = $('#single > div > center p').text().trim();
   const additionalInfo: { [key: string]: string } = {};
@@ -323,7 +322,7 @@ type FilmDetail_Stream = {
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<FilmDetails> {
   const html = await fetchPage(filmUrl, { signal });
-  const $ = cheerio.load(html, { xmlMode: true, decodeEntities: false });
+  const $ = cheerio.load(html, { xmlMode: true });
   const isSeasonNEpisode =
     $('div#serie_contenido').length > 0 &&
     $('li').filter((i, el) => {
@@ -341,7 +340,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       const season = await fetchPage($('div.sgeneros > a').attr('href')!, { signal });
       const episode = getFilmEpisode($);
       seasonData.push({ season: '', episodes: episode });
-      const $$ = cheerio.load(season, { xmlMode: true, decodeEntities: false });
+      const $$ = cheerio.load(season, { xmlMode: true });
       info = getFilmInfo($$, $);
     }
     return { type: 'detail', info, seasonData };
@@ -375,9 +374,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       );
       const episodeLink = $('span:contains("ALL")').parent().attr('href')!;
       const episodeHtml = await fetchPage(episodeLink, { signal });
-      const episodeInfo = getFilmInfo(
-        cheerio.load(episodeHtml, { xmlMode: true, decodeEntities: false }),
-      );
+      const episodeInfo = getFilmInfo(cheerio.load(episodeHtml, { xmlMode: true }));
       const title = $('h1.epih1').text().trim();
       const releaseDate = $('span.date').first().text().trim();
       const rating =
@@ -405,14 +402,14 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
   }
 }
 
-export { getFeatured, getLatest, searchFilm, getFilmDetails };
+export { getFeatured, getFilmDetails, getLatest, searchFilm };
 export type {
-  SearchResult,
-  FilmHomePage,
+  FilmDetail_Stream,
   FilmDetails,
+  FilmDetails_Detail,
   FilmEpisode,
+  FilmHomePage,
   FilmInfo,
   FilmSeason,
-  FilmDetail_Stream,
-  FilmDetails_Detail,
+  SearchResult,
 };

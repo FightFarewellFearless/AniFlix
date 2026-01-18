@@ -24,6 +24,7 @@ import {
   GestureResponderEvent,
   Pressable,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -140,15 +141,26 @@ function VideoPlayer({
 
   const [subtitles, setSubtitles] = useState<ReturnType<typeof parseSubtitles>>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
+  const [subtitleError, setSubtitleError] = useState(false);
+  const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
+  const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
 
   useEffect(() => {
     async function fetchSubtitles(url: string) {
-      const subtitleText = await fetch(url).then(res => res.text());
-      const subtitle = parseSubtitles(subtitleText);
-      setSubtitles(subtitle);
+      setSubtitleError(false);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const subtitleText = await response.text();
+        const subtitle = parseSubtitles(subtitleText ?? '');
+        setSubtitles(subtitle);
+      } catch (error) {
+        setSubtitleError(true);
+        ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+      }
     }
     subtitleURL && fetchSubtitles(subtitleURL);
-  }, [subtitleURL]);
+  }, [subtitleURL, subtitleRetryToken]);
 
   useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);
@@ -347,7 +359,8 @@ function VideoPlayer({
           <Text
             style={{
               marginHorizontal: 20,
-              backgroundColor: currentSubtitle === '' ? undefined : '#0000006b',
+              backgroundColor:
+                currentSubtitle === '' || !isSubtitleEnabled ? undefined : '#0000006b',
               fontSize: isFullscreen ? 24 : 14,
               textAlign: 'center',
               color: 'white',
@@ -355,13 +368,21 @@ function VideoPlayer({
               textShadowOffset: { width: -1, height: 1 },
               textShadowRadius: 1,
             }}>
-            {currentSubtitle}
+            {isSubtitleEnabled ? currentSubtitle : ''}
           </Text>
         </View>
         <Reanimated.View
           pointerEvents="box-none"
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
-          <Top title={title} videoRef={videoRef} />
+          <Top
+            title={title}
+            videoRef={videoRef}
+            subtitleURL={subtitleURL}
+            subtitleError={subtitleError}
+            onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
+            isSubtitleEnabled={isSubtitleEnabled}
+            onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
+          />
           <CenterControl
             isBuffering={isBuffering}
             isError={isError}
@@ -412,7 +433,23 @@ function VideoPlayer({
   );
 }
 
-function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<VideoView | null> }) {
+function Top({
+  title,
+  videoRef,
+  subtitleURL,
+  subtitleError,
+  onRetrySubtitle,
+  isSubtitleEnabled,
+  onToggleSubtitle,
+}: {
+  title: string;
+  videoRef?: React.RefObject<VideoView | null>;
+  subtitleURL?: string;
+  subtitleError: boolean;
+  onRetrySubtitle: () => void;
+  isSubtitleEnabled: boolean;
+  onToggleSubtitle: () => void;
+}) {
   const requestPiP = useCallback(() => {
     videoRef?.current?.startPictureInPicture();
   }, [videoRef]);
@@ -441,8 +478,52 @@ function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<Vi
         hitSlop={2}>
         <Icons name={'picture-in-picture'} size={20} color={'white'} />
       </TouchableOpacity>
+      {subtitleURL &&
+        (subtitleError ? (
+          <TouchableOpacity
+            style={{
+              justifyContent: 'center',
+              marginLeft: 6,
+              backgroundColor: '#00000062',
+              padding: 5,
+              borderRadius: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+            }}
+            onPress={onRetrySubtitle}
+            hitSlop={2}>
+            <Icons name={'closed-caption-off'} size={18} color={'#ff6b6b'} />
+            <Text style={{ color: '#ff6b6b', fontSize: 10, fontWeight: 'bold' }}>
+              RETRY SUBTITLE
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={{
+              justifyContent: 'center',
+              marginLeft: 6,
+              backgroundColor: '#00000062',
+              padding: 5,
+              borderRadius: 5,
+            }}
+            onPress={onToggleSubtitle}
+            hitSlop={2}>
+            <Icons
+              name={isSubtitleEnabled ? 'closed-caption' : 'closed-caption-off'}
+              size={20}
+              color={'white'}
+            />
+          </TouchableOpacity>
+        ))}
       <Text
-        style={{ color: '#dadada', fontWeight: 'bold', textAlign: 'center', flex: 1 }}
+        style={{
+          color: '#dadada',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          flex: 1,
+          marginHorizontal: 10,
+        }}
         numberOfLines={2}>
         {title}
       </Text>

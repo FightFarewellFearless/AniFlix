@@ -20,9 +20,11 @@ async function setHistory(
     .toLowerCase()
     .lastIndexOf(isFilm ? 'x' : isComics ? 'chapter' : 'episode');
   const title = (
-    episodeIndex >= 0
-      ? targetData.title.slice(0, isFilm ? episodeIndex - 3 : episodeIndex)
-      : targetData.title
+    isFilm
+      ? targetData.title.split(': ').slice(0, -1).join(': ')
+      : episodeIndex >= 0
+        ? targetData.title.slice(0, episodeIndex)
+        : targetData.title
   ).trim();
   const isFilmEpisode = targetData.title.split(': ').at(-1)?.split('x');
   const episode =
