@@ -1,3 +1,18 @@
+# v1.1.4_JS-4 (18-Januari-2026)
+YUHUUU AniFlix sekarang udah ada Film/TV Series nihhh...
+Ga kerasa pengembangan AniFlix udah berjalan selama kurang lebih 4 tahun. Terima kasih buat yang udah dukung pengembangan aplikasi ini. Aplikasi ini dibangun atas dasar pembelajaran dan akan selalu open-source dan gratis. Selalu download melalui github resmi https://github.com/FightFarewellFearless/AniFlix agar mendapat versi aplikasi yang aman dan terpercaya.
+### Catatan
+- Fitur download **memang** tidak tersedia untuk film ataupun tv series
+- Jika ada bug/masalah silahkan laporkan melalui github atau server discord
+### Next plan:
+- Dukungan untuk lebih banyak komik dan perbaikan chapter yang hilang
+- Penambahan Web Novel/Light Novel
+## Ditambahkan
+- Film/TV Series
+## Ditingkatkan
+- Beberapa tampilan UI
+## Diperbaiki
+- Tontonan terakhir yang bersmasalah terkait dengan judul anime
 # v1.1.4_JS-3 (03-Januari-2026)
 Update pertama di 2026!! hehe...
 ## Ditambahkan

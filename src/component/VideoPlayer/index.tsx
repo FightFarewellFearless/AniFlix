@@ -24,6 +24,7 @@ import {
   GestureResponderEvent,
   Pressable,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -48,6 +49,7 @@ type VideoPlayerProps = {
   title: string;
   thumbnailURL?: string;
   streamingURL: string;
+  subtitleURL?: string;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView | null>;
   ref?: React.Ref<PlayerRef>;
@@ -68,6 +70,7 @@ function VideoPlayer({
   title,
   thumbnailURL,
   streamingURL,
+  subtitleURL,
   style,
   videoRef,
   ref,
@@ -104,7 +107,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
-      initialPlayer.timeUpdateEventInterval = 1;
+      initialPlayer.timeUpdateEventInterval = subtitleURL ? 45 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
@@ -132,7 +135,32 @@ function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [showControls, setShowControls] = useState(true);
+  const controlsShowedCzOfLag = useRef(false);
+  const preventAutoHideControls = useRef(true);
   const showControlsOpacity = useSharedValue(1);
+
+  const [subtitles, setSubtitles] = useState<ReturnType<typeof parseSubtitles>>([]);
+  const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
+  const [subtitleError, setSubtitleError] = useState(false);
+  const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
+  const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
+
+  useEffect(() => {
+    async function fetchSubtitles(url: string) {
+      setSubtitleError(false);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const subtitleText = await response.text();
+        const subtitle = parseSubtitles(subtitleText ?? '');
+        setSubtitles(subtitle);
+      } catch (error) {
+        setSubtitleError(true);
+        ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+      }
+    }
+    subtitleURL && fetchSubtitles(subtitleURL);
+  }, [subtitleURL, subtitleRetryToken]);
 
   useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);
@@ -167,6 +195,12 @@ function VideoPlayer({
     setPaused(!e.isPlaying);
     if (!e.isPlaying) {
       setShowControls(true);
+      controlsShowedCzOfLag.current = player.status === 'loading';
+    } else {
+      if (controlsShowedCzOfLag.current && !preventAutoHideControls.current) {
+        setShowControls(false);
+      }
+      controlsShowedCzOfLag.current = false;
     }
   });
   useEventListener(player, 'timeUpdate', e => {
@@ -175,6 +209,13 @@ function VideoPlayer({
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
     onDurationChange?.(e.currentTime);
+
+    const currentSub = subtitles.find(subtitle => {
+      const start = Number(subtitle.startTime);
+      const end = Number(subtitle.endTime);
+      return e.currentTime >= start && e.currentTime <= end;
+    });
+    setCurrentSubtitle(currentSub?.text || '');
   });
   useImperativeHandle(
     ref,
@@ -205,7 +246,11 @@ function VideoPlayer({
       Math.abs(e.nativeEvent.locationX - pressableShowControlsLocation.current.x) < 10 &&
       Math.abs(e.nativeEvent.locationY - pressableShowControlsLocation.current.y) < 10
     ) {
-      setShowControls(a => !a);
+      controlsShowedCzOfLag.current = false;
+      setShowControls(a => {
+        preventAutoHideControls.current = !a;
+        return !a;
+      });
     }
   }, []);
 
@@ -299,10 +344,45 @@ function VideoPlayer({
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
         {batteryAndClock}
 
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 15,
+            zIndex: 10,
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            alignSelf: 'flex-start',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text
+            style={{
+              marginHorizontal: 20,
+              backgroundColor:
+                currentSubtitle === '' || !isSubtitleEnabled ? undefined : '#0000006b',
+              fontSize: isFullscreen ? 24 : 14,
+              textAlign: 'center',
+              color: 'white',
+              textShadowColor: 'black',
+              textShadowOffset: { width: -1, height: 1 },
+              textShadowRadius: 1,
+            }}>
+            {isSubtitleEnabled ? currentSubtitle : ''}
+          </Text>
+        </View>
         <Reanimated.View
           pointerEvents="box-none"
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
-          <Top title={title} videoRef={videoRef} />
+          <Top
+            title={title}
+            videoRef={videoRef}
+            subtitleURL={subtitleURL}
+            subtitleError={subtitleError}
+            onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
+            isSubtitleEnabled={isSubtitleEnabled}
+            onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
+          />
           <CenterControl
             isBuffering={isBuffering}
             isError={isError}
@@ -353,7 +433,23 @@ function VideoPlayer({
   );
 }
 
-function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<VideoView | null> }) {
+function Top({
+  title,
+  videoRef,
+  subtitleURL,
+  subtitleError,
+  onRetrySubtitle,
+  isSubtitleEnabled,
+  onToggleSubtitle,
+}: {
+  title: string;
+  videoRef?: React.RefObject<VideoView | null>;
+  subtitleURL?: string;
+  subtitleError: boolean;
+  onRetrySubtitle: () => void;
+  isSubtitleEnabled: boolean;
+  onToggleSubtitle: () => void;
+}) {
   const requestPiP = useCallback(() => {
     videoRef?.current?.startPictureInPicture();
   }, [videoRef]);
@@ -382,8 +478,52 @@ function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<Vi
         hitSlop={2}>
         <Icons name={'picture-in-picture'} size={20} color={'white'} />
       </TouchableOpacity>
+      {subtitleURL &&
+        (subtitleError ? (
+          <TouchableOpacity
+            style={{
+              justifyContent: 'center',
+              marginLeft: 6,
+              backgroundColor: '#00000062',
+              padding: 5,
+              borderRadius: 5,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+            }}
+            onPress={onRetrySubtitle}
+            hitSlop={2}>
+            <Icons name={'closed-caption-off'} size={18} color={'#ff6b6b'} />
+            <Text style={{ color: '#ff6b6b', fontSize: 10, fontWeight: 'bold' }}>
+              RETRY SUBTITLE
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={{
+              justifyContent: 'center',
+              marginLeft: 6,
+              backgroundColor: '#00000062',
+              padding: 5,
+              borderRadius: 5,
+            }}
+            onPress={onToggleSubtitle}
+            hitSlop={2}>
+            <Icons
+              name={isSubtitleEnabled ? 'closed-caption' : 'closed-caption-off'}
+              size={20}
+              color={'white'}
+            />
+          </TouchableOpacity>
+        ))}
       <Text
-        style={{ color: '#dadada', fontWeight: 'bold', textAlign: 'center', flex: 1 }}
+        style={{
+          color: '#dadada',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          flex: 1,
+          marginHorizontal: 10,
+        }}
         numberOfLines={2}>
         {title}
       </Text>
@@ -541,3 +681,34 @@ function BottomControl({
     </Pressable>
   );
 }
+
+const RE_BLOCK =
+  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3}).*?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
+const RE_ASS_NL = /\\N/g;
+const RE_SPACE = /\s+/g;
+const RE_SPLIT = /[:.,]/;
+
+const toSec = (t: string) => {
+  const d = t.split(RE_SPLIT);
+  return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
+};
+
+export const parseSubtitles = (raw: string) => {
+  const res = [];
+  let m;
+  RE_BLOCK.lastIndex = 0;
+
+  while ((m = RE_BLOCK.exec(raw)) !== null) {
+    const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
+
+    if (txt) {
+      res.push({
+        startTime: toSec(m[1]),
+        endTime: toSec(m[2]),
+        text: txt,
+      });
+    }
+  }
+  return res;
+};

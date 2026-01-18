@@ -59,7 +59,7 @@ function AniDetail(props: Props) {
     () =>
       watchLaterListsJson.some(
         item =>
-          item.title === data.title.replace('Subtitle Indonesia', '') &&
+          item.title === data.title.replace(/Subtitle Indonesia|Sub Indo/, '') &&
           !item.isComics &&
           !item.isMovie,
       ),
@@ -70,7 +70,10 @@ function AniDetail(props: Props) {
     'historyKeyCollectionsOrder',
     state => JSON.parse(state) as HistoryItemKey[],
   );
-  let historyTitle = data.title.replace('Subtitle Indonesia', '').split('(Episode')[0].trim();
+  let historyTitle = data.title
+    .replace(/Subtitle Indonesia|Sub Indo/, '')
+    .split('(Episode')[0]
+    .trim();
   if (historyTitle.endsWith('BD') && !data.episodeList.at(-1)?.title.endsWith('BD')) {
     historyTitle = replaceLast(historyTitle, 'BD', '').trim();
   }
@@ -239,7 +242,7 @@ function AniDetail(props: Props) {
               disabled={isInList}
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
-                  title: data.title.replace('Subtitle Indonesia', ''),
+                  title: data.title.replace(/Subtitle Indonesia|Sub Indo/, ''),
                   link: props.route.params.link,
                   rating: data.rating,
                   releaseYear: data.releaseYear,
@@ -278,7 +281,8 @@ function AniDetail(props: Props) {
                       ToastAndroid.show('Tidak ada episode untuk ditonton', ToastAndroid.SHORT);
                     }
                   }}>
-                  Terakhir Ditonton ({lastWatched.episode.replace('Subtitle Indonesia', '').trim()})
+                  Terakhir Ditonton (
+                  {lastWatched.episode.replace(/Subtitle Indonesia|Sub Indo/, '').trim()})
                 </Button>
               )}
               <Button
@@ -405,7 +409,7 @@ function AniDetail(props: Props) {
                     styles.episodeText,
                     isLastWatched ? styles.lastWatchedTextColor : undefined,
                   ]}>
-                  {item.title.replace('Subtitle Indonesia', '').trim()}
+                  {item.title.replace(/Subtitle Indonesia|Sub Indo/, '').trim()}
                 </Text>
                 {isLastWatched && (
                   <Icon name="film" color={styles.lastWatchedTextColor.color} size={16} />

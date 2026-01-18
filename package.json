@@ -1,7 +1,7 @@
 {
   "name": "aniflix",
   "version": "v1.1.4",
-  "OTAJSVersion": "3",
+  "OTAJSVersion": "4",
   "private": true,
   "scripts": {
     "android": "react-native run-android --active-arch-only",
@@ -32,6 +32,7 @@
     "axios": "^1.11.0",
     "buffer": "^6.0.3",
     "cheerio": "1.0.0-rc.12",
+    "crypto-js": "^4.2.0",
     "expo": "^54.0.27",
     "expo-document-picker": "~14.0.8",
     "expo-image": "~3.0.11",
@@ -74,6 +75,7 @@
     "@react-native/metro-config": "0.81.4",
     "@react-native/typescript-config": "0.81.4",
     "@rnx-kit/align-deps": "^3.2.1",
+    "@types/crypto-js": "^4.2.2",
     "@types/jest": "^29.5.14",
     "@types/metro-config": "^0.76.3",
     "@types/react": "^19.1.12",

@@ -13,6 +13,7 @@ import { LatestKomikuRelease } from '../../utils/scrapers/komiku';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
+import { FilmHomePage } from '../../utils/scrapers/film';
 
 export function ListAnimeComponent(
   props: (
@@ -22,6 +23,7 @@ export function ListAnimeComponent(
       }
     | { newAnimeData: Movies; type: 'movie' }
     | { newAnimeData: LatestKomikuRelease; type: 'comics' }
+    | { newAnimeData: FilmHomePage[number]; type: 'film' }
   ) & {
     navigationProp:
       | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
@@ -39,6 +41,8 @@ export function ListAnimeComponent(
       return 'Movie';
     } else if (props.type === 'comics') {
       return props.newAnimeData.latestChapter;
+    } else if (props.type === 'film') {
+      return 'Film';
     } else {
       return props.newAnimeData.episode;
     }
@@ -55,7 +59,7 @@ export function ListAnimeComponent(
         props.newAnimeData.concept
       );
     } else {
-      return props.newAnimeData.releaseDay;
+      return props.type === 'film' ? props.newAnimeData.year : props.newAnimeData.releaseDay;
     }
   }, [props.newAnimeData, props.type]);
 
@@ -79,7 +83,9 @@ export function ListAnimeComponent(
                 ? props.newAnimeData.url
                 : props.type === 'comics'
                   ? props.newAnimeData.detailUrl
-                  : props.newAnimeData.streamingLink,
+                  : props.type === 'film'
+                    ? props.newAnimeData.url
+                    : props.newAnimeData.streamingLink,
             type: props.type,
           }),
         );

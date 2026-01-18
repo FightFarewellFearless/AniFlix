@@ -1,22 +1,38 @@
+import URL from 'url';
+
 import { HistoryItemKey } from '../types/databaseTarget';
 import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
 import { RootStackNavigator } from '../types/navigation';
 import { DatabaseManager } from './DatabaseManager';
+import { FilmDetail_Stream } from './scrapers/film';
 import { KomikuReading } from './scrapers/komiku';
 
 async function setHistory(
-  targetData: RootStackNavigator['Video']['data'] | KomikuReading,
+  targetData: RootStackNavigator['Video']['data'] | KomikuReading | FilmDetail_Stream,
   link: string,
   skipUpdateDate = false,
   additionalData: Partial<HistoryAdditionalData> | {} = {},
   isMovie?: boolean,
   isComics?: boolean,
 ) {
-  const episodeIndex = targetData.title.toLowerCase().indexOf(isComics ? 'chapter' : 'episode');
+  const isFilm = URL.parse(link).host!?.includes('idlix') && link.includes('/episode/');
+  const episodeIndex = targetData.title
+    .toLowerCase()
+    .lastIndexOf(isFilm ? 'x' : isComics ? 'chapter' : 'episode');
   const title = (
-    episodeIndex >= 0 ? targetData.title.slice(0, episodeIndex) : targetData.title
+    isFilm
+      ? targetData.title.split(': ').slice(0, -1).join(': ')
+      : episodeIndex >= 0
+        ? targetData.title.slice(0, episodeIndex)
+        : targetData.title
   ).trim();
-  const episode = episodeIndex < 0 ? null : targetData.title.slice(episodeIndex).trim();
+  const isFilmEpisode = targetData.title.split(': ').at(-1)?.split('x');
+  const episode =
+    episodeIndex < 0
+      ? null
+      : isFilm
+        ? `Season ${isFilmEpisode?.[0]} Episode ${isFilmEpisode?.[1]}`
+        : targetData.title.slice(episodeIndex).trim();
   const dataKey = `historyItem:${title}:${isComics ?? 'false'}:${isMovie ?? 'false'}` as const;
 
   const keyOrder: HistoryItemKey[] = JSON.parse(
