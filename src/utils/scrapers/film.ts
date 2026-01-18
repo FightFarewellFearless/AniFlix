@@ -213,7 +213,7 @@ async function searchFilm(query: string, signal?: AbortSignal) {
     const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.meta > .year').text().trim();
     const rating = $(el).find('div.meta > .rating').text().trim();
-    const synopsis = $(el).find('div.contenido').text().trim();
+    const synopsis = $(el).find('div.contenido').contents().first().text().trim();
     const type = $(el).find('div.thumbnail.animation-2 > a > span').text().trim();
     results.push({ title, url, thumbnailUrl, year, rating, synopsis, type });
   });
@@ -286,7 +286,7 @@ function getFilmInfo($: CheerioAPI, episode$?: CheerioAPI) {
   const releaseDate = $('.extra span.date').text().trim();
   const coverImage = (episode$ ?? $)('.poster img').attr('src') || '';
   const backgroundImage = $('#dt_galery > div:nth-child(1) > a > img').attr('src') || '';
-  const synopsis = $('#single > div > center p').text().trim();
+  const synopsis = $('#single > div > center p').contents().first().text().trim();
   const additionalInfo: { [key: string]: string } = {};
   $('div.custom_fields').each((i, el) => {
     const key = $(el).find('b').first().text().trim();
@@ -356,7 +356,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       const genres = $('div.sgeneros a[rel="tag"]')
         .map((i, el) => $(el).text().trim())
         .get();
-      const synopsis = $('div[itemprop="description"]').text().trim();
+      const synopsis = $('div[itemprop="description"]').contents().first().text().trim();
       return {
         type: 'stream',
         streamingLink: streamingData.securedLink,
