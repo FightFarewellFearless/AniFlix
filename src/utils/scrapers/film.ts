@@ -356,7 +356,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       const genres = $('div.sgeneros a[rel="tag"]')
         .map((i, el) => $(el).text().trim())
         .get();
-      const synopsis = $('div[itemprop="description"]').contents().first().text().trim();
+      const synopsis = $('div[itemprop="description"] p').contents().first().text().trim();
       return {
         type: 'stream',
         streamingLink: streamingData.securedLink,
