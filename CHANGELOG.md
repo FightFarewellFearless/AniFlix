@@ -1,3 +1,10 @@
+# v1.1.4_JS-5 (19-Januari-2026)
+## Diperbaiki
+- Sinopsis yang tidak tersedia untuk film
+## Dihapus
+- Donasi developer. AniFlix sekarang tidak menerima donasi dalam bentuk apapun!
+## Perubahan terkait lisensi
+- Mulai sekarang, kode aplikasi menggunakan lisensi MIT
 # v1.1.4_JS-4 (18-Januari-2026)
 YUHUUU AniFlix sekarang udah ada Film/TV Series nihhh...
 Ga kerasa pengembangan AniFlix udah berjalan selama kurang lebih 4 tahun. Terima kasih buat yang udah dukung pengembangan aplikasi ini. Aplikasi ini dibangun atas dasar pembelajaran dan akan selalu open-source dan gratis. Selalu download melalui github resmi https://github.com/FightFarewellFearless/AniFlix agar mendapat versi aplikasi yang aman dan terpercaya.
