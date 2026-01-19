@@ -8,7 +8,6 @@ import About from './Utilitas/About';
 import Changelog from './Utilitas/Changelog';
 import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';
 import Setting from './Utilitas/Setting';
-import SupportDev from './Utilitas/SupportDev';
 
 const Stack = createNativeStackNavigator<UtilsStackNavigator>();
 
@@ -50,11 +49,6 @@ function Utils() {
       <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
       <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
       <Stack.Screen name="About" component={About} options={{ title: 'Tentang' }} />
-      <Stack.Screen
-        name="SupportDev"
-        component={SupportDev}
-        options={{ title: 'Dukung pengembang' }}
-      />
     </Stack.Navigator>
   );
 }
@@ -89,13 +83,6 @@ const Screens = [
     icon: 'information',
     color: '#166db4',
     screen: 'About',
-  },
-  {
-    title: 'Dukung pengembang',
-    desc: 'Dukung developer melalui donasi atau kontribusi kode sumber',
-    icon: 'hand-heart',
-    color: '#810af0',
-    screen: 'SupportDev',
   },
 ] as const;
 
