@@ -51,14 +51,49 @@ function About() {
         <Card.Content>
           <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 8 }}>
             AniFlix adalah aplikasi streaming anime non-komersial yang dibangun untuk tujuan
-            pembelajaran mobile development.
-          </Text>
-          <Text variant="bodySmall" style={{ textAlign: 'center', color: theme.colors.outline }}>
-            Semua konten didapatkan dari sumber publik di internet. Kami tidak menyimpan file video
-            di server kami.
+            pembelajaran mobile development menggunakan React Native.
           </Text>
         </Card.Content>
       </Card>
+
+      <Text variant="titleMedium" style={styles.sectionHeader}>
+        ⚖️ Pelepasan Tanggung Jawab
+      </Text>
+      <Surface style={styles.surface} elevation={1}>
+        <View style={{ padding: 16 }}>
+          <Text variant="bodySmall" style={styles.disclaimerText}>
+            • <Text style={{ fontWeight: 'bold' }}>Ketiadaan Hosting:</Text> Kami tidak menyimpan,
+            menghosting, atau memiliki kontrol atas konten video yang ditampilkan. Semua data
+            diambil dari sumber pihak ketiga yang tersedia publik di internet.
+          </Text>
+          <Text variant="bodySmall" style={styles.disclaimerText}>
+            • <Text style={{ fontWeight: 'bold' }}>Tanggung Jawab:</Text> Pengguna bertanggung jawab
+            penuh atas tindakan mereka. Pengembang tidak bertanggung jawab atas penyalahgunaan atau
+            pelanggaran hak cipta.
+          </Text>
+          <Text variant="bodySmall" style={styles.disclaimerText}>
+            • <Text style={{ fontWeight: 'bold' }}>Hak Cipta:</Text> Semua merek dagang, judul, dan
+            poster adalah milik sah dari pemegang lisensi masing-masing.
+          </Text>
+          <Text variant="bodySmall" style={{ ...styles.disclaimerText, marginBottom: 0 }}>
+            • <Text style={{ fontWeight: 'bold' }}>Dukungan Resmi:</Text> Kami sangat menyarankan
+            Anda menonton melalui platform resmi seperti Crunchyroll, Netflix, dll.
+          </Text>
+        </View>
+      </Surface>
+
+      <Text variant="titleMedium" style={styles.sectionHeader}>
+        📄 Lisensi Perangkat Lunak
+      </Text>
+      <Surface style={styles.surface} elevation={1}>
+        <List.Item
+          title="MIT License"
+          description="Aplikasi ini bersifat Open Source"
+          left={props => <List.Icon {...props} icon="file-certificate" />}
+          right={props => <List.Icon {...props} icon="open-in-new" />}
+          onPress={() => Linking.openURL('https://opensource.org/licenses/MIT')}
+        />
+      </Surface>
 
       <Text variant="titleMedium" style={styles.sectionHeader}>
         Komunitas & Kontak
@@ -198,6 +233,11 @@ function useStyles() {
           borderRadius: 12,
           backgroundColor: theme.colors.surface,
           overflow: 'hidden',
+        },
+        disclaimerText: {
+          color: theme.colors.onSurfaceVariant,
+          marginBottom: 8,
+          lineHeight: 18,
         },
       }),
     [theme],
