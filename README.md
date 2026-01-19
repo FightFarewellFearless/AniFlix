@@ -90,7 +90,8 @@ Dapatkan versi terbaru dari AniFlix dengan mudah:
 
 ---
 
-## ⚖️ Penafian Hukum (Legal Disclaimer)
+## ⚖️ Pelepasan Tanggung Jawab Hukum (Disclaimer)
+**PENTING: Harap baca ketentuan ini dengan seksama sebelum menggunakan AniFlix.**
 
 Proyek ini, **AniFlix**, dibuat hanya untuk **tujuan pendidikan, penelitian, dan pembelajaran** pengembangan aplikasi mobile menggunakan React Native. Dengan menggunakan atau mengakses repositori ini, Anda menyetujui poin-poin hukum berikut:
 
