@@ -36,7 +36,8 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { runOnJS } from 'react-native-worklets';
+import { runOnJS, runOnRuntime } from 'react-native-worklets';
+import AniFlixRuntime from '../../misc/AniFlixRuntime';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
@@ -107,7 +108,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
-      initialPlayer.timeUpdateEventInterval = subtitleURL ? 45 / 1000 : 1;
+      initialPlayer.timeUpdateEventInterval = subtitleURL ? 25 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
@@ -139,7 +140,9 @@ function VideoPlayer({
   const preventAutoHideControls = useRef(true);
   const showControlsOpacity = useSharedValue(1);
 
-  const [subtitles, setSubtitles] = useState<ReturnType<typeof parseSubtitles>>([]);
+  const [subtitles, setSubtitles] = useState<Awaited<ReturnType<typeof parseSubtitles>> | null>(
+    null,
+  );
   const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
   const [subtitleError, setSubtitleError] = useState(false);
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
@@ -152,7 +155,7 @@ function VideoPlayer({
         const response = await fetch(url);
         if (!response.ok) throw new Error('Network response was not ok');
         const subtitleText = await response.text();
-        const subtitle = parseSubtitles(subtitleText ?? '');
+        const subtitle = await parseSubtitles(subtitleText ?? '');
         setSubtitles(subtitle);
       } catch (error) {
         setSubtitleError(true);
@@ -208,14 +211,13 @@ function VideoPlayer({
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
-    onDurationChange?.(e.currentTime);
-
-    const currentSub = subtitles.find(subtitle => {
+    const currentSub = subtitles?.find(subtitle => {
       const start = Number(subtitle.startTime);
       const end = Number(subtitle.endTime);
       return e.currentTime >= start && e.currentTime <= end;
     });
     setCurrentSubtitle(currentSub?.text || '');
+    onDurationChange?.(e.currentTime);
   });
   useImperativeHandle(
     ref,
@@ -368,7 +370,11 @@ function VideoPlayer({
               textShadowOffset: { width: -1, height: 1 },
               textShadowRadius: 1,
             }}>
-            {isSubtitleEnabled ? currentSubtitle : ''}
+            {isSubtitleEnabled
+              ? subtitles === null && !subtitleError
+                ? 'Memuat Subtitle...'
+                : currentSubtitle
+              : ''}
           </Text>
         </View>
         <Reanimated.View
@@ -690,25 +696,37 @@ const RE_SPACE = /\s+/g;
 const RE_SPLIT = /[:.,]/;
 
 const toSec = (t: string) => {
+  'worklet';
   const d = t.split(RE_SPLIT);
   return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
 };
 
-export const parseSubtitles = (raw: string) => {
-  const res = [];
-  let m;
-  RE_BLOCK.lastIndex = 0;
+export const parseSubtitles = async (raw: string) => {
+  return await new Promise<
+    {
+      startTime: number;
+      endTime: number;
+      text: string;
+    }[]
+  >(resolve => {
+    runOnRuntime(AniFlixRuntime, () => {
+      'worklet';
+      const res = [];
+      let m;
+      RE_BLOCK.lastIndex = 0;
 
-  while ((m = RE_BLOCK.exec(raw)) !== null) {
-    const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
+      while ((m = RE_BLOCK.exec(raw)) !== null) {
+        const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
 
-    if (txt) {
-      res.push({
-        startTime: toSec(m[1]),
-        endTime: toSec(m[2]),
-        text: txt,
-      });
-    }
-  }
-  return res;
+        if (txt) {
+          res.push({
+            startTime: toSec(m[1]),
+            endTime: toSec(m[2]),
+            text: txt,
+          });
+        }
+      }
+      runOnJS(resolve)(res);
+    })();
+  });
 };
