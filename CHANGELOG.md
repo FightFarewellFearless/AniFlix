@@ -1,3 +1,6 @@
+# v1.1.4_JS-6 (23-Januari-2026)
+## Ditingkatkan
+- Performa parsing subtitle
 # v1.1.4_JS-5 (19-Januari-2026)
 ## Diperbaiki
 - Sinopsis yang tidak tersedia untuk film
