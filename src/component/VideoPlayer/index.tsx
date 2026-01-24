@@ -371,7 +371,7 @@ function VideoPlayer({
               textShadowRadius: 1,
             }}>
             {isSubtitleEnabled
-              ? subtitles === null && !subtitleError
+              ? subtitles === null && !subtitleError && subtitleURL
                 ? 'Memuat Subtitle...'
                 : currentSubtitle
               : ''}
