@@ -1,3 +1,6 @@
+# v1.1.4_JS-7 (24-Januari-2026)
+## Diperbaiki
+- Perbaikan pada teks "Memuat subtitle" pada video player khusus anime.
 # v1.1.4_JS-6 (23-Januari-2026)
 ## Ditingkatkan
 - Performa parsing subtitle
