@@ -112,7 +112,7 @@ export async function getKomikuDetailFromUrl(
   const readingDirection =
     tableInfo.find(item => item.key === 'Cara Baca')?.value ?? 'Data tidak tersedia';
   const headerImageUrl = data.match(/url\((.*?)\)/)?.[1] ?? '';
-  const thumbnailUrl = $('img[itemprop="image"]').attr('src') ?? '';
+  const thumbnailUrl = $('.ims > img').attr('src') ?? '';
   const genres = $('ul.genre > li')
     .map((_i, el) => $(el).text().trim())
     .toArray();
