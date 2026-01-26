@@ -1,3 +1,6 @@
+# v1.1.4_JS-8 (27-Januari-2026)
+## Diperbaiki
+- Gambar cover komik
 # v1.1.4_JS-7 (24-Januari-2026)
 ## Diperbaiki
 - Perbaikan pada teks "Memuat subtitle" pada video player khusus anime.
