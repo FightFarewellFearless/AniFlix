@@ -26,6 +26,7 @@ import controlWatchLater from '../../utils/watchLaterControl';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
@@ -341,44 +342,46 @@ function FilmDetail(props: Props) {
   }, [data.seasonData, searchQuery]);
 
   return (
-    <ReanimatedFlashList
-      ref={scrollRef}
-      data={modifiedSeasonData}
-      getItemType={item => item.type}
-      renderItem={({ item: s }) => {
-        return s.type === 'season' ? (
-          <View style={styles.seasonContainer}>
-            <View style={styles.seasonHeader}>
-              <View style={styles.seasonIndicator} />
-              <Text style={[globalStyles.text, styles.seasonText]}>{s.text}</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <ReanimatedFlashList
+        ref={scrollRef}
+        data={modifiedSeasonData}
+        getItemType={item => item.type}
+        renderItem={({ item: s }) => {
+          return s.type === 'season' ? (
+            <View style={styles.seasonContainer}>
+              <View style={styles.seasonHeader}>
+                <View style={styles.seasonIndicator} />
+                <Text style={[globalStyles.text, styles.seasonText]}>{s.text}</Text>
+              </View>
             </View>
-          </View>
-        ) : (
-          <View style={styles.episodeListContainer}>
-            <RenderEpisodeList
-              globalStyles={globalStyles}
-              colorScheme={colorScheme}
-              props={props}
-              item={s}
-              styles={styles}
-              lastWatched={lastWatched}
-            />
-          </View>
-        );
-      }}
-      // keyExtractor={item => item.season}
-      contentContainerStyle={{
-        backgroundColor: styles.mainContainer.backgroundColor,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        paddingBottom: insets.bottom + 20,
-      }}
-      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-      ListHeaderComponent={ListHeaderComponent}
-      extraData={colorScheme}
-      // estimatedItemSize={60}
-      showsVerticalScrollIndicator={false}
-    />
+          ) : (
+            <View style={styles.episodeListContainer}>
+              <RenderEpisodeList
+                globalStyles={globalStyles}
+                colorScheme={colorScheme}
+                props={props}
+                item={s}
+                styles={styles}
+                lastWatched={lastWatched}
+              />
+            </View>
+          );
+        }}
+        // keyExtractor={item => item.season}
+        contentContainerStyle={{
+          backgroundColor: styles.mainContainer.backgroundColor,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom + 20,
+        }}
+        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+        ListHeaderComponent={ListHeaderComponent}
+        extraData={colorScheme}
+        // estimatedItemSize={60}
+        showsVerticalScrollIndicator={false}
+      />
+    </KeyboardAvoidingView>
   );
 }
 
