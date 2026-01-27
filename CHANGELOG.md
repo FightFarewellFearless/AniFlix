@@ -1,3 +1,6 @@
+# v1.1.4_JS-9 (28-Januari-2026)
+## Diperbaiki
+- Ukuran tinggi pada Detail film tidak menyesuaikan dengan keyboard
 # v1.1.4_JS-8 (27-Januari-2026)
 ## Diperbaiki
 - Gambar cover komik
