@@ -1,3 +1,10 @@
+# v1.1.4_JS-10 (11-Februari-2026)
+## Diperbaiki
+- Lag dan frame drop ekstrim ketika animasi sistem dinonaktifkan
+## Ditingkatkan
+- Animasi quote pada beranda sekarang mengabaikan nilai animasi sistem
+- Animasi hide/show control pada Video Player sekarang mengabaikan nilai animasi sistem
+- Indikator loading pada Video Player sekarang mengabaikan nilai animasi sistem
 # v1.1.4_JS-9 (28-Januari-2026)
 ## Diperbaiki
 - Ukuran tinggi pada Detail film tidak menyesuaikan dengan keyboard
