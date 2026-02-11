@@ -35,6 +35,7 @@ import Reanimated, {
   cancelAnimation,
   Easing,
   interpolate,
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -115,7 +116,15 @@ function HomeList(props: HomeProps) {
         );
 
         boxTextAnim.set(
-          withDelay(2000, withTiming(1, { duration, easing: Easing.linear }, callback)),
+          withDelay(
+            2000,
+            withTiming(
+              1,
+              { duration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
+              callback,
+            ),
+            ReduceMotion.Never,
+          ),
         );
       };
       function callback(finished?: boolean) {
@@ -128,7 +137,11 @@ function HomeList(props: HomeProps) {
       boxTextAnim.set(
         withDelay(
           1000,
-          withTiming(1, { duration: initialDuration, easing: Easing.linear }, callback),
+          withTiming(
+            1,
+            { duration: initialDuration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
+            callback,
+          ),
         ),
       );
     }, [animationText, boxTextAnim, textLayoutWidth]),
