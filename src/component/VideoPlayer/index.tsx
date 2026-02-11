@@ -9,7 +9,8 @@ import {
 import Icons from '@react-native-vector-icons/material-icons';
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
-import React, {
+import {
+  default as React,
   memo,
   useCallback,
   useEffect,
@@ -19,7 +20,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   AppState,
   GestureResponderEvent,
   Pressable,
@@ -29,7 +29,9 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 import Reanimated, {
+  ReduceMotion,
   SharedValue,
   useAnimatedStyle,
   useDerivedValue,
@@ -292,6 +294,7 @@ function VideoPlayer({
     showControlsOpacity.set(
       withTiming(showControls ? 1 : 0, {
         duration: 150,
+        reduceMotion: ReduceMotion.Never,
       }),
     );
   }, [showControls, showControlsOpacity]);
@@ -577,7 +580,11 @@ function CenterControl({
         <Icons name="replay-5" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
       {isBuffering ? (
-        <ActivityIndicator color="white" size={ICON_SIZE} />
+        <ActivityIndicator
+          style={{ width: ICON_SIZE, height: ICON_SIZE }}
+          color="white"
+          size={ICON_SIZE - 10}
+        />
       ) : !isError ? (
         <TouchableOpacity onPress={onPlayPausePressed} style={{ borderRadius: 50 }}>
           <Icons name={!paused ? 'pause' : 'play-arrow'} size={ICON_SIZE} color={'white'} />
