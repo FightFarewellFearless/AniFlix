@@ -1,3 +1,10 @@
+# v1.1.4_JS-11 (11-Februari-2026)
+## Ditambahkan
+- Fitur download film (video dan subtitle terpisah, pastikan video player yang digunakan mendukung file subtitle secara terpisah)
+## Diperbaiki
+- Text Decoding pada komik
+## NEXT PLAN:
+- Menambahkan download komik (kemungkinan membutuhkan native app rebuild jadi update nya sekitaran 30an MB)
 # v1.1.4_JS-10 (11-Februari-2026)
 ## Diperbaiki
 - Lag dan frame drop ekstrim ketika animasi sistem dinonaktifkan
