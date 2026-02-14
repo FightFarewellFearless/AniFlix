@@ -1,4 +1,5 @@
 import Icon from '@react-native-vector-icons/fontawesome';
+import { Buffer } from 'buffer/';
 import { VideoView } from 'expo-video';
 import React, {
   memo,
@@ -11,6 +12,7 @@ import React, {
 } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -431,6 +433,24 @@ function Video_Film(props: Props) {
     </>
   );
 
+  const downloadFilm = useCallback(() => {
+    Linking.openURL(
+      `https://vortexdownloader.rwbcode.com/?data=${Buffer.from(
+        JSON.stringify({
+          title: data.title,
+          streamingLink: data.streamingLink,
+          subtitleLink: data.subtitleLink,
+        }),
+      ).toString('hex')}`,
+    ).catch(err => {
+      const errMessage =
+        err.message === 'No app can handle this url'
+          ? 'Tidak dapat membuka tautan, tidak ada aplikasi yang dapat menangani tautan ini'
+          : 'Error tidak diketahui: ' + err.message;
+      DialogManager.alert('Error', errMessage);
+    });
+  }, [data.streamingLink, data.subtitleLink, data.title]);
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -587,6 +607,13 @@ function Video_Film(props: Props) {
             </View>
           </View>
         )}
+        <Button
+          mode="contained-tonal"
+          icon={'link'}
+          style={{ marginTop: 12, marginHorizontal: 10 }}
+          onPress={downloadFilm}>
+          Download video / subtitle
+        </Button>
       </ScrollView>
     </View>
   );
