@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import he from 'he';
 import { ToastAndroid } from 'react-native';
 import deviceUserAgent from '../deviceUserAgent';
 
@@ -95,9 +96,12 @@ export async function getKomikuDetailFromUrl(
       return { key, value };
     })
     .toArray();
-  const title = tableInfo.find(item => item.key === 'Judul Komik')?.value ?? 'Data tidak tersedia';
-  const indonesianTitle =
+  const titleRaw =
+    tableInfo.find(item => item.key === 'Judul Komik')?.value ?? 'Data tidak tersedia';
+  const title = he.decode(titleRaw);
+  const indonesianTitleRaw =
     tableInfo.find(item => item.key === 'Judul Indonesia')?.value ?? 'Data tidak tersedia';
+  const indonesianTitle = he.decode(indonesianTitleRaw);
   const type =
     (tableInfo.find(item => item.key === 'Jenis Komik')?.value as KomikuDetail['type']) ??
     'Data tidak tersedia';
@@ -173,7 +177,8 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
     xmlMode: true,
     decodeEntities: false,
   });
-  const title = $('header > h1').text().trim() || 'Data tidak tersedia';
+  const titleRaw = $('header > h1').text().trim() || 'Data tidak tersedia';
+  const title = he.decode(titleRaw);
   const chapter =
     $('div[data-chapter-title]').attr('data-chapter-title')?.trim() || 'Data tidak tersedia';
   let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
