@@ -23,9 +23,9 @@ react {
 
     /* Variants */
     //   The list of variants to that are debuggable. For those we're going to
-    //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
+    //   skip the bundling of the JS bundle and the assets. Default is "debug", "debugOptimized".
     //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
-    // debuggableVariants = ["liteDebug", "prodDebug"]
+    // debuggableVariants = ["liteDebug", "liteDebugOptimized", "prodDebug", "prodDebugOptimized"]
 
     /* Bundling */
     //   A list containing the node command and its flags. Default is just 'node'.
@@ -63,7 +63,7 @@ react {
       commandLine("node", "--print", "require.resolve('react-native/package.json')")
     }.standardOutput.asText.get().trim()).getParentFile()
     reactNativeDir = reactNativeRelativeDir.getAbsoluteFile()
-    hermesCommand = reactNativeRelativeDir.getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    hermesCommand = new File(["node", "--print", "require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
     codegenDir = file(providers.exec {
       workingDir(rootDir)
       commandLine("node", "--print", "require.resolve('@react-native/codegen/package.json')")
@@ -110,6 +110,11 @@ android {
     //         include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
     //     }
     // }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "anime-${variant.buildType.name}.apk"
+        }
+    }
     packagingOptions {
         jniLibs {
             useLegacyPackaging true
@@ -146,7 +151,6 @@ android {
         debug {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
-            archivesBaseName = "anime"
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -155,7 +159,6 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            archivesBaseName = "anime"
         }
     }
 }

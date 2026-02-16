@@ -14,7 +14,7 @@
     "runtimeVersion": "1.1.4"
   },
   "experiments": {
-    "reactCompiler": true
+    "reactCompiler": false
   },
   "plugins": [
     [
@@ -24,6 +24,7 @@
         "supportsPictureInPicture": true
       }
     ],
-    "expo-sqlite"
+    "expo-sqlite",
+    "expo-image"
   ]
 }

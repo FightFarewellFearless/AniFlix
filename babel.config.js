@@ -4,6 +4,7 @@ const ReactCompilerConfig = {
 
 module.exports = {
   presets: [['babel-preset-expo']],
+  // presets: ['@react-native/babel-preset'],
   env: {
     production: {
       plugins: ['react-native-paper/babel'],
@@ -11,7 +12,6 @@ module.exports = {
   },
   plugins: [
     // ['babel-plugin-react-compiler', ReactCompilerConfig], // must run first!
-    // 'react-native-worklets/plugin',
     ['module:react-native-dotenv'],
     [
       'babel-plugin-inline-import',
@@ -19,5 +19,6 @@ module.exports = {
         extensions: ['.md', '.txt'],
       },
     ],
+    // 'react-native-worklets/plugin',
   ],
 };
