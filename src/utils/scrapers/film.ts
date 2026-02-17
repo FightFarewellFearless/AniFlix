@@ -180,22 +180,22 @@ async function getFeatured(signal?: AbortSignal) {
     const url = $(el).find('a').attr('href') || '';
     const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.data.dfeatur > span').text().trim();
-    const rating = $(el).find('div.poster > div.rating').text().trim();
+    const rating = $(el).find('div.poster div.rating').text().trim();
     featured.push({ title, url, thumbnailUrl, year, rating });
   });
   return featured;
 }
-async function getLatest(signal?: AbortSignal) {
-  const html = await fetchPage(BASE_URL, { signal });
+async function getLatest(page = 1, signal?: AbortSignal) {
+  const html = await fetchPage(BASE_URL + `/movie/page/${page}`, { signal });
   const $ = cheerio.load(html, { xmlMode: true });
   const latest: FilmHomePage = [];
-  const latestElements = $('div#dt-movies article');
+  const latestElements = $('div#archive-content article');
   latestElements.each((i, el) => {
     const title = $(el).find('h3').text().trim();
     const url = $(el).find('a').attr('href') || '';
     const thumbnailUrl = $(el).find('img').attr('src') || '';
     const year = $(el).find('div.data > span').text().trim();
-    const rating = $(el).find('div.poster > div.rating').text().trim();
+    const rating = $(el).find('div.poster div.rating').text().trim();
     latest.push({ title, url, thumbnailUrl, year, rating });
   });
   return latest;

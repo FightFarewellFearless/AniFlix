@@ -34,6 +34,7 @@ import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
+  FilmListHomeContext,
   MovieListHomeContext,
 } from './src/misc/context';
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
@@ -43,7 +44,8 @@ import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
 import { Movies } from './src/utils/scrapers/animeMovie';
-import { LatestKomikuRelease } from './src/utils/scrapers/komiku';
+import { LatestKomikuRelease } from './src/utils/scrapers/comicsv2';
+import { FilmHomePage } from './src/utils/scrapers/film';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
   reactNavigationLight: ReactNavigationDefaultTheme,
@@ -175,6 +177,7 @@ function App() {
     newAnime: [],
   });
   const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
+  const [filmParamsState, setFilmParamsState] = useState<FilmHomePage>([]);
   const [comicsData, setComicsData] = useState<LatestKomikuRelease[]>([]);
 
   const colorScheme = useColorScheme();
@@ -223,6 +226,14 @@ function App() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <EpisodeBaruHomeContext
               value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
+<FilmListHomeContext
+                value={useMemo(
+                  () => ({
+                    paramsState: filmParamsState,
+                    setParamsState: setFilmParamsState,
+                  }),
+                  [filmParamsState],
+                )}>
               <MovieListHomeContext
                 value={useMemo(
                   () => ({
@@ -298,7 +309,10 @@ function App() {
                         ))}
                       </Stack.Navigator>
                       <CFBypassIsOpenContext
-                        value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                        value={useMemo(
+() => ({ isOpen, url: cfUrl, setIsOpen }),
+[isOpen, cfUrl],
+)}>
                         {isOpen && (
                           <Suspense>
                             <CFBypassWebView />
@@ -314,6 +328,7 @@ function App() {
                   </PaperProvider>
                 </ComicsListContext>
               </MovieListHomeContext>
+</FilmListHomeContext>
             </EpisodeBaruHomeContext>
           </GestureHandlerRootView>
         </ErrorBoundary>

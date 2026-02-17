@@ -9,11 +9,10 @@ import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/scrapers/animeMovie';
-import { LatestKomikuRelease } from '../../utils/scrapers/komiku';
+import { FilmHomePage } from '../../utils/scrapers/film';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
-import { FilmHomePage } from '../../utils/scrapers/film';
 
 export function ListAnimeComponent(
   props: (

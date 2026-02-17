@@ -49,6 +49,7 @@ import useGlobalStyles from '../../assets/style';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
+  FilmListHomeContext,
   MovieListHomeContext,
 } from '../../misc/context';
 import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
@@ -387,8 +388,7 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
 const LatestFilmList = memo(LatestFilmListUNMEMO);
 function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
-  const [data, setData] = useState<FilmHomePage>([]);
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const { paramsState: data, setParamsState: setData } = useContext(FilmListHomeContext);
   const [isError, setIsError] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
@@ -424,6 +424,14 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Film Terbaru</Text>
+<TouchableOpacity
+          style={styles.seeMoreButton}
+          onPress={() => {
+            props.navigation.dispatch(StackActions.push('SeeMore', { type: 'FilmList' }));
+          }}>
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
+        </TouchableOpacity>
       </View>
 
       {isError && (
@@ -445,7 +453,7 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 3 }}
           horizontal
-          data={data?.slice(0, 25) ?? []}
+          data={data?.slice(0, 30) ?? []}
           renderItem={renderMovie}
           keyExtractor={z => 'latest' + z.title}
           extraData={styles}

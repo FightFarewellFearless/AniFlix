@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, createContext } from 'react';
 import { EpisodeBaruHome } from '../types/anime';
 import { Movies } from '../utils/scrapers/animeMovie';
-import { LatestKomikuRelease } from '../utils/scrapers/komiku';
+import { FilmHomePage } from '../utils/scrapers/film';
 
 export const EpisodeBaruHomeContext = createContext<{
   paramsState?: EpisodeBaruHome;
@@ -11,6 +11,11 @@ export const EpisodeBaruHomeContext = createContext<{
 export const MovieListHomeContext = createContext<{
   paramsState?: Movies[];
   setParamsState?: Dispatch<SetStateAction<Movies[]>>;
+}>({ paramsState: undefined, setParamsState: undefined });
+
+export const FilmListHomeContext = createContext<{
+  paramsState?: FilmHomePage;
+  setParamsState?: Dispatch<SetStateAction<FilmHomePage>>;
 }>({ paramsState: undefined, setParamsState: undefined });
 
 export const ComicsListContext = createContext<{
