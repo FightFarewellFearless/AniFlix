@@ -1,10 +1,19 @@
+# v1.1.4_JS-12 (18-Februari-2026)
+Update yang cukup besar pada beberapa fitur aplikasi termasuk kemampuan mengganti resolusi film, download komik, dukungan untuk lebih banyak komik, dll...
+Tolong laporkan setiap bug atau error ke server discord agar diperbaiki secepatnya
+## Ditambahkan
+- 2 Sumber data komik baru
+- Menambahkan "Lihat Semua" ke Film terbaru
+- Dukungan untuk download komik
+- Menambahkan opsi untuk mengganti resolusi streaming film
+## Diperbaiki
+- Resolusi "pixel" pada anime movie
+### Dan beberapa perubahan lainnya...
 # v1.1.4_JS-11 (11-Februari-2026)
 ## Ditambahkan
 - Fitur download film (video dan subtitle terpisah, pastikan video player yang digunakan mendukung file subtitle secara terpisah)
 ## Diperbaiki
 - Text Decoding pada komik
-## NEXT PLAN:
-- Menambahkan download komik (kemungkinan membutuhkan native app rebuild jadi update nya sekitaran 30an MB)
 # v1.1.4_JS-10 (11-Februari-2026)
 ## Diperbaiki
 - Lag dan frame drop ekstrim ketika animasi sistem dinonaktifkan
