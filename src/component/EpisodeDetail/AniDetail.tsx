@@ -36,16 +36,16 @@ import { replaceLast } from '../../utils/replaceLast';
 type RecyclerViewType = (
   props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent(FlashList as RecyclerViewType);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 
-const IMG_HEADER_HEIGHT = 250;
+const IMG_HEADER_HEIGHT = 180;
 
 function AniDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -117,11 +117,20 @@ function AniDetail(props: Props) {
   const ListHeaderComponent = useMemo(() => {
     return (
       <View style={styles.mainContainer}>
-        <ReanimatedImage
-          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-          source={{ uri: data.thumbnailUrl }}
-          contentFit="cover"
-        />
+        <Reanimated.View
+          style={[
+            { width: '100%', height: IMG_HEADER_HEIGHT },
+            headerImageStyle,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Icon color={theme.colors.onBackground} name="tv" size={64} />
+          </View>
+        </Reanimated.View>
 
         <LinearGradient
           colors={['transparent', 'black']}
@@ -131,7 +140,7 @@ function AniDetail(props: Props) {
             position: 'absolute',
             transform: [
               {
-                translateY: 165,
+                translateY: 105,
               },
             ],
           }}
@@ -352,6 +361,8 @@ function AniDetail(props: Props) {
     styles.chapterButtonsContainer,
     styles.genre,
     headerImageStyle,
+    theme.colors.elevation.level2,
+    theme.colors.onBackground,
     data.thumbnailUrl,
     data.animeType,
     data.status,

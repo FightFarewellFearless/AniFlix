@@ -44,7 +44,7 @@ import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
 import { Movies } from './src/utils/scrapers/animeMovie';
-import { LatestKomikuRelease } from './src/utils/scrapers/comicsv2';
+import { LatestComicsRelease } from './src/utils/scrapers/comicsv2';
 import { FilmHomePage } from './src/utils/scrapers/film';
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
@@ -178,7 +178,7 @@ function App() {
   });
   const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
   const [filmParamsState, setFilmParamsState] = useState<FilmHomePage>([]);
-  const [comicsData, setComicsData] = useState<LatestKomikuRelease[]>([]);
+  const [comicsData, setComicsData] = useState<LatestComicsRelease[]>([]);
 
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
@@ -226,7 +226,7 @@ function App() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <EpisodeBaruHomeContext
               value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
-<FilmListHomeContext
+              <FilmListHomeContext
                 value={useMemo(
                   () => ({
                     paramsState: filmParamsState,
@@ -234,101 +234,101 @@ function App() {
                   }),
                   [filmParamsState],
                 )}>
-              <MovieListHomeContext
-                value={useMemo(
-                  () => ({
-                    paramsState: movieParamsState,
-                    setParamsState: setMovieParamsState,
-                  }),
-                  [movieParamsState],
-                )}>
-                <ComicsListContext
+                <MovieListHomeContext
                   value={useMemo(
                     () => ({
-                      paramsState: comicsData,
-                      setParamsState: setComicsData,
+                      paramsState: movieParamsState,
+                      setParamsState: setMovieParamsState,
                     }),
-                    [comicsData],
+                    [movieParamsState],
                   )}>
-                  <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
-                    <NavigationContainer
-                      ref={navigationRef}
-                      theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
-                      <Portal>
-                        <Dialog
-                          visible={dialogVisible}
-                          dismissable={false}
-                          dismissableBackButton
-                          onDismiss={() => setDialogVisible(false)}>
-                          <Dialog.Title>{dialogContent.title}</Dialog.Title>
-                          <Dialog.Content>
-                            <Text style={globalStyles.text}>{dialogContent.message}</Text>
-                          </Dialog.Content>
-                          <Dialog.Actions>
-                            {dialogContent.buttons.map((button, index) => (
-                              <Button
-                                key={index}
-                                onPress={() => {
-                                  button.onPress();
-                                  setDialogVisible(false);
-                                }}>
-                                {button.text}
-                              </Button>
-                            ))}
-                          </Dialog.Actions>
-                        </Dialog>
-                      </Portal>
-                      <Stack.Navigator
-                        initialRouteName="connectToServer"
-                        screenOptions={{
-                          headerShown: false,
-                          header: props => (
-                            <Appbar.Header>
-                              {props.back && (
-                                <Appbar.BackAction
+                  <ComicsListContext
+                    value={useMemo(
+                      () => ({
+                        paramsState: comicsData,
+                        setParamsState: setComicsData,
+                      }),
+                      [comicsData],
+                    )}>
+                    <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
+                      <NavigationContainer
+                        ref={navigationRef}
+                        theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
+                        <Portal>
+                          <Dialog
+                            visible={dialogVisible}
+                            dismissable={false}
+                            dismissableBackButton
+                            onDismiss={() => setDialogVisible(false)}>
+                            <Dialog.Title>{dialogContent.title}</Dialog.Title>
+                            <Dialog.Content>
+                              <Text style={globalStyles.text}>{dialogContent.message}</Text>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                              {dialogContent.buttons.map((button, index) => (
+                                <Button
+                                  key={index}
                                   onPress={() => {
-                                    props.navigation.goBack();
-                                  }}
+                                    button.onPress();
+                                    setDialogVisible(false);
+                                  }}>
+                                  {button.text}
+                                </Button>
+                              ))}
+                            </Dialog.Actions>
+                          </Dialog>
+                        </Portal>
+                        <Stack.Navigator
+                          initialRouteName="connectToServer"
+                          screenOptions={{
+                            headerShown: false,
+                            header: props => (
+                              <Appbar.Header>
+                                {props.back && (
+                                  <Appbar.BackAction
+                                    onPress={() => {
+                                      props.navigation.goBack();
+                                    }}
+                                  />
+                                )}
+                                <Appbar.Content
+                                  titleStyle={{ fontWeight: 'bold' }}
+                                  title={
+                                    typeof props.options.headerTitle === 'string'
+                                      ? props.options.headerTitle
+                                      : ''
+                                  }
                                 />
-                              )}
-                              <Appbar.Content
-                                titleStyle={{ fontWeight: 'bold' }}
-                                title={
-                                  typeof props.options.headerTitle === 'string'
-                                    ? props.options.headerTitle
-                                    : ''
-                                }
-                              />
-                            </Appbar.Header>
-                          ),
-                        }}>
-                        {screens.map(({ name, component, options }) => (
-                          <Stack.Screen key={name} name={name} options={options}>
-                            {component}
-                          </Stack.Screen>
-                        ))}
-                      </Stack.Navigator>
-                      <CFBypassIsOpenContext
-                        value={useMemo(
-() => ({ isOpen, url: cfUrl, setIsOpen }),
-[isOpen, cfUrl],
-)}>
-                        {isOpen && (
-                          <Suspense>
-                            <CFBypassWebView />
-                          </Suspense>
+                              </Appbar.Header>
+                            ),
+                          }}>
+                          {screens.map(({ name, component, options }) => (
+                            <Stack.Screen key={name} name={name} options={options}>
+                              {component}
+                            </Stack.Screen>
+                          ))}
+                        </Stack.Navigator>
+                        <CFBypassIsOpenContext
+                          value={useMemo(
+                            () => ({ isOpen, url: cfUrl, setIsOpen }),
+                            [isOpen, cfUrl],
+                          )}>
+                          {isOpen && (
+                            <Suspense>
+                              <CFBypassWebView />
+                            </Suspense>
+                          )}
+                        </CFBypassIsOpenContext>
+                        {__DEV__ && (
+                          <View style={styles.Dev} pointerEvents="none">
+                            <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                          </View>
                         )}
-                      </CFBypassIsOpenContext>
-                      {__DEV__ && (
-                        <View style={styles.Dev} pointerEvents="none">
-                          <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-                        </View>
-                      )}
-                    </NavigationContainer>
-                  </PaperProvider>
-                </ComicsListContext>
-              </MovieListHomeContext>
-</FilmListHomeContext>
+                      </NavigationContainer>
+                    </PaperProvider>
+                  </ComicsListContext>
+                </MovieListHomeContext>
+              </FilmListHomeContext>
             </EpisodeBaruHomeContext>
           </GestureHandlerRootView>
         </ErrorBoundary>

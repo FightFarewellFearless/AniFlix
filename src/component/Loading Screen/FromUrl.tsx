@@ -16,9 +16,10 @@ import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { replaceLast } from '../../utils/replaceLast';
 import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
+import { getComicsDetailFromUrl, getComicsReading } from '../../utils/scrapers/comicsv2';
+import { getFilmDetails } from '../../utils/scrapers/film';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
 import LoadingIndicator from '../misc/LoadingIndicator';
-import { getFilmDetails } from '../../utils/scrapers/film';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -56,8 +57,9 @@ function FromUrl(props: Props) {
   useEffect(() => {
     props.navigation.setOptions({ headerTitle: props.route.params.title });
     const abort: AbortController = new AbortController();
+    const link = props.route.params.link;
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
-    if (props.route.params.link.includes('nanimex')) {
+    if (link.includes('nanimex')) {
       props.navigation.goBack();
       DialogManager.alert(
         'Perhatian!',
@@ -66,8 +68,8 @@ function FromUrl(props: Props) {
       return;
     }
     if (props.route.params.type === 'movie') {
-      if (URL.parse(props.route.params.link)?.pathname?.split('/')[1] === 'anime') {
-        getMovieDetail(props.route.params.link, abort.signal)
+      if (URL.parse(link)?.pathname?.split('/')[1] === 'anime') {
+        getMovieDetail(link, abort.signal)
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if ('isError' in result) {
@@ -81,13 +83,13 @@ function FromUrl(props: Props) {
             props.navigation.dispatch(
               StackActions.replace('MovieDetail', {
                 data: result,
-                link: props.route.params.link,
+                link: link,
               }),
             );
           })
           .catch(handleError);
       } else {
-        getStreamingDetail(props.route.params.link, abort.signal)
+        getStreamingDetail(link, abort.signal)
           .then(async result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if ('isError' in result) {
@@ -101,7 +103,7 @@ function FromUrl(props: Props) {
             props.navigation.dispatch(
               StackActions.replace('Video', {
                 data: result,
-                link: props.route.params.link,
+                link: link,
                 historyData: props.route.params.historyData,
                 isMovie: true,
               }),
@@ -109,7 +111,7 @@ function FromUrl(props: Props) {
             // History
             setHistory(
               result,
-              props.route.params.link,
+              link,
               false,
               props.route.params.historyData,
               props.route.params.type === 'movie',
@@ -131,7 +133,7 @@ function FromUrl(props: Props) {
           .catch(handleError);
       }
     } else if (props.route.params.type === 'anime' || props.route.params.type === undefined) {
-      AnimeAPI.fromUrl(props.route.params.link, resolution, !!resolution, undefined, abort.signal)
+      AnimeAPI.fromUrl(link, resolution, !!resolution, undefined, abort.signal)
         .then(async result => {
           if (result === 'Unsupported') {
             DialogManager.alert(
@@ -153,7 +155,7 @@ function FromUrl(props: Props) {
               props.navigation.dispatch(
                 StackActions.replace('AnimeDetail', {
                   data: result,
-                  link: props.route.params.link,
+                  link: link,
                 }),
               );
             } else if (result.type === 'animeStreaming') {
@@ -161,13 +163,13 @@ function FromUrl(props: Props) {
               props.navigation.dispatch(
                 StackActions.replace('Video', {
                   data: result,
-                  link: props.route.params.link,
+                  link: link,
                   historyData: props.route.params.historyData,
                 }),
               );
 
               // History
-              setHistory(result, props.route.params.link, false, props.route.params.historyData);
+              setHistory(result, link, false, props.route.params.historyData);
 
               const episodeIndex = result.title.toLowerCase().indexOf(' episode');
               const title = episodeIndex >= 0 ? result.title.slice(0, episodeIndex) : result.title;
@@ -200,27 +202,25 @@ function FromUrl(props: Props) {
         })
         .catch(handleError);
     } else if (props.route.params.type === 'film') {
-      getFilmDetails(props.route.params.link, abort.signal)
+      getFilmDetails(link, abort.signal)
         .then(async data => {
           if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
           if (data.type === 'detail') {
             props.navigation.dispatch(
               StackActions.replace('FilmDetail', {
                 data,
-                link: props.route.params.link,
+                link: link,
               }),
             );
           } else {
             props.navigation.dispatch(
               StackActions.replace('Video_Film', {
                 data,
-                link: props.route.params.link,
+                link: link,
                 historyData: props.route.params.historyData,
               }),
             );
-            const isFilm =
-              URL.parse(props.route.params.link).host!?.includes('idlix') &&
-              props.route.params.link.includes('/episode/');
+            const isFilm = URL.parse(link).host!?.includes('idlix') && link.includes('/episode/');
             const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
             const title = (
               isFilm
@@ -239,13 +239,22 @@ function FromUrl(props: Props) {
               controlWatchLater('delete', watchLaterIndex);
               ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
             }
-            setHistory(data, props.route.params.link, false, props.route.params.historyData, true);
+            setHistory(data, link, false, props.route.params.historyData, true);
           }
         })
         .catch(handleError);
     } else {
-      if (props.route.params.link.includes('/manga/')) {
-        getKomikuDetailFromUrl(props.route.params.link, abort.signal)
+      const isKomiku = link.includes('komiku');
+      const isKomikindo = link.includes('komikindo');
+      const isSoftkomik = link.includes('softkomik');
+      const isSoftkomikGoToDetail = isSoftkomik && !link.includes('/chapter/');
+      const isKomikuGoToDetail = isKomiku && link.includes('/manga/');
+      const isKomikindoGoToDetail = isKomikindo && !link.includes('-chapter-');
+      const goToDetail = isKomikuGoToDetail || isKomikindoGoToDetail || isSoftkomikGoToDetail;
+      if (goToDetail) {
+        (link.includes('komikindo') || link.includes('softkomik')
+          ? getComicsDetailFromUrl
+          : getKomikuDetailFromUrl)(link, abort.signal)
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if (result.genres.includes('Ecchi')) {
@@ -257,30 +266,25 @@ function FromUrl(props: Props) {
             props.navigation.dispatch(
               StackActions.replace('ComicsDetail', {
                 data: result,
-                link: props.route.params.link,
+                link: link,
               }),
             );
           })
           .catch(handleError);
       } else {
-        getKomikuReading(props.route.params.link, abort.signal)
+        (link.includes('komikindo') || link.includes('softkomik')
+          ? getComicsReading
+          : getKomikuReading)(link, abort.signal)
           .then(async result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             props.navigation.dispatch(
               StackActions.replace('ComicsReading', {
                 data: result,
                 historyData: props.route.params.historyData,
-                link: props.route.params.link,
+                link: link,
               }),
             );
-            setHistory(
-              result,
-              props.route.params.link,
-              false,
-              props.route.params.historyData,
-              false,
-              true,
-            );
+            setHistory(result, link, false, props.route.params.historyData, false, true);
             const chapterIndex = result.title.toLowerCase().indexOf(' chapter');
             const title = chapterIndex >= 0 ? result.title.slice(0, chapterIndex) : result.title;
             const watchLater: watchLaterJSON[] = JSON.parse(
@@ -304,9 +308,9 @@ function FromUrl(props: Props) {
     handleError,
     props.navigation,
     props.route.params.historyData,
-    props.route.params.link,
     props.route.params.title,
     props.route.params.type,
+    props.route.params.link,
   ]);
 
   return (

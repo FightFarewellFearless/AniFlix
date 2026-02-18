@@ -2,6 +2,7 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import moment from 'moment';
 import { useMemo } from 'react';
 import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
@@ -9,6 +10,8 @@ import useGlobalStyles from '../../assets/style';
 import { NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import { Movies } from '../../utils/scrapers/animeMovie';
+
+import { LatestComicsRelease } from '../../utils/scrapers/comicsv2';
 import { FilmHomePage } from '../../utils/scrapers/film';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
 import ImageLoading from './ImageLoading';
@@ -21,7 +24,7 @@ export function ListAnimeComponent(
         type?: 'anime';
       }
     | { newAnimeData: Movies; type: 'movie' }
-    | { newAnimeData: LatestKomikuRelease; type: 'comics' }
+    | { newAnimeData: LatestComicsRelease; type: 'comics' }
     | { newAnimeData: FilmHomePage[number]; type: 'film' }
   ) & {
     navigationProp:
@@ -39,7 +42,7 @@ export function ListAnimeComponent(
     if (props.type === 'movie') {
       return 'Movie';
     } else if (props.type === 'comics') {
-      return props.newAnimeData.latestChapter;
+      return 'Chapter ' + props.newAnimeData.latestChapter;
     } else if (props.type === 'film') {
       return 'Film';
     } else {
@@ -50,13 +53,7 @@ export function ListAnimeComponent(
     if (props.type === 'movie') {
       return 'Sub Indo';
     } else if (props.type === 'comics') {
-      return (
-        props.newAnimeData.additionalInfo +
-        ' | ' +
-        props.newAnimeData.type +
-        ' | ' +
-        props.newAnimeData.concept
-      );
+      return props.newAnimeData.type + ' | ' + moment(props.newAnimeData.updatedAt).fromNow();
     } else {
       return props.type === 'film' ? props.newAnimeData.year : props.newAnimeData.releaseDay;
     }
@@ -67,8 +64,8 @@ export function ListAnimeComponent(
       style={[
         {
           margin: props.gap ? 3 : 0,
-          minWidth:
-            props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
+          // minWidth:
+          //   props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
           gap: 6,
         },
         styles.listContainer,
@@ -96,26 +93,31 @@ export function ListAnimeComponent(
         recyclingKey={z.thumbnailUrl}
         style={[
           styles.listBackground,
-          {
-            width:
-              props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
-            height:
-              props.type === 'comics' ? styles.listBackground.width : styles.listBackground.height,
-          },
+          // {
+          //   width:
+          //     props.type === 'comics' ? styles.listBackground.height : styles.listBackground.width,
+          //   height:
+          //     props.type === 'comics' ? styles.listBackground.width : styles.listBackground.height,
+          // },
         ]}>
-        <View style={styles.animeEpisodeContainer}>
-          <Text style={styles.animeEpisode}>{episodeOrChapter}</Text>
+        <View style={{ flex: 1, justifyContent: 'space-between', flexDirection: 'row' }}>
+          <View style={styles.animeEpisodeContainer}>
+            <Text style={styles.animeEpisode}>{episodeOrChapter}</Text>
+          </View>
+          {'rating' in z && (
+            <View style={[styles.animeEpisodeContainer]}>
+              <Text style={styles.animeEpisode}>
+                <Icon name="star" size={12} color="#FFD700" /> {z.rating}
+              </Text>
+            </View>
+          )}
         </View>
       </ImageLoading>
       <View
         style={[
           styles.animeTitleContainer,
           {
-            maxWidth: props.fromSeeMore
-              ? undefined
-              : props.type === 'comics'
-                ? styles.listBackground.height
-                : styles.listBackground.width,
+            maxWidth: styles.listBackground.width,
           },
         ]}>
         <Text numberOfLines={1} style={styles.animeTitle}>
@@ -126,11 +128,7 @@ export function ListAnimeComponent(
         style={[
           styles.infoContainer,
           {
-            maxWidth: props.fromSeeMore
-              ? undefined
-              : props.type === 'comics'
-                ? styles.listBackground.height
-                : styles.listBackground.width,
+            maxWidth: styles.listBackground.width,
           },
         ]}>
         <View style={styles.animeReleaseDayContainer}>
@@ -145,21 +143,6 @@ export function ListAnimeComponent(
           </Text>
         </View>
       </View>
-      {props.type === 'comics' && (
-        <Text
-          style={[
-            styles.animeDescription,
-            {
-              maxWidth: props.fromSeeMore
-                ? undefined
-                : props.type === 'comics'
-                  ? styles.listBackground.height
-                  : styles.listBackground.width,
-            },
-          ]}>
-          {props.newAnimeData.shortDescription}
-        </Text>
-      )}
     </TouchableOpacity>
   );
 }
@@ -210,7 +193,7 @@ function useStyles() {
         },
         animeEpisodeContainer: {
           backgroundColor: '#000000b0',
-          alignSelf: 'flex-end',
+          alignSelf: 'flex-start',
           padding: 5,
           borderRadius: 5,
         },
@@ -223,12 +206,6 @@ function useStyles() {
         animeReleaseDay: {
           fontSize: 12,
           color: theme.colors.tertiary,
-          opacity: 0.8,
-          fontWeight: 'bold',
-        },
-        animeDescription: {
-          fontSize: 12,
-          color: globalStyles.text.color,
           opacity: 0.8,
           fontWeight: 'bold',
         },

@@ -34,12 +34,21 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
 import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
-import { KomikuSearch, komikuSearch } from '../../utils/scrapers/komiku';
+import { ComicsSearch, comicsSearch } from '../../utils/scrapers/comicsv2';
+import { SearchResult, searchFilm } from '../../utils/scrapers/film';
+import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '../../utils/scrapers/komiku';
 import DarkOverlay from '../misc/DarkOverlay';
 import ImageLoading from '../misc/ImageLoading';
 import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 import { RenderScrollComponent } from './AnimeList';
-import { searchFilm, SearchResult } from '../../utils/scrapers/film';
+
+type SectionHeader = { type: 'header'; title: string };
+type ComicItem = (ComicsSearch | KomikuSearch) & { source?: string };
+type ComicsComboSearch = ComicItem | SectionHeader;
+
+type AnySearchItem = Movies | SearchAnimeResult | ComicsComboSearch | SearchResult[number];
+
+type SearchRowItem = Exclude<AnySearchItem, SectionHeader>;
 
 const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpacity);
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
@@ -86,7 +95,7 @@ function Search(props: Props) {
   const [data, setData] = useState<null | SearchAnime>(null);
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [filmData, setFilmData] = useState<null | SearchResult>(null);
-  const [comicsData, setComicsData] = useState<null | KomikuSearch[]>(null);
+  const [comicsData, setComicsData] = useState<null | ComicsComboSearch[]>(null);
   const [loading, setLoading] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
   const [showSearchHistory, setShowSearchHistory] = useState(false);
@@ -178,12 +187,36 @@ function Search(props: Props) {
           setLoading(false);
         });
     } else {
-      komikuSearch(searchText)
-        .then(result => {
+      Promise.allSettled([comicsSearch(searchText), komikuSearch(searchText)])
+        .then(([comicsResponse, komikuResponse]) => {
+          const comicsResult = comicsResponse.status === 'fulfilled' ? comicsResponse.value : [];
+          const komikuResult = komikuResponse.status === 'fulfilled' ? komikuResponse.value : [];
+
           setData(null);
           setMovieData(null);
           setFilmData(null);
-          setComicsData(result);
+
+          const allItems: ComicItem[] = [
+            ...comicsResult,
+            ...komikuResult.map(res => ({ ...res, source: KomikuAlias })),
+          ];
+
+          const grouped: { [key: string]: ComicItem[] } = {};
+          allItems.forEach(item => {
+            const src = item.source || 'Lainnya';
+            if (!grouped[src]) {
+              grouped[src] = [];
+            }
+            grouped[src].push(item);
+          });
+
+          const sectionedData: ComicsComboSearch[] = [];
+          Object.keys(grouped).forEach(key => {
+            sectionedData.push({ type: 'header', title: key });
+            sectionedData.push(...grouped[key]);
+          });
+
+          setComicsData(sectionedData);
         })
         .catch(handleError)
         .finally(() => {
@@ -259,6 +292,13 @@ function Search(props: Props) {
     data === null &&
     comicsData === null &&
     filmData === null;
+
+  const flashListData: AnySearchItem[] = [
+    ...(movieData ?? []),
+    ...(data?.result ?? []),
+    ...(comicsData ?? []),
+    ...(filmData ?? []),
+  ];
 
   return (
     <View style={[{ flex: 1 }]}>
@@ -405,13 +445,19 @@ function Search(props: Props) {
             <FlashList
               renderScrollComponent={RenderScrollComponent}
               ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
-              data={[
-                ...(movieData ?? []),
-                ...(data?.result ?? []),
-                ...(comicsData ?? []),
-                ...(filmData ?? []),
-              ]}
-              keyExtractor={(_, index) => String(index)}
+              data={flashListData}
+              getItemType={item => {
+                if ('type' in item && item.type === 'header') {
+                  return 'sectionHeader';
+                }
+                return 'row';
+              }}
+              keyExtractor={(item, index) => {
+                if ('type' in item && item.type === 'header') {
+                  return `header-${item.title}-${index}`;
+                }
+                return String(index);
+              }}
               renderItem={({ item: z }) => <SearchList item={z} parentProps={props} />}
               contentContainerStyle={{ paddingBottom: 20 }}
             />
@@ -555,54 +601,76 @@ function HistoryList({
 
 type SearchAnimeResult = SearchAnime['result'][number];
 
-function SearchList({
-  item: z,
-  parentProps: props,
-}: {
-  item: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number];
-  parentProps: Props;
-}) {
-  const isMovie = (
-    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
-  ): data is Movies => {
-    return !('animeUrl' in data) && !('detailUrl' in data) && !('synopsis' in data);
-  };
-  const isComic = (
-    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
-  ): data is KomikuSearch => {
-    return 'additionalInfo' in data;
-  };
-  const isAnime = (
-    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
-  ): data is SearchAnimeResult => {
-    return 'animeUrl' in data;
-  };
-  const isFilm = (
-    data: Movies | SearchAnimeResult | KomikuSearch | SearchResult[number],
-  ): data is SearchResult[number] => {
-    return 'synopsis' in data;
-  };
+function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; parentProps: Props }) {
+  const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const styles = useStyles();
+
+  if ('type' in z && z.type === 'header') {
+    return (
+      <View style={styles.sectionHeaderContainer}>
+        <View style={styles.sectionHeaderLine} />
+        <Text style={[globalStyles.text, styles.sectionHeaderText]}>
+          <Icon name="globe" size={14} /> {z.title.toUpperCase()}
+        </Text>
+        <View style={styles.sectionHeaderLine} />
+      </View>
+    );
+  }
+  const item = z as SearchRowItem;
+
+  const isMovie = (data: SearchRowItem): data is Movies => {
+    return !('animeUrl' in data) && !('detailUrl' in data) && !('synopsis' in data);
+  };
+
+  const isComic = (data: SearchRowItem): data is ComicItem => {
+    return 'additionalInfo' in data;
+  };
+
+  const isAnime = (data: SearchRowItem): data is SearchAnimeResult => {
+    return 'animeUrl' in data;
+  };
+
+  const isFilm = (data: SearchRowItem): data is SearchResult[number] => {
+    return 'synopsis' in data;
+  };
+
   return (
     <TouchableOpacityAnimated
       entering={FadeInRight}
       style={[styles.listContainer, { minHeight: 100 }]}
       onPress={() => {
+        if (!isComic(item) && !isAnime(item) && !isMovie(item) && !isFilm(item)) return;
+
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
-            title: z.title,
-            link: isFilm(z) ? z.url : isMovie(z) ? z.url : isComic(z) ? z.detailUrl : z.animeUrl,
-            type: isFilm(z) ? 'film' : isMovie(z) ? 'movie' : isComic(z) ? 'comics' : 'anime',
+            title: item.title,
+            link: isFilm(item)
+              ? item.url
+              : isMovie(item)
+                ? item.url
+                : isComic(item)
+                  ? item.detailUrl
+                  : item.animeUrl,
+            type: isFilm(item)
+              ? 'film'
+              : isMovie(item)
+                ? 'movie'
+                : isComic(item)
+                  ? 'comics'
+                  : 'anime',
           }),
         );
       }}>
       <ImageLoading
         contentFit="fill"
-        source={{ uri: z.thumbnailUrl }}
-        style={[styles.listImage, isComic(z) ? { width: 150, height: 'auto' } : undefined]}
-        recyclingKey={z.thumbnailUrl}>
-        {isComic(z) && (
+        source={{ uri: item.thumbnailUrl }}
+        style={[
+          styles.listImage,
+          isComic(item) && 'concept' in item ? { width: 150, height: 'auto' } : undefined,
+        ]}
+        recyclingKey={item.thumbnailUrl}>
+        {isComic(item) && (
           <View
             style={{
               position: 'absolute',
@@ -613,20 +681,20 @@ function SearchList({
               borderRadius: 8,
             }}>
             <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>
-              {z.latestChapter}
+              {!('concept' in item) && item.latestChapter && 'Chapter'} {item.latestChapter}
             </Text>
           </View>
         )}
       </ImageLoading>
 
-      <ImageBackground source={{ uri: z.thumbnailUrl }} blurRadius={5} style={{ flex: 1 }}>
+      <ImageBackground source={{ uri: item.thumbnailUrl }} blurRadius={5} style={{ flex: 1 }}>
         <DarkOverlay transparent={0.8} />
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
-            {isAnime(z) ||
-              (isFilm(z) && (
+            {isAnime(item) ||
+              (isFilm(item) && (
                 <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                  <Icon name="star" color="gold" /> {z.rating}
+                  <Icon name="star" color="gold" /> {item.rating}
                 </Text>
               ))}
           </View>
@@ -636,15 +704,15 @@ function SearchList({
                 styles.statusInfo,
                 {
                   backgroundColor:
-                    isAnime(z) && z.status === 'Ongoing'
+                    isAnime(item) && item.status === 'Ongoing'
                       ? '#920000'
-                      : isMovie(z)
+                      : isMovie(item)
                         ? '#a06800'
                         : '#006600',
                 },
               ]}>
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                {isMovie(z) ? 'Movie' : isComic(z) || isFilm(z) ? z.type : z.status}
+                {isMovie(item) ? 'Movie' : isComic(item) || isFilm(item) ? item.type : item.status}
               </Text>
             </View>
           </View>
@@ -654,41 +722,91 @@ function SearchList({
           <Text
             numberOfLines={4}
             style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
-            {z?.title}
+            {item?.title}
           </Text>
         </View>
 
         <View style={styles.releaseInfo}>
-          {isFilm(z) && (
+          {isFilm(item) && (
             <Text style={styles.synopsisFilmText} numberOfLines={2}>
-              {z.synopsis}
+              {item.synopsis}
             </Text>
           )}
-          {!isMovie(z) && !isFilm(z) && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0, 0, 0, 0.445)',
-                paddingHorizontal: 6,
-                paddingVertical: 3,
-                borderRadius: 5,
-                alignSelf: 'flex-start',
-              }}>
-              <Text
-                style={[
-                  globalStyles.text,
-                  styles.animeSearchListDetailText,
-                  {
-                    fontSize: 14,
-                  },
-                ]}
-                numberOfLines={1}>
-                <Icon name="tags" color={styles.animeSearchListDetailText.color} />{' '}
-                {isAnime(z) ? z.genres.join(', ') : z.concept}
-              </Text>
-            </View>
-          )}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+            {!isMovie(item) && !isFilm(item) && (
+              <View
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.445)',
+                  paddingHorizontal: 6,
+                  paddingVertical: 3,
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.animeSearchListDetailText,
+                    {
+                      fontSize: 14,
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  <Icon name="tags" color={styles.animeSearchListDetailText.color} />{' '}
+                  {isAnime(item)
+                    ? item.genres.join(', ')
+                    : 'status' in item
+                      ? item.status
+                      : item.concept}
+                </Text>
+              </View>
+            )}
+            {isComic(item) && (
+              <View
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.445)',
+                  paddingHorizontal: 6,
+                  paddingVertical: 3,
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.animeSearchListDetailText,
+                    {
+                      fontSize: 14,
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  <Icon name="info" color={styles.animeSearchListDetailText.color} />{' '}
+                  {item.additionalInfo}
+                </Text>
+              </View>
+            )}
+
+            {/* Added Source Badge */}
+            {isComic(item) && item.source && (
+              <View
+                style={{
+                  backgroundColor: theme.colors.tertiaryContainer,
+                  paddingHorizontal: 6,
+                  paddingVertical: 3,
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.animeSearchListDetailText,
+                    {
+                      fontSize: 12,
+                      color: theme.colors.onTertiaryContainer,
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  <Icon name="globe" color={theme.colors.onTertiaryContainer} />{' '}
+                  {item.source.toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </ImageBackground>
     </TouchableOpacityAnimated>
@@ -855,6 +973,24 @@ function useStyles() {
           bottom: 32,
           right: 17,
           zIndex: 1,
+        },
+        sectionHeaderContainer: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 10,
+          paddingHorizontal: 16,
+          justifyContent: 'center',
+        },
+        sectionHeaderText: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          marginHorizontal: 10,
+          color: theme.colors.primary,
+        },
+        sectionHeaderLine: {
+          flex: 1,
+          height: 1,
+          backgroundColor: theme.colors.outlineVariant,
         },
       }),
     [globalStyles.text.color, colorScheme, theme],

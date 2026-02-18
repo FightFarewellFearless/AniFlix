@@ -18,7 +18,9 @@ import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
 import DialogManager from '../../utils/dialogManager';
 import setHistory from '../../utils/historyControl';
+import { getComicsReading } from '../../utils/scrapers/comicsv2';
 import { getKomikuReading } from '../../utils/scrapers/komiku';
+import { BASE_URL } from '../../utils/scrapers/comics1';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
@@ -28,6 +30,9 @@ export default function ComicsReading(props: Props) {
 
   const abortController = useRef<AbortController>(null);
   abortController.current ??= new AbortController();
+
+  const imageFetchOnRNAbortController = useRef<AbortController>(null);
+  imageFetchOnRNAbortController.current ??= new AbortController();
 
   useEffect(() => {
     const appState = AppState.addEventListener('blur', () => {
@@ -42,8 +47,10 @@ export default function ComicsReading(props: Props) {
 
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
-
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
+
+  // --- Layout & Handlers ---
 
   useEffect(() => {
     SystemNavigationBar.fullScreen(isFullscreen);
@@ -61,6 +68,8 @@ export default function ComicsReading(props: Props) {
       SystemNavigationBar.fullScreen(false);
       SystemNavigationBar.navigationShow();
       SystemBars.setHidden(false);
+      abortController.current?.abort();
+      imageFetchOnRNAbortController.current?.abort();
     };
   }, []);
 
@@ -75,7 +84,9 @@ export default function ComicsReading(props: Props) {
 
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: props.route.params.data.chapter,
+      headerTitle: props.route.params.link.includes('softkomik')
+        ? 'Chapter ' + props.route.params.data.chapter
+        : props.route.params.data.chapter,
       headerShown: !isFullscreen,
       header: headerProps => (
         <Appbar.Header>
@@ -103,26 +114,78 @@ export default function ComicsReading(props: Props) {
         </Appbar.Header>
       ),
     });
-  }, [isFullscreen, props.navigation, props.route.params.data.chapter]);
+  }, [isFullscreen, props.navigation, props.route.params.data.chapter, props.route.params.link]);
 
-  const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
+  // --- Fetch Logic ---
+
+  const fetchImageAndSendToWebView = async (id: number, url: string) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+          ...(url.includes('softkomik') ? { Referer: BASE_URL } : {}),
+        },
+        cache: 'no-cache',
+        signal: imageFetchOnRNAbortController.current?.signal,
+      });
+
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        if (typeof base64data === 'string') {
+          const safeBase64 = base64data.replace(/(\r\n|\n|\r)/gm, '');
+
+          webViewRef.current?.injectJavaScript(`
+            window.requestAnimationFrame(() => {
+              window.receiveImageBase64(${id}, "${safeBase64}");
+            });
+            true;
+          `);
+        }
+      };
+
+      reader.onerror = () => {
+        webViewRef.current?.injectJavaScript(`window.onImageErrorById(${id}); true;`);
+      };
+
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      webViewRef.current?.injectJavaScript(`window.onImageErrorById(${id}); true;`);
+    }
+  };
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    if (!isNaN(Number(event.nativeEvent.data))) {
-      const visibleImageId = Number(event.nativeEvent.data);
-      setCurrentlyVisibleImageId(visibleImageId);
-      setHistory(
-        props.route.params.data,
-        props.route.params.link,
-        true,
-        {
-          lastDuration: visibleImageId,
-        },
-        false,
-        true,
-      );
-    } else if (event.nativeEvent.data === 'endReached') {
-      setIsAutoScrolling(false);
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+
+      if (data.type === 'SCROLL_UPDATE') {
+        const visibleImageId = Number(data.id);
+        if (!isNaN(visibleImageId)) {
+          if (visibleImageId !== currentlyVisibleImageId) {
+            setCurrentlyVisibleImageId(visibleImageId);
+            setHistory(
+              props.route.params.data,
+              props.route.params.link,
+              true,
+              { lastDuration: visibleImageId },
+              false,
+              true,
+            );
+          }
+        }
+      } else if (data.type === 'REQUEST_IMAGE') {
+        fetchImageAndSendToWebView(data.id, data.url);
+      } else if (data.type === 'END_REACHED') {
+        setIsAutoScrolling(false);
+      }
+    } catch (e) {
+      if (event.nativeEvent.data === 'endReached') {
+        setIsAutoScrolling(false);
+      }
     }
   };
 
@@ -158,8 +221,12 @@ export default function ComicsReading(props: Props) {
       if (isAutoScrolling) toggleAutoScroll();
 
       setMoveChapterLoading(true);
-      getKomikuReading(url, abortController.current?.signal)
+      (url.includes('komikindo') || url.includes('softkomik')
+        ? getComicsReading
+        : getKomikuReading)(url, abortController.current?.signal)
         .then(res => {
+          imageFetchOnRNAbortController.current?.abort();
+          imageFetchOnRNAbortController.current = new AbortController();
           props.navigation.setParams({
             data: res,
             link: url,
@@ -179,10 +246,12 @@ export default function ComicsReading(props: Props) {
   const { data } = props.route.params;
   const comicImages = props.route.params.data.comicImages;
 
+  // --- HTML Generation ---
+
   const bgColor = theme.dark ? '#121212' : '#ffffff';
   const shimmerBase = theme.dark ? '#333333' : '#e0e0e0';
   const shimmerHighlight = theme.dark ? '#444444' : '#f0f0f0';
-  const errorTextColor = theme.dark ? '#ffb4ab' : '#ba1a1a'; // Material Design Error colors
+  const errorTextColor = theme.dark ? '#ffb4ab' : '#ba1a1a';
 
   const errorSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${errorTextColor}"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
   const errorIconUrl = `data:image/svg+xml;base64,${btoa(errorSvg)}`;
@@ -192,6 +261,7 @@ export default function ComicsReading(props: Props) {
       body {
         margin: 0;
         background-color: ${bgColor};
+        overflow-anchor: auto;
       }
       
       .img-wrapper {
@@ -203,9 +273,10 @@ export default function ComicsReading(props: Props) {
         display: flex;
         justify-content: center;
         align-items: center;
+        content-visibility: auto; /* Skip rendering elemen off-screen */
+        contain-intrinsic-size: 100vw 140vw; /* Estimasi ukuran untuk content-visibility */
       }
 
-      /* Skeleton Loading Animation */
       .img-wrapper::before {
         content: "";
         position: absolute;
@@ -217,6 +288,7 @@ export default function ComicsReading(props: Props) {
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
         z-index: 1;
+        will-change: background-position; /* Optimasi animasi */
       }
 
       @keyframes shimmer {
@@ -226,29 +298,30 @@ export default function ComicsReading(props: Props) {
 
       img {
         width: 100%;
+        height: auto;
         display: block;
-        opacity: 0; /* Hidden by default for fade-in */
-        transition: opacity 0.4s ease-in;
+        opacity: 0;
+        transition: opacity 0.2s ease-in; 
         position: relative;
         z-index: 2;
-        min-height: 50px; /* Prevent total collapse */
+        min-height: 50px;
       }
 
       img.loaded {
         opacity: 1;
         min-height: auto;
-        background-color: transparent;
       }
 
       .img-wrapper.has-loaded {
         min-height: auto;
         background: none;
+        contain-intrinsic-size: auto; /* Reset setelah load */
       }
       .img-wrapper.has-loaded::before {
         display: none;
       }
 
-      /* Error State Styling */
+      /* Error Styles */
       .img-wrapper.is-error {
         min-height: 250px;
         background-color: ${theme.dark ? '#2a2a2a' : '#ffebee'};
@@ -259,9 +332,7 @@ export default function ComicsReading(props: Props) {
         align-items: center;
         text-align: center;
       }
-      .img-wrapper.is-error::before {
-        display: none; /* Hide shimmer */
-      }
+      .img-wrapper.is-error::before { display: none; }
       
       .img-wrapper.is-error::after {
         content: "Gagal memuat gambar. Ketuk untuk ulangi.";
@@ -280,10 +351,7 @@ export default function ComicsReading(props: Props) {
         background-position: center;
         display: block;
       }
-      
-      .img-wrapper.is-error img {
-        display: none;
-      }
+      .img-wrapper.is-error img { display: none; }
     </style>
   `;
 
@@ -293,11 +361,8 @@ export default function ComicsReading(props: Props) {
         <div class="img-wrapper" id="wrap-${index}">
            <div class="error-icon" style="display:none"></div>
            <img 
-              loading="lazy" 
-              src="${link}" 
+              data-src="${link}" 
               id="${index}"
-              onload="onImageLoad(this)"
-              onerror="onImageError(this)"
            />
         </div>
       `;
@@ -307,29 +372,61 @@ export default function ComicsReading(props: Props) {
   const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body>${body}</body>`;
 
   const injectedJavaScript = `
-    window.onImageLoad = (img) => {
-      img.classList.add('loaded');
-      const wrapper = document.getElementById('wrap-' + img.id);
-      if(wrapper) wrapper.classList.add('has-loaded');
+    // --- Communication ---
+    function sendToRN(data) {
+        window.ReactNativeWebView.postMessage(JSON.stringify(data));
+    }
+    window.receiveImageBase64 = (id, base64Data) => {
+        const img = document.getElementById(id);
+        const wrapper = document.getElementById('wrap-' + id);
+        if (!img || !wrapper) return;
+
+        const bufferImg = new Image();
+        bufferImg.src = base64Data;
+        bufferImg.decode()
+            .then(() => {
+                const wrapperRect = wrapper.getBoundingClientRect();
+                const isAboveViewport = wrapperRect.top < 0;
+
+                const oldHeight = wrapper.offsetHeight;
+                const oldScrollY = window.scrollY;
+
+                img.src = base64Data;
+                img.classList.add('loaded');
+                img.removeAttribute('data-fetching');
+            
+                wrapper.classList.add('has-loaded');
+                wrapper.classList.remove('is-error'); 
+            
+                const newHeight = wrapper.offsetHeight;
+                const delta = newHeight - oldHeight;
+
+                if (isAboveViewport && delta !== 0) {
+                    window.scrollTo(0, oldScrollY + delta);
+                }
+                window.fetchObserver.unobserve(img);
+              })
+              .catch((err) => {
+                img.src = base64Data;
+                img.removeAttribute('data-fetching');
+        });
     };
 
-    window.onImageError = (img) => {
-       if (img.src && img.src.includes('cdn1')) {
-         img.src = img.src.replace('cdn1', 'img');
-         return;
-       }
-
-       const wrapper = document.getElementById('wrap-' + img.id);
-       if(wrapper) {
+    window.onImageErrorById = (id) => {
+       const wrapper = document.getElementById('wrap-' + id);
+       const img = document.getElementById(id);
+       
+       if (img) img.removeAttribute('data-fetching');
+       if (wrapper) {
          wrapper.classList.add('is-error');
          const icon = wrapper.querySelector('.error-icon');
          if(icon) icon.style.display = 'block';
        }
     };
 
+    // Retry Listener
     document.addEventListener('click', (e) => {
       const wrapper = e.target.closest('.img-wrapper.is-error');
-      
       if (wrapper) {
         const img = wrapper.querySelector('img');
         if (img) {
@@ -338,13 +435,13 @@ export default function ComicsReading(props: Props) {
           if(icon) icon.style.display = 'none';
           img.style.display = 'block';
 
-          const currentSrc = img.src;
-          img.src = ''; 
-          img.src = currentSrc;
+          sendToRN({ type: 'REQUEST_IMAGE', id: img.id, url: img.dataset.src });
+          img.setAttribute('data-fetching', 'true');
         }
       }
     });
 
+    // --- Auto Scroll ---
     const PIXELS_PER_SECOND = 60;
     window.autoScrollFrame = null;
     window.scrollSpeed = PIXELS_PER_SECOND;
@@ -355,15 +452,13 @@ export default function ComicsReading(props: Props) {
 
     window.startAutoScroll = () => {
       if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
-
       let lastTime = null;
 
       function step(timestamp) {
         if (!lastTime) lastTime = timestamp;
-
         const deltaTime = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
-
+        
         const pixelsToScroll = window.scrollSpeed * deltaTime;
 
         if (pixelsToScroll > 0) {
@@ -372,12 +467,11 @@ export default function ComicsReading(props: Props) {
 
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1) {
              window.stopAutoScroll();
-             window.ReactNativeWebView.postMessage('endReached');
+             sendToRN({ type: 'END_REACHED' });
         } else {
            window.autoScrollFrame = requestAnimationFrame(step);
         }
       }
-      
       window.autoScrollFrame = requestAnimationFrame(step);
     };
 
@@ -386,6 +480,7 @@ export default function ComicsReading(props: Props) {
       window.autoScrollFrame = null;
     };
 
+    // --- Restore History ---
     ${
       props.route.params.historyData
         ? `
@@ -393,9 +488,9 @@ export default function ComicsReading(props: Props) {
              const lastDuration = '${props.route.params.historyData.lastDuration}';
              const target = document.getElementById(lastDuration);
              if (target) {
-               target.scrollIntoView({ behavior: 'instant' });
+               target.scrollIntoView({ behavior: 'instant', block: 'end' });
                setTimeout(() => {
-                 target.scrollIntoView({ behavior: 'smooth' });
+                 target.scrollIntoView({ behavior: 'smooth', block: 'end' });
                }, 500);
              };
           }, 300);
@@ -403,23 +498,64 @@ export default function ComicsReading(props: Props) {
         : ''
     }
 
-    const options = {
+    // --- OBSERVERS ---
+    const sendScrollUpdate = (id) => {
+        sendToRN({ type: 'SCROLL_UPDATE', id: id });
+    }
+
+    const historyOptions = {
       root: null,
-      rootMargin: '20px 0px -50% 0px',
+      rootMargin: '20% 0px -50% 0px',
+      threshold: 0
+    };
+
+    const historyObserver = new IntersectionObserver((entries) => {
+      // Kita hanya ambil elemen yang intersecting
+      const visibleEntry = entries.find(e => e.isIntersecting);
+      if (visibleEntry) {
+         sendScrollUpdate(visibleEntry.target.id);
+      }
+    }, historyOptions);
+
+    // 2. Fetch Observer
+    const fetchOptions = {
+      root: null,
+      rootMargin: '200% 0px 200% 0px',
       threshold: 0.01
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    window.fetchObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
+        const img = entry.target;
+
         if (entry.isIntersecting) {
-          const img = entry.target;
-          window.ReactNativeWebView.postMessage(img.id);
+            if (!img.loadTimer) {
+              img.loadTimer = setTimeout(() => {
+                if (!img.classList.contains('loaded') && !img.hasAttribute('data-fetching')) {
+                  img.setAttribute('data-fetching', 'true');
+                  sendToRN({
+                    type: 'REQUEST_IMAGE',
+                    id: img.id,
+                    url: img.dataset.src
+                  });
+                }
+                img.loadTimer = null;
+              }, 150); 
+            }
+        } else {
+            if (img.loadTimer) {
+                clearTimeout(img.loadTimer);
+                img.loadTimer = null;
+            }
         }
       });
-    }, options);
+    }, fetchOptions);
 
-    document.querySelectorAll('img').forEach(img => {
-      observer.observe(img);
+    // Init Observers
+    const allImages = document.querySelectorAll('img');
+    allImages.forEach(img => {
+      historyObserver.observe(img);
+      window.fetchObserver.observe(img);
     });
   `;
 
@@ -434,9 +570,7 @@ export default function ComicsReading(props: Props) {
           zIndex: 999,
         }}>
         <IconButton
-          onPress={() => {
-            setIsFullscreen(false);
-          }}
+          onPress={() => setIsFullscreen(false)}
           iconColor={theme.colors.primary}
           icon="fullscreen-exit"
           size={30}
@@ -446,9 +580,7 @@ export default function ComicsReading(props: Props) {
       <Portal>
         <Snackbar
           duration={Infinity}
-          onDismiss={() => {
-            setMoveChapterLoading(false);
-          }}
+          onDismiss={() => setMoveChapterLoading(false)}
           visible={moveChapterLoading}
           action={{
             label: 'Batal',

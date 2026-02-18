@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useContext, useEffect, useState, useCallback } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ToastAndroid,
@@ -20,6 +20,7 @@ import { NewAnimeList } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
 import { FilmHomePage, getLatest } from '../../utils/scrapers/film';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
@@ -42,18 +43,18 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
 
   let columnWidth = (dimensions.width * 120) / 200 / 1.9;
   columnWidth = Math.max(columnWidth, MIN_IMAGE_WIDTH);
-  const numColumns = type === 'ComicsList' ? 1 : Math.floor(dimensions.width / columnWidth);
+  const numColumns = Math.floor(dimensions.width / columnWidth);
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle:
-type === 'FilmList'
+        type === 'FilmList'
           ? 'Film terbaru'
           : type === 'MovieList'
-          ? 'Movie terbaru'
-          : type === 'ComicsList'
-            ? 'Komik terbaru'
-            : 'Anime terbaru',
+            ? 'Movie terbaru'
+            : type === 'ComicsList'
+              ? 'Komik terbaru'
+              : 'Anime terbaru',
     });
   }, [navigation, type]);
 
@@ -97,7 +98,7 @@ type === 'FilmList'
             gap
             fromSeeMore
             type="comics"
-            newAnimeData={item as LatestKomikuRelease}
+            newAnimeData={item as LatestComicsRelease}
             navigationProp={navigation}
           />
         );
@@ -229,8 +230,8 @@ const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) =>
   const data = paramsState || [];
 
   const handleLoadMore = async () => {
-    const page = Math.round((data.length ?? 0) / 10);
-    const newData = await getLatestKomikuReleases(page + 1);
+    const page = Math.round((data.length ?? 0) / 24);
+    const newData = await getLatestComicsReleases(page + 1);
 
     if ('isError' in newData) {
       throw new Error('API Error');

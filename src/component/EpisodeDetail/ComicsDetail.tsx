@@ -28,12 +28,17 @@ import { HistoryJSON } from '../../types/historyJSON';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { KomikuDetail } from '../../utils/scrapers/komiku';
+import { __ALIAS as Comics1Alias } from '../../utils/scrapers/comics1';
+import { __ALIAS as Comics2Alias } from '../../utils/scrapers/comics2';
+import { ComicsDetail as ComicsDetailTypeData } from '../../utils/scrapers/comicsv2';
+import { __ALIAS as KomikuAlias, KomikuDetail } from '../../utils/scrapers/komiku';
 import controlWatchLater from '../../utils/watchLaterControl';
 
 type RecyclerViewType = (
-  props: RecyclerViewProps<KomikuDetail['chapters'][0]> & {
-    ref?: React.Ref<FlashListRef<KomikuDetail['chapters'][0]>>;
+  props: RecyclerViewProps<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]> & {
+    ref?: React.Ref<
+      FlashListRef<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]>
+    >;
   },
 ) => React.JSX.Element;
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
@@ -47,7 +52,10 @@ export default function ComicsDetail(props: Props) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = useStyles();
-  const scrollRef = useAnimatedRef<FlashListRef<KomikuDetail['chapters'][0]>>();
+  const scrollRef =
+    useAnimatedRef<
+      FlashListRef<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]>
+    >();
   const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
     return {
@@ -65,29 +73,12 @@ export default function ComicsDetail(props: Props) {
     };
   });
   const { data } = props.route.params;
-  const readComic = useCallback(
-    (link: string, fromHistory?: HistoryJSON) => {
-      props.navigation.navigate('FromUrl', {
-        title: props.route.params.data.title,
-        link,
-        type: 'comics',
-        historyData: fromHistory
-          ? {
-              lastDuration: fromHistory.lastDuration ?? 0,
-              resolution: fromHistory.resolution ?? '',
-            }
-          : undefined,
-      });
-    },
-    [props.navigation, props.route.params.data.title],
-  );
 
   const [searchQuery, setSearchQuery] = useState('');
-
   const filteredChapters = useMemo(() => {
     if (!searchQuery) return data.chapters;
     return data.chapters.toReversed().filter(chapter => {
-      return chapter.chapter.toLowerCase().includes('chapter ' + searchQuery.toLowerCase());
+      return chapter.chapter.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [data.chapters, searchQuery]);
 
@@ -113,6 +104,57 @@ export default function ComicsDetail(props: Props) {
     } else return undefined;
   }, [historyListsJson, data.title]);
 
+  const readComic = useCallback(
+    (url: string, fromHistory?: HistoryJSON) => {
+      let link = url;
+      const currentScraper = [Comics1Alias, Comics2Alias, KomikuAlias].find(alias =>
+        link.includes(alias),
+      );
+      const isSameScraper = props.route.params.link.includes(currentScraper ?? '');
+      if (!isSameScraper) {
+        const lastReadedData =
+          lastReaded &&
+          lastReaded.episode &&
+          data.chapters.find(item => {
+            return (
+              item.chapter
+                .toLowerCase()
+                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+                .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
+                .replace('chapter ', '')
+                .trim() ===
+              lastReaded?.episode
+                ?.toLowerCase()
+                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+                .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
+                .replace('chapter ', '')
+                .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
+                .trim()
+            );
+          });
+        if (
+          typeof lastReadedData === 'object' &&
+          lastReadedData !== null &&
+          'chapter' in lastReadedData
+        ) {
+          link = lastReadedData.chapterUrl;
+        }
+      }
+      props.navigation.navigate('FromUrl', {
+        title: props.route.params.data.title,
+        link,
+        type: 'comics',
+        historyData: fromHistory
+          ? {
+              lastDuration: fromHistory.lastDuration ?? 0,
+              resolution: fromHistory.resolution ?? '',
+            }
+          : undefined,
+      });
+    },
+    [data, lastReaded, props.navigation, props.route.params.data.title, props.route.params.link],
+  );
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ReanimatedFlashList
@@ -128,27 +170,47 @@ export default function ComicsDetail(props: Props) {
         )}
         renderItem={({ item }) => {
           if (!item) return null;
-          const isLastReaded =
+          let isLastReaded =
             lastReaded &&
             lastReaded.episode &&
-            item.chapter.toLowerCase().replace('chapter ', '') ===
-              lastReaded.episode.toLowerCase().replace('chapter 0', '').replace('chapter ', '');
+            item.chapter
+              .toLowerCase()
+              .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+              .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
+              .replace('chapter ', '')
+              .trim() ===
+              lastReaded.episode
+                .toLowerCase()
+                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+                .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
+                .replace('chapter ', '')
+                .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
+                .trim();
+          if (!isLastReaded) {
+            lastReaded?.link === item.chapterUrl && (isLastReaded = true);
+          }
           return (
             <TouchableOpacity
               style={styles.chapterItem}
               onPress={() => readComic(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
               <View style={styles.chapterTitleContainer}>
-                <Text style={[globalStyles.text, styles.chapterText]}>{item.chapter}</Text>
+                <Text style={[globalStyles.text, styles.chapterText]}>
+                  {item.chapter.includes('Chapter') ? item.chapter : `Chapter ${item.chapter}`}
+                </Text>
               </View>
               <View style={styles.chapterDetailsContainer}>
-                <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                  <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
-                  {item.releaseDate}
-                </Text>
-                <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                  <Icon color={styles.chapterDetailText.color} name="eye" size={12} /> {item.views}x
-                  dilihat
-                </Text>
+                {'releaseDate' in item && (
+                  <>
+                    <Text style={[globalStyles.text, styles.chapterDetailText]}>
+                      <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
+                      {item.releaseDate}
+                    </Text>
+                    <Text style={[globalStyles.text, styles.chapterDetailText]}>
+                      <Icon color={styles.chapterDetailText.color} name="eye" size={12} />{' '}
+                      {item.views}x dilihat
+                    </Text>
+                  </>
+                )}
                 {isLastReaded && (
                   <Text
                     style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
@@ -171,10 +233,26 @@ export default function ComicsDetail(props: Props) {
         ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
         ListHeaderComponent={
           <>
-            <ReanimatedImage
-              style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
-              source={{ uri: data.headerImageUrl }}
-            />
+            {'headerImageUrl' in data ? (
+              <ReanimatedImage
+                style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
+                source={{ uri: data.headerImageUrl }}
+              />
+            ) : (
+              <Reanimated.View
+                style={[
+                  { width: '100%', height: IMG_HEIGHT },
+                  imageStyle,
+                  { backgroundColor: theme.colors.elevation.level2 },
+                ]}>
+                <Icon
+                  color={theme.colors.onBackground}
+                  name="book"
+                  size={64}
+                  style={{ alignSelf: 'center', marginTop: 60 }}
+                />
+              </Reanimated.View>
+            )}
             <LinearGradient
               colors={['transparent', 'black']}
               style={{
@@ -214,10 +292,12 @@ export default function ComicsDetail(props: Props) {
               </View>
               <View style={styles.infoContainer}>
                 <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
-                <Text style={[globalStyles.text, styles.title, styles.indonesianTitle]}>
-                  {data.indonesianTitle}
+                <Text
+                  style={[globalStyles.text, styles.title, styles.indonesianTitle]}
+                  numberOfLines={4}>
+                  {'indonesianTitle' in data ? data.indonesianTitle : data.altTitle}
                 </Text>
-                <Text style={[globalStyles.text, styles.author]}>By {data.author}</Text>
+                <Text style={[globalStyles.text, styles.author]}>By {data.author || '-'}</Text>
                 <View style={styles.genreContainer}>
                   {data.genres.map(z => {
                     return (
@@ -237,30 +317,44 @@ export default function ComicsDetail(props: Props) {
                   })}
                 </View>
               </View>
+            </View>
+            <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
               <View style={styles.secondaryInfoContainer}>
                 <View style={styles.additionalInfo}>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="check-circle" />{' '}
-                      {data.minAge}
-                    </Text>
-                  </Surface>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
-                      {data.readingDirection}
-                    </Text>
-                  </Surface>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="tag" /> {data.concept}
-                    </Text>
-                  </Surface>
+                  {'indonesianTitle' in data ? (
+                    <>
+                      <Surface style={styles.additionalInfoTextSurface}>
+                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                          <Icon color={styles.additionalInfoText.color} name="check-circle" />{' '}
+                          {data.minAge}
+                        </Text>
+                      </Surface>
+                      <Surface style={styles.additionalInfoTextSurface}>
+                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                          <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
+                          {data.readingDirection}
+                        </Text>
+                      </Surface>
+                      <Surface style={styles.additionalInfoTextSurface}>
+                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                          <Icon color={styles.additionalInfoText.color} name="tag" /> {data.concept}
+                        </Text>
+                      </Surface>
+                    </>
+                  ) : undefined}
+                  {'releaseYear' in data && (
+                    <Surface style={[styles.additionalInfoTextSurface, { marginTop: 10 }]}>
+                      <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                        <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
+                        {data.releaseYear}
+                      </Text>
+                    </Surface>
+                  )}
                 </View>
 
                 <Text style={[globalStyles.text]}>{data.synopsis}</Text>
               </View>
-              <View style={{ flexDirection: 'column', flex: 1 }}>
+              <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
                 <Button
                   buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                   textColor={styles.additionalInfoText.color}
@@ -272,11 +366,17 @@ export default function ComicsDetail(props: Props) {
                       ToastAndroid.show('Data chapter tidak ditemukan', ToastAndroid.SHORT);
                       return;
                     }
+                    const lastData = data.chapters[data.chapters.length - 1];
                     const watchLaterJson: watchLaterJSON = {
                       title: data.title,
                       link: props.route.params.link,
                       rating: 'Komik',
-                      releaseYear: data.chapters[data.chapters.length - 1].releaseDate,
+                      releaseYear:
+                        'releaseDate' in lastData
+                          ? lastData.releaseDate
+                          : 'releaseYear' in data
+                            ? (data.releaseYear ?? 'Data tidak tersedia')
+                            : 'Data tidak tersedia',
                       thumbnailUrl: data.thumbnailUrl,
                       genre: data.genres,
                       date: Date.now(),

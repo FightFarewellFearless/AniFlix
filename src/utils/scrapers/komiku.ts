@@ -3,7 +3,8 @@ import he from 'he';
 import { ToastAndroid } from 'react-native';
 import deviceUserAgent from '../deviceUserAgent';
 
-const DOMAIN = 'komiku.org';
+export const __ALIAS = 'komiku';
+const DOMAIN = __ALIAS + '.org';
 const BASE_URL = `https://${DOMAIN}`;
 const API_URL = `https://api.${DOMAIN}`;
 

@@ -40,7 +40,6 @@ type RecyclerViewType = (
     ref?: React.Ref<FlashListRef<MovieEpisode>>;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
@@ -50,6 +49,7 @@ const IMG_HEADER_HEIGHT = 250;
 function MovieDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -101,11 +101,20 @@ function MovieDetail(props: Props) {
 
     return (
       <View style={styles.mainContainer}>
-        <ReanimatedImage
-          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-          source={{ uri: data.thumbnailUrl }}
-          contentFit="cover"
-        />
+        <Reanimated.View
+          style={[
+            { width: '100%', height: IMG_HEADER_HEIGHT },
+            headerImageStyle,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Icon color={theme.colors.onBackground} name="film" size={64} />
+          </View>
+        </Reanimated.View>
 
         <LinearGradient
           colors={['transparent', 'black']}
@@ -124,11 +133,7 @@ function MovieDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
-              source={{ uri: data.thumbnailUrl }}
-              style={styles.thumbnail}
-              contentFit="contain"
-            />
+            <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} contentFit="fill" />
             <Surface
               style={{
                 backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
@@ -344,6 +349,8 @@ function MovieDetail(props: Props) {
     styles.chapterButtonsContainer,
     styles.genre,
     headerImageStyle,
+    theme.colors.elevation.level2,
+    theme.colors.onBackground,
     colorScheme,
     globalStyles.text,
     isInList,

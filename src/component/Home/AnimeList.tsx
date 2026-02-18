@@ -56,8 +56,8 @@ import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '.
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
 import { FilmHomePage, getFeatured, getLatest } from '../../utils/scrapers/film';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scrapers/komiku';
 import { Github, JoinDiscord } from '../Loading Screen/Connect';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
@@ -419,12 +419,11 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
         .catch(() => setIsError(true));
     });
   }, [setData]);
-
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Film Terbaru</Text>
-<TouchableOpacity
+        <TouchableOpacity
           style={styles.seeMoreButton}
           onPress={() => {
             props.navigation.dispatch(StackActions.push('SeeMore', { type: 'FilmList' }));
@@ -629,7 +628,7 @@ function ComicListUNMEMO() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      getLatestKomikuReleases()
+      getLatestComicsReleases()
         .then(z => {
           setData?.(z);
         })
@@ -641,7 +640,7 @@ function ComicListUNMEMO() {
   }, [setData]);
 
   const renderComics = useCallback(
-    ({ item }: ListRenderItemInfo<LatestKomikuRelease>) => (
+    ({ item }: ListRenderItemInfo<LatestComicsRelease>) => (
       <ListAnimeComponent
         gap
         newAnimeData={item}
@@ -683,7 +682,7 @@ function ComicListUNMEMO() {
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 3 }}
           horizontal
-          data={data.slice(0, 10)}
+          data={data.slice(0, 24)}
           renderItem={renderComics}
           keyExtractor={z => z.title}
           extraData={styles}
