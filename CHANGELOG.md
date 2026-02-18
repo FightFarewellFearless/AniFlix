@@ -1,4 +1,5 @@
-# v1.1.4_JS-12 (18-Februari-2026)
+# v1.1.4_JS-12_RE (18-Februari-2026)
+(Versi rilis ulang dari JS-12, perbaikan bug pada download anime)
 Update yang cukup besar pada beberapa fitur aplikasi termasuk kemampuan mengganti resolusi film, download komik, dukungan untuk lebih banyak komik, dll...
 Tolong laporkan setiap bug atau error ke server discord agar diperbaiki secepatnya
 ## Ditambahkan
@@ -8,6 +9,7 @@ Tolong laporkan setiap bug atau error ke server discord agar diperbaiki secepatn
 - Menambahkan opsi untuk mengganti resolusi streaming film
 ## Diperbaiki
 - Resolusi "pixel" pada anime movie
+- Konflik nama file ketika download anime
 ### Dan beberapa perubahan lainnya...
 # v1.1.4_JS-11 (11-Februari-2026)
 ## Ditambahkan
