@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, View } from 'react-native';
+import { AppState, Linking, ToastAndroid, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import {
   Appbar,
@@ -18,9 +18,9 @@ import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
 import DialogManager from '../../utils/dialogManager';
 import setHistory from '../../utils/historyControl';
+import { BASE_URL } from '../../utils/scrapers/comics1';
 import { getComicsReading } from '../../utils/scrapers/comicsv2';
 import { getKomikuReading } from '../../utils/scrapers/komiku';
-import { BASE_URL } from '../../utils/scrapers/comics1';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
 
@@ -81,7 +81,34 @@ export default function ComicsReading(props: Props) {
       } else return false;
     }, [isFullscreen]),
   );
-
+  const comicsDownloadLoading = useRef(false);
+  const startComicsDownload = useCallback(() => {
+    if (comicsDownloadLoading.current) return;
+    comicsDownloadLoading.current = true;
+    fetch('https://vortexdownloader.rwbcode.com/api/requestComicsDownloadId', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: props.route.params.data.title + ' - ' + props.route.params.data.chapter,
+        comicImages: props.route.params.data.comicImages,
+      }),
+    })
+      .then(res => res.json())
+      .then(res => {
+        Linking.openURL(`https://vortexdownloader.rwbcode.com/api/getComicsDownload/${res.id}`);
+      })
+      .finally(() => {
+        comicsDownloadLoading.current = false;
+      })
+      .catch(err => {
+        DialogManager.alert('Gagal memulai unduhan', err.message);
+      });
+    ToastAndroid.show('Menyiapkan unduhan...', ToastAndroid.SHORT);
+  }, [
+    props.route.params.data.chapter,
+    props.route.params.data.comicImages,
+    props.route.params.data.title,
+  ]);
   useEffect(() => {
     props.navigation.setOptions({
       headerTitle: props.route.params.link.includes('softkomik')
@@ -105,6 +132,7 @@ export default function ComicsReading(props: Props) {
                 : ''
             }
           />
+          <Appbar.Action icon={'download'} onPress={startComicsDownload} />
           <Appbar.Action
             icon={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
             onPress={() => {
@@ -114,7 +142,15 @@ export default function ComicsReading(props: Props) {
         </Appbar.Header>
       ),
     });
-  }, [isFullscreen, props.navigation, props.route.params.data.chapter, props.route.params.link]);
+  }, [
+    isFullscreen,
+    props.navigation,
+    props.route.params.data.chapter,
+    props.route.params.data.comicImages,
+    props.route.params.data.title,
+    props.route.params.link,
+    startComicsDownload,
+  ]);
 
   // --- Fetch Logic ---
 
