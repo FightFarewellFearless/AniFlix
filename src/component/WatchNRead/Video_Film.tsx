@@ -1,3 +1,4 @@
+import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { Buffer } from 'buffer/';
 import { VideoView } from 'expo-video';
@@ -63,12 +64,14 @@ function Video_Film(props: Props) {
   const historyData = useRef(props.route.params.historyData);
 
   const [batteryLevel, setBatteryLevel] = useState(0);
-  // const [showBatteryLevel, setShowBatteryLevel] = useState(false);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
   const [batteryTimeEnable, setBatteryTimeEnable] = useState(false);
+
+  const [currentStreamUrl, setCurrentStreamUrl] = useState(props.route.params.data.streamingLink);
+  const dropdownResolutionRef = useRef<IDropdownRef>(null);
 
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
@@ -117,6 +120,7 @@ function Video_Film(props: Props) {
   });
 
   const enterFullscreen = useCallback((landscape?: OrientationType) => {
+    dropdownResolutionRef.current?.close();
     if (landscape === undefined) {
       Orientation.lockToLandscape();
     } else {
@@ -273,6 +277,7 @@ function Video_Film(props: Props) {
         );
       } else {
         setData(result);
+        setCurrentStreamUrl(result.streamingLink);
         setHistory(result, dataLink, undefined, undefined, true);
       }
       setLoading(false);
@@ -299,6 +304,9 @@ function Video_Film(props: Props) {
     }
     if (videoRef.current && videoRef.current.props.player) {
       playerRef.current?.skipTo(historyData.current.lastDuration);
+      if (!isPaused) {
+        videoRef.current.props.player.play();
+      }
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
 
@@ -306,7 +314,7 @@ function Video_Film(props: Props) {
     // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
     // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
     // `)
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     if (isPaused) {
@@ -384,8 +392,7 @@ function Video_Film(props: Props) {
     if (!isInfoPressed.current) {
       infoContainerHeight.set(initialInfoContainerHeight.current!);
 
-      /* 
-      wait for the next event loop,
+      /* wait for the next event loop,
       make sure the infoContainerHeight is set to initialInfoContainerHeight before starting animation.
       This is to prevent jumping animation in react-native-reanimated
       */
@@ -451,6 +458,20 @@ function Video_Film(props: Props) {
     });
   }, [data.streamingLink, data.subtitleLink, data.title]);
 
+  const resolutionDropdownData = useMemo(() => {
+    const list = [];
+    list.push({ label: 'Auto', value: data.streamingLink });
+    if (data.variants && data.variants.length > 0) {
+      data.variants.forEach(v => {
+        list.push({
+          label: v.name || v.resolution,
+          value: v.url,
+        });
+      });
+    }
+    return list;
+  }, [data.streamingLink, data.variants]);
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -472,7 +493,8 @@ function Video_Film(props: Props) {
           // key={data.streamingLink}
           title={data.title}
           thumbnailURL={data.thumbnailUrl}
-          streamingURL={data.streamingLink}
+          streamingURL={currentStreamUrl}
+          isHls={true}
           subtitleURL={data.subtitleLink}
           style={{ flex: 1, zIndex: 1 }}
           videoRef={videoRef}
@@ -485,8 +507,7 @@ function Video_Film(props: Props) {
         />
       </View>
       {/* END OF VIDEO ELEMENT */}
-      {/* 
-        mengecek apakah sedang dalam keadaan fullscreen atau tidak
+      {/* mengecek apakah sedang dalam keadaan fullscreen atau tidak
         jika ya, maka hanya menampilkan video saja 
        */}
       <ScrollView
@@ -607,6 +628,40 @@ function Video_Film(props: Props) {
             </View>
           </View>
         )}
+
+        <View style={[styles.container, { marginTop: 5 }]}>
+          <Text style={[globalStyles.text, { marginBottom: 5, fontWeight: 'bold' }]}>Resolusi</Text>
+          <TouchableOpacity
+            onPress={() => {
+              dropdownResolutionRef.current?.open();
+            }}>
+            <View pointerEvents="box-only">
+              <Dropdown
+                ref={dropdownResolutionRef}
+                value={currentStreamUrl}
+                placeholder="Pilih resolusi"
+                data={resolutionDropdownData}
+                valueField="value"
+                labelField="label"
+                onChange={item => {
+                  firstTimeLoad.current = true;
+                  setCurrentStreamUrl(item.value);
+                  ToastAndroid.show(`Resolusi diubah ke ${item.label}`, ToastAndroid.SHORT);
+                }}
+                style={styles.dropdownStyle}
+                containerStyle={styles.dropdownContainerStyle}
+                itemTextStyle={styles.dropdownItemTextStyle}
+                itemContainerStyle={styles.dropdownItemContainerStyle}
+                activeColor="#16687c"
+                selectedTextStyle={styles.dropdownSelectedTextStyle}
+                placeholderStyle={{ color: globalStyles.text.color }}
+                autoScroll
+                dropdownPosition="top"
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+
         <Button
           mode="contained-tonal"
           icon={'link'}

@@ -17,6 +17,13 @@ type SearchResult = Array<
   }
 >;
 
+type HlsVariant = {
+  bw: number;
+  resolution: string;
+  name: string;
+  url: string;
+};
+
 const CryptoJSAesJson = {
   encrypt: function (value: Object, password: string) {
     return CryptoJS.AES.encrypt(JSON.stringify(value), password, {
@@ -65,6 +72,33 @@ function reconstructKey(rawKey: string, embedUrl: string) {
     }
   }
   return n;
+}
+
+function resolveMasterPlaylist(content: string, masterUrl: string): HlsVariant[] {
+  if (!content.includes('#EXT-X-STREAM-INF')) return [];
+  const lines = content.split('\n');
+  const variants: HlsVariant[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes('#EXT-X-STREAM-INF')) {
+      const bw = (lines[i].match(/BANDWIDTH=(\d+)/) || [0, '0'])[1];
+      const res = (lines[i].match(/RESOLUTION=(\d+x\d+)/) || [0, 'Unknown'])[1];
+      const name = (lines[i].match(/NAME="([^"]+)"/) || [0, res !== 'Unknown' ? res : 'Auto'])[1];
+      let j = i + 1;
+      while (j < lines.length && (lines[j].trim() === '' || lines[j].trim().startsWith('#'))) j++;
+      if (j < lines.length) {
+        const u = lines[j].trim();
+        const fullUrl = u.startsWith('http') ? u : new URL(u, masterUrl).toString();
+        variants.push({
+          bw: parseInt(bw),
+          resolution: res,
+          name: name,
+          url: fullUrl,
+        });
+      }
+    }
+  }
+  variants.sort((a, b) => b.bw - a.bw);
+  return variants;
 }
 
 export const FILM_BASE_URL = 'https://tv12.idlixku.com';
@@ -318,6 +352,7 @@ type FilmDetail_Stream = {
   thumbnailUrl: string;
   next?: string;
   prev?: string;
+  variants?: HlsVariant[];
 };
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<FilmDetails> {
@@ -349,6 +384,13 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       const streamingData = await decryptHtml($.html(), filmUrl, signal).then(z =>
         jeniusPlayGetHLS(z, signal),
       );
+
+      let variants: HlsVariant[] = [];
+      try {
+        const manifestContent = await fetchPage(streamingData.securedLink, { signal });
+        variants = resolveMasterPlaylist(manifestContent, streamingData.securedLink);
+      } catch (e) {}
+
       const title = $('div.data > h1').text().trim();
       const thumbnailUrl = $('div.poster > img').attr('src')!;
       const releaseDate = $('.extra span.date').text().trim();
@@ -367,11 +409,19 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
         rating,
         genres,
         synopsis,
+        variants,
       };
     } else {
       const streamingData = await decryptHtml($.html(), filmUrl, signal).then(z =>
         jeniusPlayGetHLS(z, signal),
       );
+
+      let variants: HlsVariant[] = [];
+      try {
+        const manifestContent = await fetchPage(streamingData.securedLink, { signal });
+        variants = resolveMasterPlaylist(manifestContent, streamingData.securedLink);
+      } catch (e) {}
+
       const episodeLink = $('span:contains("ALL")').parent().attr('href')!;
       const episodeHtml = await fetchPage(episodeLink, { signal });
       const episodeInfo = getFilmInfo(cheerio.load(episodeHtml, { xmlMode: true }));
@@ -397,6 +447,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
         synopsis,
         next: next === '#' ? undefined : next,
         prev: prev === '#' ? undefined : prev,
+        variants,
       };
     }
   }
@@ -411,5 +462,6 @@ export type {
   FilmHomePage,
   FilmInfo,
   FilmSeason,
+  HlsVariant,
   SearchResult,
 };

@@ -63,6 +63,7 @@ type VideoPlayerProps = {
   onDurationChange?: (positionSecond: number) => void;
   headers?: Record<string, string>;
   batteryAndClock?: React.JSX.Element;
+  isHls?: boolean;
 };
 
 const ICON_SIZE = 45;
@@ -84,6 +85,7 @@ function VideoPlayer({
   onDurationChange,
   headers,
   batteryAndClock,
+  isHls = false,
 }: VideoPlayerProps) {
   useKeepAwake();
 
@@ -97,6 +99,7 @@ function VideoPlayer({
 
   const player = useVideoPlayer(
     {
+      contentType: isHls ? 'hls' : 'auto',
       uri: streamingURL,
       metadata: {
         title,
