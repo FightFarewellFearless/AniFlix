@@ -439,15 +439,22 @@ async function getMP4rawData(mp4data: string, signal?: AbortSignal) {
   return (await response.text()).split('src: "')[1].split('"')[0];
 }
 async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: AbortSignal) {
-  const url = cheerio
+  const link = cheerio
     .load(Buffer.from(pixelorpompomdata, 'base64').toString('utf8'))('iframe')
     .attr('src')!;
+  const hasUrlQuery = new URL(link).searchParams.has('url');
+  const url = hasUrlQuery ? decodeURIComponent(new URL(link).searchParams.get('url')!) : link;
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
   });
+  if (url.includes('pixel')) {
+    const text = await response.text();
+    const $ = cheerio.load(text, { xmlMode: true });
+    return $('meta[property="og:video:secure_url"]').attr('content')!;
+  }
   return cheerio
-    .load(await response.text())('source')
+    .load(await response.text(), { xmlMode: true })('source')
     .attr('src')!;
 }
 
