@@ -1,3 +1,6 @@
+# v1.1.4_JS-13 (19-Februari-2026)
+## Diperbaiki dan Improvisasi
+- Parser subtitle film, perbaikan untuk format vtt spesifik dan dukungan baris baru
 # v1.1.4_JS-12_RE (18-Februari-2026)
 (Versi rilis ulang dari JS-12, perbaikan bug pada download anime)
 Update yang cukup besar pada beberapa fitur aplikasi termasuk kemampuan mengganti resolusi film, download komik, dukungan untuk lebih banyak komik, dll...
