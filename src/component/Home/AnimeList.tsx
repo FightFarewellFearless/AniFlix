@@ -350,7 +350,7 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Featured Film</Text>
+        <Text style={styles.sectionTitle}>Film Unggulan</Text>
       </View>
 
       {isError && (
