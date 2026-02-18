@@ -699,10 +699,9 @@ function BottomControl({
 }
 
 const RE_BLOCK =
-  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3}).*?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+(?:-->|--&gt;)\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3})[^\n\r]*\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
 const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
 const RE_ASS_NL = /\\N/g;
-const RE_SPACE = /\s+/g;
 const RE_SPLIT = /[:.,]/;
 
 const toSec = (t: string) => {
@@ -726,13 +725,35 @@ export const parseSubtitles = async (raw: string) => {
       RE_BLOCK.lastIndex = 0;
 
       while ((m = RE_BLOCK.exec(raw)) !== null) {
-        const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
+        const rawText = m[3];
+        const lines = rawText.split(/\r?\n/);
 
-        if (txt) {
+        const cleanLines = [];
+
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          line = line.replace(RE_ASS_NL, ' ');
+          line = line.replace(RE_TAGS, '');
+          line = line
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+
+          line = line.trim();
+
+          if (line.length > 0) {
+            cleanLines.push(line);
+          }
+        }
+
+        const finalTxt = cleanLines.join('\n');
+
+        if (finalTxt) {
           res.push({
             startTime: toSec(m[1]),
             endTime: toSec(m[2]),
-            text: txt,
+            text: finalTxt,
           });
         }
       }
