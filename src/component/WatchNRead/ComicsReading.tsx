@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Linking, ToastAndroid, View } from 'react-native';
+import { AppState, Linking, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import {
   Appbar,
@@ -44,6 +44,9 @@ export default function ComicsReading(props: Props) {
       abortController.current?.abort();
     };
   }, []);
+
+  const [isSnackBarOpen, setIsSnackBarOpen] = useState(false);
+  const [snackBarText, setSnackBarText] = useState('');
 
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
@@ -92,18 +95,22 @@ export default function ComicsReading(props: Props) {
         name: props.route.params.data.title + ' - ' + props.route.params.data.chapter,
         comicImages: props.route.params.data.comicImages,
       }),
+      signal: abortController.current?.signal,
     })
       .then(res => res.json())
       .then(res => {
         Linking.openURL(`https://vortexdownloader.rwbcode.com/api/getComicsDownload/${res.id}`);
       })
       .finally(() => {
+        setIsSnackBarOpen(false);
         comicsDownloadLoading.current = false;
       })
       .catch(err => {
+        if (err.name === 'AbortError') return;
         DialogManager.alert('Gagal memulai unduhan', err.message);
       });
-    ToastAndroid.show('Menyiapkan unduhan...', ToastAndroid.SHORT);
+    setSnackBarText('Menyiapkan unduhan...');
+    setIsSnackBarOpen(true);
   }, [
     props.route.params.data.chapter,
     props.route.params.data.comicImages,
@@ -249,14 +256,13 @@ export default function ComicsReading(props: Props) {
       return newSpeed;
     });
   };
-
-  const [moveChapterLoading, setMoveChapterLoading] = useState(false);
   const moveChapter = useCallback(
     (url: string) => {
-      if (moveChapterLoading) return;
+      if (isSnackBarOpen) return;
       if (isAutoScrolling) toggleAutoScroll();
 
-      setMoveChapterLoading(true);
+      setSnackBarText('Mengambil data...');
+      setIsSnackBarOpen(true);
       (url.includes('komikindo') || url.includes('softkomik')
         ? getComicsReading
         : getKomikuReading)(url, abortController.current?.signal)
@@ -274,9 +280,9 @@ export default function ComicsReading(props: Props) {
           if (err.name === 'AbortError') return;
           DialogManager.alert('Gagal mengambil data', err.message);
         })
-        .finally(() => setMoveChapterLoading(false));
+        .finally(() => setIsSnackBarOpen(false));
     },
-    [moveChapterLoading, isAutoScrolling, toggleAutoScroll, props.navigation],
+    [isSnackBarOpen, isAutoScrolling, toggleAutoScroll, props.navigation],
   );
 
   const { data } = props.route.params;
@@ -616,8 +622,8 @@ export default function ComicsReading(props: Props) {
       <Portal>
         <Snackbar
           duration={Infinity}
-          onDismiss={() => setMoveChapterLoading(false)}
-          visible={moveChapterLoading}
+          onDismiss={() => setIsSnackBarOpen(false)}
+          visible={isSnackBarOpen}
           action={{
             label: 'Batal',
             onPress: () => {
@@ -625,7 +631,7 @@ export default function ComicsReading(props: Props) {
               abortController.current = new AbortController();
             },
           }}>
-          Mengambil data...
+          {snackBarText}
         </Snackbar>
       </Portal>
 
