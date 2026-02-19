@@ -611,7 +611,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
       <View style={styles.sectionHeaderContainer}>
         <View style={styles.sectionHeaderLine} />
         <Text style={[globalStyles.text, styles.sectionHeaderText]}>
-          <Icon name="globe" size={14} /> {z.title.toUpperCase()}
+          <Icon name="globe" size={14} color={theme.colors.secondary} /> {z.title.toUpperCase()}
         </Text>
         <View style={styles.sectionHeaderLine} />
       </View>
