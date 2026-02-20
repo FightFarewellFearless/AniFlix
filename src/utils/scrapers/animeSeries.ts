@@ -237,7 +237,7 @@ const fromUrl = async (
     let streamingLink = await getStreamLink(
       aniDetail.find('div.responsive-embed-stream > iframe').attr('src'),
       signal,
-    );
+    ).catch(() => undefined);
     const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
 
     const thumbnailUrl = $('div.cukder > img').attr('src')!;
