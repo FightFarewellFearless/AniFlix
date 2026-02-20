@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import type { Cheerio } from 'cheerio';
 import cheerio, { Element } from 'cheerio';
-import URL from 'url';
 import {
   AniDetail,
   AniDetailEpsList,
@@ -139,7 +138,7 @@ const fromUrl = async (
   detailOnly = false,
   signal?: AbortSignal,
 ): Promise<AniStreaming | AniDetail | undefined> => {
-  const withoutDomain = URL.parse(url);
+  const withoutDomain = new URL(url);
   // to make sure only request with latest domain available
   url = withoutDomain.protocol + '//' + BASE.domain + withoutDomain.pathname;
   let err = false;
@@ -449,7 +448,53 @@ async function getBloggerVideo(url: string) {
       'User-Agent': deviceUserAgent,
     },
   });
-  return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+  try {
+    return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+  } catch {
+    try {
+      const token = new URL(url).searchParams.get('token');
+      const f_sid = data.data.split('FdrFJe":"')[1].split('"')[0];
+      const bl = data.data.split('cfb2h":"')[1].split('"')[0];
+      const response = await fetch(
+        `https://www.blogger.com/_/BloggerVideoPlayerUi/data/batchexecute?rpcids=WcwnYd&source-path=%2Fvideo.g&f.sid=${f_sid}&bl=${bl}&hl=en-US&_reqid=46654&rt=c`,
+        {
+          headers: {
+            accept: '*/*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            priority: 'u=1, i',
+            'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
+            'sec-ch-ua-arch': '"x86"',
+            'sec-ch-ua-bitness': '"64"',
+            'sec-ch-ua-form-factors': '"Desktop"',
+            'sec-ch-ua-full-version': '"145.0.7632.75"',
+            'sec-ch-ua-full-version-list':
+              '"Not:A-Brand";v="99.0.0.0", "Google Chrome";v="145.0.7632.75", "Chromium";v="145.0.7632.75"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-ch-ua-platform-version': '""',
+            'sec-ch-ua-wow64': '?0',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'User-Agent': deviceUserAgent,
+            'x-same-domain': '1',
+            Referer: 'https://www.blogger.com/',
+          },
+          body: `f.req=%5B%5B%5B%22WcwnYd%22%2C%22%5B%5C%22${token}%5C%22%2C%5C%22%5C%22%2C0%5D%22%2Cnull%2C%22generic%22%5D%5D%5D&`,
+          method: 'POST',
+        },
+      );
+      return await response.text().then(res => {
+        const encodedLink = res.split('https://')[1].split('\\",[')[0].replace(/\\\\/g, '\\');
+        const link = JSON.parse(`"https://${encodedLink}"`);
+        return link;
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
 }
 
 const listAnime = async (
