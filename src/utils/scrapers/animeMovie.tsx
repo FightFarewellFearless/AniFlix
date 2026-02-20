@@ -496,7 +496,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
         setIsWebViewShown(false);
         onAnimeMovieReady();
         ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
-      }, 10_000);
+      }, 15_000);
       return () => {
         clearTimeout(timeout);
       };
