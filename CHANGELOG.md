@@ -1,3 +1,12 @@
+# v1.1.4_JS-14 (20-Februari-2026)
+## Diperbaiki
+- Error yang terkadang muncul pada anime series
+- Error pada beberapa komik yang tidak memiliki sinopsis
+- Posisi indikator loading gambar pada beranda
+- Warna ikon pencarian komik
+## Perubahan
+- Meningkatkan waktu timeout insialisasi movie
+- Mengganti "Menyiapkan download" komik menggunakan komponen SnackBar
 # v1.1.4_JS-13 (19-Februari-2026)
 ## Diperbaiki dan Improvisasi
 - Parser subtitle film, perbaikan untuk format vtt spesifik dan dukungan baris baru
