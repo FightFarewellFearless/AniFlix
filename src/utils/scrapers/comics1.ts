@@ -64,7 +64,7 @@ export async function getLatestComicsReleases1(
   const json: LatestReleaseJSON[] = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps
     .data.data;
   return json.map(x => {
-    const title = he.decode(x.title);
+    const title = he.decode(x.title ?? '');
     const thumbnailUrl = `${IMAGE_COVER_BASE_URL}/${x.gambar}`;
     const detailUrl = `${BASE_URL}/${x.title_slug}`;
     const type = capitalizeFirstLetter(x.type);
@@ -155,8 +155,8 @@ export async function getComicsDetailFromUrl1(
   const thumbnailUrl = compressedImageUrl(`${IMAGE_COVER_BASE_URL}/${json.gambar}`);
   // const headerImageUrl = IMAGE_COVER_BASE_URL + '/' + json.gambar;
   const genres = json.Genre;
-  const synopsis = he.decode(json.sinopsis);
-  const title = he.decode(json.title);
+  const synopsis = he.decode(json.sinopsis ?? 'Sinopsis tidak tersedia');
+  const title = he.decode(json.title ?? '');
   const altTitle = json.title_alt;
   const type = capitalizeFirstLetter(json.type) as ComicsDetail1['type'];
   const author = json.author;
@@ -315,7 +315,7 @@ export async function comicsSearch1(query: string, signal?: AbortSignal): Promis
   const json: SearchRawData[] = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps.data
     .data;
   return json.map(x => {
-    const title = he.decode(x.title);
+    const title = he.decode(x.title ?? '');
     const thumbnailUrl = compressedImageUrl(`${IMAGE_COVER_BASE_URL}/${x.gambar}`);
     const detailUrl = `${BASE_URL}/${x.title_slug}`;
     const type = capitalizeFirstLetter(x.type);
