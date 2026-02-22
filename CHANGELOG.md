@@ -1,3 +1,8 @@
+# v1.1.4_JS-15 (22-Februari-2026)
+## Ditambahkan
+- Pro tips ketika hasil pencarian tidak ditemukan
+## Ditingkatkan
+- Sedikit peningkatan UX pada Pencarian
 # v1.1.4_JS-14 (20-Februari-2026)
 ## Diperbaiki
 - Error yang terkadang muncul pada anime series
