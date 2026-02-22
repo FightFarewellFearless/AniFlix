@@ -34,6 +34,7 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
+import proTips from '../../assets/proTips.json';
 import useGlobalStyles from '../../assets/style';
 import { SearchAnime, listAnimeTypeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
@@ -72,6 +73,7 @@ function Search(props: Props) {
   const theme = useTheme();
 
   const [searchType, setSearchType] = useState<'anime' | 'comics' | 'film'>('anime');
+  const [searchedSearchType, setSearchedSearchType] = useState(searchType);
   const textInputRef = useRef<TextInputType>(null);
 
   const isFocus = useRef(true);
@@ -191,6 +193,7 @@ function Search(props: Props) {
           setData(animeResult);
         })
         .finally(() => {
+          setSearchedSearchType(searchType);
           if (searchHistory.includes(searchText)) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
           }
@@ -209,6 +212,7 @@ function Search(props: Props) {
         })
         .catch(handleError)
         .finally(() => {
+          setSearchedSearchType(searchType);
           if (searchHistory.includes(searchText)) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
           }
@@ -260,6 +264,7 @@ function Search(props: Props) {
         })
         .catch(handleError)
         .finally(() => {
+          setSearchedSearchType(searchType);
           if (searchHistory.includes(searchText)) {
             searchHistory.splice(searchHistory.indexOf(searchText), 1);
           }
@@ -496,6 +501,32 @@ function Search(props: Props) {
               (data?.result?.length ?? 0) > 0 &&
               '\n(Movie di tempatkan di urutan atas)'}
           </Text>
+
+          {isSearchEmpty && (
+            <Reanimated.View entering={FadeInUp} style={styles.center}>
+              <View style={styles.emptyStateContainer}>
+                <Icon
+                  name="search-minus"
+                  size={60}
+                  color={theme.colors.outline}
+                  style={{ marginBottom: 15 }}
+                />
+                <Text style={[globalStyles.text, styles.emptyStateTitle]}>
+                  Hasil tidak ditemukan
+                </Text>
+                <Text style={[globalStyles.text, styles.emptyStateSubtitle]}>
+                  Tekan tombol di bawah untuk melihat daftar anime terbaru.
+                </Text>
+                <View style={{ alignItems: 'flex-start' }}>
+                  {proTips[searchedSearchType].map(proTip => (
+                    <Text style={[globalStyles.text, styles.proTip]} key={proTip}>
+                      <Icon name="lightbulb-o" size={12} color={theme.colors.primary} /> {proTip}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            </Reanimated.View>
+          )}
 
           {hasSearchResults && (
             <FlashList
@@ -915,6 +946,12 @@ function useStyles() {
           textAlign: 'center',
           opacity: 0.6,
           marginBottom: 24,
+        },
+        proTip: {
+          fontSize: 13,
+          fontStyle: 'italic',
+          opacity: 0.8,
+          marginBottom: 4,
         },
         loadButton: {
           flexDirection: 'row',
