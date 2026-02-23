@@ -1,3 +1,7 @@
+# v1.1.4_JS-16 (24-Februari-2026)
+## Diperbaiki
+- Error komik
+- Posisi SnackBar pada pencarian
 # v1.1.4_JS-15 (22-Februari-2026)
 ## Ditambahkan
 - Pro tips ketika hasil pencarian tidak ditemukan
