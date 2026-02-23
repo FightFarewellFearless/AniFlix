@@ -30,6 +30,21 @@ function compressedImageUrl(
   return `${BASE_URL}/_next/image?url=${encodedUrl}&w=${width}&q=${quality}`;
 }
 
+interface Session {
+  token: string;
+  sign: string;
+}
+async function getSession(signal?: AbortSignal): Promise<Session> {
+  const response = await fetch(`${BASE_URL}/api/session`, {
+    headers: { 'User-Agent': deviceUserAgent },
+    signal,
+  });
+  const data: Session = await response.json();
+  const sessionToken = data.token;
+  const sessionSign = data.sign;
+  return { token: sessionToken, sign: sessionSign };
+}
+
 export interface LatestComicsRelease1 {
   title: string;
   thumbnailUrl: string;
@@ -55,14 +70,22 @@ export async function getLatestComicsReleases1(
   page: number = 1,
   signal?: AbortSignal,
 ): Promise<LatestComicsRelease1[]> {
-  const response = await fetch(`${BASE_URL}/komik/update?page=${page}`, {
-    headers: { 'User-Agent': deviceUserAgent },
+  const session = await getSession(signal);
+  const response = await fetch(`${API_URL}/komik?page=${page}&limit=24&sortBy=new`, {
+    headers: {
+      'User-Agent': deviceUserAgent,
+      Referer: BASE_URL + '/komik/update',
+      Origin: BASE_URL,
+      'X-Token': session.token,
+      'X-Sign': session.sign,
+    },
     signal,
   });
-  const data = await response.text();
-  const $ = cheerio.load(data, { xmlMode: true });
-  const json: LatestReleaseJSON[] = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps
-    .data.data;
+  // const data = await response.text();
+  // const $ = cheerio.load(data, { xmlMode: true });
+  // const json: LatestReleaseJSON[] = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps
+  //   .data.data;
+  const json: LatestReleaseJSON[] = await response.json().then(x => x.data);
   return json.map(x => {
     const title = he.decode(x.title ?? '');
     const thumbnailUrl = `${IMAGE_COVER_BASE_URL}/${x.gambar}`;
@@ -133,18 +156,28 @@ export async function getComicsDetailFromUrl1(
   url: string,
   signal?: AbortSignal,
 ): Promise<ComicsDetail1> {
-  const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
-  const data = await response.text();
-  const $ = cheerio.load(data, {
-    xmlMode: true,
-    decodeEntities: false,
+  const response = await fetch(url, {
+    headers: { 'User-Agent': deviceUserAgent },
+    signal,
   });
-  const json: ComicsDetailRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps
-    .data;
+  const data = await response.text();
+  const buildId = /"buildId":"([^"]+)"/.exec(data)?.[1];
+  if (!buildId) throw new Error('Failed to extract buildId');
+  const titleSlug = new URL(url).pathname;
+  const json = (await fetch(
+    `${BASE_URL}/_next/data/${buildId}${titleSlug}.json?title_slug=${titleSlug.replace(/\//g, '')}`,
+    {
+      headers: { 'User-Agent': deviceUserAgent },
+      signal,
+    },
+  )
+    .then(res => res.json())
+    .then(x => x.pageProps.data)) as ComicsDetailRawJSON;
   const chapterUrl = `${API_URL}/komik/${json.title_slug}/chapter?limit=9999999`;
+  const session = await getSession(signal);
   const chaptersResponse = await fetch(chapterUrl, {
     signal,
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, 'X-Token': session.token, 'X-Sign': session.sign },
   });
   const chaptersData: ChaptersData = await chaptersResponse.json();
   const chapters = chaptersData.chapter.map(chapter => ({
@@ -191,25 +224,31 @@ interface ComicsReadingRawJSON {
   komik: Komik;
   chapter: string;
   data: Data;
-  prevChapter?: PrevChapter[];
-  nextChapter?: PrevChapter[];
+  prevChapter?: CHPT[];
+  nextChapter?: CHPT[];
 }
-interface PrevChapter {
+interface CHPT {
   chapter: string;
 }
 interface Data {
+  _id: string;
   chapter: string;
   imageSrc: string[];
 }
 interface Komik {
   _id: string;
   title: string;
-  title_alt: string;
+  title_alt: null;
   author: string;
   type: string;
   link: string;
   title_slug: string;
   Genre: string[];
+  s: S;
+}
+interface S {
+  tok: string;
+  sig: string;
 }
 export async function getComicsReading1(
   url: string,
@@ -221,13 +260,24 @@ export async function getComicsReading1(
     xmlMode: true,
     decodeEntities: false,
   });
-  const json: ComicsReadingRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps
-    .data;
-  const title = json.komik.title;
-  const chapter = json.chapter;
+  const jsonPage: ComicsReadingRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props
+    .pageProps.data;
+  const jsonApi = await fetch(
+    `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/img/${jsonPage.data._id}`,
+    {
+      headers: {
+        'User-Agent': deviceUserAgent,
+        'X-Token': jsonPage.komik.s.tok,
+        'X-Sign': jsonPage.komik.s.sig,
+      },
+      signal,
+    },
+  ).then(res => res.json());
+  const title = jsonPage.komik.title;
+  const chapter = jsonPage.chapter;
   const thumbnailUrl = compressedImageUrl(
     await (async () => {
-      const baseChapterUrl = `${BASE_URL}/${json.komik.title_slug}`;
+      const baseChapterUrl = `${BASE_URL}/${jsonPage.komik.title_slug}`;
       return (await fetch(baseChapterUrl, { headers: { 'User-Agent': deviceUserAgent }, signal }))
         .text()
         .then(x => {
@@ -240,11 +290,11 @@ export async function getComicsReading1(
   );
   const detectedCdn = await detectCDNImage($, signal);
   const cdn1 = detectedCdn?.[0]?.link;
-  const comicImages = json.data.imageSrc.map((src: string) => {
+  const comicImages = jsonApi.imageSrc.map((src: string) => {
     return (cdn1 ?? `https://image.${DOMAIN}/softkomik`) + '/' + src;
   });
-  const nextChapter = json.nextChapter ? json.nextChapter[0]?.chapter : '';
-  const prevChapter = json.prevChapter ? json.prevChapter[0]?.chapter : '';
+  const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
+  const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';
   return {
     title,
     chapter,
@@ -253,11 +303,11 @@ export async function getComicsReading1(
     nextChapter:
       nextChapter === '' || nextChapter === undefined
         ? undefined
-        : BASE_URL + '/' + json.komik.title_slug + '/chapter/' + nextChapter,
+        : BASE_URL + '/' + jsonPage.komik.title_slug + '/chapter/' + nextChapter,
     prevChapter:
       prevChapter === '' || prevChapter === undefined
         ? undefined
-        : BASE_URL + '/' + json.komik.title_slug + '/chapter/' + prevChapter,
+        : BASE_URL + '/' + jsonPage.komik.title_slug + '/chapter/' + prevChapter,
   };
 }
 
