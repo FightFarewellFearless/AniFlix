@@ -4,15 +4,7 @@ import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navig
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { ImageBackground } from 'expo-image';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState, useTransition } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
@@ -109,17 +101,19 @@ function Search(props: Props) {
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
   const [showSearchHistory, setShowSearchHistory] = useState(false);
 
-  useEffect(() => {
-    if (showSearchHistory) {
-      const backAction = () => {
-        setShowSearchHistory(false);
-        textInputRef.current?.blur();
-        return true;
-      };
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-      return () => backHandler.remove();
-    }
-  }, [showSearchHistory]);
+  useFocusEffect(
+    useCallback(() => {
+      if (showSearchHistory) {
+        const backAction = () => {
+          setShowSearchHistory(false);
+          textInputRef.current?.blur();
+          return true;
+        };
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => backHandler.remove();
+      }
+    }, [showSearchHistory]),
+  );
 
   const searchHistory = useModifiedKeyValueIfFocused(
     'searchHistory',
@@ -628,7 +622,7 @@ function Search(props: Props) {
         </TouchableOpacityAnimated>
       )}
       <Snackbar
-        style={{ zIndex: 2 }}
+        style={{ zIndex: 2, position: 'absolute', bottom: 0, alignSelf: 'center' }}
         visible={loading}
         onDismiss={() => {
           setLoading(false);
