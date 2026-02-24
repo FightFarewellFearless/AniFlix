@@ -1,3 +1,9 @@
+# v1.1.4_JS-17 (25-Februari-2026)
+## Diperbaiki
+- Error pada komik
+## Ditingkatkan
+- Skala animasi histori pencarian
+- Header pada detail anime
 # v1.1.4_JS-16 (24-Februari-2026)
 ## Diperbaiki
 - Error komik
