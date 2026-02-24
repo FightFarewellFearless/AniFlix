@@ -1,7 +1,9 @@
+import { Buffer } from 'buffer/';
 import cheerio, { CheerioAPI } from 'cheerio';
+import CryptoJS from 'crypto-js';
 import he from 'he';
-import deviceUserAgent from '../deviceUserAgent';
 import moment from 'moment';
+import deviceUserAgent from '../deviceUserAgent';
 
 export const __ALIAS = 'softkomik';
 const DOMAIN = __ALIAS + '.com';
@@ -34,15 +36,19 @@ interface Session {
   token: string;
   sign: string;
 }
-async function getSession(signal?: AbortSignal): Promise<Session> {
-  const response = await fetch(`${BASE_URL}/api/session`, {
-    headers: { 'User-Agent': deviceUserAgent },
-    signal,
-  });
-  const data: Session = await response.json();
-  const sessionToken = data.token;
-  const sessionSign = data.sign;
-  return { token: sessionToken, sign: sessionSign };
+function getSession(): Session {
+  //   const response = await fetch(`${API_URL}/api/session`, {
+  //     headers: { 'User-Agent': deviceUserAgent },
+  //     signal,
+  //   });
+  //   const data: Session = await response.json();
+  //   const sessionToken = data.token;
+  //   const sessionSign = data.sign;
+  //   return { token: sessionToken, sign: sessionSign };
+  const e = { exp: Date.now() + 3e5 };
+  const token = Buffer.from(JSON.stringify(e)).toString('base64');
+  const sign = CryptoJS.HmacSHA256(token, 'Bt9kCNItFPPHWCsHjz7LwNB7').toString(CryptoJS.enc.Hex);
+  return { token, sign };
 }
 
 export interface LatestComicsRelease1 {
@@ -70,7 +76,7 @@ export async function getLatestComicsReleases1(
   page: number = 1,
   signal?: AbortSignal,
 ): Promise<LatestComicsRelease1[]> {
-  const session = await getSession(signal);
+  const session = getSession();
   const response = await fetch(`${API_URL}/komik?page=${page}&limit=24&sortBy=new`, {
     headers: {
       'User-Agent': deviceUserAgent,
@@ -174,7 +180,7 @@ export async function getComicsDetailFromUrl1(
     .then(res => res.json())
     .then(x => x.pageProps.data)) as ComicsDetailRawJSON;
   const chapterUrl = `${API_URL}/komik/${json.title_slug}/chapter?limit=9999999`;
-  const session = await getSession(signal);
+  const session = getSession();
   const chaptersResponse = await fetch(chapterUrl, {
     signal,
     headers: { 'User-Agent': deviceUserAgent, 'X-Token': session.token, 'X-Sign': session.sign },
@@ -224,10 +230,10 @@ interface ComicsReadingRawJSON {
   komik: Komik;
   chapter: string;
   data: Data;
-  prevChapter?: CHPT[];
-  nextChapter?: CHPT[];
+  prevChapter?: Chapter[];
+  nextChapter?: Chapter[];
 }
-interface CHPT {
+interface Chapter {
   chapter: string;
 }
 interface Data {
@@ -236,19 +242,19 @@ interface Data {
   imageSrc: string[];
 }
 interface Komik {
+  rating: Rating;
   _id: string;
+  link: string;
   title: string;
-  title_alt: null;
+  title_slug: string;
+  title_alt?: string;
   author: string;
   type: string;
-  link: string;
-  title_slug: string;
   Genre: string[];
-  s: S;
 }
-interface S {
-  tok: string;
-  sig: string;
+interface Rating {
+  value: number;
+  member: number;
 }
 export async function getComicsReading1(
   url: string,
@@ -262,13 +268,14 @@ export async function getComicsReading1(
   });
   const jsonPage: ComicsReadingRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props
     .pageProps.data;
+  const session = getSession();
   const jsonApi = await fetch(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/img/${jsonPage.data._id}`,
     {
       headers: {
         'User-Agent': deviceUserAgent,
-        'X-Token': jsonPage.komik.s.tok,
-        'X-Sign': jsonPage.komik.s.sig,
+        'X-Token': session.token,
+        'X-Sign': session.sign,
       },
       signal,
     },
@@ -343,9 +350,14 @@ export interface ComicsSearch1 {
   additionalInfo: string;
 }
 interface SearchRawData {
+  page: number;
+  maxPage: number;
+  data: Datum[];
+}
+interface Datum {
   _id: string;
   title: string;
-  post: string;
+  post: string[] | string;
   status: string;
   type: LatestReleaseJSON['type'];
   gambar: string;
@@ -356,15 +368,20 @@ interface SearchRawData {
   latestChapter: number;
 }
 export async function comicsSearch1(query: string, signal?: AbortSignal): Promise<ComicsSearch1[]> {
-  const response = await fetch(`${BASE_URL}/komik/list?name=${encodeURIComponent(query)}`, {
-    headers: { 'User-Agent': deviceUserAgent },
-    signal,
-  });
-  const data = await response.text();
-  const $ = cheerio.load(data);
-  const json: SearchRawData[] = JSON.parse($('script#__NEXT_DATA__').text()).props.pageProps.data
-    .data;
-  return json.map(x => {
+  const session = getSession();
+  const response = await fetch(
+    `${API_URL}/komik?page=1&limit=24&sortBy=newKomik&name=${encodeURIComponent(query)}`,
+    {
+      headers: {
+        'User-Agent': deviceUserAgent,
+        'X-Token': session.token,
+        'X-Sign': session.sign,
+      },
+      signal,
+    },
+  );
+  const data: SearchRawData = await response.json();
+  return data.data.map(x => {
     const title = he.decode(x.title ?? '');
     const thumbnailUrl = compressedImageUrl(`${IMAGE_COVER_BASE_URL}/${x.gambar}`);
     const detailUrl = `${BASE_URL}/${x.title_slug}`;
