@@ -549,7 +549,7 @@ function Search(props: Props) {
       {showSearchHistory && (
         <Reanimated_KeyboardAvoidingView
           behavior="height"
-          entering={ZoomIn.springify()}
+          entering={ZoomIn.springify().withInitialValues({ transform: [{ scale: 0.5 }] })}
           exiting={ZoomOut.springify()}
           style={styles.searchHistoryContainer}>
           <View style={{ flex: 1 }}>
