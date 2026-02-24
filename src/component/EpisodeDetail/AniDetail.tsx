@@ -40,7 +40,7 @@ const ReanimatedFlashList = Reanimated.createAnimatedComponent(FlashList as Recy
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 
-const IMG_HEADER_HEIGHT = 180;
+const IMG_HEADER_HEIGHT = 200;
 
 function AniDetail(props: Props) {
   const styles = useStyles();
@@ -136,11 +136,11 @@ function AniDetail(props: Props) {
           colors={['transparent', 'black']}
           style={{
             width: '100%',
-            height: 80,
+            height: 60,
             position: 'absolute',
             transform: [
               {
-                translateY: 105,
+                translateY: 155,
               },
             ],
           }}
