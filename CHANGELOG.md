@@ -1,3 +1,8 @@
+# v1.1.4_JS-18 (25-Februari-2026)
+## Diperbaiki
+- Error pada komik (perbaikan ke sekian kali nya xD)
+## Ditingkatkan
+- Pro tips pada pencarian
 # v1.1.4_JS-17 (25-Februari-2026)
 ## Diperbaiki
 - Error pada komik
