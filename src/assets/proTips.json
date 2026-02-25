@@ -1,5 +1,10 @@
 {
-  "anime": ["Jika anime tidak muncul melalui pencarian, coba cari melalui tombol 'Cari Film'"],
-  "comics": ["Jika chapter komik kurang update, coba lakukan pencarian ulang judul dan dari setiap hasil yang ada, cari yang paling update"],
+  "anime": [
+    "Coba ketikkan judul bahasa jepang nya terlebih dahulu sebelum mencari dengan judul bahasa inggris nya", 
+    "Jika anime yang kamu cari masih tidak muncul melalui pencarian anime, coba cari melalui tombol 'Cari Film'"
+  ],
+  "comics": [
+    "Jika chapter komik kurang update, coba lakukan pencarian ulang judul dan dari setiap hasil yang ada, cari yang paling update"
+  ],
   "film": []
 }

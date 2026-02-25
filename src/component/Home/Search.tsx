@@ -509,7 +509,8 @@ function Search(props: Props) {
                   Hasil tidak ditemukan
                 </Text>
                 <Text style={[globalStyles.text, styles.emptyStateSubtitle]}>
-                  Tekan tombol di bawah untuk melihat daftar anime terbaru.
+                  Coba periksa kembali kata kunci pencarianmu atau gunakan kata kunci lain yang
+                  lebih umum.
                 </Text>
                 <View style={{ alignItems: 'flex-start' }}>
                   {proTips[searchedSearchType].map(proTip => (
