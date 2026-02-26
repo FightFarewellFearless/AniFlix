@@ -1,3 +1,6 @@
+# v1.1.4_JS-19 (26-Februari-2026)
+## Diperbaiki
+- Gambar komik yang tidak ter load
 # v1.1.4_JS-18 (25-Februari-2026)
 ## Diperbaiki
 - Error pada komik (perbaikan ke sekian kali nya xD)
