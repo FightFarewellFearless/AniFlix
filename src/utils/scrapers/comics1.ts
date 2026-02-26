@@ -309,7 +309,7 @@ export async function getComicsReading1(
   const detectedCdn = await detectCDNImage($, signal);
   const cdn1 = detectedCdn?.[0]?.link;
   const comicImages = jsonApi.imageSrc.map((src: string) => {
-    return (cdn1 ?? `https://image.${DOMAIN}/softkomik`) + '/' + src;
+    return (cdn1 ? cdn1 : `https://f1.${DOMAIN}/file/softkomik-image`) + '/' + src;
   });
   const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
   const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';

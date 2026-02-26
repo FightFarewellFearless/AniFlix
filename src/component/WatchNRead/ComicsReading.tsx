@@ -18,7 +18,6 @@ import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
 import DialogManager from '../../utils/dialogManager';
 import setHistory from '../../utils/historyControl';
-import { BASE_URL } from '../../utils/scrapers/comics1';
 import { getComicsReading } from '../../utils/scrapers/comicsv2';
 import { getKomikuReading } from '../../utils/scrapers/komiku';
 
@@ -168,7 +167,7 @@ export default function ComicsReading(props: Props) {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
           Expires: '0',
-          ...(url.includes('softkomik') ? { Referer: BASE_URL } : {}),
+          ...(url.includes('softkomik') ? { Referer: new URL(props.route.params.link).href } : {}),
         },
         cache: 'no-cache',
         signal: imageFetchOnRNAbortController.current?.signal,
