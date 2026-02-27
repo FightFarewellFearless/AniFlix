@@ -1,3 +1,6 @@
+# v1.1.4_JS-20 (27-Februari-2026)
+## Diperbaiki
+- Download komik
 # v1.1.4_JS-19 (26-Februari-2026)
 ## Diperbaiki
 - Gambar komik yang tidak ter load
