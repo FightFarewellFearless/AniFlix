@@ -93,6 +93,7 @@ export default function ComicsReading(props: Props) {
       body: JSON.stringify({
         name: props.route.params.data.title + ' - ' + props.route.params.data.chapter,
         comicImages: props.route.params.data.comicImages,
+        sourceLink: props.route.params.link,
       }),
       signal: abortController.current?.signal,
     })
@@ -114,6 +115,7 @@ export default function ComicsReading(props: Props) {
     props.route.params.data.chapter,
     props.route.params.data.comicImages,
     props.route.params.data.title,
+    props.route.params.link,
   ]);
   useEffect(() => {
     props.navigation.setOptions({
