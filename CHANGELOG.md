@@ -1,3 +1,6 @@
+# v1.1.4_JS-22 (01-Maret-2026)
+## Diperbaiki
+- Komik error (lagi dan lagi dan lagi....)
 # v1.1.4_JS-21 (28-Februari-2026)
 ## Ditingkatkan
 - Kestabilan pergantian domain untuk seluruh data
