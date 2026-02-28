@@ -38,10 +38,10 @@ function compressedImageUrl(
 
 let Cookie = '';
 async function updateCookie(signal?: AbortSignal) {
-  const response = await fetch(BASE_URL + '/api/me', {
+  const response = await fetch(BASE_URL + '/komik/update', {
     headers: { 'User-Agent': deviceUserAgent },
     signal,
-    method: 'POST',
+    method: 'HEAD',
   });
   const cookies = response.headers
     .get('set-cookie')
