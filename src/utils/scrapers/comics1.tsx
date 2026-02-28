@@ -3,10 +3,14 @@ import cheerio, { CheerioAPI } from 'cheerio';
 // import CryptoJS from 'crypto-js';
 import he from 'he';
 import moment from 'moment';
+import { useEffect, useRef } from 'react';
+import { ToastAndroid, View } from 'react-native';
+import WebView from 'react-native-webview';
 import deviceUserAgent from '../deviceUserAgent';
 
+// let isError = false;
 export const __ALIAS = 'softkomik';
-const DOMAIN = __ALIAS + '.com';
+export const DOMAIN = __ALIAS + '.co';
 const API_DOMAIN = 'v2.softdevices.my.id';
 export const BASE_URL = `https://${DOMAIN}`; // export needed for referer header
 const API_URL = `https://${API_DOMAIN}`;
@@ -32,34 +36,38 @@ function compressedImageUrl(
   return `${BASE_URL}/_next/image?url=${encodedUrl}&w=${width}&q=${quality}`;
 }
 
+let Cookie = '';
+async function updateCookie(signal?: AbortSignal) {
+  const response = await fetch(BASE_URL + '/api/me', {
+    headers: { 'User-Agent': deviceUserAgent },
+    signal,
+    method: 'POST',
+  });
+  const cookies = response.headers
+    .get('set-cookie')
+    ?.split(',')
+    .map(cookie => cookie.trim());
+  if (cookies && cookies.length > 0) {
+    Cookie = cookies.map(cookie => cookie.split(';')[0]).join('; ');
+  }
+}
 interface Session {
   token: string;
   sign: string;
 }
 async function getSession(signal?: AbortSignal): Promise<Session> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/sessions`, {
-      headers: { 'User-Agent': deviceUserAgent },
-      signal,
-    });
-    const data: Session = await response.json();
-    const sessionToken = data.token;
-    const sessionSign = data.sign;
-    return { token: sessionToken, sign: sessionSign };
-  } catch {
-    // const e = { exp: Date.now() + 3e5 };
-    // const token = Buffer.from(JSON.stringify(e)).toString('base64');
-    // const sign = CryptoJS.HmacSHA256(token, 'Bt9kCNItFPPHWCsHjz7LwNB7').toString(CryptoJS.enc.Hex);
-    // return { token, sign };
-    const response = await fetch(`${API_URL}/api/session`, {
-      headers: { 'User-Agent': deviceUserAgent },
-      signal,
-    });
-    const data: Session = await response.json();
-    const sessionToken = data.token;
-    const sessionSign = data.sign;
-    return { token: sessionToken, sign: sessionSign };
+  // if (isError) throw new Error('Data awal error, mohon muat ulang aplikasi');
+  if (!Cookie) {
+    await updateCookie(signal);
   }
+  const response = await fetch(`${BASE_URL}/api/sessions`, {
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
+    signal,
+  });
+  const data: Session = await response.json();
+  const sessionToken = data.token;
+  const sessionSign = data.sign;
+  return { token: sessionToken, sign: sessionSign };
 }
 
 export interface LatestComicsRelease1 {
@@ -95,6 +103,7 @@ export async function getLatestComicsReleases1(
       Origin: BASE_URL,
       'X-Token': session.token,
       'X-Sign': session.sign,
+      Cookie,
     },
     signal,
   });
@@ -174,7 +183,7 @@ export async function getComicsDetailFromUrl1(
   signal?: AbortSignal,
 ): Promise<ComicsDetail1> {
   const response = await fetch(url, {
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
   const data = await response.text();
@@ -184,7 +193,7 @@ export async function getComicsDetailFromUrl1(
   const json = (await fetch(
     `${BASE_URL}/_next/data/${buildId}${titleSlug}.json?title_slug=${titleSlug.replace(/\//g, '')}`,
     {
-      headers: { 'User-Agent': deviceUserAgent },
+      headers: { 'User-Agent': deviceUserAgent, Cookie },
       signal,
     },
   )
@@ -194,7 +203,12 @@ export async function getComicsDetailFromUrl1(
   const session = await getSession(signal);
   const chaptersResponse = await fetch(chapterUrl, {
     signal,
-    headers: { 'User-Agent': deviceUserAgent, 'X-Token': session.token, 'X-Sign': session.sign },
+    headers: {
+      'User-Agent': deviceUserAgent,
+      'X-Token': session.token,
+      'X-Sign': session.sign,
+      Cookie,
+    },
   });
   const chaptersData: ChaptersData = await chaptersResponse.json();
   const chapters = chaptersData.chapter.map(chapter => ({
@@ -271,7 +285,7 @@ export async function getComicsReading1(
   url: string,
   signal?: AbortSignal,
 ): Promise<ComicsReading1> {
-  const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
+  const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent, Cookie } });
   const data = await response.text();
   const $ = cheerio.load(data, {
     xmlMode: true,
@@ -287,6 +301,7 @@ export async function getComicsReading1(
         'User-Agent': deviceUserAgent,
         'X-Token': session.token,
         'X-Sign': session.sign,
+        Cookie,
       },
       signal,
     },
@@ -296,7 +311,9 @@ export async function getComicsReading1(
   const thumbnailUrl = compressedImageUrl(
     await (async () => {
       const baseChapterUrl = `${BASE_URL}/${jsonPage.komik.title_slug}`;
-      return (await fetch(baseChapterUrl, { headers: { 'User-Agent': deviceUserAgent }, signal }))
+      return (
+        await fetch(baseChapterUrl, { headers: { 'User-Agent': deviceUserAgent, Cookie }, signal })
+      )
         .text()
         .then(x => {
           return `${IMAGE_COVER_BASE_URL}/${/["']?gambar["']?\s*:\s*["']([^"']+)["']/.exec(x)?.[1]}`;
@@ -343,7 +360,7 @@ async function detectCDNImage(
   const scriptUrl = $('script').eq(16).attr('src');
   if (!scriptUrl) return null;
   const scriptRes = await fetch(BASE_URL + scriptUrl, {
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
   const scriptData = await scriptRes.text();
@@ -387,6 +404,7 @@ export async function comicsSearch1(query: string, signal?: AbortSignal): Promis
         'User-Agent': deviceUserAgent,
         'X-Token': session.token,
         'X-Sign': session.sign,
+        Cookie,
       },
       signal,
     },
@@ -415,4 +433,62 @@ export async function comicsSearch1(query: string, signal?: AbortSignal): Promis
 function capitalizeFirstLetter<T extends string>(str: T): Capitalize<T> {
   if (!str) return str as Capitalize<T>;
   return (str.charAt(0).toUpperCase() + str.slice(1)) as Capitalize<T>;
+}
+
+type WebProps = {
+  isWebViewShown: boolean;
+  setIsWebViewShown: (state: boolean) => void;
+  onComics1Ready: () => void;
+};
+// NOTE: UNUSED FOR NOW, MAYBE USED IN THE FUTURE TO HANDLE CLOUDFARE OR OTHER PROTECTION
+export function Comics1WebView({ isWebViewShown, setIsWebViewShown, onComics1Ready }: WebProps) {
+  const webviewRef = useRef<WebView>(null);
+  useEffect(() => {
+    // isError = false;
+  }, []);
+  useEffect(() => {
+    if (isWebViewShown) {
+      const timeout = setTimeout(() => {
+        // isError = true;
+        setIsWebViewShown(false);
+        onComics1Ready();
+        ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
+      }, 15_000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [isWebViewShown, onComics1Ready, setIsWebViewShown]);
+  return (
+    <View style={{ height: 0, display: 'none' }}>
+      {isWebViewShown && (
+        <WebView
+          ref={webviewRef}
+          userAgent={deviceUserAgent}
+          source={{ uri: BASE_URL }}
+          setSupportMultipleWindows={false}
+          onError={() => {
+            // isError = true;
+            setIsWebViewShown(false);
+            onComics1Ready();
+            ToastAndroid.show('Gagal mempersiapkan data untuk komik', ToastAndroid.SHORT);
+          }}
+          onNavigationStateChange={event => {
+            if (event.title.toLowerCase().includes(__ALIAS) && event.loading === false) {
+              setIsWebViewShown(false);
+              onComics1Ready();
+            } else if (event.title.toLowerCase().includes('error')) {
+              // isError = true;
+              setIsWebViewShown(false);
+              onComics1Ready();
+              ToastAndroid.show(
+                'Error saat mempersiapkan data, coba lagi nanti',
+                ToastAndroid.SHORT,
+              );
+            }
+          }}
+        />
+      )}
+    </View>
+  );
 }

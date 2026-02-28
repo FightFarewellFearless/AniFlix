@@ -595,8 +595,10 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
             });
           }}
           style={styles.errorContainer}>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
+          <MaterialIcon name="refresh" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Ketuk disini untuk mencoba ulang.
+          </Text>
         </TouchableOpacity>
       )}
 

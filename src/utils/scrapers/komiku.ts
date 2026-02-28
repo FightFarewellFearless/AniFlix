@@ -4,7 +4,7 @@ import { ToastAndroid } from 'react-native';
 import deviceUserAgent from '../deviceUserAgent';
 
 export const __ALIAS = 'komiku';
-const DOMAIN = __ALIAS + '.org';
+export const DOMAIN = __ALIAS + '.org';
 const BASE_URL = `https://${DOMAIN}`;
 const API_URL = `https://api.${DOMAIN}`;
 

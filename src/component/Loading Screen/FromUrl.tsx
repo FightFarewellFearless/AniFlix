@@ -14,6 +14,7 @@ import controlWatchLater from '../../utils/watchLaterControl';
 import URL from 'url';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
+import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 import { replaceLast } from '../../utils/replaceLast';
 import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
 import { getComicsDetailFromUrl, getComicsReading } from '../../utils/scrapers/comicsv2';
@@ -57,7 +58,7 @@ function FromUrl(props: Props) {
   useEffect(() => {
     props.navigation.setOptions({ headerTitle: props.route.params.title });
     const abort: AbortController = new AbortController();
-    const link = props.route.params.link;
+    const link = generateUrlWithLatestDomain(props.route.params.link);
     const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
     if (link.includes('nanimex')) {
       props.navigation.goBack();

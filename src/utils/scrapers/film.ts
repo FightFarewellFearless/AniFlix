@@ -101,7 +101,9 @@ function resolveMasterPlaylist(content: string, masterUrl: string): HlsVariant[]
   return variants;
 }
 
-export const FILM_BASE_URL = 'https://tv12.idlixku.com';
+export const __ALIAS = 'idlix';
+export const FILM_DOMAIN = 'tv12.idlixku.com';
+export const FILM_BASE_URL = 'https://' + FILM_DOMAIN;
 const BASE_URL = FILM_BASE_URL;
 async function fetchPage(url: string, opt?: RequestInit) {
   const response = await fetch(url, opt);

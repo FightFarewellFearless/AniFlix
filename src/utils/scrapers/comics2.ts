@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import deviceUserAgent from '../deviceUserAgent';
 
 export const __ALIAS = 'komikindo';
-const DOMAIN = __ALIAS + '.ch';
+export const DOMAIN = __ALIAS + '.ch';
 const BASE_URL = `https://${DOMAIN}`;
 
 function normalizeUrl(url: string | undefined): string {

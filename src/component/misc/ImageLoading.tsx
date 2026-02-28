@@ -6,6 +6,7 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import URL from 'url';
 import AnimeLocal from '../../utils/scrapers/animeSeries';
 import LoadingIndicator from './LoadingIndicator';
+import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 
 const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   const { source, style, children, ...restProps } = props;
@@ -22,7 +23,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
         const withoutDomain = URL.parse(source.uri);
         return `${withoutDomain.protocol}//${AnimeLocal.BASE.domain}${withoutDomain.pathname}`;
       }
-      return source.uri;
+      return generateUrlWithLatestDomain(source.uri);
     }
     return source;
   }, [source]);

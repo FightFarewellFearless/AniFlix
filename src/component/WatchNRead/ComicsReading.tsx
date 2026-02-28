@@ -205,7 +205,6 @@ export default function ComicsReading(props: Props) {
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-
       if (data.type === 'SCROLL_UPDATE') {
         const visibleImageId = Number(data.id);
         if (!isNaN(visibleImageId)) {

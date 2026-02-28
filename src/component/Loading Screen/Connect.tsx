@@ -38,6 +38,7 @@ import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/Databas
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
 import animeLocalAPI from '../../utils/scrapers/animeSeries';
+// import { Comics1WebView } from '../../utils/scrapers/comics1';
 
 export const JoinDiscord = ({
   buttonColor,
@@ -98,6 +99,7 @@ function Loading(props: Props) {
   });
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
+  // const [isComics1WebViewOpen, setIsComics1WebViewOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const progressValueAnimation = useSharedValue(0);
 
@@ -199,6 +201,10 @@ function Loading(props: Props) {
   const [animeMoviePromise] = useState(
     () => new Promise(res => (moviePromiseResolve.current = res)),
   );
+  // const comics1PromiseResolve = useRef<(val?: unknown) => void>(null);
+  // const [comics1Promise] = useState(
+  //   () => new Promise(res => (comics1PromiseResolve.current = res)),
+  // );
   const onAnimeMovieReady = useCallback(() => {
     setLoadStatus(old => ({
       ...old,
@@ -207,9 +213,18 @@ function Loading(props: Props) {
     setIsAnimeMovieWebViewOpen(false);
     moviePromiseResolve.current?.();
   }, []);
+  // const onComics1Ready = useCallback(() => {
+  //   setLoadStatus(old => ({
+  //     ...old,
+  //     'Mempersiapkan data anime movie': !isAnimeMovieWebViewOpen && !isComics1WebViewOpen,
+  //   }));
+  //   setIsComics1WebViewOpen(false);
+  //   comics1PromiseResolve.current?.();
+  // }, [isAnimeMovieWebViewOpen, isComics1WebViewOpen]);
 
   const connectToServers = useCallback(async () => {
     setIsAnimeMovieWebViewOpen(true);
+    // setIsComics1WebViewOpen(true);
     const animeData = await fetchAnimeData();
     Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
       if (anime === undefined) {
@@ -329,6 +344,11 @@ function Loading(props: Props) {
               setIsWebViewShown={setIsAnimeMovieWebViewOpen}
               onAnimeMovieReady={onAnimeMovieReady}
             />
+            {/* <Comics1WebView
+              isWebViewShown={isComics1WebViewOpen}
+              setIsWebViewShown={setIsComics1WebViewOpen}
+              onComics1Ready={onComics1Ready}
+            /> */}
           </Suspense>
         )}
 
