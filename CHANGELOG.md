@@ -1,3 +1,8 @@
+# v1.1.4_JS-21 (28-Februari-2026)
+## Ditingkatkan
+- Kestabilan pergantian domain untuk seluruh data
+## Diperbaiki
+- Komik error... (yups, lagi dan lagi)
 # v1.1.4_JS-20 (27-Februari-2026)
 ## Diperbaiki
 - Download komik
