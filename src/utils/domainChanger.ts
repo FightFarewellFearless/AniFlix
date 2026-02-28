@@ -48,13 +48,22 @@ export function generateUrlWithLatestDomain(url: string): string {
       return urlObj.toString();
   }
 
-  const aliasIndex = urlObj.hostname.indexOf(matchedAlias);
+  const oldAliasIndex = urlObj.hostname.indexOf(matchedAlias);
+  const newAliasIndex = newDomain.indexOf(matchedAlias);
 
-  let subdomain = '';
-  if (aliasIndex > 0) {
-    subdomain = urlObj.hostname.substring(0, aliasIndex);
+  let oldSubdomain = '';
+  if (oldAliasIndex > 0) {
+    oldSubdomain = urlObj.hostname.substring(0, oldAliasIndex);
+  }
+  let newSubdomain = '';
+  if (newAliasIndex > 0) {
+    newSubdomain = newDomain.substring(0, newAliasIndex);
+  }
+  if (newSubdomain !== '') {
+    urlObj.hostname = newDomain;
+  } else {
+    urlObj.hostname = oldSubdomain + newDomain;
   }
 
-  urlObj.hostname = subdomain + newDomain;
   return urlObj.toString();
 }
