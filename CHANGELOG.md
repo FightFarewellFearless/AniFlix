@@ -1,3 +1,6 @@
+# v1.1.4_JS-23 (01-Maret-2026)
+## Diperbaiki
+- Masalah domain handling di film
 # v1.1.4_JS-22 (01-Maret-2026)
 ## Diperbaiki
 - Komik error (lagi dan lagi dan lagi....)
