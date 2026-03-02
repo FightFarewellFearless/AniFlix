@@ -152,7 +152,7 @@ function Search(props: Props) {
 
   const submit = useCallback(() => {
     const handleError = (err: Error) => {
-      if (err.message.includes('Aborted') || err.message.includes('cancelled')) {
+      if (err.message.includes('Aborted') || err.message.includes('canceled')) {
         return;
       }
       if (err.message === 'Silahkan selesaikan captcha') {
