@@ -1,3 +1,6 @@
+# v1.1.4_JS-24 (02-Maret-2026)
+## Diperbaiki
+- Gambar komik gagal dimuat
 # v1.1.4_JS-23 (01-Maret-2026)
 ## Diperbaiki
 - Masalah domain handling di film
