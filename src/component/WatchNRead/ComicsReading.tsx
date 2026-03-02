@@ -169,7 +169,9 @@ export default function ComicsReading(props: Props) {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
           Expires: '0',
-          ...(url.includes('softkomik') ? { Referer: new URL(props.route.params.link).href } : {}),
+          ...(props.route.params.link.includes('softkomik')
+            ? { Referer: new URL(props.route.params.link).href }
+            : {}),
         },
         cache: 'no-cache',
         signal: imageFetchOnRNAbortController.current?.signal,

@@ -326,7 +326,7 @@ export async function getComicsReading1(
   const detectedCdn = await detectCDNImage($, signal);
   const cdn1 = detectedCdn?.[0]?.link;
   const comicImages = jsonApi.imageSrc.map((src: string) => {
-    return (cdn1 ? cdn1 : `https://f1.${DOMAIN}/file/softkomik-image`) + '/' + src;
+    return (cdn1 ? cdn1 : `https://cd1.softkomik.online/softkomik`) + '/' + src;
   });
   const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
   const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';
@@ -357,7 +357,7 @@ async function detectCDNImage(
       value: string;
     }[]
 > {
-  const scriptUrl = $('script').eq(16).attr('src');
+  const scriptUrl = $('script').eq(17).attr('src');
   if (!scriptUrl) return null;
   const scriptRes = await fetch(BASE_URL + scriptUrl, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
