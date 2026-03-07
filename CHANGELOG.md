@@ -1,3 +1,12 @@
+# v1.1.4_JS-25 (07-Maret-2026)
+## Ditambahkan
+- Sekarang, membuka data film (bukan tv-series/season) akan mengarahkan mu ke layar detail film alih-alih langsung mengarahkan ke video player, ini memungkinkan mu untuk menambahkan film tersebut ke tonton nanti dan melanjutkan dari durasi terakhir di tonton.
+## Ditingkatkan
+- Sedikit menigkatkan jarak untuk memulai loading pada gambar komik
+## Diperbaiki
+- Error saat membatalkan pencarian
+- Subtitle tidak muncul saat durasi dibawah 1 jam pada beberapa film/tv-series
+- Perbaikan potensial untuk masalah gambar yang selalu loading
 # v1.1.4_JS-24 (02-Maret-2026)
 ## Diperbaiki
 - Gambar komik gagal dimuat
