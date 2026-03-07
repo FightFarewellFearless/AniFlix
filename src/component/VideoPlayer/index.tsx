@@ -699,7 +699,7 @@ function BottomControl({
 }
 
 const RE_BLOCK =
-  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+(?:-->|--&gt;)\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3})[^\n\r]*\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+  /(?:\d+\s+)?((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})\s+(?:-->|--&gt;)\s+((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})[^\n\r]*\s+([\s\S]*?)(?=\s*(?:\d+\s+)?(?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3}|$)/g;
 const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
 const RE_ASS_NL = /\\N/g;
 const RE_SPLIT = /[:.,]/;
@@ -707,7 +707,13 @@ const RE_SPLIT = /[:.,]/;
 const toSec = (t: string) => {
   'worklet';
   const d = t.split(RE_SPLIT);
-  return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
+  if (d.length === 3) {
+    return +d[0] * 60 + +d[1] + +d[2] / 1000;
+  }
+  if (d.length === 4) {
+    return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
+  }
+  return 0;
 };
 
 export const parseSubtitles = async (raw: string) => {
