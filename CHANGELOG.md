@@ -1,3 +1,6 @@
+# v1.1.4_JS-26 (07-Maret-2026)
+## Diperbaiki
+- Error data film saat subtitle tidak tersedia
 # v1.1.4_JS-25 (07-Maret-2026)
 ## Ditambahkan
 - Sekarang, membuka data film (bukan tv-series/season) akan mengarahkan mu ke layar detail film alih-alih langsung mengarahkan ke video player, ini memungkinkan mu untuk menambahkan film tersebut ke tonton nanti dan melanjutkan dari durasi terakhir di tonton.
