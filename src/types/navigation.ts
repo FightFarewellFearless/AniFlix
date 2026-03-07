@@ -25,7 +25,7 @@ type RootStackNavigator = {
     link: string;
   };
   FilmDetail: {
-    data: FilmDetails_Detail;
+    data: FilmDetails_Detail | FilmDetail_Stream;
     link: string;
   };
   ComicsDetail: {

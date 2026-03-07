@@ -20,6 +20,7 @@ import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMo
 import { getComicsDetailFromUrl, getComicsReading } from '../../utils/scrapers/comicsv2';
 import { getFilmDetails } from '../../utils/scrapers/film';
 import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
+import { setFilmStreamHistory } from '../EpisodeDetail/FilmDetail';
 import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
@@ -213,34 +214,26 @@ function FromUrl(props: Props) {
                 link: link,
               }),
             );
-          } else {
+          } else if (
+            data.type === 'stream' &&
+            (props.route.params.historyData ||
+              props.navigation.getState().routes.find(z => z.name === 'FilmDetail'))
+          ) {
             props.navigation.dispatch(
               StackActions.replace('Video_Film', {
                 data,
-                link: link,
+                link,
                 historyData: props.route.params.historyData,
               }),
             );
-            const isFilm = URL.parse(link).host!?.includes('idlix') && link.includes('/episode/');
-            const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
-            const title = (
-              isFilm
-                ? data.title.split(': ').slice(0, -1).join(': ')
-                : episodeIndex >= 0
-                  ? data.title.slice(0, episodeIndex)
-                  : data.title
-            ).trim();
-            const watchLater: watchLaterJSON[] = JSON.parse(
-              (await DatabaseManager.get('watchLater'))!,
+            await setFilmStreamHistory(link, data, props.route.params.historyData);
+          } else {
+            props.navigation.dispatch(
+              StackActions.replace('FilmDetail', {
+                data,
+                link,
+              }),
             );
-            const watchLaterIndex = watchLater.findIndex(
-              z => z.title.trim() === title.trim() && z.isMovie === true,
-            );
-            if (watchLaterIndex >= 0) {
-              controlWatchLater('delete', watchLaterIndex);
-              ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
-            }
-            setHistory(data, link, false, props.route.params.historyData, true);
           }
         })
         .catch(handleError);

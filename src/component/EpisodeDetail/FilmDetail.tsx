@@ -1,7 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { memo, useMemo, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
 import {
   ColorSchemeName,
   StyleSheet,
@@ -18,6 +18,7 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
+import URL from 'url';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
@@ -26,12 +27,15 @@ import controlWatchLater from '../../utils/watchLaterControl';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
+import moment from 'moment';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { FilmEpisode } from '../../utils/scrapers/film';
+import DialogManager from '../../utils/dialogManager';
+import setHistory from '../../utils/historyControl';
+import { FilmDetail_Stream, FilmDetails_Detail, FilmEpisode } from '../../utils/scrapers/film';
 
 type ModifiedFilmSeason = (
   | { type: 'season'; text: string }
@@ -50,6 +54,27 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'FilmDetail'>;
 
 const IMG_HEADER_HEIGHT = 250;
 
+function useCompatibleData(rawData: FilmDetails_Detail | FilmDetail_Stream) {
+  return useMemo(() => {
+    return 'info' in rawData
+      ? rawData
+      : {
+          info: {
+            ...rawData,
+            additionalInfo: {
+              Rating: rawData.rating,
+              'Tahun Rilis': rawData.releaseDate,
+            },
+          },
+          ...rawData,
+        };
+  }, [rawData]);
+}
+
+function isEpisode(data: FilmDetails_Detail | FilmDetail_Stream): data is FilmDetails_Detail {
+  return 'seasonData' in data;
+}
+
 function FilmDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
@@ -57,9 +82,10 @@ function FilmDetail(props: Props) {
   const colorScheme = useColorScheme();
   const theme = useTheme();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [rawSearchQuery, setSearchQuery] = useState('');
+  const searchQuery = useDeferredValue(rawSearchQuery);
 
-  const data = props.route.params.data;
+  const data = useCompatibleData(props.route.params.data);
 
   const watchLaterListsJson = useModifiedKeyValueIfFocused(
     'watchLater',
@@ -84,7 +110,15 @@ function FilmDetail(props: Props) {
   }, [historyListsJson, historyTitle]);
 
   const lastWatchedEpisodeData = useMemo(() => {
-    if (!lastWatched || !lastWatched.episode) return undefined;
+    if (!lastWatched) return undefined;
+    if (!isEpisode(data)) {
+      return {
+        episodeNumber: lastWatched.episode,
+        episodeTitle: '',
+        episodeUrl: lastWatched.link,
+      };
+    }
+    if (!lastWatched.episode) return undefined;
     const episodeLastWatchedModified = lastWatched.episode
       .replace('Season ', '')
       .trim()
@@ -98,7 +132,7 @@ function FilmDetail(props: Props) {
       if (found) return found;
     }
     return undefined;
-  }, [lastWatched, data.seasonData]);
+  }, [lastWatched, data]);
 
   const scrollRef = useAnimatedRef<FlashListRef<ModifiedFilmSeason[number]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
@@ -120,15 +154,31 @@ function FilmDetail(props: Props) {
   });
 
   const ListHeaderComponent = useMemo(() => {
-    const hasMultipleEpisodes = data.seasonData.length > 1;
+    const hasMultipleEpisodes = isEpisode(data) && data.seasonData.length > 1;
 
     return (
       <View style={styles.mainContainer}>
-        <ReanimatedImage
-          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-          source={{ uri: data.info.backgroundImage }}
-          contentFit="cover"
-        />
+        {'backgroundImage' in data.info ? (
+          <ReanimatedImage
+            style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
+            source={{ uri: data.info.backgroundImage }}
+            contentFit="cover"
+          />
+        ) : (
+          <Reanimated.View
+            style={[
+              { width: '100%', height: IMG_HEADER_HEIGHT },
+              headerImageStyle,
+              { backgroundColor: theme.colors.elevation.level2 },
+            ]}>
+            <Icon
+              color={theme.colors.onBackground}
+              name="film"
+              size={64}
+              style={{ alignSelf: 'center', marginTop: 60 }}
+            />
+          </Reanimated.View>
+        )}
 
         <LinearGradient
           colors={['transparent', 'black']}
@@ -148,7 +198,9 @@ function FilmDetail(props: Props) {
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
             <Image
-              source={{ uri: data.info.coverImage }}
+              source={{
+                uri: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
+              }}
               style={styles.thumbnail}
               contentFit="contain"
             />
@@ -163,7 +215,9 @@ function FilmDetail(props: Props) {
                 paddingVertical: 4,
                 borderRadius: 10,
               }}>
-              <Text style={[globalStyles.text, styles.type]}>Film/TV/Season</Text>
+              <Text style={[globalStyles.text, styles.type]}>
+                {data.type === 'stream' ? 'Film' : 'Film/TV/Season'}
+              </Text>
             </Surface>
           </View>
 
@@ -227,8 +281,23 @@ function FilmDetail(props: Props) {
                 buttonColor={theme.colors.primary}
                 textColor={theme.colors.onPrimary}
                 onPress={() => {
+                  if (!isEpisode(data)) {
+                    setFilmStreamHistory(props.route.params.link, data, {
+                      lastDuration: lastWatched.lastDuration ?? 0,
+                      resolution: lastWatched.resolution ?? '',
+                    });
+                    props.navigation.navigate('Video_Film', {
+                      data,
+                      link: lastWatched.link,
+                      historyData: {
+                        lastDuration: lastWatched.lastDuration ?? 0,
+                        resolution: lastWatched.resolution ?? '',
+                      },
+                    });
+                    return;
+                  }
                   props.navigation.navigate('FromUrl', {
-                    title: props.route.params.data.info.title,
+                    title: data.info.title,
                     link: lastWatchedEpisodeData.episodeUrl,
                     historyData: {
                       lastDuration: lastWatched.lastDuration ?? 0,
@@ -238,7 +307,10 @@ function FilmDetail(props: Props) {
                   });
                 }}
                 style={{ borderColor: theme.colors.primary }}>
-                Lanjutkan: {lastWatchedEpisodeData.episodeNumber}
+                Lanjutkan:{' '}
+                {isEpisode(data)
+                  ? lastWatchedEpisodeData.episodeNumber
+                  : moment.utc((lastWatched.lastDuration ?? 0) * 1000).format('HH:mm:ss')}
               </Button>
             )}
 
@@ -253,7 +325,8 @@ function FilmDetail(props: Props) {
                   link: props.route.params.link,
                   rating: 'Film',
                   releaseYear: data.info.releaseDate,
-                  thumbnailUrl: data.info.coverImage,
+                  thumbnailUrl:
+                    'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
                   genre: data.info.genres,
                   date: Date.now(),
                   isMovie: true,
@@ -265,29 +338,24 @@ function FilmDetail(props: Props) {
               {isInList ? 'Sudah Ditambahkan' : 'Tonton Nanti'}
             </Button>
 
-            <TextInput
-              mode="outlined"
-              label="Cari Episode"
-              placeholder="Contoh: 1, 2, atau 1 - 1"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              left={<TextInput.Icon icon="magnify" />}
-              style={{ backgroundColor: styles.mainContainer.backgroundColor }}
-              dense
-            />
+            {isEpisode(data) && (
+              <TextInput
+                mode="outlined"
+                label="Cari Episode"
+                placeholder="Contoh: 1, 2, atau 1 - 1"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                left={<TextInput.Icon icon="magnify" />}
+                style={{ backgroundColor: styles.mainContainer.backgroundColor }}
+                dense
+              />
+            )}
           </View>
         </View>
       </View>
     );
   }, [
-    data.seasonData,
-    data.info.backgroundImage,
-    data.info.coverImage,
-    data.info.title,
-    data.info.genres,
-    data.info.additionalInfo,
-    data.info.releaseDate,
-    data.info.synopsis,
+    data,
     styles.mainContainer,
     styles.mainContent,
     styles.thumbnail,
@@ -305,20 +373,32 @@ function FilmDetail(props: Props) {
     styles.synopsisText,
     styles.genre,
     headerImageStyle,
-    colorScheme,
-    globalStyles.text,
-    isInList,
-    props.route.params.link,
-    lastWatchedEpisodeData,
-    lastWatched,
+    theme.colors.elevation.level2,
+    theme.colors.onBackground,
     theme.colors.primary,
     theme.colors.onPrimary,
-    props.navigation,
-    props.route.params.data.info.title,
+    colorScheme,
+    globalStyles.text,
+    lastWatchedEpisodeData,
+    lastWatched,
+    isInList,
     searchQuery,
+    props.navigation,
+    props.route.params.link,
   ]);
 
   const modifiedSeasonData = useMemo(() => {
+    if (!isEpisode(data))
+      return [
+        {
+          type: 'episode',
+          episodeNumber: '',
+          episodeTitle: '',
+          episodeUrl: props.route.params.link,
+          episodeImage: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
+          releaseDate: data.info.releaseDate,
+        } as ModifiedFilmSeason[number],
+      ];
     return (searchQuery === '' ? data.seasonData : data.seasonData.toReversed()).flatMap(item => {
       const filteredEpisodes = item.episodes.filter(ep =>
         ep.episodeNumber.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -339,7 +419,47 @@ function FilmDetail(props: Props) {
         })),
       ];
     }) as ModifiedFilmSeason;
-  }, [data.seasonData, searchQuery]);
+  }, [data, props.route.params.link, searchQuery]);
+
+  const handlePlayNow = useCallback(() => {
+    if (isEpisode(data)) return;
+    let historyData: { lastDuration: number; resolution: string } | undefined;
+    const startFilm = () => {
+      setFilmStreamHistory(props.route.params.link, data, historyData);
+      props.navigation.navigate('Video_Film', {
+        data,
+        link: props.route.params.link,
+        historyData,
+      });
+    };
+    if (lastWatched) {
+      DialogManager.alert(
+        'Lanjutkan durasi?',
+        'Kamu sudah menonton film ini sebelumnya. Apakah kamu ingin melanjutkan dari durasi terakhir yang kamu tonton?',
+        [
+          {
+            text: 'Mulai dari awal',
+            onPress: () => {
+              historyData = undefined;
+              startFilm();
+            },
+          },
+          {
+            text: 'Lanjutkan',
+            onPress: () => {
+              historyData = {
+                lastDuration: lastWatched?.lastDuration ?? 0,
+                resolution: lastWatched?.resolution ?? '',
+              };
+              startFilm();
+            },
+          },
+        ],
+      );
+      return;
+    }
+    startFilm();
+  }, [data, lastWatched, props.navigation, props.route.params.link]);
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
@@ -357,14 +477,26 @@ function FilmDetail(props: Props) {
             </View>
           ) : (
             <View style={styles.episodeListContainer}>
-              <RenderEpisodeList
-                globalStyles={globalStyles}
-                colorScheme={colorScheme}
-                props={props}
-                item={s}
-                styles={styles}
-                lastWatched={lastWatched}
-              />
+              {!isEpisode(data) ? (
+                <Button
+                  icon="movie-open-play"
+                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                  textColor={styles.additionalInfoText.color}
+                  mode="elevated"
+                  style={{ flex: 1 }}
+                  onPress={handlePlayNow}>
+                  Tonton Sekarang
+                </Button>
+              ) : (
+                <RenderEpisodeList
+                  globalStyles={globalStyles}
+                  colorScheme={colorScheme}
+                  props={props}
+                  item={s}
+                  styles={styles}
+                  lastWatched={lastWatched}
+                />
+              )}
             </View>
           );
         }}
@@ -400,25 +532,50 @@ function RenderEpisodeList({
   globalStyles: ReturnType<typeof useGlobalStyles>;
   colorScheme: ColorSchemeName;
 }) {
+  const rawData = props.route.params.data;
+  const data = useCompatibleData(rawData);
   const episodeLastWatchedModified =
     lastWatched &&
     lastWatched.episode &&
     lastWatched.episode.replace('Season ', '').trim().replace('Episode', '-').trim();
-  const isLastWatched =
-    lastWatched && episodeLastWatchedModified && item.episodeNumber === episodeLastWatchedModified;
+  const isEpisodeLastWatched =
+    (lastWatched &&
+      episodeLastWatchedModified &&
+      item.episodeNumber === episodeLastWatchedModified) ||
+    (!isEpisode(data) && lastWatched);
   return (
     <TouchableOpacity
-      style={[styles.episodeButton, isLastWatched && styles.lastWatchedButton]}
+      style={[styles.episodeButton, isEpisodeLastWatched && styles.lastWatchedButton]}
       onPress={() => {
+        if (!isEpisode(data)) {
+          setFilmStreamHistory(props.route.params.link, data, {
+            lastDuration: lastWatched?.lastDuration ?? 0,
+            resolution: lastWatched?.resolution ?? '',
+          });
+          props.navigation.navigate('Video_Film', {
+            data,
+            link: item.episodeUrl,
+            historyData: {
+              lastDuration: lastWatched?.lastDuration ?? 0,
+              resolution: lastWatched?.resolution ?? '',
+            },
+          });
+          return;
+        }
         props.navigation.navigate('FromUrl', {
-          title: props.route.params.data.info.title,
+          title: data.info.title,
           link: item.episodeUrl,
-          historyData: isLastWatched
+          historyData: isEpisodeLastWatched
             ? {
                 lastDuration: lastWatched.lastDuration ?? 0,
                 resolution: lastWatched.resolution ?? '',
               }
-            : undefined,
+            : !isEpisode(data)
+              ? {
+                  lastDuration: lastWatched?.lastDuration ?? 0,
+                  resolution: lastWatched?.resolution ?? '',
+                }
+              : undefined,
           type: 'film',
         });
       }}>
@@ -432,17 +589,17 @@ function RenderEpisodeList({
             style={[
               globalStyles.text,
               styles.episodeText,
-              isLastWatched ? styles.lastWatchedTextColor : undefined,
+              isEpisodeLastWatched ? styles.lastWatchedTextColor : undefined,
             ]}>
             {item.episodeTitle}
           </Text>
-          {isLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
+          {isEpisodeLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
         </View>
         <Icon
-          name={isLastWatched ? 'history' : 'play-circle'}
+          name={isEpisodeLastWatched ? 'history' : 'play-circle'}
           size={20}
           color={
-            isLastWatched
+            isEpisodeLastWatched
               ? styles.lastWatchedTextColor.color
               : colorScheme === 'dark'
                 ? '#5ddfff'
@@ -663,6 +820,31 @@ function useStyles() {
       theme.colors.onPrimaryContainer,
     ],
   );
+}
+
+export async function setFilmStreamHistory(
+  link: string,
+  data: FilmDetail_Stream,
+  historyData?: { resolution: string | undefined; lastDuration: number },
+) {
+  const isFilm = URL.parse(link).host!?.includes('idlix') && link.includes('/episode/');
+  const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
+  const title = (
+    isFilm
+      ? data.title.split(': ').slice(0, -1).join(': ')
+      : episodeIndex >= 0
+        ? data.title.slice(0, episodeIndex)
+        : data.title
+  ).trim();
+  const watchLater: watchLaterJSON[] = JSON.parse((await DatabaseManager.get('watchLater'))!);
+  const watchLaterIndex = watchLater.findIndex(
+    z => z.title.trim() === title.trim() && z.isMovie === true,
+  );
+  if (watchLaterIndex >= 0) {
+    controlWatchLater('delete', watchLaterIndex);
+    ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+  }
+  setHistory(data, link, false, historyData, true);
 }
 
 export default memo(FilmDetail);
