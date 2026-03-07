@@ -564,7 +564,7 @@ export default function ComicsReading(props: Props) {
     // 2. Fetch Observer
     const fetchOptions = {
       root: null,
-      rootMargin: '200% 0px 200% 0px',
+      rootMargin: '250% 0px 250% 0px',
       threshold: 0.01
     };
 
