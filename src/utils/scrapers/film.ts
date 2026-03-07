@@ -160,7 +160,7 @@ interface JeniusReturnData {
   downloadLinks: any[];
   attachmentLinks: any[];
   ck: string;
-  subtitleTrackUrl: string;
+  subtitleTrackUrl?: string;
 }
 
 async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<JeniusReturnData> {
@@ -175,9 +175,9 @@ async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<Jeni
     html.split('eval(function(p,a,c,k,e,d)')[1].split('</script>')[0];
   const unpacked = unpack(packedScript);
 
-  const subtitleTrackUrl = unpacked
+  const subtitleTrackUrl: string | undefined = unpacked
     .split('"kind":"captions","file":"')[1]
-    .split('"')[0]
+    ?.split('"')[0]
     .replace(/\\/g, '');
   const fireplayerId = unpacked.split('FirePlayer("')[1].split('"')[0];
 
@@ -345,7 +345,7 @@ type FilmDetails_Detail = {
 type FilmDetail_Stream = {
   type: 'stream';
   streamingLink: string;
-  subtitleLink: string;
+  subtitleLink?: string;
   title: string;
   releaseDate: string;
   rating: string;
