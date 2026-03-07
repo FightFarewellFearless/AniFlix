@@ -253,6 +253,19 @@ function FilmDetail(props: Props) {
                   {data.info.releaseDate}
                 </Text>
               </Surface>
+              {!isEpisode(data) && data.subtitleLink === undefined && (
+                <Surface
+                  elevation={2}
+                  style={[
+                    styles.additionalInfoTextSurface,
+                    { backgroundColor: theme.colors.errorContainer },
+                  ]}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon color={styles.additionalInfoText.color} name="info-circle" /> Subtitle
+                    tidak tersedia untuk film ini!
+                  </Text>
+                </Surface>
+              )}
               {hasMultipleEpisodes && (
                 <Surface elevation={2} style={styles.additionalInfoTextSurface}>
                   <Text style={[globalStyles.text, styles.additionalInfoText]}>
@@ -375,6 +388,7 @@ function FilmDetail(props: Props) {
     headerImageStyle,
     theme.colors.elevation.level2,
     theme.colors.onBackground,
+    theme.colors.errorContainer,
     theme.colors.primary,
     theme.colors.onPrimary,
     colorScheme,

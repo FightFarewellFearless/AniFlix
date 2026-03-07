@@ -513,6 +513,18 @@ function Video_Film(props: Props) {
       <ScrollView
         style={{ flex: 1, display: fullscreen ? 'none' : 'flex' }}
         contentContainerStyle={{ paddingBottom: insets.bottom }}>
+        {data.subtitleLink === undefined && (
+          <View style={styles.container}>
+            <Text style={[globalStyles.text, { marginLeft: 5, fontSize: 16, fontWeight: '500' }]}>
+              <Icon
+                name="info-circle"
+                size={20}
+                color={colorScheme === 'dark' ? 'white' : 'black'}
+              />{' '}
+              Subtitle tidak tersedia untuk film ini!
+            </Text>
+          </View>
+        )}
         <Pressable
           style={[styles.container]}
           onPressIn={onSynopsisPressIn}
