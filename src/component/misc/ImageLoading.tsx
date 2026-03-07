@@ -9,7 +9,8 @@ import LoadingIndicator from './LoadingIndicator';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 
 const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
-  const { source, style, children, ...restProps } = props;
+  const { source, style, children, ...restPropsWithRecyclingKey } = props;
+  const { recyclingKey, ...restProps } = restPropsWithRecyclingKey;
 
   const imageSourceUri = React.useMemo(() => {
     if (
@@ -45,7 +46,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   useLayoutEffect(() => {
     setLoading(false);
     setError(false);
-  }, [source]);
+  }, [source, recyclingKey]);
 
   const isFocused = useIsFocused();
 
@@ -53,6 +54,9 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
     <View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
+          // TEMP|TODO|WORKAROUND: this workaround may cause a performance drop: recyclingKey prob
+          //  having issue when re-rendering too much
+          key={recyclingKey}
           {...restProps}
           source={
             source &&
