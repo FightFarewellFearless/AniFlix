@@ -1,3 +1,6 @@
+# v1.1.4_JS-27 (08-Maret-2026)
+## Diperbaiki
+- Masalah gambar yang selalu loading pada beberapa kasus
 # v1.1.4_JS-26 (07-Maret-2026)
 ## Diperbaiki
 - Error data film saat subtitle tidak tersedia
