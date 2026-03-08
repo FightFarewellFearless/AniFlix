@@ -3,11 +3,11 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
-import { ImageBackground } from 'expo-image';
 import React, { memo, useCallback, useMemo, useRef, useState, useTransition } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
+  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
@@ -761,13 +761,12 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
         );
       }}>
       <ImageLoading
-        contentFit="fill"
+        resizeMode="stretch"
         source={{ uri: item.thumbnailUrl }}
         style={[
           styles.listImage,
           isComic(item) && 'concept' in item ? { width: 150, height: 'auto' } : undefined,
-        ]}
-        recyclingKey={item.thumbnailUrl}>
+        ]}>
         {isComic(item) && (
           <View
             style={{

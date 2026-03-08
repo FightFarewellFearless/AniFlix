@@ -87,10 +87,9 @@ export function ListAnimeComponent(
         );
       }}>
       <ImageLoading
-        contentFit="fill"
+        resizeMode="stretch"
         key={z.thumbnailUrl}
         source={{ uri: z.thumbnailUrl }}
-        recyclingKey={z.thumbnailUrl}
         style={[
           styles.listBackground,
           // {

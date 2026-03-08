@@ -1,11 +1,13 @@
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialIcon from '@react-native-vector-icons/material-icons';
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
-import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Modal,
   StyleSheet,
   Text,
@@ -15,8 +17,6 @@ import {
   View,
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
-import Icon from '@react-native-vector-icons/fontawesome';
-import MaterialIcon from '@react-native-vector-icons/material-icons';
 import useGlobalStyles from '../../../assets/style';
 
 interface SearchResult {
@@ -195,7 +195,7 @@ function SearchAnimeByImage() {
                   <Image
                     source={{ uri: choosenImage }}
                     style={styles.selectedImage}
-                    contentFit="contain"
+                    resizeMode="contain"
                   />
                 ) : (
                   <View style={styles.placeholderContainer}>

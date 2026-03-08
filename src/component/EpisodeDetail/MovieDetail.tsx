@@ -1,8 +1,8 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { memo, useMemo } from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -133,7 +133,11 @@ function MovieDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} contentFit="fill" />
+            <Image
+              source={{ uri: data.thumbnailUrl }}
+              style={styles.thumbnail}
+              resizeMode="stretch"
+            />
             <Surface
               style={{
                 backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',

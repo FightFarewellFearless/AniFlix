@@ -1,8 +1,8 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { memo, useMemo, useState } from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -152,7 +152,7 @@ function AniDetail(props: Props) {
             <Image
               source={{ uri: data.thumbnailUrl }}
               style={styles.thumbnail}
-              contentFit="contain"
+              resizeMode="contain"
             />
             <View
               style={{

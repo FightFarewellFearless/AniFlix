@@ -2,10 +2,10 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   ToastAndroid,

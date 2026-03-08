@@ -51,11 +51,7 @@ function WatchLater(props: Props) {
               }),
             );
           }}>
-          <ImageLoading
-            source={{ uri: item.thumbnailUrl }}
-            style={styles.thumbnail}
-            recyclingKey={item.thumbnailUrl}
-          />
+          <ImageLoading source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
           <View style={styles.ratingContainer}>
             <Text
               style={[

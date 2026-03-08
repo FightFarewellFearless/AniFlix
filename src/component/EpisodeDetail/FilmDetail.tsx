@@ -1,9 +1,9 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
 import {
   ColorSchemeName,
+  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -162,7 +162,7 @@ function FilmDetail(props: Props) {
           <ReanimatedImage
             style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
             source={{ uri: data.info.backgroundImage }}
-            contentFit="cover"
+            resizeMode="cover"
           />
         ) : (
           <Reanimated.View
@@ -202,7 +202,7 @@ function FilmDetail(props: Props) {
                 uri: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
               }}
               style={styles.thumbnail}
-              contentFit="contain"
+              resizeMode="contain"
             />
             <Surface
               style={{

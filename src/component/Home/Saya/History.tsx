@@ -275,9 +275,8 @@ const RenderList = memo(function RenderList({
         );
       }}>
       <ImageLoading
-        contentFit="fill"
+        resizeMode="stretch"
         source={{ uri: item?.thumbnailUrl }}
-        recyclingKey={item?.thumbnailUrl}
         style={styles.listImage}
       />
 

@@ -1,5 +1,5 @@
 import { useIsFocused } from '@react-navigation/native';
-import { Image, ImageProps } from 'expo-image';
+import { Image, ImageProps } from 'react-native';
 import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
@@ -9,8 +9,7 @@ import LoadingIndicator from './LoadingIndicator';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 
 const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
-  const { source, style, children, ...restPropsWithRecyclingKey } = props;
-  const { recyclingKey, ...restProps } = restPropsWithRecyclingKey;
+  const { source, style, children, ...restProps } = props;
 
   const imageSourceUri = React.useMemo(() => {
     if (
@@ -46,7 +45,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
   useLayoutEffect(() => {
     setLoading(false);
     setError(false);
-  }, [source, recyclingKey]);
+  }, [source]);
 
   const isFocused = useIsFocused();
 
@@ -54,9 +53,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
     <View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
-          // TEMP|TODO|WORKAROUND: this workaround may cause a performance drop: recyclingKey prob
-          //  having issue when re-rendering too much
-          key={recyclingKey}
+          fadeDuration={200}
           {...restProps}
           source={
             source &&
