@@ -154,10 +154,13 @@ function VideoPlayer({
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
 
   useEffect(() => {
+    const abortController = new AbortController();
     async function fetchSubtitles(url: string) {
       setSubtitleError(false);
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          signal: abortController.signal,
+        });
         if (!response.ok) throw new Error('Network response was not ok');
         const subtitleText = await response.text();
         const subtitle = await parseSubtitles(subtitleText ?? '');
@@ -168,6 +171,9 @@ function VideoPlayer({
       }
     }
     subtitleURL && fetchSubtitles(subtitleURL);
+    return () => {
+      abortController.abort();
+    };
   }, [subtitleURL, subtitleRetryToken]);
 
   useLayoutEffect(() => {
