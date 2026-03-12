@@ -1,3 +1,8 @@
+# v1.1.4_JS-28 (12-Maret-2026)
+## Diperbaiki
+- Gambar komik tidak terload pada genre "eksplisit"
+- Subtitle fetching leak
+- Video stuck saat berganti resolusi
 # v1.1.4_JS-27 (08-Maret-2026)
 ## Diperbaiki
 - Masalah gambar yang selalu loading pada beberapa kasus
