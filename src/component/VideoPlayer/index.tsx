@@ -180,6 +180,12 @@ function VideoPlayer({
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
 
+  useEventListener(player, 'sourceLoad', () => {
+    if (!paused) {
+      setPaused(false);
+      player.play();
+    }
+  });
   useEventListener(player, 'statusChange', ({ status }) => {
     if (status === 'readyToPlay') {
       setIsError(false);
