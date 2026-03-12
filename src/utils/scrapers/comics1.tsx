@@ -1,6 +1,7 @@
 // import { Buffer } from 'buffer/';
 import cheerio, { CheerioAPI } from 'cheerio';
 // import CryptoJS from 'crypto-js';
+import { COMICS1_AUTH } from '@env';
 import he from 'he';
 import moment from 'moment';
 import { useEffect, useRef } from 'react';
@@ -285,7 +286,13 @@ export async function getComicsReading1(
   url: string,
   signal?: AbortSignal,
 ): Promise<ComicsReading1> {
-  const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent, Cookie } });
+  const response = await fetch(url, {
+    signal,
+    headers: {
+      'User-Agent': deviceUserAgent,
+      Cookie,
+    },
+  });
   const data = await response.text();
   const $ = cheerio.load(data, {
     xmlMode: true,
@@ -298,6 +305,8 @@ export async function getComicsReading1(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/img/${jsonPage.data._id}`,
     {
       headers: {
+        // needed for explicit genre to works
+        Authorization: COMICS1_AUTH,
         'User-Agent': deviceUserAgent,
         'X-Token': session.token,
         'X-Sign': session.sign,
