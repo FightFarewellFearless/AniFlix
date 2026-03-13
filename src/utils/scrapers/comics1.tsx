@@ -302,7 +302,7 @@ export async function getComicsReading1(
     .pageProps.data;
   const session = await getSession(signal);
   const jsonApi = await fetch(
-    `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/img/${jsonPage.data._id}`,
+    `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
     {
       headers: {
         // needed for explicit genre to works
