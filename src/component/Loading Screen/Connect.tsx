@@ -37,7 +37,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
-import animeLocalAPI from '../../utils/scrapers/animeSeries';
+import { fetchLatestDomain } from '../../utils/scrapers/animeSeries';
 // import { Comics1WebView } from '../../utils/scrapers/comics1';
 
 export const JoinDiscord = ({
@@ -162,7 +162,7 @@ function Loading(props: Props) {
   }, []);
 
   const fetchDomain = useCallback(async () => {
-    await animeLocalAPI.fetchLatestDomain().catch(() => {
+    await fetchLatestDomain().catch(() => {
       ToastAndroid.show(
         'Gagal mendapatkan domain terbaru, menggunakan domain default',
         ToastAndroid.SHORT,

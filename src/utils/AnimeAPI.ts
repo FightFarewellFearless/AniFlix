@@ -7,9 +7,17 @@ import {
   NewAnimeList,
   SearchAnime,
 } from '../types/anime';
-import Anime, { BASE } from './scrapers/animeSeries';
 import { setWebViewOpen } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
+import {
+  BASE,
+  fetchStreamingResolution,
+  fromUrl,
+  jadwalAnime,
+  listAnime,
+  newAnime,
+  searchAnime,
+} from './scrapers/animeSeries';
 
 class AnimeAPI {
   private static base_url = 'https://aniflix.pirles.ix.tc/v5/';
@@ -23,14 +31,14 @@ class AnimeAPI {
     // });
     // return await (data.json() as Promise<EpisodeBaruHome>);
 
-    const [newAnime, jadwalAnime] = await Promise.all([
-      Anime.newAnime(undefined, signal),
-      Anime.jadwalAnime(signal),
+    const [newAnimeRelease, jadwalAnimeRelease] = await Promise.all([
+      newAnime(undefined, signal),
+      jadwalAnime(signal),
     ]);
 
     return {
-      newAnime,
-      jadwalAnime,
+      newAnime: newAnimeRelease,
+      jadwalAnime: jadwalAnimeRelease,
     };
   }
 
@@ -46,7 +54,7 @@ class AnimeAPI {
     // });
     // return await (data.json() as Promise<NewAnimeList[]>);
 
-    return await Anime.newAnime(page, signal);
+    return await newAnime(page, signal);
   }
 
   static async search(query: string, signal?: AbortSignal): Promise<SearchAnime> {
@@ -73,7 +81,7 @@ class AnimeAPI {
       throw new Error('Silahkan selesaikan captcha');
     }
     return {
-      result: await Anime.searchAnime(query, signal),
+      result: await searchAnime(query, signal),
     };
   }
 
@@ -120,13 +128,7 @@ class AnimeAPI {
         setWebViewOpen.openWebViewCF(true, link);
         throw new Error('Silahkan selesaikan captcha');
       }
-      return (await Anime.fromUrl(
-        link,
-        resolution,
-        skipAutoRes,
-        detailOnly,
-        signal,
-      )) as fromUrlJSON;
+      return (await fromUrl(link, resolution, skipAutoRes, detailOnly, signal)) as fromUrlJSON;
     } catch (e: any) {
       // console.error(e.message)
       if (e.message === 'Silahkan selesaikan captcha') {
@@ -158,7 +160,7 @@ class AnimeAPI {
     //     }
     // ).then(a => a.json()) as listAnimeTypeList[];
     // return data;
-    return await Anime.listAnime(signal, streamingCallback);
+    return await listAnime(signal, streamingCallback);
   }
 
   static async reqResolution(
@@ -179,7 +181,7 @@ class AnimeAPI {
     // ).then(a => a.text()) as string;
     // return data;
 
-    return await Anime.fetchStreamingResolution(
+    return await fetchStreamingResolution(
       requestData,
       reqNonceAction,
       reqResolutionWithNonceAction,

@@ -16,7 +16,7 @@ import { runOnJS, runOnRuntime } from 'react-native-worklets';
 import runtime from '../../misc/AniFlixRuntime';
 
 export const __ALIAS = 'otakudesu';
-let BASE_DOMAIN = __ALIAS + '.best';
+let BASE_DOMAIN = __ALIAS + '.blog';
 let BASE_URL = 'https://' + BASE_DOMAIN;
 
 export const BASE = {
@@ -673,8 +673,7 @@ async function jadwalAnime(signal?: AbortSignal) {
   return jadwal;
 }
 
-export default {
-  BASE,
+export {
   fetchLatestDomain,
   newAnime,
   searchAnime,

@@ -4,7 +4,7 @@ import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
 import URL from 'url';
-import AnimeLocal from '../../utils/scrapers/animeSeries';
+import { BASE } from '../../utils/scrapers/animeSeries';
 import LoadingIndicator from './LoadingIndicator';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 
@@ -21,7 +21,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
     ) {
       if (source.uri.includes('otakudesu')) {
         const withoutDomain = URL.parse(source.uri);
-        return `${withoutDomain.protocol}//${AnimeLocal.BASE.domain}${withoutDomain.pathname}`;
+        return `${withoutDomain.protocol}//${BASE.domain}${withoutDomain.pathname}`;
       }
       return generateUrlWithLatestDomain(source.uri);
     }
