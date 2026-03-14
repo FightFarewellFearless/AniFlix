@@ -205,6 +205,8 @@ export async function getComicsDetailFromUrl1(
   const chaptersResponse = await fetch(chapterUrl, {
     signal,
     headers: {
+      Referer: url,
+      Origin: BASE_URL,
       'User-Agent': deviceUserAgent,
       'X-Token': session.token,
       'X-Sign': session.sign,
@@ -305,6 +307,8 @@ export async function getComicsReading1(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
     {
       headers: {
+        Referer: url,
+        Origin: BASE_URL,
         // needed for explicit genre to works
         Authorization: COMICS1_AUTH,
         'User-Agent': deviceUserAgent,
@@ -410,6 +414,8 @@ export async function comicsSearch1(query: string, signal?: AbortSignal): Promis
     `${API_URL}/komik?page=1&limit=24&sortBy=newKomik&name=${encodeURIComponent(query)}`,
     {
       headers: {
+        Origin: BASE_URL,
+        Referer: BASE_URL + '/komik/list?name=' + encodeURIComponent(query),
         'User-Agent': deviceUserAgent,
         'X-Token': session.token,
         'X-Sign': session.sign,
