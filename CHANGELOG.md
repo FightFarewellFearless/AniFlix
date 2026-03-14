@@ -1,3 +1,6 @@
+# v1.1.4_JS-30 (14-Maret-2026)
+## Diperbaiki
+- Resolusi anime yang sangat buruk pada beberapa anime lawas
 # v1.1.4_JS-29 (13-Maret-2026)
 - Memperbaiki gambar komik yang muncul acak
 # v1.1.4_JS-28 (12-Maret-2026)
