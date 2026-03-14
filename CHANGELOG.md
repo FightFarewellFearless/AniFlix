@@ -1,3 +1,6 @@
+# v1.1.4_JS-31 (14-Maret-2026)
+## Diperbaiki
+- Error pada komik
 # v1.1.4_JS-30 (14-Maret-2026)
 ## Diperbaiki
 - Resolusi anime yang sangat buruk pada beberapa anime lawas
