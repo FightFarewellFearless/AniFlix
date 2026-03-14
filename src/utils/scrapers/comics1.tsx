@@ -122,7 +122,7 @@ export async function getLatestComicsReleases1(
     const updatedAt = x.updated_at;
     return {
       title,
-      thumbnailUrl: normalizeUrl(thumbnailUrl),
+      thumbnailUrl: compressedImageUrl(normalizeUrl(thumbnailUrl)),
       detailUrl: normalizeUrl(detailUrl),
       type,
       latestChapter,
