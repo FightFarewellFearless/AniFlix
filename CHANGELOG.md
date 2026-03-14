@@ -1,3 +1,6 @@
+# v1.1.4_JS-32 (15-Maret-2026)
+## Diperbaiki
+- Cover komik gagal loading
 # v1.1.4_JS-31 (14-Maret-2026)
 ## Diperbaiki
 - Error pada komik
