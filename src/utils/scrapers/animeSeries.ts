@@ -377,7 +377,7 @@ const getStreamLink = async (
         //odstream
         return data.split('{id:"playerjs", file:"')[1].split('"')[0];
       } else if (data.includes('blogger.com/video.g') && data.includes('iframe')) {
-        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '');
+        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '', signal);
       } else if (data.includes('source src=')) {
         return cheerio.load(data)('source').attr('src');
       } else {
@@ -414,11 +414,12 @@ const getStreamLink = async (
   }
 };
 
-async function getFiledonVideo(url: string) {
+async function getFiledonVideo(url: string, signal?: AbortSignal) {
   const data = await axios.get(url, {
     headers: {
       'User-Agent': deviceUserAgent,
     },
+    signal,
   });
   const convertToValidJson = (jsonString: string) => {
     let sanitizedString = jsonString.replace(/&quot;/g, '"');
@@ -443,7 +444,15 @@ async function getFiledonVideo(url: string) {
   const link = convertToValidJson($('div#app').attr('data-page')!);
   return link.props.url;
 }
-async function getBloggerVideo(url: string) {
+let requestCounter = 0;
+function getReqId() {
+  const now = new Date();
+  const secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const reqid = 1 + secondsSinceMidnight + requestCounter * 100000;
+  requestCounter++;
+  return reqid;
+}
+async function getBloggerVideo(url: string, signal?: AbortSignal) {
   const data = await axios.get(url, {
     headers: {
       'User-Agent': deviceUserAgent,
@@ -457,8 +466,9 @@ async function getBloggerVideo(url: string) {
       const f_sid = data.data.split('FdrFJe":"')[1].split('"')[0];
       const bl = data.data.split('cfb2h":"')[1].split('"')[0];
       const response = await fetch(
-        `https://www.blogger.com/_/BloggerVideoPlayerUi/data/batchexecute?rpcids=WcwnYd&source-path=%2Fvideo.g&f.sid=${f_sid}&bl=${bl}&hl=en-US&_reqid=46654&rt=c`,
+        `https://www.blogger.com/_/BloggerVideoPlayerUi/data/batchexecute?rpcids=WcwnYd&source-path=%2Fvideo.g&f.sid=${f_sid}&bl=${bl}&hl=en-US&_reqid=${getReqId()}&rt=c`,
         {
+          signal,
           headers: {
             accept: '*/*',
             'accept-language': 'en-US,en;q=0.9',
@@ -488,8 +498,12 @@ async function getBloggerVideo(url: string) {
         },
       );
       return await response.text().then(res => {
-        const encodedLink = res.split('https://')[1].split('\\",[')[0].replace(/\\\\/g, '\\');
-        const link = JSON.parse(`"https://${encodedLink}"`);
+        const encodedLink = res
+          .split('https://rr')
+          .at(-1)! // select the last available video (usually higher resolution)
+          .split('\\",[')[0]
+          .replace(/\\\\/g, '\\');
+        const link = JSON.parse(`"https://rr${encodedLink}"`);
         return link;
       });
     } catch (e) {
