@@ -1,42 +1,23 @@
-import { useIsFocused } from '@react-navigation/native';
-import { Image, ImageProps } from 'react-native';
-import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/fontawesome';
+import { useIsFocused } from '@react-navigation/native';
+import React, { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { Image, ImageProps, ImageSourcePropType, StyleSheet, View } from 'react-native';
 import URL from 'url';
-import { BASE } from '../../utils/scrapers/animeSeries';
-import LoadingIndicator from './LoadingIndicator';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
+import { BASE } from '../../utils/scrapers/animeSeries';
+import { BASE_URL } from '../../utils/scrapers/comics1';
+import LoadingIndicator from './LoadingIndicator';
 
-const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
-  const { source, style, children, ...restProps } = props;
-
-  const imageSourceUri = React.useMemo(() => {
-    if (
-      source &&
-      typeof source === 'object' &&
-      !Array.isArray(source) &&
-      'uri' in source &&
-      source.uri
-    ) {
-      if (source.uri.includes('otakudesu')) {
-        const withoutDomain = URL.parse(source.uri);
-        return `${withoutDomain.protocol}//${BASE.domain}${withoutDomain.pathname}`;
-      }
-      return generateUrlWithLatestDomain(source.uri);
-    }
-    return source;
-  }, [source]);
+const ImageLoading = (
+  props: ImageProps & { children?: React.ReactNode; displayLoading?: boolean },
+) => {
+  const { source, style, children, displayLoading = true, ...restProps } = props;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const onLoadStart = useCallback(() => {
-    setLoading(true);
-  }, []);
-  const onLoadEnd = useCallback(() => {
-    setLoading(false);
-  }, []);
+  const onLoadStart = useCallback(() => setLoading(true), []);
+  const onLoadEnd = useCallback(() => setLoading(false), []);
   const onError = useCallback(() => {
     setError(true);
     setLoading(false);
@@ -49,20 +30,55 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
 
   const isFocused = useIsFocused();
 
+  const resolvedSource = useMemo<ImageSourcePropType | undefined>(() => {
+    if (!source) return source;
+
+    if (typeof source === 'number') return source;
+
+    const activeSource = Array.isArray(source) ? source[0] : source;
+    let baseSourceObj: any = {};
+
+    if (typeof activeSource === 'string') {
+      baseSourceObj = { uri: activeSource };
+    } else if (typeof activeSource === 'object' && activeSource !== null) {
+      baseSourceObj = { ...activeSource };
+    } else {
+      return source as ImageSourcePropType;
+    }
+
+    if (typeof baseSourceObj.uri === 'string') {
+      if (typeof source === 'object' && !Array.isArray(source)) {
+        if (baseSourceObj.uri.includes('otakudesu')) {
+          const withoutDomain = URL.parse(baseSourceObj.uri);
+          baseSourceObj.uri = `${withoutDomain.protocol}//${BASE.domain}${withoutDomain.pathname}`;
+        } else {
+          baseSourceObj.uri = generateUrlWithLatestDomain(baseSourceObj.uri);
+        }
+      }
+    }
+
+    let computedHeaders: Record<string, string> = { ...baseSourceObj.headers };
+
+    if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('softkomik')) {
+      computedHeaders.Referer = BASE_URL;
+    }
+
+    if (Object.keys(computedHeaders).length > 0) {
+      baseSourceObj.headers = computedHeaders;
+    } else {
+      delete baseSourceObj.headers;
+    }
+
+    return baseSourceObj as ImageSourcePropType;
+  }, [source]);
+
   return (
     <View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
           fadeDuration={200}
           {...restProps}
-          source={
-            source &&
-            typeof source === 'object' &&
-            'uri' in source &&
-            typeof imageSourceUri === 'string'
-              ? { ...source, uri: imageSourceUri }
-              : source
-          }
+          source={resolvedSource}
           style={[StyleSheet.absoluteFill]}
           onLoadStart={onLoadStart}
           onLoadEnd={onLoadEnd}
@@ -72,7 +88,7 @@ const ImageLoading = (props: ImageProps & { children?: React.ReactNode }) => {
       {children}
       {isFocused && (
         <View style={styles.overlay}>
-          {loading && <LoadingIndicator size={15} />}
+          {loading && displayLoading && <LoadingIndicator size={15} />}
           {error && <Icon name="exclamation-circle" color="red" size={18} />}
         </View>
       )}

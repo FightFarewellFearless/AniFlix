@@ -2,7 +2,6 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -29,6 +28,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
+import ImageLoading from '../misc/ImageLoading';
 
 interface MovieEpisode {
   title: string;
@@ -133,7 +133,7 @@ function MovieDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
+            <ImageLoading
               source={{ uri: data.thumbnailUrl }}
               style={styles.thumbnail}
               resizeMode="stretch"

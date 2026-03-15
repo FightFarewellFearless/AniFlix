@@ -3,7 +3,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
 import {
   ColorSchemeName,
-  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -36,6 +35,7 @@ import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/Datab
 import DialogManager from '../../utils/dialogManager';
 import setHistory from '../../utils/historyControl';
 import { FilmDetail_Stream, FilmDetails_Detail, FilmEpisode } from '../../utils/scrapers/film';
+import ImageLoading from '../misc/ImageLoading';
 
 type ModifiedFilmSeason = (
   | { type: 'season'; text: string }
@@ -47,7 +47,7 @@ type RecyclerViewType = (
     ref?: React.Ref<FlashListRef<ModifiedFilmSeason[number]>>;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
+const ReanimatedImage = Reanimated.createAnimatedComponent(ImageLoading);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FilmDetail'>;
@@ -197,7 +197,7 @@ function FilmDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
+            <ImageLoading
               source={{
                 uri: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
               }}

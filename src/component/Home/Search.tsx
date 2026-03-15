@@ -7,7 +7,6 @@ import React, { memo, useCallback, useMemo, useRef, useState, useTransition } fr
 import {
   ActivityIndicator,
   BackHandler,
-  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   StyleSheet,
@@ -784,7 +783,11 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
         )}
       </ImageLoading>
 
-      <ImageBackground source={{ uri: item.thumbnailUrl }} blurRadius={5} style={{ flex: 1 }}>
+      <ImageLoading
+        displayLoading={false}
+        source={{ uri: item.thumbnailUrl }}
+        blurRadius={5}
+        style={{ flex: 1 }}>
         <DarkOverlay transparent={0.8} />
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <View style={styles.ratingInfo}>
@@ -904,7 +907,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
             )}
           </View>
         </View>
-      </ImageBackground>
+      </ImageLoading>
     </TouchableOpacityAnimated>
   );
 }

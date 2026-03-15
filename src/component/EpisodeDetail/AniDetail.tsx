@@ -2,7 +2,6 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { memo, useMemo, useState } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -32,6 +31,7 @@ import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import { replaceLast } from '../../utils/replaceLast';
+import ImageLoading from '../misc/ImageLoading';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },
@@ -149,7 +149,7 @@ function AniDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
+            <ImageLoading
               source={{ uri: data.thumbnailUrl }}
               style={styles.thumbnail}
               resizeMode="contain"

@@ -5,7 +5,6 @@ import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/Recycle
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -33,6 +32,7 @@ import { __ALIAS as Comics2Alias } from '../../utils/scrapers/comics2';
 import { ComicsDetail as ComicsDetailTypeData } from '../../utils/scrapers/comicsv2';
 import { __ALIAS as KomikuAlias, KomikuDetail } from '../../utils/scrapers/komiku';
 import controlWatchLater from '../../utils/watchLaterControl';
+import ImageLoading from '../misc/ImageLoading';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]> & {
@@ -41,7 +41,7 @@ type RecyclerViewType = (
     >;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
+const ReanimatedImage = Reanimated.createAnimatedComponent(ImageLoading);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
@@ -268,7 +268,7 @@ export default function ComicsDetail(props: Props) {
             />
             <View style={[styles.mainContainer, styles.mainContent]}>
               <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                <Image source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
+                <ImageLoading source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
                 <View
                   style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
                   <Surface

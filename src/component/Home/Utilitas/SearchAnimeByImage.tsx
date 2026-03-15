@@ -7,7 +7,6 @@ import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Modal,
   StyleSheet,
   Text,
@@ -18,6 +17,7 @@ import {
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 import useGlobalStyles from '../../../assets/style';
+import ImageLoading from '../../misc/ImageLoading';
 
 interface SearchResult {
   frameCount: number;
@@ -192,7 +192,7 @@ function SearchAnimeByImage() {
 
               <View style={styles.imagePreviewContainer}>
                 {choosenImage ? (
-                  <Image
+                  <ImageLoading
                     source={{ uri: choosenImage }}
                     style={styles.selectedImage}
                     resizeMode="contain"
@@ -223,7 +223,7 @@ function SearchAnimeByImage() {
               <>
                 <View style={styles.resultHeader}>
                   {item.image ? (
-                    <Image style={styles.resultImage} source={{ uri: item.image }} />
+                    <ImageLoading style={styles.resultImage} source={{ uri: item.image }} />
                   ) : (
                     <View style={styles.resultImagePlaceholder}>
                       <Icon name="image" size={32} color={globalStyles.text.color} />
