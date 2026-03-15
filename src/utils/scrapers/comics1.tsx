@@ -339,7 +339,7 @@ export async function getComicsReading1(
   const detectedCdn = await detectCDNImage($, signal);
   const cdn1 = detectedCdn?.[0]?.link;
   const comicImages = jsonApi.imageSrc.map((src: string) => {
-    return (cdn1 ? cdn1 : `https://cd1.softkomik.online/softkomik`) + '/' + src;
+    return (cdn1 ? cdn1 : `https://image.komik.im/softkomik`) + '/' + src;
   });
   const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
   const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';
@@ -377,9 +377,9 @@ async function detectCDNImage(
     signal,
   });
   const scriptData = await scriptRes.text();
-  const cdnMatch = scriptData.match(/(\[\{.*?CDN 1.*?\},?\])/);
+  const cdnMatch = scriptData.match(/(\[\{.*?CDN 1.*?\},?\])/g);
   // eslint-disable-next-line no-new-func
-  return cdnMatch ? new Function(`return ${cdnMatch[0]}`)() : null;
+  return cdnMatch ? new Function(`return ${cdnMatch[1] ?? cdnMatch[0]}`)() : null;
 }
 export interface ComicsSearch1 {
   title: string;
