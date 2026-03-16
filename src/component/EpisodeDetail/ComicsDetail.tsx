@@ -10,6 +10,7 @@ import {
   ToastAndroid,
   TouchableOpacity,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
@@ -449,6 +450,7 @@ function useStyles() {
   const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+  const dimensions = useWindowDimensions();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -472,7 +474,7 @@ function useStyles() {
         },
         thumbnail: {
           margin: 15,
-          width: 110,
+          width: dimensions.width * 0.3,
           height: 150,
           borderRadius: 10,
           transform: [{ translateY: -30 }],
@@ -583,6 +585,7 @@ function useStyles() {
       }),
     [
       colorScheme,
+      dimensions.width,
       globalStyles.text.color,
       theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,

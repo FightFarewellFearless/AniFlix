@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
 import { Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
@@ -440,6 +441,7 @@ function useStyles() {
   const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+  const dimensions = useWindowDimensions();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -465,7 +467,7 @@ function useStyles() {
         },
         thumbnail: {
           margin: 15,
-          width: 110,
+          width: dimensions.width * 0.3,
           height: 150,
           borderRadius: 10,
           transform: [{ translateY: -40 }],
@@ -614,12 +616,13 @@ function useStyles() {
       }),
     [
       colorScheme,
+      dimensions.width,
       globalStyles.text.color,
-      theme.colors.onPrimaryContainer,
-      theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
-      theme.colors.primary,
+      theme.colors.onSecondaryContainer,
       theme.colors.primaryContainer,
+      theme.colors.primary,
+      theme.colors.onPrimaryContainer,
     ],
   );
 }
