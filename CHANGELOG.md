@@ -1,3 +1,12 @@
+# v1.1.4_JS-33 (16-Maret-2026)
+## Ditambahkan
+- Pengumuman
+## Diperbaiki
+- Gambar cover komik gagal dimuat
+- Stuck di detail komik pada beberapa judul
+## Ditingkatkan
+- Menggunakan CDN komik yang paling baru
+- Membuat ukuran gambar cover responsif di detail episode/movie/film/komik
 # v1.1.4_JS-32 (15-Maret-2026)
 ## Diperbaiki
 - Cover komik gagal loading
