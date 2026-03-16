@@ -59,6 +59,7 @@ import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
 import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
 import { FilmHomePage, getFeatured, getLatest } from '../../utils/scrapers/film';
 import { Github, JoinDiscord } from '../Loading Screen/Connect';
+import Announcment from '../misc/Announcement';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
@@ -238,6 +239,7 @@ function HomeList(props: HomeProps) {
       }}
       ListHeaderComponent={
         <>
+          <Announcment />
           <View style={styles.headerCard}>
             <View style={styles.headerInfo}>
               <ReText style={styles.timeText} text={localTime} />
