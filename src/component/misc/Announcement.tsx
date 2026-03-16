@@ -42,8 +42,8 @@ export default function Announcement() {
       <Modal visible={modalVisible} contentContainerStyle={{ flex: 1 }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <View style={styles.container}>
-            <View style={styles.contentContainer}>
-              <View style={styles.contentInnerContainer}>
+            <View>
+              <View style={styles.contentContainer}>
                 <View style={styles.header}>
                   <Text
                     style={[
@@ -65,14 +65,16 @@ export default function Announcement() {
                     value={announcementText}
                   />
                 </View>
-                <Button
-                  mode="contained"
-                  icon="close"
-                  onPress={() => {
-                    setModalVisible(false);
-                  }}>
-                  Tutup
-                </Button>
+                <View style={styles.footer}>
+                  <Button
+                    mode="contained"
+                    icon="close"
+                    onPress={() => {
+                      setModalVisible(false);
+                    }}>
+                    Tutup
+                  </Button>
+                </View>
               </View>
             </View>
           </View>
@@ -92,14 +94,9 @@ function useStyles() {
         justifyContent: 'center',
       },
       contentContainer: {
-        backgroundColor: theme.colors.elevation.level1,
         padding: 12,
         borderRadius: 6,
-      },
-      contentInnerContainer: {
-        padding: 2,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.elevation.level1,
       },
       header: {
         minHeight: '15%',
@@ -112,6 +109,7 @@ function useStyles() {
         fontSize: 28,
       },
       content: {},
+      footer: {},
     });
   }, [theme]);
 }
