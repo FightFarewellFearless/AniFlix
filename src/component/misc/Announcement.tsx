@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BackHandler, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Markdown from 'react-native-marked';
 import { Button, Modal, Portal, useTheme } from 'react-native-paper';
 import useGlobalStyles from '../../assets/style';
@@ -28,18 +28,14 @@ export default function Announcement() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (modalVisible) {
-      const event = BackHandler.addEventListener('hardwareBackPress', () => {
-        setModalVisible(false);
-      });
-      return event.remove;
-    }
-  }, [modalVisible]);
-
   return (
     <Portal>
-      <Modal visible={modalVisible} contentContainerStyle={{ flex: 1 }}>
+      <Modal
+        visible={modalVisible}
+        contentContainerStyle={{ flex: 1 }}
+        onDismiss={() => {
+          setModalVisible(false);
+        }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <View style={styles.container}>
             <View>
