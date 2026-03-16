@@ -7,7 +7,7 @@ function Changelog() {
   const theme = useTheme();
   return (
     <Markdown
-      flatListProps={{ style: { backgroundColor: theme.colors.background } }}
+      flatListProps={{ style: { backgroundColor: theme.colors.elevation.level1 } }}
       value={CHANGELOG}
     />
   );
