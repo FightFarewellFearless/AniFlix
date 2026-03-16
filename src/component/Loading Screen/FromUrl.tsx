@@ -17,9 +17,17 @@ import DialogManager from '../../utils/dialogManager';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 import { replaceLast } from '../../utils/replaceLast';
 import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
-import { getComicsDetailFromUrl, getComicsReading } from '../../utils/scrapers/comicsv2';
+import {
+  ComicsDetail,
+  getComicsDetailFromUrl,
+  getComicsReading,
+} from '../../utils/scrapers/comicsv2';
 import { getFilmDetails } from '../../utils/scrapers/film';
-import { getKomikuDetailFromUrl, getKomikuReading } from '../../utils/scrapers/komiku';
+import {
+  getKomikuDetailFromUrl,
+  getKomikuReading,
+  KomikuDetail,
+} from '../../utils/scrapers/komiku';
 import { setFilmStreamHistory } from '../EpisodeDetail/FilmDetail';
 import LoadingIndicator from '../misc/LoadingIndicator';
 
@@ -243,12 +251,16 @@ function FromUrl(props: Props) {
       const isSoftkomik = link.includes('softkomik');
       const isSoftkomikGoToDetail = isSoftkomik && !link.includes('/chapter/');
       const isKomikuGoToDetail = isKomiku && link.includes('/manga/');
-      const isKomikindoGoToDetail = isKomikindo && !link.includes('-chapter-');
+      const isKomikindoGoToDetail =
+        isKomikindo && !(link.includes('-chapter-') || link.includes('-chapte-'));
       const goToDetail = isKomikuGoToDetail || isKomikindoGoToDetail || isSoftkomikGoToDetail;
       if (goToDetail) {
-        (link.includes('komikindo') || link.includes('softkomik')
-          ? getComicsDetailFromUrl
-          : getKomikuDetailFromUrl)(link, abort.signal)
+        const fetchComicsPromise = (
+          link.includes('komikindo') || link.includes('softkomik')
+            ? getComicsDetailFromUrl(link, abort.signal)
+            : getKomikuDetailFromUrl(link, abort.signal)
+        ) as Promise<ComicsDetail | KomikuDetail>;
+        fetchComicsPromise
           .then(result => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if (result.genres.includes('Ecchi')) {
