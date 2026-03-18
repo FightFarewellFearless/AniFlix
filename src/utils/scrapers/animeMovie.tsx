@@ -498,7 +498,9 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
             'User-Agent': deviceUserAgent,
           },
           signal: abortController.signal,
-        }).then(a => a.text());
+        })
+          .then(a => a.text())
+          .catch(() => '');
         if (text.includes('<title>AnimeSail')) {
           setIsWebViewShown(false);
           onAnimeMovieReady();
