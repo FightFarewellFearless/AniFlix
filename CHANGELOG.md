@@ -1,3 +1,6 @@
+# v1.2.0_JS-1 (18-Maret-2026)
+## Diperbaiki
+- Memperbaiki crash Invalid URL (hanya potensi perbaikan, akar masalah belum diperbaiki karena minim nya informasi crash, harap untuk orang yang melapor agar join server discord dan infokan lebih lanjut disana, trimakasih)
 # v1.2.0 (18-Maret-2026)
 Versi 1.2.0 Hadir!
 Versi ini memberikan pengalaman yang lebih stabil dengan versi library yang ditingkatkan dan dukungan untuk membuka file .cbz (ini file untuk komik)
@@ -8,6 +11,7 @@ Versi ini memberikan pengalaman yang lebih stabil dengan versi library yang diti
 - Hanya membuka webview inisialisasi data movie ketika dibutuhkan
 ## Diperbaiki
 - Beberapa masalah pada kode
+
 # v1.1.4_JS-33 (16-Maret-2026)
 ## Ditambahkan
 - Pengumuman
