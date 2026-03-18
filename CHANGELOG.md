@@ -1,3 +1,13 @@
+# v1.2.0 (18-Maret-2026)
+Versi 1.2.0 Hadir!
+Versi ini memberikan pengalaman yang lebih stabil dengan versi library yang ditingkatkan dan dukungan untuk membuka file .cbz (ini file untuk komik)
+## Ditambahkan
+- Dukungan untuk membuka file .cbz (comic book zip)
+- Download komik ke dalam file .cbz dan buka secara offline!
+## Ditingkatkan
+- Hanya membuka webview inisialisasi data movie ketika dibutuhkan
+## Diperbaiki
+- Beberapa masalah pada kode
 # v1.1.4_JS-33 (16-Maret-2026)
 ## Ditambahkan
 - Pengumuman
