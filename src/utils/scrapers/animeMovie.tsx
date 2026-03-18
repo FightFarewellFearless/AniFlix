@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -7,6 +7,7 @@ import deviceUserAgent from '../deviceUserAgent';
 
 import cheerio from 'cheerio';
 
+import { useFocusEffect, useIsFocused } from '@react-navigation/core';
 import { unpack } from '../unpacker';
 
 export interface Movies {
@@ -486,25 +487,47 @@ export async function searchMovie(query: string, signal?: AbortSignal) {
 
 export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
   const webviewRef = useRef<WebView>(null);
-  useEffect(() => {
-    isError = false;
-  }, []);
-  useEffect(() => {
-    if (isWebViewShown) {
-      const timeout = setTimeout(() => {
-        isError = true;
-        setIsWebViewShown(false);
-        onAnimeMovieReady();
-        ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
-      }, 15_000);
+  const [webviewRequired, setWebviewRequired] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      isError = false;
+      const abortController = new AbortController();
+      (async () => {
+        const text = await fetch('https://154.26.137.28/', {
+          headers: {
+            'User-Agent': deviceUserAgent,
+          },
+          signal: abortController.signal,
+        }).then(a => a.text());
+        if (text.includes('<title>AnimeSail')) {
+          setIsWebViewShown(false);
+          onAnimeMovieReady();
+        } else setWebviewRequired(true);
+      })();
       return () => {
-        clearTimeout(timeout);
+        abortController.abort();
       };
-    }
-  }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
+    }, [onAnimeMovieReady, setIsWebViewShown]),
+  );
+  useFocusEffect(
+    useCallback(() => {
+      if (isWebViewShown) {
+        const timeout = setTimeout(() => {
+          isError = true;
+          setIsWebViewShown(false);
+          onAnimeMovieReady();
+          ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
+        }, 15_000);
+        return () => {
+          clearTimeout(timeout);
+        };
+      }
+    }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]),
+  );
+  if (!useIsFocused()) return null;
   return (
     <View style={{ height: 0, display: 'none' }}>
-      {isWebViewShown && (
+      {isWebViewShown && webviewRequired && (
         <WebView
           ref={webviewRef}
           userAgent={deviceUserAgent}

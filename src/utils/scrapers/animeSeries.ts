@@ -24,9 +24,12 @@ export const BASE = {
   url: BASE_URL,
 };
 
-const fetchLatestDomain = async () => {
+const fetchLatestDomain = async (signal?: AbortSignal) => {
   const domainName = await fetch(
     'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/master/SCRAPE_DOMAIN.txt',
+    {
+      signal,
+    },
   ).then(res => res.text());
   if (domainName === '404: Not Found') {
     throw new Error('Domain not found');

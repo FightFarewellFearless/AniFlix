@@ -103,8 +103,8 @@ function Loading(props: Props) {
   const [progressValue, setProgressValue] = useState(0);
   const progressValueAnimation = useSharedValue(0);
 
-  const fetchAnimeData = useCallback(async () => {
-    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
+  const fetchAnimeData = useCallback(async (signal: AbortSignal) => {
+    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home(signal).catch(() => {
       // props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       ToastAndroid.show('Gagal menghubungkan ke server anime', ToastAndroid.SHORT);
     });
@@ -161,8 +161,8 @@ function Loading(props: Props) {
     }
   }, []);
 
-  const fetchDomain = useCallback(async () => {
-    await fetchLatestDomain().catch(() => {
+  const fetchDomain = useCallback(async (signal: AbortSignal) => {
+    await fetchLatestDomain(signal).catch(() => {
       ToastAndroid.show(
         'Gagal mendapatkan domain terbaru, menggunakan domain default',
         ToastAndroid.SHORT,
@@ -170,9 +170,12 @@ function Loading(props: Props) {
     });
   }, []);
 
-  const checkNativeAppVersion = useCallback(async () => {
+  const checkNativeAppVersion = useCallback(async (signal: AbortSignal) => {
     const abort = new AbortController();
     const timoeut = setTimeout(() => abort.abort(), 5000);
+    const onAbort = () => abort.abort();
+    signal.addEventListener('abort', onAbort);
+
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
       {
@@ -185,6 +188,10 @@ function Loading(props: Props) {
       .then(d => d.json())
       .catch(() => {});
     clearTimeout(timoeut);
+    signal.removeEventListener('abort', onAbort);
+
+    if (signal.aborted) return null;
+
     if (data === undefined) {
       ToastAndroid.show('Error saat mengecek versi', ToastAndroid.SHORT);
       return true;
@@ -222,62 +229,82 @@ function Loading(props: Props) {
   //   comics1PromiseResolve.current?.();
   // }, [isAnimeMovieWebViewOpen, isComics1WebViewOpen]);
 
-  const connectToServers = useCallback(async () => {
-    setIsAnimeMovieWebViewOpen(true);
-    // setIsComics1WebViewOpen(true);
-    const animeData = await fetchAnimeData();
-    Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
-      if (anime === undefined) {
-        return;
-      }
-      props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
-    });
-  }, [animeMoviePromise, fetchAnimeData, props.navigation]);
+  const connectToServers = useCallback(
+    async (signal: AbortSignal) => {
+      setIsAnimeMovieWebViewOpen(true);
+      // setIsComics1WebViewOpen(true);
+      const animeData = await fetchAnimeData(signal);
+      Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
+        if (signal.aborted) return;
+        if (anime === undefined) {
+          return;
+        }
+        props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
+      });
+    },
+    [animeMoviePromise, fetchAnimeData, props.navigation],
+  );
 
   useFocusEffect(
     useCallback(() => {
+      const abortController = new AbortController();
+      const signal = abortController.signal;
+
       (async () => {
         await prepareData();
+        if (signal.aborted) return;
+
         await deleteUnnecessaryUpdate();
+        if (signal.aborted) return;
+
         setLoadStatus(old => ({
           ...old,
           'Menyiapkan database': true,
         }));
 
-        const nativeAppVersion = await checkNativeAppVersion();
+        const nativeAppVersion = await checkNativeAppVersion(signal);
+        if (signal.aborted) return;
+
         if (nativeAppVersion === null) {
           props.navigation.dispatch(StackActions.replace('FailedToConnect'));
         } else if (nativeAppVersion === true || __DEV__) {
           let isOTADoneExecuted = false;
           async function OTADone() {
-            if (isOTADoneExecuted) return;
+            if (isOTADoneExecuted || signal.aborted) return;
             isOTADoneExecuted = true;
             setLoadStatus(old => ({
               ...old,
               'Mengecek versi aplikasi': true,
             }));
-            await fetchDomain();
+            await fetchDomain(signal);
+            if (signal.aborted) return;
             setLoadStatus(old => ({
               ...old,
               'Mendapatkan domain terbaru': true,
             }));
-            connectToServers();
+            connectToServers(signal);
           }
           const OTATimeout = setTimeout(() => {
+            if (signal.aborted) return;
             ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
             OTADone();
           }, 6_000);
           const OTAUpdate = await Updates.checkForUpdateAsync()
             .catch(() => {
-              ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
+              if (!signal.aborted) {
+                ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
+              }
               return null;
             })
             .finally(() => clearTimeout(OTATimeout));
+
+          if (signal.aborted) return;
 
           if (OTAUpdate !== null && OTAUpdate.isAvailable) {
             const changelog = await fetch(
               'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
               {
+                signal,
                 headers: {
                   'User-Agent': deviceUserAgent,
                   'Cache-Control': 'no-cache',
@@ -286,6 +313,9 @@ function Loading(props: Props) {
             )
               .then(d => d.text())
               .catch(() => 'Gagal mendapatkan changelog');
+
+            if (signal.aborted) return;
+
             props.navigation.dispatch(
               StackActions.replace('NeedUpdate', {
                 changelog,
@@ -311,6 +341,10 @@ function Loading(props: Props) {
           );
         }
       })();
+
+      return () => {
+        abortController.abort();
+      };
     }, [
       prepareData,
       checkNativeAppVersion,
