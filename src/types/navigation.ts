@@ -13,6 +13,9 @@ type HomeNavigator = {
 
 type RootStackNavigator = {
   connectToServer: undefined;
+  CbzReader: {
+    fileUrl: string;
+  };
   Home: {
     data: EpisodeBaruHome;
   };

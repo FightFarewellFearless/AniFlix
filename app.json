@@ -11,7 +11,33 @@
     "url": "https://u.expo.dev/ccdabe85-93a9-4297-936c-074a7cf27a4a"
   },
   "android": {
-    "runtimeVersion": "1.1.4"
+    "runtimeVersion": "1.1.4",
+    "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": [
+            { "scheme": "file", "mimeType": "application/zip" },
+            { "scheme": "content", "mimeType": "application/zip" },
+            { "scheme": "file", "mimeType": "application/x-cbz" },
+            { "scheme": "content", "mimeType": "application/x-cbz" },
+            { "scheme": "file", "mimeType": "application/vnd.comicbook+zip" },
+            { "scheme": "content", "mimeType": "application/vnd.comicbook+zip" },
+            { "scheme": "file", "mimeType": "application/x-zip-compressed" },
+            { "scheme": "content", "mimeType": "application/x-zip-compressed" }
+          ]
+        },
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": [
+            { "scheme": "file", "host": "*", "mimeType": "*/*", "pathPattern": ".*\\.cbz" },
+            { "scheme": "content", "host": "*", "mimeType": "*/*", "pathPattern": ".*\\.cbz" },
+            { "scheme": "file", "host": "*", "mimeType": "*/*", "pathPattern": ".*\\..*\\.cbz" },
+            { "scheme": "content", "host": "*", "mimeType": "*/*", "pathPattern": ".*\\..*\\.cbz" }
+          ]
+        }
+      ]
   },
   "experiments": {
     "reactCompiler": true

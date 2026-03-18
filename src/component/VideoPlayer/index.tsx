@@ -7,6 +7,7 @@ import {
 } from 'expo-video';
 
 import Icons from '@react-native-vector-icons/material-icons';
+import { useFocusEffect } from '@react-navigation/core';
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
 import {
@@ -153,28 +154,31 @@ function VideoPlayer({
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    async function fetchSubtitles(url: string) {
-      setSubtitleError(false);
-      try {
-        const response = await fetch(url, {
-          signal: abortController.signal,
-        });
-        if (!response.ok) throw new Error('Network response was not ok');
-        const subtitleText = await response.text();
-        const subtitle = await parseSubtitles(subtitleText ?? '');
-        setSubtitles(subtitle);
-      } catch (error) {
-        setSubtitleError(true);
-        ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+  useFocusEffect(
+    useCallback(() => {
+      const abortController = new AbortController();
+      async function fetchSubtitles(url: string) {
+        setSubtitleError(false);
+        try {
+          const response = await fetch(url, {
+            signal: abortController.signal,
+          });
+          if (!response.ok) throw new Error('Network response was not ok');
+          const subtitleText = await response.text();
+          const subtitle = await parseSubtitles(subtitleText ?? '');
+          setSubtitles(subtitle);
+        } catch (error) {
+          setSubtitleError(true);
+          ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+        }
       }
-    }
-    subtitleURL && fetchSubtitles(subtitleURL);
-    return () => {
-      abortController.abort();
-    };
-  }, [subtitleURL, subtitleRetryToken]);
+      subtitleURL && fetchSubtitles(subtitleURL);
+      return () => {
+        abortController.abort();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [subtitleURL, subtitleRetryToken]),
+  );
 
   useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);

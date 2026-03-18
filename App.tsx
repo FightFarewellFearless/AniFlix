@@ -1,4 +1,5 @@
 import {
+  LinkingOptions,
   NavigationContainer,
   DarkTheme as ReactNavigationDarkTheme,
   DefaultTheme as ReactNavigationDefaultTheme,
@@ -9,7 +10,7 @@ import {
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Appearance, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Appearance, Linking, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,6 +24,7 @@ import {
   Portal,
 } from 'react-native-paper';
 
+import ReactNativeBlobUtil from 'react-native-blob-util';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { MDDark, MDLight } from './src/assets/MaterialTheme';
@@ -40,12 +42,15 @@ import {
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
+import { cleanCbzDir } from './src/utils/cbzCleaner.ts';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
 import { Movies } from './src/utils/scrapers/animeMovie';
 import { LatestComicsRelease } from './src/utils/scrapers/comicsv2';
 import { FilmHomePage } from './src/utils/scrapers/film';
+
+cleanCbzDir();
 
 const { DarkTheme, LightTheme } = adaptNavigationTheme({
   reactNavigationLight: ReactNavigationDefaultTheme,
@@ -68,7 +73,7 @@ const CombinedDarkTheme = {
     ...MDDark.colors,
   },
 };
-
+const CbzReader = lazy(() => import('./src/component/WatchNRead/CbzReader.tsx'));
 const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
 const Home = lazy(() => import('./src/component/Home/Home'));
 const Video = lazy(() => import('./src/component/WatchNRead/Video'));
@@ -87,6 +92,45 @@ const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator<RootStackNavigator>();
+
+const linking: LinkingOptions<RootStackNavigator> = {
+  prefixes: ['aniflix://'],
+  config: {
+    initialRouteName: 'connectToServer',
+    screens: {
+      CbzReader: 'cbzReader',
+    },
+  },
+
+  async getInitialURL() {
+    const url = await Linking.getInitialURL();
+    if (
+      url &&
+      (url.startsWith('file://') || url.startsWith('content://')) &&
+      (await ReactNativeBlobUtil.fs.stat(url)).filename.endsWith('.cbz')
+    ) {
+      const encodedUrl = encodeURIComponent(url);
+      return `aniflix://cbzReader?fileUrl=${encodedUrl}`;
+    }
+    return null;
+  },
+
+  subscribe(listener) {
+    const onReceiveURL = async ({ url }: { url: string }) => {
+      if (
+        url &&
+        (url.startsWith('file://') || url.startsWith('content://')) &&
+        (await ReactNativeBlobUtil.fs.stat(url)).filename.endsWith('.cbz')
+      ) {
+        const encodedUrl = encodeURIComponent(url);
+        listener(`aniflix://cbzReader?fileUrl=${encodedUrl}`);
+      }
+    };
+
+    const subscription = Linking.addEventListener('url', onReceiveURL);
+    return () => subscription.remove();
+  },
+};
 
 export const withSuspenseAndSafeArea = (
   Component: React.ComponentType<any>,
@@ -125,6 +169,7 @@ type Screens = {
 }[];
 
 const screens: Screens = [
+  { name: 'CbzReader', component: withSuspenseAndSafeArea(CbzReader, true, true) },
   { name: 'Home', component: withSuspenseAndSafeArea(Home, false), options: undefined },
   { name: 'AnimeDetail', component: withSuspenseAndSafeArea(AniDetail, false), options: undefined },
   {
@@ -252,6 +297,7 @@ function App() {
                     )}>
                     <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
                       <NavigationContainer
+                        linking={linking}
                         ref={navigationRef}
                         theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
                         <Portal>

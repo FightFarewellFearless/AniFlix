@@ -1,7 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import Fontisto from '@react-native-vector-icons/fontisto';
 import MaterialIcon from '@react-native-vector-icons/material-design-icons';
-import { StackActions } from '@react-navigation/native';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -234,91 +234,92 @@ function Loading(props: Props) {
     });
   }, [animeMoviePromise, fetchAnimeData, props.navigation]);
 
-  useEffect(() => {
-    (async () => {
-      await prepareData();
-      await deleteUnnecessaryUpdate();
-      setLoadStatus(old => ({
-        ...old,
-        'Menyiapkan database': true,
-      }));
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        await prepareData();
+        await deleteUnnecessaryUpdate();
+        setLoadStatus(old => ({
+          ...old,
+          'Menyiapkan database': true,
+        }));
 
-      const nativeAppVersion = await checkNativeAppVersion();
-      if (nativeAppVersion === null) {
-        props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      } else if (nativeAppVersion === true || __DEV__) {
-        let isOTADoneExecuted = false;
-        async function OTADone() {
-          if (isOTADoneExecuted) return;
-          isOTADoneExecuted = true;
-          setLoadStatus(old => ({
-            ...old,
-            'Mengecek versi aplikasi': true,
-          }));
-          await fetchDomain();
-          setLoadStatus(old => ({
-            ...old,
-            'Mendapatkan domain terbaru': true,
-          }));
-          connectToServers();
-        }
-        const OTATimeout = setTimeout(() => {
-          ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
-          OTADone();
-        }, 6_000);
-        const OTAUpdate = await Updates.checkForUpdateAsync()
-          .catch(() => {
-            ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
-            return null;
-          })
-          .finally(() => clearTimeout(OTATimeout));
+        const nativeAppVersion = await checkNativeAppVersion();
+        if (nativeAppVersion === null) {
+          props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+        } else if (nativeAppVersion === true || __DEV__) {
+          let isOTADoneExecuted = false;
+          async function OTADone() {
+            if (isOTADoneExecuted) return;
+            isOTADoneExecuted = true;
+            setLoadStatus(old => ({
+              ...old,
+              'Mengecek versi aplikasi': true,
+            }));
+            await fetchDomain();
+            setLoadStatus(old => ({
+              ...old,
+              'Mendapatkan domain terbaru': true,
+            }));
+            connectToServers();
+          }
+          const OTATimeout = setTimeout(() => {
+            ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
+            OTADone();
+          }, 6_000);
+          const OTAUpdate = await Updates.checkForUpdateAsync()
+            .catch(() => {
+              ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
+              return null;
+            })
+            .finally(() => clearTimeout(OTATimeout));
 
-        if (OTAUpdate !== null && OTAUpdate.isAvailable) {
-          const changelog = await fetch(
-            'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
-            {
-              headers: {
-                'User-Agent': deviceUserAgent,
-                'Cache-Control': 'no-cache',
+          if (OTAUpdate !== null && OTAUpdate.isAvailable) {
+            const changelog = await fetch(
+              'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
+              {
+                headers: {
+                  'User-Agent': deviceUserAgent,
+                  'Cache-Control': 'no-cache',
+                },
               },
-            },
-          )
-            .then(d => d.text())
-            .catch(() => 'Gagal mendapatkan changelog');
+            )
+              .then(d => d.text())
+              .catch(() => 'Gagal mendapatkan changelog');
+            props.navigation.dispatch(
+              StackActions.replace('NeedUpdate', {
+                changelog,
+                size: 0,
+                nativeUpdate: false,
+              }),
+            );
+            return;
+          }
+          await OTADone();
+        } else {
+          const latestVersion = nativeAppVersion.tag_name;
+          const changelog = nativeAppVersion.body;
+          const download = nativeAppVersion.assets[0].browser_download_url;
+
           props.navigation.dispatch(
             StackActions.replace('NeedUpdate', {
+              latestVersion,
               changelog,
-              size: 0,
-              nativeUpdate: false,
+              download,
+              nativeUpdate: true,
             }),
           );
-          return;
         }
-        await OTADone();
-      } else {
-        const latestVersion = nativeAppVersion.tag_name;
-        const changelog = nativeAppVersion.body;
-        const download = nativeAppVersion.assets[0].browser_download_url;
-
-        props.navigation.dispatch(
-          StackActions.replace('NeedUpdate', {
-            latestVersion,
-            changelog,
-            download,
-            nativeUpdate: true,
-          }),
-        );
-      }
-    })();
-  }, [
-    fetchAnimeData,
-    prepareData,
-    checkNativeAppVersion,
-    props.navigation,
-    deleteUnnecessaryUpdate,
-    fetchDomain,
-    connectToServers,
-  ]);
+      })();
+    }, [
+      prepareData,
+      checkNativeAppVersion,
+      props.navigation,
+      deleteUnnecessaryUpdate,
+      fetchDomain,
+      connectToServers,
+    ]),
+  );
 
   useEffect(() => {
     const completedSteps = Object.values(loadStatus).filter(Boolean).length;
