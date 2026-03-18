@@ -68,7 +68,13 @@ function FromUrl(props: Props) {
     useCallback(() => {
       props.navigation.setOptions({ headerTitle: props.route.params.title });
       const abort: AbortController = new AbortController();
-      const link = generateUrlWithLatestDomain(props.route.params.link);
+      let link: string;
+      try {
+        // fix invalid url crash
+        link = generateUrlWithLatestDomain(props.route.params.link);
+      } catch {
+        link = props.route.params.link;
+      }
       const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
       if (link.includes('nanimex')) {
         props.navigation.goBack();

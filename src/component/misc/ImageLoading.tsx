@@ -52,7 +52,10 @@ const ImageLoading = (
           const withoutDomain = URL.parse(baseSourceObj.uri);
           baseSourceObj.uri = `${withoutDomain.protocol}//${BASE.domain}${withoutDomain.pathname}`;
         } else {
-          baseSourceObj.uri = generateUrlWithLatestDomain(baseSourceObj.uri);
+          try {
+            // fix invalid url crash
+            baseSourceObj.uri = generateUrlWithLatestDomain(baseSourceObj.uri);
+          } catch {}
         }
       }
     }
