@@ -775,7 +775,7 @@ function useLocalTime() {
 }
 
 function randomQuote() {
-  const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)];
+  const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)] ?? {};
   const quote = `"${randomizeQuote.quote}" - ${randomizeQuote.by}`;
   return quote;
 }

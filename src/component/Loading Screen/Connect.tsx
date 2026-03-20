@@ -367,7 +367,10 @@ function Loading(props: Props) {
     width: `${progressValueAnimation.get()}%`,
   }));
 
-  const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
+  const quotes = useMemo(
+    () => runningText[Math.floor(runningText.length * Math.random())] ?? {},
+    [],
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>

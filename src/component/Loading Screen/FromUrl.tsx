@@ -43,7 +43,7 @@ function FromUrl(props: Props) {
 
   const randomQuote = useRef(
     // eslint-disable-next-line no-bitwise
-    runningTextArray[~~(Math.random() * runningTextArray.length)],
+    runningTextArray[~~(Math.random() * runningTextArray.length)] ?? {},
   ).current;
 
   const handleError = useCallback(
