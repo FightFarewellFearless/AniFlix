@@ -251,6 +251,13 @@ function Loading(props: Props) {
       const signal = abortController.signal;
 
       (async () => {
+        setLoadStatus({
+          'Menyiapkan database': false,
+          'Mengecek versi aplikasi': false,
+          'Mendapatkan domain terbaru': false,
+          'Mempersiapkan data anime movie': false,
+          'Menghubungkan ke server': false,
+        });
         await prepareData();
         if (signal.aborted) return;
 
