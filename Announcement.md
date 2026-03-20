@@ -1,2 +1,0 @@
-Setiap laporan crash yang dikirim kami terima dengan baik. Namun karena keterbatasan informasi, kami memiliki kendala dalam memperbaiki nya, diharapkan kepada para pelapor agar join server discord dan memberikan informasi lebih lanjut disana agar cepat diperbaiki.
-Terima kasih

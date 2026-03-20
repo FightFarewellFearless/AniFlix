@@ -1,3 +1,7 @@
+# v1.2.0_JS-2 (20-Maret-2026)
+## Diperbaiki
+- Reset status loading saat layar awal di fokuskan kembali (seperti saat membuka file komik offline saat aplikasi sedang ditengah proses loading awal)
+- Crash aneh&langka berkaitan dengan quote aplikasi (Ntah masalah nya dimana, sekarang crash nya di "silent" kalo masih nemu yang serupa silahkan laporkan ke server discord)
 # v1.2.0_JS-1 (18-Maret-2026)
 ## Diperbaiki
 - Memperbaiki crash Invalid URL (hanya potensi perbaikan, akar masalah belum diperbaiki karena minim nya informasi crash, harap untuk orang yang melapor agar join server discord dan infokan lebih lanjut disana, trimakasih)
