@@ -1,3 +1,8 @@
+# v1.2.0_JS-3 (25-Maret-2026)
+## Ditambahkan
+- Fitur terjemahan untuk sinopsis film dan subtitle ketika terdeteksi bukan berbahasa indonesia
+## Diperbaiki
+- Error pada komik
 # v1.2.0_JS-2 (20-Maret-2026)
 ## Diperbaiki
 - Reset status loading saat layar awal di fokuskan kembali (seperti saat membuka file komik offline saat aplikasi sedang ditengah proses loading awal)
