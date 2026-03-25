@@ -2,6 +2,7 @@ import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { Buffer } from 'buffer/';
 import { VideoView } from 'expo-video';
+import tr from 'googletrans';
 import React, {
   memo,
   useCallback,
@@ -12,7 +13,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Linking,
   Pressable,
   ScrollView,
@@ -43,7 +43,7 @@ import setHistory from '../../utils/historyControl';
 
 import { useFocusEffect } from '@react-navigation/core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
 import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
@@ -51,7 +51,7 @@ import DialogManager from '../../utils/dialogManager';
 import { getFilmDetails } from '../../utils/scrapers/film';
 import { throttle } from '../../utils/throttle';
 import Skeleton from '../misc/Skeleton';
-import VideoPlayer, { PlayerRef } from '../VideoPlayer';
+import VideoPlayer, { parseSubtitles, PlayerRef } from '../VideoPlayer';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -446,6 +446,49 @@ function Video_Film(props: Props) {
     </>
   );
 
+  // Subtitle translation and language check
+  const [isSubNotID, setIsSubNotID] = useState(false);
+  const [isUsingTranslatedSub, setIsUsingTranslatedSub] = useState(false);
+  const [subTranslationLoading, setSubTranslationLoading] = useState(false);
+  const originalSub = useRef<string>(null);
+  const translatedSub = useRef<string[]>([]);
+  const onSubtitleLoad = useCallback(async (subtitleText: string) => {
+    originalSub.current = subtitleText;
+    // check language source
+    try {
+      const trRes = await tr(subtitleText.slice(0, 500), 'id');
+      if (trRes.src !== 'id') {
+        setIsSubNotID(true);
+      }
+    } catch {}
+  }, []);
+  const applyTranslation = useCallback(async () => {
+    setSubTranslationLoading(true);
+    try {
+      const splittedSub = splitStringByLimit(originalSub.current ?? '');
+      const allTrRes = await Promise.all(
+        splittedSub.map(string => {
+          return tr(string, 'id');
+        }),
+      );
+      allTrRes.forEach(res => {
+        translatedSub.current.push(res.text);
+      });
+      playerRef.current?.overwriteSubtitleObj(await parseSubtitles(translatedSub.current.join('')));
+      setIsUsingTranslatedSub(true);
+    } catch {
+      ToastAndroid.show('Gagal menerjemahkan subtitle', ToastAndroid.SHORT);
+    } finally {
+      setSubTranslationLoading(false);
+    }
+  }, []);
+  const restoreOriginalSub = useCallback(async () => {
+    setSubTranslationLoading(true);
+    playerRef.current?.overwriteSubtitleObj(await parseSubtitles(originalSub.current ?? ''));
+    setIsUsingTranslatedSub(false);
+    setSubTranslationLoading(false);
+  }, []);
+
   const downloadFilm = useCallback(() => {
     Linking.openURL(
       `https://vortexdownloader.rwbcode.com/?data=${Buffer.from(
@@ -502,6 +545,7 @@ function Video_Film(props: Props) {
           streamingURL={currentStreamUrl}
           isHls={true}
           subtitleURL={data.subtitleLink}
+          onSubtitleLoad={onSubtitleLoad}
           style={{ flex: 1, zIndex: 1 }}
           videoRef={videoRef}
           ref={playerRef}
@@ -529,6 +573,29 @@ function Video_Film(props: Props) {
               />{' '}
               Subtitle tidak tersedia untuk film ini!
             </Text>
+          </View>
+        )}
+        {isSubNotID && (
+          <View style={styles.container}>
+            <Text style={[globalStyles.text, { marginLeft: 5, fontSize: 16, fontWeight: '500' }]}>
+              <Icon name="language" size={20} color={colorScheme === 'dark' ? 'white' : 'black'} />{' '}
+              Subtitle terdeteksi bukan berbahasa Indonesia.{'\n'}
+              <Text style={{ fontSize: 12 }}>
+                Kamu bisa mencoba fitur terjemahan otomatis dengan menekan tombol dibawah, namun
+                harap perhatikan bahwa tingkat akurasi tidak dijamin, dan beberapa hasil mungkin
+                akan kehilangan konteks bahasa
+              </Text>
+            </Text>
+            <Button
+              onPress={isUsingTranslatedSub ? restoreOriginalSub : applyTranslation}
+              disabled={subTranslationLoading}
+              mode="contained-tonal"
+              icon="google-translate">
+              {isUsingTranslatedSub
+                ? 'Kembalikan subtitle asli'
+                : 'Terjemahkan ke dalam bahasa Indonesia'}
+            </Button>
+            {subTranslationLoading && <ActivityIndicator />}
           </View>
         )}
         <Pressable
@@ -733,7 +800,7 @@ function LoadingModal({
           >
             <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={28} />
           <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
         </ReAnimated.View>
       </View>
@@ -961,4 +1028,15 @@ function useStyles() {
     [colorScheme, globalStyles.text.color, theme],
   );
 }
+
+function splitStringByLimit(text: string): string[] {
+  const result: string[] = [];
+
+  for (let i = 0; i < text.length; i += 5000) {
+    result.push(text.slice(i, i + 5000));
+  }
+
+  return result;
+}
+
 export default memo(Video_Film);

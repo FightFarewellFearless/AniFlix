@@ -1,5 +1,6 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import tr from 'googletrans';
 import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
 import {
   ColorSchemeName,
@@ -11,7 +12,7 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
-import { Button, Surface, TextInput, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, Surface, TextInput, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
@@ -83,10 +84,10 @@ function FilmDetail(props: Props) {
   const colorScheme = useColorScheme();
   const theme = useTheme();
 
+  const data = useCompatibleData(props.route.params.data);
+
   const [rawSearchQuery, setSearchQuery] = useState('');
   const searchQuery = useDeferredValue(rawSearchQuery);
-
-  const data = useCompatibleData(props.route.params.data);
 
   const watchLaterListsJson = useModifiedKeyValueIfFocused(
     'watchLater',
@@ -153,6 +154,21 @@ function FilmDetail(props: Props) {
       opacity: interpolate(scrollOffset.value, [0, IMG_HEADER_HEIGHT], [1, 0], 'clamp'),
     };
   });
+
+  const [translatedSynopsis, setTranslatedSynopsis] = useState<null | string>(null);
+  const [isSynopsisTranslationPending, setIsSynopsisTranslationPending] = useState(false);
+  const translateSynopsisToIndonesia = useCallback(async () => {
+    setIsSynopsisTranslationPending(true);
+    try {
+      const translationResult = (await tr(data.info.synopsis, 'id')).text;
+      setTranslatedSynopsis(translationResult);
+    } catch {
+      setTranslatedSynopsis(null);
+      ToastAndroid.show('Translate gagal', ToastAndroid.SHORT);
+    } finally {
+      setIsSynopsisTranslationPending(false);
+    }
+  }, [data.info.synopsis]);
 
   const ListHeaderComponent = useMemo(() => {
     const hasMultipleEpisodes = isEpisode(data) && data.seasonData.length > 1;
@@ -278,12 +294,29 @@ function FilmDetail(props: Props) {
             </View>
 
             <View style={[styles.synopsisContainer]}>
-              <Text style={[globalStyles.text, styles.synopsisTitle]}>Sinopsis</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                }}>
+                <Text style={[globalStyles.text, styles.synopsisTitle]}>Sinopsis</Text>
+                {!(isSynopsisTranslationPending || translatedSynopsis !== null) && (
+                  <Button
+                    icon="google-translate"
+                    mode="outlined"
+                    onPress={translateSynopsisToIndonesia}>
+                    Terjemahkan ke Bahasa Indonesia
+                  </Button>
+                )}
+                {isSynopsisTranslationPending && <ActivityIndicator />}
+              </View>
               <View style={styles.synopsisView}>
                 <Text style={[globalStyles.text, styles.synopsisText]}>
                   {data.info.synopsis === ''
                     ? 'Tidak ada sinopsis yang tersedia.'
-                    : data.info.synopsis}
+                    : (translatedSynopsis ?? data.info.synopsis)}
                 </Text>
               </View>
             </View>
@@ -394,6 +427,9 @@ function FilmDetail(props: Props) {
     theme.colors.onPrimary,
     colorScheme,
     globalStyles.text,
+    isSynopsisTranslationPending,
+    translatedSynopsis,
+    translateSynopsisToIndonesia,
     lastWatchedEpisodeData,
     lastWatched,
     isInList,

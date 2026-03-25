@@ -14,7 +14,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -46,7 +45,7 @@ import setHistory from '../../utils/historyControl';
 
 import { useFocusEffect } from '@react-navigation/core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { AniDetail } from '../../types/anime';
@@ -1120,7 +1119,7 @@ function LoadingModal({
           >
             <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={28} />
           <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
         </ReAnimated.View>
       </View>

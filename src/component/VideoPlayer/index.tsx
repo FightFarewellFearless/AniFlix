@@ -46,14 +46,17 @@ import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
 
+type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
 export type PlayerRef = {
   skipTo: (duration: number) => void;
+  overwriteSubtitleObj: (obj: SubtitleObj) => void;
 };
 type VideoPlayerProps = {
   title: string;
   thumbnailURL?: string;
   streamingURL: string;
   subtitleURL?: string;
+  onSubtitleLoad?: (data: string) => void;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView | null>;
   ref?: React.Ref<PlayerRef>;
@@ -76,6 +79,7 @@ function VideoPlayer({
   thumbnailURL,
   streamingURL,
   subtitleURL,
+  onSubtitleLoad,
   style,
   videoRef,
   ref,
@@ -154,6 +158,9 @@ function VideoPlayer({
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
 
+  const onSubtitleLoadRef = useRef(onSubtitleLoad);
+  onSubtitleLoadRef.current = onSubtitleLoad;
+
   useFocusEffect(
     useCallback(() => {
       const abortController = new AbortController();
@@ -165,6 +172,7 @@ function VideoPlayer({
           });
           if (!response.ok) throw new Error('Network response was not ok');
           const subtitleText = await response.text();
+          onSubtitleLoadRef.current?.(subtitleText);
           const subtitle = await parseSubtitles(subtitleText ?? '');
           setSubtitles(subtitle);
         } catch (error) {
@@ -247,6 +255,9 @@ function VideoPlayer({
         player.currentTime = duration;
         currentDurationSecond.set(duration);
         seekBarProgress.set(duration / (player.duration ?? 1));
+      },
+      overwriteSubtitleObj: (obj: SubtitleObj) => {
+        setSubtitles(obj);
       },
     }),
     [player, currentDurationSecond, seekBarProgress],
