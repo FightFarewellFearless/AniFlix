@@ -61,7 +61,7 @@ async function getSession(signal?: AbortSignal): Promise<Session> {
   if (!Cookie) {
     await updateCookie(signal);
   }
-  const response = await fetch(`${BASE_URL}/api/sessions`, {
+  const response = await fetch(`${BASE_URL}/api/se`, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
