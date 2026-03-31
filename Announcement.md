@@ -1,1 +1,0 @@
-Komik saat ini sedang mangalami masalah. solusi sementara yaitu dengan mencari ulang komik yang ingin dibaca dan pilih dari sumber yang tersedia

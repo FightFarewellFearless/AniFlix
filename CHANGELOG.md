@@ -1,3 +1,6 @@
+# v1.2.0_JS-4 (31-Maret-2026)
+## Diperbaiki
+- Error pada komik
 # v1.2.0_JS-3 (25-Maret-2026)
 ## Ditambahkan
 - Fitur terjemahan untuk sinopsis film dan subtitle ketika terdeteksi bukan berbahasa indonesia
