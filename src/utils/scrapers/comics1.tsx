@@ -55,20 +55,31 @@ async function updateCookie(signal?: AbortSignal) {
 interface Session {
   token: string;
   sign: string;
+  ex: number;
 }
-async function getSession(signal?: AbortSignal): Promise<Session> {
-  // if (isError) throw new Error('Data awal error, mohon muat ulang aplikasi');
-  if (!Cookie) {
-    await updateCookie(signal);
-  }
-  const response = await fetch(`${BASE_URL}/api/se`, {
+let currentSession: Partial<Session> = {};
+async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
+  const response = await fetch(`${BASE_URL}/api/me`, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
   const data: Session = await response.json();
   const sessionToken = data.token;
   const sessionSign = data.sign;
-  return { token: sessionToken, sign: sessionSign };
+  const expired = data.ex;
+  return { token: sessionToken, sign: sessionSign, ex: expired };
+}
+async function getSession(signal?: AbortSignal): Promise<Session> {
+  // if (isError) throw new Error('Data awal error, mohon muat ulang aplikasi');
+  if (!Cookie) {
+    await updateCookie(signal);
+  }
+  if (!currentSession.token || Date.now() > (currentSession.ex ?? Infinity)) {
+    const newSession = await fetchNewSession(signal);
+    currentSession = newSession;
+    return newSession;
+  }
+  return currentSession as Session;
 }
 
 export interface LatestComicsRelease1 {
