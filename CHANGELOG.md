@@ -1,3 +1,6 @@
+# v1.2.0_JS-5 (1-April-2026)
+## Diperbaiki
+- Error pada komik
 # v1.2.0_JS-4 (31-Maret-2026)
 ## Diperbaiki
 - Error pada komik
