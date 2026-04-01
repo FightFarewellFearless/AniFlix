@@ -59,7 +59,7 @@ interface Session {
 }
 let currentSession: Partial<Session> = {};
 async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
-  const response = await fetch(`${BASE_URL}/api/me`, {
+  const response = await fetch(`${BASE_URL}/api/sessions`, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
