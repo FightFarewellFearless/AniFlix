@@ -59,7 +59,7 @@ interface Session {
 }
 let currentSession: Partial<Session> = {};
 async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
-  const response = await fetch(`${BASE_URL}/api/sessions`, {
+  const response = await fetch(`${BASE_URL}/api/sessions/oqiw918pa`, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
   });
@@ -491,7 +491,7 @@ export function Comics1WebView({ isWebViewShown, setIsWebViewShown, onComics1Rea
         <WebView
           ref={webviewRef}
           userAgent={deviceUserAgent}
-          source={{ uri: BASE_URL }}
+          source={{ uri: BASE_URL + '/komik/update' }}
           setSupportMultipleWindows={false}
           onError={() => {
             // isError = true;
