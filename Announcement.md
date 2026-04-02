@@ -1,3 +1,1 @@
-komik saat ini sedang error, kami sedang memikirkan cara paling tepat untuk mengatasi nya. mohon pengertiannya.
-
-sebagai solusi sementara kamu bisa coba cari ulang komik yang ingin dibaca
+Komik saat ini sering error, kami sedang memikirkan cara paling tepat untuk mengatasi nya. mohon pengertiannya. Perbaikan yang dilakukan untuk saat ini hanya sementara dan dapat kembali bermasalah sewaktu-waktu
