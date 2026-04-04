@@ -9,7 +9,7 @@ import {
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Appearance, Linking, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
@@ -44,6 +44,12 @@ import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { cleanCbzDir } from './src/utils/cbzCleaner.ts';
 import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
+import {
+  comics1FetchSession,
+  Comics1SessionFetcherContext,
+  PromiseResRej,
+} from './src/utils/comics1sessionfetchercontext.ts';
+import Comics1WebView from './src/utils/comics1sessionfetcherwebview.tsx';
 import { DatabaseManager } from './src/utils/DatabaseManager';
 import DialogManager from './src/utils/dialogManager';
 import { Movies } from './src/utils/scrapers/animeMovie';
@@ -217,6 +223,9 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
 
+  const [isComics1FetchSessionOpen, setIsComics1FetchSessionOpen] = useState(false);
+  const comics1PromisesCollector = useRef<PromiseResRej[]>([]);
+
   const [paramsState, setParamsState] = useState<EpisodeBaruHome>({
     jadwalAnime: {},
     newAnime: [],
@@ -229,6 +238,20 @@ function App() {
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
+    comics1FetchSession.fetchSession = (
+      res: PromiseResRej['resolve'],
+      rej: PromiseResRej['reject'],
+    ) => {
+      setIsComics1FetchSessionOpen(true);
+      comics1PromisesCollector.current.push({ resolve: res, reject: rej });
+    };
+    comics1FetchSession.abortCleanup = () => {
+      setIsComics1FetchSessionOpen(false);
+      while (comics1PromisesCollector.current.length > 0) {
+        const val = comics1PromisesCollector.current.shift();
+        val?.reject();
+      }
+    };
     setWebViewOpen.openWebViewCF = (isOpenCF: boolean, url: string) => {
       setIsOpen(isOpenCF);
       setCfUrl(url);
@@ -365,6 +388,17 @@ function App() {
                             </Suspense>
                           )}
                         </CFBypassIsOpenContext>
+                        <Comics1SessionFetcherContext
+                          value={useMemo(
+                            () => ({
+                              isOpen: isComics1FetchSessionOpen,
+                              setIsOpen: setIsComics1FetchSessionOpen,
+                              promisesCollector: comics1PromisesCollector,
+                            }),
+                            [isComics1FetchSessionOpen],
+                          )}>
+                          {isComics1FetchSessionOpen && <Comics1WebView />}
+                        </Comics1SessionFetcherContext>
                         {__DEV__ && (
                           <View style={styles.Dev} pointerEvents="none">
                             <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>

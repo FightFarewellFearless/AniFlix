@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import WebView from 'react-native-webview';
 import deviceUserAgent from '../deviceUserAgent';
+import { comics1FetchSession } from '../comics1sessionfetchercontext';
 
 // let isError = false;
 export const __ALIAS = 'softkomik';
@@ -52,18 +53,24 @@ async function updateCookie(signal?: AbortSignal) {
     Cookie = cookies.map(cookie => cookie.split(';')[0]).join('; ');
   }
 }
-interface Session {
+export interface Session {
   token: string;
   sign: string;
   ex: number;
 }
 let currentSession: Partial<Session> = {};
 async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
-  const response = await fetch(`${BASE_URL}/api/sessions/oqiw918pa`, {
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
-    signal,
-  });
-  const data: Session = await response.json();
+  const onAbort = () => {
+    comics1FetchSession.abortCleanup();
+  };
+  signal?.addEventListener('abort', onAbort, { once: true });
+  const data: Session = await new Promise((res, rej) => comics1FetchSession.fetchSession(res, rej));
+  signal?.removeEventListener('abort', onAbort);
+  // const response = await fetch(`${BASE_URL}/api/sessions/oqiw918pa`, {
+  //   headers: { 'User-Agent': deviceUserAgent, Cookie },
+  //   signal,
+  // });
+  // const data: Session = await response.json();
   const sessionToken = data.token;
   const sessionSign = data.sign;
   const expired = data.ex;
