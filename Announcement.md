@@ -1,2 +1,0 @@
-Oops... Komik saat ini sedang mangalami error (bahkan setelah update), my bad guys..
-Saat ini developer ga ada cukup waktu untuk memperbaiki masalah nya, jadi mungkin baru bisa dikerjakan siang atau sore ini... Mohon pengertiannya :)
