@@ -456,7 +456,10 @@ function Video_Film(props: Props) {
     originalSub.current = subtitleText;
     // check language source
     try {
-      const trRes = await tr(subtitleText.slice(0, 500), 'id');
+      const trRes = await tr(subtitleText.slice(0, 500), {
+        to: 'id',
+        signal: abortController.current?.signal,
+      });
       if (trRes.src !== 'id') {
         setIsSubNotID(true);
       }
@@ -468,7 +471,10 @@ function Video_Film(props: Props) {
       const splittedSub = splitStringByLimit(originalSub.current ?? '');
       const allTrRes = await Promise.all(
         splittedSub.map(string => {
-          return tr(string, 'id');
+          return tr(string, {
+            to: 'id',
+            signal: abortController.current?.signal,
+          });
         }),
       );
       allTrRes.forEach(res => {
