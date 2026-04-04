@@ -238,12 +238,12 @@ function App() {
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
-    comics1FetchSession.fetchSession = (
+    comics1FetchSession.getSessionPath = (
       res: PromiseResRej['resolve'],
       rej: PromiseResRej['reject'],
     ) => {
-      setIsComics1FetchSessionOpen(true);
       comics1PromisesCollector.current.push({ resolve: res, reject: rej });
+      setIsComics1FetchSessionOpen(true);
     };
     comics1FetchSession.abortCleanup = () => {
       setIsComics1FetchSessionOpen(false);

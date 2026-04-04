@@ -28,13 +28,15 @@ export default function Comics1WebView() {
       const val = context.promisesCollector.current.shift();
       val?.reject();
     }
+    context.setIsOpen(false);
   }, [context]);
   const resolveAllPromisesCollector = useCallback(
     (session: string) => {
       while (context.promisesCollector.current.length > 0) {
         const val = context.promisesCollector.current.shift();
-        val?.resolve(JSON.parse(decodeURIComponent(session)));
+        val?.resolve(decodeURIComponent(session));
       }
+      context.setIsOpen(false);
     },
     [context],
   );
@@ -43,6 +45,8 @@ export default function Comics1WebView() {
       {context.isOpen && (
         <WebView
           incognito
+          cacheEnabled={false}
+          domStorageEnabled={false}
           ref={webviewRef}
           userAgent={deviceUserAgent}
           source={{ uri: BASE_URL + '/komik/update' }}
@@ -100,23 +104,11 @@ export default function Comics1WebView() {
           onMessage={event => {
             const data = JSON.parse(event.nativeEvent.data);
             if (data.url?.startsWith('/api/')) {
-              webviewRef.current?.injectJavaScript(`
-const getCookie = (name) => {
-  const value = \`; \${document.cookie}\`;
-  const parts = value.split(\`; \${name}=\`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-}
-window.ReactNativeWebView.postMessage(JSON.stringify({cookieData: getCookie('x-m')}));
-true;
-`);
-            } else if (data.cookieData) {
-              context.setIsOpen(false);
-              resolveAllPromisesCollector(data.cookieData);
+              resolveAllPromisesCollector(data.url);
             }
           }}
           onError={() => {
             // isError = true;
-            context.setIsOpen(false);
             rejectAllPromisesCollector();
             ToastAndroid.show('Gagal mempersiapkan data untuk komik', ToastAndroid.SHORT);
           }}

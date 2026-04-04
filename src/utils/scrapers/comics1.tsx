@@ -59,20 +59,31 @@ export interface Session {
   ex: number;
 }
 let currentSession: Partial<Session> = {};
-async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
+async function getSessionPath(signal?: AbortSignal): Promise<string> {
   const onAbort = () => {
     comics1FetchSession.abortCleanup();
   };
   signal?.addEventListener('abort', onAbort, { once: true });
-  const data: Session = await new Promise((res, rej) => comics1FetchSession.fetchSession(res, rej));
+  const data: string = await new Promise((res, rej) =>
+    comics1FetchSession.getSessionPath(res, rej),
+  );
   signal?.removeEventListener('abort', onAbort);
-  // const response = await fetch(`${BASE_URL}/api/sessions/oqiw918pa`, {
-  //   headers: { 'User-Agent': deviceUserAgent, Cookie },
-  //   signal,
-  // });
-  // const data: Session = await response.json();
+  return data;
+}
+async function fetchNewSession(signal?: AbortSignal): Promise<Session> {
+  const path = await getSessionPath(signal);
+  const response = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      Accept: 'application/json, text/plain, */*',
+      'User-Agent': deviceUserAgent,
+      Cookie,
+      Referer: `${BASE_URL}/komik/update`,
+    },
+    signal,
+  });
+  const data: Session = await response.json();
   const sessionToken = data.token;
-  const sessionSign = data.sign;
+  const sessionSign = data.sign.split('|')[0];
   const expired = data.ex;
   return { token: sessionToken, sign: sessionSign, ex: expired };
 }

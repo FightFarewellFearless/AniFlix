@@ -1,7 +1,6 @@
 import { createContext } from 'react';
-import { Session } from './scrapers/comics1';
 
-export type PromiseResRej = { resolve: (value: Session) => void; reject: (reason?: any) => void };
+export type PromiseResRej = { resolve: (value: string) => void; reject: (reason?: any) => void };
 export const Comics1SessionFetcherContext = createContext({
   isOpen: false,
   setIsOpen: (_isOpen: boolean) => {},
@@ -20,6 +19,6 @@ export const Comics1SessionFetcherContext = createContext({
 // }
 
 export const comics1FetchSession = {
-  fetchSession: (_res: PromiseResRej['resolve'], _rej: PromiseResRej['reject']) => {},
+  getSessionPath: (_res: PromiseResRej['resolve'], _rej: PromiseResRej['reject']) => {},
   abortCleanup: () => {},
 };
