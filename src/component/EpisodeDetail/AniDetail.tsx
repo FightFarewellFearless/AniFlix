@@ -1,6 +1,5 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { memo, useMemo, useState } from 'react';
 import {
   StyleSheet,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { Button, Divider, Searchbar, Surface, useTheme } from 'react-native-paper';
@@ -32,20 +32,21 @@ import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import { replaceLast } from '../../utils/replaceLast';
+import ImageLoading from '../misc/ImageLoading';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent(FlashList as RecyclerViewType);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'AnimeDetail'>;
 
-const IMG_HEADER_HEIGHT = 250;
+const IMG_HEADER_HEIGHT = 200;
 
 function AniDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -117,21 +118,30 @@ function AniDetail(props: Props) {
   const ListHeaderComponent = useMemo(() => {
     return (
       <View style={styles.mainContainer}>
-        <ReanimatedImage
-          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-          source={{ uri: data.thumbnailUrl }}
-          contentFit="cover"
-        />
+        <Reanimated.View
+          style={[
+            { width: '100%', height: IMG_HEADER_HEIGHT },
+            headerImageStyle,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Icon color={theme.colors.onBackground} name="tv" size={64} />
+          </View>
+        </Reanimated.View>
 
         <LinearGradient
           colors={['transparent', 'black']}
           style={{
             width: '100%',
-            height: 80,
+            height: 60,
             position: 'absolute',
             transform: [
               {
-                translateY: 165,
+                translateY: 155,
               },
             ],
           }}
@@ -140,10 +150,10 @@ function AniDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
+            <ImageLoading
               source={{ uri: data.thumbnailUrl }}
               style={styles.thumbnail}
-              contentFit="contain"
+              resizeMode="contain"
             />
             <View
               style={{
@@ -352,6 +362,8 @@ function AniDetail(props: Props) {
     styles.chapterButtonsContainer,
     styles.genre,
     headerImageStyle,
+    theme.colors.elevation.level2,
+    theme.colors.onBackground,
     data.thumbnailUrl,
     data.animeType,
     data.status,
@@ -444,6 +456,7 @@ function useStyles() {
   const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+  const dimensions = useWindowDimensions();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -470,7 +483,7 @@ function useStyles() {
         },
         thumbnail: {
           margin: 15,
-          width: 110,
+          width: 0.3 * dimensions.width,
           height: 150,
           borderRadius: 10,
           transform: [{ translateY: -40 }],
@@ -595,6 +608,7 @@ function useStyles() {
       }),
     [
       colorScheme,
+      dimensions.width,
       globalStyles.text.color,
       theme.colors.onPrimaryContainer,
       theme.colors.onSecondaryContainer,

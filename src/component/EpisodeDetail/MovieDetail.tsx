@@ -1,6 +1,5 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { memo, useMemo } from 'react';
 import {
   StyleSheet,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
 import { Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
@@ -29,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
+import ImageLoading from '../misc/ImageLoading';
 
 interface MovieEpisode {
   title: string;
@@ -40,7 +41,6 @@ type RecyclerViewType = (
     ref?: React.Ref<FlashListRef<MovieEpisode>>;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'MovieDetail'>;
@@ -50,6 +50,7 @@ const IMG_HEADER_HEIGHT = 250;
 function MovieDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -101,11 +102,20 @@ function MovieDetail(props: Props) {
 
     return (
       <View style={styles.mainContainer}>
-        <ReanimatedImage
-          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-          source={{ uri: data.thumbnailUrl }}
-          contentFit="cover"
-        />
+        <Reanimated.View
+          style={[
+            { width: '100%', height: IMG_HEADER_HEIGHT },
+            headerImageStyle,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Icon color={theme.colors.onBackground} name="film" size={64} />
+          </View>
+        </Reanimated.View>
 
         <LinearGradient
           colors={['transparent', 'black']}
@@ -124,10 +134,10 @@ function MovieDetail(props: Props) {
         <View
           style={[styles.mainContent, { backgroundColor: styles.mainContainer.backgroundColor }]}>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <Image
+            <ImageLoading
               source={{ uri: data.thumbnailUrl }}
               style={styles.thumbnail}
-              contentFit="contain"
+              resizeMode="stretch"
             />
             <Surface
               style={{
@@ -344,6 +354,8 @@ function MovieDetail(props: Props) {
     styles.chapterButtonsContainer,
     styles.genre,
     headerImageStyle,
+    theme.colors.elevation.level2,
+    theme.colors.onBackground,
     colorScheme,
     globalStyles.text,
     isInList,
@@ -429,6 +441,7 @@ function useStyles() {
   const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
+  const dimensions = useWindowDimensions();
   return useMemo(
     () =>
       StyleSheet.create({
@@ -454,7 +467,7 @@ function useStyles() {
         },
         thumbnail: {
           margin: 15,
-          width: 110,
+          width: dimensions.width * 0.3,
           height: 150,
           borderRadius: 10,
           transform: [{ translateY: -40 }],
@@ -603,12 +616,13 @@ function useStyles() {
       }),
     [
       colorScheme,
+      dimensions.width,
       globalStyles.text.color,
-      theme.colors.onPrimaryContainer,
-      theme.colors.onSecondaryContainer,
       theme.colors.secondaryContainer,
-      theme.colors.primary,
+      theme.colors.onSecondaryContainer,
       theme.colors.primaryContainer,
+      theme.colors.primary,
+      theme.colors.onPrimaryContainer,
     ],
   );
 }

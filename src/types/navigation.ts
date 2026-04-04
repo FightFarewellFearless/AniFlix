@@ -1,4 +1,5 @@
 import { MovieDetail, MovieStreamingDetail } from '../utils/scrapers/animeMovie';
+import { ComicsDetail, ComicsReading } from '../utils/scrapers/comicsv2';
 import { FilmDetail_Stream, FilmDetails_Detail } from '../utils/scrapers/film';
 import { KomikuDetail, KomikuReading } from '../utils/scrapers/komiku';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
@@ -12,6 +13,9 @@ type HomeNavigator = {
 
 type RootStackNavigator = {
   connectToServer: undefined;
+  CbzReader: {
+    fileUrl: string;
+  };
   Home: {
     data: EpisodeBaruHome;
   };
@@ -24,15 +28,15 @@ type RootStackNavigator = {
     link: string;
   };
   FilmDetail: {
-    data: FilmDetails_Detail;
+    data: FilmDetails_Detail | FilmDetail_Stream;
     link: string;
   };
   ComicsDetail: {
-    data: KomikuDetail;
+    data: KomikuDetail | ComicsDetail;
     link: string;
   };
   ComicsReading: {
-    data: KomikuReading;
+    data: KomikuReading | ComicsReading;
     link: string;
     historyData: {
       lastDuration?: number;
@@ -86,7 +90,7 @@ type RootStackNavigator = {
     message?: string;
   };
   SeeMore: {
-    type: 'AnimeList' | 'MovieList' | 'ComicsList';
+    type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList';
   };
   ErrorScreen: { error: Error };
 };

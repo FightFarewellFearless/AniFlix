@@ -7,6 +7,7 @@ import {
 } from 'expo-video';
 
 import Icons from '@react-native-vector-icons/material-icons';
+import { useFocusEffect } from '@react-navigation/core';
 import { useEventListener } from 'expo';
 import { useKeepAwake } from 'expo-keep-awake';
 import {
@@ -45,14 +46,17 @@ import deviceUserAgent from '../../utils/deviceUserAgent';
 import ReText from '../misc/ReText';
 import SeekBar from './SeekBar';
 
+type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
 export type PlayerRef = {
   skipTo: (duration: number) => void;
+  overwriteSubtitleObj: (obj: SubtitleObj) => void;
 };
 type VideoPlayerProps = {
   title: string;
   thumbnailURL?: string;
   streamingURL: string;
   subtitleURL?: string;
+  onSubtitleLoad?: (data: string) => void;
   style?: ViewStyle;
   videoRef?: React.RefObject<VideoView | null>;
   ref?: React.Ref<PlayerRef>;
@@ -63,6 +67,7 @@ type VideoPlayerProps = {
   onDurationChange?: (positionSecond: number) => void;
   headers?: Record<string, string>;
   batteryAndClock?: React.JSX.Element;
+  isHls?: boolean;
 };
 
 const ICON_SIZE = 45;
@@ -74,6 +79,7 @@ function VideoPlayer({
   thumbnailURL,
   streamingURL,
   subtitleURL,
+  onSubtitleLoad,
   style,
   videoRef,
   ref,
@@ -84,6 +90,7 @@ function VideoPlayer({
   onDurationChange,
   headers,
   batteryAndClock,
+  isHls = false,
 }: VideoPlayerProps) {
   useKeepAwake();
 
@@ -97,6 +104,7 @@ function VideoPlayer({
 
   const player = useVideoPlayer(
     {
+      contentType: isHls ? 'hls' : 'auto',
       uri: streamingURL,
       metadata: {
         title,
@@ -150,27 +158,46 @@ function VideoPlayer({
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
 
-  useEffect(() => {
-    async function fetchSubtitles(url: string) {
-      setSubtitleError(false);
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const subtitleText = await response.text();
-        const subtitle = await parseSubtitles(subtitleText ?? '');
-        setSubtitles(subtitle);
-      } catch (error) {
-        setSubtitleError(true);
-        ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+  const onSubtitleLoadRef = useRef(onSubtitleLoad);
+  onSubtitleLoadRef.current = onSubtitleLoad;
+
+  useFocusEffect(
+    useCallback(() => {
+      const abortController = new AbortController();
+      async function fetchSubtitles(url: string) {
+        setSubtitleError(false);
+        try {
+          const response = await fetch(url, {
+            signal: abortController.signal,
+          });
+          if (!response.ok) throw new Error('Network response was not ok');
+          const subtitleText = await response.text();
+          onSubtitleLoadRef.current?.(subtitleText);
+          const subtitle = await parseSubtitles(subtitleText ?? '');
+          setSubtitles(subtitle);
+        } catch (error) {
+          setSubtitleError(true);
+          ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+        }
       }
-    }
-    subtitleURL && fetchSubtitles(subtitleURL);
-  }, [subtitleURL, subtitleRetryToken]);
+      subtitleURL && fetchSubtitles(subtitleURL);
+      return () => {
+        abortController.abort();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [subtitleURL, subtitleRetryToken]),
+  );
 
   useLayoutEffect(() => {
     setIsFullscreen(fullscreen ?? false);
   }, [fullscreen]);
 
+  useEventListener(player, 'sourceLoad', () => {
+    if (!paused) {
+      setPaused(false);
+      player.play();
+    }
+  });
   useEventListener(player, 'statusChange', ({ status }) => {
     if (status === 'readyToPlay') {
       setIsError(false);
@@ -228,6 +255,9 @@ function VideoPlayer({
         player.currentTime = duration;
         currentDurationSecond.set(duration);
         seekBarProgress.set(duration / (player.duration ?? 1));
+      },
+      overwriteSubtitleObj: (obj: SubtitleObj) => {
+        setSubtitles(obj);
       },
     }),
     [player, currentDurationSecond, seekBarProgress],
@@ -696,16 +726,21 @@ function BottomControl({
 }
 
 const RE_BLOCK =
-  /(?:\d+\s+)?(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s+-->\s+(\d{1,2}:\d{2}:\d{2}[.,]\d{3}).*?\s+([\s\S]*?)(?=\s*(?:\d+\s+)?\d{1,2}:\d{2}:\d{2}[.,]\d{3}|$)/g;
+  /(?:\d+\s+)?((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})\s+(?:-->|--&gt;)\s+((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})[^\n\r]*\s+([\s\S]*?)(?=\s*(?:\d+\s+)?(?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3}|$)/g;
 const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
 const RE_ASS_NL = /\\N/g;
-const RE_SPACE = /\s+/g;
 const RE_SPLIT = /[:.,]/;
 
 const toSec = (t: string) => {
   'worklet';
   const d = t.split(RE_SPLIT);
-  return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
+  if (d.length === 3) {
+    return +d[0] * 60 + +d[1] + +d[2] / 1000;
+  }
+  if (d.length === 4) {
+    return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
+  }
+  return 0;
 };
 
 export const parseSubtitles = async (raw: string) => {
@@ -723,13 +758,35 @@ export const parseSubtitles = async (raw: string) => {
       RE_BLOCK.lastIndex = 0;
 
       while ((m = RE_BLOCK.exec(raw)) !== null) {
-        const txt = m[3].replace(RE_ASS_NL, ' ').replace(RE_TAGS, '').replace(RE_SPACE, ' ').trim();
+        const rawText = m[3];
+        const lines = rawText.split(/\r?\n/);
 
-        if (txt) {
+        const cleanLines = [];
+
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          line = line.replace(RE_ASS_NL, ' ');
+          line = line.replace(RE_TAGS, '');
+          line = line
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+
+          line = line.trim();
+
+          if (line.length > 0) {
+            cleanLines.push(line);
+          }
+        }
+
+        const finalTxt = cleanLines.join('\n');
+
+        if (finalTxt) {
           res.push({
             startTime: toSec(m[1]),
             endTime: toSec(m[2]),
-            text: txt,
+            text: finalTxt,
           });
         }
       }

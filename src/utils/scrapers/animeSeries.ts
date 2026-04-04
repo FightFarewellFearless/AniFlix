@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import type { Cheerio } from 'cheerio';
 import cheerio, { Element } from 'cheerio';
-import URL from 'url';
 import {
   AniDetail,
   AniDetailEpsList,
@@ -16,7 +15,8 @@ import { Buffer } from 'buffer/';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
 import runtime from '../../misc/AniFlixRuntime';
 
-let BASE_DOMAIN = 'otakudesu.best';
+export const __ALIAS = 'otakudesu';
+let BASE_DOMAIN = __ALIAS + '.blog';
 let BASE_URL = 'https://' + BASE_DOMAIN;
 
 export const BASE = {
@@ -24,9 +24,12 @@ export const BASE = {
   url: BASE_URL,
 };
 
-const fetchLatestDomain = async () => {
+const fetchLatestDomain = async (signal?: AbortSignal) => {
   const domainName = await fetch(
     'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/master/SCRAPE_DOMAIN.txt',
+    {
+      signal,
+    },
   ).then(res => res.text());
   if (domainName === '404: Not Found') {
     throw new Error('Domain not found');
@@ -139,7 +142,7 @@ const fromUrl = async (
   detailOnly = false,
   signal?: AbortSignal,
 ): Promise<AniStreaming | AniDetail | undefined> => {
-  const withoutDomain = URL.parse(url);
+  const withoutDomain = new URL(url);
   // to make sure only request with latest domain available
   url = withoutDomain.protocol + '//' + BASE.domain + withoutDomain.pathname;
   let err = false;
@@ -238,7 +241,7 @@ const fromUrl = async (
     let streamingLink = await getStreamLink(
       aniDetail.find('div.responsive-embed-stream > iframe').attr('src'),
       signal,
-    );
+    ).catch(() => undefined);
     const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
 
     const thumbnailUrl = $('div.cukder > img').attr('src')!;
@@ -377,7 +380,7 @@ const getStreamLink = async (
         //odstream
         return data.split('{id:"playerjs", file:"')[1].split('"')[0];
       } else if (data.includes('blogger.com/video.g') && data.includes('iframe')) {
-        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '');
+        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '', signal);
       } else if (data.includes('source src=')) {
         return cheerio.load(data)('source').attr('src');
       } else {
@@ -414,11 +417,12 @@ const getStreamLink = async (
   }
 };
 
-async function getFiledonVideo(url: string) {
+async function getFiledonVideo(url: string, signal?: AbortSignal) {
   const data = await axios.get(url, {
     headers: {
       'User-Agent': deviceUserAgent,
     },
+    signal,
   });
   const convertToValidJson = (jsonString: string) => {
     let sanitizedString = jsonString.replace(/&quot;/g, '"');
@@ -443,13 +447,72 @@ async function getFiledonVideo(url: string) {
   const link = convertToValidJson($('div#app').attr('data-page')!);
   return link.props.url;
 }
-async function getBloggerVideo(url: string) {
+let requestCounter = 0;
+function getReqId() {
+  const now = new Date();
+  const secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const reqid = 1 + secondsSinceMidnight + requestCounter * 100000;
+  requestCounter++;
+  return reqid;
+}
+async function getBloggerVideo(url: string, signal?: AbortSignal) {
   const data = await axios.get(url, {
     headers: {
       'User-Agent': deviceUserAgent,
     },
   });
-  return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+  try {
+    return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
+  } catch {
+    try {
+      const token = new URL(url).searchParams.get('token');
+      const f_sid = data.data.split('FdrFJe":"')[1].split('"')[0];
+      const bl = data.data.split('cfb2h":"')[1].split('"')[0];
+      const response = await fetch(
+        `https://www.blogger.com/_/BloggerVideoPlayerUi/data/batchexecute?rpcids=WcwnYd&source-path=%2Fvideo.g&f.sid=${f_sid}&bl=${bl}&hl=en-US&_reqid=${getReqId()}&rt=c`,
+        {
+          signal,
+          headers: {
+            accept: '*/*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            priority: 'u=1, i',
+            'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
+            'sec-ch-ua-arch': '"x86"',
+            'sec-ch-ua-bitness': '"64"',
+            'sec-ch-ua-form-factors': '"Desktop"',
+            'sec-ch-ua-full-version': '"145.0.7632.75"',
+            'sec-ch-ua-full-version-list':
+              '"Not:A-Brand";v="99.0.0.0", "Google Chrome";v="145.0.7632.75", "Chromium";v="145.0.7632.75"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Linux"',
+            'sec-ch-ua-platform-version': '""',
+            'sec-ch-ua-wow64': '?0',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'User-Agent': deviceUserAgent,
+            'x-same-domain': '1',
+            Referer: 'https://www.blogger.com/',
+          },
+          body: `f.req=%5B%5B%5B%22WcwnYd%22%2C%22%5B%5C%22${token}%5C%22%2C%5C%22%5C%22%2C0%5D%22%2Cnull%2C%22generic%22%5D%5D%5D&`,
+          method: 'POST',
+        },
+      );
+      return await response.text().then(res => {
+        const encodedLink = res
+          .split('https://rr')
+          .at(-1)! // select the last available video (usually higher resolution)
+          .split('\\",[')[0]
+          .replace(/\\\\/g, '\\');
+        const link = JSON.parse(`"https://rr${encodedLink}"`);
+        return link;
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
 }
 
 const listAnime = async (
@@ -627,8 +690,7 @@ async function jadwalAnime(signal?: AbortSignal) {
   return jadwal;
 }
 
-export default {
-  BASE,
+export {
   fetchLatestDomain,
   newAnime,
   searchAnime,

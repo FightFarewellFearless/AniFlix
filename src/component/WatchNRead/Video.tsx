@@ -14,7 +14,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -44,8 +43,9 @@ import useGlobalStyles, { darkText, lightText } from '../../assets/style';
 import useDownloadAnimeFunction from '../../utils/downloadAnime';
 import setHistory from '../../utils/historyControl';
 
+import { useFocusEffect } from '@react-navigation/core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { AniDetail } from '../../types/anime';
@@ -97,7 +97,7 @@ function Video(props: Props) {
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
   const embedInformationRef = useRef<View>(null);
 
-  const synopsisTextRef = useAnimatedRef<View>();
+  const synopsisTextRef = useAnimatedRef<Text>();
 
   const [animeDetail, setAnimeDetail] = useState<
     | ((MovieDetail & { status: 'Movie'; releaseYear: string }) | Omit<AniDetail, 'episodeList'>)
@@ -163,9 +163,6 @@ function Video(props: Props) {
   );
 
   const abortController = useRef<AbortController | null>(null);
-  if (abortController.current === null) {
-    abortController.current = new AbortController();
-  }
 
   const [isPaused, setIsPaused] = useState(false);
 
@@ -235,15 +232,18 @@ function Video(props: Props) {
   }, []);
 
   // didMount and willUnmount
-  useEffect(() => {
-    Orientation.addDeviceOrientationListener(orientationDidChange);
+  useFocusEffect(
+    useCallback(() => {
+      abortController.current = new AbortController();
+      Orientation.addDeviceOrientationListener(orientationDidChange);
 
-    return () => {
-      Orientation.removeDeviceOrientationListener(orientationDidChange);
-      willUnmountHandler();
-      abortController.current?.abort();
-    };
-  }, [orientationDidChange, willUnmountHandler]);
+      return () => {
+        Orientation.removeDeviceOrientationListener(orientationDidChange);
+        willUnmountHandler();
+        abortController.current?.abort();
+      };
+    }, [orientationDidChange, willUnmountHandler]),
+  );
 
   // set header title
   useLayoutEffect(() => {
@@ -254,22 +254,24 @@ function Video(props: Props) {
   }, [data, fullscreen, props.navigation]);
 
   // Battery level
-  useEffect(() => {
-    let _batteryEvent: NodeJS.Timeout | null;
-    if (enableBatteryTimeInfo === 'true') {
-      const updateLevel = () => {
-        const currentLevel = DeviceInfoModule.getBatteryLevel();
-        setBatteryLevel(prev => (prev === currentLevel ? prev : currentLevel));
+  useFocusEffect(
+    useCallback(() => {
+      let _batteryEvent: NodeJS.Timeout | null;
+      if (enableBatteryTimeInfo === 'true') {
+        const updateLevel = () => {
+          const currentLevel = DeviceInfoModule.getBatteryLevel();
+          setBatteryLevel(prev => (prev === currentLevel ? prev : currentLevel));
+        };
+        updateLevel();
+        _batteryEvent = setInterval(updateLevel, 5000);
+        setBatteryTimeEnable(true);
+      }
+      return () => {
+        _batteryEvent && clearInterval(_batteryEvent);
+        _batteryEvent = null;
       };
-      updateLevel();
-      _batteryEvent = setInterval(updateLevel, 5000);
-      setBatteryTimeEnable(true);
-    }
-    return () => {
-      _batteryEvent && clearInterval(_batteryEvent);
-      _batteryEvent = null;
-    };
-  }, [enableBatteryTimeInfo]);
+    }, [enableBatteryTimeInfo]),
+  );
 
   // BackHandler event
   useBackHandler(
@@ -581,16 +583,19 @@ function Video(props: Props) {
     [hadSynopsisMeasured, synopsisTextRef],
   );
   const initialRender = useRef(true);
-  useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
-    const mightBeTimeoutID = measureAndUpdateSynopsisLayout(true);
-    return () => {
-      clearTimeout(mightBeTimeoutID);
-    };
-  }, [fullscreen, measureAndUpdateSynopsisLayout]);
+  useFocusEffect(
+    useCallback(() => {
+      fullscreen; // fix for react hooks deps. This is need because we need to call the code below when changing fullscreen state
+      if (initialRender.current) {
+        initialRender.current = false;
+        return;
+      }
+      const mightBeTimeoutID = measureAndUpdateSynopsisLayout(true);
+      return () => {
+        clearTimeout(mightBeTimeoutID);
+      };
+    }, [fullscreen, measureAndUpdateSynopsisLayout]),
+  );
   useLayoutEffect(() => {
     measureAndUpdateSynopsisLayout();
   }, [
@@ -1114,7 +1119,7 @@ function LoadingModal({
           >
             <Icon name="close" size={28} color="red" />
           </TouchableOpacity>
-          <ActivityIndicator size={'large'} />
+          <ActivityIndicator size={28} />
           <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
         </ReAnimated.View>
       </View>
@@ -1135,13 +1140,15 @@ function TimeInfo() {
     }
   }, [time]);
 
-  useEffect(() => {
-    changeTime();
-    const interval = setInterval(changeTime, 1_000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [changeTime, time]);
+  useFocusEffect(
+    useCallback(() => {
+      changeTime();
+      const interval = setInterval(changeTime, 1_000);
+      return () => {
+        clearInterval(interval);
+      };
+    }, [changeTime]),
+  );
   return <Text style={{ color: '#dadada' }}>{time}</Text>;
 }
 

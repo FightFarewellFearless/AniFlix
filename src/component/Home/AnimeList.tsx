@@ -49,15 +49,17 @@ import useGlobalStyles from '../../assets/style';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
+  FilmListHomeContext,
   MovieListHomeContext,
 } from '../../misc/context';
 import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
 import { FilmHomePage, getFeatured, getLatest } from '../../utils/scrapers/film';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scrapers/komiku';
 import { Github, JoinDiscord } from '../Loading Screen/Connect';
+import Announcment from '../misc/Announcement';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
 import Skeleton from '../misc/Skeleton';
@@ -237,6 +239,7 @@ function HomeList(props: HomeProps) {
       }}
       ListHeaderComponent={
         <>
+          <Announcment />
           <View style={styles.headerCard}>
             <View style={styles.headerInfo}>
               <ReText style={styles.timeText} text={localTime} />
@@ -349,7 +352,7 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Featured Film</Text>
+        <Text style={styles.sectionTitle}>Film Unggulan</Text>
       </View>
 
       {isError && (
@@ -387,8 +390,7 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
 const LatestFilmList = memo(LatestFilmListUNMEMO);
 function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
-  const [data, setData] = useState<FilmHomePage>([]);
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const { paramsState: data, setParamsState: setData } = useContext(FilmListHomeContext);
   const [isError, setIsError] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
@@ -419,11 +421,18 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
         .catch(() => setIsError(true));
     });
   }, [setData]);
-
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Film Terbaru</Text>
+        <TouchableOpacity
+          style={styles.seeMoreButton}
+          onPress={() => {
+            props.navigation.dispatch(StackActions.push('SeeMore', { type: 'FilmList' }));
+          }}>
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
+        </TouchableOpacity>
       </View>
 
       {isError && (
@@ -445,7 +454,7 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 3 }}
           horizontal
-          data={data?.slice(0, 25) ?? []}
+          data={data?.slice(0, 30) ?? []}
           renderItem={renderMovie}
           keyExtractor={z => 'latest' + z.title}
           extraData={styles}
@@ -588,8 +597,10 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
             });
           }}
           style={styles.errorContainer}>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
+          <MaterialIcon name="refresh" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Ketuk disini untuk mencoba ulang.
+          </Text>
         </TouchableOpacity>
       )}
 
@@ -621,7 +632,7 @@ function ComicListUNMEMO() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      getLatestKomikuReleases()
+      getLatestComicsReleases()
         .then(z => {
           setData?.(z);
         })
@@ -633,7 +644,7 @@ function ComicListUNMEMO() {
   }, [setData]);
 
   const renderComics = useCallback(
-    ({ item }: ListRenderItemInfo<LatestKomikuRelease>) => (
+    ({ item }: ListRenderItemInfo<LatestComicsRelease>) => (
       <ListAnimeComponent
         gap
         newAnimeData={item}
@@ -675,7 +686,7 @@ function ComicListUNMEMO() {
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 3 }}
           horizontal
-          data={data.slice(0, 10)}
+          data={data.slice(0, 24)}
           renderItem={renderComics}
           keyExtractor={z => z.title}
           extraData={styles}
@@ -764,7 +775,7 @@ function useLocalTime() {
 }
 
 function randomQuote() {
-  const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)];
+  const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)] ?? {};
   const quote = `"${randomizeQuote.quote}" - ${randomizeQuote.by}`;
   return quote;
 }

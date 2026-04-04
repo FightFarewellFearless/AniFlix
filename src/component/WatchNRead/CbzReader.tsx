@@ -1,59 +1,56 @@
 import { useFocusEffect } from '@react-navigation/core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Linking, View } from 'react-native';
+import { AppState, View } from 'react-native';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 import { SystemBars } from 'react-native-edge-to-edge';
-import {
-  Appbar,
-  Button,
-  IconButton,
-  Portal,
-  ProgressBar,
-  Snackbar,
-  Text,
-  useTheme,
-} from 'react-native-paper';
+import { Appbar, Button, IconButton, ProgressBar, Text, useTheme } from 'react-native-paper';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import { unzip } from 'react-native-zip-archive';
 import { useBackHandler } from '../../hooks/useBackHandler';
 import { RootStackNavigator } from '../../types/navigation';
-import DialogManager from '../../utils/dialogManager';
-import setHistory from '../../utils/historyControl';
-import { getComicsReading } from '../../utils/scrapers/comicsv2';
-import { getKomikuReading } from '../../utils/scrapers/komiku';
+import { cbzDir, cleanCbzDir } from '../../utils/cbzCleaner';
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsReading'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'CbzReader'>;
 
 export default function ComicsReading(props: Props) {
   const theme = useTheme();
   const webViewRef = useRef<WebView>(null);
 
-  const abortController = useRef<AbortController>(null);
-  const imageFetchOnRNAbortController = useRef<AbortController>(null);
-
   useFocusEffect(
     useCallback(() => {
-      abortController.current = new AbortController();
-      imageFetchOnRNAbortController.current = new AbortController();
       const appState = AppState.addEventListener('blur', () => {
         webViewRef.current?.injectJavaScript(`window.stopAutoScroll(); true;`);
         setIsAutoScrolling(false);
       });
       return () => {
         appState.remove();
-        abortController.current?.abort();
       };
     }, []),
   );
-
-  const [isSnackBarOpen, setIsSnackBarOpen] = useState(false);
-  const [snackBarText, setSnackBarText] = useState('');
 
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentlyVisibleImageId, setCurrentlyVisibleImageId] = useState(0);
 
+  // --- Comics preparation ---
+  const [comicImages, setComicsImages] = useState<string[]>([]);
+  useEffect(() => {
+    (async () => {
+      const newSource = cbzDir + 'a.cbz';
+      await cleanCbzDir();
+      await ReactNativeBlobUtil.fs.cp(props.route.params.fileUrl, newSource);
+      await unzip(newSource, cbzDir);
+      await ReactNativeBlobUtil.fs.unlink(newSource);
+      setComicsImages(
+        (await ReactNativeBlobUtil.fs.ls(cbzDir)).map(file => {
+          return 'file://' + cbzDir + file;
+        }),
+      );
+    })();
+  }, [props.route.params.fileUrl]);
   // --- Layout & Handlers ---
 
   useFocusEffect(
@@ -75,8 +72,6 @@ export default function ComicsReading(props: Props) {
         SystemNavigationBar.fullScreen(false);
         SystemNavigationBar.navigationShow();
         SystemBars.setHidden(false);
-        abortController.current?.abort();
-        imageFetchOnRNAbortController.current?.abort();
       };
     }, []),
   );
@@ -89,45 +84,9 @@ export default function ComicsReading(props: Props) {
       } else return false;
     }, [isFullscreen]),
   );
-  const comicsDownloadLoading = useRef(false);
-  const startComicsDownload = useCallback(() => {
-    if (comicsDownloadLoading.current) return;
-    comicsDownloadLoading.current = true;
-    fetch('https://vortexdownloader.rwbcode.com/api/requestComicsDownloadId', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: props.route.params.data.title + ' - ' + props.route.params.data.chapter,
-        comicImages: props.route.params.data.comicImages,
-        sourceLink: props.route.params.link,
-      }),
-      signal: abortController.current?.signal,
-    })
-      .then(res => res.json())
-      .then(res => {
-        Linking.openURL(`https://vortexdownloader.rwbcode.com/api/getComicsDownload/${res.id}`);
-      })
-      .finally(() => {
-        setIsSnackBarOpen(false);
-        comicsDownloadLoading.current = false;
-      })
-      .catch(err => {
-        if (err.name === 'AbortError') return;
-        DialogManager.alert('Gagal memulai unduhan', err.message);
-      });
-    setSnackBarText('Menyiapkan unduhan...');
-    setIsSnackBarOpen(true);
-  }, [
-    props.route.params.data.chapter,
-    props.route.params.data.comicImages,
-    props.route.params.data.title,
-    props.route.params.link,
-  ]);
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: props.route.params.link.includes('softkomik')
-        ? 'Chapter ' + props.route.params.data.chapter
-        : props.route.params.data.chapter,
+      headerTitle: 'Baca offline',
       headerShown: !isFullscreen,
       header: headerProps => (
         <Appbar.Header>
@@ -146,7 +105,6 @@ export default function ComicsReading(props: Props) {
                 : ''
             }
           />
-          <Appbar.Action icon={'download'} onPress={startComicsDownload} />
           <Appbar.Action
             icon={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
             onPress={() => {
@@ -156,59 +114,7 @@ export default function ComicsReading(props: Props) {
         </Appbar.Header>
       ),
     });
-  }, [
-    isFullscreen,
-    props.navigation,
-    props.route.params.data.chapter,
-    props.route.params.data.comicImages,
-    props.route.params.data.title,
-    props.route.params.link,
-    startComicsDownload,
-  ]);
-
-  // --- Fetch Logic ---
-
-  const fetchImageAndSendToWebView = async (id: number, url: string) => {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0',
-          ...(props.route.params.link.includes('softkomik')
-            ? { Referer: new URL(props.route.params.link).href }
-            : {}),
-        },
-        cache: 'no-cache',
-        signal: imageFetchOnRNAbortController.current?.signal,
-      });
-
-      const blob = await response.blob();
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        const base64data = reader.result;
-        if (typeof base64data === 'string') {
-          const safeBase64 = base64data.replace(/(\r\n|\n|\r)/gm, '');
-
-          webViewRef.current?.injectJavaScript(`
-            window.requestAnimationFrame(() => {
-              window.receiveImageBase64(${id}, "${safeBase64}");
-            });
-            true;
-          `);
-        }
-      };
-
-      reader.onerror = () => {
-        webViewRef.current?.injectJavaScript(`window.onImageErrorById(${id}); true;`);
-      };
-
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      webViewRef.current?.injectJavaScript(`window.onImageErrorById(${id}); true;`);
-    }
-  };
+  }, [isFullscreen, props.navigation]);
 
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
@@ -218,18 +124,8 @@ export default function ComicsReading(props: Props) {
         if (!isNaN(visibleImageId)) {
           if (visibleImageId !== currentlyVisibleImageId) {
             setCurrentlyVisibleImageId(visibleImageId);
-            setHistory(
-              props.route.params.data,
-              props.route.params.link,
-              true,
-              { lastDuration: visibleImageId },
-              false,
-              true,
-            );
           }
         }
-      } else if (data.type === 'REQUEST_IMAGE') {
-        fetchImageAndSendToWebView(data.id, data.url);
       } else if (data.type === 'END_REACHED') {
         setIsAutoScrolling(false);
       }
@@ -264,37 +160,6 @@ export default function ComicsReading(props: Props) {
       return newSpeed;
     });
   };
-  const moveChapter = useCallback(
-    (url: string) => {
-      if (isSnackBarOpen) return;
-      if (isAutoScrolling) toggleAutoScroll();
-
-      setSnackBarText('Mengambil data...');
-      setIsSnackBarOpen(true);
-      (url.includes('komikindo') || url.includes('softkomik')
-        ? getComicsReading
-        : getKomikuReading)(url, abortController.current?.signal)
-        .then(res => {
-          imageFetchOnRNAbortController.current?.abort();
-          imageFetchOnRNAbortController.current = new AbortController();
-          props.navigation.setParams({
-            data: res,
-            link: url,
-            historyData: undefined,
-          });
-          setHistory(res, url, false, undefined, false, true);
-        })
-        .catch(err => {
-          if (err.name === 'AbortError') return;
-          DialogManager.alert('Gagal mengambil data', err.message);
-        })
-        .finally(() => setIsSnackBarOpen(false));
-    },
-    [isSnackBarOpen, isAutoScrolling, toggleAutoScroll, props.navigation],
-  );
-
-  const { data } = props.route.params;
-  const comicImages = props.route.params.data.comicImages;
 
   // --- HTML Generation ---
 
@@ -411,8 +276,11 @@ export default function ComicsReading(props: Props) {
         <div class="img-wrapper" id="wrap-${index}">
            <div class="error-icon" style="display:none"></div>
            <img 
-              data-src="${link}" 
+              src="${link}" 
               id="${index}"
+              loading="lazy"
+              onload="this.classList.add('loaded'); this.parentElement.classList.add('has-loaded');"
+              onerror="this.parentElement.classList.add('is-error');"
            />
         </div>
       `;
@@ -426,71 +294,6 @@ export default function ComicsReading(props: Props) {
     function sendToRN(data) {
         window.ReactNativeWebView.postMessage(JSON.stringify(data));
     }
-    window.receiveImageBase64 = (id, base64Data) => {
-        const img = document.getElementById(id);
-        const wrapper = document.getElementById('wrap-' + id);
-        if (!img || !wrapper) return;
-
-        const bufferImg = new Image();
-        bufferImg.src = base64Data;
-        bufferImg.decode()
-            .then(() => {
-                const wrapperRect = wrapper.getBoundingClientRect();
-                const isAboveViewport = wrapperRect.top < 0;
-
-                const oldHeight = wrapper.offsetHeight;
-                const oldScrollY = window.scrollY;
-
-                img.src = base64Data;
-                img.classList.add('loaded');
-                img.removeAttribute('data-fetching');
-            
-                wrapper.classList.add('has-loaded');
-                wrapper.classList.remove('is-error'); 
-            
-                const newHeight = wrapper.offsetHeight;
-                const delta = newHeight - oldHeight;
-
-                if (isAboveViewport && delta !== 0) {
-                    window.scrollTo(0, oldScrollY + delta);
-                }
-                window.fetchObserver.unobserve(img);
-              })
-              .catch((err) => {
-                img.src = base64Data;
-                img.removeAttribute('data-fetching');
-        });
-    };
-
-    window.onImageErrorById = (id) => {
-       const wrapper = document.getElementById('wrap-' + id);
-       const img = document.getElementById(id);
-       
-       if (img) img.removeAttribute('data-fetching');
-       if (wrapper) {
-         wrapper.classList.add('is-error');
-         const icon = wrapper.querySelector('.error-icon');
-         if(icon) icon.style.display = 'block';
-       }
-    };
-
-    // Retry Listener
-    document.addEventListener('click', (e) => {
-      const wrapper = e.target.closest('.img-wrapper.is-error');
-      if (wrapper) {
-        const img = wrapper.querySelector('img');
-        if (img) {
-          wrapper.classList.remove('is-error');
-          const icon = wrapper.querySelector('.error-icon');
-          if(icon) icon.style.display = 'none';
-          img.style.display = 'block';
-
-          sendToRN({ type: 'REQUEST_IMAGE', id: img.id, url: img.dataset.src });
-          img.setAttribute('data-fetching', 'true');
-        }
-      }
-    });
-
     // --- Auto Scroll ---
     const PIXELS_PER_SECOND = 60;
     window.autoScrollFrame = null;
@@ -529,25 +332,6 @@ export default function ComicsReading(props: Props) {
       if (window.autoScrollFrame) cancelAnimationFrame(window.autoScrollFrame);
       window.autoScrollFrame = null;
     };
-
-    // --- Restore History ---
-    ${
-      props.route.params.historyData
-        ? `
-          setTimeout(() => {
-             const lastDuration = '${props.route.params.historyData.lastDuration}';
-             const target = document.getElementById(lastDuration);
-             if (target) {
-               target.scrollIntoView({ behavior: 'instant', block: 'end' });
-               setTimeout(() => {
-                 target.scrollIntoView({ behavior: 'smooth', block: 'end' });
-               }, 500);
-             };
-          }, 300);
-          `
-        : ''
-    }
-
     // --- OBSERVERS ---
     const sendScrollUpdate = (id) => {
         sendToRN({ type: 'SCROLL_UPDATE', id: id });
@@ -566,46 +350,9 @@ export default function ComicsReading(props: Props) {
          sendScrollUpdate(visibleEntry.target.id);
       }
     }, historyOptions);
-
-    // 2. Fetch Observer
-    const fetchOptions = {
-      root: null,
-      rootMargin: '250% 0px 250% 0px',
-      threshold: 0.01
-    };
-
-    window.fetchObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const img = entry.target;
-
-        if (entry.isIntersecting) {
-            if (!img.loadTimer) {
-              img.loadTimer = setTimeout(() => {
-                if (!img.classList.contains('loaded') && !img.hasAttribute('data-fetching')) {
-                  img.setAttribute('data-fetching', 'true');
-                  sendToRN({
-                    type: 'REQUEST_IMAGE',
-                    id: img.id,
-                    url: img.dataset.src
-                  });
-                }
-                img.loadTimer = null;
-              }, 150); 
-            }
-        } else {
-            if (img.loadTimer) {
-                clearTimeout(img.loadTimer);
-                img.loadTimer = null;
-            }
-        }
-      });
-    }, fetchOptions);
-
-    // Init Observers
     const allImages = document.querySelectorAll('img');
     allImages.forEach(img => {
       historyObserver.observe(img);
-      window.fetchObserver.observe(img);
     });
   `;
 
@@ -627,21 +374,6 @@ export default function ComicsReading(props: Props) {
           mode="outlined"
         />
       </View>
-      <Portal>
-        <Snackbar
-          duration={Infinity}
-          onDismiss={() => setIsSnackBarOpen(false)}
-          visible={isSnackBarOpen}
-          action={{
-            label: 'Batal',
-            onPress: () => {
-              abortController.current?.abort();
-              abortController.current = new AbortController();
-            },
-          }}>
-          {snackBarText}
-        </Snackbar>
-      </Portal>
 
       <WebView
         ref={webViewRef}
@@ -653,6 +385,10 @@ export default function ComicsReading(props: Props) {
         onMessage={handleMessage}
         showsVerticalScrollIndicator={false}
         androidLayerType="hardware"
+        originWhitelist={['*']}
+        allowFileAccess={true}
+        allowUniversalAccessFromFileURLs={true}
+        allowFileAccessFromFileURLs={true}
       />
 
       <View>
@@ -693,32 +429,6 @@ export default function ComicsReading(props: Props) {
               onPress={() => changeSpeed(0.2)}
               disabled={scrollSpeed >= 10}
             />
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-            }}>
-            {data.prevChapter && (
-              <Button
-                icon="arrow-left"
-                onPress={() => {
-                  moveChapter(data.prevChapter!);
-                }}>
-                Sebelumnya
-              </Button>
-            )}
-            {data.nextChapter && (
-              <Button
-                icon="arrow-right"
-                onPress={() => {
-                  moveChapter(data.nextChapter!);
-                }}
-                contentStyle={{ flexDirection: 'row-reverse' }}>
-                Selanjutnya
-              </Button>
-            )}
           </View>
         </View>
 

@@ -1,10 +1,154 @@
+# v1.2.0_JS-8 (4-April-2026)
+## Diperbaiki
+- Error pada komik
+  > Perbaikan untuk versi sebelumnya dimana komik loading terus menerus. Ini kemungkinan adalah versi stabil untuk komik. Segala masalah dan error yang ditemui mohon laporkan ke github atau ke server discord
+# v1.2.0_JS-7 (4-April-2026)
+## Diperbaiki
+- Error pada komik
+  > Perbaikan kali ini diharapkan lebih stabil daripada perbaikan sebelumnya
+- Sedikit meningkatkan batas timeout persiapan data movie
+# v1.2.0_JS-6 (2-April-2026)
+## Diperbaiki
+- Error pada komik (Sementara)
+# v1.2.0_JS-5 (1-April-2026)
+## Diperbaiki
+- Error pada komik
+# v1.2.0_JS-4 (31-Maret-2026)
+## Diperbaiki
+- Error pada komik
+# v1.2.0_JS-3 (25-Maret-2026)
+## Ditambahkan
+- Fitur terjemahan untuk sinopsis film dan subtitle ketika terdeteksi bukan berbahasa indonesia
+## Diperbaiki
+- Error pada komik
+# v1.2.0_JS-2 (20-Maret-2026)
+## Diperbaiki
+- Reset status loading saat layar awal di fokuskan kembali (seperti saat membuka file komik offline saat aplikasi sedang ditengah proses loading awal)
+- Crash aneh&langka berkaitan dengan quote aplikasi (Ntah masalah nya dimana, sekarang crash nya di "silent" kalo masih nemu yang serupa silahkan laporkan ke server discord)
+# v1.2.0_JS-1 (18-Maret-2026)
+## Diperbaiki
+- Memperbaiki crash Invalid URL (hanya potensi perbaikan, akar masalah belum diperbaiki karena minim nya informasi crash, harap untuk orang yang melapor agar join server discord dan infokan lebih lanjut disana, trimakasih)
+# v1.2.0 (18-Maret-2026)
+Versi 1.2.0 Hadir!
+Versi ini memberikan pengalaman yang lebih stabil dengan versi library yang ditingkatkan dan dukungan untuk membuka file .cbz (ini file untuk komik)
+## Ditambahkan
+- Dukungan untuk membuka file .cbz (comic book zip)
+- Download komik ke dalam file .cbz dan buka secara offline!
+## Ditingkatkan
+- Hanya membuka webview inisialisasi data movie ketika dibutuhkan
+## Diperbaiki
+- Beberapa masalah pada kode
+
+# v1.1.4_JS-33 (16-Maret-2026)
+## Ditambahkan
+- Pengumuman
+## Diperbaiki
+- Gambar cover komik gagal dimuat
+- Stuck di detail komik pada beberapa judul
+## Ditingkatkan
+- Menggunakan CDN komik yang paling baru
+- Membuat ukuran gambar cover responsif di detail episode/movie/film/komik
+# v1.1.4_JS-32 (15-Maret-2026)
+## Diperbaiki
+- Cover komik gagal loading
+# v1.1.4_JS-31 (14-Maret-2026)
+## Diperbaiki
+- Error pada komik
+# v1.1.4_JS-30 (14-Maret-2026)
+## Diperbaiki
+- Resolusi anime yang sangat buruk pada beberapa anime lawas
+# v1.1.4_JS-29 (13-Maret-2026)
+- Memperbaiki gambar komik yang muncul acak
+# v1.1.4_JS-28 (12-Maret-2026)
+## Diperbaiki
+- Gambar komik tidak terload pada genre "eksplisit"
+- Subtitle fetching leak
+- Video stuck saat berganti resolusi
+# v1.1.4_JS-27 (08-Maret-2026)
+## Diperbaiki
+- Masalah gambar yang selalu loading pada beberapa kasus
+# v1.1.4_JS-26 (07-Maret-2026)
+## Diperbaiki
+- Error data film saat subtitle tidak tersedia
+# v1.1.4_JS-25 (07-Maret-2026)
+## Ditambahkan
+- Sekarang, membuka data film (bukan tv-series/season) akan mengarahkan mu ke layar detail film alih-alih langsung mengarahkan ke video player, ini memungkinkan mu untuk menambahkan film tersebut ke tonton nanti dan melanjutkan dari durasi terakhir di tonton.
+## Ditingkatkan
+- Sedikit menigkatkan jarak untuk memulai loading pada gambar komik
+## Diperbaiki
+- Error saat membatalkan pencarian
+- Subtitle tidak muncul saat durasi dibawah 1 jam pada beberapa film/tv-series
+- Perbaikan potensial untuk masalah gambar yang selalu loading
+# v1.1.4_JS-24 (02-Maret-2026)
+## Diperbaiki
+- Gambar komik gagal dimuat
+# v1.1.4_JS-23 (01-Maret-2026)
+## Diperbaiki
+- Masalah domain handling di film
+# v1.1.4_JS-22 (01-Maret-2026)
+## Diperbaiki
+- Komik error (lagi dan lagi dan lagi....)
+# v1.1.4_JS-21 (28-Februari-2026)
+## Ditingkatkan
+- Kestabilan pergantian domain untuk seluruh data
+## Diperbaiki
+- Komik error... (yups, lagi dan lagi)
+# v1.1.4_JS-20 (27-Februari-2026)
+## Diperbaiki
+- Download komik
+# v1.1.4_JS-19 (26-Februari-2026)
+## Diperbaiki
+- Gambar komik yang tidak ter load
+# v1.1.4_JS-18 (25-Februari-2026)
+## Diperbaiki
+- Error pada komik (perbaikan ke sekian kali nya xD)
+## Ditingkatkan
+- Pro tips pada pencarian
+# v1.1.4_JS-17 (25-Februari-2026)
+## Diperbaiki
+- Error pada komik
+## Ditingkatkan
+- Skala animasi histori pencarian
+- Header pada detail anime
+# v1.1.4_JS-16 (24-Februari-2026)
+## Diperbaiki
+- Error komik
+- Posisi SnackBar pada pencarian
+# v1.1.4_JS-15 (22-Februari-2026)
+## Ditambahkan
+- Pro tips ketika hasil pencarian tidak ditemukan
+## Ditingkatkan
+- Sedikit peningkatan UX pada Pencarian
+# v1.1.4_JS-14 (20-Februari-2026)
+## Diperbaiki
+- Error yang terkadang muncul pada anime series
+- Error pada beberapa komik yang tidak memiliki sinopsis
+- Posisi indikator loading gambar pada beranda
+- Warna ikon pencarian komik
+## Perubahan
+- Meningkatkan waktu timeout insialisasi movie
+- Mengganti "Menyiapkan download" komik menggunakan komponen SnackBar
+# v1.1.4_JS-13 (19-Februari-2026)
+## Diperbaiki dan Improvisasi
+- Parser subtitle film, perbaikan untuk format vtt spesifik dan dukungan baris baru
+# v1.1.4_JS-12_RE (18-Februari-2026)
+(Versi rilis ulang dari JS-12, perbaikan bug pada download anime)
+Update yang cukup besar pada beberapa fitur aplikasi termasuk kemampuan mengganti resolusi film, download komik, dukungan untuk lebih banyak komik, dll...
+Tolong laporkan setiap bug atau error ke server discord agar diperbaiki secepatnya
+## Ditambahkan
+- 2 Sumber data komik baru
+- Menambahkan "Lihat Semua" ke Film terbaru
+- Dukungan untuk download komik
+- Menambahkan opsi untuk mengganti resolusi streaming film
+## Diperbaiki
+- Resolusi "pixel" pada anime movie
+- Konflik nama file ketika download anime
+### Dan beberapa perubahan lainnya...
 # v1.1.4_JS-11 (11-Februari-2026)
 ## Ditambahkan
 - Fitur download film (video dan subtitle terpisah, pastikan video player yang digunakan mendukung file subtitle secara terpisah)
 ## Diperbaiki
 - Text Decoding pada komik
-## NEXT PLAN:
-- Menambahkan download komik (kemungkinan membutuhkan native app rebuild jadi update nya sekitaran 30an MB)
 # v1.1.4_JS-10 (11-Februari-2026)
 ## Diperbaiki
 - Lag dan frame drop ekstrim ketika animasi sistem dinonaktifkan

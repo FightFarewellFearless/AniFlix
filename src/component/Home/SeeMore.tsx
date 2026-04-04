@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import React, { memo, useContext, useEffect, useState, useCallback } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   ToastAndroid,
@@ -13,22 +13,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
+  FilmListHomeContext,
   MovieListHomeContext,
 } from '../../misc/context';
 import { NewAnimeList } from '../../types/anime';
 import { RootStackNavigator } from '../../types/navigation';
 import AnimeAPI from '../../utils/AnimeAPI';
 import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
-import { getLatestKomikuReleases, LatestKomikuRelease } from '../../utils/scrapers/komiku';
+import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
+import { FilmHomePage, getLatest } from '../../utils/scrapers/film';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
-type ItemType = NewAnimeList | Movies | LatestKomikuRelease;
+type ItemType = NewAnimeList | Movies | LatestComicsRelease | FilmHomePage[number];
 
 interface SeeMoreUIProps {
   data: ItemType[];
-  type: 'AnimeList' | 'MovieList' | 'ComicsList';
+  type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList';
   onLoadMore: () => Promise<void>;
   navigation: Props['navigation'];
 }
@@ -41,16 +43,18 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
 
   let columnWidth = (dimensions.width * 120) / 200 / 1.9;
   columnWidth = Math.max(columnWidth, MIN_IMAGE_WIDTH);
-  const numColumns = type === 'ComicsList' ? 1 : Math.floor(dimensions.width / columnWidth);
+  const numColumns = Math.floor(dimensions.width / columnWidth);
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle:
-        type === 'MovieList'
-          ? 'Movie terbaru'
-          : type === 'ComicsList'
-            ? 'Komik terbaru'
-            : 'Anime terbaru',
+        type === 'FilmList'
+          ? 'Film terbaru'
+          : type === 'MovieList'
+            ? 'Movie terbaru'
+            : type === 'ComicsList'
+              ? 'Komik terbaru'
+              : 'Anime terbaru',
     });
   }, [navigation, type]);
 
@@ -78,13 +82,23 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
           />
         );
       }
+      if (type === 'FilmList') {
+        return (
+          <ListAnimeComponent
+            gap
+            type="film"
+            newAnimeData={item as FilmHomePage[number]}
+            navigationProp={navigation}
+          />
+        );
+      }
       if (type === 'ComicsList') {
         return (
           <ListAnimeComponent
             gap
             fromSeeMore
             type="comics"
-            newAnimeData={item as LatestKomikuRelease}
+            newAnimeData={item as LatestComicsRelease}
             navigationProp={navigation}
           />
         );
@@ -184,13 +198,40 @@ const MovieContainer = ({ navigation }: { navigation: Props['navigation'] }) => 
   );
 };
 
+const FilmContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(FilmListHomeContext);
+  const data = paramsState || [];
+
+  const handleLoadMore = async () => {
+    const page = Math.round((data.length ?? 0) / 30);
+    const newData = await getLatest(page + 1);
+
+    if ('isError' in newData) {
+      throw new Error('API Error');
+    }
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev, ...newData];
+        return combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="FilmList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
 const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
   const { paramsState, setParamsState } = useContext(ComicsListContext);
   const data = paramsState || [];
 
   const handleLoadMore = async () => {
-    const page = Math.round((data.length ?? 0) / 10);
-    const newData = await getLatestKomikuReleases(page + 1);
+    const page = Math.round((data.length ?? 0) / 24);
+    const newData = await getLatestComicsReleases(page + 1);
 
     if ('isError' in newData) {
       throw new Error('API Error');
@@ -214,6 +255,8 @@ const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) =>
 function SeeMore(props: Props) {
   const { type } = props.route.params;
   switch (type) {
+    case 'FilmList':
+      return <FilmContainer navigation={props.navigation} />;
     case 'MovieList':
       return <MovieContainer navigation={props.navigation} />;
     case 'ComicsList':

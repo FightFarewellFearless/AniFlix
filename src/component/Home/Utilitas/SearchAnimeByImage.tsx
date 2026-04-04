@@ -1,6 +1,7 @@
+import Icon from '@react-native-vector-icons/fontawesome';
+import MaterialIcon from '@react-native-vector-icons/material-icons';
 import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
-import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
@@ -15,9 +16,8 @@ import {
   View,
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
-import Icon from '@react-native-vector-icons/fontawesome';
-import MaterialIcon from '@react-native-vector-icons/material-icons';
 import useGlobalStyles from '../../../assets/style';
+import ImageLoading from '../../misc/ImageLoading';
 
 interface SearchResult {
   frameCount: number;
@@ -192,10 +192,10 @@ function SearchAnimeByImage() {
 
               <View style={styles.imagePreviewContainer}>
                 {choosenImage ? (
-                  <Image
+                  <ImageLoading
                     source={{ uri: choosenImage }}
                     style={styles.selectedImage}
-                    contentFit="contain"
+                    resizeMode="contain"
                   />
                 ) : (
                   <View style={styles.placeholderContainer}>
@@ -223,7 +223,7 @@ function SearchAnimeByImage() {
               <>
                 <View style={styles.resultHeader}>
                   {item.image ? (
-                    <Image style={styles.resultImage} source={{ uri: item.image }} />
+                    <ImageLoading style={styles.resultImage} source={{ uri: item.image }} />
                   ) : (
                     <View style={styles.resultImagePlaceholder}>
                       <Icon name="image" size={32} color={globalStyles.text.color} />

@@ -9,11 +9,12 @@ function useDownloadAnime() {
     async (
       source: string,
       downloadSource: string[],
-      Title: string,
+      _Title: string,
       resolution: string,
       force: boolean | undefined = false,
       callback: () => any,
     ) => {
+      let Title = _Title.replace(/[/\\:*?"<>|]/g, '_'); //safe title
       if (downloadSource.includes(source) && force === false) {
         DialogManager.alert(
           'Lanjutkan?',

@@ -1,7 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import Fontisto from '@react-native-vector-icons/fontisto';
 import MaterialIcon from '@react-native-vector-icons/material-design-icons';
-import { StackActions } from '@react-navigation/native';
+import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -37,7 +37,8 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
-import animeLocalAPI from '../../utils/scrapers/animeSeries';
+import { fetchLatestDomain } from '../../utils/scrapers/animeSeries';
+// import { Comics1WebView } from '../../utils/scrapers/comics1';
 
 export const JoinDiscord = ({
   buttonColor,
@@ -98,11 +99,12 @@ function Loading(props: Props) {
   });
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
+  // const [isComics1WebViewOpen, setIsComics1WebViewOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const progressValueAnimation = useSharedValue(0);
 
-  const fetchAnimeData = useCallback(async () => {
-    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home().catch(() => {
+  const fetchAnimeData = useCallback(async (signal: AbortSignal) => {
+    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home(signal).catch(() => {
       // props.navigation.dispatch(StackActions.replace('FailedToConnect'));
       ToastAndroid.show('Gagal menghubungkan ke server anime', ToastAndroid.SHORT);
     });
@@ -159,8 +161,8 @@ function Loading(props: Props) {
     }
   }, []);
 
-  const fetchDomain = useCallback(async () => {
-    await animeLocalAPI.fetchLatestDomain().catch(() => {
+  const fetchDomain = useCallback(async (signal: AbortSignal) => {
+    await fetchLatestDomain(signal).catch(() => {
       ToastAndroid.show(
         'Gagal mendapatkan domain terbaru, menggunakan domain default',
         ToastAndroid.SHORT,
@@ -168,9 +170,12 @@ function Loading(props: Props) {
     });
   }, []);
 
-  const checkNativeAppVersion = useCallback(async () => {
+  const checkNativeAppVersion = useCallback(async (signal: AbortSignal) => {
     const abort = new AbortController();
     const timoeut = setTimeout(() => abort.abort(), 5000);
+    const onAbort = () => abort.abort();
+    signal.addEventListener('abort', onAbort);
+
     const data = await fetch(
       'https://api.github.com/repos/FightFarewellFearless/AniFlix/releases?per_page=1',
       {
@@ -183,6 +188,10 @@ function Loading(props: Props) {
       .then(d => d.json())
       .catch(() => {});
     clearTimeout(timoeut);
+    signal.removeEventListener('abort', onAbort);
+
+    if (signal.aborted) return null;
+
     if (data === undefined) {
       ToastAndroid.show('Error saat mengecek versi', ToastAndroid.SHORT);
       return true;
@@ -199,6 +208,10 @@ function Loading(props: Props) {
   const [animeMoviePromise] = useState(
     () => new Promise(res => (moviePromiseResolve.current = res)),
   );
+  // const comics1PromiseResolve = useRef<(val?: unknown) => void>(null);
+  // const [comics1Promise] = useState(
+  //   () => new Promise(res => (comics1PromiseResolve.current = res)),
+  // );
   const onAnimeMovieReady = useCallback(() => {
     setLoadStatus(old => ({
       ...old,
@@ -207,103 +220,147 @@ function Loading(props: Props) {
     setIsAnimeMovieWebViewOpen(false);
     moviePromiseResolve.current?.();
   }, []);
+  // const onComics1Ready = useCallback(() => {
+  //   setLoadStatus(old => ({
+  //     ...old,
+  //     'Mempersiapkan data anime movie': !isAnimeMovieWebViewOpen && !isComics1WebViewOpen,
+  //   }));
+  //   setIsComics1WebViewOpen(false);
+  //   comics1PromiseResolve.current?.();
+  // }, [isAnimeMovieWebViewOpen, isComics1WebViewOpen]);
 
-  const connectToServers = useCallback(async () => {
-    setIsAnimeMovieWebViewOpen(true);
-    const animeData = await fetchAnimeData();
-    Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
-      if (anime === undefined) {
-        return;
-      }
-      props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
-    });
-  }, [animeMoviePromise, fetchAnimeData, props.navigation]);
-
-  useEffect(() => {
-    (async () => {
-      await prepareData();
-      await deleteUnnecessaryUpdate();
-      setLoadStatus(old => ({
-        ...old,
-        'Menyiapkan database': true,
-      }));
-
-      const nativeAppVersion = await checkNativeAppVersion();
-      if (nativeAppVersion === null) {
-        props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      } else if (nativeAppVersion === true || __DEV__) {
-        let isOTADoneExecuted = false;
-        async function OTADone() {
-          if (isOTADoneExecuted) return;
-          isOTADoneExecuted = true;
-          setLoadStatus(old => ({
-            ...old,
-            'Mengecek versi aplikasi': true,
-          }));
-          await fetchDomain();
-          setLoadStatus(old => ({
-            ...old,
-            'Mendapatkan domain terbaru': true,
-          }));
-          connectToServers();
-        }
-        const OTATimeout = setTimeout(() => {
-          ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
-          OTADone();
-        }, 6_000);
-        const OTAUpdate = await Updates.checkForUpdateAsync()
-          .catch(() => {
-            ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
-            return null;
-          })
-          .finally(() => clearTimeout(OTATimeout));
-
-        if (OTAUpdate !== null && OTAUpdate.isAvailable) {
-          const changelog = await fetch(
-            'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
-            {
-              headers: {
-                'User-Agent': deviceUserAgent,
-                'Cache-Control': 'no-cache',
-              },
-            },
-          )
-            .then(d => d.text())
-            .catch(() => 'Gagal mendapatkan changelog');
-          props.navigation.dispatch(
-            StackActions.replace('NeedUpdate', {
-              changelog,
-              size: 0,
-              nativeUpdate: false,
-            }),
-          );
+  const connectToServers = useCallback(
+    async (signal: AbortSignal) => {
+      setIsAnimeMovieWebViewOpen(true);
+      // setIsComics1WebViewOpen(true);
+      const animeData = await fetchAnimeData(signal);
+      Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
+        if (signal.aborted) return;
+        if (anime === undefined) {
           return;
         }
-        await OTADone();
-      } else {
-        const latestVersion = nativeAppVersion.tag_name;
-        const changelog = nativeAppVersion.body;
-        const download = nativeAppVersion.assets[0].browser_download_url;
+        props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
+      });
+    },
+    [animeMoviePromise, fetchAnimeData, props.navigation],
+  );
 
-        props.navigation.dispatch(
-          StackActions.replace('NeedUpdate', {
-            latestVersion,
-            changelog,
-            download,
-            nativeUpdate: true,
-          }),
-        );
-      }
-    })();
-  }, [
-    fetchAnimeData,
-    prepareData,
-    checkNativeAppVersion,
-    props.navigation,
-    deleteUnnecessaryUpdate,
-    fetchDomain,
-    connectToServers,
-  ]);
+  useFocusEffect(
+    useCallback(() => {
+      const abortController = new AbortController();
+      const signal = abortController.signal;
+
+      (async () => {
+        setLoadStatus({
+          'Menyiapkan database': false,
+          'Mengecek versi aplikasi': false,
+          'Mendapatkan domain terbaru': false,
+          'Mempersiapkan data anime movie': false,
+          'Menghubungkan ke server': false,
+        });
+        await prepareData();
+        if (signal.aborted) return;
+
+        await deleteUnnecessaryUpdate();
+        if (signal.aborted) return;
+
+        setLoadStatus(old => ({
+          ...old,
+          'Menyiapkan database': true,
+        }));
+
+        const nativeAppVersion = await checkNativeAppVersion(signal);
+        if (signal.aborted) return;
+
+        if (nativeAppVersion === null) {
+          props.navigation.dispatch(StackActions.replace('FailedToConnect'));
+        } else if (nativeAppVersion === true || __DEV__) {
+          let isOTADoneExecuted = false;
+          async function OTADone() {
+            if (isOTADoneExecuted || signal.aborted) return;
+            isOTADoneExecuted = true;
+            setLoadStatus(old => ({
+              ...old,
+              'Mengecek versi aplikasi': true,
+            }));
+            await fetchDomain(signal);
+            if (signal.aborted) return;
+            setLoadStatus(old => ({
+              ...old,
+              'Mendapatkan domain terbaru': true,
+            }));
+            connectToServers(signal);
+          }
+          const OTATimeout = setTimeout(() => {
+            if (signal.aborted) return;
+            ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
+            OTADone();
+          }, 6_000);
+          const OTAUpdate = await Updates.checkForUpdateAsync()
+            .catch(() => {
+              if (!signal.aborted) {
+                ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
+              }
+              return null;
+            })
+            .finally(() => clearTimeout(OTATimeout));
+
+          if (signal.aborted) return;
+
+          if (OTAUpdate !== null && OTAUpdate.isAvailable) {
+            const changelog = await fetch(
+              'https://raw.githubusercontent.com/FightFarewellFearless/AniFlix/refs/heads/master/CHANGELOG.md',
+              {
+                signal,
+                headers: {
+                  'User-Agent': deviceUserAgent,
+                  'Cache-Control': 'no-cache',
+                },
+              },
+            )
+              .then(d => d.text())
+              .catch(() => 'Gagal mendapatkan changelog');
+
+            if (signal.aborted) return;
+
+            props.navigation.dispatch(
+              StackActions.replace('NeedUpdate', {
+                changelog,
+                size: 0,
+                nativeUpdate: false,
+              }),
+            );
+            return;
+          }
+          await OTADone();
+        } else {
+          const latestVersion = nativeAppVersion.tag_name;
+          const changelog = nativeAppVersion.body;
+          const download = nativeAppVersion.assets[0].browser_download_url;
+
+          props.navigation.dispatch(
+            StackActions.replace('NeedUpdate', {
+              latestVersion,
+              changelog,
+              download,
+              nativeUpdate: true,
+            }),
+          );
+        }
+      })();
+
+      return () => {
+        abortController.abort();
+      };
+    }, [
+      prepareData,
+      checkNativeAppVersion,
+      props.navigation,
+      deleteUnnecessaryUpdate,
+      fetchDomain,
+      connectToServers,
+    ]),
+  );
 
   useEffect(() => {
     const completedSteps = Object.values(loadStatus).filter(Boolean).length;
@@ -317,7 +374,10 @@ function Loading(props: Props) {
     width: `${progressValueAnimation.get()}%`,
   }));
 
-  const quotes = useMemo(() => runningText[Math.floor(runningText.length * Math.random())], []);
+  const quotes = useMemo(
+    () => runningText[Math.floor(runningText.length * Math.random())] ?? {},
+    [],
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -329,6 +389,11 @@ function Loading(props: Props) {
               setIsWebViewShown={setIsAnimeMovieWebViewOpen}
               onAnimeMovieReady={onAnimeMovieReady}
             />
+            {/* <Comics1WebView
+              isWebViewShown={isComics1WebViewOpen}
+              setIsWebViewShown={setIsComics1WebViewOpen}
+              onComics1Ready={onComics1Ready}
+            /> */}
           </Suspense>
         )}
 

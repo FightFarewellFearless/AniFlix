@@ -1,7 +1,6 @@
 import { LegendList } from '@legendapp/list';
-import { ImageBackground } from 'expo-image';
 import { memo, useMemo } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { ImageBackground, Linking, StyleSheet, View } from 'react-native';
 import {
   Avatar,
   Card,
@@ -152,7 +151,7 @@ function About() {
   );
 
   return (
-    <ImageBackground source={tokyo} contentFit="cover" style={{ flex: 1 }}>
+    <ImageBackground source={tokyo} resizeMode="cover" style={{ flex: 1 }}>
       <DarkOverlay transparent={0.85} />
 
       <LegendList
