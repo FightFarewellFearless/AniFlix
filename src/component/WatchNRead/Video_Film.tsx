@@ -447,6 +447,16 @@ function Video_Film(props: Props) {
   );
 
   // Subtitle translation and language check
+  const translationAbortController = useRef<AbortController>(null);
+  useFocusEffect(
+    useCallback(() => {
+      void loading;
+      translationAbortController.current = new AbortController();
+      return () => {
+        translationAbortController.current?.abort();
+      };
+    }, [loading]),
+  );
   const [isSubNotID, setIsSubNotID] = useState(false);
   const [isUsingTranslatedSub, setIsUsingTranslatedSub] = useState(false);
   const [subTranslationLoading, setSubTranslationLoading] = useState(false);
@@ -458,7 +468,7 @@ function Video_Film(props: Props) {
     try {
       const trRes = await tr(subtitleText.slice(0, 500), {
         to: 'id',
-        signal: abortController.current?.signal,
+        signal: translationAbortController.current?.signal,
       });
       if (trRes.src !== 'id') {
         setIsSubNotID(true);
@@ -473,7 +483,7 @@ function Video_Film(props: Props) {
         splittedSub.map(string => {
           return tr(string, {
             to: 'id',
-            signal: abortController.current?.signal,
+            signal: translationAbortController.current?.signal,
           });
         }),
       );
@@ -482,7 +492,8 @@ function Video_Film(props: Props) {
       });
       playerRef.current?.overwriteSubtitleObj(await parseSubtitles(translatedSub.current.join('')));
       setIsUsingTranslatedSub(true);
-    } catch {
+    } catch (e: any) {
+      if (e.message === 'canceled') return;
       ToastAndroid.show('Gagal menerjemahkan subtitle', ToastAndroid.SHORT);
     } finally {
       setSubTranslationLoading(false);
@@ -1035,11 +1046,11 @@ function useStyles() {
   );
 }
 
-function splitStringByLimit(text: string): string[] {
+function splitStringByLimit(text: string, charLimit = 8000): string[] {
   const result: string[] = [];
 
-  for (let i = 0; i < text.length; i += 5000) {
-    result.push(text.slice(i, i + 5000));
+  for (let i = 0; i < text.length; i += charLimit) {
+    result.push(text.slice(i, i + charLimit));
   }
 
   return result;
