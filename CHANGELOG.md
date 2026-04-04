@@ -1,3 +1,8 @@
+# v1.2.0_JS-7 (4-April-2026)
+## Diperbaiki
+- Error pada komik
+  > Perbaikan kali ini diharapkan lebih stabil daripada perbaikan sebelumnya
+- Sedikit meningkatkan batas timeout persiapan data movie
 # v1.2.0_JS-6 (2-April-2026)
 ## Diperbaiki
 - Error pada komik (Sementara)
