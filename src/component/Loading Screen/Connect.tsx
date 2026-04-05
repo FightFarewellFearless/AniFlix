@@ -94,8 +94,8 @@ function Loading(props: Props) {
     'Menyiapkan database': false,
     'Mengecek versi aplikasi': false,
     'Mendapatkan domain terbaru': false,
-    'Mempersiapkan data anime movie': false,
-    'Menghubungkan ke server': false,
+    'Menyiapkan data anime movie': false,
+    'Menyiapkan data anime series': false,
   });
 
   const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
@@ -106,11 +106,11 @@ function Loading(props: Props) {
   const fetchAnimeData = useCallback(async (signal: AbortSignal) => {
     const jsondata: EpisodeBaruHome | void = await AnimeAPI.home(signal).catch(() => {
       // props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      ToastAndroid.show('Gagal menghubungkan ke server anime', ToastAndroid.SHORT);
+      ToastAndroid.show('Gagal menyiapkan data anime series', ToastAndroid.SHORT);
     });
     setLoadStatus(old => ({
       ...old,
-      'Menghubungkan ke server': true,
+      'Menyiapkan data anime series': true,
     }));
     if (jsondata === undefined) {
       return {
@@ -215,7 +215,7 @@ function Loading(props: Props) {
   const onAnimeMovieReady = useCallback(() => {
     setLoadStatus(old => ({
       ...old,
-      'Mempersiapkan data anime movie': true,
+      'Menyiapkan data anime movie': true,
     }));
     setIsAnimeMovieWebViewOpen(false);
     moviePromiseResolve.current?.();
@@ -223,7 +223,7 @@ function Loading(props: Props) {
   // const onComics1Ready = useCallback(() => {
   //   setLoadStatus(old => ({
   //     ...old,
-  //     'Mempersiapkan data anime movie': !isAnimeMovieWebViewOpen && !isComics1WebViewOpen,
+  //     'Menyiapkan data anime movie': !isAnimeMovieWebViewOpen && !isComics1WebViewOpen,
   //   }));
   //   setIsComics1WebViewOpen(false);
   //   comics1PromiseResolve.current?.();
@@ -255,8 +255,8 @@ function Loading(props: Props) {
           'Menyiapkan database': false,
           'Mengecek versi aplikasi': false,
           'Mendapatkan domain terbaru': false,
-          'Mempersiapkan data anime movie': false,
-          'Menghubungkan ke server': false,
+          'Menyiapkan data anime movie': false,
+          'Menyiapkan data anime series': false,
         });
         await prepareData();
         if (signal.aborted) return;
