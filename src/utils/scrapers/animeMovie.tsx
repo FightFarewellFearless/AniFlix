@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -487,30 +487,6 @@ export async function searchMovie(query: string, signal?: AbortSignal) {
 
 export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
   const webviewRef = useRef<WebView>(null);
-  const [webviewRequired, setWebviewRequired] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      isError = false;
-      const abortController = new AbortController();
-      (async () => {
-        const text = await fetch('https://154.26.137.28/', {
-          headers: {
-            'User-Agent': deviceUserAgent,
-          },
-          signal: abortController.signal,
-        })
-          .then(a => a.text())
-          .catch(() => '');
-        if (text.includes('<title>AnimeSail')) {
-          setIsWebViewShown(false);
-          onAnimeMovieReady();
-        } else setWebviewRequired(true);
-      })();
-      return () => {
-        abortController.abort();
-      };
-    }, [onAnimeMovieReady, setIsWebViewShown]),
-  );
   useFocusEffect(
     useCallback(() => {
       if (isWebViewShown) {
@@ -529,7 +505,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   if (!useIsFocused()) return null;
   return (
     <View style={{ height: 0, display: 'none' }}>
-      {isWebViewShown && webviewRequired && (
+      {isWebViewShown && (
         <WebView
           ref={webviewRef}
           userAgent={deviceUserAgent}
