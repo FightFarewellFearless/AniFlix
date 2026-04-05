@@ -1,3 +1,12 @@
+# v1.2.0_JS-9 (5-April-2026)
+## Diperbaiki
+- Error pada chapter komik
+- 'Data tidak tersedia' pada komik bersumber dari komiku
+## Perubahan lain
+- Ikon error pada gambar background di hasil pencarian dihilangkan
+- [Film] Otomatis membatalkan terjemahan subtitle jika keluar atau pindah ke episode lain
+- Menghilangkan pengecekan untuk persiapan anime movie
+- Mengganti teks pada menu koneksi awal dan ikon pada rating usia (jika data adalah komiku)
 # v1.2.0_JS-8 (4-April-2026)
 ## Diperbaiki
 - Error pada komik
