@@ -1,13 +1,14 @@
+import { COMICS1_AUTH } from '@env';
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Comics1SessionFetcherContext } from './comics1sessionfetchercontext';
-import deviceUserAgent from './deviceUserAgent';
-import { BASE_URL } from './scrapers/comics1';
+import deviceUserAgent from '../deviceUserAgent';
+import { BASE_URL, Cookie } from '../scrapers/comics1';
+import { Comics1ChapterSessionFetcherContext } from './comics1chaptersessionfetchercontext';
 
-export default function Comics1WebView() {
+export default function Comics1ChapterSessionWebView() {
   const webviewRef = useRef<WebView>(null);
-  const context = use(Comics1SessionFetcherContext);
+  const context = use(Comics1ChapterSessionFetcherContext);
   // useEffect(() => {
   //   // isError = false;z
   // }, []);
@@ -49,7 +50,12 @@ export default function Comics1WebView() {
           domStorageEnabled={false}
           ref={webviewRef}
           userAgent={deviceUserAgent}
-          source={{ uri: BASE_URL + '/komik/update' }}
+          source={{
+            uri: context.chapterUrl?.current ?? '',
+            headers: {
+              Cookie: Cookie + `; tokkey=${encodeURIComponent(COMICS1_AUTH)}`,
+            },
+          }}
           setSupportMultipleWindows={false}
           injectedJavaScriptBeforeContentLoaded={`
   (function() {

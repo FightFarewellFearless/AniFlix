@@ -8,7 +8,8 @@ import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import WebView from 'react-native-webview';
 import deviceUserAgent from '../deviceUserAgent';
-import { comics1FetchSession } from '../comics1sessionfetchercontext';
+import { comics1FetchSession } from '../comics1SessionFetcher/comics1sessionfetchercontext';
+import { comics1FetchChapterSession } from '../comics1SessionFetcher/comics1chaptersessionfetchercontext';
 
 // let isError = false;
 export const __ALIAS = 'softkomik';
@@ -38,7 +39,7 @@ function compressedImageUrl(
   return `${BASE_URL}/_next/image?url=${encodedUrl}&w=${width}&q=${quality}`;
 }
 
-let Cookie = '';
+export let Cookie = '';
 async function updateCookie(signal?: AbortSignal) {
   const response = await fetch(BASE_URL + '/komik/update', {
     headers: { 'User-Agent': deviceUserAgent },
@@ -98,6 +99,48 @@ async function getSession(signal?: AbortSignal): Promise<Session> {
     return newSession;
   }
   return currentSession as Session;
+}
+
+let currentChapterSession: Partial<Session> = {};
+async function getChapterSessionPath(chapterUrl: string, signal?: AbortSignal): Promise<string> {
+  const onAbort = () => {
+    comics1FetchChapterSession.abortCleanup();
+  };
+  signal?.addEventListener('abort', onAbort, { once: true });
+  const data: string = await new Promise((res, rej) =>
+    comics1FetchChapterSession.getChapterSessionPath(chapterUrl, res, rej),
+  );
+  signal?.removeEventListener('abort', onAbort);
+  return data;
+}
+async function fetchNewChapterSession(chapterUrl: string, signal?: AbortSignal): Promise<Session> {
+  const path = await getChapterSessionPath(chapterUrl, signal);
+  const response = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      Accept: 'application/json, text/plain, */*',
+      'User-Agent': deviceUserAgent,
+      Cookie,
+      Referer: chapterUrl,
+    },
+    signal,
+  });
+  const data: Session = await response.json();
+  const sessionToken = data.token;
+  const sessionSign = data.sign.split('|')[0];
+  const expired = data.ex;
+  return { token: sessionToken, sign: sessionSign, ex: expired };
+}
+async function getChapterSession(chapterUrl: string, signal?: AbortSignal): Promise<Session> {
+  // if (isError) throw new Error('Data awal error, mohon muat ulang aplikasi');
+  if (!Cookie) {
+    await updateCookie(signal);
+  }
+  if (!currentChapterSession.token || Date.now() > (currentChapterSession.ex ?? Infinity)) {
+    const newSession = await fetchNewChapterSession(chapterUrl, signal);
+    currentChapterSession = newSession;
+    return newSession;
+  }
+  return currentChapterSession as Session;
 }
 
 export interface LatestComicsRelease1 {
@@ -331,7 +374,7 @@ export async function getComicsReading1(
   });
   const jsonPage: ComicsReadingRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props
     .pageProps.data;
-  const session = await getSession(signal);
+  const session = await getChapterSession(url, signal);
   const jsonApi = await fetch(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
     {
