@@ -326,7 +326,7 @@ export default function ComicsDetail(props: Props) {
                     <>
                       <Surface style={styles.additionalInfoTextSurface}>
                         <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                          <Icon color={styles.additionalInfoText.color} name="check-circle" />{' '}
+                          <Icon color={styles.additionalInfoText.color} name="child" />{' '}
                           {data.minAge}
                         </Text>
                       </Surface>

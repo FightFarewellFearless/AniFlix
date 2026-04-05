@@ -97,25 +97,22 @@ export async function getKomikuDetailFromUrl(
       return { key, value };
     })
     .toArray();
-  const titleRaw =
-    tableInfo.find(item => item.key === 'Judul Komik')?.value ?? 'Data tidak tersedia';
+  const titleRaw = tableInfo.find(item => item.key === 'Judul:')?.value ?? 'Data tidak tersedia';
   const title = he.decode(titleRaw);
   const indonesianTitleRaw =
-    tableInfo.find(item => item.key === 'Judul Indonesia')?.value ?? 'Data tidak tersedia';
+    tableInfo.find(item => item.key === 'Judul Alternatif:')?.value ?? 'Data tidak tersedia';
   const indonesianTitle = he.decode(indonesianTitleRaw);
   const type =
-    (tableInfo.find(item => item.key === 'Jenis Komik')?.value as KomikuDetail['type']) ??
+    (tableInfo.find(item => item.key === 'Tipe:')?.value as KomikuDetail['type']) ??
     'Data tidak tersedia';
-  const author = tableInfo.find(item => item.key === 'Pengarang')?.value ?? 'Data tidak tersedia';
+  const author = tableInfo.find(item => item.key === 'Author:')?.value ?? 'Data tidak tersedia';
   const status =
-    (tableInfo.find(item => item.key === 'Status')?.value as KomikuDetail['status']) ??
+    (tableInfo.find(item => item.key === 'Status:')?.value as KomikuDetail['status']) ??
     'Data tidak tersedia';
-  const minAge =
-    tableInfo.find(item => item.key === 'Umur Pembaca')?.value ?? 'Data tidak tersedia';
-  const concept =
-    tableInfo.find(item => item.key === 'Konsep Cerita')?.value ?? 'Data tidak tersedia';
+  const minAge = tableInfo.find(item => item.key === 'Rating:')?.value ?? 'Data tidak tersedia';
+  const concept = tableInfo.find(item => item.key === 'Tema:')?.value ?? 'Data tidak tersedia';
   const readingDirection =
-    tableInfo.find(item => item.key === 'Cara Baca')?.value ?? 'Data tidak tersedia';
+    tableInfo.find(item => item.key === 'Cara Baca:')?.value ?? 'Data tidak tersedia';
   const headerImageUrl = data.match(/url\((.*?)\)/)?.[1] ?? '';
   const thumbnailUrl = $('.ims > img').attr('src') ?? '';
   const genres = $('ul.genre > li')
