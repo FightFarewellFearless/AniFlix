@@ -92,7 +92,7 @@ const ImageLoading = (
       {isFocused && (
         <View style={styles.overlay}>
           {loading && displayLoading && <LoadingIndicator size={15} />}
-          {error && <Icon name="exclamation-circle" color="red" size={18} />}
+          {error && displayLoading && <Icon name="exclamation-circle" color="red" size={18} />}
         </View>
       )}
     </View>
