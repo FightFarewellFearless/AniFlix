@@ -1,3 +1,7 @@
+# v1.2.0_JS-10 (6-April-2026)
+## Diperbaiki
+- Handle crash pada bagian loading dengan pesan yang lebih informatif
+- Memperbaiki error insialisasi data movie tidak kunjung hilang setelah mencoba lagi
 # v1.2.0_JS-9 (5-April-2026)
 ## Diperbaiki
 - Error pada chapter komik
