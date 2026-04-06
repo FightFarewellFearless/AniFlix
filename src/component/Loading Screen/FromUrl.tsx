@@ -75,6 +75,16 @@ function FromUrl(props: Props) {
       } catch {
         link = props.route.params.link;
       }
+      if (link === undefined) {
+        props.navigation.goBack();
+        DialogManager.alert(
+          'Error',
+          'Link tidak ditemukan!\nMohon informasikan hal ini ke server discord kami ' +
+            '(dapat ditemukan di beranda aplikasi). ' +
+            'Lengkap dengan judul anime/film/komik yang kamu cari.',
+        );
+        return;
+      }
       const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
       if (link.includes('nanimex')) {
         props.navigation.goBack();
