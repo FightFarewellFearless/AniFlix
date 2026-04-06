@@ -490,6 +490,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   useFocusEffect(
     useCallback(() => {
       if (isWebViewShown) {
+        isError = false;
         const timeout = setTimeout(() => {
           isError = true;
           setIsWebViewShown(false);
