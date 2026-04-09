@@ -2734,6 +2734,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@preeternal/react-native-cookie-manager@npm:^6.3.1":
+  version: 6.3.1
+  resolution: "@preeternal/react-native-cookie-manager@npm:6.3.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: f834ba5eb78426ee744b8d9d098fc79c12959842f6f3de87a7a3d78c0ce2efe57b2a526c67b15f551c4a4b674258ef3cdf061773d3b24e46d3fc71ca430351a5
+  languageName: node
+  linkType: hard
+
 "@react-native-community/cli-clean@npm:20.0.2":
   version: 20.0.2
   resolution: "@react-native-community/cli-clean@npm:20.0.2"
@@ -4119,6 +4129,7 @@ __metadata:
     "@domir/react-native-measure-text": 0.1.8
     "@legendapp/list": 2.0.19
     "@pirles/react-native-element-dropdown": ^2.15.0
+    "@preeternal/react-native-cookie-manager": ^6.3.1
     "@react-native-community/cli": ^20.0.2
     "@react-native-community/cli-platform-android": ^20.0.2
     "@react-native-vector-icons/entypo": ^12.4.3
