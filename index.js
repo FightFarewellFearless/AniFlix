@@ -1,6 +1,8 @@
 /**
  * @format
  */
+import { install } from 'react-native-quick-crypto';
+install();
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';
 import { enableFreeze, enableScreens } from 'react-native-screens';

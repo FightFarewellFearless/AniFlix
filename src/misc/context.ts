@@ -19,6 +19,11 @@ export const FilmListHomeContext = createContext<{
   setParamsState?: Dispatch<SetStateAction<FilmHomePage>>;
 }>({ paramsState: undefined, setParamsState: undefined });
 
+export const SeriesListHomeContext = createContext<{
+  paramsState?: FilmHomePage;
+  setParamsState?: Dispatch<SetStateAction<FilmHomePage>>;
+}>({ paramsState: undefined, setParamsState: undefined });
+
 export const ComicsListContext = createContext<{
   paramsState?: LatestComicsRelease[];
   setParamsState?: Dispatch<SetStateAction<LatestComicsRelease[]>>;

@@ -44,7 +44,7 @@ export function ListAnimeComponent(
     } else if (props.type === 'comics') {
       return 'Chapter ' + props.newAnimeData.latestChapter;
     } else if (props.type === 'film') {
-      return 'Film';
+      return props.newAnimeData.contentType === 'movie' ? 'Movie' : 'Series';
     } else {
       return props.newAnimeData.episode;
     }

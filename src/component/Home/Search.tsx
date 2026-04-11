@@ -163,7 +163,7 @@ function Search(props: Props) {
           : 'Error tidak diketahui: ' + err.message;
       DialogManager.alert('Error', errMessage);
     };
-    if (searchText === '') {
+    if (searchText.trim() === '') {
       return;
     }
 
@@ -187,10 +187,10 @@ function Search(props: Props) {
         })
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
           setLoading(false);
         })
@@ -206,12 +206,12 @@ function Search(props: Props) {
         .catch(handleError)
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
-          setCurrentSearchQuery(searchText);
+          setCurrentSearchQuery(searchText.trim());
           setLoading(false);
         });
     } else {
@@ -258,12 +258,12 @@ function Search(props: Props) {
         .catch(handleError)
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
-          setCurrentSearchQuery(searchText);
+          setCurrentSearchQuery(searchText.trim());
           setLoading(false);
         });
     }

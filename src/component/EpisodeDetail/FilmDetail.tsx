@@ -1,7 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import tr from 'googletrans';
-import { memo, useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import {
   ColorSchemeName,
   StyleSheet,
@@ -12,19 +12,19 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
-import { ActivityIndicator, Button, Surface, TextInput, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import URL from 'url';
 import useGlobalStyles from '../../assets/style';
 import { RootStackNavigator } from '../../types/navigation';
 import watchLaterJSON from '../../types/watchLaterJSON';
 import controlWatchLater from '../../utils/watchLaterControl';
 
+import { Dropdown } from '@pirles/react-native-element-dropdown';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,21 +35,20 @@ import { HistoryItemKey } from '../../types/databaseTarget';
 import { HistoryJSON } from '../../types/historyJSON';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
-import setHistory from '../../utils/historyControl';
-import { FilmDetail_Stream, FilmDetails_Detail, FilmEpisode } from '../../utils/scrapers/film';
+import {
+  FilmDetail_Stream,
+  FilmDetails_Detail,
+  FilmEpisode,
+  getFilmSeasonDetails,
+} from '../../utils/scrapers/film';
+import { setFilmStreamHistory } from '../../utils/setFilmStreamHistory';
 import ImageLoading from '../misc/ImageLoading';
 
-type ModifiedFilmSeason = (
-  | { type: 'season'; text: string }
-  | ({ type: 'episode' } & FilmEpisode)
-)[];
-
 type RecyclerViewType = (
-  props: RecyclerViewProps<ModifiedFilmSeason[number]> & {
-    ref?: React.Ref<FlashListRef<ModifiedFilmSeason[number]>>;
+  props: RecyclerViewProps<FilmEpisode> & {
+    ref?: React.Ref<FlashListRef<FilmEpisode>>;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(ImageLoading);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FilmDetail'>;
@@ -65,7 +64,7 @@ function useCompatibleData(rawData: FilmDetails_Detail | FilmDetail_Stream) {
             ...rawData,
             additionalInfo: {
               Rating: rawData.rating,
-              'Tahun Rilis': rawData.releaseDate,
+              ['Resolusi']: rawData.variants?.map(a => a.name).join(', '),
             },
           },
           ...rawData,
@@ -74,7 +73,7 @@ function useCompatibleData(rawData: FilmDetails_Detail | FilmDetail_Stream) {
 }
 
 function isEpisode(data: FilmDetails_Detail | FilmDetail_Stream): data is FilmDetails_Detail {
-  return 'seasonData' in data;
+  return 'firstSeason' in data;
 }
 
 function FilmDetail(props: Props) {
@@ -85,9 +84,6 @@ function FilmDetail(props: Props) {
   const theme = useTheme();
 
   const data = useCompatibleData(props.route.params.data);
-
-  const [rawSearchQuery, setSearchQuery] = useState('');
-  const searchQuery = useDeferredValue(rawSearchQuery);
 
   const watchLaterListsJson = useModifiedKeyValueIfFocused(
     'watchLater',
@@ -121,22 +117,15 @@ function FilmDetail(props: Props) {
       };
     }
     if (!lastWatched.episode) return undefined;
-    const episodeLastWatchedModified = lastWatched.episode
-      .replace('Season ', '')
-      .trim()
-      .replace('Episode', '-')
-      .trim();
 
-    for (const season of data.seasonData) {
-      const found = season.episodes.find(ep =>
-        ep.episodeNumber.includes(episodeLastWatchedModified),
-      );
-      if (found) return found;
-    }
-    return undefined;
+    return {
+      episodeNumber: lastWatched.episode,
+      episodeTitle: '',
+      episodeUrl: lastWatched.link,
+    };
   }, [lastWatched, data]);
 
-  const scrollRef = useAnimatedRef<FlashListRef<ModifiedFilmSeason[number]>>();
+  const scrollRef = useAnimatedRef<FlashListRef<FilmEpisode>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
 
   const headerImageStyle = useAnimatedStyle(() => {
@@ -170,32 +159,29 @@ function FilmDetail(props: Props) {
     }
   }, [data.info.synopsis]);
 
-  const ListHeaderComponent = useMemo(() => {
-    const hasMultipleEpisodes = isEpisode(data) && data.seasonData.length > 1;
+  const [selectedSeason, setSelectedSeason] = useState(1);
+  const mappedSeasons = useMemo(() => {
+    if (isEpisode(data)) {
+      return data.seasons.map(s => ({
+        label: `Season ${s}`,
+        value: s,
+      }));
+    }
+    return [];
+  }, [data]);
 
+  const [currentEpisodeList, setCurrentEpisodeList] = useState(
+    isEpisode(data) ? data.firstSeason.episodes : [],
+  );
+
+  const ListHeaderComponent = useMemo(() => {
     return (
       <View style={styles.mainContainer}>
-        {'backgroundImage' in data.info ? (
-          <ReanimatedImage
-            style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
-            source={{ uri: data.info.backgroundImage }}
-            resizeMode="cover"
-          />
-        ) : (
-          <Reanimated.View
-            style={[
-              { width: '100%', height: IMG_HEADER_HEIGHT },
-              headerImageStyle,
-              { backgroundColor: theme.colors.elevation.level2 },
-            ]}>
-            <Icon
-              color={theme.colors.onBackground}
-              name="film"
-              size={64}
-              style={{ alignSelf: 'center', marginTop: 60 }}
-            />
-          </Reanimated.View>
-        )}
+        <ImageLoading
+          style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
+          source={{ uri: data.info.backgroundImage }}
+          resizeMode="cover"
+        />
 
         <LinearGradient
           colors={['transparent', 'black']}
@@ -280,14 +266,6 @@ function FilmDetail(props: Props) {
                   <Text style={[globalStyles.text, styles.additionalInfoText]}>
                     <Icon color={styles.additionalInfoText.color} name="info-circle" /> Subtitle
                     tidak tersedia untuk film ini!
-                  </Text>
-                </Surface>
-              )}
-              {hasMultipleEpisodes && (
-                <Surface elevation={2} style={styles.additionalInfoTextSurface}>
-                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon color={styles.additionalInfoText.color} name="list" />{' '}
-                    {data.seasonData.flatMap(a => a.episodes).length} Episode
                   </Text>
                 </Surface>
               )}
@@ -384,47 +362,45 @@ function FilmDetail(props: Props) {
               disabled={isInList}>
               {isInList ? 'Sudah Ditambahkan' : 'Tonton Nanti'}
             </Button>
-
-            {isEpisode(data) && (
-              <TextInput
-                mode="outlined"
-                label="Cari Episode"
-                placeholder="Contoh: 1, 2, atau 1 - 1"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                left={<TextInput.Icon icon="magnify" />}
-                style={{ backgroundColor: styles.mainContainer.backgroundColor }}
-                dense
-              />
-            )}
           </View>
+          {isEpisode(data) && (
+            <View style={styles.seasonContainer}>
+              <View style={styles.seasonHeader}>
+                <View style={styles.seasonIndicator} />
+                <Dropdown
+                  data={mappedSeasons}
+                  value={selectedSeason}
+                  placeholder="Pilih Season"
+                  valueField="value"
+                  labelField="label"
+                  onChange={item => {
+                    setSelectedSeason(item.value);
+                    getFilmSeasonDetails(props.route.params.link + '/season/' + item.value)
+                      .then(a => setCurrentEpisodeList(a.episodes))
+                      .catch(console.error);
+                  }}
+                  style={styles.dropdownStyle}
+                  containerStyle={styles.dropdownContainerStyle}
+                  itemTextStyle={styles.dropdownItemTextStyle}
+                  itemContainerStyle={styles.dropdownItemContainerStyle}
+                  activeColor={theme.colors.secondaryContainer}
+                  selectedTextStyle={styles.dropdownSelectedTextStyle}
+                  placeholderStyle={styles.dropdownPlaceholderStyle}
+                  iconStyle={styles.dropdownIconStyle}
+                  autoScroll
+                  dropdownPosition={currentEpisodeList.length < 5 ? 'top' : 'auto'}
+                />
+              </View>
+            </View>
+          )}
         </View>
       </View>
     );
   }, [
+    styles,
     data,
-    styles.mainContainer,
-    styles.mainContent,
-    styles.thumbnail,
-    styles.type,
-    styles.infoContainer,
-    styles.title,
-    styles.genreContainer,
-    styles.secondaryInfoContainer,
-    styles.additionalInfo,
-    styles.additionalInfoTextSurface,
-    styles.additionalInfoText,
-    styles.synopsisContainer,
-    styles.synopsisTitle,
-    styles.synopsisView,
-    styles.synopsisText,
-    styles.genre,
     headerImageStyle,
-    theme.colors.elevation.level2,
-    theme.colors.onBackground,
-    theme.colors.errorContainer,
-    theme.colors.primary,
-    theme.colors.onPrimary,
+    theme,
     colorScheme,
     globalStyles.text,
     isSynopsisTranslationPending,
@@ -433,44 +409,28 @@ function FilmDetail(props: Props) {
     lastWatchedEpisodeData,
     lastWatched,
     isInList,
-    searchQuery,
+    mappedSeasons,
+    selectedSeason,
+    currentEpisodeList.length,
     props.navigation,
     props.route.params.link,
   ]);
 
-  const modifiedSeasonData = useMemo(() => {
+  const episodeList = useMemo(() => {
     if (!isEpisode(data))
       return [
         {
           type: 'episode',
           episodeNumber: '',
           episodeTitle: '',
+          episodeId: '',
           episodeUrl: props.route.params.link,
           episodeImage: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
           releaseDate: data.info.releaseDate,
-        } as ModifiedFilmSeason[number],
+        } as FilmEpisode,
       ];
-    return (searchQuery === '' ? data.seasonData : data.seasonData.toReversed()).flatMap(item => {
-      const filteredEpisodes = item.episodes.filter(ep =>
-        ep.episodeNumber.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-
-      if (searchQuery && filteredEpisodes.length === 0) {
-        return [];
-      }
-
-      return [
-        {
-          type: 'season',
-          text: item.season,
-        },
-        ...filteredEpisodes.map(ep => ({
-          type: 'episode',
-          ...ep,
-        })),
-      ];
-    }) as ModifiedFilmSeason;
-  }, [data, props.route.params.link, searchQuery]);
+    return currentEpisodeList;
+  }, [data, props.route.params.link, currentEpisodeList]);
 
   const handlePlayNow = useCallback(() => {
     if (isEpisode(data)) return;
@@ -516,17 +476,9 @@ function FilmDetail(props: Props) {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ReanimatedFlashList
         ref={scrollRef}
-        data={modifiedSeasonData}
-        getItemType={item => item.type}
+        data={episodeList}
         renderItem={({ item: s }) => {
-          return s.type === 'season' ? (
-            <View style={styles.seasonContainer}>
-              <View style={styles.seasonHeader}>
-                <View style={styles.seasonIndicator} />
-                <Text style={[globalStyles.text, styles.seasonText]}>{s.text}</Text>
-              </View>
-            </View>
-          ) : (
+          return (
             <View style={styles.episodeListContainer}>
               {!isEpisode(data) ? (
                 <Button
@@ -551,7 +503,6 @@ function FilmDetail(props: Props) {
             </View>
           );
         }}
-        // keyExtractor={item => item.season}
         contentContainerStyle={{
           backgroundColor: styles.mainContainer.backgroundColor,
           paddingLeft: insets.left,
@@ -561,7 +512,6 @@ function FilmDetail(props: Props) {
         ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
         ListHeaderComponent={ListHeaderComponent}
         extraData={colorScheme}
-        // estimatedItemSize={60}
         showsVerticalScrollIndicator={false}
       />
     </KeyboardAvoidingView>
@@ -707,10 +657,6 @@ function useStyles() {
           fontWeight: 'bold',
           color: globalStyles.text.color,
         },
-        author: {
-          color: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
-          marginTop: 5,
-        },
         secondaryInfoContainer: {
           width: '100%',
           gap: 15,
@@ -764,32 +710,58 @@ function useStyles() {
           color: globalStyles.text.color,
           opacity: 0.9,
         },
-        listChapterTextContainer: {
-          paddingVertical: 15,
-          borderBottomWidth: 1,
-          borderBottomColor: colorScheme === 'dark' ? '#222' : '#ddd',
-          marginBottom: 10,
+        // --- DROPDOWN STYLES ---
+        dropdownStyle: {
+          backgroundColor: theme.colors.elevation.level2,
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+          minWidth: dimensions.width * 0.4,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: theme.colors.outlineVariant || (colorScheme === 'dark' ? '#444' : '#E0E0E0'),
         },
-        listChapterText: {
+        dropdownContainerStyle: {
+          borderRadius: 12,
+          backgroundColor: theme.colors.elevation.level3,
+          borderWidth: 1,
+          borderColor: theme.colors.outlineVariant || (colorScheme === 'dark' ? '#444' : '#E0E0E0'),
+          overflow: 'hidden',
+          elevation: 6,
+        },
+        dropdownItemTextStyle: {
+          color: theme.colors.onSurface,
+          fontSize: 15,
+          fontWeight: '500',
+        },
+        dropdownItemContainerStyle: {
+          // paddingVertical: 10,
+          paddingHorizontal: 12,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor:
+            theme.colors.outlineVariant || (colorScheme === 'dark' ? '#333' : '#E0E0E0'),
+        },
+        dropdownSelectedTextStyle: {
+          color: theme.colors.primary,
+          fontSize: 15,
           fontWeight: 'bold',
-          fontSize: 20,
-          color: globalStyles.text.color,
-          textAlign: 'left',
-          letterSpacing: 0.5,
         },
-        chapterButtonsContainer: {
-          gap: 10,
-          marginBottom: 15,
+        dropdownPlaceholderStyle: {
+          color: globalStyles.text.color,
+          fontSize: 15,
+          opacity: 0.7,
+        },
+        dropdownIconStyle: {
+          tintColor: theme.colors.onSurface,
+          width: 24,
+          height: 24,
         },
         seasonContainer: {
-          marginVertical: 10,
-          paddingHorizontal: 15,
+          width: '100%',
         },
         seasonHeader: {
           flexDirection: 'row',
           alignItems: 'center',
           marginBottom: 12,
-          paddingLeft: 5,
         },
         seasonIndicator: {
           width: 4,
@@ -797,13 +769,6 @@ function useStyles() {
           backgroundColor: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
           borderRadius: 2,
           marginRight: 10,
-        },
-        seasonText: {
-          fontSize: 18,
-          fontWeight: '800',
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-          color: globalStyles.text.color,
         },
         episodeListContainer: {
           margin: 5,
@@ -829,6 +794,8 @@ function useStyles() {
         },
         episodeNumberBox: {
           height: 35,
+          minWidth: 40,
+          paddingHorizontal: 8,
           backgroundColor: colorScheme === 'dark' ? '#333' : '#f0f0f0',
           borderRadius: 8,
           justifyContent: 'center',
@@ -858,46 +825,9 @@ function useStyles() {
         lastWatchedTextColor: {
           color: theme.colors.onPrimaryContainer,
         },
-        chapterDivider: {
-          display: 'none',
-        },
       }),
-    [
-      colorScheme,
-      dimensions.width,
-      globalStyles.text.color,
-      theme.colors.secondaryContainer,
-      theme.colors.onSecondaryContainer,
-      theme.colors.secondary,
-      theme.colors.primary,
-      theme.colors.onPrimaryContainer,
-    ],
+    [colorScheme, dimensions.width, globalStyles.text.color, theme.colors],
   );
-}
-
-export async function setFilmStreamHistory(
-  link: string,
-  data: FilmDetail_Stream,
-  historyData?: { resolution: string | undefined; lastDuration: number },
-) {
-  const isFilm = URL.parse(link).host!?.includes('idlix') && link.includes('/episode/');
-  const episodeIndex = data.title.toLowerCase().lastIndexOf('x');
-  const title = (
-    isFilm
-      ? data.title.split(': ').slice(0, -1).join(': ')
-      : episodeIndex >= 0
-        ? data.title.slice(0, episodeIndex)
-        : data.title
-  ).trim();
-  const watchLater: watchLaterJSON[] = JSON.parse((await DatabaseManager.get('watchLater'))!);
-  const watchLaterIndex = watchLater.findIndex(
-    z => z.title.trim() === title.trim() && z.isMovie === true,
-  );
-  if (watchLaterIndex >= 0) {
-    controlWatchLater('delete', watchLaterIndex);
-    ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
-  }
-  setHistory(data, link, false, historyData, true);
 }
 
 export default memo(FilmDetail);

@@ -1,7 +1,6 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Buffer } from 'buffer/';
 import { reloadAppAsync } from 'expo';
 import * as DocumentPicker from 'expo-document-picker';
 import { AudioMixingMode } from 'expo-video';

@@ -11,7 +11,6 @@ import {
 } from '../../types/anime';
 import deviceUserAgent from '../deviceUserAgent';
 
-import { Buffer } from 'buffer/';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
 import runtime from '../../misc/AniFlixRuntime';
 

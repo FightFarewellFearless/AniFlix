@@ -1,6 +1,4 @@
-// import { Buffer } from 'buffer/';
 import cheerio, { CheerioAPI } from 'cheerio';
-// import CryptoJS from 'crypto-js';
 import { COMICS1_AUTH } from '@env';
 import he from 'he';
 import moment from 'moment';

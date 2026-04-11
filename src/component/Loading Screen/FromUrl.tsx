@@ -28,7 +28,7 @@ import {
   getKomikuReading,
   KomikuDetail,
 } from '../../utils/scrapers/komiku';
-import { setFilmStreamHistory } from '../EpisodeDetail/FilmDetail';
+import { setFilmStreamHistory } from '../../utils/setFilmStreamHistory';
 import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
@@ -233,6 +233,14 @@ function FromUrl(props: Props) {
           })
           .catch(handleError);
       } else if (props.route.params.type === 'film') {
+        if (props.route.params.link.includes('tv12.idlix')) {
+          props.navigation.goBack();
+          DialogManager.alert(
+            'Perhatian!',
+            'Dikarenakan perubahan terkait data film, history film lama tidak didukung, sehingga sebagai solusi, kamu harus mencari film ini secara manual di menu pencarian dan pilih episode yang sesuai.',
+          );
+          return;
+        }
         getFilmDetails(link, abort.signal)
           .then(async data => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;

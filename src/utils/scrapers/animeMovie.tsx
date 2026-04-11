@@ -3,7 +3,6 @@ import { useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import { Buffer } from 'buffer/';
 import deviceUserAgent from '../deviceUserAgent';
 
 import cheerio from 'cheerio';

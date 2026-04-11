@@ -1,6 +1,5 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
-import { Buffer } from 'buffer/';
 import { VideoView } from 'expo-video';
 import tr from 'googletrans';
 import React, {
@@ -185,7 +184,8 @@ function Video_Film(props: Props) {
   // set header title
   useLayoutEffect(() => {
     props.navigation.setOptions({
-      headerTitle: data.title,
+      headerTitle:
+        data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
       headerShown: !fullscreen,
     });
   }, [data, fullscreen, props.navigation]);
@@ -462,6 +462,14 @@ function Video_Film(props: Props) {
   const [subTranslationLoading, setSubTranslationLoading] = useState(false);
   const originalSub = useRef<string>(null);
   const translatedSub = useRef<string[]>([]);
+  useEffect(() => {
+    return () => {
+      setIsSubNotID(false);
+      setIsUsingTranslatedSub(false);
+      setSubTranslationLoading(false);
+    };
+  }, [data]);
+
   const onSubtitleLoad = useCallback(async (subtitleText: string) => {
     originalSub.current = subtitleText;
     // check language source
@@ -510,7 +518,8 @@ function Video_Film(props: Props) {
     Linking.openURL(
       `https://vortexdownloader.rwbcode.com/?data=${Buffer.from(
         JSON.stringify({
-          title: data.title,
+          title:
+            data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
           streamingLink: data.streamingLink,
           subtitleLink: data.subtitleLink,
         }),
@@ -522,7 +531,7 @@ function Video_Film(props: Props) {
           : 'Error tidak diketahui: ' + err.message;
       DialogManager.alert('Error', errMessage);
     });
-  }, [data.streamingLink, data.subtitleLink, data.title]);
+  }, [data.episode, data.season, data.streamingLink, data.subtitleLink, data.title]);
 
   const resolutionDropdownData = useMemo(() => {
     const list = [];
@@ -557,7 +566,9 @@ function Video_Film(props: Props) {
         />
         <VideoPlayer
           // key={data.streamingLink}
-          title={data.title}
+          title={
+            data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
+          }
           thumbnailURL={data.thumbnailUrl}
           streamingURL={currentStreamUrl}
           isHls={true}
@@ -622,7 +633,9 @@ function Video_Film(props: Props) {
           // onLayout={onSynopsisLayout}
           onPress={onSynopsisPress}
           disabled={synopsisTextLength < 3}>
-          <Text style={[globalStyles.text, styles.infoTitle]}>{data.title}</Text>
+          <Text style={[globalStyles.text, styles.infoTitle]}>
+            {data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')}
+          </Text>
 
           {animeDetail !== undefined ? (
             <ReAnimated.Text

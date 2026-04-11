@@ -1,7 +1,16 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { useIsFocused } from '@react-navigation/native';
 import React, { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { Image, ImageProps, ImageSourcePropType, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  ImageProps,
+  ImageSourcePropType,
+  ImageStyle,
+  StyleProp,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Reanimated, { AnimatedStyle } from 'react-native-reanimated';
 import URL from 'url';
 import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
 import { BASE } from '../../utils/scrapers/animeSeries';
@@ -9,7 +18,11 @@ import { BASE_URL } from '../../utils/scrapers/comics1';
 import LoadingIndicator from './LoadingIndicator';
 
 const ImageLoading = (
-  props: ImageProps & { children?: React.ReactNode; displayLoading?: boolean },
+  props: ImageProps & {
+    children?: React.ReactNode;
+    style?: StyleProp<AnimatedStyle<StyleProp<ImageStyle>>>;
+    displayLoading?: boolean;
+  },
 ) => {
   const { source, style, children, displayLoading = true, ...restProps } = props;
 
@@ -76,7 +89,7 @@ const ImageLoading = (
   }, [source]);
 
   return (
-    <View style={[style, styles.imageBackground]}>
+    <Reanimated.View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
           fadeDuration={200}
@@ -95,7 +108,7 @@ const ImageLoading = (
           {error && displayLoading && <Icon name="exclamation-circle" color="red" size={18} />}
         </View>
       )}
-    </View>
+    </Reanimated.View>
   );
 };
 

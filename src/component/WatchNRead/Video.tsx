@@ -1,7 +1,6 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import { Buffer } from 'buffer/';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
 import React, {

@@ -90,7 +90,7 @@ type RootStackNavigator = {
     message?: string;
   };
   SeeMore: {
-    type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList';
+    type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList';
   };
   ErrorScreen: { error: Error };
 };
