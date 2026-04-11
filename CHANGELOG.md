@@ -1,3 +1,10 @@
+# v1.2.1 (11-April-2026)
+## Diperbaiki
+- 'Data tidak tersedia' pada anime movie
+- Perbaikan sekaligus peningkatan untuk seluruh data film
+  > Data lama (termasuk histori dan list tonton nanti) tidak dapat digunakan
+- Gambar header background di komiku
+
 # v1.2.0_JS-10 (6-April-2026)
 ## Diperbaiki
 - Handle crash pada bagian loading dengan pesan yang lebih informatif
