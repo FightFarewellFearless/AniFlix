@@ -1,5 +1,5 @@
 Progres perbaikan Film:
-⌛ 75%
+⌛ 90%
 
-Akan di kerjakan secara intensif Minggu ini. Mohon bersabar...
-Kemungkinan akan selesai dan siap besok atau lusa(Senin)
+
+Perbaikan hampir sepenuhnya selesai, hanya tinggal mengecek apakah ada masalah atau bug yang tersisa 
