@@ -42,7 +42,6 @@ type RecyclerViewType = (
     >;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(ImageLoading);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
@@ -234,26 +233,19 @@ export default function ComicsDetail(props: Props) {
         ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
         ListHeaderComponent={
           <>
-            {'headerImageUrl' in data ? (
-              <ReanimatedImage
-                style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
-                source={{ uri: data.headerImageUrl }}
+            <Reanimated.View
+              style={[
+                { width: '100%', height: IMG_HEIGHT },
+                imageStyle,
+                { backgroundColor: theme.colors.elevation.level2 },
+              ]}>
+              <Icon
+                color={theme.colors.onBackground}
+                name="book"
+                size={64}
+                style={{ alignSelf: 'center', marginTop: 60 }}
               />
-            ) : (
-              <Reanimated.View
-                style={[
-                  { width: '100%', height: IMG_HEIGHT },
-                  imageStyle,
-                  { backgroundColor: theme.colors.elevation.level2 },
-                ]}>
-                <Icon
-                  color={theme.colors.onBackground}
-                  name="book"
-                  size={64}
-                  style={{ alignSelf: 'center', marginTop: 60 }}
-                />
-              </Reanimated.View>
-            )}
+            </Reanimated.View>
             <LinearGradient
               colors={['transparent', 'black']}
               style={{

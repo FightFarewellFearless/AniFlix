@@ -68,7 +68,6 @@ export interface KomikuDetail {
   minAge: string;
   concept: string;
   readingDirection: string;
-  headerImageUrl: string;
   thumbnailUrl: string;
   genres: string[];
   synopsis: string;
@@ -113,7 +112,6 @@ export async function getKomikuDetailFromUrl(
   const concept = tableInfo.find(item => item.key === 'Tema:')?.value ?? 'Data tidak tersedia';
   const readingDirection =
     tableInfo.find(item => item.key === 'Cara Baca:')?.value ?? 'Data tidak tersedia';
-  const headerImageUrl = data.match(/url\((.*?)\)/)?.[1] ?? '';
   const thumbnailUrl = $('.ims > img').attr('src') ?? '';
   const genres = $('ul.genre > li')
     .map((_i, el) => $(el).text().trim())
@@ -151,7 +149,6 @@ export async function getKomikuDetailFromUrl(
     minAge,
     concept,
     readingDirection,
-    headerImageUrl,
     thumbnailUrl,
     genres,
     synopsis,
