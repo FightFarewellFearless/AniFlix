@@ -76,6 +76,7 @@ async function solveChallenge(
       }
     }
   });
+  hashObj.dispose();
   if (signal) {
     signal.removeEventListener('abort', onAbort);
   }
