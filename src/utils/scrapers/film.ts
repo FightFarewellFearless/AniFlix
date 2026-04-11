@@ -28,6 +28,8 @@ type FilmHomePage = Array<{
 type SearchResult = Array<
   Omit<FilmHomePage[number], 'contentType'> & {
     synopsis: string;
+    numberOfSeasons?: number;
+    quality?: string;
     type: string;
   }
 >;
@@ -296,6 +298,8 @@ async function searchFilm(query: string, signal?: AbortSignal) {
     thumbnailUrl: `https://image.tmdb.org/t/p/w500${item.posterPath}`,
     year: item.releaseDate?.split('-')[0] || item.firstAirDate?.split('-')[0] || 'Unknown',
     rating: String(item.voteAverage ?? 'Unknown'),
+    numberOfSeasons: item.numberOfSeasons,
+    quality: item.quality,
     synopsis: item.overview,
     type: item.contentType === 'movie' ? 'Movie' : 'Series',
   }));

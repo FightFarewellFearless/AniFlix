@@ -798,7 +798,28 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                 </Text>
               ))}
           </View>
-          <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'baseline',
+              marginHorizontal: 5,
+              gap: 5,
+            }}>
+            {isFilm(item) && (item.quality || item.numberOfSeasons) && (
+              <View
+                style={[
+                  styles.statusInfo,
+                  {
+                    backgroundColor: item.quality ? 'rgb(0, 57, 80)' : '#ffffff2c',
+                    marginTop: 5,
+                  },
+                ]}>
+                <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+                  <Icon name={item.quality ? 'video-camera' : 'tv'} color={'rgb(220, 184, 255)'} />{' '}
+                  {item.quality ?? `S${item.numberOfSeasons}`}
+                </Text>
+              </View>
+            )}
             <View
               style={[
                 styles.statusInfo,
@@ -822,7 +843,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
           <Text
             numberOfLines={4}
             style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
-            {item?.title}
+            {item?.title} {isFilm(item) && item.year !== 'Unknown' && `(${item.year})`}
           </Text>
         </View>
 
