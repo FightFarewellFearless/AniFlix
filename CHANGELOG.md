@@ -1,3 +1,6 @@
+# v1.2.1_JS-1 (12-April-2026)
+## Ditingkatkan
+- Pesan error untuk data video pada film yang sedang disiapkan
 # v1.2.1 (11-April-2026)
 ## Diperbaiki
 - 'Data tidak tersedia' pada anime movie
