@@ -6,6 +6,7 @@ import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
 import { NitroModules } from 'react-native-nitro-modules';
+import crypto from 'react-native-quick-crypto';
 import type { Hash as NativeHash } from 'react-native-quick-crypto/src/specs/hash.nitro';
 import type { Utils } from 'react-native-quick-crypto/src/specs/utils.nitro';
 import { ChallengeResponse, SolveChallengeResponse } from './filmTypes/challenge';
@@ -82,6 +83,43 @@ async function solveChallenge(
   }
   return res;
 }
+
+function extractDecryptedIframe(html: string): string {
+  const $ = cheerio.load(html);
+  const directIframe = $('iframe').attr('src');
+  if (directIframe) return directIframe;
+
+  const styleText = $('style').text();
+  const partBMatch = styleText.match(/--_[a-f0-9]+:"([a-f0-9]{32})"/i);
+  const partB = partBMatch ? partBMatch[1] : null;
+
+  const vaultDiv = $('div[data-a][data-p][data-v]');
+  const partA = vaultDiv.attr('data-a');
+  const dataP = vaultDiv.attr('data-p'); // Ciphertext (base64)
+  const dataV = vaultDiv.attr('data-v'); // IV (base64)
+
+  if (partA && partB && dataP && dataV) {
+    const keyHex = partA + partB;
+    const key = Buffer.from(keyHex, 'hex');
+    const iv = Buffer.from(dataV, 'base64');
+    const encryptedData = Buffer.from(dataP, 'base64');
+
+    const authTag = encryptedData.subarray(encryptedData.length - 16) as any;
+    const ciphertext = encryptedData.subarray(0, encryptedData.length - 16);
+
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+
+    const decryptedBuffer = decipher.update(ciphertext);
+    const finalBuffer = decipher.final();
+    const decryptedUrl = Buffer.concat([decryptedBuffer, finalBuffer]).toString('utf8');
+
+    return decryptedUrl;
+  }
+
+  throw new Error('Gagal mengekstrak atau mendekripsi URL video dari embed.');
+}
+
 async function getChallengeAndSolve(
   contentId: string,
   contentType: 'movie' | 'episode',
@@ -403,9 +441,9 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
     const epApi = api;
     const embedUrl = await getChallengeAndSolve(epApi.episode.id, 'episode', signal);
     const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
+    const jeniusUrl = extractDecryptedIframe(embedHtml);
 
-    const $ = cheerio.load(embedHtml);
-    const jeniusPlay = await jeniusPlayGetHLS($('iframe').attr('src')!, signal);
+    const jeniusPlay = await jeniusPlayGetHLS(jeniusUrl, signal);
 
     let variants: HlsVariant[] = [];
     try {
@@ -451,9 +489,9 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
   const movieApi = api;
   const embedUrl = await getChallengeAndSolve(movieApi.id, 'movie', signal);
   const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
+  const jeniusUrl = extractDecryptedIframe(embedHtml);
 
-  const $ = cheerio.load(embedHtml);
-  const jeniusPlay = await jeniusPlayGetHLS($('iframe').attr('src')!, signal);
+  const jeniusPlay = await jeniusPlayGetHLS(jeniusUrl, signal);
 
   let variants: HlsVariant[] = [];
   try {
