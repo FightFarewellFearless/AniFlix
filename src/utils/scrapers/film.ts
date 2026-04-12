@@ -171,6 +171,9 @@ async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<Jeni
     },
     signal,
   });
+  if (html.includes('The video is currently being prepared')) {
+    throw new Error('Video sedang disiapkan, silakan coba lagi nanti');
+  }
   const packedScript =
     'eval(function(p,a,c,k,e,d)' +
     html.split('eval(function(p,a,c,k,e,d)')[1].split('</script>')[0];
