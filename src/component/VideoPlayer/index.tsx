@@ -696,7 +696,7 @@ function BottomControl({
       }}>
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <ReText style={{ color: 'white', zIndex: 1, fontSize: 12 }} text={currentSecond} />
             <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
             <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
