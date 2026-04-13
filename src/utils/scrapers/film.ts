@@ -1,6 +1,9 @@
 import cheerio from 'cheerio';
-import { createSynchronizable, runOnRuntimeAsync } from 'react-native-worklets';
-import AniFlixRuntime from '../../misc/AniFlixRuntime';
+import {
+  createSynchronizable,
+  createWorkletRuntime,
+  runOnRuntimeAsync,
+} from 'react-native-worklets';
 import { unpack } from '../unpacker';
 import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
@@ -9,6 +12,7 @@ import { NitroModules } from 'react-native-nitro-modules';
 import crypto from 'react-native-quick-crypto';
 import type { Hash as NativeHash } from 'react-native-quick-crypto/src/specs/hash.nitro';
 import type { Utils } from 'react-native-quick-crypto/src/specs/utils.nitro';
+import AniFlixRuntime from '../../misc/AniFlixRuntime';
 import deviceUserAgent from '../deviceUserAgent';
 import { ChallengeResponse, SolveChallengeResponse } from './filmTypes/challenge';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
@@ -43,46 +47,152 @@ type HlsVariant = {
   url: string;
 };
 
+export type HashProgressData = {
+  difficulty: number;
+  elapsed: number;
+  isCompleted: boolean;
+  canSpeedUp?: boolean;
+  isSpeedingUp?: boolean;
+};
+
 async function solveChallenge(
   challenge: string,
   difficulty: number,
   signal?: AbortSignal,
+  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
 ): Promise<number | undefined> {
   if (signal?.aborted) return undefined;
 
-  const hashObj = NitroModules.createHybridObject<NativeHash>('Hash');
+  let interval: ReturnType<typeof setInterval> | undefined;
+  let elapsed = 0;
+  let speedUpActive = false;
 
   const shouldStop = createSynchronizable(false);
+  const shouldSpeedUp = createSynchronizable(false);
+
+  const triggerSpeedUp = () => {
+    if (!speedUpActive) {
+      speedUpActive = true;
+      shouldSpeedUp.setBlocking(true);
+      if (onProgress) {
+        onProgress({
+          difficulty,
+          elapsed,
+          isCompleted: false,
+          canSpeedUp: false,
+          isSpeedingUp: true,
+        });
+      }
+    }
+  };
+
+  if (onProgress) {
+    onProgress(
+      { difficulty, elapsed, isCompleted: false, canSpeedUp: false, isSpeedingUp: false },
+      triggerSpeedUp,
+    );
+    interval = setInterval(() => {
+      elapsed++;
+      if (onProgress) {
+        onProgress(
+          {
+            difficulty,
+            elapsed,
+            isCompleted: false,
+            canSpeedUp: elapsed >= 5 && !speedUpActive,
+            isSpeedingUp: speedUpActive,
+          },
+          triggerSpeedUp,
+        );
+      }
+    }, 1000);
+  }
+
   const onAbort = () => {
     shouldStop.setBlocking(true);
   };
   if (signal) {
     signal.addEventListener('abort', onAbort, { once: true });
   }
-  const res = await runOnRuntimeAsync(AniFlixRuntime, () => {
+
+  const hashObj = NitroModules.createHybridObject<NativeHash>('Hash');
+  const targetPrefix = '0'.repeat(difficulty);
+  const maxAttempts = 1e7;
+
+  let currentNonce = 0;
+  let finalNonce: number | undefined;
+
+  const singleRes = await runOnRuntimeAsync(AniFlixRuntime, () => {
     'worklet';
-
-    const targetPrefix = '0'.repeat(difficulty);
-    const maxAttempts = 1e7;
-
     for (let nonce = 0; nonce < maxAttempts; nonce++) {
-      if (shouldStop.getBlocking()) {
-        break;
-      }
+      if (shouldStop.getDirty()) return { status: 'aborted' as const, nonce };
+      if (shouldSpeedUp.getDirty()) return { status: 'speedup' as const, nonce };
+
       const data = challenge + String(nonce);
       hashObj.createHash('sha256');
       hashObj.update(data);
       const hash = cryptoUtils.bufferToString(hashObj.digest('hex'), 'hex');
+
       if (hash.startsWith(targetPrefix)) {
-        return nonce;
+        return { status: 'found' as const, nonce };
       }
     }
+    return { status: 'failed' as const, nonce: maxAttempts };
   });
+
+  if (singleRes?.status === 'found') {
+    finalNonce = singleRes.nonce;
+  } else if (singleRes?.status === 'speedup') {
+    currentNonce = singleRes.nonce;
+
+    const TOTAL_THREADS = 4;
+    const extraRuntimes = Array.from({ length: TOTAL_THREADS - 1 }).map((_, i) =>
+      createWorkletRuntime(`HashWorker_${i + 1}`),
+    );
+
+    const activeRuntimes = [AniFlixRuntime, ...extraRuntimes];
+
+    const promises = activeRuntimes.map(async (runtime, workerId) => {
+      const multiHashObj = NitroModules.createHybridObject<NativeHash>('Hash');
+      const Worker_Length = activeRuntimes.length;
+
+      const mRes = await runOnRuntimeAsync(runtime, () => {
+        'worklet';
+        for (let nonce = currentNonce + workerId; nonce < maxAttempts; nonce += Worker_Length) {
+          if (shouldStop.getDirty()) break;
+
+          const data = challenge + String(nonce);
+          multiHashObj.createHash('sha256');
+          multiHashObj.update(data);
+          const hash = cryptoUtils.bufferToString(multiHashObj.digest('hex'), 'hex');
+
+          if (hash.startsWith(targetPrefix)) {
+            shouldStop.setBlocking(true);
+            return nonce;
+          }
+        }
+        return undefined;
+      });
+
+      multiHashObj.dispose();
+      return mRes;
+    });
+
+    const multiResults = await Promise.all(promises);
+    finalNonce = multiResults.find(n => n !== undefined);
+  }
+
   hashObj.dispose();
+
   if (signal) {
     signal.removeEventListener('abort', onAbort);
   }
-  return res;
+  if (interval) clearInterval(interval);
+
+  if (onProgress) {
+    onProgress({ difficulty, elapsed, isCompleted: true });
+  }
+  return finalNonce;
 }
 
 function extractDecryptedIframe(html: string): string {
@@ -126,6 +236,7 @@ async function getChallengeAndSolve(
   contentType: 'movie' | 'episode',
   slug: string,
   signal?: AbortSignal,
+  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
 ): Promise<string> {
   const apiUrl = `${BASE_URL}/api/watch/challenge`;
   const response: ChallengeResponse = await fetchPage(apiUrl, {
@@ -141,7 +252,7 @@ async function getChallengeAndSolve(
     asJson: true,
   });
   const { challenge, difficulty, signature } = response;
-  const nonce = await solveChallenge(challenge, difficulty, signal);
+  const nonce = await solveChallenge(challenge, difficulty, signal, onProgress);
 
   const solveResponse: SolveChallengeResponse = await fetchPage(BASE_URL + '/api/watch/solve', {
     headers: {
@@ -155,6 +266,7 @@ async function getChallengeAndSolve(
     signal,
     asJson: true,
   });
+  global.gc?.();
   return solveResponse.embedUrl;
 }
 
@@ -433,7 +545,12 @@ type FilmDetail_Stream = {
 };
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmMovieDetailsResponse;
-async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<FilmDetails> {
+
+async function getFilmDetails(
+  filmUrl: string,
+  signal?: AbortSignal,
+  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+): Promise<FilmDetails> {
   const api: PossibleAPIResponse = await fetchPage(filmUrl, { signal, asJson: true });
   if ('defaultSeason' in api) {
     const info = getFilmInfo(api);
@@ -459,6 +576,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       'episode',
       epApi.series.slug,
       signal,
+      onProgress,
     );
     const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
     const jeniusUrl = extractDecryptedIframe(embedHtml);
@@ -509,7 +627,13 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
 
   // (Halaman Movie/Film)
   const movieApi = api;
-  const embedUrl = await getChallengeAndSolve(movieApi.id, 'movie', movieApi.slug, signal);
+  const embedUrl = await getChallengeAndSolve(
+    movieApi.id,
+    'movie',
+    movieApi.slug,
+    signal,
+    onProgress,
+  );
   const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
   const jeniusUrl = extractDecryptedIframe(embedHtml);
 
@@ -525,7 +649,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
 
   return {
     type: 'stream',
-title: movieApi.title + `${year ? ` (${year})` : ''}`,
+    title: movieApi.title + `${year ? ` (${year})` : ''}`,
     streamingLink: jeniusPlay.securedLink,
     subtitleLink: jeniusPlay.subtitleTrackUrl,
     releaseDate: movieApi.releaseDate,

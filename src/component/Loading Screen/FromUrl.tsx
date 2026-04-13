@@ -1,7 +1,7 @@
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useRef } from 'react';
-import { Text, ToastAndroid, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { Text, ToastAndroid, View } from 'react-native'; // <-- Tambahkan TouchableOpacity
 import randomTipsArray from '../../assets/loadingTips.json';
 import runningTextArray from '../../assets/runningText.json';
 import useGlobalStyles from '../../assets/style';
@@ -11,6 +11,7 @@ import AnimeAPI from '../../utils/AnimeAPI';
 import setHistory from '../../utils/historyControl';
 import controlWatchLater from '../../utils/watchLaterControl';
 
+import { Button } from 'react-native-paper';
 import URL from 'url';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import DialogManager from '../../utils/dialogManager';
@@ -22,7 +23,7 @@ import {
   getComicsDetailFromUrl,
   getComicsReading,
 } from '../../utils/scrapers/comicsv2';
-import { getFilmDetails } from '../../utils/scrapers/film';
+import { getFilmDetails, HashProgressData } from '../../utils/scrapers/film';
 import {
   getKomikuDetailFromUrl,
   getKomikuReading,
@@ -35,6 +36,14 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
+
+  const [hashProgress, setHashProgress] = useState<HashProgressData | null>(null);
+  const speedUpRef = useRef<(() => void) | null>(null);
+
+  const onProgressUpdate = useCallback((data: HashProgressData, trigger?: () => void) => {
+    setHashProgress(data);
+    if (trigger) speedUpRef.current = trigger;
+  }, []);
 
   const randomTips = useRef<string>(
     // eslint-disable-next-line no-bitwise
@@ -241,7 +250,7 @@ function FromUrl(props: Props) {
           );
           return;
         }
-        getFilmDetails(link, abort.signal)
+        getFilmDetails(link, abort.signal, onProgressUpdate)
           .then(async data => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if (data.type === 'detail') {
@@ -346,6 +355,7 @@ function FromUrl(props: Props) {
       props.route.params.title,
       props.route.params.type,
       props.route.params.link,
+      onProgressUpdate,
     ]),
   );
 
@@ -359,16 +369,141 @@ function FromUrl(props: Props) {
           paddingHorizontal: 24,
         }}>
         <LoadingIndicator size={15} />
-        <Text style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20 }]}>
-          Mengambil data... Mohon tunggu sebentar!
-        </Text>
-        <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>
-          "{randomQuote.quote}"
-        </Text>
-        <Text
-          style={[globalStyles.text, { textAlign: 'center', marginTop: 5, fontWeight: 'bold' }]}>
-          — {randomQuote.by}
-        </Text>
+
+        {hashProgress ? (
+          <View style={{ alignItems: 'center', marginTop: 24, width: '100%' }}>
+            <Text
+              style={[
+                globalStyles.text,
+                {
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  color: hashProgress.isCompleted ? '#4CAF50' : globalStyles.text.color,
+                },
+              ]}>
+              {hashProgress.isCompleted
+                ? 'Proteksi Berhasil Dipecahkan!'
+                : 'Memecahkan Proteksi Keamanan'}
+            </Text>
+
+            <Text style={[globalStyles.text, { fontSize: 13, opacity: 0.7, marginTop: 4 }]}>
+              Tingkat Kesulitan: {hashProgress.difficulty}
+            </Text>
+
+            <View
+              style={{
+                backgroundColor: hashProgress.isCompleted
+                  ? 'rgba(76, 175, 80, 0.1)'
+                  : 'rgba(255, 255, 255, 0.08)',
+                borderColor: hashProgress.isCompleted ? '#4CAF50' : 'transparent',
+                borderWidth: 1,
+                paddingVertical: 12,
+                paddingHorizontal: 32,
+                borderRadius: 12,
+                marginTop: 20,
+                marginBottom: 20,
+              }}>
+              <Text
+                style={[
+                  globalStyles.text,
+                  {
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: hashProgress.isCompleted ? '#4CAF50' : globalStyles.text.color,
+                  },
+                ]}>
+                {hashProgress.elapsed} detik
+              </Text>
+            </View>
+
+            {hashProgress.canSpeedUp && !hashProgress.isSpeedingUp && !hashProgress.isCompleted && (
+              <Button
+                onPress={() => speedUpRef.current?.()}
+                style={{
+                  marginBottom: 16,
+                  width: '80%',
+                  alignItems: 'center',
+                }}
+                mode="contained-tonal">
+                🚀 Percepat Proses
+              </Button>
+            )}
+
+            {hashProgress.isSpeedingUp && !hashProgress.isCompleted && (
+              <Text
+                style={[
+                  globalStyles.text,
+                  {
+                    color: '#4CAF50',
+                    fontSize: 13,
+                    marginBottom: 16,
+                    fontStyle: 'italic',
+                  },
+                ]}>
+                ⚡ Mempercepat dengan multi-core...
+              </Text>
+            )}
+
+            {!hashProgress.isCompleted ? (
+              <>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    { textAlign: 'center', fontSize: 12, opacity: 0.6, lineHeight: 18 },
+                  ]}>
+                  Proses ini mungkin memakan waktu lama tergantung performa perangkat.
+                </Text>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    {
+                      textAlign: 'center',
+                      fontSize: 12,
+                      opacity: 0.8,
+                      marginTop: 8,
+                      color: '#ef233c',
+                      fontWeight: 'bold',
+                    },
+                  ]}>
+                  Tekan tombol KEMBALI untuk batal.
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={[
+                  globalStyles.text,
+                  {
+                    textAlign: 'center',
+                    fontSize: 13,
+                    marginTop: 8,
+                    color: '#4CAF50',
+                    fontWeight: 'bold',
+                  },
+                ]}>
+                Menyiapkan Video...
+              </Text>
+            )}
+          </View>
+        ) : (
+          <>
+            <Text
+              style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20, marginTop: 20 }]}>
+              Mengambil data... Mohon tunggu sebentar!
+            </Text>
+            <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>
+              "{randomQuote.quote}"
+            </Text>
+            <Text
+              style={[
+                globalStyles.text,
+                { textAlign: 'center', marginTop: 5, fontWeight: 'bold' },
+              ]}>
+              — {randomQuote.by}
+            </Text>
+          </>
+        )}
       </View>
       <View style={{ alignItems: 'center' }}>
         <View style={{ position: 'absolute', bottom: 10 }}>
