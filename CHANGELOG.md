@@ -1,3 +1,11 @@
+# v1.2.1_JS-3 (13-April-2026)
+## Ditambahkan
+- Pemberitahuan progres pemecahan 'challenge' di data film saat loading, dan opsi untuk mempercepat nya ketika waktu yang dibutuhkan lebih dari 5 detik
+## Diperbaiki
+- Error terkait jaringan pada film (#2)
+- Memperbaiki nama film yang duplikat pada histor
+  > Diperbaiki dengan cara menambahkan tahun rilis pada setiap judul
+- Memperbaiki error pada 1 data komik menyebabkan pencarian untuk data lainnya ikut gagal
 # v1.2.1_JS-2 (12-April-2026)
 ## Diperbaiki
 - Error terkait jaringan pada film
