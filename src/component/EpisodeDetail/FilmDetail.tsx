@@ -377,9 +377,9 @@ function FilmDetail(props: Props) {
                   labelField="label"
                   onChange={item => {
                     setSelectedSeason(item.value);
-                    getFilmSeasonDetails(props.route.params.link + '/season/' + item.value)
-                      .then(a => setCurrentEpisodeList(a.episodes))
-                      .catch(console.error);
+                    getFilmSeasonDetails(props.route.params.link + '/season/' + item.value).then(
+                      a => setCurrentEpisodeList(a.episodes),
+                    );
                   }}
                   style={styles.dropdownStyle}
                   containerStyle={styles.dropdownContainerStyle}
