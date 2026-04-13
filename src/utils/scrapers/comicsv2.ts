@@ -38,8 +38,8 @@ export async function getComicsReading(url: string, signal?: AbortSignal): Promi
 
 export async function comicsSearch(query: string, signal?: AbortSignal): Promise<ComicsSearch[]> {
   const [results1, results2] = await Promise.all([
-    comics1.comicsSearch1(query, signal),
-    comics2.comicsSearch2(query, signal),
+    comics1.comicsSearch1(query, signal).catch(() => []),
+    comics2.comicsSearch2(query, signal).catch(() => []),
   ]);
 
   const tagged1 = results1.map(res => ({
