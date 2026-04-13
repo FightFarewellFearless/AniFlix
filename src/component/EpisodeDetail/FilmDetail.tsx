@@ -73,7 +73,7 @@ function useCompatibleData(rawData: FilmDetails_Detail | FilmDetail_Stream) {
 }
 
 function isEpisode(data: FilmDetails_Detail | FilmDetail_Stream): data is FilmDetails_Detail {
-  return 'firstSeason' in data;
+  return 'defaultSeason' in data;
 }
 
 function FilmDetail(props: Props) {
@@ -159,7 +159,9 @@ function FilmDetail(props: Props) {
     }
   }, [data.info.synopsis]);
 
-  const [selectedSeason, setSelectedSeason] = useState(1);
+  const [selectedSeason, setSelectedSeason] = useState(
+    isEpisode(data) ? data.defaultSeason.seasonNumber : 1,
+  );
   const mappedSeasons = useMemo(() => {
     if (isEpisode(data)) {
       return data.seasons.map(s => ({
@@ -171,7 +173,7 @@ function FilmDetail(props: Props) {
   }, [data]);
 
   const [currentEpisodeList, setCurrentEpisodeList] = useState(
-    isEpisode(data) ? data.firstSeason.episodes : [],
+    isEpisode(data) ? data.defaultSeason.episodes : [],
   );
 
   const ListHeaderComponent = useMemo(() => {

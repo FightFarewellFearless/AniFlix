@@ -9,6 +9,7 @@ import { NitroModules } from 'react-native-nitro-modules';
 import crypto from 'react-native-quick-crypto';
 import type { Hash as NativeHash } from 'react-native-quick-crypto/src/specs/hash.nitro';
 import type { Utils } from 'react-native-quick-crypto/src/specs/utils.nitro';
+import deviceUserAgent from '../deviceUserAgent';
 import { ChallengeResponse, SolveChallengeResponse } from './filmTypes/challenge';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
 import { FilmMovieDetailsResponse } from './filmTypes/movie';
@@ -123,6 +124,7 @@ function extractDecryptedIframe(html: string): string {
 async function getChallengeAndSolve(
   contentId: string,
   contentType: 'movie' | 'episode',
+  slug: string,
   signal?: AbortSignal,
 ): Promise<string> {
   const apiUrl = `${BASE_URL}/api/watch/challenge`;
@@ -130,6 +132,8 @@ async function getChallengeAndSolve(
     headers: {
       accept: '*/*',
       'content-type': 'application/json',
+      origin: BASE_URL,
+      referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
     },
     body: JSON.stringify({ contentId, contentType }),
     method: 'POST',
@@ -143,6 +147,8 @@ async function getChallengeAndSolve(
     headers: {
       accept: '*/*',
       'content-type': 'application/json',
+      origin: BASE_URL,
+      referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
     },
     body: JSON.stringify({ challenge, nonce, signature }),
     method: 'POST',
@@ -186,7 +192,13 @@ const BASE_URL = FILM_BASE_URL;
 function fetchPage(url: string, opt?: RequestInit & { asJson?: false }): Promise<string>;
 function fetchPage(url: string, opt?: RequestInit & { asJson: true }): Promise<any>;
 async function fetchPage(url: string, opt?: RequestInit & { asJson?: boolean }) {
-  const response = await fetch(url, opt);
+  const response = await fetch(url, {
+    headers: {
+      'user-agent': deviceUserAgent,
+      ...opt?.headers,
+    },
+    ...opt,
+  });
   const asJson = opt?.asJson ?? false;
   return await (asJson ? response.json() : response.text());
 }
@@ -366,13 +378,15 @@ type FilmEpisode = {
 };
 type FilmSeason = {
   season: string;
+  seasonNumber: number;
   episodes: FilmEpisode[];
 };
 
 function getFilmInfo(api: SeriesDetailsResponse | FilmMovieDetailsResponse) {
-  const title = api.title;
-  const genres = api.genres?.map(g => g.name) || [];
   const releaseDate = ('releaseDate' in api ? api.releaseDate : api.firstAirDate) || 'Unknown';
+  const year = releaseDate.split('-')[0];
+  const title = api.title + `${year ? ` (${year})` : ''}`;
+  const genres = api.genres?.map(g => g.name) || [];
   const coverImage = `https://image.tmdb.org/t/p/w500${api.posterPath}`;
   const backgroundImage = `https://image.tmdb.org/t/p/w780${api.backdropPath}`;
   const synopsis = api.overview || 'No synopsis available.';
@@ -397,7 +411,7 @@ function getFilmInfo(api: SeriesDetailsResponse | FilmMovieDetailsResponse) {
 type FilmDetails_Detail = {
   type: 'detail';
   info: FilmInfo;
-  firstSeason: FilmSeason;
+  defaultSeason: FilmSeason;
   seasons: number[];
 };
 type FilmDetail_Stream = {
@@ -421,25 +435,31 @@ type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmMovieDetailsResponse;
 async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<FilmDetails> {
   const api: PossibleAPIResponse = await fetchPage(filmUrl, { signal, asJson: true });
-  if ('firstSeason' in api) {
+  if ('defaultSeason' in api) {
     const info = getFilmInfo(api);
     const seasons = api.seasons.map(s => s.seasonNumber);
-    const firstSeason = {
-      season: `Season ${api.firstSeason.seasonNumber}`,
-      episodes: api.firstSeason.episodes.map(e => ({
+    const defaultSeason = {
+      season: `Season ${api.defaultSeason.seasonNumber}`,
+      seasonNumber: api.defaultSeason.seasonNumber,
+      episodes: api.defaultSeason.episodes.map(e => ({
         episodeImage: `https://image.tmdb.org/t/p/w500${e.stillPath}`,
-        episodeNumber: `1 - ${e.episodeNumber}`,
+        episodeNumber: `${api.defaultSeason.seasonNumber} - ${e.episodeNumber}`,
         episodeId: e.id,
         episodeTitle: e.name,
-        episodeUrl: `${BASE_URL}/api/series/${api.slug}/season/${api.firstSeason.seasonNumber}/episode/${e.episodeNumber}`,
+        episodeUrl: `${BASE_URL}/api/series/${api.slug}/season/${api.defaultSeason.seasonNumber}/episode/${e.episodeNumber}`,
         releaseDate: e.airDate,
       })),
     };
-    return { type: 'detail', info, firstSeason, seasons };
+    return { type: 'detail', info, defaultSeason, seasons };
   }
   if ('episode' in api) {
     const epApi = api;
-    const embedUrl = await getChallengeAndSolve(epApi.episode.id, 'episode', signal);
+    const embedUrl = await getChallengeAndSolve(
+      epApi.episode.id,
+      'episode',
+      epApi.series.slug,
+      signal,
+    );
     const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
     const jeniusUrl = extractDecryptedIframe(embedHtml);
 
@@ -462,11 +482,13 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
       asJson: true,
     }).then(res => res.genres.map((g: any) => g.name));
 
+    const year = epApi.series.firstAirDate?.split('-')[0];
+
     return {
       type: 'stream',
+      title: epApi.series.title + `${year ? ` (${year})` : ''}`,
       streamingLink: jeniusPlay.securedLink,
       subtitleLink: jeniusPlay.subtitleTrackUrl,
-      title: epApi.series.title,
       releaseDate: epApi.episode.airDate,
       rating: epApi.episode.voteAverage || '0',
       genres,
@@ -487,7 +509,7 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
 
   // (Halaman Movie/Film)
   const movieApi = api;
-  const embedUrl = await getChallengeAndSolve(movieApi.id, 'movie', signal);
+  const embedUrl = await getChallengeAndSolve(movieApi.id, 'movie', movieApi.slug, signal);
   const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
   const jeniusUrl = extractDecryptedIframe(embedHtml);
 
@@ -499,11 +521,13 @@ async function getFilmDetails(filmUrl: string, signal?: AbortSignal): Promise<Fi
     variants = resolveMasterPlaylist(manifestContent, jeniusPlay.securedLink);
   } catch (e) {}
 
+  const year = movieApi.releaseDate?.split('-')[0];
+
   return {
     type: 'stream',
+title: movieApi.title + `${year ? ` (${year})` : ''}`,
     streamingLink: jeniusPlay.securedLink,
     subtitleLink: jeniusPlay.subtitleTrackUrl,
-    title: movieApi.title,
     releaseDate: movieApi.releaseDate,
     rating: movieApi.voteAverage || '0',
     genres: movieApi.genres?.map(g => g.name) || [],
@@ -518,6 +542,7 @@ async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Pr
   const api: SeriesSeasonResponse = await fetchPage(seasonUrl, { signal, asJson: true });
   return {
     season: `Season ${api.season.seasonNumber}`,
+    seasonNumber: api.season.seasonNumber,
     episodes: api.season.episodes.map(e => ({
       episodeImage: `https://image.tmdb.org/t/p/w500${e.stillPath}`,
       episodeNumber: `${api.season.seasonNumber} - ${e.episodeNumber}`,

@@ -23,21 +23,21 @@ export interface SeriesDetailsResponse {
   networks: Network[];
   productionCompanies: ProductionCompany[];
   keywords: Keyword[];
-  createdBy: any[];
+  createdBy: CreatedBy[];
   importedBy: string;
   viewCount: number;
   watchlistCount: number;
   favouriteCount: number;
   isPublished: boolean;
-  createdAt: CreatedAt;
-  updatedAt: CreatedAt;
+  createdAt: string;
+  updatedAt: string;
   genres: Genre[];
   cast: Cast[];
   seasons: Season[];
-  firstSeason: FirstSeason;
+  defaultSeason: DefaultSeason;
 }
 
-interface FirstSeason {
+interface DefaultSeason {
   id: string;
   tvSeriesId: string;
   tmdbId: number;
@@ -48,8 +48,8 @@ interface FirstSeason {
   airDate: string;
   episodeCount: number;
   isPublished: boolean;
-  createdAt: CreatedAt;
-  updatedAt: CreatedAt;
+  createdAt: string;
+  updatedAt: string;
   episodes: Episode[];
 }
 
@@ -68,8 +68,8 @@ interface Episode {
   quality: null;
   viewCount: number;
   isPublished: boolean;
-  createdAt: CreatedAt;
-  updatedAt: CreatedAt;
+  createdAt: string;
+  updatedAt: string;
   hasVideo: boolean;
 }
 
@@ -81,11 +81,11 @@ interface Season {
   name: string;
   overview: string;
   posterPath: string;
-  airDate: null | string;
+  airDate: string;
   episodeCount: number;
   isPublished: boolean;
-  createdAt: CreatedAt;
-  updatedAt: CreatedAt;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Cast {
@@ -103,10 +103,17 @@ interface Genre {
   tmdbId: number;
   name: string;
   slug: string;
-  createdAt: CreatedAt;
+  createdAt: string;
 }
 
-interface CreatedAt {}
+interface CreatedBy {
+  id: number;
+  name: string;
+  gender: number;
+  credit_id: string;
+  profile_path: string;
+  original_name: string;
+}
 
 interface Keyword {
   id: number;
@@ -116,7 +123,7 @@ interface Keyword {
 interface ProductionCompany {
   id: number;
   name: string;
-  logo_path: string;
+  logo_path: null | string;
 }
 
 interface Network {
