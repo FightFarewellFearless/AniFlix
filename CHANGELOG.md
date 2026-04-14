@@ -1,3 +1,6 @@
+# v1.2.1_JS-4 (14-April-2026)
+## Diperbaiki
+- 00:00 pada durasi total video player
 # v1.2.1_JS-3 (13-April-2026)
 ## Ditambahkan
 - Pemberitahuan progres pemecahan 'challenge' di data film saat loading, dan opsi untuk mempercepat nya ketika waktu yang dibutuhkan lebih dari 5 detik
