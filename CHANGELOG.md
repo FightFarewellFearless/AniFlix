@@ -1,3 +1,9 @@
+# v1.2.1_JS-5 (16-April-2026)
+## Ditambahkan
+- Pilihan mode content fit untuk video player
+## Diperbaiki
+- (film/tv series) Masalah encoding pada subtitle, menyebabkan subtitle gagal di uraikan
+- (komiku) beberapa komik memberikan cover komik yang kosong dan pemilihan chapter tidak bekerja
 # v1.2.1_JS-4 (14-April-2026)
 ## Diperbaiki
 - 00:00 pada durasi total video player
