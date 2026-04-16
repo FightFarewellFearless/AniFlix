@@ -31,8 +31,6 @@ import { MDDark, MDLight } from './src/assets/MaterialTheme';
 import useGlobalStyles from './src/assets/style';
 import ErrorScreen from './src/component/misc/ErrorScreen';
 import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
-import SafeAreaWrapper from './src/component/misc/SafeAreaWrapper';
-import SuspenseLoading from './src/component/misc/SuspenseLoading';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
@@ -41,6 +39,7 @@ import {
   SeriesListHomeContext,
 } from './src/misc/context';
 import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
+import { withSuspenseAndSafeArea } from './src/misc/withSuspenseAndSafeArea.tsx';
 import { EpisodeBaruHome } from './src/types/anime';
 import { RootStackNavigator } from './src/types/navigation';
 import { cleanCbzDir } from './src/utils/cbzCleaner.ts';
@@ -85,21 +84,56 @@ const CombinedDarkTheme = {
     ...MDDark.colors,
   },
 };
-const CbzReader = lazy(() => import('./src/component/WatchNRead/CbzReader.tsx'));
-const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
-const Home = lazy(() => import('./src/component/Home/Home'));
-const Video = lazy(() => import('./src/component/WatchNRead/Video'));
-const Video_Film = lazy(() => import('./src/component/WatchNRead/Video_Film'));
-const FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
-const NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
-const MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
-const FilmDetail = lazy(() => import('./src/component/EpisodeDetail/FilmDetail'));
-const ComicsDetail = lazy(() => import('./src/component/EpisodeDetail/ComicsDetail'));
-const ComicsReading = lazy(() => import('./src/component/WatchNRead/ComicsReading'));
-const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
-const Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
-const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
-const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
+
+let CbzReader: React.ComponentType<any>;
+let AniDetail: React.ComponentType<any>;
+let Home: React.ComponentType<any>;
+let Video: React.ComponentType<any>;
+let Video_Film: React.ComponentType<any>;
+let FailedToConnect: React.ComponentType<any>;
+let NeedUpdate: React.ComponentType<any>;
+let MovieDetail: React.ComponentType<any>;
+let FilmDetail: React.ComponentType<any>;
+let ComicsDetail: React.ComponentType<any>;
+let ComicsReading: React.ComponentType<any>;
+let CFBypassWebView: React.ComponentType<any>;
+let Connecting: React.ComponentType<any>;
+let FromUrl: React.ComponentType<any>;
+let SeeMore: React.ComponentType<any>;
+
+if (__DEV__) {
+  CbzReader = require('./src/component/WatchNRead/CbzReader.tsx').default;
+  AniDetail = require('./src/component/EpisodeDetail/AniDetail').default;
+  Home = require('./src/component/Home/Home').default;
+  Video = require('./src/component/WatchNRead/Video').default;
+  Video_Film = require('./src/component/WatchNRead/Video_Film').default;
+  FailedToConnect = require('./src/component/NeedAttention/FailedToConnect').default;
+  NeedUpdate = require('./src/component/NeedAttention/NeedUpdate').default;
+  MovieDetail = require('./src/component/EpisodeDetail/MovieDetail').default;
+  FilmDetail = require('./src/component/EpisodeDetail/FilmDetail').default;
+  ComicsDetail = require('./src/component/EpisodeDetail/ComicsDetail').default;
+  ComicsReading = require('./src/component/WatchNRead/ComicsReading').default;
+  CFBypassWebView = require('./src/utils/CFBypassWebview').default;
+  Connecting = require('./src/component/Loading Screen/Connect').default;
+  FromUrl = require('./src/component/Loading Screen/FromUrl').default;
+  SeeMore = require('./src/component/Home/SeeMore').default;
+} else {
+  CbzReader = lazy(() => import('./src/component/WatchNRead/CbzReader.tsx'));
+  AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
+  Home = lazy(() => import('./src/component/Home/Home'));
+  Video = lazy(() => import('./src/component/WatchNRead/Video'));
+  Video_Film = lazy(() => import('./src/component/WatchNRead/Video_Film'));
+  FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
+  NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
+  MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
+  FilmDetail = lazy(() => import('./src/component/EpisodeDetail/FilmDetail'));
+  ComicsDetail = lazy(() => import('./src/component/EpisodeDetail/ComicsDetail'));
+  ComicsReading = lazy(() => import('./src/component/WatchNRead/ComicsReading'));
+  CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
+  Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
+  FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
+  SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -142,27 +176,6 @@ const linking: LinkingOptions<RootStackNavigator> = {
     const subscription = Linking.addEventListener('url', onReceiveURL);
     return () => subscription.remove();
   },
-};
-
-export const withSuspenseAndSafeArea = (
-  Component: React.ComponentType<any>,
-  safeArea = true,
-  ignoreTop = false,
-  ignoreBottom = false,
-) => {
-  const SuspenseComponent = (props: any) => (
-    <SuspenseLoading>
-      <Component {...props} />
-    </SuspenseLoading>
-  );
-  return (props: any) =>
-    safeArea ? (
-      <SafeAreaWrapper ignoreTop={ignoreTop} ignoreBottom={ignoreBottom}>
-        {<SuspenseComponent {...props} />}
-      </SafeAreaWrapper>
-    ) : (
-      <SuspenseComponent {...props} />
-    );
 };
 
 // Handle JavaScript Error globally
