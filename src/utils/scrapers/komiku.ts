@@ -188,7 +188,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       ?.replace(new RegExp('\'|"', 'g'), '');
     if (!coverUrl) {
       thumbnailUrl = data
-        .split('thumbnail: "')[1]
+        .split(/thumbnail:\s*"/)[1]
         ?.split('"')[0]
         ?.replace(new RegExp('\\\\', 'g'), '');
       if (!thumbnailUrl) {
@@ -203,8 +203,12 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       return $(el).attr('src');
     })
     .toArray();
-  const nextChapter = normalizeUrl($('svg[data-icon="caret-right"]').parent().attr('href') ?? '');
-  const prevChapter = normalizeUrl($('svg[data-icon="caret-left"]').parent().attr('href') ?? '');
+  const nextChapter = normalizeUrl(
+    $('svg[data-icon="caret-right"], svg.fa-caret-right').parent().attr('href') ?? '',
+  );
+  const prevChapter = normalizeUrl(
+    $('svg[data-icon="caret-left"], svg.fa-caret-left').parent().attr('href') ?? '',
+  );
 
   return {
     title,
