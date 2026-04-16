@@ -171,7 +171,8 @@ function VideoPlayer({
             signal: abortController.signal,
           });
           if (!response.ok) throw new Error('Network response was not ok');
-          const subtitleText = await response.text();
+          const subtitleArr = await response.arrayBuffer();
+          const subtitleText = decodeSubtitleBuffer(subtitleArr);
           onSubtitleLoadRef.current?.(subtitleText);
           const subtitle = await parseSubtitles(subtitleText ?? '');
           setSubtitles(subtitle);
@@ -793,4 +794,36 @@ export const parseSubtitles = async (raw: string) => {
       runOnJS(resolve)(res);
     })();
   });
+};
+
+const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
+  const uint8Array = new Uint8Array(buffer);
+  // UTF-8 BOM: EF BB BF
+  if (
+    uint8Array.length >= 3 &&
+    uint8Array[0] === 0xef &&
+    uint8Array[1] === 0xbb &&
+    uint8Array[2] === 0xbf
+  ) {
+    return Buffer.from(buffer).toString('utf8');
+  }
+  // UTF-16 LE BOM: FF FE
+  if (uint8Array.length >= 2 && uint8Array[0] === 0xff && uint8Array[1] === 0xfe) {
+    return Buffer.from(buffer).toString('utf16le');
+  }
+
+  let nullByteCount = 0;
+  const sampleSize = Math.min(uint8Array.length, 100);
+
+  for (let i = 0; i < sampleSize; i++) {
+    if (uint8Array[i] === 0) {
+      nullByteCount++;
+    }
+  }
+
+  if (nullByteCount > sampleSize * 0.2) {
+    return Buffer.from(buffer).toString('utf16le');
+  }
+
+  return Buffer.from(buffer).toString('utf8');
 };
