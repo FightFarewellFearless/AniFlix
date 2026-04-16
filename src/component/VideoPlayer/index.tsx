@@ -2,6 +2,7 @@
 import {
   AudioMixingMode,
   VideoPlayer as ExpoVideoPlayer,
+  VideoContentFit,
   VideoView,
   useVideoPlayer,
 } from 'expo-video';
@@ -37,6 +38,8 @@ import Reanimated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withDelay,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
@@ -71,6 +74,7 @@ type VideoPlayerProps = {
 };
 
 const ICON_SIZE = 45;
+const VideoContentFitModeArr: VideoContentFit[] = ['contain', 'cover', 'fill'];
 
 export default memo(VideoPlayer);
 
@@ -144,6 +148,7 @@ function VideoPlayer({
   }, [isPaused]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [contentFitMode, setContentFitMode] = useState<VideoContentFit>('contain');
 
   const [showControls, setShowControls] = useState(true);
   const controlsShowedCzOfLag = useRef(false);
@@ -372,7 +377,7 @@ function VideoPlayer({
         pointerEvents="none"
         player={player}
         key={streamingURL}
-        contentFit="contain"
+        contentFit={contentFitMode}
         nativeControls={false}
         style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0 }}
         ref={videoRef}
@@ -437,6 +442,8 @@ function VideoPlayer({
             onLoad={onLoad}
           />
           <BottomControl
+            contentFitMode={contentFitMode}
+            setContentFitMode={setContentFitMode}
             currentDurationSecond={currentDurationSecond}
             totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen}
@@ -647,6 +654,8 @@ function CenterControl({
 }
 
 function BottomControl({
+  contentFitMode,
+  setContentFitMode,
   seekBarProgress,
   onProgressChange,
   onProgressChangeEnd,
@@ -655,6 +664,8 @@ function BottomControl({
   currentDurationSecond,
   totalDurationSecond,
 }: {
+  contentFitMode: VideoContentFit;
+  setContentFitMode: React.Dispatch<React.SetStateAction<VideoContentFit>>;
   seekBarProgress: SharedValue<number>;
   onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
@@ -685,6 +696,18 @@ function BottomControl({
       ? `${hour.toString().padStart(2, '0')}:${minStr}:${secStr}`
       : `${minStr}:${secStr}`;
   });
+
+  const contentFitToastOpacity = useSharedValue(0);
+  const contentFitToastStyle = useAnimatedStyle(() => {
+    return {
+      opacity: contentFitToastOpacity.get(),
+    };
+  });
+
+  useEffect(() => {
+    contentFitToastOpacity.set(withSequence(withTiming(1), withDelay(500, withTiming(0))));
+  }, [contentFitMode, contentFitToastOpacity]);
+
   return (
     <Pressable
       style={{
@@ -702,16 +725,41 @@ function BottomControl({
             <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
             <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
           </View>
-          <TouchableOpacity
-            style={{ justifyContent: 'center' }}
-            /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
-            hitSlop={2}>
-            <Icons
-              name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-              size={28}
-              color={'white'}
-            />
-          </TouchableOpacity>
+          <Reanimated.View style={contentFitToastStyle}>
+            <Text
+              style={{
+                color: 'white',
+                backgroundColor: '#00000077',
+                fontSize: isFullscreen ? 16 : 12,
+              }}>
+              {contentFitMode.toUpperCase()}
+            </Text>
+          </Reanimated.View>
+          <View style={{ flexDirection: 'row', gap: 18 }}>
+            <TouchableOpacity
+              style={{ justifyContent: 'center' }}
+              /* //rngh - containerStyle */ onPress={() => {
+                setContentFitMode(val => {
+                  const mode = VideoContentFitModeArr.at(
+                    (VideoContentFitModeArr.indexOf(val) + 1) % 3,
+                  );
+                  return mode!;
+                });
+              }}
+              hitSlop={2}>
+              <Icons name={'fit-screen'} size={28} color={'white'} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ justifyContent: 'center' }}
+              /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
+              hitSlop={2}>
+              <Icons
+                name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+                size={28}
+                color={'white'}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={{ width: '100%' }}>
           <SeekBar
