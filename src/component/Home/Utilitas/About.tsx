@@ -12,7 +12,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import appPackage from '../../../../package.json';
-import { JoinDiscord } from '../../Loading Screen/Connect';
+import { JoinDiscord } from '../../misc/Social';
 import DarkOverlay from '../../misc/DarkOverlay';
 
 const tokyo = require('../../../assets/tokyo.jpg');

@@ -3,7 +3,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import tr from 'googletrans';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
-  ColorSchemeName,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -78,10 +77,8 @@ function isEpisode(data: FilmDetails_Detail | FilmDetail_Stream): data is FilmDe
 
 function FilmDetail(props: Props) {
   const styles = useStyles();
-  const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
-  const theme = useTheme();
 
   const data = useCompatibleData(props.route.params.data);
 
@@ -176,7 +173,155 @@ function FilmDetail(props: Props) {
     isEpisode(data) ? data.defaultSeason.episodes : [],
   );
 
-  const ListHeaderComponent = useMemo(() => {
+  const listHeaderComponent = (
+    <FilmDetailHeader
+      data={data}
+      headerImageStyle={headerImageStyle}
+      isSynopsisTranslationPending={isSynopsisTranslationPending}
+      translatedSynopsis={translatedSynopsis}
+      translateSynopsisToIndonesia={translateSynopsisToIndonesia}
+      lastWatchedEpisodeData={lastWatchedEpisodeData}
+      lastWatched={lastWatched}
+      isInList={isInList}
+      mappedSeasons={mappedSeasons}
+      selectedSeason={selectedSeason}
+      setSelectedSeason={setSelectedSeason}
+      setCurrentEpisodeList={setCurrentEpisodeList}
+      currentEpisodeListLength={currentEpisodeList.length}
+      link={props.route.params.link}
+      navigation={props.navigation}
+    />
+  );
+
+  const episodeList = useMemo(() => {
+    if (!isEpisode(data))
+      return [
+        {
+          type: 'episode',
+          episodeNumber: '',
+          episodeTitle: '',
+          episodeId: '',
+          episodeUrl: props.route.params.link,
+          episodeImage: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
+          releaseDate: data.info.releaseDate,
+        } as FilmEpisode,
+      ];
+    return currentEpisodeList;
+  }, [data, props.route.params.link, currentEpisodeList]);
+
+  const handlePlayNow = useCallback(() => {
+    if (isEpisode(data)) return;
+    let historyData: { lastDuration: number; resolution: string } | undefined;
+    const startFilm = () => {
+      setFilmStreamHistory(props.route.params.link, data, historyData);
+      props.navigation.navigate('Video_Film', {
+        data,
+        link: props.route.params.link,
+        historyData,
+      });
+    };
+    if (lastWatched) {
+      DialogManager.alert(
+        'Lanjutkan durasi?',
+        'Kamu sudah menonton film ini sebelumnya. Apakah kamu ingin melanjutkan dari durasi terakhir yang kamu tonton?',
+        [
+          {
+            text: 'Mulai dari awal',
+            onPress: () => {
+              historyData = undefined;
+              startFilm();
+            },
+          },
+          {
+            text: 'Lanjutkan',
+            onPress: () => {
+              historyData = {
+                lastDuration: lastWatched?.lastDuration ?? 0,
+                resolution: lastWatched?.resolution ?? '',
+              };
+              startFilm();
+            },
+          },
+        ],
+      );
+      return;
+    }
+    startFilm();
+  }, [data, lastWatched, props.navigation, props.route.params.link]);
+
+  return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <ReanimatedFlashList
+        ref={scrollRef}
+        data={episodeList}
+        renderItem={({ item }) => (
+          <RenderFilmItem
+            item={item}
+            data={data}
+            lastWatched={lastWatched}
+            handlePlayNow={handlePlayNow}
+            link={props.route.params.link}
+            navigation={props.navigation}
+          />
+        )}
+        contentContainerStyle={{
+          backgroundColor: styles.mainContainer.backgroundColor,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom + 20,
+        }}
+        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+        ListHeaderComponent={listHeaderComponent}
+        extraData={colorScheme}
+        showsVerticalScrollIndicator={false}
+      />
+    </KeyboardAvoidingView>
+  );
+}
+
+interface FilmDetailHeaderProps {
+  data: ReturnType<typeof useCompatibleData>;
+  headerImageStyle: any;
+  isSynopsisTranslationPending: boolean;
+  translatedSynopsis: string | null;
+  translateSynopsisToIndonesia: () => void;
+  lastWatchedEpisodeData:
+    | { episodeNumber: string | null; episodeTitle: string; episodeUrl: string }
+    | undefined;
+  lastWatched: HistoryJSON | undefined;
+  isInList: boolean;
+  mappedSeasons: { label: string; value: number }[];
+  selectedSeason: number;
+  setSelectedSeason: (season: number) => void;
+  setCurrentEpisodeList: (episodes: FilmEpisode[]) => void;
+  currentEpisodeListLength: number;
+  link: string;
+  navigation: Props['navigation'];
+}
+
+const FilmDetailHeader = memo(
+  ({
+    data,
+    headerImageStyle,
+    isSynopsisTranslationPending,
+    translatedSynopsis,
+    translateSynopsisToIndonesia,
+    lastWatchedEpisodeData,
+    lastWatched,
+    isInList,
+    mappedSeasons,
+    selectedSeason,
+    setSelectedSeason,
+    setCurrentEpisodeList,
+    currentEpisodeListLength,
+    link,
+    navigation,
+  }: FilmDetailHeaderProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const theme = useTheme();
+    const colorScheme = useColorScheme();
+
     return (
       <View style={styles.mainContainer}>
         <ImageLoading
@@ -309,11 +454,11 @@ function FilmDetail(props: Props) {
                 textColor={theme.colors.onPrimary}
                 onPress={() => {
                   if (!isEpisode(data)) {
-                    setFilmStreamHistory(props.route.params.link, data, {
+                    setFilmStreamHistory(link, data, {
                       lastDuration: lastWatched.lastDuration ?? 0,
                       resolution: lastWatched.resolution ?? '',
                     });
-                    props.navigation.navigate('Video_Film', {
+                    navigation.navigate('Video_Film', {
                       data,
                       link: lastWatched.link,
                       historyData: {
@@ -323,7 +468,7 @@ function FilmDetail(props: Props) {
                     });
                     return;
                   }
-                  props.navigation.navigate('FromUrl', {
+                  navigation.navigate('FromUrl', {
                     title: data.info.title,
                     link: lastWatchedEpisodeData.episodeUrl,
                     historyData: {
@@ -349,7 +494,7 @@ function FilmDetail(props: Props) {
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
                   title: data.info.title.trim(),
-                  link: props.route.params.link,
+                  link: link,
                   rating: 'Film',
                   releaseYear: data.info.releaseDate,
                   thumbnailUrl:
@@ -377,8 +522,8 @@ function FilmDetail(props: Props) {
                   labelField="label"
                   onChange={item => {
                     setSelectedSeason(item.value);
-                    getFilmSeasonDetails(props.route.params.link + '/season/' + item.value).then(
-                      a => setCurrentEpisodeList(a.episodes),
+                    getFilmSeasonDetails(link + '/season/' + item.value).then(a =>
+                      setCurrentEpisodeList(a.episodes),
                     );
                   }}
                   style={styles.dropdownStyle}
@@ -390,7 +535,7 @@ function FilmDetail(props: Props) {
                   placeholderStyle={styles.dropdownPlaceholderStyle}
                   iconStyle={styles.dropdownIconStyle}
                   autoScroll
-                  dropdownPosition={currentEpisodeList.length < 5 ? 'top' : 'auto'}
+                  dropdownPosition={currentEpisodeListLength < 5 ? 'top' : 'auto'}
                 />
               </View>
             </View>
@@ -398,221 +543,99 @@ function FilmDetail(props: Props) {
         </View>
       </View>
     );
-  }, [
-    styles,
-    data,
-    headerImageStyle,
-    theme,
-    colorScheme,
-    globalStyles.text,
-    isSynopsisTranslationPending,
-    translatedSynopsis,
-    translateSynopsisToIndonesia,
-    lastWatchedEpisodeData,
-    lastWatched,
-    isInList,
-    mappedSeasons,
-    selectedSeason,
-    currentEpisodeList.length,
-    props.navigation,
-    props.route.params.link,
-  ]);
+  },
+);
 
-  const episodeList = useMemo(() => {
-    if (!isEpisode(data))
-      return [
-        {
-          type: 'episode',
-          episodeNumber: '',
-          episodeTitle: '',
-          episodeId: '',
-          episodeUrl: props.route.params.link,
-          episodeImage: 'coverImage' in data.info ? data.info.coverImage : data.info.thumbnailUrl,
-          releaseDate: data.info.releaseDate,
-        } as FilmEpisode,
-      ];
-    return currentEpisodeList;
-  }, [data, props.route.params.link, currentEpisodeList]);
-
-  const handlePlayNow = useCallback(() => {
-    if (isEpisode(data)) return;
-    let historyData: { lastDuration: number; resolution: string } | undefined;
-    const startFilm = () => {
-      setFilmStreamHistory(props.route.params.link, data, historyData);
-      props.navigation.navigate('Video_Film', {
-        data,
-        link: props.route.params.link,
-        historyData,
-      });
-    };
-    if (lastWatched) {
-      DialogManager.alert(
-        'Lanjutkan durasi?',
-        'Kamu sudah menonton film ini sebelumnya. Apakah kamu ingin melanjutkan dari durasi terakhir yang kamu tonton?',
-        [
-          {
-            text: 'Mulai dari awal',
-            onPress: () => {
-              historyData = undefined;
-              startFilm();
-            },
-          },
-          {
-            text: 'Lanjutkan',
-            onPress: () => {
-              historyData = {
-                lastDuration: lastWatched?.lastDuration ?? 0,
-                resolution: lastWatched?.resolution ?? '',
-              };
-              startFilm();
-            },
-          },
-        ],
-      );
-      return;
-    }
-    startFilm();
-  }, [data, lastWatched, props.navigation, props.route.params.link]);
-
-  return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
-      <ReanimatedFlashList
-        ref={scrollRef}
-        data={episodeList}
-        renderItem={({ item: s }) => {
-          return (
-            <View style={styles.episodeListContainer}>
-              {!isEpisode(data) ? (
-                <Button
-                  icon="movie-open-play"
-                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                  textColor={styles.additionalInfoText.color}
-                  mode="elevated"
-                  style={{ flex: 1 }}
-                  onPress={handlePlayNow}>
-                  Tonton Sekarang
-                </Button>
-              ) : (
-                <RenderEpisodeList
-                  globalStyles={globalStyles}
-                  colorScheme={colorScheme}
-                  props={props}
-                  item={s}
-                  styles={styles}
-                  lastWatched={lastWatched}
-                />
-              )}
-            </View>
-          );
-        }}
-        contentContainerStyle={{
-          backgroundColor: styles.mainContainer.backgroundColor,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-          paddingBottom: insets.bottom + 20,
-        }}
-        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-        ListHeaderComponent={ListHeaderComponent}
-        extraData={colorScheme}
-        showsVerticalScrollIndicator={false}
-      />
-    </KeyboardAvoidingView>
-  );
-}
-
-function RenderEpisodeList({
-  props,
-  item,
-  styles,
-  lastWatched,
-  globalStyles,
-  colorScheme,
-}: {
-  props: Props;
+interface RenderFilmItemProps {
   item: FilmEpisode;
-  styles: ReturnType<typeof useStyles>;
+  data: ReturnType<typeof useCompatibleData>;
   lastWatched: HistoryJSON | undefined;
-  globalStyles: ReturnType<typeof useGlobalStyles>;
-  colorScheme: ColorSchemeName;
-}) {
-  const rawData = props.route.params.data;
-  const data = useCompatibleData(rawData);
-  const episodeLastWatchedModified =
-    lastWatched &&
-    lastWatched.episode &&
-    lastWatched.episode.replace('Season ', '').trim().replace('Episode', '-').trim();
-  const isEpisodeLastWatched =
-    (lastWatched &&
-      episodeLastWatchedModified &&
-      item.episodeNumber === episodeLastWatchedModified) ||
-    (!isEpisode(data) && lastWatched);
-  return (
-    <TouchableOpacity
-      style={[styles.episodeButton, isEpisodeLastWatched && styles.lastWatchedButton]}
-      onPress={() => {
-        if (!isEpisode(data)) {
-          setFilmStreamHistory(props.route.params.link, data, {
-            lastDuration: lastWatched?.lastDuration ?? 0,
-            resolution: lastWatched?.resolution ?? '',
-          });
-          props.navigation.navigate('Video_Film', {
-            data,
-            link: item.episodeUrl,
-            historyData: {
-              lastDuration: lastWatched?.lastDuration ?? 0,
-              resolution: lastWatched?.resolution ?? '',
-            },
-          });
-          return;
-        }
-        props.navigation.navigate('FromUrl', {
-          title: data.info.title,
-          link: item.episodeUrl,
-          historyData: isEpisodeLastWatched
-            ? {
-                lastDuration: lastWatched.lastDuration ?? 0,
-                resolution: lastWatched.resolution ?? '',
-              }
-            : !isEpisode(data)
-              ? {
-                  lastDuration: lastWatched?.lastDuration ?? 0,
-                  resolution: lastWatched?.resolution ?? '',
-                }
-              : undefined,
-          type: 'film',
-        });
-      }}>
-      <View style={styles.episodeMainContent}>
-        <View style={styles.episodeNumberBox}>
-          <Text style={styles.episodeNumberText}>{item.episodeNumber}</Text>
-        </View>
-        <View style={styles.episodeTitleWrapper}>
-          <Text
-            numberOfLines={1}
-            style={[
-              globalStyles.text,
-              styles.episodeText,
-              isEpisodeLastWatched ? styles.lastWatchedTextColor : undefined,
-            ]}>
-            {item.episodeTitle}
-          </Text>
-          {isEpisodeLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
-        </View>
-        <Icon
-          name={isEpisodeLastWatched ? 'history' : 'play-circle'}
-          size={20}
-          color={
-            isEpisodeLastWatched
-              ? styles.lastWatchedTextColor.color
-              : colorScheme === 'dark'
-                ? '#5ddfff'
-                : '#00608d'
-          }
-        />
-      </View>
-    </TouchableOpacity>
-  );
+  handlePlayNow: () => void;
+  link: string;
+  navigation: Props['navigation'];
 }
+
+const RenderFilmItem = memo(
+  ({ item, data, lastWatched, handlePlayNow, navigation }: RenderFilmItemProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const colorScheme = useColorScheme();
+
+    if (!isEpisode(data)) {
+      return (
+        <View style={styles.episodeListContainer}>
+          <Button
+            icon="movie-open-play"
+            buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+            textColor={styles.additionalInfoText.color}
+            mode="elevated"
+            style={{ flex: 1 }}
+            onPress={handlePlayNow}>
+            Tonton Sekarang
+          </Button>
+        </View>
+      );
+    }
+
+    const episodeLastWatchedModified =
+      lastWatched &&
+      lastWatched.episode &&
+      lastWatched.episode.replace('Season ', '').trim().replace('Episode', '-').trim();
+    const isEpisodeLastWatched =
+      lastWatched &&
+      episodeLastWatchedModified &&
+      item.episodeNumber === episodeLastWatchedModified;
+
+    return (
+      <View style={styles.episodeListContainer}>
+        <TouchableOpacity
+          style={[styles.episodeButton, isEpisodeLastWatched && styles.lastWatchedButton]}
+          onPress={() => {
+            navigation.navigate('FromUrl', {
+              title: data.info.title,
+              link: item.episodeUrl,
+              historyData: isEpisodeLastWatched
+                ? {
+                    lastDuration: lastWatched.lastDuration ?? 0,
+                    resolution: lastWatched.resolution ?? '',
+                  }
+                : undefined,
+              type: 'film',
+            });
+          }}>
+          <View style={styles.episodeMainContent}>
+            <View style={styles.episodeNumberBox}>
+              <Text style={styles.episodeNumberText}>{item.episodeNumber}</Text>
+            </View>
+            <View style={styles.episodeTitleWrapper}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  globalStyles.text,
+                  styles.episodeText,
+                  isEpisodeLastWatched ? styles.lastWatchedTextColor : undefined,
+                ]}>
+                {item.episodeTitle}
+              </Text>
+              {isEpisodeLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
+            </View>
+            <Icon
+              name={isEpisodeLastWatched ? 'history' : 'play-circle'}
+              size={20}
+              color={
+                isEpisodeLastWatched
+                  ? styles.lastWatchedTextColor.color
+                  : colorScheme === 'dark'
+                    ? '#5ddfff'
+                    : '#00608d'
+              }
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  },
+);
 
 function useStyles() {
   const theme = useTheme();

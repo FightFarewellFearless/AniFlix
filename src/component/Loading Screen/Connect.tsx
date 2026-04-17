@@ -1,5 +1,3 @@
-import Icon from '@react-native-vector-icons/fontawesome';
-import Fontisto from '@react-native-vector-icons/fontisto';
 import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,15 +5,12 @@ import * as Updates from 'expo-updates';
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Linking,
   ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   useColorScheme,
   View,
-  ViewStyle,
 } from 'react-native';
 import RNFetchBlob from 'react-native-blob-util';
 import Orientation from 'react-native-orientation-locker';
@@ -28,7 +23,6 @@ import {
 } from 'react-native-reanimated';
 import { version as appVersion, OTAJSVersion } from '../../../package.json';
 import runningText from '../../assets/runningText.json';
-import useGlobalStyles from '../../assets/style';
 import defaultDatabase from '../../misc/defaultDatabaseValue.json';
 import { EpisodeBaruHome } from '../../types/anime';
 import { SetDatabaseTarget } from '../../types/databaseTarget';
@@ -38,48 +32,8 @@ import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/Databas
 import deviceUserAgent from '../../utils/deviceUserAgent';
 import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
 import { fetchLatestDomain } from '../../utils/scrapers/animeSeries';
+import { Github, JoinDiscord } from '../misc/Social';
 // import { Comics1WebView } from '../../utils/scrapers/comics1';
-
-export const JoinDiscord = ({
-  buttonColor,
-  size = 24,
-  style,
-}: {
-  buttonColor?: string;
-  size?: number;
-  style?: ViewStyle;
-}) => {
-  const styles = useStyles();
-  return (
-    <TouchableOpacity
-      onPress={() => Linking.openURL('https://discord.gg/sbTwxHb9NM')}
-      style={[styles.socialButton, buttonColor ? { backgroundColor: buttonColor } : {}, style]}>
-      <Fontisto name="discord" size={size} color={'#7289d9'} />
-      <Text style={styles.socialButtonText}>Join Discord</Text>
-    </TouchableOpacity>
-  );
-};
-
-export const Github = ({
-  buttonColor,
-  size = 24,
-  style,
-}: {
-  buttonColor?: string;
-  size?: number;
-  style?: ViewStyle;
-}) => {
-  const styles = useStyles();
-  const globalStyles = useGlobalStyles();
-  return (
-    <TouchableOpacity
-      onPress={() => Linking.openURL('https://github.com/FightFarewellFearless/AniFlix')}
-      style={[styles.socialButton, buttonColor ? { backgroundColor: buttonColor } : {}, style]}>
-      <Icon name="github" size={size} color={globalStyles.text.color} />
-      <Text style={styles.socialButtonText}>GitHub</Text>
-    </TouchableOpacity>
-  );
-};
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
@@ -559,21 +513,6 @@ function useStyles() {
           flexDirection: 'row',
           justifyContent: 'center',
           marginBottom: 16,
-        },
-        socialButton: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: isDark ? '#252525' : '#e0e0e0',
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          borderRadius: 20,
-          marginHorizontal: 8,
-        },
-        socialButtonText: {
-          fontSize: 14,
-          fontWeight: '500',
-          color: isDark ? '#e0e0e0' : '#333',
-          marginLeft: 8,
         },
         versionText: {
           fontSize: 12,

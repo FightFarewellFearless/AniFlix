@@ -64,7 +64,7 @@ import {
   getLatestMovies,
   getLatestSeries,
 } from '../../utils/scrapers/film';
-import { Github, JoinDiscord } from '../Loading Screen/Connect';
+import { Github, JoinDiscord } from '../misc/Social';
 import Announcment from '../misc/Announcement';
 import { ListAnimeComponent } from '../misc/ListAnimeComponent';
 import ReText from '../misc/ReText';
