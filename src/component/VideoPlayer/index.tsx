@@ -704,7 +704,12 @@ function BottomControl({
     };
   });
 
+  const initialRender = useRef(true);
   useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
     contentFitToastOpacity.set(withSequence(withTiming(1), withDelay(500, withTiming(0))));
   }, [contentFitMode, contentFitToastOpacity]);
 
