@@ -532,6 +532,10 @@ type FilmDetail_Stream = {
   streamingLink: string;
   subtitleLink?: string;
   title: string;
+  originalLanguage: string;
+  quality?: string;
+  country: string;
+  director?: string;
   releaseDate: string;
   backgroundImage: string;
   rating: string;
@@ -606,6 +610,8 @@ async function getFilmDetails(
     return {
       type: 'stream',
       title: epApi.series.title + `${year ? ` (${year})` : ''}`,
+      originalLanguage: epApi.series.originalLanguage,
+      country: epApi.series.country,
       streamingLink: jeniusPlay.securedLink,
       subtitleLink: jeniusPlay.subtitleTrackUrl,
       releaseDate: epApi.episode.airDate,
@@ -651,6 +657,10 @@ async function getFilmDetails(
   return {
     type: 'stream',
     title: movieApi.title + `${year ? ` (${year})` : ''}`,
+    originalLanguage: movieApi.originalLanguage,
+    quality: movieApi.quality,
+    country: movieApi.country,
+    director: movieApi.director,
     streamingLink: jeniusPlay.securedLink,
     subtitleLink: jeniusPlay.subtitleTrackUrl,
     releaseDate: movieApi.releaseDate,
