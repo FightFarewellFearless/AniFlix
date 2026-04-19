@@ -4,7 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import * as DocumentPicker from 'expo-document-picker';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -90,18 +90,14 @@ function SearchAnimeByImage() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
 
+  const closeModal = useCallback(() => setVideoModal({ open: false, link: '' }), []);
+
   return (
     <View style={styles.container}>
-      <Modal
-        visible={videoModal.open}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setVideoModal({ open: false, link: '' })}>
+      <Modal visible={videoModal.open} transparent animationType="fade" onRequestClose={closeModal}>
         <View style={styles.videoModalBackdrop}>
           <View style={styles.videoModalContainer}>
-            <TouchableOpacity
-              onPress={() => setVideoModal({ open: false, link: '' })}
-              style={styles.closeButton}>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
               <MaterialIcon name="close" color="white" size={28} />
             </TouchableOpacity>
             <VideoView
