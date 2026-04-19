@@ -8,9 +8,10 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { lazy, memo, useCallback, useContext, useEffect } from 'react';
 import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 import { BottomNavigation, useTheme } from 'react-native-paper';
-import { withSuspenseAndSafeArea } from '../../misc/withSuspenseAndSafeArea';
-import { EpisodeBaruHomeContext } from '../../misc/context';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
+
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import { EpisodeBaruHomeContext } from '@misc/context';
+import { withSuspenseAndSafeArea } from '@misc/withSuspenseAndSafeArea';
 
 let EpisodeBaruHome: React.ComponentType<any>;
 let Search: React.ComponentType<any>;

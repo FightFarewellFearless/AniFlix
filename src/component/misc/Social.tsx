@@ -1,3 +1,4 @@
+import useGlobalStyles from '@assets/style';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { Fontisto } from '@react-native-vector-icons/fontisto';
 import React, { useMemo } from 'react';
@@ -9,7 +10,6 @@ import {
   useColorScheme,
   ViewStyle,
 } from 'react-native';
-import useGlobalStyles from '../../assets/style';
 
 function useStyles() {
   const colorScheme = useColorScheme();

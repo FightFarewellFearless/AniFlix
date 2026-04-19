@@ -1,5 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useMemo, useState } from 'react';
 import {
   StyleSheet,
@@ -18,21 +20,19 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import controlWatchLater from '../../utils/watchLaterControl';
-
-import { FlashList, FlashListRef } from '@shopify/flash-list';
-import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AniDetailEpsList } from '../../types/anime';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { replaceLast } from '../../utils/replaceLast';
-import ImageLoading from '../misc/ImageLoading';
+
+import { AniDetailEpsList } from '@/types/anime';
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import { replaceLast } from '@/utils/replaceLast';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },

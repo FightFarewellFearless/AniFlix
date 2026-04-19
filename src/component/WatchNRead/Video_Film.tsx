@@ -1,5 +1,6 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoView } from 'expo-video';
 import tr from 'googletrans';
 import React, {
@@ -23,22 +24,22 @@ import {
 import Orientation from 'react-native-orientation-locker';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
 
-import useGlobalStyles, { darkText, lightText } from '../../assets/style';
-import setHistory from '../../utils/historyControl';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 
+import useGlobalStyles, { darkText, lightText } from '@assets/style';
+import setHistory from '@utils/historyControl';
+
+import { RootStackNavigator } from '@/types/navigation';
+import { useBackHandler } from '@hooks/useBackHandler';
 import { useFocusEffect } from '@react-navigation/core';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import { getFilmDetails } from '@utils/scrapers/film';
+import { throttle } from '@utils/throttle';
 import { ActivityIndicator, Button } from 'react-native-paper';
-import { useBackHandler } from '../../hooks/useBackHandler';
-import { RootStackNavigator } from '../../types/navigation';
-import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
-import { getFilmDetails } from '../../utils/scrapers/film';
-import { throttle } from '../../utils/throttle';
-import Skeleton from '../misc/Skeleton';
-import VideoPlayer, { parseSubtitles, PlayerRef } from '../VideoPlayer';
+import Skeleton from '@component/misc/Skeleton';
+import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import {
   LoadingModal,
   TimeInfo,

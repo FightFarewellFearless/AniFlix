@@ -1,6 +1,11 @@
+import { Dropdown } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
+import { LinearGradient } from 'expo-linear-gradient';
 import tr from 'googletrans';
+import moment from 'moment';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
@@ -11,6 +16,7 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { ActivityIndicator, Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -18,30 +24,24 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import controlWatchLater from '../../utils/watchLaterControl';
-
-import { Dropdown } from '@pirles/react-native-element-dropdown';
-import { FlashList, FlashListRef } from '@shopify/flash-list';
-import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
-import { LinearGradient } from 'expo-linear-gradient';
-import moment from 'moment';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
 import {
   FilmDetail_Stream,
   FilmDetails_Detail,
   FilmEpisode,
   getFilmSeasonDetails,
-} from '../../utils/scrapers/film';
-import { setFilmStreamHistory } from '../../utils/setFilmStreamHistory';
-import ImageLoading from '../misc/ImageLoading';
+} from '@utils/scrapers/film';
+import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<FilmEpisode> & {

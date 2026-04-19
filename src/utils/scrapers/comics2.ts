@@ -1,5 +1,5 @@
+import deviceUserAgent from '@utils/deviceUserAgent';
 import cheerio from 'cheerio';
-import deviceUserAgent from '../deviceUserAgent';
 
 export const __ALIAS = 'komikindo';
 export const DOMAIN = __ALIAS + '.ch';

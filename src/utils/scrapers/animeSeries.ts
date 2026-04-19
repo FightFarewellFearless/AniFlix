@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import type { Cheerio } from 'cheerio';
 import cheerio, { Element } from 'cheerio';
+
 import {
   AniDetail,
   AniDetailEpsList,
@@ -8,11 +9,10 @@ import {
   NewAnimeList,
   SearchAnimeList,
   listAnimeTypeList,
-} from '../../types/anime';
-import deviceUserAgent from '../deviceUserAgent';
-
+} from '@/types/anime';
+import runtime from '@misc/AniFlixRuntime';
+import deviceUserAgent from '@utils/deviceUserAgent';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
-import runtime from '../../misc/AniFlixRuntime';
 
 export const __ALIAS = 'otakudesu';
 let BASE_DOMAIN = __ALIAS + '.blog';
@@ -691,10 +691,10 @@ async function jadwalAnime(signal?: AbortSignal) {
 
 export {
   fetchLatestDomain,
+  fetchStreamingResolution,
+  fromUrl,
+  jadwalAnime,
+  listAnime,
   newAnime,
   searchAnime,
-  fromUrl,
-  listAnime,
-  fetchStreamingResolution,
-  jadwalAnime,
 };

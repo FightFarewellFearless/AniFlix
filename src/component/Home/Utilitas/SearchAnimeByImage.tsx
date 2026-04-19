@@ -16,8 +16,9 @@ import {
   View,
 } from 'react-native';
 import { TouchableNativeFeedback } from 'react-native-gesture-handler';
-import useGlobalStyles from '../../../assets/style';
-import ImageLoading from '../../misc/ImageLoading';
+
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
 
 interface SearchResult {
   frameCount: number;

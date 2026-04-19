@@ -1,36 +1,29 @@
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useRef, useState } from 'react';
-import { Text, ToastAndroid, View } from 'react-native'; // <-- Tambahkan TouchableOpacity
-import randomTipsArray from '../../assets/loadingTips.json';
-import runningTextArray from '../../assets/runningText.json';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import AnimeAPI from '../../utils/AnimeAPI';
-import setHistory from '../../utils/historyControl';
-import controlWatchLater from '../../utils/watchLaterControl';
+import { Text, ToastAndroid, View } from 'react-native';
 
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import randomTipsArray from '@assets/loadingTips.json';
+import runningTextArray from '@assets/runningText.json';
+import useGlobalStyles from '@assets/style';
+import AnimeAPI from '@utils/AnimeAPI';
+import setHistory from '@utils/historyControl';
+import controlWatchLater from '@utils/watchLaterControl';
+
+import LoadingIndicator from '@component/misc/LoadingIndicator';
+import { DatabaseManager } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import { generateUrlWithLatestDomain } from '@utils/domainChanger';
+import { replaceLast } from '@utils/replaceLast';
+import { getMovieDetail, getStreamingDetail } from '@utils/scrapers/animeMovie';
+import { ComicsDetail, getComicsDetailFromUrl, getComicsReading } from '@utils/scrapers/comicsv2';
+import { getFilmDetails, HashProgressData } from '@utils/scrapers/film';
+import { getKomikuDetailFromUrl, getKomikuReading, KomikuDetail } from '@utils/scrapers/komiku';
+import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
 import { Button } from 'react-native-paper';
 import URL from 'url';
-import { DatabaseManager } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
-import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
-import { replaceLast } from '../../utils/replaceLast';
-import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
-import {
-  ComicsDetail,
-  getComicsDetailFromUrl,
-  getComicsReading,
-} from '../../utils/scrapers/comicsv2';
-import { getFilmDetails, HashProgressData } from '../../utils/scrapers/film';
-import {
-  getKomikuDetailFromUrl,
-  getKomikuReading,
-  KomikuDetail,
-} from '../../utils/scrapers/komiku';
-import { setFilmStreamHistory } from '../../utils/setFilmStreamHistory';
-import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 

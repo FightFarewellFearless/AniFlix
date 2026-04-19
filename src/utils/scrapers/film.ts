@@ -4,16 +4,17 @@ import {
   createWorkletRuntime,
   runOnRuntimeAsync,
 } from 'react-native-worklets';
-import { unpack } from '../unpacker';
+
+import { unpack } from '@utils/unpacker';
 import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
+import AniFlixRuntime from '@misc/AniFlixRuntime';
+import deviceUserAgent from '@utils/deviceUserAgent';
 import { NitroModules } from 'react-native-nitro-modules';
 import crypto from 'react-native-quick-crypto';
 import type { Hash as NativeHash } from 'react-native-quick-crypto/src/specs/hash.nitro';
 import type { Utils } from 'react-native-quick-crypto/src/specs/utils.nitro';
-import AniFlixRuntime from '../../misc/AniFlixRuntime';
-import deviceUserAgent from '../deviceUserAgent';
 import { ChallengeResponse, SolveChallengeResponse } from './filmTypes/challenge';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
 import { FilmMovieDetailsResponse } from './filmTypes/movie';

@@ -5,8 +5,9 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import { Appbar, ProgressBar, useTheme } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { unzip } from 'react-native-zip-archive';
-import { RootStackNavigator } from '../../types/navigation';
-import { cbzDir, cleanCbzDir } from '../../utils/cbzCleaner';
+
+import { RootStackNavigator } from '@/types/navigation';
+import { cbzDir, cleanCbzDir } from '@utils/cbzCleaner';
 import {
   ComicsBottomBar,
   FullscreenExitButton,

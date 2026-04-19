@@ -1,13 +1,14 @@
-import cheerio, { CheerioAPI } from 'cheerio';
 import { COMICS1_AUTH } from '@env';
+import cheerio, { CheerioAPI } from 'cheerio';
 import he from 'he';
 import moment from 'moment';
 import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import WebView from 'react-native-webview';
-import deviceUserAgent from '../deviceUserAgent';
-import { comics1FetchSession } from '../comics1SessionFetcher/comics1sessionfetchercontext';
-import { comics1FetchChapterSession } from '../comics1SessionFetcher/comics1chaptersessionfetchercontext';
+
+import { comics1FetchChapterSession } from '@utils/comics1SessionFetcher/comics1chaptersessionfetchercontext';
+import { comics1FetchSession } from '@utils/comics1SessionFetcher/comics1sessionfetchercontext';
+import deviceUserAgent from '@utils/deviceUserAgent';
 
 // let isError = false;
 export const __ALIAS = 'softkomik';

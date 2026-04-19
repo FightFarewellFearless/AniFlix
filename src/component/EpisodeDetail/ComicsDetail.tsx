@@ -22,18 +22,19 @@ import Reanimated, {
   useScrollOffset,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import useGlobalStyles from '../../assets/style';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { __ALIAS as Comics1Alias } from '../../utils/scrapers/comics1';
-import { __ALIAS as Comics2Alias } from '../../utils/scrapers/comics2';
-import { ComicsDetail as ComicsDetailTypeData } from '../../utils/scrapers/comicsv2';
-import { __ALIAS as KomikuAlias, KomikuDetail } from '../../utils/scrapers/komiku';
-import controlWatchLater from '../../utils/watchLaterControl';
-import ImageLoading from '../misc/ImageLoading';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import { __ALIAS as Comics1Alias } from '@utils/scrapers/comics1';
+import { __ALIAS as Comics2Alias } from '@utils/scrapers/comics2';
+import { ComicsDetail as ComicsDetailTypeData } from '@utils/scrapers/comicsv2';
+import { __ALIAS as KomikuAlias, KomikuDetail } from '@utils/scrapers/komiku';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]> & {

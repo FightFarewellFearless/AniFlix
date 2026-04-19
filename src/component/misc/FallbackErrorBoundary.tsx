@@ -1,10 +1,10 @@
+import useGlobalStyles from '@assets/style';
 import { WEBHOOK_REPORT_ERROR } from '@env';
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { DeviceInfoModule } from 'react-native-nitro-device-info';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import useGlobalStyles from '../../assets/style';
 
 export type Props = { error: Error };
 

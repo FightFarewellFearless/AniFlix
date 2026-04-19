@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import Reanimated, { AnimatedStyle } from 'react-native-reanimated';
 import URL from 'url';
-import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
-import { BASE } from '../../utils/scrapers/animeSeries';
-import { BASE_URL } from '../../utils/scrapers/comics1';
+
+import { generateUrlWithLatestDomain } from '@utils/domainChanger';
+import { BASE } from '@utils/scrapers/animeSeries';
+import { BASE_URL } from '@utils/scrapers/comics1';
 import LoadingIndicator from './LoadingIndicator';
 
 const ImageLoading = (

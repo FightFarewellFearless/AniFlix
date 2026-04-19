@@ -1,15 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import { EpisodeBaruHome } from '@/types/anime';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
   SeriesListHomeContext,
-} from '../../misc/context';
-import { EpisodeBaruHome } from '../../types/anime';
-import { Movies } from '../../utils/scrapers/animeMovie';
-import { LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import { FilmHomePage } from '../../utils/scrapers/film';
+} from '@misc/context';
+import { Movies } from '@utils/scrapers/animeMovie';
+import { LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage } from '@utils/scrapers/film';
+import React, { useMemo, useState } from 'react';
 
 export default function HomeContext({ children }: { children: React.ReactNode }) {
   const [paramsState, setParamsState] = useState<EpisodeBaruHome>({

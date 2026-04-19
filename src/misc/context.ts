@@ -1,8 +1,8 @@
+import { EpisodeBaruHome } from '@/types/anime';
+import { Movies } from '@utils/scrapers/animeMovie';
+import { LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage } from '@utils/scrapers/film';
 import { Dispatch, SetStateAction, createContext } from 'react';
-import { EpisodeBaruHome } from '../types/anime';
-import { Movies } from '../utils/scrapers/animeMovie';
-import { LatestComicsRelease } from '../utils/scrapers/comicsv2';
-import { FilmHomePage } from '../utils/scrapers/film';
 
 export const EpisodeBaruHomeContext = createContext<{
   paramsState?: EpisodeBaruHome;

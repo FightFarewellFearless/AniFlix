@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, View } from 'react-native';
 import { Appbar, Button, Portal, ProgressBar, Snackbar, useTheme } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import { RootStackNavigator } from '../../types/navigation';
-import DialogManager from '../../utils/dialogManager';
-import setHistory from '../../utils/historyControl';
-import { getComicsReading } from '../../utils/scrapers/comicsv2';
-import { getKomikuReading } from '../../utils/scrapers/komiku';
+
+import { RootStackNavigator } from '@/types/navigation';
+import DialogManager from '@utils/dialogManager';
+import setHistory from '@utils/historyControl';
+import { getComicsReading } from '@utils/scrapers/comicsv2';
+import { getKomikuReading } from '@utils/scrapers/komiku';
 import {
   ComicsBottomBar,
   FullscreenExitButton,

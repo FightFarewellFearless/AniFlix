@@ -21,19 +21,20 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { version as appVersion, OTAJSVersion } from '../../../package.json';
-import runningText from '../../assets/runningText.json';
-import defaultDatabase from '../../misc/defaultDatabaseValue.json';
-import { EpisodeBaruHome } from '../../types/anime';
-import { SetDatabaseTarget } from '../../types/databaseTarget';
-import { RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '../../utils/DatabaseManager';
-import deviceUserAgent from '../../utils/deviceUserAgent';
-import { AnimeMovieWebView } from '../../utils/scrapers/animeMovie';
-import { fetchLatestDomain } from '../../utils/scrapers/animeSeries';
-import { Github, JoinDiscord } from '../misc/Social';
-// import { Comics1WebView } from '../../utils/scrapers/comics1';
+
+import { EpisodeBaruHome } from '@/types/anime';
+import { SetDatabaseTarget } from '@/types/databaseTarget';
+import { RootStackNavigator } from '@/types/navigation';
+import runningText from '@assets/runningText.json';
+import { Github, JoinDiscord } from '@component/misc/Social';
+import defaultDatabase from '@misc/defaultDatabaseValue.json';
+import { version as appVersion, OTAJSVersion } from '@root/package.json';
+import AnimeAPI from '@utils/AnimeAPI';
+import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '@utils/DatabaseManager';
+import deviceUserAgent from '@utils/deviceUserAgent';
+import { AnimeMovieWebView } from '@utils/scrapers/animeMovie';
+import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
+// import { Comics1WebView } from '@utils/scrapers/comics1';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 

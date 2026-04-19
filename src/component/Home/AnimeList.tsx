@@ -43,33 +43,29 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { runOnJS } from 'react-native-worklets';
-import { OTAJSVersion, version } from '../../../package.json';
-import runningText from '../../assets/runningText.json';
-import useGlobalStyles from '../../assets/style';
+
+import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '@/types/anime';
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import runningText from '@assets/runningText.json';
+import useGlobalStyles from '@assets/style';
+import Announcment from '@component/misc/Announcement';
+import { ListAnimeComponent } from '@component/misc/ListAnimeComponent';
+import ReText from '@component/misc/ReText';
+import Skeleton from '@component/misc/Skeleton';
+import { Github, JoinDiscord } from '@component/misc/Social';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
   SeriesListHomeContext,
-} from '../../misc/context';
-import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
-import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import {
-  FilmHomePage,
-  getHomepage,
-  getLatestMovies,
-  getLatestSeries,
-} from '../../utils/scrapers/film';
-import { Github, JoinDiscord } from '../misc/Social';
-import Announcment from '../misc/Announcement';
-import { ListAnimeComponent } from '../misc/ListAnimeComponent';
-import ReText from '../misc/ReText';
-import Skeleton from '../misc/Skeleton';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+} from '@misc/context';
+import { OTAJSVersion, version } from '@root/package.json';
+import AnimeAPI from '@utils/AnimeAPI';
+import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;

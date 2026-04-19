@@ -1,4 +1,3 @@
-import { ToastAndroid } from 'react-native';
 import {
   AniDetail,
   AniStreaming,
@@ -6,7 +5,8 @@ import {
   listAnimeTypeList,
   NewAnimeList,
   SearchAnime,
-} from '../types/anime';
+} from '@/types/anime';
+import { ToastAndroid } from 'react-native';
 import { setWebViewOpen } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 import {

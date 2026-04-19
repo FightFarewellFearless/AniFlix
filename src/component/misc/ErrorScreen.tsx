@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackNavigator } from '../../types/navigation';
+import { RootStackNavigator } from '@/types/navigation';
 import FallbackComponent from './FallbackErrorBoundary';
 import SafeAreaWrapper from './SafeAreaWrapper';
 

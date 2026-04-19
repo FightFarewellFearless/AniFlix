@@ -1,6 +1,6 @@
+import SafeAreaWrapper from '@component/misc/SafeAreaWrapper';
+import SuspenseLoading from '@component/misc/SuspenseLoading';
 import React from 'react';
-import SafeAreaWrapper from '../component/misc/SafeAreaWrapper';
-import SuspenseLoading from '../component/misc/SuspenseLoading';
 
 export const withSuspenseAndSafeArea = (
   Component: React.ComponentType<any>,

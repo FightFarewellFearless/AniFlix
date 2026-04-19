@@ -1,9 +1,9 @@
-import watchLaterJSON from '../types/watchLaterJSON';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import { ToastAndroid } from 'react-native';
 import { DatabaseManager } from './DatabaseManager';
+import setHistory from './historyControl';
 import { FilmDetail_Stream } from './scrapers/film';
 import controlWatchLater from './watchLaterControl';
-import { ToastAndroid } from 'react-native';
-import setHistory from './historyControl';
 
 export async function setFilmStreamHistory(
   link: string,

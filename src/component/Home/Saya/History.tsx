@@ -27,13 +27,14 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import URL from 'url';
-import useGlobalStyles, { darkText } from '../../../assets/style';
-import { HistoryItemKey } from '../../../types/databaseTarget';
-import { HistoryJSON } from '../../../types/historyJSON';
-import { SayaDrawerNavigator } from '../../../types/navigation';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
-import DialogManager from '../../../utils/dialogManager';
-import ImageLoading from '../../misc/ImageLoading';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { SayaDrawerNavigator } from '@/types/navigation';
+import useGlobalStyles, { darkText } from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
 
 export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
 

@@ -43,10 +43,11 @@ import Reanimated, {
   withTiming,
 } from 'react-native-reanimated';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
-import AniFlixRuntime from '../../misc/AniFlixRuntime';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import deviceUserAgent from '../../utils/deviceUserAgent';
-import ReText from '../misc/ReText';
+
+import ReText from '@component/misc/ReText';
+import AniFlixRuntime from '@misc/AniFlixRuntime';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import deviceUserAgent from '@utils/deviceUserAgent';
 import SeekBar from './SeekBar';
 
 type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;

@@ -3,12 +3,12 @@ import { useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import deviceUserAgent from '../deviceUserAgent';
+import deviceUserAgent from '@utils/deviceUserAgent';
 
 import cheerio from 'cheerio';
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/core';
-import { unpack } from '../unpacker';
+import { unpack } from '@utils/unpacker';
 
 export interface Movies {
   title: string;

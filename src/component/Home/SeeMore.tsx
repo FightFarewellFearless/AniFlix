@@ -10,20 +10,21 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { NewAnimeList } from '@/types/anime';
+import { RootStackNavigator } from '@/types/navigation';
+import { ListAnimeComponent } from '@component/misc/ListAnimeComponent';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
   SeriesListHomeContext,
-} from '../../misc/context';
-import { NewAnimeList } from '../../types/anime';
-import { RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
-import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import { FilmHomePage, getLatestMovies, getLatestSeries } from '../../utils/scrapers/film';
-import { ListAnimeComponent } from '../misc/ListAnimeComponent';
+} from '@misc/context';
+import AnimeAPI from '@utils/AnimeAPI';
+import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;

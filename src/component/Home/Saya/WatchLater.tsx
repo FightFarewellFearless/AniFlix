@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
 import { FlashList, FlashListRef, ListRenderItem } from '@shopify/flash-list';
@@ -5,15 +6,15 @@ import moment from 'moment';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import URL from 'url';
-import useGlobalStyles from '../../../assets/style';
-import { SayaDrawerNavigator } from '../../../types/navigation';
-import watchLaterJSON from '../../../types/watchLaterJSON';
-import { useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
-import DialogManager from '../../../utils/dialogManager';
-import controlWatchLater from '../../../utils/watchLaterControl';
-import ImageLoading from '../../misc/ImageLoading';
+
+import { SayaDrawerNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type Props = DrawerScreenProps<SayaDrawerNavigator, 'WatchLater'>;
 

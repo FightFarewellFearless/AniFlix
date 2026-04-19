@@ -1,7 +1,7 @@
-import { MovieDetail, MovieStreamingDetail } from '../utils/scrapers/animeMovie';
-import { ComicsDetail, ComicsReading } from '../utils/scrapers/comicsv2';
-import { FilmDetail_Stream, FilmDetails_Detail } from '../utils/scrapers/film';
-import { KomikuDetail, KomikuReading } from '../utils/scrapers/komiku';
+import { MovieDetail, MovieStreamingDetail } from '@utils/scrapers/animeMovie';
+import { ComicsDetail, ComicsReading } from '@utils/scrapers/comicsv2';
+import { FilmDetail_Stream, FilmDetails_Detail } from '@utils/scrapers/film';
+import { KomikuDetail, KomikuReading } from '@utils/scrapers/komiku';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {

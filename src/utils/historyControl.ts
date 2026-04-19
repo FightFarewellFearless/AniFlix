@@ -1,6 +1,6 @@
-import { HistoryItemKey } from '../types/databaseTarget';
-import { HistoryAdditionalData, HistoryJSON } from '../types/historyJSON';
-import { RootStackNavigator } from '../types/navigation';
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryAdditionalData, HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
 import { DatabaseManager } from './DatabaseManager';
 import { ComicsReading } from './scrapers/comicsv2';
 import { FilmDetail_Stream } from './scrapers/film';

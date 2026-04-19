@@ -1,10 +1,10 @@
 // NavigationService.ts
+import type { RootStackNavigator } from '@/types/navigation';
 import {
   CommonActions,
   createNavigationContainerRef,
   StackActions,
 } from '@react-navigation/native';
-import type { RootStackNavigator } from '../types/navigation';
 
 export const navigationRef = createNavigationContainerRef<RootStackNavigator>();
 

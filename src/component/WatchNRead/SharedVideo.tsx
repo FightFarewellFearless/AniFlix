@@ -16,9 +16,10 @@ import ReAnimated, {
   withTiming,
 } from 'react-native-reanimated';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import useGlobalStyles, { darkText } from '../../assets/style';
-import { useBackHandler } from '../../hooks/useBackHandler';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+
+import useGlobalStyles, { darkText } from '@assets/style';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+import { useBackHandler } from '@hooks/useBackHandler';
 
 export function LoadingModal({
   isLoading,

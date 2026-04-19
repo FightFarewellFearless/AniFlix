@@ -1,6 +1,6 @@
+import useGlobalStyles from '@assets/style';
 import { Suspense } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
-import useGlobalStyles from '../../assets/style';
 
 function Loading() {
   const globalStyles = useGlobalStyles();

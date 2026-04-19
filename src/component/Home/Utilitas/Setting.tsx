@@ -28,20 +28,21 @@ import {
 } from 'react-native-paper';
 import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
-import defaultDatabaseValue from '../../../misc/defaultDatabaseValue.json';
-import { HistoryItemKey } from '../../../types/databaseTarget';
-import { HistoryJSON } from '../../../types/historyJSON';
-import { UtilsStackNavigator } from '../../../types/navigation';
-import watchLaterJSON from '../../../types/watchLaterJSON';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { UtilsStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import { HistoryDatabaseCache } from '@component/Home/Saya/History';
+import ReText from '@component/misc/ReText';
+import defaultDatabaseValue from '@misc/defaultDatabaseValue.json';
 import {
   DANGER_MIGRATE_OLD_HISTORY,
   DatabaseManager,
   useKeyValueIfFocused,
   useModifiedKeyValueIfFocused,
-} from '../../../utils/DatabaseManager';
-import DialogManager from '../../../utils/dialogManager';
-import ReText from '../../misc/ReText';
-import { HistoryDatabaseCache } from '../Saya/History';
+} from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
 
 const defaultDatabaseValueKeys = Object.keys(defaultDatabaseValue);
 

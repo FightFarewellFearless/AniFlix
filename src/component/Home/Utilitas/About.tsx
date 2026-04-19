@@ -11,11 +11,12 @@ import {
   TouchableRipple,
   useTheme,
 } from 'react-native-paper';
-import appPackage from '../../../../package.json';
-import { JoinDiscord } from '../../misc/Social';
-import DarkOverlay from '../../misc/DarkOverlay';
 
-const tokyo = require('../../../assets/tokyo.jpg');
+import DarkOverlay from '@component/misc/DarkOverlay';
+import { JoinDiscord } from '@component/misc/Social';
+import appPackage from '@root/package.json';
+
+const tokyo = require('@assets/tokyo.jpg');
 
 const allDependencies = Object.entries({
   ...appPackage.dependencies,

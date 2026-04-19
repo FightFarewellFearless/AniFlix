@@ -1,9 +1,10 @@
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+
+import deviceUserAgent from '@utils/deviceUserAgent';
+import { BASE_URL } from '@utils/scrapers/comics1';
 import { Comics1SessionFetcherContext } from './comics1sessionfetchercontext';
-import deviceUserAgent from '../deviceUserAgent';
-import { BASE_URL } from '../scrapers/comics1';
 
 export default function Comics1SessionWebView() {
   const webviewRef = useRef<WebView>(null);

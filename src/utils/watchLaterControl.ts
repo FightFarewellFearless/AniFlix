@@ -1,4 +1,4 @@
-import watchLaterJSON from '../types/watchLaterJSON';
+import watchLaterJSON from '@/types/watchLaterJSON';
 import { DatabaseManager } from './DatabaseManager';
 
 function controlWatchLater(action: 'add', data: watchLaterJSON): void;

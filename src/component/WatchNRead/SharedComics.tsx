@@ -5,7 +5,8 @@ import { SystemBars } from 'react-native-edge-to-edge';
 import { Button, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import WebView from 'react-native-webview';
-import { useBackHandler } from '../../hooks/useBackHandler';
+
+import { useBackHandler } from '@hooks/useBackHandler';
 
 export function useComicsFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(false);

@@ -1,6 +1,8 @@
 import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import { useFocusEffect } from '@react-navigation/core';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import cheerio from 'cheerio';
 import { VideoView } from 'expo-video';
 import React, {
@@ -14,35 +16,34 @@ import React, {
 } from 'react';
 import { Pressable, ScrollView, Text, ToastAndroid, useColorScheme, View } from 'react-native';
 import Orientation from 'react-native-orientation-locker';
+import { Button, useTheme } from 'react-native-paper';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import url from 'url';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
-
-import useGlobalStyles, { darkText, lightText } from '../../assets/style';
-import useDownloadAnimeFunction from '../../utils/downloadAnime';
-import setHistory from '../../utils/historyControl';
-
-import { useFocusEffect } from '@react-navigation/core';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Button, useTheme } from 'react-native-paper';
 import WebView from 'react-native-webview';
-import { useBackHandler } from '../../hooks/useBackHandler';
-import { AniDetail } from '../../types/anime';
-import { RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { useKeyValueIfFocused } from '../../utils/DatabaseManager';
-import deviceUserAgent from '../../utils/deviceUserAgent';
-import DialogManager from '../../utils/dialogManager';
+import url from 'url';
+
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+
+import useGlobalStyles, { darkText, lightText } from '@assets/style';
+import useDownloadAnimeFunction from '@utils/downloadAnime';
+import setHistory from '@utils/historyControl';
+
+import { AniDetail } from '@/types/anime';
+import { RootStackNavigator } from '@/types/navigation';
+import Skeleton from '@component/misc/Skeleton';
+import VideoPlayer, { PlayerRef } from '@component/VideoPlayer';
+import { useBackHandler } from '@hooks/useBackHandler';
+import AnimeAPI from '@utils/AnimeAPI';
+import { useKeyValueIfFocused } from '@utils/DatabaseManager';
+import deviceUserAgent from '@utils/deviceUserAgent';
+import DialogManager from '@utils/dialogManager';
 import {
   getMovieDetail,
   getRawDataIfAvailable,
   getStreamingDetail,
   MovieDetail,
-} from '../../utils/scrapers/animeMovie';
-import { throttle } from '../../utils/throttle';
-import Skeleton from '../misc/Skeleton';
-import VideoPlayer, { PlayerRef } from '../VideoPlayer';
+} from '@utils/scrapers/animeMovie';
+import { throttle } from '@utils/throttle';
 import {
   LoadingModal,
   TimeInfo,

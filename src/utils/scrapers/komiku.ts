@@ -1,7 +1,8 @@
 import cheerio from 'cheerio';
 import he from 'he';
 import { ToastAndroid } from 'react-native';
-import deviceUserAgent from '../deviceUserAgent';
+
+import deviceUserAgent from '@utils/deviceUserAgent';
 
 export const __ALIAS = 'komiku';
 export const DOMAIN = __ALIAS + '.org';

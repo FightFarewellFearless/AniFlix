@@ -25,20 +25,21 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import proTips from '../../assets/proTips.json';
-import useGlobalStyles from '../../assets/style';
-import { SearchAnime, listAnimeTypeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
-import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
-import { ComicsSearch, comicsSearch } from '../../utils/scrapers/comicsv2';
-import { SearchResult, searchFilm } from '../../utils/scrapers/film';
-import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '../../utils/scrapers/komiku';
-import DarkOverlay from '../misc/DarkOverlay';
-import ImageLoading from '../misc/ImageLoading';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+
+import { SearchAnime, listAnimeTypeList } from '@/types/anime';
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import proTips from '@assets/proTips.json';
+import useGlobalStyles from '@assets/style';
+import DarkOverlay from '@component/misc/DarkOverlay';
+import ImageLoading from '@component/misc/ImageLoading';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+import AnimeAPI from '@utils/AnimeAPI';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import { Movies, searchMovie } from '@utils/scrapers/animeMovie';
+import { ComicsSearch, comicsSearch } from '@utils/scrapers/comicsv2';
+import { SearchResult, searchFilm } from '@utils/scrapers/film';
+import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '@utils/scrapers/komiku';
 import { RenderScrollComponent } from './AnimeList';
 type SectionHeader = { type: 'header'; title: string };
 type ComicItem = (ComicsSearch | KomikuSearch) & { source?: string };

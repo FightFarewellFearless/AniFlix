@@ -2,8 +2,9 @@ import { COMICS1_AUTH } from '@env';
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import deviceUserAgent from '../deviceUserAgent';
-import { BASE_URL, Cookie } from '../scrapers/comics1';
+
+import deviceUserAgent from '@utils/deviceUserAgent';
+import { BASE_URL, Cookie } from '@utils/scrapers/comics1';
 import { Comics1ChapterSessionFetcherContext } from './comics1chaptersessionfetchercontext';
 
 export default function Comics1ChapterSessionWebView() {
