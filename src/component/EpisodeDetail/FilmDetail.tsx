@@ -64,6 +64,10 @@ function useCompatibleData(rawData: FilmDetails_Detail | FilmDetail_Stream) {
             additionalInfo: {
               Rating: rawData.rating,
               ['Resolusi']: rawData.variants?.map(a => a.name).join(', '),
+              ['Director']: rawData.director,
+              ['Bahasa']: rawData.originalLanguage,
+              ['Negara']: rawData.country,
+              ['Kualitas']: rawData.quality,
             },
           },
           ...rawData,
@@ -387,16 +391,18 @@ const FilmDetailHeader = memo(
 
           <View style={styles.secondaryInfoContainer}>
             <View style={styles.additionalInfo}>
-              {Object.entries(data.info.additionalInfo).map(([key, value]) => {
-                return (
-                  <Surface elevation={2} key={key} style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="info-circle" /> {key}:{' '}
-                      {value}
-                    </Text>
-                  </Surface>
-                );
-              })}
+              {Object.entries(data.info.additionalInfo)
+                .filter(a => Boolean(a[1]))
+                .map(([key, value]) => {
+                  return (
+                    <Surface elevation={2} key={key} style={styles.additionalInfoTextSurface}>
+                      <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                        <Icon color={styles.additionalInfoText.color} name="info-circle" /> {key}:{' '}
+                        {value}
+                      </Text>
+                    </Surface>
+                  );
+                })}
               <Surface elevation={2} style={styles.additionalInfoTextSurface}>
                 <Text style={[globalStyles.text, styles.additionalInfoText]}>
                   <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
