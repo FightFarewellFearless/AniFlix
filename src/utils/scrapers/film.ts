@@ -327,6 +327,48 @@ interface JeniusReturnData {
   subtitleTrackUrl?: string;
 }
 
+interface MajorPlayAPIReturnData {
+  expiresAt: number;
+  hlsUrl: string;
+  isLegacy: boolean;
+  mpdUrl: string;
+  primaryUrl: string;
+  subtitles: Subtitle[];
+}
+
+interface Subtitle {
+  label: string;
+  lang: string;
+  path: string;
+}
+
+async function majorplayGetHLS(urlObj: URL, signal?: AbortSignal): Promise<JeniusReturnData> {
+  const videoId = urlObj.pathname.split('/').at(-1)!;
+  const response: MajorPlayAPIReturnData = await fetchPage(
+    'https://e2e.majorplay.net/api/token/viewer?videoId=' + videoId,
+    {
+      signal,
+      asJson: true,
+      headers: {
+        'user-agent': deviceUserAgent,
+        referer: 'https://e2e.majorplay.net/embed/' + videoId,
+      },
+      method: 'GET',
+    },
+  );
+  return {
+    hls: true,
+    videoImage: null,
+    videoSource: response.primaryUrl,
+    securedLink: response.hlsUrl,
+    downloadLinks: [],
+    attachmentLinks: [],
+    ck: '',
+    subtitleTrackUrl:
+      response.subtitles.find(a => a.lang === 'id')?.path ?? response.subtitles[0].path,
+  };
+}
+
 async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<JeniusReturnData> {
   const html: string = await fetchPage(url, {
     headers: {
@@ -584,9 +626,14 @@ async function getFilmDetails(
       onProgress,
     );
     const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
-    const jeniusUrl = extractDecryptedIframe(embedHtml);
-
-    const jeniusPlay = await jeniusPlayGetHLS(jeniusUrl, signal);
+    const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
+    const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
+    let jeniusPlay: JeniusReturnData;
+    if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
+      jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
+    } else {
+      jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
+    }
 
     let variants: HlsVariant[] = [];
     try {
@@ -642,9 +689,14 @@ async function getFilmDetails(
     onProgress,
   );
   const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
-  const jeniusUrl = extractDecryptedIframe(embedHtml);
-
-  const jeniusPlay = await jeniusPlayGetHLS(jeniusUrl, signal);
+  const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
+  const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
+  let jeniusPlay: JeniusReturnData;
+  if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
+    jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
+  } else {
+    jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
+  }
 
   let variants: HlsVariant[] = [];
   try {
