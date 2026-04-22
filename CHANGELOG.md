@@ -1,3 +1,10 @@
+# v1.2.1_JS-6 (22-April-2026)
+## Ditambahkan
+- Informasi tambahan di detail film
+## Diperbaiki
+- Error pada streaming film
+## Perubahan lain
+- Refactor cukup besar di codebase aplikasi agar lebih mudah dirawat dan dibaca
 # v1.2.1_JS-5 (16-April-2026)
 ## Ditambahkan
 - Pilihan mode content fit untuk video player
