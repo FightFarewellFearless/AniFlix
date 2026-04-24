@@ -365,7 +365,7 @@ async function majorplayGetHLS(urlObj: URL, signal?: AbortSignal): Promise<Jeniu
     attachmentLinks: [],
     ck: '',
     subtitleTrackUrl:
-      response.subtitles.find(a => a.lang === 'id')?.path ?? response.subtitles[0].path,
+      response.subtitles.find(a => a.lang === 'id')?.path ?? response.subtitles[0]?.path,
   };
 }
 
