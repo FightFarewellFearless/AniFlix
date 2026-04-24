@@ -74,8 +74,6 @@ function Video_Film(props: Props) {
 
   const synopsisTextRef = useAnimatedRef<Text>();
 
-  const filmDetail = props.route.params.data;
-
   const updateHistory = useMemo(
     () =>
       throttle((currentTime: number, stateData: RootStackNavigator['Video_Film']['data']) => {
@@ -257,12 +255,7 @@ function Video_Film(props: Props) {
   );
   useLayoutEffect(() => {
     measureAndUpdateSynopsisLayout();
-  }, [
-    filmDetail?.synopsis,
-    filmDetail?.rating,
-    filmDetail?.genres,
-    measureAndUpdateSynopsisLayout,
-  ]);
+  }, [data?.synopsis, data?.rating, data?.genres, measureAndUpdateSynopsisLayout]);
 
   const batteryAndClock = (
     <>
@@ -474,29 +467,29 @@ function Video_Film(props: Props) {
             {data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')}
           </Text>
 
-          {filmDetail !== undefined ? (
+          {data !== undefined ? (
             <ReAnimated.Text
               ref={synopsisTextRef}
               style={[globalStyles.text, styles.infoSinopsis, infoContainerStyle]}
               numberOfLines={!showSynopsis && hadSynopsisMeasured ? 2 : undefined}>
-              {filmDetail?.synopsis || 'Tidak ada sinopsis'}
+              {data?.synopsis || 'Tidak ada sinopsis'}
             </ReAnimated.Text>
           ) : (
             <Skeleton stopOnBlur={false} width={150} height={20} />
           )}
-          {!hadSynopsisMeasured && filmDetail !== undefined && (
+          {!hadSynopsisMeasured && data !== undefined && (
             <Skeleton stopOnBlur={false} width={150} height={20} />
           )}
 
           <View style={[styles.infoGenre]}>
-            {filmDetail === undefined ? (
+            {data === undefined ? (
               <View style={{ gap: 5, flexDirection: 'row' }}>
                 <Skeleton stopOnBlur={false} width={50} height={20} />
                 <Skeleton stopOnBlur={false} width={50} height={20} />
                 <Skeleton stopOnBlur={false} width={50} height={20} />
               </View>
             ) : (
-              filmDetail.genres.map(genre => (
+              data.genres.map(genre => (
                 <Text key={genre} style={[globalStyles.text, styles.genre]}>
                   {genre}
                 </Text>
@@ -510,16 +503,16 @@ function Video_Film(props: Props) {
                 globalStyles.text,
                 styles.status,
                 {
-                  backgroundColor: filmDetail?.next || filmDetail?.prev ? 'green' : 'red',
+                  backgroundColor: data?.next || data?.prev ? 'green' : 'red',
                 },
               ]}>
-              {filmDetail?.next || filmDetail?.prev ? 'TV Series' : 'Film'}
+              {data?.next || data?.prev ? 'TV Series' : 'Film'}
             </Text>
             <Text style={[{ color: lightText }, styles.releaseYear]}>
-              <Icon name="calendar" color={styles.releaseYear.color} /> {filmDetail?.releaseDate}
+              <Icon name="calendar" color={styles.releaseYear.color} /> {data?.releaseDate}
             </Text>
             <Text style={[globalStyles.text, styles.rating]}>
-              <Icon name="star" color="black" /> {filmDetail?.rating}
+              <Icon name="star" color="black" /> {data?.rating}
             </Text>
           </View>
 

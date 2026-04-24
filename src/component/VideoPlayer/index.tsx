@@ -159,7 +159,7 @@ function VideoPlayer({
   const [subtitles, setSubtitles] = useState<Awaited<ReturnType<typeof parseSubtitles>> | null>(
     null,
   );
-  const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
+  const [currentSubtitle, setCurrentSubtitle] = useState<string[]>([]);
   const [subtitleError, setSubtitleError] = useState(false);
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
@@ -173,6 +173,8 @@ function VideoPlayer({
       async function fetchSubtitles(url: string) {
         setSubtitleError(false);
         try {
+          setSubtitles(null);
+          setCurrentSubtitle([]);
           const response = await fetch(url, {
             signal: abortController.signal,
           });
@@ -247,12 +249,14 @@ function VideoPlayer({
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
-    const currentSub = subtitles?.find(subtitle => {
-      const start = Number(subtitle.startTime);
-      const end = Number(subtitle.endTime);
-      return e.currentTime >= start && e.currentTime <= end;
-    });
-    setCurrentSubtitle(currentSub?.text || '');
+    const currentSub = subtitles
+      ?.filter(subtitle => {
+        const start = Number(subtitle.startTime);
+        const end = Number(subtitle.endTime);
+        return e.currentTime >= start && e.currentTime <= end;
+      })
+      .map(a => a.text);
+    setCurrentSubtitle(currentSub || []);
     onDurationChange?.(e.currentTime);
   });
   useImperativeHandle(
@@ -398,24 +402,53 @@ function VideoPlayer({
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Text
-            style={{
-              marginHorizontal: 20,
-              backgroundColor:
-                currentSubtitle === '' || !isSubtitleEnabled ? undefined : '#0000006b',
-              fontSize: isFullscreen ? 24 : 14,
-              textAlign: 'center',
-              color: 'white',
-              textShadowColor: 'black',
-              textShadowOffset: { width: -1, height: 1 },
-              textShadowRadius: 1,
-            }}>
-            {isSubtitleEnabled
-              ? subtitles === null && !subtitleError && subtitleURL
-                ? 'Memuat Subtitle...'
-                : currentSubtitle
-              : ''}
-          </Text>
+          <View style={{ gap: 2 }}>
+            {isSubtitleEnabled ? (
+              subtitles === null && !subtitleError && subtitleURL ? (
+                <Text
+                  style={{
+                    backgroundColor:
+                      currentSubtitle.length === 0 || !isSubtitleEnabled ? undefined : '#0000006b',
+                    fontSize: isFullscreen ? 22 : 12,
+                    textAlign: 'center',
+                    color: 'white',
+                    textShadowColor: 'black',
+                    textShadowOffset: { width: -1, height: 1 },
+                    textShadowRadius: 1,
+                  }}>
+                  Memuat Subtitle...
+                </Text>
+              ) : (
+                currentSubtitle.map((text, i) => {
+                  const totalCharLength = currentSubtitle.reduce(
+                    (acc, curr) => acc + curr.length,
+                    0,
+                  );
+                  return (
+                    <Text
+                      style={{
+                        backgroundColor:
+                          currentSubtitle.length === 0 || !isSubtitleEnabled
+                            ? undefined
+                            : '#0000006b',
+                        fontSize: calculateSubtitleCharSize(
+                          isFullscreen ? 24 : 14,
+                          totalCharLength,
+                        ),
+                        textAlign: 'center',
+                        color: 'white',
+                        textShadowColor: 'black',
+                        textShadowOffset: { width: -1, height: 1 },
+                        textShadowRadius: 1,
+                      }}
+                      key={text + i}>
+                      {text}
+                    </Text>
+                  );
+                })
+              )
+            ) : undefined}
+          </View>
         </View>
         <Reanimated.View
           pointerEvents="box-none"
@@ -841,7 +874,7 @@ export const parseSubtitles = async (raw: string) => {
           res.push({
             startTime: toSec(m[1]),
             endTime: toSec(m[2]),
-            text: finalTxt,
+            text: finalTxt.replaceAll('\\h', ' '),
           });
         }
       }
@@ -881,3 +914,10 @@ const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
 
   return Buffer.from(buffer).toString('utf8');
 };
+
+function calculateSubtitleCharSize(size: number, totalLength: number, limit = 150) {
+  if (totalLength <= limit) {
+    return size;
+  }
+  return size * (limit / totalLength);
+}
