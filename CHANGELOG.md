@@ -1,3 +1,6 @@
+# v1.2.1_JS-8 (24-April-2026)
+## Diperbaiki
+- [Film] Error saat subtitle tidak tersedia
 # v1.2.1_JS-7 (24-April-2026)
 ## Ditingkatkan
 - Memperbaiki sinopsis episode series yang salah
