@@ -1,3 +1,8 @@
+# v1.2.1_JS-7 (24-April-2026)
+## Ditingkatkan
+- Memperbaiki sinopsis episode series yang salah
+- Menghandle subtitle yang muncul di waktu yang bersamaan
+- Memunculkan teks memuat subtitle saat berganti episode series
 # v1.2.1_JS-6 (22-April-2026)
 ## Ditambahkan
 - Informasi tambahan di detail film
