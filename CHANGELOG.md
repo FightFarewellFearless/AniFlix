@@ -1,3 +1,6 @@
+# v1.2.1_JS-9 (26-April-2026)
+## Diperbaiki
+- [Film] Error pada seluruh data film
 # v1.2.1_JS-8 (24-April-2026)
 ## Diperbaiki
 - [Film] Error saat subtitle tidak tersedia

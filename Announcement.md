@@ -1,1 +1,0 @@
-mohon maaf, semua data film saat ini sedang bermasalah, developer akan memperbaikinya secepatnya
