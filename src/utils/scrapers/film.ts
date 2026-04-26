@@ -1,28 +1,15 @@
-import cheerio from 'cheerio';
-import {
-  createSynchronizable,
-  createWorkletRuntime,
-  runOnRuntimeAsync,
-} from 'react-native-worklets';
-
-import { unpack } from '@utils/unpacker';
 import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
-import AniFlixRuntime from '@misc/AniFlixRuntime';
 import deviceUserAgent from '@utils/deviceUserAgent';
-import { NitroModules } from 'react-native-nitro-modules';
-import crypto from 'react-native-quick-crypto';
-import type { Hash as NativeHash } from 'react-native-quick-crypto/src/specs/hash.nitro';
-import type { Utils } from 'react-native-quick-crypto/src/specs/utils.nitro';
-import { ChallengeResponse, SolveChallengeResponse } from './filmTypes/challenge';
+import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
 import { FilmMovieDetailsResponse } from './filmTypes/movie';
+import { RedeemApi } from './filmTypes/redeemApi';
 import { SearchFilmResponse } from './filmTypes/searchFilm';
 import { SeriesDetailsResponse } from './filmTypes/series';
 import { SeriesEpisodeResponse } from './filmTypes/seriesEpisode';
 import { SeriesSeasonResponse } from './filmTypes/seriesSeason';
-const cryptoUtils = NitroModules.createHybridObject<Utils>('Utils');
 
 type FilmHomePage = Array<{
   title: string;
@@ -55,221 +42,221 @@ export type HashProgressData = {
   canSpeedUp?: boolean;
   isSpeedingUp?: boolean;
 };
+// TODO: Check this in about a month or two, and plan to remove quick crypto entirely and uninstall it depending on future needs
+// async function solveChallenge(
+//   challenge: string,
+//   difficulty: number,
+//   signal?: AbortSignal,
+//   onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+// ): Promise<number | undefined> {
+//   if (signal?.aborted) return undefined;
 
-async function solveChallenge(
-  challenge: string,
-  difficulty: number,
-  signal?: AbortSignal,
-  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
-): Promise<number | undefined> {
-  if (signal?.aborted) return undefined;
+//   let interval: ReturnType<typeof setInterval> | undefined;
+//   let elapsed = 0;
+//   let speedUpActive = false;
 
-  let interval: ReturnType<typeof setInterval> | undefined;
-  let elapsed = 0;
-  let speedUpActive = false;
+//   const shouldStop = createSynchronizable(false);
+//   const shouldSpeedUp = createSynchronizable(false);
 
-  const shouldStop = createSynchronizable(false);
-  const shouldSpeedUp = createSynchronizable(false);
+//   const triggerSpeedUp = () => {
+//     if (!speedUpActive) {
+//       speedUpActive = true;
+//       shouldSpeedUp.setBlocking(true);
+//       if (onProgress) {
+//         onProgress({
+//           difficulty,
+//           elapsed,
+//           isCompleted: false,
+//           canSpeedUp: false,
+//           isSpeedingUp: true,
+//         });
+//       }
+//     }
+//   };
 
-  const triggerSpeedUp = () => {
-    if (!speedUpActive) {
-      speedUpActive = true;
-      shouldSpeedUp.setBlocking(true);
-      if (onProgress) {
-        onProgress({
-          difficulty,
-          elapsed,
-          isCompleted: false,
-          canSpeedUp: false,
-          isSpeedingUp: true,
-        });
-      }
-    }
-  };
+//   if (onProgress) {
+//     onProgress(
+//       { difficulty, elapsed, isCompleted: false, canSpeedUp: false, isSpeedingUp: false },
+//       triggerSpeedUp,
+//     );
+//     interval = setInterval(() => {
+//       elapsed++;
+//       if (onProgress) {
+//         onProgress(
+//           {
+//             difficulty,
+//             elapsed,
+//             isCompleted: false,
+//             canSpeedUp: elapsed >= 5 && !speedUpActive,
+//             isSpeedingUp: speedUpActive,
+//           },
+//           triggerSpeedUp,
+//         );
+//       }
+//     }, 1000);
+//   }
 
-  if (onProgress) {
-    onProgress(
-      { difficulty, elapsed, isCompleted: false, canSpeedUp: false, isSpeedingUp: false },
-      triggerSpeedUp,
-    );
-    interval = setInterval(() => {
-      elapsed++;
-      if (onProgress) {
-        onProgress(
-          {
-            difficulty,
-            elapsed,
-            isCompleted: false,
-            canSpeedUp: elapsed >= 5 && !speedUpActive,
-            isSpeedingUp: speedUpActive,
-          },
-          triggerSpeedUp,
-        );
-      }
-    }, 1000);
-  }
+//   const onAbort = () => {
+//     shouldStop.setBlocking(true);
+//   };
+//   if (signal) {
+//     signal.addEventListener('abort', onAbort, { once: true });
+//   }
 
-  const onAbort = () => {
-    shouldStop.setBlocking(true);
-  };
-  if (signal) {
-    signal.addEventListener('abort', onAbort, { once: true });
-  }
+//   const hashObj = NitroModules.createHybridObject<NativeHash>('Hash');
+//   const targetPrefix = '0'.repeat(difficulty);
+//   const maxAttempts = 1e7;
 
-  const hashObj = NitroModules.createHybridObject<NativeHash>('Hash');
-  const targetPrefix = '0'.repeat(difficulty);
-  const maxAttempts = 1e7;
+//   let currentNonce = 0;
+//   let finalNonce: number | undefined;
 
-  let currentNonce = 0;
-  let finalNonce: number | undefined;
+//   const singleRes = await runOnRuntimeAsync(AniFlixRuntime, () => {
+//     'worklet';
+//     for (let nonce = 0; nonce < maxAttempts; nonce++) {
+//       if (shouldStop.getDirty()) return { status: 'aborted' as const, nonce };
+//       if (shouldSpeedUp.getDirty()) return { status: 'speedup' as const, nonce };
 
-  const singleRes = await runOnRuntimeAsync(AniFlixRuntime, () => {
-    'worklet';
-    for (let nonce = 0; nonce < maxAttempts; nonce++) {
-      if (shouldStop.getDirty()) return { status: 'aborted' as const, nonce };
-      if (shouldSpeedUp.getDirty()) return { status: 'speedup' as const, nonce };
+//       const data = challenge + String(nonce);
+//       hashObj.createHash('sha256');
+//       hashObj.update(data);
+//       const hash = cryptoUtils.bufferToString(hashObj.digest('hex'), 'hex');
 
-      const data = challenge + String(nonce);
-      hashObj.createHash('sha256');
-      hashObj.update(data);
-      const hash = cryptoUtils.bufferToString(hashObj.digest('hex'), 'hex');
+//       if (hash.startsWith(targetPrefix)) {
+//         return { status: 'found' as const, nonce };
+//       }
+//     }
+//     return { status: 'failed' as const, nonce: maxAttempts };
+//   });
 
-      if (hash.startsWith(targetPrefix)) {
-        return { status: 'found' as const, nonce };
-      }
-    }
-    return { status: 'failed' as const, nonce: maxAttempts };
-  });
+//   if (singleRes?.status === 'found') {
+//     finalNonce = singleRes.nonce;
+//   } else if (singleRes?.status === 'speedup') {
+//     currentNonce = singleRes.nonce;
 
-  if (singleRes?.status === 'found') {
-    finalNonce = singleRes.nonce;
-  } else if (singleRes?.status === 'speedup') {
-    currentNonce = singleRes.nonce;
+//     const TOTAL_THREADS = 4;
+//     const extraRuntimes = Array.from({ length: TOTAL_THREADS - 1 }).map((_, i) =>
+//       createWorkletRuntime(`HashWorker_${i + 1}`),
+//     );
 
-    const TOTAL_THREADS = 4;
-    const extraRuntimes = Array.from({ length: TOTAL_THREADS - 1 }).map((_, i) =>
-      createWorkletRuntime(`HashWorker_${i + 1}`),
-    );
+//     const activeRuntimes = [AniFlixRuntime, ...extraRuntimes];
 
-    const activeRuntimes = [AniFlixRuntime, ...extraRuntimes];
+//     const promises = activeRuntimes.map(async (runtime, workerId) => {
+//       const multiHashObj = NitroModules.createHybridObject<NativeHash>('Hash');
+//       const Worker_Length = activeRuntimes.length;
 
-    const promises = activeRuntimes.map(async (runtime, workerId) => {
-      const multiHashObj = NitroModules.createHybridObject<NativeHash>('Hash');
-      const Worker_Length = activeRuntimes.length;
+//       const mRes = await runOnRuntimeAsync(runtime, () => {
+//         'worklet';
+//         for (let nonce = currentNonce + workerId; nonce < maxAttempts; nonce += Worker_Length) {
+//           if (shouldStop.getDirty()) break;
 
-      const mRes = await runOnRuntimeAsync(runtime, () => {
-        'worklet';
-        for (let nonce = currentNonce + workerId; nonce < maxAttempts; nonce += Worker_Length) {
-          if (shouldStop.getDirty()) break;
+//           const data = challenge + String(nonce);
+//           multiHashObj.createHash('sha256');
+//           multiHashObj.update(data);
+//           const hash = cryptoUtils.bufferToString(multiHashObj.digest('hex'), 'hex');
 
-          const data = challenge + String(nonce);
-          multiHashObj.createHash('sha256');
-          multiHashObj.update(data);
-          const hash = cryptoUtils.bufferToString(multiHashObj.digest('hex'), 'hex');
+//           if (hash.startsWith(targetPrefix)) {
+//             shouldStop.setBlocking(true);
+//             return nonce;
+//           }
+//         }
+//         return undefined;
+//       });
 
-          if (hash.startsWith(targetPrefix)) {
-            shouldStop.setBlocking(true);
-            return nonce;
-          }
-        }
-        return undefined;
-      });
+//       multiHashObj.dispose();
+//       return mRes;
+//     });
 
-      multiHashObj.dispose();
-      return mRes;
-    });
+//     const multiResults = await Promise.all(promises);
+//     finalNonce = multiResults.find(n => n !== undefined);
+//   }
 
-    const multiResults = await Promise.all(promises);
-    finalNonce = multiResults.find(n => n !== undefined);
-  }
+//   hashObj.dispose();
 
-  hashObj.dispose();
+//   if (signal) {
+//     signal.removeEventListener('abort', onAbort);
+//   }
+//   if (interval) clearInterval(interval);
 
-  if (signal) {
-    signal.removeEventListener('abort', onAbort);
-  }
-  if (interval) clearInterval(interval);
+//   if (onProgress) {
+//     onProgress({ difficulty, elapsed, isCompleted: true });
+//   }
+//   return finalNonce;
+// }
 
-  if (onProgress) {
-    onProgress({ difficulty, elapsed, isCompleted: true });
-  }
-  return finalNonce;
-}
+// function extractDecryptedIframe(html: string): string {
+//   const $ = cheerio.load(html);
+//   const directIframe = $('iframe').attr('src');
+//   if (directIframe) return directIframe;
 
-function extractDecryptedIframe(html: string): string {
-  const $ = cheerio.load(html);
-  const directIframe = $('iframe').attr('src');
-  if (directIframe) return directIframe;
+//   const styleText = $('style').text();
+//   const partBMatch = styleText.match(/--_[a-f0-9]+:"([a-f0-9]{32})"/i);
+//   const partB = partBMatch ? partBMatch[1] : null;
 
-  const styleText = $('style').text();
-  const partBMatch = styleText.match(/--_[a-f0-9]+:"([a-f0-9]{32})"/i);
-  const partB = partBMatch ? partBMatch[1] : null;
+//   const vaultDiv = $('div[data-a][data-p][data-v]');
+//   const partA = vaultDiv.attr('data-a');
+//   const dataP = vaultDiv.attr('data-p'); // Ciphertext (base64)
+//   const dataV = vaultDiv.attr('data-v'); // IV (base64)
 
-  const vaultDiv = $('div[data-a][data-p][data-v]');
-  const partA = vaultDiv.attr('data-a');
-  const dataP = vaultDiv.attr('data-p'); // Ciphertext (base64)
-  const dataV = vaultDiv.attr('data-v'); // IV (base64)
+//   if (partA && partB && dataP && dataV) {
+//     const keyHex = partA + partB;
+//     const key = Buffer.from(keyHex, 'hex');
+//     const iv = Buffer.from(dataV, 'base64');
+//     const encryptedData = Buffer.from(dataP, 'base64');
 
-  if (partA && partB && dataP && dataV) {
-    const keyHex = partA + partB;
-    const key = Buffer.from(keyHex, 'hex');
-    const iv = Buffer.from(dataV, 'base64');
-    const encryptedData = Buffer.from(dataP, 'base64');
+//     const authTag = encryptedData.subarray(encryptedData.length - 16) as any;
+//     const ciphertext = encryptedData.subarray(0, encryptedData.length - 16);
 
-    const authTag = encryptedData.subarray(encryptedData.length - 16) as any;
-    const ciphertext = encryptedData.subarray(0, encryptedData.length - 16);
+//     const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+//     decipher.setAuthTag(authTag);
 
-    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-    decipher.setAuthTag(authTag);
+//     const decryptedBuffer = decipher.update(ciphertext);
+//     const finalBuffer = decipher.final();
+//     const decryptedUrl = Buffer.concat([decryptedBuffer, finalBuffer]).toString('utf8');
 
-    const decryptedBuffer = decipher.update(ciphertext);
-    const finalBuffer = decipher.final();
-    const decryptedUrl = Buffer.concat([decryptedBuffer, finalBuffer]).toString('utf8');
+//     return decryptedUrl;
+//   }
 
-    return decryptedUrl;
-  }
+//   throw new Error('Gagal mengekstrak atau mendekripsi URL video dari embed.');
+// }
 
-  throw new Error('Gagal mengekstrak atau mendekripsi URL video dari embed.');
-}
+// async function getChallengeAndSolve(
+//   contentId: string,
+//   contentType: 'movie' | 'episode',
+//   slug: string,
+//   signal?: AbortSignal,
+//   onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+// ): Promise<string> {
+//   const apiUrl = `${BASE_URL}/api/watch/challenge`;
+//   const response: ChallengeResponse = await fetchPage(apiUrl, {
+//     headers: {
+//       accept: '*/*',
+//       'content-type': 'application/json',
+//       origin: BASE_URL,
+//       referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
+//     },
+//     body: JSON.stringify({ contentId, contentType }),
+//     method: 'POST',
+//     signal,
+//     asJson: true,
+//   });
+//   const { challenge, difficulty, signature } = response;
+//   const nonce = await solveChallenge(challenge, difficulty, signal, onProgress);
 
-async function getChallengeAndSolve(
-  contentId: string,
-  contentType: 'movie' | 'episode',
-  slug: string,
-  signal?: AbortSignal,
-  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
-): Promise<string> {
-  const apiUrl = `${BASE_URL}/api/watch/challenge`;
-  const response: ChallengeResponse = await fetchPage(apiUrl, {
-    headers: {
-      accept: '*/*',
-      'content-type': 'application/json',
-      origin: BASE_URL,
-      referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
-    },
-    body: JSON.stringify({ contentId, contentType }),
-    method: 'POST',
-    signal,
-    asJson: true,
-  });
-  const { challenge, difficulty, signature } = response;
-  const nonce = await solveChallenge(challenge, difficulty, signal, onProgress);
-
-  const solveResponse: SolveChallengeResponse = await fetchPage(BASE_URL + '/api/watch/solve', {
-    headers: {
-      accept: '*/*',
-      'content-type': 'application/json',
-      origin: BASE_URL,
-      referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
-    },
-    body: JSON.stringify({ challenge, nonce, signature }),
-    method: 'POST',
-    signal,
-    asJson: true,
-  });
-  global.gc?.();
-  return solveResponse.embedUrl;
-}
+//   const solveResponse: SolveChallengeResponse = await fetchPage(BASE_URL + '/api/watch/solve', {
+//     headers: {
+//       accept: '*/*',
+//       'content-type': 'application/json',
+//       origin: BASE_URL,
+//       referer: BASE_URL + `/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
+//     },
+//     body: JSON.stringify({ challenge, nonce, signature }),
+//     method: 'POST',
+//     signal,
+//     asJson: true,
+//   });
+//   global.gc?.();
+//   return solveResponse.embedUrl;
+// }
 
 function resolveMasterPlaylist(content: string, masterUrl: string): HlsVariant[] {
   if (!content.includes('#EXT-X-STREAM-INF')) return [];
@@ -316,105 +303,105 @@ async function fetchPage(url: string, opt?: RequestInit & { asJson?: boolean }) 
   return await (asJson ? response.json() : response.text());
 }
 
-interface JeniusReturnData {
-  hls: boolean;
-  videoImage: null;
-  videoSource: string;
-  securedLink: string;
-  downloadLinks: any[];
-  attachmentLinks: any[];
-  ck: string;
-  subtitleTrackUrl?: string;
-}
+// interface JeniusReturnData {
+//   hls: boolean;
+//   videoImage: null;
+//   videoSource: string;
+//   securedLink: string;
+//   downloadLinks: any[];
+//   attachmentLinks: any[];
+//   ck: string;
+//   subtitleTrackUrl?: string;
+// }
 
-interface MajorPlayAPIReturnData {
-  expiresAt: number;
-  hlsUrl: string;
-  isLegacy: boolean;
-  mpdUrl: string;
-  primaryUrl: string;
-  subtitles: Subtitle[];
-}
+// interface MajorPlayAPIReturnData {
+//   expiresAt: number;
+//   hlsUrl: string;
+//   isLegacy: boolean;
+//   mpdUrl: string;
+//   primaryUrl: string;
+//   subtitles: Subtitle[];
+// }
 
-interface Subtitle {
-  label: string;
-  lang: string;
-  path: string;
-}
+// interface Subtitle {
+//   label: string;
+//   lang: string;
+//   path: string;
+// }
 
-async function majorplayGetHLS(urlObj: URL, signal?: AbortSignal): Promise<JeniusReturnData> {
-  const videoId = urlObj.pathname.split('/').at(-1)!;
-  const response: MajorPlayAPIReturnData = await fetchPage(
-    'https://e2e.majorplay.net/api/token/viewer?videoId=' + videoId,
-    {
-      signal,
-      asJson: true,
-      headers: {
-        'user-agent': deviceUserAgent,
-        referer: 'https://e2e.majorplay.net/embed/' + videoId,
-      },
-      method: 'GET',
-    },
-  );
-  return {
-    hls: true,
-    videoImage: null,
-    videoSource: response.primaryUrl,
-    securedLink: response.hlsUrl,
-    downloadLinks: [],
-    attachmentLinks: [],
-    ck: '',
-    subtitleTrackUrl:
-      response.subtitles.find(a => a.lang === 'id')?.path ?? response.subtitles[0]?.path,
-  };
-}
+// async function majorplayGetHLS(urlObj: URL, signal?: AbortSignal): Promise<JeniusReturnData> {
+//   const videoId = urlObj.pathname.split('/').at(-1)!;
+//   const response: MajorPlayAPIReturnData = await fetchPage(
+//     'https://e2e.majorplay.net/api/token/viewer?videoId=' + videoId,
+//     {
+//       signal,
+//       asJson: true,
+//       headers: {
+//         'user-agent': deviceUserAgent,
+//         referer: 'https://e2e.majorplay.net/embed/' + videoId,
+//       },
+//       method: 'GET',
+//     },
+//   );
+//   return {
+//     hls: true,
+//     videoImage: null,
+//     videoSource: response.primaryUrl,
+//     securedLink: response.hlsUrl,
+//     downloadLinks: [],
+//     attachmentLinks: [],
+//     ck: '',
+//     subtitleTrackUrl:
+//       response.subtitles.find(a => a.lang === 'id')?.path ?? response.subtitles[0]?.path,
+//   };
+// }
 
-async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<JeniusReturnData> {
-  const html: string = await fetchPage(url, {
-    headers: {
-      referer: 'https://jeniusplay.com/',
-    },
-    signal,
-  });
-  if (html.includes('The video is currently being prepared')) {
-    throw new Error('Video sedang disiapkan, silakan coba lagi nanti');
-  }
-  const packedScript =
-    'eval(function(p,a,c,k,e,d)' +
-    html.split('eval(function(p,a,c,k,e,d)')[1].split('</script>')[0];
-  const unpacked = unpack(packedScript);
+// async function jeniusPlayGetHLS(url: string, signal?: AbortSignal): Promise<JeniusReturnData> {
+//   const html: string = await fetchPage(url, {
+//     headers: {
+//       referer: 'https://jeniusplay.com/',
+//     },
+//     signal,
+//   });
+//   if (html.includes('The video is currently being prepared')) {
+//     throw new Error('Video sedang disiapkan, silakan coba lagi nanti');
+//   }
+//   const packedScript =
+//     'eval(function(p,a,c,k,e,d)' +
+//     html.split('eval(function(p,a,c,k,e,d)')[1].split('</script>')[0];
+//   const unpacked = unpack(packedScript);
 
-  const subtitleTrackUrl: string | undefined = unpacked
-    .split('"kind":"captions","file":"')[1]
-    ?.split('"')[0]
-    .replace(/\\/g, '');
-  const fireplayerId = unpacked.split('FirePlayer("')[1].split('"')[0];
+//   const subtitleTrackUrl: string | undefined = unpacked
+//     .split('"kind":"captions","file":"')[1]
+//     ?.split('"')[0]
+//     .replace(/\\/g, '');
+//   const fireplayerId = unpacked.split('FirePlayer("')[1].split('"')[0];
 
-  const params = new URLSearchParams();
-  params.append('hash', fireplayerId);
-  params.append('r', 'https://jeniusplay.com/');
+//   const params = new URLSearchParams();
+//   params.append('hash', fireplayerId);
+//   params.append('r', 'https://jeniusplay.com/');
 
-  const response = (await fetchPage(
-    'https://jeniusplay.com/player/index.php?data=' + fireplayerId + '&do=getVideo',
-    {
-      method: 'POST',
-      headers: {
-        accept: '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'x-requested-with': 'XMLHttpRequest',
-        'user-agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        referer: 'https://jeniusplay.com/video/' + fireplayerId,
-        origin: 'https://jeniusplay.com',
-      },
-      body: params.toString(),
-      signal,
-      asJson: true,
-    },
-  )) as any;
-  return { ...response, subtitleTrackUrl };
-}
+//   const response = (await fetchPage(
+//     'https://jeniusplay.com/player/index.php?data=' + fireplayerId + '&do=getVideo',
+//     {
+//       method: 'POST',
+//       headers: {
+//         accept: '*/*',
+//         'accept-language': 'en-US,en;q=0.9',
+//         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+//         'x-requested-with': 'XMLHttpRequest',
+//         'user-agent':
+//           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+//         referer: 'https://jeniusplay.com/video/' + fireplayerId,
+//         origin: 'https://jeniusplay.com',
+//       },
+//       body: params.toString(),
+//       signal,
+//       asJson: true,
+//     },
+//   )) as any;
+//   return { ...response, subtitleTrackUrl };
+// }
 
 async function getHomepage(signal?: AbortSignal) {
   const api: HomepageApiResponse = await fetchPage(BASE_URL + '/api/homepage', {
@@ -596,7 +583,7 @@ type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmM
 async function getFilmDetails(
   filmUrl: string,
   signal?: AbortSignal,
-  onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+  // onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
 ): Promise<FilmDetails> {
   const api: PossibleAPIResponse = await fetchPage(filmUrl, { signal, asJson: true });
   if ('defaultSeason' in api) {
@@ -618,27 +605,38 @@ async function getFilmDetails(
   }
   if ('episode' in api) {
     const epApi = api;
-    const embedUrl = await getChallengeAndSolve(
-      epApi.episode.id,
-      'episode',
-      epApi.series.slug,
-      signal,
-      onProgress,
+    // const embedUrl = await getChallengeAndSolve(
+    //   epApi.episode.id,
+    //   'episode',
+    //   epApi.series.slug,
+    //   signal,
+    //   onProgress,
+    // );
+    // const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
+    // const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
+    // const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
+    // let jeniusPlay: JeniusReturnData;
+    // if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
+    //   jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
+    // } else {
+    //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
+    // }
+    const claimApi: ClaimApi = await fetchPage(
+      BASE_URL + '/api/watch/play-info/episode/' + epApi.episode.id,
+      {
+        signal,
+        asJson: true,
+      },
     );
-    const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
-    const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
-    const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
-    let jeniusPlay: JeniusReturnData;
-    if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
-      jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
-    } else {
-      jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
-    }
-
+    const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
+      method: 'POST',
+      asJson: true,
+      body: JSON.stringify({ claim: claimApi.claim }),
+    });
     let variants: HlsVariant[] = [];
     try {
-      const manifestContent = await fetchPage(jeniusPlay.securedLink, { signal });
-      variants = resolveMasterPlaylist(manifestContent, jeniusPlay.securedLink);
+      const manifestContent = await fetchPage(redeemVid.url, { signal });
+      variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
     } catch (e) {}
 
     const episodes = epApi.season.episodes;
@@ -659,8 +657,9 @@ async function getFilmDetails(
       title: epApi.series.title + `${year ? ` (${year})` : ''}`,
       originalLanguage: epApi.series.originalLanguage,
       country: epApi.series.country,
-      streamingLink: jeniusPlay.securedLink,
-      subtitleLink: jeniusPlay.subtitleTrackUrl,
+      streamingLink: redeemVid.url,
+      subtitleLink:
+        redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
       releaseDate: epApi.episode.airDate,
       rating: epApi.episode.voteAverage || '0',
       genres,
@@ -681,27 +680,40 @@ async function getFilmDetails(
 
   // (Halaman Movie/Film)
   const movieApi = api;
-  const embedUrl = await getChallengeAndSolve(
-    movieApi.id,
-    'movie',
-    movieApi.slug,
-    signal,
-    onProgress,
+  // const embedUrl = await getChallengeAndSolve(
+  //   movieApi.id,
+  //   'movie',
+  //   movieApi.slug,
+  //   signal,
+  //   onProgress,
+  // );
+  // const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
+  // const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
+  // const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
+  // let jeniusPlay: JeniusReturnData;
+  // if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
+  //   jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
+  // } else {
+  //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
+  // }
+
+  const claimApi: ClaimApi = await fetchPage(
+    BASE_URL + '/api/watch/play-info/movie/' + movieApi.id,
+    {
+      signal,
+      asJson: true,
+    },
   );
-  const embedHtml = await fetchPage(BASE_URL + embedUrl, { signal });
-  const extractedEmbedUrl = extractDecryptedIframe(embedHtml);
-  const extractedEmbedUrlObj = new URL(extractedEmbedUrl);
-  let jeniusPlay: JeniusReturnData;
-  if (extractedEmbedUrlObj.host.includes('jeniusplay')) {
-    jeniusPlay = await jeniusPlayGetHLS(extractedEmbedUrl, signal);
-  } else {
-    jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
-  }
+  const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
+    method: 'POST',
+    asJson: true,
+    body: JSON.stringify({ claim: claimApi.claim }),
+  });
 
   let variants: HlsVariant[] = [];
   try {
-    const manifestContent = await fetchPage(jeniusPlay.securedLink, { signal });
-    variants = resolveMasterPlaylist(manifestContent, jeniusPlay.securedLink);
+    const manifestContent = await fetchPage(redeemVid.url, { signal });
+    variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
   } catch (e) {}
 
   const year = movieApi.releaseDate?.split('-')[0];
@@ -713,8 +725,9 @@ async function getFilmDetails(
     quality: movieApi.quality,
     country: movieApi.country,
     director: movieApi.director,
-    streamingLink: jeniusPlay.securedLink,
-    subtitleLink: jeniusPlay.subtitleTrackUrl,
+    streamingLink: redeemVid.url,
+    subtitleLink:
+      redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
     releaseDate: movieApi.releaseDate,
     rating: movieApi.voteAverage || '0',
     genres: movieApi.genres?.map(g => g.name) || [],
