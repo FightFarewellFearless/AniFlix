@@ -1,3 +1,7 @@
+# v1.2.1_JS-12 (28-April-2026)
+Sorry banget hari ini ada 3 update yang berdekatan :(
+## Diperbaiki
+- Histori tidak sinkron saat keluar dari layar streaming
 # v1.2.1_JS-11 (28-April-2026)
 ## Ditingkatkan
 - Performa perangkat ketika streaming film/movie/anime, sekaligus potensi untuk memperbaiki penggunaan memori yang tinggi ketika streaming dalam waktu lama
