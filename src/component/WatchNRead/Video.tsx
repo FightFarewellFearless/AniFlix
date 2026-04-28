@@ -43,7 +43,6 @@ import {
   getStreamingDetail,
   MovieDetail,
 } from '@utils/scrapers/animeMovie';
-import { throttle } from '@utils/throttle';
 import {
   LoadingModal,
   TimeInfo,
@@ -73,6 +72,9 @@ function Video(props: Props) {
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
+
+  const currentData = useRef(data);
+  currentData.current = data;
 
   const downloadSource = useRef<string[]>([]);
   const currentLink = useRef(props.route.params.link);
@@ -125,27 +127,31 @@ function Video(props: Props) {
 
   const downloadAnimeFunction = useDownloadAnimeFunction();
 
-  const updateHistory = useMemo(
-    () =>
-      throttle(
-        (
-          currentTime: number,
-          stateData: RootStackNavigator['Video']['data'],
-          isMovie?: boolean,
-        ) => {
-          if (Math.floor(currentTime) === 0) {
-            return;
-          }
-          const additionalData = {
-            resolution: stateData.resolution,
-            lastDuration: currentTime,
-          };
-          setHistory(stateData, currentLink.current, true, additionalData, isMovie);
-          historyData.current = additionalData;
-        },
-        2000,
-      ),
-    [],
+  const lastSavedTimeRef = useRef<number>(0);
+  const currentTimeRef = useRef<number>(0);
+  const saveProgressToHistory = useCallback(() => {
+    if (!(currentTimeRef.current > 5)) return;
+    setHistory(
+      currentData.current,
+      currentLink.current,
+      true,
+      {
+        lastDuration: currentTimeRef.current,
+      },
+      props.route.params.isMovie,
+    );
+  }, [props.route.params.isMovie]);
+  const updateHistory = useCallback(
+    (currentTime: number) => {
+      currentTimeRef.current = currentTime;
+
+      if (Math.abs(currentTime - lastSavedTimeRef.current) > 30) {
+        lastSavedTimeRef.current = currentTime;
+
+        saveProgressToHistory();
+      }
+    },
+    [saveProgressToHistory],
   );
 
   const abortController = useRef<AbortController | null>(null);
@@ -181,6 +187,13 @@ function Video(props: Props) {
         abortController.current?.abort();
       };
     }, [orientationDidChange, willUnmountHandler]),
+  );
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        saveProgressToHistory();
+      };
+    }, [saveProgressToHistory]),
   );
 
   // set header title
@@ -311,9 +324,9 @@ function Video(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistory(currentTime, data, props.route.params.isMovie);
+      updateHistory(currentTime);
     },
-    [updateHistory, data, props.route.params.isMovie],
+    [updateHistory],
   );
 
   const episodeDataControl = useCallback(
@@ -428,10 +441,11 @@ function Video(props: Props) {
   useEffect(() => {
     if (isPaused) {
       videoRef.current?.props.player.pause();
+      saveProgressToHistory();
     } else {
       videoRef.current?.props.player.play();
     }
-  }, [isPaused]);
+  }, [isPaused, saveProgressToHistory]);
 
   const fullscreenUpdate = useCallback(
     (isFullscreen: boolean) => {

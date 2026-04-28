@@ -36,7 +36,6 @@ import { useFocusEffect } from '@react-navigation/core';
 import { useKeyValueIfFocused } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
 import { getFilmDetails } from '@utils/scrapers/film';
-import { throttle } from '@utils/throttle';
 import { ActivityIndicator, Button } from 'react-native-paper';
 import Skeleton from '@component/misc/Skeleton';
 import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
@@ -64,6 +63,9 @@ function Video_Film(props: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(props.route.params.data);
 
+  const currentData = useRef(data);
+  currentData.current = data;
+
   const [currentStreamUrl, setCurrentStreamUrl] = useState(props.route.params.data.streamingLink);
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
 
@@ -74,20 +76,31 @@ function Video_Film(props: Props) {
 
   const synopsisTextRef = useAnimatedRef<Text>();
 
-  const updateHistory = useMemo(
-    () =>
-      throttle((currentTime: number, stateData: RootStackNavigator['Video_Film']['data']) => {
-        if (Math.floor(currentTime) === 0) {
-          return;
-        }
-        const additionalData = {
-          resolution: undefined,
-          lastDuration: currentTime,
-        };
-        setHistory(stateData, currentLink.current, true, additionalData, true);
-        historyData.current = additionalData;
-      }, 2000),
-    [],
+  const lastSavedTimeRef = useRef<number>(0);
+  const currentTimeRef = useRef<number>(0);
+  const saveProgressToHistory = useCallback(() => {
+    if (!(currentTimeRef.current > 5)) return;
+    setHistory(
+      currentData.current,
+      currentLink.current,
+      true,
+      {
+        lastDuration: currentTimeRef.current,
+      },
+      true,
+    );
+  }, []);
+  const updateHistory = useCallback(
+    (currentTime: number) => {
+      currentTimeRef.current = currentTime;
+
+      if (Math.abs(currentTime - lastSavedTimeRef.current) > 30) {
+        lastSavedTimeRef.current = currentTime;
+
+        saveProgressToHistory();
+      }
+    },
+    [saveProgressToHistory],
   );
 
   const abortController = useRef<AbortController | null>(null);
@@ -125,6 +138,14 @@ function Video_Film(props: Props) {
     }, [orientationDidChange, willUnmountHandler]),
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        saveProgressToHistory();
+      };
+    }, [saveProgressToHistory]),
+  );
+
   // set header title
   useLayoutEffect(() => {
     props.navigation.setOptions({
@@ -149,9 +170,9 @@ function Video_Film(props: Props) {
 
   const handleProgress = useCallback(
     (currentTime: number) => {
-      updateHistory(currentTime, data);
+      updateHistory(currentTime);
     },
-    [updateHistory, data],
+    [updateHistory],
   );
 
   const episodeDataControl = useCallback(
@@ -223,10 +244,11 @@ function Video_Film(props: Props) {
   useEffect(() => {
     if (isPaused) {
       videoRef.current?.props.player.pause();
+      saveProgressToHistory();
     } else {
       videoRef.current?.props.player.play();
     }
-  }, [isPaused]);
+  }, [isPaused, saveProgressToHistory]);
 
   const fullscreenUpdate = useCallback(
     (isFullscreen: boolean) => {

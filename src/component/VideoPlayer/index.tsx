@@ -123,7 +123,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
-      initialPlayer.timeUpdateEventInterval = subtitleURL ? 25 / 1000 : 1;
+      initialPlayer.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
@@ -244,21 +244,36 @@ function VideoPlayer({
       controlsShowedCzOfLag.current = false;
     }
   });
+  const prevSubtitleRef = useRef<string>('');
   useEventListener(player, 'timeUpdate', e => {
     if (!player.playing) return; // Do not update time if video is paused (fix for video history not synced)
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
-    const currentSub = subtitles
-      ?.filter(subtitle => {
-        const start = Number(subtitle.startTime);
-        const end = Number(subtitle.endTime);
-        return e.currentTime >= start && e.currentTime <= end;
-      })
-      .map(a => a.text);
-    setCurrentSubtitle(currentSub || []);
+
+    const currentTime = e.currentTime;
+    const activeSubs: string[] = [];
+    if (subtitles) {
+      for (let i = 0; i < subtitles.length; i++) {
+        const sub = subtitles[i];
+
+        if (sub.startTime > currentTime) break;
+
+        if (currentTime >= sub.startTime && currentTime <= sub.endTime) {
+          activeSubs.push(sub.text);
+        }
+      }
+    }
+
+    const newSubtitleString = activeSubs.join('|');
+
+    if (prevSubtitleRef.current !== newSubtitleString) {
+      prevSubtitleRef.current = newSubtitleString;
+      setCurrentSubtitle(activeSubs);
+    }
     onDurationChange?.(e.currentTime);
   });
+
   useImperativeHandle(
     ref,
     () => ({
