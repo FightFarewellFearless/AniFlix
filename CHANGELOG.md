@@ -1,3 +1,6 @@
+# v1.2.1_JS-10 (28-April-2026)
+## Diperbaiki/Ditingkatkan
+- [Video player] Beberapa masalah pada video player sekaligus peningkatan UX
 # v1.2.1_JS-9 (26-April-2026)
 ## Diperbaiki
 - [Film] Error pada seluruh data film
