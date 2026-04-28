@@ -44,7 +44,6 @@ module.exports = {
         },
       },
     ],
-    ['module:react-native-dotenv'],
     [
       'babel-plugin-inline-import',
       {

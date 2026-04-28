@@ -1,4 +1,5 @@
-import { COMICS1_AUTH } from '@env';
+import Config from 'react-native-config';
+const COMICS1_AUTH = Config.COMICS1_AUTH;
 import cheerio, { CheerioAPI } from 'cheerio';
 import he from 'he';
 import moment from 'moment';

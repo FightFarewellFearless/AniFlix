@@ -1,5 +1,6 @@
 import useGlobalStyles from '@assets/style';
-import { WEBHOOK_REPORT_ERROR } from '@env';
+import Config from 'react-native-config';
+const WEBHOOK_REPORT_ERROR = Config.WEBHOOK_REPORT_ERROR;
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';

@@ -1,4 +1,5 @@
-import { COMICS1_AUTH } from '@env';
+import Config from 'react-native-config';
+const COMICS1_AUTH = Config.COMICS1_AUTH;
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
