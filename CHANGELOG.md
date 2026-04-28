@@ -1,3 +1,6 @@
+# v1.2.1_JS-11 (28-April-2026)
+## Ditingkatkan
+- Performa perangkat ketika streaming film/movie/anime, sekaligus potensi untuk memperbaiki penggunaan memori yang tinggi ketika streaming dalam waktu lama
 # v1.2.1_JS-10 (28-April-2026)
 ## Diperbaiki/Ditingkatkan
 - [Video player] Beberapa masalah pada video player sekaligus peningkatan UX
