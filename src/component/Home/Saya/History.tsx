@@ -9,7 +9,7 @@ import {
   useRecyclingState,
 } from '@shopify/flash-list';
 import moment from 'moment';
-import { memo, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -27,13 +27,14 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import URL from 'url';
-import useGlobalStyles, { darkText } from '../../../assets/style';
-import { HistoryItemKey } from '../../../types/databaseTarget';
-import { HistoryJSON } from '../../../types/historyJSON';
-import { SayaDrawerNavigator } from '../../../types/navigation';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../../utils/DatabaseManager';
-import DialogManager from '../../../utils/dialogManager';
-import ImageLoading from '../../misc/ImageLoading';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { SayaDrawerNavigator } from '@/types/navigation';
+import useGlobalStyles, { darkText } from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
 
 export const HistoryDatabaseCache = new Map<HistoryItemKey, HistoryJSON>();
 
@@ -238,17 +239,35 @@ const RenderList = memo(function RenderList({
     [keyItem],
   );
 
+  const fetchItem = useCallback(() => {
+    DatabaseManager.get(keyItem).then(value => {
+      if (currentItem.current !== keyItem) return;
+      const historyDb = JSON.parse(value ?? '{}');
+      HistoryDatabaseCache.set(keyItem, historyDb);
+      // startTransition(() => {
+      setItem(historyDb);
+      // });
+    });
+  }, [keyItem, setItem]);
+  const currentFetchItem = useRef(fetchItem);
+  currentFetchItem.current = fetchItem;
+
+  const currentKeyItem = useRef(keyItem);
+  currentKeyItem.current = keyItem;
+
+  useEffect(() => {
+    currentFetchItem.current();
+  }, [keyItem]);
   useFocusEffect(
     useCallback(() => {
-      DatabaseManager.get(keyItem).then(value => {
-        if (currentItem.current !== keyItem) return;
-        const historyDb = JSON.parse(value ?? '{}');
-        HistoryDatabaseCache.set(keyItem, historyDb);
-        // startTransition(() => {
-        setItem(historyDb);
-        // });
+      currentFetchItem.current();
+      const listener = DatabaseManager.listenOnValueChanged(key => {
+        if (key === currentKeyItem.current) {
+          currentFetchItem.current();
+        }
       });
-    }, [keyItem, setItem]),
+      return () => listener.remove();
+    }, []),
   );
 
   return (

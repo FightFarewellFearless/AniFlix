@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,18 +22,19 @@ import Reanimated, {
   useScrollOffset,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import useGlobalStyles from '../../assets/style';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { __ALIAS as Comics1Alias } from '../../utils/scrapers/comics1';
-import { __ALIAS as Comics2Alias } from '../../utils/scrapers/comics2';
-import { ComicsDetail as ComicsDetailTypeData } from '../../utils/scrapers/comicsv2';
-import { __ALIAS as KomikuAlias, KomikuDetail } from '../../utils/scrapers/komiku';
-import controlWatchLater from '../../utils/watchLaterControl';
-import ImageLoading from '../misc/ImageLoading';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import { __ALIAS as Comics1Alias } from '@utils/scrapers/comics1';
+import { __ALIAS as Comics2Alias } from '@utils/scrapers/comics2';
+import { ComicsDetail as ComicsDetailTypeData } from '@utils/scrapers/comicsv2';
+import { __ALIAS as KomikuAlias, KomikuDetail } from '@utils/scrapers/komiku';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]> & {
@@ -42,16 +43,13 @@ type RecyclerViewType = (
     >;
   },
 ) => React.JSX.Element;
-const ReanimatedImage = Reanimated.createAnimatedComponent(ImageLoading);
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
 const IMG_HEIGHT = 200;
 export default function ComicsDetail(props: Props) {
-  const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
   const styles = useStyles();
   const scrollRef =
     useAnimatedRef<
@@ -156,6 +154,19 @@ export default function ComicsDetail(props: Props) {
     [data, lastReaded, props.navigation, props.route.params.data.title, props.route.params.link],
   );
 
+  const listHeaderComponent = (
+    <ComicsDetailHeader
+      data={data}
+      imageStyle={imageStyle}
+      isInList={isInList}
+      lastReaded={lastReaded}
+      readComic={readComic}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      link={props.route.params.link}
+    />
+  );
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ReanimatedFlashList
@@ -169,60 +180,14 @@ export default function ComicsDetail(props: Props) {
             <Text style={globalStyles.text}>Tidak ada chapter</Text>
           </View>
         )}
-        renderItem={({ item }) => {
-          if (!item) return null;
-          let isLastReaded =
-            lastReaded &&
-            lastReaded.episode &&
-            item.chapter
-              .toLowerCase()
-              .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-              .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
-              .replace('chapter ', '')
-              .trim() ===
-              lastReaded.episode
-                .toLowerCase()
-                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-                .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
-                .replace('chapter ', '')
-                .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
-                .trim();
-          if (!isLastReaded) {
-            lastReaded?.link === item.chapterUrl && (isLastReaded = true);
-          }
-          return (
-            <TouchableOpacity
-              style={styles.chapterItem}
-              onPress={() => readComic(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
-              <View style={styles.chapterTitleContainer}>
-                <Text style={[globalStyles.text, styles.chapterText]}>
-                  {item.chapter.includes('Chapter') ? item.chapter : `Chapter ${item.chapter}`}
-                </Text>
-              </View>
-              <View style={styles.chapterDetailsContainer}>
-                {'releaseDate' in item && (
-                  <>
-                    <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                      <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
-                      {item.releaseDate}
-                    </Text>
-                    <Text style={[globalStyles.text, styles.chapterDetailText]}>
-                      <Icon color={styles.chapterDetailText.color} name="eye" size={12} />{' '}
-                      {item.views}x dilihat
-                    </Text>
-                  </>
-                )}
-                {isLastReaded && (
-                  <Text
-                    style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
-                    <Icon color={styles.lastReadedText.color} name="book" size={12} /> Terakhir
-                    dibaca
-                  </Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          );
-        }}
+        renderItem={({ item }) => (
+          <RenderChapterItem
+            item={item}
+            data={data}
+            lastReaded={lastReaded}
+            readComic={readComic}
+          />
+        )}
         ItemSeparatorComponent={() => <Divider />}
         keyExtractor={(item, index) => item.chapter + index}
         contentContainerStyle={{
@@ -232,219 +197,304 @@ export default function ComicsDetail(props: Props) {
           paddingBottom: insets.bottom,
         }}
         ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-        ListHeaderComponent={
-          <>
-            {'headerImageUrl' in data ? (
-              <ReanimatedImage
-                style={[{ width: '100%', height: IMG_HEIGHT }, imageStyle]}
-                source={{ uri: data.headerImageUrl }}
-              />
-            ) : (
-              <Reanimated.View
-                style={[
-                  { width: '100%', height: IMG_HEIGHT },
-                  imageStyle,
-                  { backgroundColor: theme.colors.elevation.level2 },
-                ]}>
-                <Icon
-                  color={theme.colors.onBackground}
-                  name="book"
-                  size={64}
-                  style={{ alignSelf: 'center', marginTop: 60 }}
-                />
-              </Reanimated.View>
-            )}
-            <LinearGradient
-              colors={['transparent', 'black']}
-              style={{
-                width: '100%',
-                height: 60,
-                position: 'absolute',
-                transform: [
-                  {
-                    translateY: 155,
-                  },
-                ],
-              }}
-            />
-            <View style={[styles.mainContainer, styles.mainContent]}>
-              <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                <ImageLoading source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
-                <View
-                  style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
-                  <Surface
-                    elevation={3}
-                    style={{
-                      backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
-                      borderRadius: 10,
-                    }}>
-                    <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
-                  </Surface>
-                  <Surface
-                    elevation={3}
-                    style={{
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      borderColor: colorScheme === 'dark' ? 'white' : 'black',
-                    }}>
-                    <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
-                  </Surface>
-                </View>
-              </View>
-              <View style={styles.infoContainer}>
-                <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
-                <Text
-                  style={[globalStyles.text, styles.title, styles.indonesianTitle]}
-                  numberOfLines={4}>
-                  {'indonesianTitle' in data ? data.indonesianTitle : data.altTitle}
-                </Text>
-                <Text style={[globalStyles.text, styles.author]}>By {data.author || '-'}</Text>
-                <View style={styles.genreContainer}>
-                  {data.genres.map(z => {
-                    return (
-                      <Surface
-                        key={z}
-                        elevation={3}
-                        style={{
-                          borderRadius: 8,
-                          backgroundColor:
-                            z === 'Ecchi' ? 'rgba(255, 0, 0, 0.5)' : theme.colors.elevation.level3,
-                        }}>
-                        <Text style={styles.genre} key={z}>
-                          {z}
-                        </Text>
-                      </Surface>
-                    );
-                  })}
-                </View>
-              </View>
-            </View>
-            <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
-              <View style={styles.secondaryInfoContainer}>
-                <View style={styles.additionalInfo}>
-                  {'indonesianTitle' in data ? (
-                    <>
-                      <Surface style={styles.additionalInfoTextSurface}>
-                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                          <Icon color={styles.additionalInfoText.color} name="check-circle" />{' '}
-                          {data.minAge}
-                        </Text>
-                      </Surface>
-                      <Surface style={styles.additionalInfoTextSurface}>
-                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                          <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
-                          {data.readingDirection}
-                        </Text>
-                      </Surface>
-                      <Surface style={styles.additionalInfoTextSurface}>
-                        <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                          <Icon color={styles.additionalInfoText.color} name="tag" /> {data.concept}
-                        </Text>
-                      </Surface>
-                    </>
-                  ) : undefined}
-                  {'releaseYear' in data && (
-                    <Surface style={[styles.additionalInfoTextSurface, { marginTop: 10 }]}>
-                      <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                        <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
-                        {data.releaseYear}
-                      </Text>
-                    </Surface>
-                  )}
-                </View>
-
-                <Text style={[globalStyles.text]}>{data.synopsis}</Text>
-              </View>
-              <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
-                <Button
-                  buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                  textColor={styles.additionalInfoText.color}
-                  mode="outlined"
-                  icon="playlist-plus"
-                  disabled={isInList}
-                  onPress={() => {
-                    if (!data.chapters[data.chapters.length - 1]) {
-                      ToastAndroid.show('Data chapter tidak ditemukan', ToastAndroid.SHORT);
-                      return;
-                    }
-                    const lastData = data.chapters[data.chapters.length - 1];
-                    const watchLaterJson: watchLaterJSON = {
-                      title: data.title,
-                      link: props.route.params.link,
-                      rating: 'Komik',
-                      releaseYear:
-                        'releaseDate' in lastData
-                          ? lastData.releaseDate
-                          : 'releaseYear' in data
-                            ? (data.releaseYear ?? 'Data tidak tersedia')
-                            : 'Data tidak tersedia',
-                      thumbnailUrl: data.thumbnailUrl,
-                      genre: data.genres,
-                      date: Date.now(),
-                      isComics: true,
-                    };
-                    controlWatchLater('add', watchLaterJson);
-                    ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
-                  }}>
-                  {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
-                </Button>
-                <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
-                <View style={{ gap: 10 }}>
-                  {lastReaded && lastReaded.episode && (
-                    <Button
-                      mode="elevated"
-                      icon="book-open"
-                      onPress={() => {
-                        readComic(lastReaded.link, lastReaded);
-                      }}>
-                      Terakhir Dibaca ({lastReaded.episode})
-                    </Button>
-                  )}
-                  <Button
-                    onPress={() => {
-                      const chapterData = data.chapters[data.chapters.length - 1];
-                      if (!chapterData?.chapterUrl) {
-                        ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
-                        return;
-                      }
-                      readComic(chapterData.chapterUrl);
-                    }}
-                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                    textColor={styles.additionalInfoText.color}
-                    mode="elevated">
-                    Baca Chapter Pertama
-                  </Button>
-                  <Button
-                    onPress={() => {
-                      const chapterData = data.chapters[0];
-                      if (!chapterData?.chapterUrl) {
-                        ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
-                        return;
-                      }
-                      readComic(chapterData?.chapterUrl);
-                    }}
-                    buttonColor={styles.additionalInfoTextSurface.backgroundColor}
-                    textColor={styles.additionalInfoText.color}
-                    mode="elevated">
-                    Baca Chapter Terbaru
-                  </Button>
-                </View>
-                <Searchbar
-                  onChangeText={setSearchQuery}
-                  value={searchQuery}
-                  style={{ margin: 10 }}
-                  placeholder="Cari chapter"
-                  keyboardType="number-pad"
-                />
-              </View>
-            </View>
-          </>
-        }
+        ListHeaderComponent={listHeaderComponent}
         showsVerticalScrollIndicator={false}
       />
     </KeyboardAvoidingView>
   );
 }
+
+interface ComicsDetailHeaderProps {
+  data: Props['route']['params']['data'];
+  imageStyle: any;
+  isInList: boolean;
+  lastReaded: HistoryJSON | undefined;
+  readComic: (url: string, fromHistory?: HistoryJSON) => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  link: string;
+}
+
+const ComicsDetailHeader = memo(
+  ({
+    data,
+    imageStyle,
+    isInList,
+    lastReaded,
+    readComic,
+    searchQuery,
+    setSearchQuery,
+    link,
+  }: ComicsDetailHeaderProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const theme = useTheme();
+    const colorScheme = useColorScheme();
+
+    return (
+      <>
+        <Reanimated.View
+          style={[
+            { width: '100%', height: IMG_HEIGHT },
+            imageStyle,
+            { backgroundColor: theme.colors.elevation.level2 },
+          ]}>
+          <Icon
+            color={theme.colors.onBackground}
+            name="book"
+            size={64}
+            style={{ alignSelf: 'center', marginTop: 60 }}
+          />
+        </Reanimated.View>
+        <LinearGradient
+          colors={['transparent', 'black']}
+          style={{
+            width: '100%',
+            height: 60,
+            position: 'absolute',
+            transform: [
+              {
+                translateY: 155,
+              },
+            ],
+          }}
+        />
+        <View style={[styles.mainContainer, styles.mainContent]}>
+          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+            <ImageLoading source={{ uri: data.thumbnailUrl }} style={styles.thumbnail} />
+            <View style={{ transform: styles.thumbnail.transform, flexDirection: 'row', gap: 5 }}>
+              <Surface
+                elevation={3}
+                style={{
+                  backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
+                  borderRadius: 10,
+                }}>
+                <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
+              </Surface>
+              <Surface
+                elevation={3}
+                style={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  borderColor: colorScheme === 'dark' ? 'white' : 'black',
+                }}>
+                <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+              </Surface>
+            </View>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
+            <Text
+              style={[globalStyles.text, styles.title, styles.indonesianTitle]}
+              numberOfLines={4}>
+              {'indonesianTitle' in data ? data.indonesianTitle : data.altTitle}
+            </Text>
+            <Text style={[globalStyles.text, styles.author]}>By {data.author || '-'}</Text>
+            <View style={styles.genreContainer}>
+              {data.genres.map(z => {
+                return (
+                  <Surface
+                    key={z}
+                    elevation={3}
+                    style={{
+                      borderRadius: 8,
+                      backgroundColor:
+                        z === 'Ecchi' ? 'rgba(255, 0, 0, 0.5)' : theme.colors.elevation.level3,
+                    }}>
+                    <Text style={styles.genre} key={z}>
+                      {z}
+                    </Text>
+                  </Surface>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+        <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
+          <View style={styles.secondaryInfoContainer}>
+            <View style={styles.additionalInfo}>
+              {'indonesianTitle' in data ? (
+                <>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon color={styles.additionalInfoText.color} name="child" /> {data.minAge}
+                    </Text>
+                  </Surface>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
+                      {data.readingDirection}
+                    </Text>
+                  </Surface>
+                  <Surface style={styles.additionalInfoTextSurface}>
+                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                      <Icon color={styles.additionalInfoText.color} name="tag" /> {data.concept}
+                    </Text>
+                  </Surface>
+                </>
+              ) : undefined}
+              {'releaseYear' in data && (
+                <Surface style={[styles.additionalInfoTextSurface, { marginTop: 10 }]}>
+                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
+                    <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
+                    {data.releaseYear}
+                  </Text>
+                </Surface>
+              )}
+            </View>
+
+            <Text style={[globalStyles.text]}>{data.synopsis}</Text>
+          </View>
+          <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
+            <Button
+              buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+              textColor={styles.additionalInfoText.color}
+              mode="outlined"
+              icon="playlist-plus"
+              disabled={isInList}
+              onPress={() => {
+                if (!data.chapters[data.chapters.length - 1]) {
+                  ToastAndroid.show('Data chapter tidak ditemukan', ToastAndroid.SHORT);
+                  return;
+                }
+                const lastData = data.chapters[data.chapters.length - 1];
+                const watchLaterJson: watchLaterJSON = {
+                  title: data.title,
+                  link: link,
+                  rating: 'Komik',
+                  releaseYear:
+                    'releaseDate' in lastData
+                      ? lastData.releaseDate
+                      : 'releaseYear' in data
+                        ? (data.releaseYear ?? 'Data tidak tersedia')
+                        : 'Data tidak tersedia',
+                  thumbnailUrl: data.thumbnailUrl,
+                  genre: data.genres,
+                  date: Date.now(),
+                  isComics: true,
+                };
+                controlWatchLater('add', watchLaterJson);
+                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+              }}>
+              {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
+            </Button>
+            <Text style={[globalStyles.text, styles.listChapterText]}>List Chapters</Text>
+            <View style={{ gap: 10 }}>
+              {lastReaded && lastReaded.episode && (
+                <Button
+                  mode="elevated"
+                  icon="book-open"
+                  onPress={() => {
+                    readComic(lastReaded.link, lastReaded);
+                  }}>
+                  Terakhir Dibaca ({lastReaded.episode})
+                </Button>
+              )}
+              <Button
+                onPress={() => {
+                  const chapterData = data.chapters[data.chapters.length - 1];
+                  if (!chapterData?.chapterUrl) {
+                    ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                    return;
+                  }
+                  readComic(chapterData.chapterUrl);
+                }}
+                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                textColor={styles.additionalInfoText.color}
+                mode="elevated">
+                Baca Chapter Pertama
+              </Button>
+              <Button
+                onPress={() => {
+                  const chapterData = data.chapters[0];
+                  if (!chapterData?.chapterUrl) {
+                    ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                    return;
+                  }
+                  readComic(chapterData?.chapterUrl);
+                }}
+                buttonColor={styles.additionalInfoTextSurface.backgroundColor}
+                textColor={styles.additionalInfoText.color}
+                mode="elevated">
+                Baca Chapter Terbaru
+              </Button>
+            </View>
+            <Searchbar
+              onChangeText={setSearchQuery}
+              value={searchQuery}
+              style={{ margin: 10 }}
+              placeholder="Cari chapter"
+              keyboardType="number-pad"
+            />
+          </View>
+        </View>
+      </>
+    );
+  },
+);
+
+interface RenderChapterItemProps {
+  item: KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0];
+  data: Props['route']['params']['data'];
+  lastReaded: HistoryJSON | undefined;
+  readComic: (url: string, fromHistory?: HistoryJSON) => void;
+}
+
+const RenderChapterItem = memo(({ item, data, lastReaded, readComic }: RenderChapterItemProps) => {
+  const styles = useStyles();
+  const globalStyles = useGlobalStyles();
+
+  if (!item) return null;
+  let isLastReaded =
+    lastReaded &&
+    lastReaded.episode &&
+    item.chapter
+      .toLowerCase()
+      .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+      .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
+      .replace('chapter ', '')
+      .trim() ===
+      lastReaded.episode
+        .toLowerCase()
+        .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
+        .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
+        .replace('chapter ', '')
+        .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
+        .trim();
+  if (!isLastReaded) {
+    lastReaded?.link === item.chapterUrl && (isLastReaded = true);
+  }
+  return (
+    <TouchableOpacity
+      style={styles.chapterItem}
+      onPress={() => readComic(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
+      <View style={styles.chapterTitleContainer}>
+        <Text style={[globalStyles.text, styles.chapterText]}>
+          {item.chapter.includes('Chapter') ? item.chapter : `Chapter ${item.chapter}`}
+        </Text>
+      </View>
+      <View style={styles.chapterDetailsContainer}>
+        {'releaseDate' in item && (
+          <>
+            <Text style={[globalStyles.text, styles.chapterDetailText]}>
+              <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
+              {item.releaseDate}
+            </Text>
+            <Text style={[globalStyles.text, styles.chapterDetailText]}>
+              <Icon color={styles.chapterDetailText.color} name="eye" size={12} /> {item.views}x
+              dilihat
+            </Text>
+          </>
+        )}
+        {isLastReaded && (
+          <Text style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
+            <Icon color={styles.lastReadedText.color} name="book" size={12} /> Terakhir dibaca
+          </Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 function useStyles() {
   const theme = useTheme();

@@ -2,6 +2,7 @@
 import {
   AudioMixingMode,
   VideoPlayer as ExpoVideoPlayer,
+  VideoContentFit,
   VideoView,
   useVideoPlayer,
 } from 'expo-video';
@@ -37,13 +38,16 @@ import Reanimated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withDelay,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
-import AniFlixRuntime from '../../misc/AniFlixRuntime';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import deviceUserAgent from '../../utils/deviceUserAgent';
-import ReText from '../misc/ReText';
+
+import ReText from '@component/misc/ReText';
+import AniFlixRuntime from '@misc/AniFlixRuntime';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import deviceUserAgent from '@utils/deviceUserAgent';
 import SeekBar from './SeekBar';
 
 type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
@@ -71,6 +75,7 @@ type VideoPlayerProps = {
 };
 
 const ICON_SIZE = 45;
+const VideoContentFitModeArr: VideoContentFit[] = ['contain', 'cover', 'fill'];
 
 export default memo(VideoPlayer);
 
@@ -118,7 +123,7 @@ function VideoPlayer({
     },
     initialPlayer => {
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
-      initialPlayer.timeUpdateEventInterval = subtitleURL ? 25 / 1000 : 1;
+      initialPlayer.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
     },
   );
@@ -144,6 +149,7 @@ function VideoPlayer({
   }, [isPaused]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [contentFitMode, setContentFitMode] = useState<VideoContentFit>('contain');
 
   const [showControls, setShowControls] = useState(true);
   const controlsShowedCzOfLag = useRef(false);
@@ -153,7 +159,7 @@ function VideoPlayer({
   const [subtitles, setSubtitles] = useState<Awaited<ReturnType<typeof parseSubtitles>> | null>(
     null,
   );
-  const [currentSubtitle, setCurrentSubtitle] = useState<string>('');
+  const [currentSubtitle, setCurrentSubtitle] = useState<string[]>([]);
   const [subtitleError, setSubtitleError] = useState(false);
   const [subtitleRetryToken, setSubtitleRetryToken] = useState(0);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(true);
@@ -167,11 +173,14 @@ function VideoPlayer({
       async function fetchSubtitles(url: string) {
         setSubtitleError(false);
         try {
+          setSubtitles(null);
+          setCurrentSubtitle([]);
           const response = await fetch(url, {
             signal: abortController.signal,
           });
           if (!response.ok) throw new Error('Network response was not ok');
-          const subtitleText = await response.text();
+          const subtitleArr = await response.arrayBuffer();
+          const subtitleText = decodeSubtitleBuffer(subtitleArr);
           onSubtitleLoadRef.current?.(subtitleText);
           const subtitle = await parseSubtitles(subtitleText ?? '');
           setSubtitles(subtitle);
@@ -235,19 +244,36 @@ function VideoPlayer({
       controlsShowedCzOfLag.current = false;
     }
   });
+  const prevSubtitleRef = useRef<string>('');
   useEventListener(player, 'timeUpdate', e => {
     if (!player.playing) return; // Do not update time if video is paused (fix for video history not synced)
     if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(e.currentTime);
     if (seekBarProgressDisabled.get() === false)
       seekBarProgress.set(e.currentTime / (player.duration ?? 1));
-    const currentSub = subtitles?.find(subtitle => {
-      const start = Number(subtitle.startTime);
-      const end = Number(subtitle.endTime);
-      return e.currentTime >= start && e.currentTime <= end;
-    });
-    setCurrentSubtitle(currentSub?.text || '');
+
+    const currentTime = e.currentTime;
+    const activeSubs: string[] = [];
+    if (subtitles) {
+      for (let i = 0; i < subtitles.length; i++) {
+        const sub = subtitles[i];
+
+        if (sub.startTime > currentTime) break;
+
+        if (currentTime >= sub.startTime && currentTime <= sub.endTime) {
+          activeSubs.push(sub.text);
+        }
+      }
+    }
+
+    const newSubtitleString = activeSubs.join('|');
+
+    if (prevSubtitleRef.current !== newSubtitleString) {
+      prevSubtitleRef.current = newSubtitleString;
+      setCurrentSubtitle(activeSubs);
+    }
     onDurationChange?.(e.currentTime);
   });
+
   useImperativeHandle(
     ref,
     () => ({
@@ -268,6 +294,9 @@ function VideoPlayer({
 
   const setPositionAsync = (duration: number) => {
     player.currentTime = duration;
+    queueMicrotask(() => {
+      seekBarProgressDisabled.set(false);
+    });
   };
   const onPressIn = useCallback((e: GestureResponderEvent) => {
     pressableShowControlsLocation.current = {
@@ -371,7 +400,7 @@ function VideoPlayer({
         pointerEvents="none"
         player={player}
         key={streamingURL}
-        contentFit="contain"
+        contentFit={contentFitMode}
         nativeControls={false}
         style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0 }}
         ref={videoRef}
@@ -391,24 +420,53 @@ function VideoPlayer({
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Text
-            style={{
-              marginHorizontal: 20,
-              backgroundColor:
-                currentSubtitle === '' || !isSubtitleEnabled ? undefined : '#0000006b',
-              fontSize: isFullscreen ? 24 : 14,
-              textAlign: 'center',
-              color: 'white',
-              textShadowColor: 'black',
-              textShadowOffset: { width: -1, height: 1 },
-              textShadowRadius: 1,
-            }}>
-            {isSubtitleEnabled
-              ? subtitles === null && !subtitleError && subtitleURL
-                ? 'Memuat Subtitle...'
-                : currentSubtitle
-              : ''}
-          </Text>
+          <View style={{ gap: 2 }}>
+            {isSubtitleEnabled ? (
+              subtitles === null && !subtitleError && subtitleURL ? (
+                <Text
+                  style={{
+                    backgroundColor:
+                      currentSubtitle.length === 0 || !isSubtitleEnabled ? undefined : '#0000006b',
+                    fontSize: isFullscreen ? 22 : 12,
+                    textAlign: 'center',
+                    color: 'white',
+                    textShadowColor: 'black',
+                    textShadowOffset: { width: -1, height: 1 },
+                    textShadowRadius: 1,
+                  }}>
+                  Memuat Subtitle...
+                </Text>
+              ) : (
+                currentSubtitle.map((text, i) => {
+                  const totalCharLength = currentSubtitle.reduce(
+                    (acc, curr) => acc + curr.length,
+                    0,
+                  );
+                  return (
+                    <Text
+                      style={{
+                        backgroundColor:
+                          currentSubtitle.length === 0 || !isSubtitleEnabled
+                            ? undefined
+                            : '#0000006b',
+                        fontSize: calculateSubtitleCharSize(
+                          isFullscreen ? 24 : 14,
+                          totalCharLength,
+                        ),
+                        textAlign: 'center',
+                        color: 'white',
+                        textShadowColor: 'black',
+                        textShadowOffset: { width: -1, height: 1 },
+                        textShadowRadius: 1,
+                      }}
+                      key={text + i}>
+                      {text}
+                    </Text>
+                  );
+                })
+              )
+            ) : undefined}
+          </View>
         </View>
         <Reanimated.View
           pointerEvents="box-none"
@@ -436,6 +494,8 @@ function VideoPlayer({
             onLoad={onLoad}
           />
           <BottomControl
+            contentFitMode={contentFitMode}
+            setContentFitMode={setContentFitMode}
             currentDurationSecond={currentDurationSecond}
             totalDurationSecond={totalDurationSecond}
             isFullscreen={isFullscreen}
@@ -449,7 +509,6 @@ function VideoPlayer({
             onProgressChangeEnd={e => {
               'worklet';
               seekBarProgress.set(e);
-              seekBarProgressDisabled.set(false);
               runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
             }}
             seekBarProgress={seekBarProgress}
@@ -646,6 +705,8 @@ function CenterControl({
 }
 
 function BottomControl({
+  contentFitMode,
+  setContentFitMode,
   seekBarProgress,
   onProgressChange,
   onProgressChangeEnd,
@@ -654,6 +715,8 @@ function BottomControl({
   currentDurationSecond,
   totalDurationSecond,
 }: {
+  contentFitMode: VideoContentFit;
+  setContentFitMode: React.Dispatch<React.SetStateAction<VideoContentFit>>;
   seekBarProgress: SharedValue<number>;
   onProgressChange: (value: number) => void;
   onProgressChangeEnd: (lastValue: number) => void;
@@ -684,6 +747,23 @@ function BottomControl({
       ? `${hour.toString().padStart(2, '0')}:${minStr}:${secStr}`
       : `${minStr}:${secStr}`;
   });
+
+  const contentFitToastOpacity = useSharedValue(0);
+  const contentFitToastStyle = useAnimatedStyle(() => {
+    return {
+      opacity: contentFitToastOpacity.get(),
+    };
+  });
+
+  const initialRender = useRef(true);
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+    contentFitToastOpacity.set(withSequence(withTiming(1), withDelay(500, withTiming(0))));
+  }, [contentFitMode, contentFitToastOpacity]);
+
   return (
     <Pressable
       style={{
@@ -701,16 +781,41 @@ function BottomControl({
             <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
             <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
           </View>
-          <TouchableOpacity
-            style={{ justifyContent: 'center' }}
-            /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
-            hitSlop={2}>
-            <Icons
-              name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-              size={28}
-              color={'white'}
-            />
-          </TouchableOpacity>
+          <Reanimated.View style={contentFitToastStyle}>
+            <Text
+              style={{
+                color: 'white',
+                backgroundColor: '#00000077',
+                fontSize: isFullscreen ? 16 : 12,
+              }}>
+              {contentFitMode.toUpperCase()}
+            </Text>
+          </Reanimated.View>
+          <View style={{ flexDirection: 'row', gap: 18 }}>
+            <TouchableOpacity
+              style={{ justifyContent: 'center' }}
+              /* //rngh - containerStyle */ onPress={() => {
+                setContentFitMode(val => {
+                  const mode = VideoContentFitModeArr.at(
+                    (VideoContentFitModeArr.indexOf(val) + 1) % 3,
+                  );
+                  return mode!;
+                });
+              }}
+              hitSlop={2}>
+              <Icons name={'fit-screen'} size={28} color={'white'} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ justifyContent: 'center' }}
+              /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
+              hitSlop={2}>
+              <Icons
+                name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+                size={28}
+                color={'white'}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={{ width: '100%' }}>
           <SeekBar
@@ -786,7 +891,7 @@ export const parseSubtitles = async (raw: string) => {
           res.push({
             startTime: toSec(m[1]),
             endTime: toSec(m[2]),
-            text: finalTxt,
+            text: finalTxt.replaceAll('\\h', ' '),
           });
         }
       }
@@ -794,3 +899,42 @@ export const parseSubtitles = async (raw: string) => {
     })();
   });
 };
+
+const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
+  const uint8Array = new Uint8Array(buffer);
+  // UTF-8 BOM: EF BB BF
+  if (
+    uint8Array.length >= 3 &&
+    uint8Array[0] === 0xef &&
+    uint8Array[1] === 0xbb &&
+    uint8Array[2] === 0xbf
+  ) {
+    return Buffer.from(buffer).toString('utf8');
+  }
+  // UTF-16 LE BOM: FF FE
+  if (uint8Array.length >= 2 && uint8Array[0] === 0xff && uint8Array[1] === 0xfe) {
+    return Buffer.from(buffer).toString('utf16le');
+  }
+
+  let nullByteCount = 0;
+  const sampleSize = Math.min(uint8Array.length, 100);
+
+  for (let i = 0; i < sampleSize; i++) {
+    if (uint8Array[i] === 0) {
+      nullByteCount++;
+    }
+  }
+
+  if (nullByteCount > sampleSize * 0.2) {
+    return Buffer.from(buffer).toString('utf16le');
+  }
+
+  return Buffer.from(buffer).toString('utf8');
+};
+
+function calculateSubtitleCharSize(size: number, totalLength: number, limit = 150) {
+  if (totalLength <= limit) {
+    return size;
+  }
+  return size * (limit / totalLength);
+}

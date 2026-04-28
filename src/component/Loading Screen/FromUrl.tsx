@@ -2,34 +2,27 @@ import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useRef } from 'react';
 import { Text, ToastAndroid, View } from 'react-native';
-import randomTipsArray from '../../assets/loadingTips.json';
-import runningTextArray from '../../assets/runningText.json';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import AnimeAPI from '../../utils/AnimeAPI';
-import setHistory from '../../utils/historyControl';
-import controlWatchLater from '../../utils/watchLaterControl';
 
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import randomTipsArray from '@assets/loadingTips.json';
+import runningTextArray from '@assets/runningText.json';
+import useGlobalStyles from '@assets/style';
+import AnimeAPI from '@utils/AnimeAPI';
+import setHistory from '@utils/historyControl';
+import controlWatchLater from '@utils/watchLaterControl';
+
+import LoadingIndicator from '@component/misc/LoadingIndicator';
+import { DatabaseManager } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import { generateUrlWithLatestDomain } from '@utils/domainChanger';
+import { replaceLast } from '@utils/replaceLast';
+import { getMovieDetail, getStreamingDetail } from '@utils/scrapers/animeMovie';
+import { ComicsDetail, getComicsDetailFromUrl, getComicsReading } from '@utils/scrapers/comicsv2';
+import { getFilmDetails } from '@utils/scrapers/film';
+import { getKomikuDetailFromUrl, getKomikuReading, KomikuDetail } from '@utils/scrapers/komiku';
+import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
 import URL from 'url';
-import { DatabaseManager } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
-import { generateUrlWithLatestDomain } from '../../utils/domainChanger';
-import { replaceLast } from '../../utils/replaceLast';
-import { getMovieDetail, getStreamingDetail } from '../../utils/scrapers/animeMovie';
-import {
-  ComicsDetail,
-  getComicsDetailFromUrl,
-  getComicsReading,
-} from '../../utils/scrapers/comicsv2';
-import { getFilmDetails } from '../../utils/scrapers/film';
-import {
-  getKomikuDetailFromUrl,
-  getKomikuReading,
-  KomikuDetail,
-} from '../../utils/scrapers/komiku';
-import { setFilmStreamHistory } from '../EpisodeDetail/FilmDetail';
-import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -64,6 +57,7 @@ function FromUrl(props: Props) {
     },
     [props.navigation],
   );
+
   useFocusEffect(
     useCallback(() => {
       props.navigation.setOptions({ headerTitle: props.route.params.title });
@@ -74,6 +68,16 @@ function FromUrl(props: Props) {
         link = generateUrlWithLatestDomain(props.route.params.link);
       } catch {
         link = props.route.params.link;
+      }
+      if (link === undefined) {
+        props.navigation.goBack();
+        DialogManager.alert(
+          'Error',
+          'Link tidak ditemukan!\nMohon informasikan hal ini ke server discord kami ' +
+            '(dapat ditemukan di beranda aplikasi). ' +
+            'Lengkap dengan judul anime/film/komik yang kamu cari.',
+        );
+        return;
       }
       const resolution = props.route.params.historyData?.resolution; // only if FromUrl is called from history component
       if (link.includes('nanimex')) {
@@ -223,6 +227,14 @@ function FromUrl(props: Props) {
           })
           .catch(handleError);
       } else if (props.route.params.type === 'film') {
+        if (props.route.params.link.includes('tv12.idlix')) {
+          props.navigation.goBack();
+          DialogManager.alert(
+            'Perhatian!',
+            'Dikarenakan perubahan terkait data film, history film lama tidak didukung, sehingga sebagai solusi, kamu harus mencari film ini secara manual di menu pencarian dan pilih episode yang sesuai.',
+          );
+          return;
+        }
         getFilmDetails(link, abort.signal)
           .then(async data => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
@@ -341,7 +353,8 @@ function FromUrl(props: Props) {
           paddingHorizontal: 24,
         }}>
         <LoadingIndicator size={15} />
-        <Text style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20 }]}>
+
+        <Text style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20, marginTop: 20 }]}>
           Mengambil data... Mohon tunggu sebentar!
         </Text>
         <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>

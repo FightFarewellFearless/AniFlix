@@ -1,7 +1,8 @@
 import cheerio from 'cheerio';
 import he from 'he';
 import { ToastAndroid } from 'react-native';
-import deviceUserAgent from '../deviceUserAgent';
+
+import deviceUserAgent from '@utils/deviceUserAgent';
 
 export const __ALIAS = 'komiku';
 export const DOMAIN = __ALIAS + '.org';
@@ -68,7 +69,6 @@ export interface KomikuDetail {
   minAge: string;
   concept: string;
   readingDirection: string;
-  headerImageUrl: string;
   thumbnailUrl: string;
   genres: string[];
   synopsis: string;
@@ -97,26 +97,22 @@ export async function getKomikuDetailFromUrl(
       return { key, value };
     })
     .toArray();
-  const titleRaw =
-    tableInfo.find(item => item.key === 'Judul Komik')?.value ?? 'Data tidak tersedia';
+  const titleRaw = tableInfo.find(item => item.key === 'Judul:')?.value ?? 'Data tidak tersedia';
   const title = he.decode(titleRaw);
   const indonesianTitleRaw =
-    tableInfo.find(item => item.key === 'Judul Indonesia')?.value ?? 'Data tidak tersedia';
+    tableInfo.find(item => item.key === 'Judul Alternatif:')?.value ?? 'Data tidak tersedia';
   const indonesianTitle = he.decode(indonesianTitleRaw);
   const type =
-    (tableInfo.find(item => item.key === 'Jenis Komik')?.value as KomikuDetail['type']) ??
+    (tableInfo.find(item => item.key === 'Tipe:')?.value as KomikuDetail['type']) ??
     'Data tidak tersedia';
-  const author = tableInfo.find(item => item.key === 'Pengarang')?.value ?? 'Data tidak tersedia';
+  const author = tableInfo.find(item => item.key === 'Author:')?.value ?? 'Data tidak tersedia';
   const status =
-    (tableInfo.find(item => item.key === 'Status')?.value as KomikuDetail['status']) ??
+    (tableInfo.find(item => item.key === 'Status:')?.value as KomikuDetail['status']) ??
     'Data tidak tersedia';
-  const minAge =
-    tableInfo.find(item => item.key === 'Umur Pembaca')?.value ?? 'Data tidak tersedia';
-  const concept =
-    tableInfo.find(item => item.key === 'Konsep Cerita')?.value ?? 'Data tidak tersedia';
+  const minAge = tableInfo.find(item => item.key === 'Rating:')?.value ?? 'Data tidak tersedia';
+  const concept = tableInfo.find(item => item.key === 'Tema:')?.value ?? 'Data tidak tersedia';
   const readingDirection =
-    tableInfo.find(item => item.key === 'Cara Baca')?.value ?? 'Data tidak tersedia';
-  const headerImageUrl = data.match(/url\((.*?)\)/)?.[1] ?? '';
+    tableInfo.find(item => item.key === 'Cara Baca:')?.value ?? 'Data tidak tersedia';
   const thumbnailUrl = $('.ims > img').attr('src') ?? '';
   const genres = $('ul.genre > li')
     .map((_i, el) => $(el).text().trim())
@@ -154,7 +150,6 @@ export async function getKomikuDetailFromUrl(
     minAge,
     concept,
     readingDirection,
-    headerImageUrl,
     thumbnailUrl,
     genres,
     synopsis,
@@ -194,7 +189,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       ?.replace(new RegExp('\'|"', 'g'), '');
     if (!coverUrl) {
       thumbnailUrl = data
-        .split('thumbnail: "')[1]
+        .split(/thumbnail:\s*"/)[1]
         ?.split('"')[0]
         ?.replace(new RegExp('\\\\', 'g'), '');
       if (!thumbnailUrl) {
@@ -209,8 +204,12 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
       return $(el).attr('src');
     })
     .toArray();
-  const nextChapter = normalizeUrl($('svg[data-icon="caret-right"]').parent().attr('href') ?? '');
-  const prevChapter = normalizeUrl($('svg[data-icon="caret-left"]').parent().attr('href') ?? '');
+  const nextChapter = normalizeUrl(
+    $('svg[data-icon="caret-right"], svg.fa-caret-right').parent().attr('href') ?? '',
+  );
+  const prevChapter = normalizeUrl(
+    $('svg[data-icon="caret-left"], svg.fa-caret-left').parent().attr('href') ?? '',
+  );
 
   return {
     title,

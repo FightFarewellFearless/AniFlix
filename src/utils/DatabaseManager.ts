@@ -2,8 +2,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { EventEmitter } from 'expo';
 import SQLiteKV from 'expo-sqlite/kv-store';
 import { useCallback, useRef, useState } from 'react';
-import { HistoryItemKey, SetDatabaseTarget } from '../types/databaseTarget';
-import { HistoryJSON } from '../types/historyJSON';
+
+import { HistoryItemKey, SetDatabaseTarget } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
 
 export type DataKey = SetDatabaseTarget | HistoryItemKey;
 

@@ -1,14 +1,14 @@
-import { useCallback, useRef, useState } from 'react';
+import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
+import { useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import { Buffer } from 'buffer/';
-import deviceUserAgent from '../deviceUserAgent';
+import deviceUserAgent from '@utils/deviceUserAgent';
 
 import cheerio from 'cheerio';
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/core';
-import { unpack } from '../unpacker';
+import { unpack } from '@utils/unpacker';
 
 export interface Movies {
   title: string;
@@ -35,7 +35,7 @@ type Props = {
   onAnimeMovieReady: () => void;
 };
 let isError = false;
-
+let Cookie = '';
 export async function getLatestMovie(signal?: AbortSignal, page?: number) {
   if (isError) {
     return { isError };
@@ -44,7 +44,7 @@ export async function getLatestMovie(signal?: AbortSignal, page?: number) {
     `https://154.26.137.28/movie-terbaru/${page ? `page/${page}/` : ''}`,
     {
       signal,
-      headers: { 'User-Agent': deviceUserAgent },
+      headers: { 'User-Agent': deviceUserAgent, Cookie },
     },
   );
   const data = await response.text();
@@ -70,7 +70,7 @@ export async function getMovieDetail(
   let err;
   const response = await fetch(url, {
     signal,
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
   }).catch(erro => {
     err = erro;
   });
@@ -148,7 +148,7 @@ export async function getStreamingDetail(
   }
   const response = await fetch(url, {
     signal,
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
   });
   const data = await response.text();
   const $ = cheerio.load(data);
@@ -246,8 +246,8 @@ export async function getStreamingDetail(
 
   let isRawAvailable = true;
   let supportedRawLinks = [
-    ...pompomLinks,
     ...pixelLinks,
+    ...pompomLinks,
     ...mp4UploadLinks,
     ...acefileLinks,
     ...pogoLinks,
@@ -465,7 +465,7 @@ export async function searchMovie(query: string, signal?: AbortSignal) {
   }
   const response = await fetch('https://154.26.137.28/?s=' + encodeURIComponent(query), {
     signal,
-    headers: { 'User-Agent': deviceUserAgent },
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
   });
   const data = await response.text();
   const $ = cheerio.load(data);
@@ -485,35 +485,18 @@ export async function searchMovie(query: string, signal?: AbortSignal) {
   return movies;
 }
 
+function makeCookieString(cookies: Cookies) {
+  return Object.entries(cookies)
+    .map(([key, details]) => `${key}=${details.value}`)
+    .join('; ');
+}
+
 export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
   const webviewRef = useRef<WebView>(null);
-  const [webviewRequired, setWebviewRequired] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      isError = false;
-      const abortController = new AbortController();
-      (async () => {
-        const text = await fetch('https://154.26.137.28/', {
-          headers: {
-            'User-Agent': deviceUserAgent,
-          },
-          signal: abortController.signal,
-        })
-          .then(a => a.text())
-          .catch(() => '');
-        if (text.includes('<title>AnimeSail')) {
-          setIsWebViewShown(false);
-          onAnimeMovieReady();
-        } else setWebviewRequired(true);
-      })();
-      return () => {
-        abortController.abort();
-      };
-    }, [onAnimeMovieReady, setIsWebViewShown]),
-  );
   useFocusEffect(
     useCallback(() => {
       if (isWebViewShown) {
+        isError = false;
         const timeout = setTimeout(() => {
           isError = true;
           setIsWebViewShown(false);
@@ -529,9 +512,10 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   if (!useIsFocused()) return null;
   return (
     <View style={{ height: 0, display: 'none' }}>
-      {isWebViewShown && webviewRequired && (
+      {isWebViewShown && (
         <WebView
           ref={webviewRef}
+          sharedCookiesEnabled
           userAgent={deviceUserAgent}
           source={{ uri: 'https://154.26.137.28/' }}
           setSupportMultipleWindows={false}
@@ -543,8 +527,15 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
           }}
           onNavigationStateChange={event => {
             if (event.title.includes('AnimeSail')) {
-              setIsWebViewShown(false);
-              onAnimeMovieReady();
+              CookieManager.get('https://154.26.137.28/')
+                .then(makeCookieString)
+                .then(a => {
+                  Cookie = a;
+                })
+                .then(() => {
+                  setIsWebViewShown(false);
+                  onAnimeMovieReady();
+                });
             } else if (event.title.toLowerCase().includes('error')) {
               isError = true;
               setIsWebViewShown(false);

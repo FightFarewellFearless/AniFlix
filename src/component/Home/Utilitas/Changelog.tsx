@@ -1,7 +1,7 @@
+import CHANGELOG from '@root/CHANGELOG.md';
 import { memo } from 'react';
 import Markdown from 'react-native-marked';
 import { useTheme } from 'react-native-paper';
-import CHANGELOG from '../../../../CHANGELOG.md';
 
 function Changelog() {
   const theme = useTheme();

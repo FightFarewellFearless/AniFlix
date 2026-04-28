@@ -6,14 +6,15 @@ import moment from 'moment';
 import { useMemo } from 'react';
 import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import useGlobalStyles from '../../assets/style';
-import { NewAnimeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import { Movies } from '../../utils/scrapers/animeMovie';
 
-import { LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import { FilmHomePage } from '../../utils/scrapers/film';
-import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '../Home/AnimeList';
+import { NewAnimeList } from '@/types/anime';
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import useGlobalStyles from '@assets/style';
+import { Movies } from '@utils/scrapers/animeMovie';
+
+import { LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage } from '@utils/scrapers/film';
+import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '@component/Home/AnimeList';
 import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
 
@@ -44,7 +45,7 @@ export function ListAnimeComponent(
     } else if (props.type === 'comics') {
       return 'Chapter ' + props.newAnimeData.latestChapter;
     } else if (props.type === 'film') {
-      return 'Film';
+      return props.newAnimeData.contentType === 'movie' ? 'Movie' : 'Series';
     } else {
       return props.newAnimeData.episode;
     }

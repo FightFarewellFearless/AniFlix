@@ -1,10 +1,11 @@
 /*
-This code is from react-native-redash with small modification
+This code is originally from react-native-redash with small modification
 */
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import type { TextProps as RNTextProps } from 'react-native';
 import { StyleSheet, TextInput } from 'react-native';
-import Animated, { AnimatedProps, SharedValue, useAnimatedProps } from 'react-native-reanimated';
+import { SharedValue, useAnimatedRef, useDerivedValue } from 'react-native-reanimated';
+import { runOnJS } from 'react-native-worklets';
 
 const styles = StyleSheet.create({
   baseStyle: {
@@ -14,10 +15,8 @@ const styles = StyleSheet.create({
 
 interface TextProps {
   text: SharedValue<string>;
-  style?: AnimatedProps<RNTextProps>['style'];
+  style?: RNTextProps['style'];
 }
-
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 const ReText = (props: TextProps) => {
   const { text, style } = { style: {}, ...props };
@@ -25,20 +24,27 @@ const ReText = (props: TextProps) => {
   useLayoutEffect(() => {
     setDefaultValue(text.get());
   }, [text]);
-  const animatedProps = useAnimatedProps(() => {
-    return {
-      text: text.get(),
-      // Here we use any because the text prop is not available in the type
-    } as any;
+  const textRef = useAnimatedRef<typeof TextInput>();
+  const setNativeText = useCallback(
+    (str: string) => {
+      textRef.current?.setNativeProps({
+        text: str,
+      });
+    },
+    [textRef],
+  );
+  useDerivedValue(() => {
+    'worklet';
+    runOnJS(setNativeText)(text.get());
   });
   return (
-    <AnimatedTextInput
+    <TextInput
+      ref={textRef}
       underlineColorAndroid="transparent"
       editable={false}
       value={defaultValue}
       style={[styles.baseStyle, style]}
       multiline
-      {...{ animatedProps }}
     />
   );
 };

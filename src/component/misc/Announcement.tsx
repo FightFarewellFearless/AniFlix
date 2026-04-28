@@ -1,8 +1,8 @@
+import useGlobalStyles from '@assets/style';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Markdown from 'react-native-marked';
 import { Button, Modal, Portal, useTheme } from 'react-native-paper';
-import useGlobalStyles from '../../assets/style';
 
 export default function Announcement() {
   const [modalVisible, setModalVisible] = useState(false);

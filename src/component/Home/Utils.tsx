@@ -3,7 +3,8 @@ import { memo, useMemo } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Appbar, Surface, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { UtilsStackNavigator } from '../../types/navigation';
+
+import { UtilsStackNavigator } from '@/types/navigation';
 import About from './Utilitas/About';
 import Changelog from './Utilitas/Changelog';
 import SearchAnimeByImage from './Utilitas/SearchAnimeByImage';

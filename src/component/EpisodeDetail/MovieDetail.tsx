@@ -1,5 +1,8 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
+import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useMemo } from 'react';
 import {
   StyleSheet,
@@ -17,19 +20,16 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import controlWatchLater from '../../utils/watchLaterControl';
-
-import { FlashList, FlashListRef } from '@shopify/flash-list';
-import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import ImageLoading from '../misc/ImageLoading';
+
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import controlWatchLater from '@utils/watchLaterControl';
 
 interface MovieEpisode {
   title: string;
@@ -49,8 +49,6 @@ const IMG_HEADER_HEIGHT = 250;
 
 function MovieDetail(props: Props) {
   const styles = useStyles();
-  const globalStyles = useGlobalStyles();
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -97,7 +95,61 @@ function MovieDetail(props: Props) {
     };
   });
 
-  const ListHeaderComponent = useMemo(() => {
+  const listHeaderComponent = (
+    <MovieDetailHeader
+      data={data}
+      headerImageStyle={headerImageStyle}
+      isInList={isInList}
+      lastWatched={lastWatched}
+      link={props.route.params.link}
+      navigation={props.navigation}
+    />
+  );
+
+  return (
+    <ReanimatedFlashList
+      ref={scrollRef}
+      data={data.episodeList.length > 1 ? data.episodeList.toReversed() : []}
+      renderItem={({ item, index }) => (
+        <RenderMovieEpisodeItem
+          item={item}
+          index={index}
+          lastWatched={lastWatched}
+          navigation={props.navigation}
+          routeTitle={data.title}
+        />
+      )}
+      keyExtractor={item => item.title}
+      contentContainerStyle={{
+        backgroundColor: styles.mainContainer.backgroundColor,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        paddingBottom: insets.bottom + 20,
+      }}
+      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+      ListHeaderComponent={listHeaderComponent}
+      extraData={colorScheme}
+      // estimatedItemSize={60}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+}
+
+interface MovieDetailHeaderProps {
+  data: Props['route']['params']['data'];
+  headerImageStyle: any;
+  isInList: boolean;
+  lastWatched: HistoryJSON | undefined;
+  link: string;
+  navigation: Props['navigation'];
+}
+
+const MovieDetailHeader = memo(
+  ({ data, headerImageStyle, isInList, lastWatched, link, navigation }: MovieDetailHeaderProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const theme = useTheme();
+    const colorScheme = useColorScheme();
     const hasMultipleEpisodes = data.episodeList.length > 1;
 
     return (
@@ -219,7 +271,7 @@ function MovieDetail(props: Props) {
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
                   title: data.title.replace('Subtitle Indonesia', ''),
-                  link: props.route.params.link,
+                  link: link,
                   rating: data.rating,
                   releaseYear: data.releaseDate,
                   thumbnailUrl: data.thumbnailUrl,
@@ -249,8 +301,8 @@ function MovieDetail(props: Props) {
                       icon="play"
                       onPress={() => {
                         if (data.episodeList.length > 0) {
-                          props.navigation.navigate('FromUrl', {
-                            title: props.route.params.data.title,
+                          navigation.navigate('FromUrl', {
+                            title: data.title,
                             link: lastWatched.link,
                             historyData: lastWatched
                               ? {
@@ -272,8 +324,8 @@ function MovieDetail(props: Props) {
                     textColor={styles.additionalInfoText.color}
                     mode="elevated"
                     onPress={() => {
-                      props.navigation.navigate('FromUrl', {
-                        title: props.route.params.data.title,
+                      navigation.navigate('FromUrl', {
+                        title: data.title,
                         link: data.episodeList[data.episodeList.length - 1].url,
                         type: 'movie',
                       });
@@ -285,8 +337,8 @@ function MovieDetail(props: Props) {
                     textColor={styles.additionalInfoText.color}
                     mode="elevated"
                     onPress={() => {
-                      props.navigation.navigate('FromUrl', {
-                        title: props.route.params.data.title,
+                      navigation.navigate('FromUrl', {
+                        title: data.title,
                         link: data.episodeList[0].url,
                         type: 'movie',
                       });
@@ -302,8 +354,8 @@ function MovieDetail(props: Props) {
                   mode="elevated"
                   style={{ flex: 1 }}
                   onPress={() => {
-                    props.navigation.navigate('FromUrl', {
-                      title: props.route.params.data.title,
+                    navigation.navigate('FromUrl', {
+                      title: data.title,
                       link: data.streamingUrl,
                       type: 'movie',
                       historyData: lastWatched
@@ -322,120 +374,76 @@ function MovieDetail(props: Props) {
         </View>
       </View>
     );
-  }, [
-    data.episodeList,
-    data.thumbnailUrl,
-    data.title,
-    data.studio,
-    data.genres,
-    data.rating,
-    data.releaseDate,
-    data.updateDate,
-    data.synopsis,
-    data.streamingUrl,
-    styles.mainContainer,
-    styles.mainContent,
-    styles.thumbnail,
-    styles.type,
-    styles.infoContainer,
-    styles.title,
-    styles.author,
-    styles.genreContainer,
-    styles.secondaryInfoContainer,
-    styles.additionalInfo,
-    styles.additionalInfoTextSurface,
-    styles.additionalInfoText,
-    styles.synopsisContainer,
-    styles.synopsisTitle,
-    styles.synopsisView,
-    styles.synopsisText,
-    styles.listChapterTextContainer,
-    styles.listChapterText,
-    styles.chapterButtonsContainer,
-    styles.genre,
-    headerImageStyle,
-    theme.colors.elevation.level2,
-    theme.colors.onBackground,
-    colorScheme,
-    globalStyles.text,
-    isInList,
-    lastWatched,
-    props.route.params.link,
-    props.route.params.data.title,
-    props.navigation,
-  ]);
+  },
+);
 
-  return (
-    <ReanimatedFlashList
-      ref={scrollRef}
-      data={data.episodeList.length > 1 ? data.episodeList.toReversed() : []}
-      renderItem={({ item, index }) => {
-        const isLastWatched =
-          lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
-        return (
-          <View style={styles.episodeListContainer}>
-            <TouchableOpacity
-              style={[styles.episodeButton, isLastWatched && styles.lastWatchedButton]}
-              onPress={() => {
-                props.navigation.navigate('FromUrl', {
-                  title: props.route.params.data.title,
-                  link: item.url,
-                  historyData: isLastWatched
-                    ? {
-                        lastDuration: lastWatched.lastDuration ?? 0,
-                        resolution: lastWatched.resolution ?? '',
-                      }
-                    : undefined,
-                  type: 'movie',
-                });
-              }}>
-              <View style={styles.episodeMainContent}>
-                <View style={styles.episodeNumberBox}>
-                  <Text style={styles.episodeNumberText}>{index + 1}</Text>
-                </View>
-                <View style={styles.episodeTitleWrapper}>
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      globalStyles.text,
-                      styles.episodeText,
-                      isLastWatched ? styles.lastWatchedTextColor : undefined,
-                    ]}>
-                    {item.title}
-                  </Text>
-                  {isLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
-                </View>
-                <Icon
-                  name={isLastWatched ? 'history' : 'play-circle'}
-                  size={20}
-                  color={
-                    isLastWatched
-                      ? styles.lastWatchedTextColor.color
-                      : colorScheme === 'dark'
-                        ? '#5ddfff'
-                        : '#00608d'
-                  }
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      }}
-      keyExtractor={item => item.title}
-      contentContainerStyle={{
-        backgroundColor: styles.mainContainer.backgroundColor,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-        paddingBottom: insets.bottom + 20,
-      }}
-      ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-      ListHeaderComponent={ListHeaderComponent}
-      extraData={colorScheme}
-      // estimatedItemSize={60}
-      showsVerticalScrollIndicator={false}
-    />
-  );
+interface RenderMovieEpisodeItemProps {
+  item: MovieEpisode;
+  index: number;
+  lastWatched: HistoryJSON | undefined;
+  navigation: Props['navigation'];
+  routeTitle: string;
 }
+
+const RenderMovieEpisodeItem = memo(
+  ({ item, index, lastWatched, navigation, routeTitle }: RenderMovieEpisodeItemProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const colorScheme = useColorScheme();
+
+    const isLastWatched =
+      lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
+
+    return (
+      <View style={styles.episodeListContainer}>
+        <TouchableOpacity
+          style={[styles.episodeButton, isLastWatched && styles.lastWatchedButton]}
+          onPress={() => {
+            navigation.navigate('FromUrl', {
+              title: routeTitle,
+              link: item.url,
+              historyData: isLastWatched
+                ? {
+                    lastDuration: lastWatched.lastDuration ?? 0,
+                    resolution: lastWatched.resolution ?? '',
+                  }
+                : undefined,
+              type: 'movie',
+            });
+          }}>
+          <View style={styles.episodeMainContent}>
+            <View style={styles.episodeNumberBox}>
+              <Text style={styles.episodeNumberText}>{index + 1}</Text>
+            </View>
+            <View style={styles.episodeTitleWrapper}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  globalStyles.text,
+                  styles.episodeText,
+                  isLastWatched ? styles.lastWatchedTextColor : undefined,
+                ]}>
+                {item.title}
+              </Text>
+              {isLastWatched && <Text style={styles.watchingNowTag}>Terakhir Ditonton</Text>}
+            </View>
+            <Icon
+              name={isLastWatched ? 'history' : 'play-circle'}
+              size={20}
+              color={
+                isLastWatched
+                  ? styles.lastWatchedTextColor.color
+                  : colorScheme === 'dark'
+                    ? '#5ddfff'
+                    : '#00608d'
+              }
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  },
+);
 
 function useStyles() {
   const theme = useTheme();

@@ -3,8 +3,8 @@ import { memo } from 'react';
 import { Appbar, useTheme } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/fontawesome';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
-import useGlobalStyles from '../../assets/style';
-import { SayaDrawerNavigator } from '../../types/navigation';
+import useGlobalStyles from '@assets/style';
+import { SayaDrawerNavigator } from '@/types/navigation';
 import History from './Saya/History';
 import WatchLater from './Saya/WatchLater';
 

@@ -4,8 +4,9 @@ import React, { useMemo } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Fontisto from '@react-native-vector-icons/fontisto';
 import Icon from '@react-native-vector-icons/material-design-icons';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
+
+import useGlobalStyles from '@assets/style';
+import { RootStackNavigator } from '@/types/navigation';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FailedToConnect'>;
 
@@ -89,7 +90,7 @@ function FailedToConnect(props: Props) {
       </View>
 
       <Text style={[styles.versionText, globalStyles.text]}>
-        Versi: {require('../../../package.json').version}
+        Versi: {require('@root/package.json').version}
       </Text>
     </View>
   );

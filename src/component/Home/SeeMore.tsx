@@ -10,19 +10,21 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { NewAnimeList } from '@/types/anime';
+import { RootStackNavigator } from '@/types/navigation';
+import { ListAnimeComponent } from '@component/misc/ListAnimeComponent';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
-} from '../../misc/context';
-import { NewAnimeList } from '../../types/anime';
-import { RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
-import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import { FilmHomePage, getLatest } from '../../utils/scrapers/film';
-import { ListAnimeComponent } from '../misc/ListAnimeComponent';
+  SeriesListHomeContext,
+} from '@misc/context';
+import AnimeAPI from '@utils/AnimeAPI';
+import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
@@ -30,7 +32,7 @@ type ItemType = NewAnimeList | Movies | LatestComicsRelease | FilmHomePage[numbe
 
 interface SeeMoreUIProps {
   data: ItemType[];
-  type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList';
+  type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList';
   onLoadMore: () => Promise<void>;
   navigation: Props['navigation'];
 }
@@ -50,11 +52,13 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
       headerTitle:
         type === 'FilmList'
           ? 'Film terbaru'
-          : type === 'MovieList'
-            ? 'Movie terbaru'
-            : type === 'ComicsList'
-              ? 'Komik terbaru'
-              : 'Anime terbaru',
+          : type === 'SeriesList'
+            ? 'Series terbaru'
+            : type === 'MovieList'
+              ? 'Movie terbaru'
+              : type === 'ComicsList'
+                ? 'Komik terbaru'
+                : 'Anime terbaru',
     });
   }, [navigation, type]);
 
@@ -83,6 +87,16 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
         );
       }
       if (type === 'FilmList') {
+        return (
+          <ListAnimeComponent
+            gap
+            type="film"
+            newAnimeData={item as FilmHomePage[number]}
+            navigationProp={navigation}
+          />
+        );
+      }
+      if (type === 'SeriesList') {
         return (
           <ListAnimeComponent
             gap
@@ -204,7 +218,7 @@ const FilmContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
 
   const handleLoadMore = async () => {
     const page = Math.round((data.length ?? 0) / 30);
-    const newData = await getLatest(page + 1);
+    const newData = await getLatestMovies(page + 1);
 
     if ('isError' in newData) {
       throw new Error('API Error');
@@ -222,6 +236,33 @@ const FilmContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
 
   return (
     <SeeMoreUI data={data} type="FilmList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
+const SeriesContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(SeriesListHomeContext);
+  const data = paramsState || [];
+
+  const handleLoadMore = async () => {
+    const page = Math.round((data.length ?? 0) / 30);
+    const newData = await getLatestSeries(page + 1);
+
+    if ('isError' in newData) {
+      throw new Error('API Error');
+    }
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev, ...newData];
+        return combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="SeriesList" onLoadMore={handleLoadMore} navigation={navigation} />
   );
 };
 
@@ -257,6 +298,8 @@ function SeeMore(props: Props) {
   switch (type) {
     case 'FilmList':
       return <FilmContainer navigation={props.navigation} />;
+    case 'SeriesList':
+      return <SeriesContainer navigation={props.navigation} />;
     case 'MovieList':
       return <MovieContainer navigation={props.navigation} />;
     case 'ComicsList':

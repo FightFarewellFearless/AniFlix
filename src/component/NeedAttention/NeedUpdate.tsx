@@ -1,3 +1,4 @@
+import Icon from '@react-native-vector-icons/fontawesome5';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -8,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import Markdown from 'react-native-marked';
-import Icon from '@react-native-vector-icons/fontawesome5';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
@@ -20,10 +20,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { runOnJS } from 'react-native-worklets';
-import { version as appVersion, OTAJSVersion } from '../../../package.json';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import DialogManager from '../../utils/dialogManager';
+
+import { RootStackNavigator } from '@/types/navigation';
+import useGlobalStyles from '@assets/style';
+import { version as appVersion, OTAJSVersion } from '@root/package.json';
+import DialogManager from '@utils/dialogManager';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'NeedUpdate'>;
 

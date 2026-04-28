@@ -43,27 +43,29 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { runOnJS } from 'react-native-worklets';
-import { OTAJSVersion, version } from '../../../package.json';
-import runningText from '../../assets/runningText.json';
-import useGlobalStyles from '../../assets/style';
+
+import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '@/types/anime';
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import runningText from '@assets/runningText.json';
+import useGlobalStyles from '@assets/style';
+import Announcment from '@component/misc/Announcement';
+import { ListAnimeComponent } from '@component/misc/ListAnimeComponent';
+import ReText from '@component/misc/ReText';
+import Skeleton from '@component/misc/Skeleton';
+import { Github, JoinDiscord } from '@component/misc/Social';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import {
   ComicsListContext,
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
-} from '../../misc/context';
-import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { getLatestMovie, Movies } from '../../utils/scrapers/animeMovie';
-import { getLatestComicsReleases, LatestComicsRelease } from '../../utils/scrapers/comicsv2';
-import { FilmHomePage, getFeatured, getLatest } from '../../utils/scrapers/film';
-import { Github, JoinDiscord } from '../Loading Screen/Connect';
-import Announcment from '../misc/Announcement';
-import { ListAnimeComponent } from '../misc/ListAnimeComponent';
-import ReText from '../misc/ReText';
-import Skeleton from '../misc/Skeleton';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+  SeriesListHomeContext,
+} from '@misc/context';
+import { OTAJSVersion, version } from '@root/package.json';
+import AnimeAPI from '@utils/AnimeAPI';
+import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
+import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -217,6 +219,29 @@ function HomeList(props: HomeProps) {
     [data?.jadwalAnime, jadwalHidden],
   );
 
+  const [filmHomepageData, setFilmHomepageData] = useState<Awaited<ReturnType<typeof getHomepage>>>(
+    {
+      featured: [],
+      trending: [],
+    },
+  );
+  const [isFilmError, setIsFilmError] = useState(false);
+
+  useEffect(() => {
+    setFilmHomepageData({
+      featured: [],
+      trending: [],
+    }); // so the skeleton loading show
+    setIsFilmError(false);
+    queueMicrotask(() => {
+      getHomepage()
+        .then(setFilmHomepageData)
+        .catch(() => {
+          setIsFilmError(true);
+        });
+    });
+  }, [refreshingKey]);
+
   return (
     <LegendList
       ref={listRef}
@@ -286,8 +311,20 @@ function HomeList(props: HomeProps) {
             data={data}
             props={props}
           />
-          <FeaturedFilmList props={props} key={'film_featured' + refreshingKey} />
+          <FeaturedFilmList
+            data={filmHomepageData.featured}
+            isError={isFilmError}
+            props={props}
+            key={'film_featured' + refreshingKey}
+          />
+          <TrendingFilmList
+            data={filmHomepageData.trending}
+            isError={isFilmError}
+            props={props}
+            key={'film_trending' + refreshingKey}
+          />
           <LatestFilmList props={props} key={'film_latest' + refreshingKey} />
+          <LatestSeriesList props={props} key={'series_latest' + refreshingKey} />
           <MovieList props={props} key={'anime_movie' + refreshingKey} />
           <ComicList key={'comick' + refreshingKey} />
           <TouchableOpacity
@@ -314,12 +351,17 @@ function HomeList(props: HomeProps) {
 }
 
 const FeaturedFilmList = memo(FeaturedFilmListUNMEMO);
-function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
+function FeaturedFilmListUNMEMO({
+  props,
+  data,
+  isError,
+}: {
+  props: HomeProps;
+  data: FilmHomePage;
+  isError: boolean;
+}) {
   const styles = useStyles();
-  const [data, setData] = useState<FilmHomePage>([]);
   // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
-  const [isError, setIsError] = useState(false);
-  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -334,21 +376,6 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
     [props.navigation],
   );
 
-  useEffect(() => {
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
-      getFeatured()
-        .then(movieData => {
-          if ('isError' in movieData) {
-            setIsError(true);
-          } else {
-            setData?.(movieData);
-          }
-        })
-        .catch(() => setIsError(true));
-    });
-  }, [setData]);
-
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -356,17 +383,71 @@ function FeaturedFilmListUNMEMO({ props }: { props: HomeProps }) {
       </View>
 
       {isError && (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'connectToServer' }],
-            });
-          }}
-          style={styles.errorContainer}>
+        <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
-        </TouchableOpacity>
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
+      )}
+
+      {data?.length !== 0 ? (
+        <FlashList
+          renderScrollComponent={RenderScrollComponent}
+          contentContainerStyle={{ gap: 3 }}
+          horizontal
+          data={data?.slice(0, 25) ?? []}
+          renderItem={renderMovie}
+          keyExtractor={z => 'featured' + z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
+  );
+}
+
+const TrendingFilmList = memo(TrendingFilmListUNMEMO);
+function TrendingFilmListUNMEMO({
+  props,
+  data,
+  isError,
+}: {
+  props: HomeProps;
+  data: FilmHomePage;
+  isError: boolean;
+}) {
+  const styles = useStyles();
+  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+
+  const renderMovie = useCallback(
+    ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
+      <ListAnimeComponent
+        gap
+        newAnimeData={item}
+        type="film"
+        key={'btn' + item.title}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Film Trending</Text>
+      </View>
+
+      {isError && (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
       )}
 
       {data?.length !== 0 ? (
@@ -392,7 +473,6 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(FilmListHomeContext);
   const [isError, setIsError] = useState(false);
-  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -410,7 +490,7 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   useEffect(() => {
     setData?.([]); // so the skeleton loading show
     queueMicrotask(() => {
-      getLatest()
+      getLatestMovies()
         .then(movieData => {
           if ('isError' in movieData) {
             setIsError(true);
@@ -436,17 +516,12 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
       </View>
 
       {isError && (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'connectToServer' }],
-            });
-          }}
-          style={styles.errorContainer}>
+        <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>Error mendapatkan data. Ketuk untuk mencoba ulang.</Text>
-        </TouchableOpacity>
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
       )}
 
       {data?.length !== 0 ? (
@@ -454,7 +529,76 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
           renderScrollComponent={RenderScrollComponent}
           contentContainerStyle={{ gap: 3 }}
           horizontal
-          data={data?.slice(0, 30) ?? []}
+          data={data?.slice(0, 36) ?? []}
+          renderItem={renderMovie}
+          keyExtractor={z => 'latest' + z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
+  );
+}
+const LatestSeriesList = memo(LatestSeriesListUNMEMO);
+function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
+  const styles = useStyles();
+  const { paramsState: data, setParamsState: setData } = useContext(SeriesListHomeContext);
+  const [isError, setIsError] = useState(false);
+
+  const renderMovie = useCallback(
+    ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
+      <ListAnimeComponent
+        gap
+        newAnimeData={item}
+        type="film"
+        key={'btn' + item.title}
+        navigationProp={props.navigation}
+      />
+    ),
+    [props.navigation],
+  );
+
+  useEffect(() => {
+    setData?.([]); // so the skeleton loading show
+    queueMicrotask(() => {
+      getLatestSeries()
+        .then(movieData => {
+          setData?.(movieData);
+        })
+        .catch(() => setIsError(true));
+    });
+  }, [setData]);
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Series Terbaru</Text>
+        <TouchableOpacity
+          style={styles.seeMoreButton}
+          onPress={() => {
+            props.navigation.dispatch(StackActions.push('SeeMore', { type: 'SeriesList' }));
+          }}>
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
+        </TouchableOpacity>
+      </View>
+
+      {isError && (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
+      )}
+
+      {data?.length !== 0 ? (
+        <FlashList
+          renderScrollComponent={RenderScrollComponent}
+          contentContainerStyle={{ gap: 3 }}
+          horizontal
+          data={data?.slice(0, 36) ?? []}
           renderItem={renderMovie}
           keyExtractor={z => 'latest' + z.title}
           extraData={styles}

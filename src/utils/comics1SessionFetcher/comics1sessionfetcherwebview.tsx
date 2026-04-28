@@ -1,11 +1,12 @@
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Comics1SessionFetcherContext } from './comics1sessionfetchercontext';
-import deviceUserAgent from './deviceUserAgent';
-import { BASE_URL } from './scrapers/comics1';
 
-export default function Comics1WebView() {
+import deviceUserAgent from '@utils/deviceUserAgent';
+import { BASE_URL } from '@utils/scrapers/comics1';
+import { Comics1SessionFetcherContext } from './comics1sessionfetchercontext';
+
+export default function Comics1SessionWebView() {
   const webviewRef = useRef<WebView>(null);
   const context = use(Comics1SessionFetcherContext);
   // useEffect(() => {

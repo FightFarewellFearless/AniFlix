@@ -25,20 +25,21 @@ import Reanimated, {
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
-import proTips from '../../assets/proTips.json';
-import useGlobalStyles from '../../assets/style';
-import { SearchAnime, listAnimeTypeList } from '../../types/anime';
-import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
-import AnimeAPI from '../../utils/AnimeAPI';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import DialogManager from '../../utils/dialogManager';
-import { Movies, searchMovie } from '../../utils/scrapers/animeMovie';
-import { ComicsSearch, comicsSearch } from '../../utils/scrapers/comicsv2';
-import { SearchResult, searchFilm } from '../../utils/scrapers/film';
-import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '../../utils/scrapers/komiku';
-import DarkOverlay from '../misc/DarkOverlay';
-import ImageLoading from '../misc/ImageLoading';
-import { TouchableOpacity } from '../misc/TouchableOpacityRNGH';
+
+import { SearchAnime, listAnimeTypeList } from '@/types/anime';
+import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import proTips from '@assets/proTips.json';
+import useGlobalStyles from '@assets/style';
+import DarkOverlay from '@component/misc/DarkOverlay';
+import ImageLoading from '@component/misc/ImageLoading';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+import AnimeAPI from '@utils/AnimeAPI';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
+import { Movies, searchMovie } from '@utils/scrapers/animeMovie';
+import { ComicsSearch, comicsSearch } from '@utils/scrapers/comicsv2';
+import { SearchResult, searchFilm } from '@utils/scrapers/film';
+import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '@utils/scrapers/komiku';
 import { RenderScrollComponent } from './AnimeList';
 type SectionHeader = { type: 'header'; title: string };
 type ComicItem = (ComicsSearch | KomikuSearch) & { source?: string };
@@ -163,7 +164,7 @@ function Search(props: Props) {
           : 'Error tidak diketahui: ' + err.message;
       DialogManager.alert('Error', errMessage);
     };
-    if (searchText === '') {
+    if (searchText.trim() === '') {
       return;
     }
 
@@ -187,10 +188,10 @@ function Search(props: Props) {
         })
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
           setLoading(false);
         })
@@ -206,12 +207,12 @@ function Search(props: Props) {
         .catch(handleError)
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
-          setCurrentSearchQuery(searchText);
+          setCurrentSearchQuery(searchText.trim());
           setLoading(false);
         });
     } else {
@@ -258,12 +259,12 @@ function Search(props: Props) {
         .catch(handleError)
         .finally(() => {
           setSearchedSearchType(searchType);
-          if (searchHistory.includes(searchText)) {
-            searchHistory.splice(searchHistory.indexOf(searchText), 1);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
           }
-          searchHistory.unshift(searchText);
+          searchHistory.unshift(searchText.trim());
           DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
-          setCurrentSearchQuery(searchText);
+          setCurrentSearchQuery(searchText.trim());
           setLoading(false);
         });
     }
@@ -798,7 +799,28 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                 </Text>
               ))}
           </View>
-          <View style={{ flexDirection: 'column', marginRight: 5, marginTop: 5 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'baseline',
+              marginHorizontal: 5,
+              gap: 5,
+            }}>
+            {isFilm(item) && (item.quality || item.numberOfSeasons) && (
+              <View
+                style={[
+                  styles.statusInfo,
+                  {
+                    backgroundColor: item.quality ? 'rgb(0, 57, 80)' : '#ffffff2c',
+                    marginTop: 5,
+                  },
+                ]}>
+                <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
+                  <Icon name={item.quality ? 'video-camera' : 'tv'} color={'rgb(220, 184, 255)'} />{' '}
+                  {item.quality ?? `S${item.numberOfSeasons}`}
+                </Text>
+              </View>
+            )}
             <View
               style={[
                 styles.statusInfo,
@@ -822,7 +844,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
           <Text
             numberOfLines={4}
             style={[{ flexShrink: 1 }, [globalStyles.text, styles.animeSearchListDetailText]]}>
-            {item?.title}
+            {item?.title} {isFilm(item) && item.year !== 'Unknown' && `(${item.year})`}
           </Text>
         </View>
 

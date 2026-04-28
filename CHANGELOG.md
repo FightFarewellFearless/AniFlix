@@ -1,3 +1,74 @@
+# v1.2.1_JS-12 (28-April-2026)
+Sorry banget hari ini ada 3 update yang berdekatan :(
+## Diperbaiki
+- Histori tidak sinkron saat keluar dari layar streaming
+# v1.2.1_JS-11 (28-April-2026)
+## Ditingkatkan
+- Performa perangkat ketika streaming film/movie/anime, sekaligus potensi untuk memperbaiki penggunaan memori yang tinggi ketika streaming dalam waktu lama
+# v1.2.1_JS-10 (28-April-2026)
+## Diperbaiki/Ditingkatkan
+- [Video player] Beberapa masalah pada video player sekaligus peningkatan UX
+# v1.2.1_JS-9 (26-April-2026)
+## Diperbaiki
+- [Film] Error pada seluruh data film
+# v1.2.1_JS-8 (24-April-2026)
+## Diperbaiki
+- [Film] Error saat subtitle tidak tersedia
+# v1.2.1_JS-7 (24-April-2026)
+## Ditingkatkan
+- Memperbaiki sinopsis episode series yang salah
+- Menghandle subtitle yang muncul di waktu yang bersamaan
+- Memunculkan teks memuat subtitle saat berganti episode series
+# v1.2.1_JS-6 (22-April-2026)
+## Ditambahkan
+- Informasi tambahan di detail film
+## Diperbaiki
+- Error pada streaming film
+## Perubahan lain
+- Refactor cukup besar di codebase aplikasi agar lebih mudah dirawat dan dibaca
+# v1.2.1_JS-5 (16-April-2026)
+## Ditambahkan
+- Pilihan mode content fit untuk video player
+## Diperbaiki
+- (film/tv series) Masalah encoding pada subtitle, menyebabkan subtitle gagal di uraikan
+- (komiku) beberapa komik memberikan cover komik yang kosong dan pemilihan chapter tidak bekerja
+# v1.2.1_JS-4 (14-April-2026)
+## Diperbaiki
+- 00:00 pada durasi total video player
+# v1.2.1_JS-3 (13-April-2026)
+## Ditambahkan
+- Pemberitahuan progres pemecahan 'challenge' di data film saat loading, dan opsi untuk mempercepat nya ketika waktu yang dibutuhkan lebih dari 5 detik
+## Diperbaiki
+- Error terkait jaringan pada film (#2)
+- Memperbaiki nama film yang duplikat pada histori
+  > Diperbaiki dengan cara menambahkan tahun rilis pada setiap judul
+- Memperbaiki error pada 1 data komik menyebabkan pencarian untuk data lainnya ikut gagal
+# v1.2.1_JS-2 (12-April-2026)
+## Diperbaiki
+- Error terkait jaringan pada film
+# v1.2.1_JS-1 (12-April-2026)
+## Ditingkatkan
+- Pesan error untuk data video pada film yang sedang disiapkan
+# v1.2.1 (11-April-2026)
+## Diperbaiki
+- 'Data tidak tersedia' pada anime movie
+- Perbaikan sekaligus peningkatan untuk seluruh data film
+  > Data lama (termasuk histori dan list tonton nanti) tidak dapat digunakan
+- Gambar header background di komiku
+
+# v1.2.0_JS-10 (6-April-2026)
+## Diperbaiki
+- Handle crash pada bagian loading dengan pesan yang lebih informatif
+- Memperbaiki error insialisasi data movie tidak kunjung hilang setelah mencoba lagi
+# v1.2.0_JS-9 (5-April-2026)
+## Diperbaiki
+- Error pada chapter komik
+- 'Data tidak tersedia' pada komik bersumber dari komiku
+## Perubahan lain
+- Ikon error pada gambar background di hasil pencarian dihilangkan
+- [Film] Otomatis membatalkan terjemahan subtitle jika keluar atau pindah ke episode lain
+- Menghilangkan pengecekan untuk persiapan anime movie
+- Mengganti teks pada menu koneksi awal dan ikon pada rating usia (jika data adalah komiku)
 # v1.2.0_JS-8 (4-April-2026)
 ## Diperbaiki
 - Error pada komik

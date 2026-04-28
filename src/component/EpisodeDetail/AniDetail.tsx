@@ -1,5 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
+import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useMemo, useState } from 'react';
 import {
   StyleSheet,
@@ -18,21 +20,19 @@ import Reanimated, {
   useAnimatedStyle,
   useScrollOffset,
 } from 'react-native-reanimated';
-import useGlobalStyles from '../../assets/style';
-import { RootStackNavigator } from '../../types/navigation';
-import watchLaterJSON from '../../types/watchLaterJSON';
-import controlWatchLater from '../../utils/watchLaterControl';
-
-import { FlashList, FlashListRef } from '@shopify/flash-list';
-import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AniDetailEpsList } from '../../types/anime';
-import { HistoryItemKey } from '../../types/databaseTarget';
-import { HistoryJSON } from '../../types/historyJSON';
-import { DatabaseManager, useModifiedKeyValueIfFocused } from '../../utils/DatabaseManager';
-import { replaceLast } from '../../utils/replaceLast';
-import ImageLoading from '../misc/ImageLoading';
+
+import { AniDetailEpsList } from '@/types/anime';
+import { HistoryItemKey } from '@/types/databaseTarget';
+import { HistoryJSON } from '@/types/historyJSON';
+import { RootStackNavigator } from '@/types/navigation';
+import watchLaterJSON from '@/types/watchLaterJSON';
+import { replaceLast } from '@/utils/replaceLast';
+import useGlobalStyles from '@assets/style';
+import ImageLoading from '@component/misc/ImageLoading';
+import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/RecyclerViewProps';
+import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
+import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<AniDetailEpsList> & { ref?: React.Ref<FlashListRef<AniDetailEpsList>> },
@@ -46,7 +46,6 @@ const IMG_HEADER_HEIGHT = 200;
 function AniDetail(props: Props) {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
@@ -115,7 +114,87 @@ function AniDetail(props: Props) {
     });
   }, [data.episodeList, searchQuery]);
 
-  const ListHeaderComponent = useMemo(() => {
+  const listHeaderComponent = (
+    <AniDetailHeader
+      data={data}
+      historyTitle={historyTitle}
+      isInList={isInList}
+      lastWatched={lastWatched}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      headerImageStyle={headerImageStyle}
+      link={props.route.params.link}
+      navigation={props.navigation}
+    />
+  );
+
+  return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <ReanimatedFlashList
+        maintainVisibleContentPosition={{
+          disabled: true,
+        }}
+        ref={scrollRef}
+        data={filteredEpisodes}
+        renderItem={({ item }) => (
+          <RenderEpisodeItem
+            item={item}
+            lastWatched={lastWatched}
+            navigation={props.navigation}
+            routeTitle={data.title}
+          />
+        )}
+        ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
+        keyExtractor={item => item.title}
+        contentContainerStyle={{
+          backgroundColor: styles.mainContainer.backgroundColor,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+          paddingBottom: insets.bottom,
+        }}
+        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
+        ListHeaderComponent={listHeaderComponent}
+        ListEmptyComponent={
+          <View style={[styles.mainContainer, { marginVertical: 6 }]}>
+            <Text style={globalStyles.text}>Tidak ada episode</Text>
+          </View>
+        }
+        extraData={colorScheme}
+        showsVerticalScrollIndicator={false}
+      />
+    </KeyboardAvoidingView>
+  );
+}
+
+interface AniDetailHeaderProps {
+  data: Props['route']['params']['data'];
+  historyTitle: string;
+  isInList: boolean;
+  lastWatched: HistoryJSON | undefined;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  headerImageStyle: any;
+  link: string;
+  navigation: Props['navigation'];
+}
+
+const AniDetailHeader = memo(
+  ({
+    data,
+    historyTitle,
+    isInList,
+    lastWatched,
+    searchQuery,
+    setSearchQuery,
+    headerImageStyle,
+    link,
+    navigation,
+  }: AniDetailHeaderProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+    const theme = useTheme();
+    const colorScheme = useColorScheme();
+
     return (
       <View style={styles.mainContainer}>
         <Reanimated.View
@@ -253,7 +332,7 @@ function AniDetail(props: Props) {
               onPress={() => {
                 const watchLaterJson: watchLaterJSON = {
                   title: data.title.replace(/Subtitle Indonesia|Sub Indo/, ''),
-                  link: props.route.params.link,
+                  link: link,
                   rating: data.rating,
                   releaseYear: data.releaseYear,
                   thumbnailUrl: data.thumbnailUrl,
@@ -277,8 +356,8 @@ function AniDetail(props: Props) {
                   icon="play"
                   onPress={() => {
                     if (data.episodeList.length > 0) {
-                      props.navigation.navigate('FromUrl', {
-                        title: props.route.params.data.title,
+                      navigation.navigate('FromUrl', {
+                        title: data.title,
                         link: lastWatched.link,
                         historyData: lastWatched
                           ? {
@@ -301,8 +380,8 @@ function AniDetail(props: Props) {
                 mode="elevated"
                 onPress={() => {
                   if (data.episodeList.length > 0) {
-                    props.navigation.navigate('FromUrl', {
-                      title: props.route.params.data.title,
+                    navigation.navigate('FromUrl', {
+                      title: data.title,
                       link: data.episodeList[data.episodeList.length - 1].link,
                     });
                   } else {
@@ -317,8 +396,8 @@ function AniDetail(props: Props) {
                 mode="elevated"
                 onPress={() => {
                   if (data.episodeList.length > 0) {
-                    props.navigation.navigate('FromUrl', {
-                      title: props.route.params.data.title,
+                    navigation.navigate('FromUrl', {
+                      title: data.title,
                       link: data.episodeList[0].link,
                     });
                   } else {
@@ -338,119 +417,56 @@ function AniDetail(props: Props) {
         </View>
       </View>
     );
-  }, [
-    styles.mainContainer,
-    styles.mainContent,
-    styles.thumbnail,
-    styles.type,
-    styles.status,
-    styles.infoContainer,
-    styles.title,
-    styles.indonesianTitle,
-    styles.author,
-    styles.genreContainer,
-    styles.secondaryInfoContainer,
-    styles.additionalInfo,
-    styles.additionalInfoTextSurface,
-    styles.additionalInfoText,
-    styles.synopsisContainer,
-    styles.synopsisTitle,
-    styles.synopsisView,
-    styles.synopsisText,
-    styles.listChapterTextContainer,
-    styles.listChapterText,
-    styles.chapterButtonsContainer,
-    styles.genre,
-    headerImageStyle,
-    theme.colors.elevation.level2,
-    theme.colors.onBackground,
-    data.thumbnailUrl,
-    data.animeType,
-    data.status,
-    data.alternativeTitle,
-    data.studio,
-    data.genres,
-    data.rating,
-    data.releaseYear,
-    data.minutesPerEp,
-    data.episodeList,
-    data.epsTotal,
-    data.synopsis,
-    data.title,
-    colorScheme,
-    globalStyles.text,
-    historyTitle,
-    isInList,
-    lastWatched,
-    searchQuery,
-    props.route.params.link,
-    props.route.params.data.title,
-    props.navigation,
-  ]);
+  },
+);
 
-  return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
-      <ReanimatedFlashList
-        maintainVisibleContentPosition={{
-          disabled: true,
-        }}
-        ref={scrollRef}
-        data={filteredEpisodes}
-        renderItem={({ item }) => {
-          const isLastWatched =
-            lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
-          return (
-            <TouchableOpacity
-              style={styles.episodeButton}
-              onPress={() => {
-                props.navigation.navigate('FromUrl', {
-                  title: props.route.params.data.title,
-                  link: item.link,
-                  historyData: isLastWatched
-                    ? {
-                        lastDuration: lastWatched.lastDuration ?? 0,
-                        resolution: lastWatched.resolution ?? '',
-                      }
-                    : undefined,
-                });
-              }}>
-              <View style={styles.episodeTitleContainer}>
-                <Text
-                  style={[
-                    globalStyles.text,
-                    styles.episodeText,
-                    isLastWatched ? styles.lastWatchedTextColor : undefined,
-                  ]}>
-                  {item.title.replace(/Subtitle Indonesia|Sub Indo/, '').trim()}
-                </Text>
-                {isLastWatched && (
-                  <Icon name="film" color={styles.lastWatchedTextColor.color} size={16} />
-                )}
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-        ItemSeparatorComponent={() => <Divider style={styles.chapterDivider} />}
-        keyExtractor={item => item.title}
-        contentContainerStyle={{
-          backgroundColor: styles.mainContainer.backgroundColor,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-          paddingBottom: insets.bottom,
-        }}
-        ListHeaderComponentStyle={[styles.mainContainer, { marginBottom: 12 }]}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={
-          <View style={[styles.mainContainer, { marginVertical: 6 }]}>
-            <Text style={globalStyles.text}>Tidak ada episode</Text>
-          </View>
-        }
-        extraData={colorScheme}
-        showsVerticalScrollIndicator={false}
-      />
-    </KeyboardAvoidingView>
-  );
+interface RenderEpisodeItemProps {
+  item: AniDetailEpsList;
+  lastWatched: HistoryJSON | undefined;
+  navigation: Props['navigation'];
+  routeTitle: string;
 }
+
+const RenderEpisodeItem = memo(
+  ({ item, lastWatched, navigation, routeTitle }: RenderEpisodeItemProps) => {
+    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
+
+    const isLastWatched =
+      lastWatched && lastWatched.episode && item.title.includes(lastWatched?.episode);
+
+    return (
+      <TouchableOpacity
+        style={styles.episodeButton}
+        onPress={() => {
+          navigation.navigate('FromUrl', {
+            title: routeTitle,
+            link: item.link,
+            historyData: isLastWatched
+              ? {
+                  lastDuration: lastWatched.lastDuration ?? 0,
+                  resolution: lastWatched.resolution ?? '',
+                }
+              : undefined,
+          });
+        }}>
+        <View style={styles.episodeTitleContainer}>
+          <Text
+            style={[
+              globalStyles.text,
+              styles.episodeText,
+              isLastWatched ? styles.lastWatchedTextColor : undefined,
+            ]}>
+            {item.title.replace(/Subtitle Indonesia|Sub Indo/, '').trim()}
+          </Text>
+          {isLastWatched && (
+            <Icon name="film" color={styles.lastWatchedTextColor.color} size={16} />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  },
+);
 
 function useStyles() {
   const theme = useTheme();

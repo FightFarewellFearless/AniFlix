@@ -9,7 +9,7 @@ import {
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Appearance, Linking, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
@@ -27,34 +27,20 @@ import {
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { MDDark, MDLight } from './src/assets/MaterialTheme';
-import useGlobalStyles from './src/assets/style';
-import ErrorScreen from './src/component/misc/ErrorScreen';
-import FallbackComponent from './src/component/misc/FallbackErrorBoundary';
-import SafeAreaWrapper from './src/component/misc/SafeAreaWrapper';
-import SuspenseLoading from './src/component/misc/SuspenseLoading';
-import {
-  ComicsListContext,
-  EpisodeBaruHomeContext,
-  FilmListHomeContext,
-  MovieListHomeContext,
-} from './src/misc/context';
-import { navigationRef, replaceAllWith } from './src/misc/NavigationService';
-import { EpisodeBaruHome } from './src/types/anime';
-import { RootStackNavigator } from './src/types/navigation';
-import { cleanCbzDir } from './src/utils/cbzCleaner.ts';
-import { CFBypassIsOpenContext, setWebViewOpen } from './src/utils/CFBypass';
-import {
-  comics1FetchSession,
-  Comics1SessionFetcherContext,
-  PromiseResRej,
-} from './src/utils/comics1sessionfetchercontext.ts';
-import Comics1WebView from './src/utils/comics1sessionfetcherwebview.tsx';
-import { DatabaseManager } from './src/utils/DatabaseManager';
-import DialogManager from './src/utils/dialogManager';
-import { Movies } from './src/utils/scrapers/animeMovie';
-import { LatestComicsRelease } from './src/utils/scrapers/comicsv2';
-import { FilmHomePage } from './src/utils/scrapers/film';
+
+import { RootStackNavigator } from '@/types/navigation';
+import { MDDark, MDLight } from '@assets/MaterialTheme';
+import useGlobalStyles from '@assets/style';
+import HomeContext from '@component/Home/HomeContext.tsx';
+import ErrorScreen from '@component/misc/ErrorScreen';
+import FallbackComponent from '@component/misc/FallbackErrorBoundary';
+import { navigationRef, replaceAllWith } from '@misc/NavigationService';
+import { withSuspenseAndSafeArea } from '@misc/withSuspenseAndSafeArea.tsx';
+import { cleanCbzDir } from '@utils/cbzCleaner.ts';
+import { CFBypassIsOpenContext, setWebViewOpen } from '@utils/CFBypass';
+import SetupComics1 from '@utils/comics1SessionFetcher/SetupComics1.tsx';
+import { DatabaseManager } from '@utils/DatabaseManager';
+import DialogManager from '@utils/dialogManager';
 
 cleanCbzDir();
 
@@ -79,21 +65,56 @@ const CombinedDarkTheme = {
     ...MDDark.colors,
   },
 };
-const CbzReader = lazy(() => import('./src/component/WatchNRead/CbzReader.tsx'));
-const AniDetail = lazy(() => import('./src/component/EpisodeDetail/AniDetail'));
-const Home = lazy(() => import('./src/component/Home/Home'));
-const Video = lazy(() => import('./src/component/WatchNRead/Video'));
-const Video_Film = lazy(() => import('./src/component/WatchNRead/Video_Film'));
-const FailedToConnect = lazy(() => import('./src/component/NeedAttention/FailedToConnect'));
-const NeedUpdate = lazy(() => import('./src/component/NeedAttention/NeedUpdate'));
-const MovieDetail = lazy(() => import('./src/component/EpisodeDetail/MovieDetail'));
-const FilmDetail = lazy(() => import('./src/component/EpisodeDetail/FilmDetail'));
-const ComicsDetail = lazy(() => import('./src/component/EpisodeDetail/ComicsDetail'));
-const ComicsReading = lazy(() => import('./src/component/WatchNRead/ComicsReading'));
-const CFBypassWebView = lazy(() => import('./src/utils/CFBypassWebview'));
-const Connecting = lazy(() => import('./src/component/Loading Screen/Connect'));
-const FromUrl = lazy(() => import('./src/component/Loading Screen/FromUrl'));
-const SeeMore = lazy(() => import('./src/component/Home/SeeMore'));
+
+let CbzReader: React.ComponentType<any>;
+let AniDetail: React.ComponentType<any>;
+let Home: React.ComponentType<any>;
+let Video: React.ComponentType<any>;
+let Video_Film: React.ComponentType<any>;
+let FailedToConnect: React.ComponentType<any>;
+let NeedUpdate: React.ComponentType<any>;
+let MovieDetail: React.ComponentType<any>;
+let FilmDetail: React.ComponentType<any>;
+let ComicsDetail: React.ComponentType<any>;
+let ComicsReading: React.ComponentType<any>;
+let CFBypassWebView: React.ComponentType<any>;
+let Connecting: React.ComponentType<any>;
+let FromUrl: React.ComponentType<any>;
+let SeeMore: React.ComponentType<any>;
+
+if (__DEV__) {
+  CbzReader = require('@component/WatchNRead/CbzReader.tsx').default;
+  AniDetail = require('@component/EpisodeDetail/AniDetail').default;
+  Home = require('@component/Home/Home').default;
+  Video = require('@component/WatchNRead/Video').default;
+  Video_Film = require('@component/WatchNRead/Video_Film').default;
+  FailedToConnect = require('@component/NeedAttention/FailedToConnect').default;
+  NeedUpdate = require('@component/NeedAttention/NeedUpdate').default;
+  MovieDetail = require('@component/EpisodeDetail/MovieDetail').default;
+  FilmDetail = require('@component/EpisodeDetail/FilmDetail').default;
+  ComicsDetail = require('@component/EpisodeDetail/ComicsDetail').default;
+  ComicsReading = require('@component/WatchNRead/ComicsReading').default;
+  CFBypassWebView = require('@utils/CFBypassWebview').default;
+  Connecting = require('@component/Loading Screen/Connect').default;
+  FromUrl = require('@component/Loading Screen/FromUrl').default;
+  SeeMore = require('@component/Home/SeeMore').default;
+} else {
+  CbzReader = lazy(() => import('@component/WatchNRead/CbzReader.tsx'));
+  AniDetail = lazy(() => import('@component/EpisodeDetail/AniDetail'));
+  Home = lazy(() => import('@component/Home/Home'));
+  Video = lazy(() => import('@component/WatchNRead/Video'));
+  Video_Film = lazy(() => import('@component/WatchNRead/Video_Film'));
+  FailedToConnect = lazy(() => import('@component/NeedAttention/FailedToConnect'));
+  NeedUpdate = lazy(() => import('@component/NeedAttention/NeedUpdate'));
+  MovieDetail = lazy(() => import('@component/EpisodeDetail/MovieDetail'));
+  FilmDetail = lazy(() => import('@component/EpisodeDetail/FilmDetail'));
+  ComicsDetail = lazy(() => import('@component/EpisodeDetail/ComicsDetail'));
+  ComicsReading = lazy(() => import('@component/WatchNRead/ComicsReading'));
+  CFBypassWebView = lazy(() => import('@utils/CFBypassWebview'));
+  Connecting = lazy(() => import('@component/Loading Screen/Connect'));
+  FromUrl = lazy(() => import('@component/Loading Screen/FromUrl'));
+  SeeMore = lazy(() => import('@component/Home/SeeMore'));
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -136,27 +157,6 @@ const linking: LinkingOptions<RootStackNavigator> = {
     const subscription = Linking.addEventListener('url', onReceiveURL);
     return () => subscription.remove();
   },
-};
-
-export const withSuspenseAndSafeArea = (
-  Component: React.ComponentType<any>,
-  safeArea = true,
-  ignoreTop = false,
-  ignoreBottom = false,
-) => {
-  const SuspenseComponent = (props: any) => (
-    <SuspenseLoading>
-      <Component {...props} />
-    </SuspenseLoading>
-  );
-  return (props: any) =>
-    safeArea ? (
-      <SafeAreaWrapper ignoreTop={ignoreTop} ignoreBottom={ignoreBottom}>
-        {<SuspenseComponent {...props} />}
-      </SafeAreaWrapper>
-    ) : (
-      <SuspenseComponent {...props} />
-    );
 };
 
 // Handle JavaScript Error globally
@@ -223,35 +223,10 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
 
-  const [isComics1FetchSessionOpen, setIsComics1FetchSessionOpen] = useState(false);
-  const comics1PromisesCollector = useRef<PromiseResRej[]>([]);
-
-  const [paramsState, setParamsState] = useState<EpisodeBaruHome>({
-    jadwalAnime: {},
-    newAnime: [],
-  });
-  const [movieParamsState, setMovieParamsState] = useState<Movies[]>([]);
-  const [filmParamsState, setFilmParamsState] = useState<FilmHomePage>([]);
-  const [comicsData, setComicsData] = useState<LatestComicsRelease[]>([]);
-
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
-    comics1FetchSession.getSessionPath = (
-      res: PromiseResRej['resolve'],
-      rej: PromiseResRej['reject'],
-    ) => {
-      comics1PromisesCollector.current.push({ resolve: res, reject: rej });
-      setIsComics1FetchSessionOpen(true);
-    };
-    comics1FetchSession.abortCleanup = () => {
-      setIsComics1FetchSessionOpen(false);
-      while (comics1PromisesCollector.current.length > 0) {
-        const val = comics1PromisesCollector.current.shift();
-        val?.reject();
-      }
-    };
     setWebViewOpen.openWebViewCF = (isOpenCF: boolean, url: string) => {
       setIsOpen(isOpenCF);
       setCfUrl(url);
@@ -292,124 +267,83 @@ function App() {
       <KeyboardProvider>
         <ErrorBoundary FallbackComponent={FallbackComponent}>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <EpisodeBaruHomeContext
-              value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
-              <FilmListHomeContext
-                value={useMemo(
-                  () => ({
-                    paramsState: filmParamsState,
-                    setParamsState: setFilmParamsState,
-                  }),
-                  [filmParamsState],
-                )}>
-                <MovieListHomeContext
-                  value={useMemo(
-                    () => ({
-                      paramsState: movieParamsState,
-                      setParamsState: setMovieParamsState,
-                    }),
-                    [movieParamsState],
-                  )}>
-                  <ComicsListContext
-                    value={useMemo(
-                      () => ({
-                        paramsState: comicsData,
-                        setParamsState: setComicsData,
-                      }),
-                      [comicsData],
-                    )}>
-                    <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
-                      <NavigationContainer
-                        linking={linking}
-                        ref={navigationRef}
-                        theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
-                        <Portal>
-                          <Dialog
-                            visible={dialogVisible}
-                            dismissable={false}
-                            dismissableBackButton
-                            onDismiss={() => setDialogVisible(false)}>
-                            <Dialog.Title>{dialogContent.title}</Dialog.Title>
-                            <Dialog.Content>
-                              <Text style={globalStyles.text}>{dialogContent.message}</Text>
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                              {dialogContent.buttons.map((button, index) => (
-                                <Button
-                                  key={index}
-                                  onPress={() => {
-                                    button.onPress();
-                                    setDialogVisible(false);
-                                  }}>
-                                  {button.text}
-                                </Button>
-                              ))}
-                            </Dialog.Actions>
-                          </Dialog>
-                        </Portal>
-                        <Stack.Navigator
-                          initialRouteName="connectToServer"
-                          screenOptions={{
-                            headerShown: false,
-                            header: props => (
-                              <Appbar.Header>
-                                {props.back && (
-                                  <Appbar.BackAction
-                                    onPress={() => {
-                                      props.navigation.goBack();
-                                    }}
-                                  />
-                                )}
-                                <Appbar.Content
-                                  titleStyle={{ fontWeight: 'bold' }}
-                                  title={
-                                    typeof props.options.headerTitle === 'string'
-                                      ? props.options.headerTitle
-                                      : ''
-                                  }
-                                />
-                              </Appbar.Header>
-                            ),
-                          }}>
-                          {screens.map(({ name, component, options }) => (
-                            <Stack.Screen key={name} name={name} options={options}>
-                              {component}
-                            </Stack.Screen>
-                          ))}
-                        </Stack.Navigator>
-                        <CFBypassIsOpenContext
-                          value={useMemo(
-                            () => ({ isOpen, url: cfUrl, setIsOpen }),
-                            [isOpen, cfUrl],
-                          )}>
-                          {isOpen && (
-                            <Suspense>
-                              <CFBypassWebView />
-                            </Suspense>
+            <HomeContext>
+              <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
+                <NavigationContainer
+                  linking={linking}
+                  ref={navigationRef}
+                  theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
+                  <Portal>
+                    <Dialog
+                      visible={dialogVisible}
+                      dismissable={false}
+                      dismissableBackButton
+                      onDismiss={() => setDialogVisible(false)}>
+                      <Dialog.Title>{dialogContent.title}</Dialog.Title>
+                      <Dialog.Content>
+                        <Text style={globalStyles.text}>{dialogContent.message}</Text>
+                      </Dialog.Content>
+                      <Dialog.Actions>
+                        {dialogContent.buttons.map((button, index) => (
+                          <Button
+                            key={index}
+                            onPress={() => {
+                              button.onPress();
+                              setDialogVisible(false);
+                            }}>
+                            {button.text}
+                          </Button>
+                        ))}
+                      </Dialog.Actions>
+                    </Dialog>
+                  </Portal>
+                  <Stack.Navigator
+                    initialRouteName="connectToServer"
+                    screenOptions={{
+                      headerShown: false,
+                      header: props => (
+                        <Appbar.Header>
+                          {props.back && (
+                            <Appbar.BackAction
+                              onPress={() => {
+                                props.navigation.goBack();
+                              }}
+                            />
                           )}
-                        </CFBypassIsOpenContext>
-                        <Comics1SessionFetcherContext
-                          value={useMemo(
-                            () => ({
-                              isOpen: isComics1FetchSessionOpen,
-                              setIsOpen: setIsComics1FetchSessionOpen,
-                              promisesCollector: comics1PromisesCollector,
-                            }),
-                            [isComics1FetchSessionOpen],
-                          )}>
-                          {isComics1FetchSessionOpen && <Comics1WebView />}
-                        </Comics1SessionFetcherContext>
-                        {__DEV__ && (
-                          <View style={styles.Dev} pointerEvents="none">
-                            <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
-                          </View>
-                        )}
-                      </NavigationContainer>
-                    </PaperProvider>
-                  </ComicsListContext>
-                </MovieListHomeContext>
-              </FilmListHomeContext>
-            </EpisodeBaruHomeContext>
+                          <Appbar.Content
+                            titleStyle={{ fontWeight: 'bold' }}
+                            title={
+                              typeof props.options.headerTitle === 'string'
+                                ? props.options.headerTitle
+                                : ''
+                            }
+                          />
+                        </Appbar.Header>
+                      ),
+                    }}>
+                    {screens.map(({ name, component, options }) => (
+                      <Stack.Screen key={name} name={name} options={options}>
+                        {component}
+                      </Stack.Screen>
+                    ))}
+                  </Stack.Navigator>
+                  <CFBypassIsOpenContext
+                    value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                    {isOpen && (
+                      <Suspense>
+                        <CFBypassWebView />
+                      </Suspense>
+                    )}
+                  </CFBypassIsOpenContext>
+                  <SetupComics1 />
+                  {__DEV__ && (
+                    <View style={styles.Dev} pointerEvents="none">
+                      <Text style={[globalStyles.text, styles.DevText]}>Dev</Text>
+                    </View>
+                  )}
+                </NavigationContainer>
+              </PaperProvider>
+            </HomeContext>
           </GestureHandlerRootView>
         </ErrorBoundary>
       </KeyboardProvider>
