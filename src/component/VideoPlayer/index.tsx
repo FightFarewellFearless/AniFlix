@@ -279,6 +279,9 @@ function VideoPlayer({
 
   const setPositionAsync = (duration: number) => {
     player.currentTime = duration;
+    queueMicrotask(() => {
+      seekBarProgressDisabled.set(false);
+    });
   };
   const onPressIn = useCallback((e: GestureResponderEvent) => {
     pressableShowControlsLocation.current = {
@@ -491,7 +494,6 @@ function VideoPlayer({
             onProgressChangeEnd={e => {
               'worklet';
               seekBarProgress.set(e);
-              seekBarProgressDisabled.set(false);
               runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
             }}
             seekBarProgress={seekBarProgress}
