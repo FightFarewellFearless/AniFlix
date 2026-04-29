@@ -1,5 +1,5 @@
 import Icon from '@react-native-vector-icons/fontawesome';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { NativeBottomTabNavigationProp } from '@bottom-tabs/react-navigation';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import moment from 'moment';
@@ -31,8 +31,8 @@ export function ListAnimeComponent(
     navigationProp:
       | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
       | NativeStackNavigationProp<RootStackNavigator, 'SeeMore', undefined>
-      | BottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
-      | BottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
+      | NativeBottomTabNavigationProp<HomeNavigator, 'AnimeList', undefined>
+      | NativeBottomTabNavigationProp<RootStackNavigator, 'SeeMore', undefined>;
   } & { gap?: boolean; fromSeeMore?: boolean },
 ) {
   const styles = useStyles();

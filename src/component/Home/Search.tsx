@@ -1,5 +1,5 @@
 import Icon from '@react-native-vector-icons/fontawesome';
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
@@ -53,7 +53,7 @@ const TouchableOpacityAnimated = Reanimated.createAnimatedComponent(TouchableOpa
 const Reanimated_KeyboardAvoidingView = Reanimated.createAnimatedComponent(KeyboardAvoidingView);
 
 type Props = CompositeScreenProps<
-  BottomTabScreenProps<HomeNavigator, 'Search'>,
+  NativeBottomTabScreenProps<HomeNavigator, 'Search'>,
   NativeStackScreenProps<RootStackNavigator>
 >;
 

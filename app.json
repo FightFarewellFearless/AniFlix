@@ -42,6 +42,7 @@
     "reactCompiler": false
   },
   "plugins": [
+    ["react-native-bottom-tabs"],
     [
       "expo-video",
       {
