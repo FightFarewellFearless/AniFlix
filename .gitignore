@@ -87,6 +87,7 @@ mykeystore.txt
 dist
 
 # etc
+.expo
 .git*
 !.github
 !.gitignore
