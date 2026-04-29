@@ -1,3 +1,7 @@
+# v1.2.1_JS-13 (29-April-2026)
+## Diperbaiki
+- Potensi perbaikan untuk native crash yang mungkin berhubungan dengan pengelolaan gambar
+- Video player restart dari awal saat berganti resolusi
 # v1.2.1_JS-12 (28-April-2026)
 Sorry banget hari ini ada 3 update yang berdekatan :(
 ## Diperbaiki
