@@ -1,0 +1,3 @@
+Mohon maaf, ternyata AniFlix mempunyai masalah crash (atau kalian lebih familiar dengan sebutan force close) saat scrolling di daftar histori atau tonton nanti, dan kemungkinan di tempat² lainnya. Developer akan melakukan investigasi dan debugging untuk menemukan masalah ini dan memperbaiki secepatnya. Masalah ini diketahui dimulai dari awal versi 1.2.1 atau bahkan sebelum itu.
+
+Mohon maaf atas ketidaknyamanannya 🙏
