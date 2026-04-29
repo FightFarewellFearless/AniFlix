@@ -90,3 +90,4 @@ dist
 .git*
 !.github
 !.gitignore
+.expo
