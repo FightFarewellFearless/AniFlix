@@ -131,6 +131,10 @@ function Video(props: Props) {
   const currentTimeRef = useRef<number>(0);
   const saveProgressToHistory = useCallback(() => {
     if (!(currentTimeRef.current > 5)) return;
+    historyData.current = {
+      resolution: historyData.current?.resolution,
+      lastDuration: currentTimeRef.current,
+    };
     setHistory(
       currentData.current,
       currentLink.current,
@@ -440,10 +444,10 @@ function Video(props: Props) {
 
   useEffect(() => {
     if (isPaused) {
-      videoRef.current?.props.player.pause();
+      videoRef.current?.props?.player?.pause();
       saveProgressToHistory();
     } else {
-      videoRef.current?.props.player.play();
+      videoRef.current?.props?.player?.play();
     }
   }, [isPaused, saveProgressToHistory]);
 
