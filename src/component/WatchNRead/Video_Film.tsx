@@ -320,6 +320,8 @@ function Video_Film(props: Props) {
       firstTimeLoad.current = false;
       historyData.current = undefined;
       currentLink.current = dataLink;
+      lastSavedTimeRef.current = 0;
+      currentTimeRef.current = 0;
     },
     [loading],
   );
