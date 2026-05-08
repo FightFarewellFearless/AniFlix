@@ -1,3 +1,10 @@
+# v1.2.2 (08-Mei-2026)
+## Diperbaiki
+- Error pada beberapa film serta error saat sudah streaming selama kurang lebih 1 jam
+- [Film] Mengganti resolusi menyebabkan hilangnya audio
+- [Video Player] Mengganti resolusi di bawah 5 detik pertama setelah mengganti episode menyebabkan durasi otomatis dilewati dengan durasi episode terakhir
+### Catatan: Update dan perbaikan tambahan akan dirilis melalui OTA update
+
 # v1.2.1_JS-13 (29-April-2026)
 ## Diperbaiki
 - Potensi perbaikan untuk native crash yang mungkin berhubungan dengan pengelolaan gambar

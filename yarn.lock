@@ -4332,7 +4332,6 @@ __metadata:
     react-native-nitro-modules: ^0.35.4
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.15.0
-    react-native-quick-base64: ^2.2.2
     react-native-reanimated: 4.3.1
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.7.0
@@ -11620,16 +11619,6 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: "*"
   checksum: 9faf84170d0f8a61f186c79f0d57f9ca170f57d99b7ad697a3859b90bbc7baeee16b8c6ebb33caef91289877000724725d8b0fe674939aec300032f52a61ef27
-  languageName: node
-  linkType: hard
-
-"react-native-quick-base64@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "react-native-quick-base64@npm:2.2.2"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 51cd8df0b7f78d4c10996f157927cc075b8a9e85f7d0e48790a4247a033ca335e440c96572969fb6f6b49135d51dbf87c6d659fba509b51b9237957d41a6c580
   languageName: node
   linkType: hard
 
