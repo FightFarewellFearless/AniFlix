@@ -42,6 +42,7 @@ export type HashProgressData = {
   canSpeedUp?: boolean;
   isSpeedingUp?: boolean;
 };
+
 // TODO: Check this in about a month or two, and plan to remove quick crypto entirely and uninstall it depending on future needs
 // async function solveChallenge(
 //   challenge: string,
@@ -294,7 +295,7 @@ function fetchPage(url: string, opt?: RequestInit & { asJson: true }): Promise<a
 async function fetchPage(url: string, opt?: RequestInit & { asJson?: boolean }) {
   const response = await fetch(url, {
     headers: {
-      'user-agent': deviceUserAgent,
+      'User-Agent': deviceUserAgent,
       ...opt?.headers,
     },
     ...opt,
@@ -428,7 +429,6 @@ async function getHomepage(signal?: AbortSignal) {
     return {
       title: data.title!,
       url: `${BASE_URL}/api/${contentType === 'movie' ? 'movies' : 'series'}/${slug}`,
-      // url: `${BASE_URL}/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
       contentType,
       thumbnailUrl: `https://image.tmdb.org/t/p/w500${data.posterPath}`,
       year: (data.releaseDate || data.firstAirDate || 'Unknown').split('-')[0],
@@ -443,6 +443,7 @@ async function getHomepage(signal?: AbortSignal) {
     trending,
   };
 }
+
 async function getLatestMovies(page = 1, signal?: AbortSignal) {
   const api: LatestMoviesResponse = await fetchPage(
     `${BASE_URL}/api/movies?page=${page}&limit=36&sort=createdAt`,
@@ -453,7 +454,6 @@ async function getLatestMovies(page = 1, signal?: AbortSignal) {
   );
   return api.data.map(item => ({
     title: item.title,
-    // url: `${BASE_URL}/movie/${item.slug}`,
     url: `${BASE_URL}/api/movies/${item.slug}`,
     thumbnailUrl: `https://image.tmdb.org/t/p/w500${item.posterPath}`,
     year: item.releaseDate.split('-')[0],
@@ -461,6 +461,7 @@ async function getLatestMovies(page = 1, signal?: AbortSignal) {
     rating: item.voteAverage ?? 'Unknown',
   }));
 }
+
 async function getLatestSeries(page = 1, signal?: AbortSignal) {
   const api: LatestSeriesResponse = await fetchPage(
     `${BASE_URL}/api/series?page=${page}&limit=36&sort=createdAt`,
@@ -576,6 +577,8 @@ type FilmDetail_Stream = {
   next?: string;
   prev?: string;
   variants?: HlsVariant[];
+  claim?: string;
+  redeemUrl?: string;
 };
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmMovieDetailsResponse;
@@ -625,14 +628,14 @@ async function getFilmDetails(
       BASE_URL + '/api/watch/play-info/episode/' + epApi.episode.id,
       {
         signal,
+        headers: {
+          Referer: FILM_BASE_URL + '/',
+          Origin: FILM_BASE_URL,
+        },
         asJson: true,
       },
     );
-    const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
-      method: 'POST',
-      asJson: true,
-      body: JSON.stringify({ claim: claimApi.claim }),
-    });
+    const redeemVid: RedeemApi = await redeemVideo(claimApi, signal);
     let variants: HlsVariant[] = [];
     try {
       const manifestContent = await fetchPage(redeemVid.url, { signal });
@@ -658,6 +661,8 @@ async function getFilmDetails(
       originalLanguage: epApi.series.originalLanguage,
       country: epApi.series.country,
       streamingLink: redeemVid.url,
+      claim: claimApi.claim,
+      redeemUrl: claimApi.redeemUrl,
       subtitleLink:
         redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
       releaseDate: epApi.episode.airDate,
@@ -701,14 +706,14 @@ async function getFilmDetails(
     BASE_URL + '/api/watch/play-info/movie/' + movieApi.id,
     {
       signal,
+      headers: {
+        Referer: FILM_BASE_URL + '/',
+        Origin: FILM_BASE_URL,
+      },
       asJson: true,
     },
   );
-  const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
-    method: 'POST',
-    asJson: true,
-    body: JSON.stringify({ claim: claimApi.claim }),
-  });
+  const redeemVid: RedeemApi = await redeemVideo(claimApi, signal);
 
   let variants: HlsVariant[] = [];
   try {
@@ -726,6 +731,8 @@ async function getFilmDetails(
     country: movieApi.country,
     director: movieApi.director,
     streamingLink: redeemVid.url,
+    claim: claimApi.claim,
+    redeemUrl: claimApi.redeemUrl,
     subtitleLink:
       redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
     releaseDate: movieApi.releaseDate,
@@ -736,6 +743,19 @@ async function getFilmDetails(
     backgroundImage: `https://image.tmdb.org/t/p/w780${movieApi.backdropPath}`,
     variants,
   };
+}
+
+async function redeemVideo(claimApi: ClaimApi, signal?: AbortSignal): Promise<RedeemApi> {
+  return await fetchPage(claimApi.redeemUrl, {
+    method: 'POST',
+    signal,
+    headers: {
+      Referer: FILM_BASE_URL + '/',
+      Origin: FILM_BASE_URL,
+    },
+    asJson: true,
+    body: JSON.stringify({ claim: claimApi.claim }),
+  });
 }
 
 async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Promise<FilmSeason> {
@@ -754,12 +774,86 @@ async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Pr
   };
 }
 
+function filterManifestByResolution(manifest: string, targetRes: string): string {
+  if (!targetRes || targetRes === 'Auto') return manifest;
+
+  const lines = manifest.split('\n');
+  const result: string[] = [];
+  let skipNextLine = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    if (skipNextLine) {
+      skipNextLine = false;
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-STREAM-INF')) {
+      if (line.includes(`NAME="${targetRes}"`) || line.includes(`RESOLUTION=${targetRes}`)) {
+        result.push(line);
+      } else {
+        skipNextLine = true;
+      }
+    } else {
+      result.push(line);
+    }
+  }
+
+  return result.join('\n');
+}
+
+function rewriteManifestToLocalProxy(
+  STREAMING_MIDDLE_SERVER_PORT: number,
+  data: string,
+  baseUrl: string,
+  masterResolution: string,
+): string {
+  const lines = data.split('\n');
+  let result = '';
+  const isMaster = data.includes('#EXT-X-STREAM-INF');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      result += '\n';
+      continue;
+    }
+
+    if (line.startsWith('#')) {
+      if (line.includes('URI="')) {
+        const newLine = line.replace(/URI="([^"]+)"/g, (match, url) => {
+          const fullUrl = url.startsWith('http') ? url : `${baseUrl}/${url}`;
+          const route = isMaster
+            ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
+            : `/segment?`;
+          return `URI="http://localhost:${STREAMING_MIDDLE_SERVER_PORT}${route}url=${encodeURIComponent(fullUrl)}"`;
+        });
+        result += newLine + '\n';
+      } else {
+        result += line + '\n';
+      }
+    } else {
+      const fullUrl = line.startsWith('http') ? line : `${baseUrl}/${line}`;
+      const route = isMaster
+        ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
+        : `/segment?`;
+      result += `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}${route}url=${encodeURIComponent(fullUrl)}\n`;
+    }
+  }
+
+  return result;
+}
+
 export {
+  filterManifestByResolution,
   getFilmDetails,
   getFilmSeasonDetails,
   getHomepage,
   getLatestMovies,
   getLatestSeries,
+  rewriteManifestToLocalProxy,
   searchFilm,
 };
 export type {

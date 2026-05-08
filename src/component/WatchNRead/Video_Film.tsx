@@ -2,6 +2,7 @@ import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoView } from 'expo-video';
+import { fetch as expoFetch } from 'expo/fetch';
 import tr from 'googletrans';
 import React, {
   memo,
@@ -30,15 +31,23 @@ import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import useGlobalStyles, { darkText, lightText } from '@assets/style';
 import setHistory from '@utils/historyControl';
 
+import { useFilmTokenRotate } from '@/hooks/useFilmTokenRotate';
 import { RootStackNavigator } from '@/types/navigation';
+import deviceUserAgent from '@/utils/deviceUserAgent';
+import Skeleton from '@component/misc/Skeleton';
+import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import { useBackHandler } from '@hooks/useBackHandler';
 import { useFocusEffect } from '@react-navigation/core';
 import { useKeyValueIfFocused } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
-import { getFilmDetails } from '@utils/scrapers/film';
+import {
+  FILM_BASE_URL,
+  filterManifestByResolution,
+  getFilmDetails,
+  rewriteManifestToLocalProxy,
+} from '@utils/scrapers/film';
+import { createServer } from 'react-native-nitro-http-server';
 import { ActivityIndicator, Button } from 'react-native-paper';
-import Skeleton from '@component/misc/Skeleton';
-import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import {
   LoadingModal,
   TimeInfo,
@@ -47,6 +56,8 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
+
+const STREAMING_MIDDLE_SERVER_PORT = 43621;
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -66,8 +77,104 @@ function Video_Film(props: Props) {
   const currentData = useRef(data);
   currentData.current = data;
 
-  const [currentStreamUrl, setCurrentStreamUrl] = useState(props.route.params.data.streamingLink);
+  const [currentResolution, setCurrentResolution] = useState('Auto');
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
+
+  const activeTokenRef = useFilmTokenRotate(data);
+
+  useFocusEffect(
+    useCallback(() => {
+      const server = createServer(async (req, res) => {
+        try {
+          const localUrlObj = new URL(`http://localhost${req.url}`);
+          const path = localUrlObj.pathname;
+
+          if (path === '/manifest') {
+            const originalManifestUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+            const targetRes = localUrlObj.searchParams.get('res') || 'Auto';
+
+            const upstreamUrlObj = new URL(originalManifestUrl);
+            if (activeTokenRef.current) {
+              upstreamUrlObj.searchParams.set('t', activeTokenRef.current);
+            }
+
+            const manifestResponse = await expoFetch(upstreamUrlObj.toString(), {
+              headers: {
+                origin: FILM_BASE_URL,
+                referer: FILM_BASE_URL + '/',
+                Accept: '*/*',
+                'User-Agent': deviceUserAgent,
+              },
+            });
+            let manifestText = await manifestResponse.text();
+
+            if (targetRes !== 'Auto' && manifestText.includes('#EXT-X-STREAM-INF')) {
+              manifestText = filterManifestByResolution(manifestText, targetRes);
+            }
+
+            const baseUrl =
+              upstreamUrlObj.origin +
+              upstreamUrlObj.pathname.substring(0, upstreamUrlObj.pathname.lastIndexOf('/'));
+            const rebuildHLS = rewriteManifestToLocalProxy(
+              STREAMING_MIDDLE_SERVER_PORT,
+              manifestText,
+              baseUrl,
+              targetRes,
+            );
+            res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+            res.end(rebuildHLS, 'utf-8');
+          } else if (req.url.startsWith('/segment')) {
+            const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+            const segmentUrlObj = new URL(originalSegmentUrl);
+
+            if (activeTokenRef.current) {
+              segmentUrlObj.searchParams.set('t', activeTokenRef.current);
+            }
+
+            const fetchHeaders: any = {
+              origin: FILM_BASE_URL,
+              referer: FILM_BASE_URL + '/',
+              'User-Agent': deviceUserAgent,
+            };
+            if (req.headers['range'] || req.headers['Range']) {
+              fetchHeaders['Range'] = req.headers['range'] || req.headers['Range'];
+            }
+            const segmentResponse = await expoFetch(segmentUrlObj.toString(), {
+              headers: fetchHeaders,
+            });
+
+            res.statusCode = segmentResponse.status;
+            res.setHeader(
+              'Content-Type',
+              segmentResponse.headers.get('content-type') || 'application/octet-stream',
+            );
+
+            const contentRange = segmentResponse.headers.get('content-range');
+            if (contentRange) res.setHeader('Content-Range', contentRange);
+
+            try {
+              const arrayBuffer = await segmentResponse.arrayBuffer();
+              res.end(Buffer.from(arrayBuffer));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end();
+            }
+          } else {
+            res.statusCode = 404;
+            res.end('Not Found', 'utf-8');
+          }
+        } catch (e) {
+          res.statusCode = 500;
+          res.end('Server Error', 'utf-8');
+        }
+      });
+
+      server.listen(STREAMING_MIDDLE_SERVER_PORT);
+      return () => {
+        server.close();
+      };
+    }, [activeTokenRef]),
+  );
 
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
@@ -206,7 +313,7 @@ function Video_Film(props: Props) {
         );
       } else {
         setData(result);
-        setCurrentStreamUrl(result.streamingLink);
+        setCurrentResolution('Auto');
         setHistory(result, dataLink, undefined, undefined, true);
       }
       setLoading(false);
@@ -238,11 +345,6 @@ function Video_Film(props: Props) {
       }
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
-
-    // DialogManager.alert('Perhatian', `
-    // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
-    // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
-    // `)
   }, [isPaused]);
 
   useEffect(() => {
@@ -387,21 +489,21 @@ function Video_Film(props: Props) {
           : 'Error tidak diketahui: ' + err.message;
       DialogManager.alert('Error', errMessage);
     });
-  }, [data.episode, data.season, data.streamingLink, data.subtitleLink, data.title]);
+  }, [data]);
 
   const resolutionDropdownData = useMemo(() => {
     const list = [];
-    list.push({ label: 'Auto', value: data.streamingLink });
-    if (data.variants && data.variants.length > 0) {
+    list.push({ label: 'Auto', value: 'Auto' });
+    if (data.type === 'stream' && data.variants && data.variants.length > 0) {
       data.variants.forEach(v => {
         list.push({
           label: v.name || v.resolution,
-          value: v.url,
+          value: v.name || v.resolution,
         });
       });
     }
     return list;
-  }, [data.streamingLink, data.variants]);
+  }, [data]);
 
   const insets = useSafeAreaInsets();
 
@@ -421,12 +523,11 @@ function Video_Film(props: Props) {
           }}
         />
         <VideoPlayer
-          // key={data.streamingLink}
           title={
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
           }
           thumbnailURL={data.thumbnailUrl}
-          streamingURL={currentStreamUrl}
+          streamingURL={`http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`}
           isHls={true}
           subtitleURL={data.subtitleLink}
           onSubtitleLoad={onSubtitleLoad}
@@ -438,6 +539,11 @@ function Video_Film(props: Props) {
           onDurationChange={handleProgress}
           onLoad={handleVideoLoad}
           batteryAndClock={batteryAndClock}
+          headers={{
+            origin: FILM_BASE_URL,
+            referer: FILM_BASE_URL + '/',
+            Accept: '*/*',
+          }}
         />
       </View>
       {/* END OF VIDEO ELEMENT */}
@@ -601,7 +707,7 @@ function Video_Film(props: Props) {
             <View pointerEvents="box-only">
               <Dropdown
                 ref={dropdownResolutionRef}
-                value={currentStreamUrl}
+                value={currentResolution}
                 placeholder="Pilih resolusi"
                 data={resolutionDropdownData}
                 valueField="value"
@@ -609,7 +715,7 @@ function Video_Film(props: Props) {
                 onChange={item => {
                   saveProgressToHistory();
                   firstTimeLoad.current = true;
-                  setCurrentStreamUrl(item.value);
+                  setCurrentResolution(item.value);
                   ToastAndroid.show(`Resolusi diubah ke ${item.label}`, ToastAndroid.SHORT);
                 }}
                 style={styles.dropdownStyle}
