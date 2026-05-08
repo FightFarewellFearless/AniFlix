@@ -4324,16 +4324,16 @@ __metadata:
     react-native-dotenv: ^3.4.11
     react-native-edge-to-edge: ^1.8.1
     react-native-error-boundary: ^3.1.0
-    react-native-gesture-handler: 2.31.1
+    react-native-gesture-handler: 2.31.2
     react-native-keyboard-controller: ^1.21.5
     react-native-marked: ^8.0.1
     react-native-nitro-device-info: ^1.7.0
-    react-native-nitro-http-server: ^1.8.1
+    react-native-nitro-http-server: ^1.9.0
     react-native-nitro-modules: ^0.35.4
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.15.0
     react-native-quick-base64: ^2.2.2
-    react-native-reanimated: 4.3.0
+    react-native-reanimated: 4.3.1
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.7.0
     react-native-screens: 4.24.0
@@ -11482,9 +11482,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:2.31.1":
-  version: 2.31.1
-  resolution: "react-native-gesture-handler@npm:2.31.1"
+"react-native-gesture-handler@npm:2.31.2":
+  version: 2.31.2
+  resolution: "react-native-gesture-handler@npm:2.31.2"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     "@types/react-test-renderer": ^19.1.0
@@ -11493,7 +11493,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: db5205254ed2b897dcba2e1767fada16dc5255713555edcf5d1a8590b36ff929afd262a4e478c1cbc9a5ce3da8c826f89b73b6494a84d3ee256fb25a2d1ab831
+  checksum: 0caa56d14b4deadf776e48c73084a69e19e9e0e86e6c6b2bbb97cb44190cfa25806bf8aff35782410ae33e2d3d429068013602a5a011ae1c47fe52cebb7b0df8
   languageName: node
   linkType: hard
 
@@ -11571,15 +11571,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-http-server@npm:^1.8.1":
-  version: 1.8.1
-  resolution: "react-native-nitro-http-server@npm:1.8.1"
+"react-native-nitro-http-server@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "react-native-nitro-http-server@npm:1.9.0"
   dependencies:
     eventemitter3: ^5.0.1
     react-native-nitro-buffer: ">=0.0.14"
   peerDependencies:
+    react-native: "*"
     react-native-nitro-modules: ^0.35.0
-  checksum: 77f1096594ef4b0139f6cfef41ba28e261f4cf7374d61e4808098422c44e499bae00d69c6e0c0c84dda4867f95c03d0f8968ec20cee4157813a8ccbacdc3d02a
+  checksum: bd201e330604159ca910a77accc30f6ee6a8de981c0027cb6252f33b8a9a71cb8c4ec7697d53b723711f79aebb7eca393e51fc2cfc1fda1bb033937bd4395e22
   languageName: node
   linkType: hard
 
@@ -11642,9 +11643,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.3.0":
-  version: 4.3.0
-  resolution: "react-native-reanimated@npm:4.3.0"
+"react-native-reanimated@npm:4.3.1":
+  version: 4.3.1
+  resolution: "react-native-reanimated@npm:4.3.1"
   dependencies:
     react-native-is-edge-to-edge: ^1.3.1
     semver: ^7.7.3
@@ -11652,7 +11653,7 @@ __metadata:
     react: "*"
     react-native: 0.81 - 0.85
     react-native-worklets: 0.8.x
-  checksum: 444925347ff9c9b5dd882133e89aa93e36db62a2b15567e8fc29982e872e5260117c67866e5dbc9e6584b816f9a48d177d5be3dd5ca564c56e6d939b1fbbb180
+  checksum: 2649672f72dbd52aa612e5c9bcf8ab2dc256d614ed3cd21cd44ba97b26eefd30e0be629f5aec6ba209ccc07aad46831866b69f6bf51fb9708d49431bd608507a
   languageName: node
   linkType: hard
 
