@@ -80,16 +80,18 @@ function Video_Film(props: Props) {
   const [currentResolution, setCurrentResolution] = useState('Auto');
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
 
-  const activeTokenRef = useFilmTokenRotate(data);
+  const { activeTokenRef, checkAndRotateToken } = useFilmTokenRotate(data);
+  const checkAndRotateTokenRef = useRef(checkAndRotateToken);
+  checkAndRotateTokenRef.current = checkAndRotateToken;
 
   useFocusEffect(
     useCallback(() => {
-      const server = createServer(async (req, res) => {
+      const server = createServer({ autoRestart: true }, async (req, res) => {
         try {
           const localUrlObj = new URL(`http://localhost${req.url}`);
           const path = localUrlObj.pathname;
-
           if (path === '/manifest') {
+            await checkAndRotateTokenRef.current();
             const originalManifestUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
             const targetRes = localUrlObj.searchParams.get('res') || 'Auto';
 
@@ -100,6 +102,7 @@ function Video_Film(props: Props) {
 
             const manifestResponse = await expoFetch(upstreamUrlObj.toString(), {
               headers: {
+                'Cache-Control': 'no-store',
                 origin: FILM_BASE_URL,
                 referer: FILM_BASE_URL + '/',
                 Accept: '*/*',
@@ -107,7 +110,6 @@ function Video_Film(props: Props) {
               },
             });
             let manifestText = await manifestResponse.text();
-
             if (targetRes !== 'Auto' && manifestText.includes('#EXT-X-STREAM-INF')) {
               manifestText = filterManifestByResolution(manifestText, targetRes);
             }
@@ -124,6 +126,7 @@ function Video_Film(props: Props) {
             res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
             res.end(rebuildHLS, 'utf-8');
           } else if (req.url.startsWith('/segment')) {
+            await checkAndRotateTokenRef.current();
             const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
             const segmentUrlObj = new URL(originalSegmentUrl);
 
@@ -132,6 +135,7 @@ function Video_Film(props: Props) {
             }
 
             const fetchHeaders: any = {
+              'Cache-Control': 'no-store',
               origin: FILM_BASE_URL,
               referer: FILM_BASE_URL + '/',
               'User-Agent': deviceUserAgent,
@@ -170,6 +174,7 @@ function Video_Film(props: Props) {
       });
 
       server.listen(STREAMING_MIDDLE_SERVER_PORT);
+
       return () => {
         server.close();
       };

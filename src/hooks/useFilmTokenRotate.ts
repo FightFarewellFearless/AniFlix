@@ -1,6 +1,6 @@
 import deviceUserAgent from '@/utils/deviceUserAgent';
 import { FILM_BASE_URL, FilmDetail_Stream } from '@/utils/scrapers/film';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export function useFilmTokenRotate(data: FilmDetail_Stream) {
   const activeTokenRef = useRef<string>('');
@@ -15,38 +15,34 @@ export function useFilmTokenRotate(data: FilmDetail_Stream) {
     }
   }, [data]);
 
-  // Rotate token
-  useEffect(() => {
-    if (!data || data.type !== 'stream' || !data.claim || !data.redeemUrl) return;
+  const checkAndRotateToken = useCallback(async () => {
+    const expired: number = JSON.parse(
+      Buffer.from(activeTokenRef.current.split('.').shift()!, 'base64').toString(),
+    ).e;
+    const now = Math.floor(Date.now() / 1000);
+    if (expired < now) {
+      try {
+        const res = await fetch(data.redeemUrl as string, {
+          method: 'POST',
+          headers: {
+            Referer: FILM_BASE_URL + '/',
+            Origin: FILM_BASE_URL,
+            'Content-Type': 'application/json',
+            'User-Agent': deviceUserAgent,
+          },
+          body: JSON.stringify({ claim: data.claim }),
+        });
+        const result = await res.json();
 
-    const interval = setInterval(
-      async () => {
-        try {
-          const res = await fetch(data.redeemUrl as string, {
-            method: 'POST',
-            headers: {
-              Referer: FILM_BASE_URL + '/',
-              Origin: FILM_BASE_URL,
-              'Content-Type': 'application/json',
-              'User-Agent': deviceUserAgent,
-            },
-            body: JSON.stringify({ claim: data.claim }),
-          });
-          const result = await res.json();
-
-          if (result && result.url) {
-            const newToken = new URL(result.url).searchParams.get('t');
-            if (newToken) {
-              activeTokenRef.current = newToken;
-            }
+        if (result && result.url) {
+          const newToken = new URL(result.url).searchParams.get('t');
+          if (newToken) {
+            activeTokenRef.current = newToken;
           }
-        } catch {}
-      },
-      40 * 60 * 1000,
-    ); // 40 Menit
+        }
+      } catch {}
+    }
+  }, [data.claim, data.redeemUrl]);
 
-    return () => clearInterval(interval);
-  }, [data]);
-
-  return activeTokenRef;
+  return { activeTokenRef, checkAndRotateToken };
 }
