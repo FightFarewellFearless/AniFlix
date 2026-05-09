@@ -492,6 +492,7 @@ function VideoPlayer({
             headers={headers}
             lastTimeError={currentDurationSecond}
             onLoad={onLoad}
+            isHls={isHls}
           />
           <BottomControl
             contentFitMode={contentFitMode}
@@ -641,6 +642,7 @@ function CenterControl({
   streamingURL,
   lastTimeError,
   onLoad,
+  isHls,
 }: {
   isBuffering: boolean;
   isError: boolean;
@@ -650,7 +652,7 @@ function CenterControl({
   onRewind: () => void;
   player: ExpoVideoPlayer;
   lastTimeError: SharedValue<number>;
-} & Pick<VideoPlayerProps, 'streamingURL' | 'headers' | 'onLoad'>) {
+} & Pick<VideoPlayerProps, 'streamingURL' | 'headers' | 'onLoad' | 'isHls'>) {
   return (
     <View
       pointerEvents="box-none"
@@ -680,9 +682,10 @@ function CenterControl({
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          onPress={() => {
-            player.replace('');
-            player.replace({
+          onPress={async () => {
+            await player.replaceAsync('');
+            await player.replaceAsync({
+              contentType: isHls ? 'hls' : 'auto',
               uri: streamingURL,
               headers: {
                 'User-Agent': deviceUserAgent,
