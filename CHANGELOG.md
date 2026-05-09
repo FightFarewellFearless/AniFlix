@@ -1,3 +1,8 @@
+# v1.2.2_JS-1 (09-Mei-2026)
+## Diperbaiki
+- Video refresh setelah error tidak bekerja pada film
+- Mengimplementasikan rotasi token yang lebih baik
+- Pengalaman streaming film yang lebih stabil
 # v1.2.2 (08-Mei-2026)
 ## Diperbaiki
 - Error pada beberapa film serta error saat sudah streaming selama kurang lebih 1 jam
