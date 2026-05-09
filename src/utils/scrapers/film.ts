@@ -1,6 +1,8 @@
 import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
+import { fetch as expoFetch } from 'expo/fetch';
+
 import deviceUserAgent from '@utils/deviceUserAgent';
 import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
@@ -10,6 +12,8 @@ import { SearchFilmResponse } from './filmTypes/searchFilm';
 import { SeriesDetailsResponse } from './filmTypes/series';
 import { SeriesEpisodeResponse } from './filmTypes/seriesEpisode';
 import { SeriesSeasonResponse } from './filmTypes/seriesSeason';
+import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
+import React from 'react';
 
 type FilmHomePage = Array<{
   title: string;
@@ -845,6 +849,100 @@ function rewriteManifestToLocalProxy(
 
   return result;
 }
+
+export const STREAMING_MIDDLE_SERVER_PORT = 43621;
+
+export const middleServerCallback = async (
+  req: IncomingMessage,
+  res: ServerResponse,
+  checkAndRotateTokenRef: React.RefObject<() => Promise<void>>,
+  activeTokenRef: React.RefObject<string | undefined>,
+) => {
+  try {
+    const localUrlObj = new URL(`http://localhost${req.url}`);
+    const path = localUrlObj.pathname;
+    if (path === '/manifest') {
+      await checkAndRotateTokenRef.current();
+      const originalManifestUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+      const targetRes = localUrlObj.searchParams.get('res') || 'Auto';
+
+      const upstreamUrlObj = new URL(originalManifestUrl);
+      if (activeTokenRef.current) {
+        upstreamUrlObj.searchParams.set('t', activeTokenRef.current);
+      }
+
+      const manifestResponse = await expoFetch(upstreamUrlObj.toString(), {
+        headers: {
+          'Cache-Control': 'no-store',
+          origin: FILM_BASE_URL,
+          referer: FILM_BASE_URL + '/',
+          Accept: '*/*',
+          'User-Agent': deviceUserAgent,
+        },
+      });
+      let manifestText = await manifestResponse.text();
+      if (targetRes !== 'Auto' && manifestText.includes('#EXT-X-STREAM-INF')) {
+        manifestText = filterManifestByResolution(manifestText, targetRes);
+      }
+
+      const baseUrl =
+        upstreamUrlObj.origin +
+        upstreamUrlObj.pathname.substring(0, upstreamUrlObj.pathname.lastIndexOf('/'));
+      const rebuildHLS = rewriteManifestToLocalProxy(
+        STREAMING_MIDDLE_SERVER_PORT,
+        manifestText,
+        baseUrl,
+        targetRes,
+      );
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+      res.end(rebuildHLS, 'utf-8');
+    } else if (req.url.startsWith('/segment')) {
+      await checkAndRotateTokenRef.current();
+      const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+      const segmentUrlObj = new URL(originalSegmentUrl);
+
+      if (activeTokenRef.current) {
+        segmentUrlObj.searchParams.set('t', activeTokenRef.current);
+      }
+
+      const fetchHeaders: any = {
+        'Cache-Control': 'no-store',
+        origin: FILM_BASE_URL,
+        referer: FILM_BASE_URL + '/',
+        'User-Agent': deviceUserAgent,
+      };
+      if (req.headers['range'] || req.headers['Range']) {
+        fetchHeaders['Range'] = req.headers['range'] || req.headers['Range'];
+      }
+      const segmentResponse = await expoFetch(segmentUrlObj.toString(), {
+        headers: fetchHeaders,
+      });
+
+      res.statusCode = segmentResponse.status;
+      res.setHeader(
+        'Content-Type',
+        segmentResponse.headers.get('content-type') || 'application/octet-stream',
+      );
+
+      const contentRange = segmentResponse.headers.get('content-range');
+      if (contentRange) res.setHeader('Content-Range', contentRange);
+
+      try {
+        const arrayBuffer = await segmentResponse.arrayBuffer();
+        res.end(Buffer.from(arrayBuffer));
+      } catch (err) {
+        res.statusCode = 500;
+        res.end();
+      }
+    } else {
+      res.statusCode = 404;
+      res.end('Not Found', 'utf-8');
+    }
+  } catch (e) {
+    res.statusCode = 500;
+    res.end('Server Error', 'utf-8');
+  }
+};
 
 export {
   filterManifestByResolution,

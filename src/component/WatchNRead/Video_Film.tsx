@@ -2,7 +2,6 @@ import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoView } from 'expo-video';
-import { fetch as expoFetch } from 'expo/fetch';
 import tr from 'googletrans';
 import React, {
   memo,
@@ -14,6 +13,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  AppState,
   Linking,
   Pressable,
   ScrollView,
@@ -33,7 +33,6 @@ import setHistory from '@utils/historyControl';
 
 import { useFilmTokenRotate } from '@/hooks/useFilmTokenRotate';
 import { RootStackNavigator } from '@/types/navigation';
-import deviceUserAgent from '@/utils/deviceUserAgent';
 import Skeleton from '@component/misc/Skeleton';
 import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import { useBackHandler } from '@hooks/useBackHandler';
@@ -42,11 +41,11 @@ import { useKeyValueIfFocused } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
 import {
   FILM_BASE_URL,
-  filterManifestByResolution,
   getFilmDetails,
-  rewriteManifestToLocalProxy,
+  middleServerCallback,
+  STREAMING_MIDDLE_SERVER_PORT,
 } from '@utils/scrapers/film';
-import { createServer } from 'react-native-nitro-http-server';
+import { createServer, Server } from 'react-native-nitro-http-server';
 import { ActivityIndicator, Button } from 'react-native-paper';
 import {
   LoadingModal,
@@ -56,8 +55,6 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
-
-const STREAMING_MIDDLE_SERVER_PORT = 43621;
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -86,97 +83,40 @@ function Video_Film(props: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      const server = createServer({ autoRestart: true }, async (req, res) => {
+      let server: Server;
+      async function autoRestartWhenInactive() {
         try {
-          const localUrlObj = new URL(`http://localhost${req.url}`);
-          const path = localUrlObj.pathname;
-          if (path === '/manifest') {
-            await checkAndRotateTokenRef.current();
-            const originalManifestUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
-            const targetRes = localUrlObj.searchParams.get('res') || 'Auto';
-
-            const upstreamUrlObj = new URL(originalManifestUrl);
-            if (activeTokenRef.current) {
-              upstreamUrlObj.searchParams.set('t', activeTokenRef.current);
-            }
-
-            const manifestResponse = await expoFetch(upstreamUrlObj.toString(), {
-              headers: {
-                'Cache-Control': 'no-store',
-                origin: FILM_BASE_URL,
-                referer: FILM_BASE_URL + '/',
-                Accept: '*/*',
-                'User-Agent': deviceUserAgent,
-              },
-            });
-            let manifestText = await manifestResponse.text();
-            if (targetRes !== 'Auto' && manifestText.includes('#EXT-X-STREAM-INF')) {
-              manifestText = filterManifestByResolution(manifestText, targetRes);
-            }
-
-            const baseUrl =
-              upstreamUrlObj.origin +
-              upstreamUrlObj.pathname.substring(0, upstreamUrlObj.pathname.lastIndexOf('/'));
-            const rebuildHLS = rewriteManifestToLocalProxy(
-              STREAMING_MIDDLE_SERVER_PORT,
-              manifestText,
-              baseUrl,
-              targetRes,
-            );
-            res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-            res.end(rebuildHLS, 'utf-8');
-          } else if (req.url.startsWith('/segment')) {
-            await checkAndRotateTokenRef.current();
-            const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
-            const segmentUrlObj = new URL(originalSegmentUrl);
-
-            if (activeTokenRef.current) {
-              segmentUrlObj.searchParams.set('t', activeTokenRef.current);
-            }
-
-            const fetchHeaders: any = {
-              'Cache-Control': 'no-store',
-              origin: FILM_BASE_URL,
-              referer: FILM_BASE_URL + '/',
-              'User-Agent': deviceUserAgent,
-            };
-            if (req.headers['range'] || req.headers['Range']) {
-              fetchHeaders['Range'] = req.headers['range'] || req.headers['Range'];
-            }
-            const segmentResponse = await expoFetch(segmentUrlObj.toString(), {
-              headers: fetchHeaders,
-            });
-
-            res.statusCode = segmentResponse.status;
-            res.setHeader(
-              'Content-Type',
-              segmentResponse.headers.get('content-type') || 'application/octet-stream',
-            );
-
-            const contentRange = segmentResponse.headers.get('content-range');
-            if (contentRange) res.setHeader('Content-Range', contentRange);
-
-            try {
-              const arrayBuffer = await segmentResponse.arrayBuffer();
-              res.end(Buffer.from(arrayBuffer));
-            } catch (err) {
-              res.statusCode = 500;
-              res.end();
-            }
-          } else {
-            res.statusCode = 404;
-            res.end('Not Found', 'utf-8');
-          }
-        } catch (e) {
-          res.statusCode = 500;
-          res.end('Server Error', 'utf-8');
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 500);
+          await fetch(`http://127.0.0.1:${STREAMING_MIDDLE_SERVER_PORT}/`, {
+            method: 'HEAD',
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+        } catch {
+          server.close();
+          server = createServer((req, res) => {
+            middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
+          });
+          server.listen(STREAMING_MIDDLE_SERVER_PORT);
         }
+      }
+      const probe = AppState.addEventListener('change', async state => {
+        if (state !== 'active') return;
+        await autoRestartWhenInactive();
       });
-
+      server = createServer((req, res) => {
+        middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
+      });
       server.listen(STREAMING_MIDDLE_SERVER_PORT);
 
+      const heartBeat = setInterval(() => {
+        autoRestartWhenInactive();
+      }, 2000);
       return () => {
+        clearInterval(heartBeat);
         server.close();
+        probe.remove();
       };
     }, [activeTokenRef]),
   );
@@ -487,6 +427,8 @@ function Video_Film(props: Props) {
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
           streamingLink: data.streamingLink,
           subtitleLink: data.subtitleLink,
+          claim: data.claim,
+          redeemUrl: data.redeemUrl,
         }),
       ).toString('hex')}`,
     ).catch(err => {
