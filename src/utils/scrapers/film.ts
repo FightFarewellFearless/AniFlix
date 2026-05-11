@@ -827,8 +827,15 @@ function rewriteManifestToLocalProxy(
 
     if (line.startsWith('#')) {
       if (line.includes('URI="')) {
-        const newLine = line.replace(/URI="([^"]+)"/g, (match, url) => {
-          const fullUrl = url.startsWith('http') ? url : `${baseUrl}/${url}`;
+        const newLine = line.replace(/URI="([^"]+)"/g, (match, url: string) => {
+          let fullUrl: string;
+          const urlSplit = url.split('/');
+          if (urlSplit.length - 1 > 3) {
+            fullUrl = url.startsWith('http') ? url : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
+          } else {
+            fullUrl = url.startsWith('http') ? url : `${baseUrl}/${url}`;
+          }
+
           const route = isMaster
             ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
             : `/segment?`;
@@ -839,7 +846,14 @@ function rewriteManifestToLocalProxy(
         result += line + '\n';
       }
     } else {
-      const fullUrl = line.startsWith('http') ? line : `${baseUrl}/${line}`;
+      let fullUrl: string;
+      const urlSplit = line.split('/');
+      if (urlSplit.length - 1 > 3) {
+        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
+      } else {
+        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${line}`;
+      }
+
       const route = isMaster
         ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
         : `/segment?`;
