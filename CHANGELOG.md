@@ -1,3 +1,8 @@
+# v1.2.2_JS-2 (12-Mei-2026)
+## Ditambahkan
+- Pesan error pada video player agar lebih jelas saat melaporkan
+## Diperbaiki
+- [Film] Error pada sebagian besar film baru
 # v1.2.2_JS-1 (09-Mei-2026)
 ## Diperbaiki
 - Video refresh setelah error tidak bekerja pada film

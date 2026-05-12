@@ -1,1 +1,0 @@
-Data film (terutama yang baru rilis/update) kembali mengalami error ketika streaming. perbaikan sudah di lakukan, namun kemungkinan akan di update besok dengan tambahan perbaikan lain
