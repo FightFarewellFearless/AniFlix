@@ -94,7 +94,8 @@ function Video_Film(props: Props) {
           });
           clearTimeout(timeout);
         } catch {
-          server.close();
+          server?.close?.();
+          await new Promise(resolve => setTimeout(resolve, 500));
           server = createServer((req, res) => {
             middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
           });
@@ -112,10 +113,10 @@ function Video_Film(props: Props) {
 
       const heartBeat = setInterval(() => {
         autoRestartWhenInactive();
-      }, 2000);
+      }, 15_000);
       return () => {
         clearInterval(heartBeat);
-        server.close();
+        server?.close?.();
         probe.remove();
       };
     }, [activeTokenRef]),

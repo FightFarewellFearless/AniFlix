@@ -943,7 +943,7 @@ export const middleServerCallback = async (
 
       try {
         const arrayBuffer = await segmentResponse.arrayBuffer();
-        res.end(Buffer.from(arrayBuffer));
+        res.end(arrayBuffer);
       } catch (err) {
         res.statusCode = 500;
         res.end();
