@@ -1,1 +1,1 @@
-Setelah update terakhir, pemutaran film (streaming) sudah lebih stabil, namun tetap ada beberapa masalah yang dapat diselesaikan dengan  cara muat ulang film yang dipilih (keluar lalu masuk lagi). Developer akan terus meninjau dan akan terus memperbaiki hingga pemuatan kembali stabil seperti dulu. Selama proses ini, ada kemungkinan aplikasi akan di update melalui native update jika diperlukan
+Data film (terutama yang baru rilis/update) kembali mengalami error ketika streaming. perbaikan sudah di lakukan, namun kemungkinan akan di update besok dengan tambahan perbaikan lain
