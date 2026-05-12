@@ -142,6 +142,7 @@ function VideoPlayer({
   }, [currentDurationSecond, seekBarProgress, streamingURL, totalDurationSecond]);
 
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [paused, setPaused] = useState(isPaused ?? false);
   useEffect(() => {
@@ -207,9 +208,10 @@ function VideoPlayer({
       player.play();
     }
   });
-  useEventListener(player, 'statusChange', ({ status }) => {
+  useEventListener(player, 'statusChange', ({ status, error }) => {
     if (status === 'readyToPlay') {
       setIsError(false);
+      setErrorMessage('');
       setIsBuffering(false);
       totalDurationSecond.set(player.duration ?? 0);
       if (seekBarProgressDisabled.get() === false) currentDurationSecond.set(player.currentTime);
@@ -229,6 +231,7 @@ function VideoPlayer({
       setIsBuffering(true);
     } else if (status === 'error') {
       setIsError(true);
+      setErrorMessage(error?.message ?? '');
       setIsBuffering(false);
     }
   });
@@ -525,7 +528,17 @@ function VideoPlayer({
             justifyContent: 'center',
             display: isError ? 'flex' : 'none',
           }}>
-          <Icons name="error" size={50} color="red" />
+          <Icons name="error" style={{ alignSelf: 'center' }} size={50} color="red" />
+          <Text
+            style={{
+              color: 'white',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              backgroundColor: '#00000062',
+              marginHorizontal: 5,
+            }}>
+            {errorMessage || 'Terjadi kesalahan saat memutar video'}
+          </Text>
         </View>
       </Pressable>
     </View>
