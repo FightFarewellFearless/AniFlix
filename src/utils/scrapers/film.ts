@@ -759,7 +759,7 @@ async function redeemVideo(
   claimApi: ClaimApi;
 }> {
   let timeout: NodeJS.Timeout | undefined;
-  const totalWaitTime = Math.floor(Math.abs(playInfo.unlockAt - playInfo.serverNow) / 1000);
+  const totalWaitTime = Math.floor(Math.max(0, playInfo.unlockAt - playInfo.serverNow) / 1000) || 0;
   const startTime = Date.now();
 
   const updateProgress = () => {
@@ -773,7 +773,9 @@ async function redeemVideo(
     const handler = () => {
       clearTimeout(timeout);
       clearInterval(interval);
-      rej(new Error('Aborted'));
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      rej(err);
     };
     if (signal?.aborted) return handler();
     signal?.addEventListener('abort', handler, { once: true });
@@ -783,7 +785,7 @@ async function redeemVideo(
         clearInterval(interval);
         res(true);
       },
-      Math.abs(playInfo.unlockAt - Date.now()),
+      Math.max(0, playInfo.unlockAt - Date.now()),
     );
   });
   const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
