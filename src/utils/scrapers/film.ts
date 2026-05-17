@@ -14,6 +14,7 @@ import { SeriesEpisodeResponse } from './filmTypes/seriesEpisode';
 import { SeriesSeasonResponse } from './filmTypes/seriesSeason';
 import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
 import React from 'react';
+import { PlayInfo } from './filmTypes/playInfo';
 
 type FilmHomePage = Array<{
   title: string;
@@ -39,13 +40,13 @@ type HlsVariant = {
   url: string;
 };
 
-export type HashProgressData = {
-  difficulty: number;
-  elapsed: number;
-  isCompleted: boolean;
-  canSpeedUp?: boolean;
-  isSpeedingUp?: boolean;
-};
+// export type HashProgressData = {
+//   difficulty: number;
+//   elapsed: number;
+//   isCompleted: boolean;
+//   canSpeedUp?: boolean;
+//   isSpeedingUp?: boolean;
+// };
 
 // TODO: Check this in about a month or two, and plan to remove quick crypto entirely and uninstall it depending on future needs
 // async function solveChallenge(
@@ -590,7 +591,7 @@ type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmM
 async function getFilmDetails(
   filmUrl: string,
   signal?: AbortSignal,
-  // onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+  onWaitTime?: (waitTime: number, totalWaitTime: number) => void,
 ): Promise<FilmDetails> {
   const api: PossibleAPIResponse = await fetchPage(filmUrl, { signal, asJson: true });
   if ('defaultSeason' in api) {
@@ -628,7 +629,7 @@ async function getFilmDetails(
     // } else {
     //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
     // }
-    const claimApi: ClaimApi = await fetchPage(
+    const playInfo: PlayInfo = await fetchPage(
       BASE_URL + '/api/watch/play-info/episode/' + epApi.episode.id,
       {
         signal,
@@ -639,11 +640,11 @@ async function getFilmDetails(
         asJson: true,
       },
     );
-    const redeemVid: RedeemApi = await redeemVideo(claimApi, signal);
+    const { claimApi, redeemApi } = await redeemVideo(playInfo, signal, onWaitTime);
     let variants: HlsVariant[] = [];
     try {
-      const manifestContent = await fetchPage(redeemVid.url, { signal });
-      variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
+      const manifestContent = await fetchPage(redeemApi.url, { signal });
+      variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
     } catch (e) {}
 
     const episodes = epApi.season.episodes;
@@ -664,11 +665,11 @@ async function getFilmDetails(
       title: epApi.series.title + `${year ? ` (${year})` : ''}`,
       originalLanguage: epApi.series.originalLanguage,
       country: epApi.series.country,
-      streamingLink: redeemVid.url,
+      streamingLink: redeemApi.url,
       claim: claimApi.claim,
       redeemUrl: claimApi.redeemUrl,
       subtitleLink:
-        redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
+        redeemApi.subtitles.find(s => s.lang === 'id')?.path ?? redeemApi.subtitles[0]?.path,
       releaseDate: epApi.episode.airDate,
       rating: epApi.episode.voteAverage || '0',
       genres,
@@ -706,7 +707,7 @@ async function getFilmDetails(
   //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
   // }
 
-  const claimApi: ClaimApi = await fetchPage(
+  const playInfo: PlayInfo = await fetchPage(
     BASE_URL + '/api/watch/play-info/movie/' + movieApi.id,
     {
       signal,
@@ -717,12 +718,12 @@ async function getFilmDetails(
       asJson: true,
     },
   );
-  const redeemVid: RedeemApi = await redeemVideo(claimApi, signal);
+  const { redeemApi, claimApi } = await redeemVideo(playInfo, signal, onWaitTime);
 
   let variants: HlsVariant[] = [];
   try {
-    const manifestContent = await fetchPage(redeemVid.url, { signal });
-    variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
+    const manifestContent = await fetchPage(redeemApi.url, { signal });
+    variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
   } catch (e) {}
 
   const year = movieApi.releaseDate?.split('-')[0];
@@ -734,11 +735,11 @@ async function getFilmDetails(
     quality: movieApi.quality,
     country: movieApi.country,
     director: movieApi.director,
-    streamingLink: redeemVid.url,
+    streamingLink: redeemApi.url,
     claim: claimApi.claim,
     redeemUrl: claimApi.redeemUrl,
     subtitleLink:
-      redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
+      redeemApi.subtitles.find(s => s.lang === 'id')?.path ?? redeemApi.subtitles[0]?.path,
     releaseDate: movieApi.releaseDate,
     rating: movieApi.voteAverage || '0',
     genres: movieApi.genres?.map(g => g.name) || [],
@@ -749,8 +750,53 @@ async function getFilmDetails(
   };
 }
 
-async function redeemVideo(claimApi: ClaimApi, signal?: AbortSignal): Promise<RedeemApi> {
-  return await fetchPage(claimApi.redeemUrl, {
+async function redeemVideo(
+  playInfo: PlayInfo,
+  signal?: AbortSignal,
+  onWaitTime?: (waitTime: number, totalWaitTime: number) => void,
+): Promise<{
+  redeemApi: RedeemApi;
+  claimApi: ClaimApi;
+}> {
+  let timeout: NodeJS.Timeout | undefined;
+  const totalWaitTime = Math.floor(Math.abs(playInfo.unlockAt - playInfo.serverNow) / 1000);
+  const startTime = Date.now();
+
+  const updateProgress = () => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    onWaitTime?.(Math.min(elapsed, totalWaitTime), totalWaitTime);
+  };
+
+  updateProgress();
+  await new Promise((res, rej) => {
+    const interval = setInterval(updateProgress, 1000);
+    const handler = () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+      rej(new Error('Aborted'));
+    };
+    if (signal?.aborted) return handler();
+    signal?.addEventListener('abort', handler, { once: true });
+    timeout = setTimeout(
+      () => {
+        signal?.removeEventListener('abort', handler);
+        clearInterval(interval);
+        res(true);
+      },
+      Math.abs(playInfo.unlockAt - Date.now()),
+    );
+  });
+  const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
+    method: 'POST',
+    signal,
+    headers: {
+      Referer: FILM_BASE_URL + '/',
+      Origin: FILM_BASE_URL,
+    },
+    asJson: true,
+    body: JSON.stringify({ gateToken: playInfo.gateToken }),
+  });
+  const redeemApi: RedeemApi = await fetchPage(claimApi.redeemUrl, {
     method: 'POST',
     signal,
     headers: {
@@ -760,6 +806,7 @@ async function redeemVideo(claimApi: ClaimApi, signal?: AbortSignal): Promise<Re
     asJson: true,
     body: JSON.stringify({ claim: claimApi.claim }),
   });
+  return { redeemApi, claimApi };
 }
 
 async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Promise<FilmSeason> {
