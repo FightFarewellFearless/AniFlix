@@ -1,3 +1,10 @@
+# v1.2.2_JS-3 (17-Mei-2026)
+## Ditambahkan
+- Menampilkan sisa waktu tunggu saat memproses proteksi pada film
+## Diperbaiki
+- [Film] Error saat memutar video akibat sistem proteksi baru
+## Ditingkatkan
+- Memindahkan inisialisasi data dan pengecekan domain ke halaman Beranda agar proses masuk ke aplikasi lebih cepat
 # v1.2.2_JS-2 (12-Mei-2026)
 ## Ditambahkan
 - Pesan error pada video player agar lebih jelas saat melaporkan
