@@ -12,10 +12,22 @@ import { useTheme } from 'react-native-paper';
 import { EpisodeBaruHomeContext } from '../../misc/context';
 import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 
-const EpisodeBaruHome = lazy(() => import('./AnimeList'));
-const Search = lazy(() => import('./Search'));
-const Utils = lazy(() => import('./Utils'));
-const Saya = lazy(() => import('./Saya'));
+let EpisodeBaruHome: React.ComponentType<any>;
+let Search: React.ComponentType<any>;
+let Utils: React.ComponentType<any>;
+let Saya: React.ComponentType<any>;
+
+if (__DEV__) {
+  EpisodeBaruHome = require('./AnimeList').default;
+  Search = require('./Search').default;
+  Utils = require('./Utils').default;
+  Saya = require('./Saya').default;
+} else {
+  EpisodeBaruHome = lazy(() => import('./AnimeList'));
+  Search = lazy(() => import('./Search'));
+  Utils = lazy(() => import('./Utils'));
+  Saya = lazy(() => import('./Saya'));
+}
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
 const Tab = createNativeBottomTabNavigator<HomeNavigator>();
