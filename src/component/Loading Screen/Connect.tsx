@@ -2,7 +2,7 @@ import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Updates from 'expo-updates';
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -29,12 +29,8 @@ import runningText from '@assets/runningText.json';
 import { Github, JoinDiscord } from '@component/misc/Social';
 import defaultDatabase from '@misc/defaultDatabaseValue.json';
 import { version as appVersion, OTAJSVersion } from '@root/package.json';
-import AnimeAPI from '@utils/AnimeAPI';
 import { DANGER_MIGRATE_OLD_HISTORY, DatabaseManager } from '@utils/DatabaseManager';
 import deviceUserAgent from '@utils/deviceUserAgent';
-import { AnimeMovieWebView } from '@utils/scrapers/animeMovie';
-import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
-// import { Comics1WebView } from '@utils/scrapers/comics1';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'connectToServer'>;
 
@@ -48,33 +44,10 @@ function Loading(props: Props) {
   const [loadStatus, setLoadStatus] = useState({
     'Menyiapkan database': false,
     'Mengecek versi aplikasi': false,
-    'Mendapatkan domain terbaru': false,
-    'Menyiapkan data anime movie': false,
-    'Menyiapkan data anime series': false,
   });
 
-  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(false);
-  // const [isComics1WebViewOpen, setIsComics1WebViewOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const progressValueAnimation = useSharedValue(0);
-
-  const fetchAnimeData = useCallback(async (signal: AbortSignal) => {
-    const jsondata: EpisodeBaruHome | void = await AnimeAPI.home(signal).catch(() => {
-      // props.navigation.dispatch(StackActions.replace('FailedToConnect'));
-      ToastAndroid.show('Gagal menyiapkan data anime series', ToastAndroid.SHORT);
-    });
-    setLoadStatus(old => ({
-      ...old,
-      'Menyiapkan data anime series': true,
-    }));
-    if (jsondata === undefined) {
-      return {
-        newAnime: [],
-        jadwalAnime: [],
-      };
-    }
-    return jsondata;
-  }, []);
 
   const prepareData = useCallback(async () => {
     const arrOfDefaultData = Object.keys(defaultDatabase) as SetDatabaseTarget[];
@@ -116,15 +89,6 @@ function Loading(props: Props) {
     }
   }, []);
 
-  const fetchDomain = useCallback(async (signal: AbortSignal) => {
-    await fetchLatestDomain(signal).catch(() => {
-      ToastAndroid.show(
-        'Gagal mendapatkan domain terbaru, menggunakan domain default',
-        ToastAndroid.SHORT,
-      );
-    });
-  }, []);
-
   const checkNativeAppVersion = useCallback(async (signal: AbortSignal) => {
     const abort = new AbortController();
     const timoeut = setTimeout(() => abort.abort(), 5000);
@@ -159,45 +123,16 @@ function Loading(props: Props) {
     return data[0];
   }, []);
 
-  const moviePromiseResolve = useRef<(val?: unknown) => void>(null);
-  const [animeMoviePromise] = useState(
-    () => new Promise(res => (moviePromiseResolve.current = res)),
-  );
-  // const comics1PromiseResolve = useRef<(val?: unknown) => void>(null);
-  // const [comics1Promise] = useState(
-  //   () => new Promise(res => (comics1PromiseResolve.current = res)),
-  // );
-  const onAnimeMovieReady = useCallback(() => {
-    setLoadStatus(old => ({
-      ...old,
-      'Menyiapkan data anime movie': true,
-    }));
-    setIsAnimeMovieWebViewOpen(false);
-    moviePromiseResolve.current?.();
-  }, []);
-  // const onComics1Ready = useCallback(() => {
-  //   setLoadStatus(old => ({
-  //     ...old,
-  //     'Menyiapkan data anime movie': !isAnimeMovieWebViewOpen && !isComics1WebViewOpen,
-  //   }));
-  //   setIsComics1WebViewOpen(false);
-  //   comics1PromiseResolve.current?.();
-  // }, [isAnimeMovieWebViewOpen, isComics1WebViewOpen]);
-
   const connectToServers = useCallback(
     async (signal: AbortSignal) => {
-      setIsAnimeMovieWebViewOpen(true);
-      // setIsComics1WebViewOpen(true);
-      const animeData = await fetchAnimeData(signal);
-      Promise.all([animeData, animeMoviePromise]).then(([anime]) => {
-        if (signal.aborted) return;
-        if (anime === undefined) {
-          return;
-        }
-        props.navigation.dispatch(StackActions.replace('Home', { data: anime }));
-      });
+      if (signal.aborted) return;
+      props.navigation.dispatch(
+        StackActions.replace('Home', {
+          data: { newAnime: [], jadwalAnime: {} } as unknown as EpisodeBaruHome,
+        }),
+      );
     },
-    [animeMoviePromise, fetchAnimeData, props.navigation],
+    [props.navigation],
   );
 
   useFocusEffect(
@@ -209,9 +144,6 @@ function Loading(props: Props) {
         setLoadStatus({
           'Menyiapkan database': false,
           'Mengecek versi aplikasi': false,
-          'Mendapatkan domain terbaru': false,
-          'Menyiapkan data anime movie': false,
-          'Menyiapkan data anime series': false,
         });
         await prepareData();
         if (signal.aborted) return;
@@ -237,12 +169,6 @@ function Loading(props: Props) {
             setLoadStatus(old => ({
               ...old,
               'Mengecek versi aplikasi': true,
-            }));
-            await fetchDomain(signal);
-            if (signal.aborted) return;
-            setLoadStatus(old => ({
-              ...old,
-              'Mendapatkan domain terbaru': true,
             }));
             connectToServers(signal);
           }
@@ -312,7 +238,6 @@ function Loading(props: Props) {
       checkNativeAppVersion,
       props.navigation,
       deleteUnnecessaryUpdate,
-      fetchDomain,
       connectToServers,
     ]),
   );
@@ -337,21 +262,6 @@ function Loading(props: Props) {
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
-        {isAnimeMovieWebViewOpen && (
-          <Suspense>
-            <AnimeMovieWebView
-              isWebViewShown={isAnimeMovieWebViewOpen}
-              setIsWebViewShown={setIsAnimeMovieWebViewOpen}
-              onAnimeMovieReady={onAnimeMovieReady}
-            />
-            {/* <Comics1WebView
-              isWebViewShown={isComics1WebViewOpen}
-              setIsWebViewShown={setIsComics1WebViewOpen}
-              onComics1Ready={onComics1Ready}
-            /> */}
-          </Suspense>
-        )}
-
         <View style={styles.header}>
           <Text style={styles.appName}>AniFlix</Text>
           <Text style={styles.subtitle}>Loading your anime experience...</Text>

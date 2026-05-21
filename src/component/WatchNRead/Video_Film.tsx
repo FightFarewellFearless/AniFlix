@@ -13,6 +13,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  AppState,
   Linking,
   Pressable,
   ScrollView,
@@ -30,15 +31,22 @@ import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import useGlobalStyles, { darkText, lightText } from '@assets/style';
 import setHistory from '@utils/historyControl';
 
+import { useFilmTokenRotate } from '@/hooks/useFilmTokenRotate';
 import { RootStackNavigator } from '@/types/navigation';
+import Skeleton from '@component/misc/Skeleton';
+import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import { useBackHandler } from '@hooks/useBackHandler';
 import { useFocusEffect } from '@react-navigation/core';
 import { useKeyValueIfFocused } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
-import { getFilmDetails } from '@utils/scrapers/film';
+import {
+  FILM_BASE_URL,
+  getFilmDetails,
+  middleServerCallback,
+  STREAMING_MIDDLE_SERVER_PORT,
+} from '@utils/scrapers/film';
+import { createServer, Server } from 'react-native-nitro-http-server';
 import { ActivityIndicator, Button } from 'react-native-paper';
-import Skeleton from '@component/misc/Skeleton';
-import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
 import {
   LoadingModal,
   TimeInfo,
@@ -66,8 +74,53 @@ function Video_Film(props: Props) {
   const currentData = useRef(data);
   currentData.current = data;
 
-  const [currentStreamUrl, setCurrentStreamUrl] = useState(props.route.params.data.streamingLink);
+  const [currentResolution, setCurrentResolution] = useState('Auto');
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
+
+  const { activeTokenRef, checkAndRotateToken } = useFilmTokenRotate(data);
+  const checkAndRotateTokenRef = useRef(checkAndRotateToken);
+  checkAndRotateTokenRef.current = checkAndRotateToken;
+
+  useFocusEffect(
+    useCallback(() => {
+      let server: Server;
+      async function autoRestartWhenInactive() {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 500);
+          await fetch(`http://127.0.0.1:${STREAMING_MIDDLE_SERVER_PORT}/`, {
+            method: 'HEAD',
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+        } catch {
+          server?.close?.();
+          await new Promise(resolve => setTimeout(resolve, 500));
+          server = createServer((req, res) => {
+            middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
+          });
+          server.listen(STREAMING_MIDDLE_SERVER_PORT);
+        }
+      }
+      const probe = AppState.addEventListener('change', async state => {
+        if (state !== 'active') return;
+        await autoRestartWhenInactive();
+      });
+      server = createServer((req, res) => {
+        middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
+      });
+      server.listen(STREAMING_MIDDLE_SERVER_PORT);
+
+      const heartBeat = setInterval(() => {
+        autoRestartWhenInactive();
+      }, 15_000);
+      return () => {
+        clearInterval(heartBeat);
+        server?.close?.();
+        probe.remove();
+      };
+    }, [activeTokenRef]),
+  );
 
   const currentLink = useRef(props.route.params.link);
   const firstTimeLoad = useRef(true);
@@ -80,6 +133,10 @@ function Video_Film(props: Props) {
   const currentTimeRef = useRef<number>(0);
   const saveProgressToHistory = useCallback(() => {
     if (!(currentTimeRef.current > 5)) return;
+    historyData.current = {
+      resolution: historyData.current?.resolution,
+      lastDuration: currentTimeRef.current,
+    };
     setHistory(
       currentData.current,
       currentLink.current,
@@ -202,13 +259,15 @@ function Video_Film(props: Props) {
         );
       } else {
         setData(result);
-        setCurrentStreamUrl(result.streamingLink);
+        setCurrentResolution('Auto');
         setHistory(result, dataLink, undefined, undefined, true);
       }
       setLoading(false);
       firstTimeLoad.current = false;
       historyData.current = undefined;
       currentLink.current = dataLink;
+      lastSavedTimeRef.current = 0;
+      currentTimeRef.current = 0;
     },
     [loading],
   );
@@ -234,19 +293,14 @@ function Video_Film(props: Props) {
       }
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
-
-    // DialogManager.alert('Perhatian', `
-    // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
-    // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
-    // `)
   }, [isPaused]);
 
   useEffect(() => {
     if (isPaused) {
-      videoRef.current?.props.player.pause();
+      videoRef.current?.props?.player?.pause();
       saveProgressToHistory();
     } else {
-      videoRef.current?.props.player.play();
+      videoRef.current?.props?.player?.play();
     }
   }, [isPaused, saveProgressToHistory]);
 
@@ -374,6 +428,8 @@ function Video_Film(props: Props) {
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
           streamingLink: data.streamingLink,
           subtitleLink: data.subtitleLink,
+          claim: data.claim,
+          redeemUrl: data.redeemUrl,
         }),
       ).toString('hex')}`,
     ).catch(err => {
@@ -383,21 +439,21 @@ function Video_Film(props: Props) {
           : 'Error tidak diketahui: ' + err.message;
       DialogManager.alert('Error', errMessage);
     });
-  }, [data.episode, data.season, data.streamingLink, data.subtitleLink, data.title]);
+  }, [data]);
 
   const resolutionDropdownData = useMemo(() => {
     const list = [];
-    list.push({ label: 'Auto', value: data.streamingLink });
-    if (data.variants && data.variants.length > 0) {
+    list.push({ label: 'Auto', value: 'Auto' });
+    if (data.type === 'stream' && data.variants && data.variants.length > 0) {
       data.variants.forEach(v => {
         list.push({
           label: v.name || v.resolution,
-          value: v.url,
+          value: v.name || v.resolution,
         });
       });
     }
     return list;
-  }, [data.streamingLink, data.variants]);
+  }, [data]);
 
   const insets = useSafeAreaInsets();
 
@@ -417,12 +473,11 @@ function Video_Film(props: Props) {
           }}
         />
         <VideoPlayer
-          // key={data.streamingLink}
           title={
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
           }
           thumbnailURL={data.thumbnailUrl}
-          streamingURL={currentStreamUrl}
+          streamingURL={`http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`}
           isHls={true}
           subtitleURL={data.subtitleLink}
           onSubtitleLoad={onSubtitleLoad}
@@ -434,6 +489,11 @@ function Video_Film(props: Props) {
           onDurationChange={handleProgress}
           onLoad={handleVideoLoad}
           batteryAndClock={batteryAndClock}
+          headers={{
+            origin: FILM_BASE_URL,
+            referer: FILM_BASE_URL + '/',
+            Accept: '*/*',
+          }}
         />
       </View>
       {/* END OF VIDEO ELEMENT */}
@@ -597,14 +657,15 @@ function Video_Film(props: Props) {
             <View pointerEvents="box-only">
               <Dropdown
                 ref={dropdownResolutionRef}
-                value={currentStreamUrl}
+                value={currentResolution}
                 placeholder="Pilih resolusi"
                 data={resolutionDropdownData}
                 valueField="value"
                 labelField="label"
                 onChange={item => {
+                  saveProgressToHistory();
                   firstTimeLoad.current = true;
-                  setCurrentStreamUrl(item.value);
+                  setCurrentResolution(item.value);
                   ToastAndroid.show(`Resolusi diubah ke ${item.label}`, ToastAndroid.SHORT);
                 }}
                 style={styles.dropdownStyle}

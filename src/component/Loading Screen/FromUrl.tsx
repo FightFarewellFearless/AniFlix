@@ -1,6 +1,6 @@
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Text, ToastAndroid, View } from 'react-native';
 
 import { RootStackNavigator } from '@/types/navigation';
@@ -28,6 +28,14 @@ type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
 function FromUrl(props: Props) {
   const globalStyles = useGlobalStyles();
+
+  const [currentWaitTime, setCurrentWaitTime] = useState<number | null>(null);
+  const [totalWaitTime, setTotalWaitTime] = useState<number | null>(null);
+
+  const onWaitTime = useCallback((currentWaitTime: number, totalWaitTime: number) => {
+    setCurrentWaitTime(currentWaitTime);
+    setTotalWaitTime(totalWaitTime);
+  }, []);
 
   const randomTips = useRef<string>(
     // eslint-disable-next-line no-bitwise
@@ -57,7 +65,6 @@ function FromUrl(props: Props) {
     },
     [props.navigation],
   );
-
   useFocusEffect(
     useCallback(() => {
       props.navigation.setOptions({ headerTitle: props.route.params.title });
@@ -235,7 +242,7 @@ function FromUrl(props: Props) {
           );
           return;
         }
-        getFilmDetails(link, abort.signal)
+        getFilmDetails(link, abort.signal, onWaitTime)
           .then(async data => {
             if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
             if (data.type === 'detail') {
@@ -340,6 +347,7 @@ function FromUrl(props: Props) {
       props.route.params.title,
       props.route.params.type,
       props.route.params.link,
+      onWaitTime,
     ]),
   );
 
@@ -354,16 +362,110 @@ function FromUrl(props: Props) {
         }}>
         <LoadingIndicator size={15} />
 
-        <Text style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20, marginTop: 20 }]}>
-          Mengambil data... Mohon tunggu sebentar!
-        </Text>
-        <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>
-          "{randomQuote.quote}"
-        </Text>
-        <Text
-          style={[globalStyles.text, { textAlign: 'center', marginTop: 5, fontWeight: 'bold' }]}>
-          — {randomQuote.by}
-        </Text>
+        {currentWaitTime && totalWaitTime ? (
+          <View style={{ alignItems: 'center', marginTop: 24, width: '100%' }}>
+            <Text
+              style={[
+                globalStyles.text,
+                {
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  color: currentWaitTime >= totalWaitTime ? '#4CAF50' : globalStyles.text.color,
+                },
+              ]}>
+              {currentWaitTime >= totalWaitTime
+                ? 'Selesai! Mohon tunggu...'
+                : 'Menunggu Proteksi...'}
+            </Text>
+
+            <View
+              style={{
+                backgroundColor:
+                  currentWaitTime >= totalWaitTime
+                    ? 'rgba(76, 175, 80, 0.1)'
+                    : 'rgba(255, 255, 255, 0.08)',
+                borderColor: currentWaitTime >= totalWaitTime ? '#4CAF50' : 'transparent',
+                borderWidth: 1,
+                paddingVertical: 12,
+                paddingHorizontal: 32,
+                borderRadius: 12,
+                marginTop: 20,
+                marginBottom: 20,
+              }}>
+              <Text
+                style={[
+                  globalStyles.text,
+                  {
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: currentWaitTime >= totalWaitTime ? '#4CAF50' : globalStyles.text.color,
+                  },
+                ]}>
+                {currentWaitTime + ' / ' + totalWaitTime} detik
+              </Text>
+            </View>
+
+            {!(currentWaitTime >= totalWaitTime) ? (
+              <>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    { textAlign: 'center', fontSize: 12, opacity: 0.6, lineHeight: 18 },
+                  ]}>
+                  Mohon tunggu sebentar, video sedang di siapkan dan iklan sedang di lewati di latar
+                  belakang...
+                </Text>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    {
+                      textAlign: 'center',
+                      fontSize: 12,
+                      opacity: 0.8,
+                      marginTop: 8,
+                      color: '#ef233c',
+                      fontWeight: 'bold',
+                    },
+                  ]}>
+                  Tekan tombol KEMBALI untuk batal.
+                </Text>
+              </>
+            ) : (
+              <Text
+                style={[
+                  globalStyles.text,
+                  {
+                    textAlign: 'center',
+                    fontSize: 13,
+                    marginTop: 8,
+                    color: '#4CAF50',
+                    fontWeight: 'bold',
+                  },
+                ]}>
+                Menyiapkan Video...
+              </Text>
+            )}
+          </View>
+        ) : (
+          <>
+            <Text
+              style={[globalStyles.text, { fontWeight: 'bold', marginBottom: 20, marginTop: 20 }]}>
+              Mengambil data... Mohon tunggu sebentar!
+            </Text>
+            <Text style={[globalStyles.text, { textAlign: 'center', fontStyle: 'italic' }]}>
+              "{randomQuote.quote}"
+            </Text>
+            <Text
+              style={[
+                globalStyles.text,
+                { textAlign: 'center', marginTop: 5, fontWeight: 'bold' },
+              ]}>
+              — {randomQuote.by}
+            </Text>
+          </>
+        )}
       </View>
       <View style={{ alignItems: 'center' }}>
         <View style={{ position: 'absolute', bottom: 10 }}>

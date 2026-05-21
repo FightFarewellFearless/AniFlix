@@ -1,6 +1,8 @@
 import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
+import { fetch as expoFetch } from 'expo/fetch';
+
 import deviceUserAgent from '@utils/deviceUserAgent';
 import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
@@ -10,6 +12,9 @@ import { SearchFilmResponse } from './filmTypes/searchFilm';
 import { SeriesDetailsResponse } from './filmTypes/series';
 import { SeriesEpisodeResponse } from './filmTypes/seriesEpisode';
 import { SeriesSeasonResponse } from './filmTypes/seriesSeason';
+import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
+import React from 'react';
+import { PlayInfo } from './filmTypes/playInfo';
 
 type FilmHomePage = Array<{
   title: string;
@@ -35,13 +40,14 @@ type HlsVariant = {
   url: string;
 };
 
-export type HashProgressData = {
-  difficulty: number;
-  elapsed: number;
-  isCompleted: boolean;
-  canSpeedUp?: boolean;
-  isSpeedingUp?: boolean;
-};
+// export type HashProgressData = {
+//   difficulty: number;
+//   elapsed: number;
+//   isCompleted: boolean;
+//   canSpeedUp?: boolean;
+//   isSpeedingUp?: boolean;
+// };
+
 // TODO: Check this in about a month or two, and plan to remove quick crypto entirely and uninstall it depending on future needs
 // async function solveChallenge(
 //   challenge: string,
@@ -294,7 +300,7 @@ function fetchPage(url: string, opt?: RequestInit & { asJson: true }): Promise<a
 async function fetchPage(url: string, opt?: RequestInit & { asJson?: boolean }) {
   const response = await fetch(url, {
     headers: {
-      'user-agent': deviceUserAgent,
+      'User-Agent': deviceUserAgent,
       ...opt?.headers,
     },
     ...opt,
@@ -428,7 +434,6 @@ async function getHomepage(signal?: AbortSignal) {
     return {
       title: data.title!,
       url: `${BASE_URL}/api/${contentType === 'movie' ? 'movies' : 'series'}/${slug}`,
-      // url: `${BASE_URL}/${contentType === 'movie' ? 'movie' : 'series'}/${slug}`,
       contentType,
       thumbnailUrl: `https://image.tmdb.org/t/p/w500${data.posterPath}`,
       year: (data.releaseDate || data.firstAirDate || 'Unknown').split('-')[0],
@@ -443,6 +448,7 @@ async function getHomepage(signal?: AbortSignal) {
     trending,
   };
 }
+
 async function getLatestMovies(page = 1, signal?: AbortSignal) {
   const api: LatestMoviesResponse = await fetchPage(
     `${BASE_URL}/api/movies?page=${page}&limit=36&sort=createdAt`,
@@ -453,7 +459,6 @@ async function getLatestMovies(page = 1, signal?: AbortSignal) {
   );
   return api.data.map(item => ({
     title: item.title,
-    // url: `${BASE_URL}/movie/${item.slug}`,
     url: `${BASE_URL}/api/movies/${item.slug}`,
     thumbnailUrl: `https://image.tmdb.org/t/p/w500${item.posterPath}`,
     year: item.releaseDate.split('-')[0],
@@ -461,6 +466,7 @@ async function getLatestMovies(page = 1, signal?: AbortSignal) {
     rating: item.voteAverage ?? 'Unknown',
   }));
 }
+
 async function getLatestSeries(page = 1, signal?: AbortSignal) {
   const api: LatestSeriesResponse = await fetchPage(
     `${BASE_URL}/api/series?page=${page}&limit=36&sort=createdAt`,
@@ -576,6 +582,8 @@ type FilmDetail_Stream = {
   next?: string;
   prev?: string;
   variants?: HlsVariant[];
+  claim?: string;
+  redeemUrl?: string;
 };
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmMovieDetailsResponse;
@@ -583,7 +591,7 @@ type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmM
 async function getFilmDetails(
   filmUrl: string,
   signal?: AbortSignal,
-  // onProgress?: (data: HashProgressData, triggerSpeedUp?: () => void) => void,
+  onWaitTime?: (waitTime: number, totalWaitTime: number) => void,
 ): Promise<FilmDetails> {
   const api: PossibleAPIResponse = await fetchPage(filmUrl, { signal, asJson: true });
   if ('defaultSeason' in api) {
@@ -621,22 +629,22 @@ async function getFilmDetails(
     // } else {
     //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
     // }
-    const claimApi: ClaimApi = await fetchPage(
+    const playInfo: PlayInfo = await fetchPage(
       BASE_URL + '/api/watch/play-info/episode/' + epApi.episode.id,
       {
         signal,
+        headers: {
+          Referer: FILM_BASE_URL + '/',
+          Origin: FILM_BASE_URL,
+        },
         asJson: true,
       },
     );
-    const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
-      method: 'POST',
-      asJson: true,
-      body: JSON.stringify({ claim: claimApi.claim }),
-    });
+    const { claimApi, redeemApi } = await redeemVideo(playInfo, signal, onWaitTime);
     let variants: HlsVariant[] = [];
     try {
-      const manifestContent = await fetchPage(redeemVid.url, { signal });
-      variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
+      const manifestContent = await fetchPage(redeemApi.url, { signal });
+      variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
     } catch (e) {}
 
     const episodes = epApi.season.episodes;
@@ -657,9 +665,11 @@ async function getFilmDetails(
       title: epApi.series.title + `${year ? ` (${year})` : ''}`,
       originalLanguage: epApi.series.originalLanguage,
       country: epApi.series.country,
-      streamingLink: redeemVid.url,
+      streamingLink: redeemApi.url,
+      claim: claimApi.claim,
+      redeemUrl: claimApi.redeemUrl,
       subtitleLink:
-        redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
+        redeemApi.subtitles.find(s => s.lang === 'id')?.path ?? redeemApi.subtitles[0]?.path,
       releaseDate: epApi.episode.airDate,
       rating: epApi.episode.voteAverage || '0',
       genres,
@@ -697,23 +707,23 @@ async function getFilmDetails(
   //   jeniusPlay = await majorplayGetHLS(extractedEmbedUrlObj, signal);
   // }
 
-  const claimApi: ClaimApi = await fetchPage(
+  const playInfo: PlayInfo = await fetchPage(
     BASE_URL + '/api/watch/play-info/movie/' + movieApi.id,
     {
       signal,
+      headers: {
+        Referer: FILM_BASE_URL + '/',
+        Origin: FILM_BASE_URL,
+      },
       asJson: true,
     },
   );
-  const redeemVid: RedeemApi = await fetchPage(claimApi.redeemUrl, {
-    method: 'POST',
-    asJson: true,
-    body: JSON.stringify({ claim: claimApi.claim }),
-  });
+  const { redeemApi, claimApi } = await redeemVideo(playInfo, signal, onWaitTime);
 
   let variants: HlsVariant[] = [];
   try {
-    const manifestContent = await fetchPage(redeemVid.url, { signal });
-    variants = resolveMasterPlaylist(manifestContent, redeemVid.url);
+    const manifestContent = await fetchPage(redeemApi.url, { signal });
+    variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
   } catch (e) {}
 
   const year = movieApi.releaseDate?.split('-')[0];
@@ -725,9 +735,11 @@ async function getFilmDetails(
     quality: movieApi.quality,
     country: movieApi.country,
     director: movieApi.director,
-    streamingLink: redeemVid.url,
+    streamingLink: redeemApi.url,
+    claim: claimApi.claim,
+    redeemUrl: claimApi.redeemUrl,
     subtitleLink:
-      redeemVid.subtitles.find(s => s.lang === 'id')?.path ?? redeemVid.subtitles[0]?.path,
+      redeemApi.subtitles.find(s => s.lang === 'id')?.path ?? redeemApi.subtitles[0]?.path,
     releaseDate: movieApi.releaseDate,
     rating: movieApi.voteAverage || '0',
     genres: movieApi.genres?.map(g => g.name) || [],
@@ -736,6 +748,67 @@ async function getFilmDetails(
     backgroundImage: `https://image.tmdb.org/t/p/w780${movieApi.backdropPath}`,
     variants,
   };
+}
+
+async function redeemVideo(
+  playInfo: PlayInfo,
+  signal?: AbortSignal,
+  onWaitTime?: (waitTime: number, totalWaitTime: number) => void,
+): Promise<{
+  redeemApi: RedeemApi;
+  claimApi: ClaimApi;
+}> {
+  let timeout: NodeJS.Timeout | undefined;
+  const totalWaitTime = Math.floor(Math.max(0, playInfo.unlockAt - playInfo.serverNow) / 1000) || 0;
+  const startTime = Date.now();
+
+  const updateProgress = () => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    onWaitTime?.(Math.min(elapsed, totalWaitTime), totalWaitTime);
+  };
+
+  updateProgress();
+  await new Promise((res, rej) => {
+    const interval = setInterval(updateProgress, 1000);
+    const handler = () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      rej(err);
+    };
+    if (signal?.aborted) return handler();
+    signal?.addEventListener('abort', handler, { once: true });
+    timeout = setTimeout(
+      () => {
+        signal?.removeEventListener('abort', handler);
+        clearInterval(interval);
+        res(true);
+      },
+      Math.max(0, playInfo.unlockAt - Date.now()),
+    );
+  });
+  const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
+    method: 'POST',
+    signal,
+    headers: {
+      Referer: FILM_BASE_URL + '/',
+      Origin: FILM_BASE_URL,
+    },
+    asJson: true,
+    body: JSON.stringify({ gateToken: playInfo.gateToken }),
+  });
+  const redeemApi: RedeemApi = await fetchPage(claimApi.redeemUrl, {
+    method: 'POST',
+    signal,
+    headers: {
+      Referer: FILM_BASE_URL + '/',
+      Origin: FILM_BASE_URL,
+    },
+    asJson: true,
+    body: JSON.stringify({ claim: claimApi.claim }),
+  });
+  return { redeemApi, claimApi };
 }
 
 async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Promise<FilmSeason> {
@@ -754,12 +827,194 @@ async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Pr
   };
 }
 
+function filterManifestByResolution(manifest: string, targetRes: string): string {
+  if (!targetRes || targetRes === 'Auto') return manifest;
+
+  const lines = manifest.split('\n');
+  const result: string[] = [];
+  let skipNextLine = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    if (skipNextLine) {
+      skipNextLine = false;
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-STREAM-INF')) {
+      if (line.includes(`NAME="${targetRes}"`) || line.includes(`RESOLUTION=${targetRes}`)) {
+        result.push(line);
+      } else {
+        skipNextLine = true;
+      }
+    } else {
+      result.push(line);
+    }
+  }
+
+  return result.join('\n');
+}
+
+function rewriteManifestToLocalProxy(
+  STREAMING_MIDDLE_SERVER_PORT: number,
+  data: string,
+  baseUrl: string,
+  masterResolution: string,
+): string {
+  const lines = data.split('\n');
+  let result = '';
+  const isMaster = data.includes('#EXT-X-STREAM-INF');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      result += '\n';
+      continue;
+    }
+
+    if (line.startsWith('#')) {
+      if (line.includes('URI="')) {
+        const newLine = line.replace(/URI="([^"]+)"/g, (match, url: string) => {
+          let fullUrl: string;
+          const urlSplit = url.split('/');
+          if (urlSplit.length - 1 > 3) {
+            fullUrl = url.startsWith('http') ? url : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
+          } else {
+            fullUrl = url.startsWith('http') ? url : `${baseUrl}/${url}`;
+          }
+
+          const route = isMaster
+            ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
+            : `/segment?`;
+          return `URI="http://localhost:${STREAMING_MIDDLE_SERVER_PORT}${route}url=${encodeURIComponent(fullUrl)}"`;
+        });
+        result += newLine + '\n';
+      } else {
+        result += line + '\n';
+      }
+    } else {
+      let fullUrl: string;
+      const urlSplit = line.split('/');
+      if (urlSplit.length - 1 > 3) {
+        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
+      } else {
+        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${line}`;
+      }
+
+      const route = isMaster
+        ? `/manifest?res=${encodeURIComponent(masterResolution)}&`
+        : `/segment?`;
+      result += `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}${route}url=${encodeURIComponent(fullUrl)}\n`;
+    }
+  }
+
+  return result;
+}
+
+export const STREAMING_MIDDLE_SERVER_PORT = 43621;
+
+export const middleServerCallback = async (
+  req: IncomingMessage,
+  res: ServerResponse,
+  checkAndRotateTokenRef: React.RefObject<() => Promise<void>>,
+  activeTokenRef: React.RefObject<string | undefined>,
+) => {
+  try {
+    const localUrlObj = new URL(`http://localhost${req.url}`);
+    const path = localUrlObj.pathname;
+    if (path === '/manifest') {
+      await checkAndRotateTokenRef.current();
+      const originalManifestUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+      const targetRes = localUrlObj.searchParams.get('res') || 'Auto';
+
+      const upstreamUrlObj = new URL(originalManifestUrl);
+      if (activeTokenRef.current) {
+        upstreamUrlObj.searchParams.set('t', activeTokenRef.current);
+      }
+
+      const manifestResponse = await expoFetch(upstreamUrlObj.toString(), {
+        headers: {
+          'Cache-Control': 'no-store',
+          origin: FILM_BASE_URL,
+          referer: FILM_BASE_URL + '/',
+          Accept: '*/*',
+          'User-Agent': deviceUserAgent,
+        },
+      });
+      let manifestText = await manifestResponse.text();
+      if (targetRes !== 'Auto' && manifestText.includes('#EXT-X-STREAM-INF')) {
+        manifestText = filterManifestByResolution(manifestText, targetRes);
+      }
+
+      const baseUrl =
+        upstreamUrlObj.origin +
+        upstreamUrlObj.pathname.substring(0, upstreamUrlObj.pathname.lastIndexOf('/'));
+      const rebuildHLS = rewriteManifestToLocalProxy(
+        STREAMING_MIDDLE_SERVER_PORT,
+        manifestText,
+        baseUrl,
+        targetRes,
+      );
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+      res.end(rebuildHLS, 'utf-8');
+    } else if (req.url.startsWith('/segment')) {
+      await checkAndRotateTokenRef.current();
+      const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
+      const segmentUrlObj = new URL(originalSegmentUrl);
+
+      if (activeTokenRef.current) {
+        segmentUrlObj.searchParams.set('t', activeTokenRef.current);
+      }
+
+      const fetchHeaders: any = {
+        'Cache-Control': 'no-store',
+        origin: FILM_BASE_URL,
+        referer: FILM_BASE_URL + '/',
+        'User-Agent': deviceUserAgent,
+      };
+      if (req.headers['range'] || req.headers['Range']) {
+        fetchHeaders['Range'] = req.headers['range'] || req.headers['Range'];
+      }
+      const segmentResponse = await expoFetch(segmentUrlObj.toString(), {
+        headers: fetchHeaders,
+      });
+
+      res.statusCode = segmentResponse.status;
+      res.setHeader(
+        'Content-Type',
+        segmentResponse.headers.get('content-type') || 'application/octet-stream',
+      );
+
+      const contentRange = segmentResponse.headers.get('content-range');
+      if (contentRange) res.setHeader('Content-Range', contentRange);
+
+      try {
+        const arrayBuffer = await segmentResponse.arrayBuffer();
+        res.end(arrayBuffer);
+      } catch (err) {
+        res.statusCode = 500;
+        res.end();
+      }
+    } else {
+      res.statusCode = 404;
+      res.end('Not Found', 'utf-8');
+    }
+  } catch (e) {
+    res.statusCode = 500;
+    res.end('Server Error', 'utf-8');
+  }
+};
+
 export {
+  filterManifestByResolution,
   getFilmDetails,
   getFilmSeasonDetails,
   getHomepage,
   getLatestMovies,
   getLatestSeries,
+  rewriteManifestToLocalProxy,
   searchFilm,
 };
 export type {

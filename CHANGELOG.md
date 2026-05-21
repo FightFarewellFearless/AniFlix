@@ -1,3 +1,31 @@
+# v1.2.2_JS-3 (17-Mei-2026)
+## Ditambahkan
+- Menampilkan sisa waktu tunggu saat memproses proteksi pada film
+## Diperbaiki
+- [Film] Error saat memutar video akibat sistem proteksi baru
+## Ditingkatkan
+- Memindahkan inisialisasi data dan pengecekan domain ke halaman Beranda agar proses masuk ke aplikasi lebih cepat
+# v1.2.2_JS-2 (12-Mei-2026)
+## Ditambahkan
+- Pesan error pada video player agar lebih jelas saat melaporkan
+## Diperbaiki
+- [Film] Error pada sebagian besar film baru
+# v1.2.2_JS-1 (09-Mei-2026)
+## Diperbaiki
+- Video refresh setelah error tidak bekerja pada film
+- Mengimplementasikan rotasi token yang lebih baik
+- Pengalaman streaming film yang lebih stabil
+# v1.2.2 (08-Mei-2026)
+## Diperbaiki
+- Error pada beberapa film serta error saat sudah streaming selama kurang lebih 1 jam
+- [Film] Mengganti resolusi menyebabkan hilangnya audio
+- [Video Player] Mengganti resolusi di bawah 5 detik pertama setelah mengganti episode menyebabkan durasi otomatis dilewati dengan durasi episode terakhir
+### Catatan: Update dan perbaikan tambahan akan dirilis melalui OTA update
+
+# v1.2.1_JS-13 (29-April-2026)
+## Diperbaiki
+- Potensi perbaikan untuk native crash yang mungkin berhubungan dengan pengelolaan gambar
+- Video player restart dari awal saat berganti resolusi
 # v1.2.1_JS-12 (28-April-2026)
 Sorry banget hari ini ada 3 update yang berdekatan :(
 ## Diperbaiki

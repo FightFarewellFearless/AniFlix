@@ -1,10 +1,10 @@
-export interface ClaimApi {
+export interface PlayInfo {
   kind: string;
-  claim: string;
-  redeemUrl: string;
-  videoId: string;
-  title: string;
-  durationSec: number;
+  gateToken: string;
+  serverNow: number;
+  unlockAt: number;
+  viewerTier: string;
+  maxHeight: number;
   preroll: Preroll;
 }
 

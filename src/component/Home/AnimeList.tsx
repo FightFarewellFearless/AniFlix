@@ -63,7 +63,8 @@ import {
 } from '@misc/context';
 import { OTAJSVersion, version } from '@root/package.json';
 import AnimeAPI from '@utils/AnimeAPI';
-import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { AnimeMovieWebView, getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
 
@@ -84,6 +85,8 @@ function HomeList(props: HomeProps) {
   const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
   const [refresh, setRefresh] = useState(false);
   const [refreshingKey, setRefreshingKey] = useState(0);
+  const [isHomeLoading, setIsHomeLoading] = useState(true);
+  const [isHomeError, setIsHomeError] = useState(false);
   const windowSize = useWindowDimensions();
 
   const boxTextAnim = useSharedValue(0);
@@ -91,6 +94,18 @@ function HomeList(props: HomeProps) {
   const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
+
+  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
+  const [isMovieReady, setIsMovieReady] = useState(false);
+  const onAnimeMovieReady = useCallback(() => {
+    setIsAnimeMovieWebViewOpen(false);
+    setIsMovieReady(true);
+  }, []);
+
+  const retryMovie = useCallback(() => {
+    setIsMovieReady(false);
+    setIsAnimeMovieWebViewOpen(true);
+  }, []);
 
   const [animationText, setAnimationText] = useState(() => {
     const quote = randomQuote();
@@ -160,20 +175,51 @@ function HomeList(props: HomeProps) {
     }, [boxTextAnim]),
   );
 
+  useEffect(() => {
+    const abort = new AbortController();
+    setIsHomeLoading(true);
+    setIsHomeError(false);
+    fetchLatestDomain(abort.signal)
+      .catch(() => {})
+      .finally(() => {
+        if (abort.signal.aborted) return;
+        AnimeAPI.home(abort.signal)
+          .then(async jsondata => {
+            if (abort.signal.aborted) return;
+            setData?.(jsondata as any);
+          })
+          .catch(() => {
+            if (!abort.signal.aborted) {
+              setIsHomeError(true);
+            }
+          })
+          .finally(() => {
+            if (!abort.signal.aborted) setIsHomeLoading(false);
+          });
+      });
+    return () => abort.abort();
+  }, [setData]);
+
   const refreshing = useCallback(() => {
     setRefresh(true);
+    setIsHomeError(false);
     setData?.(val => ({ ...val, newAnime: [] }));
     setRefreshingKey(val => val + 1);
 
     setTimeout(() => {
-      AnimeAPI.home()
-        .then(async jsondata => {
-          setData?.(jsondata);
-          setRefresh(false);
-        })
-        .catch(() => {
-          ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
-          setRefresh(false);
+      fetchLatestDomain()
+        .catch(() => {})
+        .finally(() => {
+          AnimeAPI.home()
+            .then(async jsondata => {
+              setData?.(jsondata as any);
+              setRefresh(false);
+            })
+            .catch(() => {
+              ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
+              setRefresh(false);
+              setIsHomeError(true);
+            });
         });
     }, 0);
   }, [setData]);
@@ -243,110 +289,127 @@ function HomeList(props: HomeProps) {
   }, [refreshingKey]);
 
   return (
-    <LegendList
-      ref={listRef}
-      recycleItems
-      renderScrollComponent={RenderScrollComponent}
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          style={{ zIndex: 1 }}
-          refreshing={refresh}
-          onRefresh={refreshing}
-          progressBackgroundColor={colorScheme === 'dark' ? '#121212' : '#f5f5f7'}
-          colors={['#00a2ff', '#BB86FC']}
-        />
-      }
-      contentContainerStyle={{
-        paddingTop: insets.top,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}
-      ListHeaderComponent={
-        <>
-          <Announcment />
-          <View style={styles.headerCard}>
-            <View style={styles.headerInfo}>
-              <ReText style={styles.timeText} text={localTime} />
-              <Text style={styles.batteryText}>{Math.round((battery ?? 0) * 100)}%</Text>
-            </View>
-
-            <View style={styles.appInfo}>
-              <Text style={styles.appName}>AniFlix</Text>
-              <Text style={styles.appVersion}>
-                {version}-JS_{OTAJSVersion}
-              </Text>
-            </View>
-
-            <View style={styles.socialButtons}>
-              <JoinDiscord
-                buttonColor={theme.colors.surfaceVariant}
-                size={20}
-                style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
-              />
-              <Github
-                buttonColor={theme.colors.surfaceVariant}
-                size={20}
-                style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
-              />
-            </View>
-
-            <View
-              style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
-              <Reanimated.Text
-                onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
-                style={[styles.runningText, AnimationTextStyle]}>
-                {animationText}
-              </Reanimated.Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
-            <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
-            <Text style={styles.refreshText}>Refresh Data</Text>
-          </TouchableOpacity>
-          <EpisodeBaru
-            isRefreshing={refresh}
-            styles={styles}
-            globalStyles={globalStyles}
-            data={data}
-            props={props}
+    <>
+      {isAnimeMovieWebViewOpen && (
+        <React.Suspense>
+          <AnimeMovieWebView
+            isWebViewShown={isAnimeMovieWebViewOpen}
+            setIsWebViewShown={setIsAnimeMovieWebViewOpen}
+            onAnimeMovieReady={onAnimeMovieReady}
           />
-          <FeaturedFilmList
-            data={filmHomepageData.featured}
-            isError={isFilmError}
-            props={props}
-            key={'film_featured' + refreshingKey}
+        </React.Suspense>
+      )}
+      <LegendList
+        ref={listRef}
+        recycleItems
+        renderScrollComponent={RenderScrollComponent}
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            style={{ zIndex: 1 }}
+            refreshing={refresh}
+            onRefresh={refreshing}
+            progressBackgroundColor={colorScheme === 'dark' ? '#121212' : '#f5f5f7'}
+            colors={['#00a2ff', '#BB86FC']}
           />
-          <TrendingFilmList
-            data={filmHomepageData.trending}
-            isError={isFilmError}
-            props={props}
-            key={'film_trending' + refreshingKey}
-          />
-          <LatestFilmList props={props} key={'film_latest' + refreshingKey} />
-          <LatestSeriesList props={props} key={'series_latest' + refreshingKey} />
-          <MovieList props={props} key={'anime_movie' + refreshingKey} />
-          <ComicList key={'comick' + refreshingKey} />
-          <TouchableOpacity
-            onPress={toggleJadwal}
-            style={[
-              styles.scheduleSection,
-              { flexDirection: 'row', justifyContent: 'space-between' },
-            ]}>
-            <Text style={styles.sectionTitle}>Jadwal Anime</Text>
-            <MaterialIcons
-              name={jadwalHidden ? 'arrow-downward' : 'arrow-upward'}
-              size={20}
-              color={styles.sectionTitle.color}
+        }
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        }}
+        ListHeaderComponent={
+          <>
+            <Announcment />
+            <View style={styles.headerCard}>
+              <View style={styles.headerInfo}>
+                <ReText style={styles.timeText} text={localTime} />
+                <Text style={styles.batteryText}>{Math.round((battery ?? 0) * 100)}%</Text>
+              </View>
+
+              <View style={styles.appInfo}>
+                <Text style={styles.appName}>AniFlix</Text>
+                <Text style={styles.appVersion}>
+                  {version}-JS_{OTAJSVersion}
+                </Text>
+              </View>
+
+              <View style={styles.socialButtons}>
+                <JoinDiscord
+                  buttonColor={theme.colors.surfaceVariant}
+                  size={20}
+                  style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
+                />
+                <Github
+                  buttonColor={theme.colors.surfaceVariant}
+                  size={20}
+                  style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4 }}
+                />
+              </View>
+
+              <View
+                style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
+                <Reanimated.Text
+                  onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
+                  style={[styles.runningText, AnimationTextStyle]}>
+                  {animationText}
+                </Reanimated.Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
+              <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
+              <Text style={styles.refreshText}>Refresh Data</Text>
+            </TouchableOpacity>
+            <EpisodeBaru
+              isLoading={isHomeLoading || refresh}
+              isError={isHomeError}
+              styles={styles}
+              globalStyles={globalStyles}
+              data={data}
+              props={props}
             />
-          </TouchableOpacity>
-        </>
-      }
-      data={jadwalDataArray}
-      keyExtractor={z => z?.toString()}
-      renderItem={renderJadwalAnime}
-      showsVerticalScrollIndicator={false}
-    />
+            <FeaturedFilmList
+              data={filmHomepageData.featured}
+              isError={isFilmError}
+              props={props}
+              key={'film_featured' + refreshingKey}
+            />
+            <TrendingFilmList
+              data={filmHomepageData.trending}
+              isError={isFilmError}
+              props={props}
+              key={'film_trending' + refreshingKey}
+            />
+            <LatestFilmList props={props} key={'film_latest' + refreshingKey} />
+            <LatestSeriesList props={props} key={'series_latest' + refreshingKey} />
+            <MovieList
+              props={props}
+              key={'anime_movie' + refreshingKey}
+              isMovieReady={isMovieReady}
+              retryMovie={retryMovie}
+            />
+            <ComicList key={'comick' + refreshingKey} />
+            <TouchableOpacity
+              onPress={toggleJadwal}
+              style={[
+                styles.scheduleSection,
+                { flexDirection: 'row', justifyContent: 'space-between' },
+              ]}>
+              <Text style={styles.sectionTitle}>Jadwal Anime</Text>
+              <MaterialIcons
+                name={jadwalHidden ? 'arrow-downward' : 'arrow-upward'}
+                size={20}
+                color={styles.sectionTitle.color}
+              />
+            </TouchableOpacity>
+          </>
+        }
+        data={jadwalDataArray}
+        keyExtractor={z => z?.toString()}
+        renderItem={renderJadwalAnime}
+        showsVerticalScrollIndicator={false}
+      />
+    </>
   );
 }
 
@@ -615,7 +678,8 @@ const EpisodeBaru = memo(
   EpisodeBaruUNMEMO,
   (prev, next) =>
     prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
-    prev.isRefreshing === next.isRefreshing &&
+    prev.isLoading === next.isLoading &&
+    prev.isError === next.isError &&
     prev.styles === next.styles &&
     prev.globalStyles.text === next.globalStyles.text,
 );
@@ -624,11 +688,13 @@ function EpisodeBaruUNMEMO({
   styles,
   data,
   props,
-  isRefreshing,
+  isLoading,
+  isError,
 }: {
   data: EpisodeBaruType | undefined;
   props: HomeProps;
-  isRefreshing?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
   styles: ReturnType<typeof useStyles>;
   globalStyles: ReturnType<typeof useGlobalStyles>;
 }) {
@@ -668,13 +734,15 @@ function EpisodeBaruUNMEMO({
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
-      ) : isRefreshing ? (
+      ) : isLoading ? (
         <ShowSkeletonLoading />
       ) : (
         <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
           <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+            {isError
+              ? 'Error mendapatkan data. Silahkan refresh data untuk mencoba lagi'
+              : 'Data tidak tersedia'}
           </Text>
         </View>
       )}
@@ -683,11 +751,18 @@ function EpisodeBaruUNMEMO({
 }
 
 const MovieList = memo(MovieListUNMEMO);
-function MovieListUNMEMO({ props }: { props: HomeProps }) {
+function MovieListUNMEMO({
+  props,
+  isMovieReady,
+  retryMovie,
+}: {
+  props: HomeProps;
+  isMovieReady?: boolean;
+  retryMovie: () => void;
+}) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
   const [isError, setIsError] = useState(false);
-  const navigation = useNavigation<NavigationProp<RootStackNavigator>>();
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<Movies>) => (
@@ -703,6 +778,8 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
   );
 
   useEffect(() => {
+    if (!isMovieReady) return;
+    setIsError(false);
     setData?.([]); // so the skeleton loading show
     queueMicrotask(() => {
       getLatestMovie()
@@ -715,7 +792,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
         })
         .catch(() => setIsError(true));
     });
-  }, [setData]);
+  }, [setData, isMovieReady]);
 
   return (
     <View style={styles.sectionContainer}>
@@ -733,14 +810,7 @@ function MovieListUNMEMO({ props }: { props: HomeProps }) {
       </View>
 
       {isError && (
-        <TouchableOpacity
-          onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'connectToServer' }],
-            });
-          }}
-          style={styles.errorContainer}>
+        <TouchableOpacity onPress={retryMovie} style={styles.errorContainer}>
           <MaterialIcon name="refresh" size={24} color="#d80000" />
           <Text style={styles.errorText}>
             Error mendapatkan data. Ketuk disini untuk mencoba ulang.
