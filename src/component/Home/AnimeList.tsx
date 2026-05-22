@@ -75,42 +75,20 @@ type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 const Home = memo(HomeList);
 export default Home;
 
-function HomeList(props: HomeProps) {
-  const globalStyles = useGlobalStyles();
-  const colorScheme = useColorScheme();
-  const styles = useStyles();
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
-  const [refresh, setRefresh] = useState(false);
-  const [refreshingKey, setRefreshingKey] = useState(0);
-  const [isHomeLoading, setIsHomeLoading] = useState(true);
-  const [isHomeError, setIsHomeError] = useState(false);
-
-  const boxTextAnim = useSharedValue(0);
-  const boxTextLayout = useSharedValue(0);
-  const localTime = useLocalTime();
-  const battery = useBatteryLevel();
-
-  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
-  const [isMovieReady, setIsMovieReady] = useState(false);
-  const onAnimeMovieReady = useCallback(() => {
-    setIsAnimeMovieWebViewOpen(false);
-    setIsMovieReady(true);
-  }, []);
-
-  const retryMovie = useCallback(() => {
-    setIsMovieReady(false);
-    setIsAnimeMovieWebViewOpen(true);
-  }, []);
-
+const MarqueeText = memo(() => {
   const windowSize = useWindowDimensions();
+  const styles = useStyles();
   const [animationText, setAnimationText] = useState(randomQuote);
   const [measuredWidth, setMeasuredWidth] = useState(0);
 
+  const boxTextAnim = useSharedValue(0);
+  const boxTextLayout = useSharedValue(0);
+
   const nextQuote = useCallback(() => {
     setMeasuredWidth(0);
-    setAnimationText(randomQuote());
+    queueMicrotask(() => {
+      setAnimationText(randomQuote());
+    });
   }, []);
 
   const startMarquee = useCallback(
@@ -171,29 +149,104 @@ function HomeList(props: HomeProps) {
     };
   });
 
+  return (
+    <View
+      style={{
+        overflow: 'hidden',
+        position: 'absolute',
+        bottom: 2,
+        left: 0,
+        right: 0,
+        height: 22,
+      }}>
+      <View style={{ position: 'absolute', opacity: 0, flexDirection: 'row' }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <Text
+            key={animationText}
+            style={[styles.runningText, { width: 'auto', flexShrink: 0 }]}
+            onLayout={e => {
+              const width = e.nativeEvent.layout.width;
+              if (width > 0 && measuredWidth === 0) {
+                setMeasuredWidth(width);
+              }
+            }}>
+            {animationText}
+          </Text>
+        </ScrollView>
+      </View>
+
+      {measuredWidth > 0 && (
+        <Reanimated.Text
+          numberOfLines={1}
+          ellipsizeMode="clip"
+          style={[
+            styles.runningText,
+            AnimationTextStyle,
+            { position: 'absolute', width: measuredWidth, flexShrink: 0 },
+          ]}>
+          {animationText}
+        </Reanimated.Text>
+      )}
+    </View>
+  );
+});
+
+function HomeList(props: HomeProps) {
+  const globalStyles = useGlobalStyles();
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { paramsState: data, setParamsState: setData } = useContext(EpisodeBaruHomeContext);
+  const [refresh, setRefresh] = useState(false);
+  const [refreshingKey, setRefreshingKey] = useState(0);
+  const [isHomeLoading, setIsHomeLoading] = useState(true);
+  const [isHomeError, setIsHomeError] = useState(false);
+
+  const localTime = useLocalTime();
+  const battery = useBatteryLevel();
+
+  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
+  const [isMovieReady, setIsMovieReady] = useState(false);
+  const onAnimeMovieReady = useCallback(() => {
+    setIsAnimeMovieWebViewOpen(false);
+    setIsMovieReady(true);
+  }, []);
+
+  const retryMovie = useCallback(() => {
+    setIsMovieReady(false);
+    setIsAnimeMovieWebViewOpen(true);
+  }, []);
+
   useEffect(() => {
     const abort = new AbortController();
-    setIsHomeLoading(true);
-    setIsHomeError(false);
-    fetchLatestDomain(abort.signal)
-      .catch(() => {})
-      .finally(() => {
-        if (abort.signal.aborted) return;
-        AnimeAPI.home(abort.signal)
-          .then(async jsondata => {
-            if (abort.signal.aborted) return;
-            setData?.(jsondata as any);
-          })
-          .catch(() => {
-            if (!abort.signal.aborted) {
-              setIsHomeError(true);
-            }
-          })
-          .finally(() => {
-            if (!abort.signal.aborted) setIsHomeLoading(false);
-          });
-      });
-    return () => abort.abort();
+    const task = requestIdleCallback(() => {
+      setIsHomeLoading(true);
+      setIsHomeError(false);
+      fetchLatestDomain(abort.signal)
+        .catch(() => {})
+        .finally(() => {
+          if (abort.signal.aborted) return;
+          AnimeAPI.home(abort.signal)
+            .then(async jsondata => {
+              if (abort.signal.aborted) return;
+              setData?.(jsondata as any);
+            })
+            .catch(() => {
+              if (!abort.signal.aborted) {
+                setIsHomeError(true);
+              }
+            })
+            .finally(() => {
+              if (!abort.signal.aborted) setIsHomeLoading(false);
+            });
+        });
+    });
+
+    return () => {
+      cancelIdleCallback(task);
+      abort.abort();
+    };
   }, [setData]);
 
   const refreshing = useCallback(() => {
@@ -258,15 +311,16 @@ function HomeList(props: HomeProps) {
     setFilmHomepageData({
       featured: [],
       trending: [],
-    }); // so the skeleton loading show
+    });
     setIsFilmError(false);
-    queueMicrotask(() => {
+    const task = requestIdleCallback(() => {
       getHomepage()
         .then(setFilmHomepageData)
         .catch(() => {
           setIsFilmError(true);
         });
     });
+    return () => cancelIdleCallback(task);
   }, [refreshingKey]);
 
   return (
@@ -328,44 +382,7 @@ function HomeList(props: HomeProps) {
                 />
               </View>
 
-              <View
-                style={{
-                  overflow: 'hidden',
-                  position: 'absolute',
-                  bottom: 2,
-                  left: 0,
-                  right: 0,
-                  height: 22,
-                }}>
-                <View style={{ position: 'absolute', opacity: 0, flexDirection: 'row' }}>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <Text
-                      key={animationText}
-                      style={[styles.runningText, { width: 'auto', flexShrink: 0 }]}
-                      onLayout={e => {
-                        const width = e.nativeEvent.layout.width;
-                        if (width > 0 && measuredWidth === 0) {
-                          setMeasuredWidth(width);
-                        }
-                      }}>
-                      {animationText}
-                    </Text>
-                  </ScrollView>
-                </View>
-
-                {measuredWidth > 0 && (
-                  <Reanimated.Text
-                    numberOfLines={1}
-                    ellipsizeMode="clip"
-                    style={[
-                      styles.runningText,
-                      AnimationTextStyle,
-                      { position: 'absolute', width: measuredWidth, flexShrink: 0 },
-                    ]}>
-                    {animationText}
-                  </Reanimated.Text>
-                )}
-              </View>
+              <MarqueeText />
             </View>
             <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
               <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
@@ -560,8 +577,8 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   );
 
   useEffect(() => {
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
+    setData?.([]);
+    const task = requestIdleCallback(() => {
       getLatestMovies()
         .then(movieData => {
           if ('isError' in movieData) {
@@ -572,7 +589,9 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
         })
         .catch(() => setIsError(true));
     });
+    return () => cancelIdleCallback(task);
   }, [setData]);
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -633,15 +652,17 @@ function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
   );
 
   useEffect(() => {
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
+    setData?.([]);
+    const task = requestIdleCallback(() => {
       getLatestSeries()
         .then(movieData => {
           setData?.(movieData);
         })
         .catch(() => setIsError(true));
     });
+    return () => cancelIdleCallback(task);
   }, [setData]);
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -789,8 +810,8 @@ function MovieListUNMEMO({
   useEffect(() => {
     if (!isMovieReady) return;
     setIsError(false);
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
+    setData?.([]);
+    const task = requestIdleCallback(() => {
       getLatestMovie()
         .then(movieData => {
           if ('isError' in movieData) {
@@ -801,6 +822,7 @@ function MovieListUNMEMO({
         })
         .catch(() => setIsError(true));
     });
+    return () => cancelIdleCallback(task);
   }, [setData, isMovieReady]);
 
   return (
@@ -819,7 +841,12 @@ function MovieListUNMEMO({
       </View>
 
       {isError && (
-        <TouchableOpacity onPress={retryMovie} style={styles.errorContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setIsError(false);
+            retryMovie();
+          }}
+          style={styles.errorContainer}>
           <MaterialIcon name="refresh" size={24} color="#d80000" />
           <Text style={styles.errorText}>
             Error mendapatkan data. Ketuk disini untuk mencoba ulang.
@@ -854,7 +881,7 @@ function ComicListUNMEMO() {
   const { paramsState: data, setParamsState: setData } = useContext(ComicsListContext);
 
   useEffect(() => {
-    queueMicrotask(() => {
+    const task = requestIdleCallback(() => {
       getLatestComicsReleases()
         .then(z => {
           setData?.(z);
@@ -862,6 +889,7 @@ function ComicListUNMEMO() {
         .catch(() => setIsError(true));
     });
     return () => {
+      cancelIdleCallback(task);
       setData?.([]);
     };
   }, [setData]);
@@ -873,8 +901,7 @@ function ComicListUNMEMO() {
         newAnimeData={item}
         type="comics"
         key={'btn' + item.title}
-        // @ts-expect-error
-        navigationProp={navigation}
+        navigationProp={navigation as any}
       />
     ),
     [navigation],
