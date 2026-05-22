@@ -77,7 +77,8 @@ const ImageLoading = (
     let computedHeaders: Record<string, string> = { ...baseSourceObj.headers };
 
     if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('softkomik')) {
-      computedHeaders.Referer = BASE_URL;
+      computedHeaders.Referer = BASE_URL + '/';
+      computedHeaders.Origin = BASE_URL;
     }
 
     if (Object.keys(computedHeaders).length > 0) {

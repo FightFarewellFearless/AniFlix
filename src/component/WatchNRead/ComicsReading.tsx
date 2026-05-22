@@ -167,7 +167,7 @@ export default function ComicsReading(props: Props) {
       };
 
       reader.readAsDataURL(blob);
-    } catch (error) {
+    } catch {
       webViewRef.current?.injectJavaScript(`window.onImageErrorById(${id}); true;`);
     }
   };
@@ -195,7 +195,7 @@ export default function ComicsReading(props: Props) {
       } else if (data.type === 'END_REACHED') {
         setIsAutoScrolling(false);
       }
-    } catch (e) {
+    } catch {
       if (event.nativeEvent.data === 'endReached') {
         setIsAutoScrolling(false);
       }
