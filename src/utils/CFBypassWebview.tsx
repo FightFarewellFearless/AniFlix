@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
