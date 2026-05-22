@@ -2,7 +2,7 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import { memo, useMemo } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Appbar, Surface, Text, TouchableRipple, useTheme } from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
 import { UtilsStackNavigator } from '@/types/navigation';
 import About from './Utilitas/About';
