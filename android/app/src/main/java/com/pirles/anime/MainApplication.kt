@@ -10,6 +10,9 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.ReactPackage
 
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
+import com.facebook.react.common.ReleaseLevel
+
 import org.wonday.orientation.OrientationActivityLifecycle
 
 class MainApplication : Application(), ReactApplication {
@@ -26,6 +29,7 @@ class MainApplication : Application(), ReactApplication {
   }
 
   override fun onCreate() {
+    DefaultNewArchitectureEntryPoint.releaseLevel = ReleaseLevel.EXPERIMENTAL
     super.onCreate()
     loadReactNative(this)
     registerActivityLifecycleCallbacks(OrientationActivityLifecycle.getInstance())
