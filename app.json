@@ -50,7 +50,6 @@
         "supportsPictureInPicture": true
       }
     ],
-    "expo-sqlite",
-    "expo-image"
+    "expo-sqlite"
   ]
 }

@@ -1,7 +1,6 @@
-import * as MeasureText from '@domir/react-native-measure-text';
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import MaterialIcon, { MaterialIcons } from '@react-native-vector-icons/material-icons';
-import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import {
   NavigationProp,
   StackActions,
@@ -87,11 +86,9 @@ function HomeList(props: HomeProps) {
   const [refreshingKey, setRefreshingKey] = useState(0);
   const [isHomeLoading, setIsHomeLoading] = useState(true);
   const [isHomeError, setIsHomeError] = useState(false);
-  const windowSize = useWindowDimensions();
 
   const boxTextAnim = useSharedValue(0);
   const boxTextLayout = useSharedValue(0);
-  const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
 
@@ -107,73 +104,72 @@ function HomeList(props: HomeProps) {
     setIsAnimeMovieWebViewOpen(true);
   }, []);
 
-  const [animationText, setAnimationText] = useState(() => {
-    const quote = randomQuote();
-    textLayoutWidth.set(measureQuoteTextWidth(quote));
-    return quote;
-  });
+  const windowSize = useWindowDimensions();
+  const [animationText, setAnimationText] = useState(randomQuote);
+  const [measuredWidth, setMeasuredWidth] = useState(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      const baseDurationPer100px = 2000; // 2000ms per 100px
+  const nextQuote = useCallback(() => {
+    setMeasuredWidth(0);
+    setAnimationText(randomQuote());
+  }, []);
+
+  const startMarquee = useCallback(
+    (width: number) => {
+      boxTextLayout.set(width);
+      boxTextAnim.set(0);
+
+      const baseDurationPer100px = 2000;
       const minimumAnimationDuration = 8000;
-      const displayNewQuote = (finished?: boolean) => {
-        let layoutWidth = textLayoutWidth.get();
-        if (finished) {
-          textLayoutWidth.set(0);
-          const quote = randomQuote();
-          const newWidth = measureQuoteTextWidth(quote);
-          textLayoutWidth.set(newWidth);
-          setAnimationText(quote);
-          layoutWidth = newWidth;
-        }
-        boxTextAnim.set(0);
-        if (!finished) return;
-        const duration = Math.max(
-          minimumAnimationDuration,
-          (layoutWidth / 100) * baseDurationPer100px,
-        );
+      const duration = Math.max(minimumAnimationDuration, (width / 100) * baseDurationPer100px);
 
-        boxTextAnim.set(
-          withDelay(
-            2000,
-            withTiming(
-              1,
-              { duration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
-              callback,
-            ),
-            ReduceMotion.Never,
-          ),
-        );
-      };
-      function callback(finished?: boolean) {
-        if (finished) runOnJS(displayNewQuote)(finished);
-      }
-      const initialDuration = Math.max(
-        minimumAnimationDuration,
-        (measureQuoteTextWidth(animationText) / 100) * baseDurationPer100px,
-      );
       boxTextAnim.set(
         withDelay(
           1000,
           withTiming(
             1,
-            { duration: initialDuration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
-            callback,
+            { duration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
+            finished => {
+              if (finished) {
+                runOnJS(nextQuote)();
+              }
+            },
           ),
         ),
       );
-    }, [animationText, boxTextAnim, textLayoutWidth]),
+    },
+    [boxTextAnim, boxTextLayout, nextQuote],
   );
 
   useFocusEffect(
     useCallback(() => {
+      if (measuredWidth > 0) {
+        startMarquee(measuredWidth);
+      }
       return () => {
         cancelAnimation(boxTextAnim);
-        boxTextAnim.set(0);
       };
-    }, [boxTextAnim]),
+    }, [measuredWidth, startMarquee, boxTextAnim]),
   );
+
+  useEffect(() => {
+    if (measuredWidth > 0) {
+      startMarquee(measuredWidth);
+    }
+  }, [measuredWidth, startMarquee]);
+
+  const AnimationTextStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: interpolate(
+            boxTextAnim.get(),
+            [0, 1],
+            [windowSize.width, -boxTextLayout.get()],
+          ),
+        },
+      ],
+    };
+  });
 
   useEffect(() => {
     const abort = new AbortController();
@@ -223,21 +219,6 @@ function HomeList(props: HomeProps) {
         });
     }, 0);
   }, [setData]);
-
-  const AnimationTextStyle = useAnimatedStyle(() => {
-    return {
-      width: textLayoutWidth.get() === 0 ? 'auto' : textLayoutWidth.get(),
-      transform: [
-        {
-          translateX: interpolate(
-            boxTextAnim.get(),
-            [0, 1],
-            [windowSize.width, -boxTextLayout.get()],
-          ),
-        },
-      ],
-    };
-  });
 
   const renderJadwalAnime = useCallback(
     ({ item }: { item: keyof JadwalAnime }) => {
@@ -348,12 +329,42 @@ function HomeList(props: HomeProps) {
               </View>
 
               <View
-                style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
-                <Reanimated.Text
-                  onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
-                  style={[styles.runningText, AnimationTextStyle]}>
-                  {animationText}
-                </Reanimated.Text>
+                style={{
+                  overflow: 'hidden',
+                  position: 'absolute',
+                  bottom: 2,
+                  left: 0,
+                  right: 0,
+                  height: 22,
+                }}>
+                <View style={{ position: 'absolute', opacity: 0, flexDirection: 'row' }}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <Text
+                      key={animationText}
+                      style={[styles.runningText, { width: 'auto', flexShrink: 0 }]}
+                      onLayout={e => {
+                        const width = e.nativeEvent.layout.width;
+                        if (width > 0 && measuredWidth === 0) {
+                          setMeasuredWidth(width);
+                        }
+                      }}>
+                      {animationText}
+                    </Text>
+                  </ScrollView>
+                </View>
+
+                {measuredWidth > 0 && (
+                  <Reanimated.Text
+                    numberOfLines={1}
+                    ellipsizeMode="clip"
+                    style={[
+                      styles.runningText,
+                      AnimationTextStyle,
+                      { position: 'absolute', width: measuredWidth, flexShrink: 0 },
+                    ]}>
+                    {animationText}
+                  </Reanimated.Text>
+                )}
               </View>
             </View>
             <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
@@ -424,7 +435,6 @@ function FeaturedFilmListUNMEMO({
   isError: boolean;
 }) {
   const styles = useStyles();
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -483,7 +493,6 @@ function TrendingFilmListUNMEMO({
   isError: boolean;
 }) {
   const styles = useStyles();
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -992,13 +1001,6 @@ function randomQuote() {
   const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)] ?? {};
   const quote = `"${randomizeQuote.quote}" - ${randomizeQuote.by}`;
   return quote;
-}
-function measureQuoteTextWidth(quote: string) {
-  const width = MeasureText.measureWidth(quote, {
-    fontWeight: 'bold',
-    fontSize: 17,
-  });
-  return width;
 }
 
 export function RenderScrollComponent(renderProps: ScrollViewProps) {
