@@ -116,6 +116,6 @@
   },
   "resolutions": {
     "@pirles/react-native-element-dropdown@^2.15.0": "patch:@pirles/react-native-element-dropdown@npm%3A2.15.0#./.yarn/patches/@pirles-react-native-element-dropdown-npm-2.15.0-51dcb6fc77.patch",
-    "react-native@0.85.2": "patch:react-native@npm%3A0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch"
+    "react-native@0.85.2": "patch:react-native@npm:0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch"
   }
 }

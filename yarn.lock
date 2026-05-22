@@ -10639,9 +10639,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native@patch:react-native@npm%3A0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch::locator=aniflix%40workspace%3A.":
+"react-native@patch:react-native@npm:0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch::locator=aniflix%40workspace%3A.":
   version: 0.85.2
-  resolution: "react-native@patch:react-native@npm%3A0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch::version=0.85.2&hash=99d672&locator=aniflix%40workspace%3A."
+  resolution: "react-native@patch:react-native@npm%3A0.85.2#./.yarn/patches/react-native-npm-0.85.2-4396b5ae54.patch::version=0.85.2&hash=86cfba&locator=aniflix%40workspace%3A."
   dependencies:
     "@react-native/assets-registry": 0.85.2
     "@react-native/codegen": 0.85.2
@@ -10686,7 +10686,7 @@ __metadata:
       optional: true
   bin:
     react-native: cli.js
-  checksum: bcd0fa9ae83901b943d413a36e4fc92fd62ffcd6521d9031cfc21321546d542ad8905b7176e8525ac014b50fb1914988199dd151e27d17e0e7623b85078043fc
+  checksum: ca301ef748dd9245cf40d5cf8761ecf53072adec9e57a071505a422407b336fa8e6c612b7b13e4f5bba7cac7f1b18576ae07d1ac5f5ccec332a1c8ee36a590cd
   languageName: node
   linkType: hard
 
