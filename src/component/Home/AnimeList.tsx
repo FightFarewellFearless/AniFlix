@@ -810,7 +810,12 @@ function MovieListUNMEMO({
       </View>
 
       {isError && (
-        <TouchableOpacity onPress={retryMovie} style={styles.errorContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setIsError(false);
+            retryMovie();
+          }}
+          style={styles.errorContainer}>
           <MaterialIcon name="refresh" size={24} color="#d80000" />
           <Text style={styles.errorText}>
             Error mendapatkan data. Ketuk disini untuk mencoba ulang.
