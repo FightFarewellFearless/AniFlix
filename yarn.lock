@@ -3987,7 +3987,6 @@ __metadata:
     react-native-keyboard-controller: ^1.21.8
     react-native-marked: ^8.1.0
     react-native-nitro-device-info: ^1.7.0
-    react-native-nitro-dns: ^0.3.0
     react-native-nitro-http-server: ^1.9.2
     react-native-nitro-modules: ^0.35.7
     react-native-orientation-locker: ^1.7.0
@@ -10461,15 +10460,6 @@ __metadata:
     react-native: "*"
     react-native-nitro-modules: 0.35.0
   checksum: fb6f75ede2286938fde4de1db7ff26a15b7b043cf39a59cc3b5c84c7f9c915c182fbdb26a314113229133b3585ac67e5ce435b89960999b4d1d4e1aae71bd2ac
-  languageName: node
-  linkType: hard
-
-"react-native-nitro-dns@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "react-native-nitro-dns@npm:0.3.0"
-  peerDependencies:
-    react-native-nitro-modules: ^0.35.0
-  checksum: 7b2e5b5e66a6320c2c04d023e8c9dc87242ee8fadbc2fd20e0ed53e421aa2232edbbf32c293a087c144f1848af0b11ef33e6991c2a97a372d816bec2c2237780
   languageName: node
   linkType: hard
 

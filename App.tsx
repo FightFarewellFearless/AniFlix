@@ -15,7 +15,6 @@ import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import dns from 'react-native-nitro-dns';
 import {
   adaptNavigationTheme,
   Appbar,
@@ -245,10 +244,7 @@ function App() {
     SystemBars.setHidden(false);
     SystemNavigationBar.fullScreen(false);
     SystemNavigationBar.navigationShow();
-    SplashScreen.hideAsync().then(() => {
-      dns.setServers(['1dot1dot1dot1.cloudflare-dns.com']);
-      dns.setNativeInterceptionEnabled(true);
-    });
+    SplashScreen.hideAsync();
   }, []);
 
   useEffect(() => {
