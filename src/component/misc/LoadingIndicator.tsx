@@ -1,115 +1,80 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-import { View } from 'react-native';
+import React, { useCallback, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import {
-  default as Reanimated,
-  cancelAnimation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
 
 const DEFAULT_SIZE = 20;
-const DEFAULT_SCALE = 0.5;
-const DEFAULT_SCALE_TO = 1.2;
+
+type DotProps = {
+  index: number;
+  animation: Animated.Value;
+  size: number;
+  color: string;
+};
+
+function AnimatedDot({ index, animation, size, color }: DotProps) {
+  const scale = animation.interpolate({
+    inputRange: [index, index + 1, index + 2],
+    outputRange: [0.5, 1.2, 0.5],
+    extrapolate: 'clamp',
+  });
+
+  return (
+    <Animated.View
+      style={{
+        backgroundColor: color,
+        borderRadius: size,
+        height: size,
+        width: size,
+        transform: [{ scale }],
+      }}
+    />
+  );
+}
 
 export default function LoadingIndicator({ size = DEFAULT_SIZE }: { size?: number }) {
   const theme = useTheme();
-  const animation = useSharedValue(0);
+  const animation = useRef(new Animated.Value(0)).current;
+
   useFocusEffect(
     useCallback(() => {
-      animation.set(
-        withRepeat(
-          withSequence(withTiming(4, { duration: 900 }), withTiming(0, { duration: 900 })),
-          0,
-          false,
-        ),
+      const activeAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(animation, {
+            toValue: 4,
+            duration: 900,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animation, {
+            toValue: 0,
+            duration: 900,
+            useNativeDriver: true,
+          }),
+        ]),
       );
+
+      activeAnimation.start();
+
       return () => {
-        cancelAnimation(animation);
+        activeAnimation.stop();
       };
     }, [animation]),
   );
-  const style1 = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          animation.get(),
-          [0, 1, 2],
-          [DEFAULT_SCALE, DEFAULT_SCALE_TO, DEFAULT_SCALE],
-          'clamp',
-        ),
-      },
-    ],
-  }));
-  const style2 = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          animation.get(),
-          [1, 2, 3],
-          [DEFAULT_SCALE, DEFAULT_SCALE_TO, DEFAULT_SCALE],
-          'clamp',
-        ),
-      },
-    ],
-  }));
-  const style3 = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          animation.get(),
-          [2, 3, 4],
-          [DEFAULT_SCALE, DEFAULT_SCALE_TO, DEFAULT_SCALE],
-          'clamp',
-        ),
-      },
-    ],
-  }));
+
+  const color = theme.colors.onSecondaryContainer;
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        gap: 2,
-      }}>
-      <Reanimated.View
-        style={[
-          {
-            backgroundColor: theme.colors.onSecondaryContainer,
-            borderRadius: 100,
-            height: size,
-            width: size,
-          },
-          style1,
-        ]}
-      />
-      <Reanimated.View
-        style={[
-          {
-            backgroundColor: theme.colors.onSecondaryContainer,
-            borderRadius: 100,
-            height: size,
-            width: size,
-          },
-          style2,
-        ]}
-      />
-      <Reanimated.View
-        style={[
-          {
-            backgroundColor: theme.colors.onSecondaryContainer,
-            borderRadius: 100,
-            height: size,
-            width: size,
-          },
-          style3,
-        ]}
-      />
+    <View style={styles.container}>
+      <AnimatedDot index={0} animation={animation} size={size} color={color} />
+      <AnimatedDot index={1} animation={animation} size={size} color={color} />
+      <AnimatedDot index={2} animation={animation} size={size} color={color} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+});
