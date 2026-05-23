@@ -232,13 +232,23 @@ function Video_Film(props: Props) {
     [updateHistory],
   );
 
+  const [waitTime, setWaitTime] = useState(0);
+  const [totalWaitTime, setTotalWaitTime] = useState(0);
+
   const episodeDataControl = useCallback(
     async (dataLink: string) => {
       if (loading) {
         return;
       }
       setLoading(true);
-      const result = await getFilmDetails(dataLink, abortController.current?.signal).catch(err => {
+      const result = await getFilmDetails(
+        dataLink,
+        abortController.current?.signal,
+        (wait, total) => {
+          setWaitTime(wait);
+          setTotalWaitTime(total);
+        },
+      ).catch(err => {
         if (err.message === 'Aborted') {
           return;
         }
@@ -275,6 +285,8 @@ function Video_Film(props: Props) {
   const cancelLoading = useCallback(() => {
     abortController.current?.abort();
     setLoading(false);
+    setWaitTime(0);
+    setTotalWaitTime(0);
     abortController.current = new AbortController();
   }, []);
 
@@ -460,7 +472,13 @@ function Video_Film(props: Props) {
   return (
     <View style={{ flex: 1 }}>
       {/* Loading modal */}
-      <LoadingModal setIsPaused={setIsPaused} isLoading={loading} cancelLoading={cancelLoading} />
+      <LoadingModal
+        waitTime={waitTime}
+        totalWaitTime={totalWaitTime}
+        setIsPaused={setIsPaused}
+        isLoading={loading}
+        cancelLoading={cancelLoading}
+      />
       {/* VIDEO ELEMENT */}
       <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
         <View

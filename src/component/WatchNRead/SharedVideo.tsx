@@ -25,10 +25,14 @@ export function LoadingModal({
   isLoading,
   cancelLoading,
   setIsPaused,
+  waitTime,
+  totalWaitTime,
 }: {
   isLoading: boolean;
   cancelLoading: () => void;
   setIsPaused: React.Dispatch<React.SetStateAction<boolean>>;
+  waitTime?: number;
+  totalWaitTime?: number;
 }) {
   const globalStyles = useGlobalStyles();
   const styles = useVideoStyles();
@@ -64,6 +68,11 @@ export function LoadingModal({
           </TouchableOpacity>
           <ActivityIndicator size={28} />
           <Text style={globalStyles.text}>Tunggu sebentar, sedang mengambil data...</Text>
+          {waitTime !== undefined && totalWaitTime !== undefined && totalWaitTime > 0 && (
+            <Text style={[globalStyles.text, { fontSize: 12, marginTop: 5 }]}>
+              Melewati iklan secara otomatis, mohon tunggu sebentar: {waitTime}s / {totalWaitTime}s
+            </Text>
+          )}
         </ReAnimated.View>
       </View>
     )
@@ -348,7 +357,7 @@ export function useBatteryAndClock(enableBatteryTimeInfo: string) {
 
   useFocusEffect(
     useCallback(() => {
-      let _batteryEvent: NodeJS.Timeout | null;
+      let _batteryEvent: number | null;
       if (enableBatteryTimeInfo === 'true') {
         const updateLevel = () => {
           const currentLevel = DeviceInfoModule.getBatteryLevel();
