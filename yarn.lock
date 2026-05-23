@@ -6585,6 +6585,60 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo@patch:expo@npm%3A56.0.3#./.yarn/patches/expo-npm-56.0.3-691cd93122.patch::locator=aniflix%40workspace%3A.":
+  version: 56.0.3
+  resolution: "expo@patch:expo@npm%3A56.0.3#./.yarn/patches/expo-npm-56.0.3-691cd93122.patch::version=56.0.3&hash=b54bf7&locator=aniflix%40workspace%3A."
+  dependencies:
+    "@babel/runtime": ^7.20.0
+    "@expo/cli": ^56.1.10
+    "@expo/config": ~56.0.8
+    "@expo/config-plugins": ~56.0.7
+    "@expo/devtools": ~56.0.2
+    "@expo/dom-webview": ~56.0.5
+    "@expo/fingerprint": ^0.19.1
+    "@expo/local-build-cache-provider": ^56.0.7
+    "@expo/log-box": ^56.0.12
+    "@expo/metro": ~56.0.0
+    "@expo/metro-config": ~56.0.11
+    "@ungap/structured-clone": ^1.3.0
+    babel-preset-expo: ~56.0.11
+    expo-asset: ~56.0.13
+    expo-constants: ~56.0.14
+    expo-file-system: ~56.0.7
+    expo-font: ~56.0.5
+    expo-keep-awake: ~56.0.3
+    expo-modules-autolinking: ~56.0.11
+    expo-modules-core: ~56.0.12
+    pretty-format: ^29.7.0
+    react-refresh: ^0.14.2
+    whatwg-url-minimum: ^0.1.2
+  peerDependencies:
+    "@expo/dom-webview": "*"
+    "@expo/metro-runtime": "*"
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+    react-native-web: "*"
+    react-native-webview: "*"
+  peerDependenciesMeta:
+    "@expo/dom-webview":
+      optional: true
+    "@expo/metro-runtime":
+      optional: true
+    react-dom:
+      optional: true
+    react-native-web:
+      optional: true
+    react-native-webview:
+      optional: true
+  bin:
+    expo: bin/cli
+    expo-modules-autolinking: bin/autolinking
+    fingerprint: bin/fingerprint
+  checksum: ebb4324d1c1180b1bd34c3a7b8609cee08dcfe229638b5b6950a911f793cf1bae55534255d7dc3c8636d3a778910147f52cdda76831f76aa0fdb8da77cbf89e3
+  languageName: node
+  linkType: hard
+
 "exponential-backoff@npm:^3.1.1":
   version: 3.1.3
   resolution: "exponential-backoff@npm:3.1.3"
