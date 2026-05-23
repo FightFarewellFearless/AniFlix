@@ -1,3 +1,13 @@
+# v1.2.2_JS-4 (23-Mei-2026)
+## Ditambahkan
+- Informasi waktu tunggu pada next/prev episode series (film)
+## Diperbaiki
+- [Film] Error saat menunggu proteksi (terutama di detik ke 14) pada beberapa perangkat
+- Tampilan loading retry anime movie
+## Ditingkatkan
+- Performa loading pada beranda
+- Skeleton loading indicator lebih ringan
+- Loading anime movie sekarang tidak otomatis batal saat berpindah dari layar beranda
 # v1.2.2_JS-3 (17-Mei-2026)
 ## Ditambahkan
 - Menampilkan sisa waktu tunggu saat memproses proteksi pada film
