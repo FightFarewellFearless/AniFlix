@@ -1,5 +1,5 @@
 import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
-import { useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -7,7 +7,6 @@ import deviceUserAgent from '@utils/deviceUserAgent';
 
 import cheerio from 'cheerio';
 
-import { useFocusEffect, useIsFocused } from '@react-navigation/core';
 import { unpack } from '@utils/unpacker';
 
 export interface Movies {
@@ -493,23 +492,21 @@ function makeCookieString(cookies: Cookies) {
 
 export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
   const webviewRef = useRef<WebView>(null);
-  useFocusEffect(
-    useCallback(() => {
-      if (isWebViewShown) {
-        isError = false;
-        const timeout = setTimeout(() => {
-          isError = true;
-          setIsWebViewShown(false);
-          onAnimeMovieReady();
-          ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
-        }, 18_000);
-        return () => {
-          clearTimeout(timeout);
-        };
-      }
-    }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]),
-  );
-  if (!useIsFocused()) return null;
+  useEffect(() => {
+    if (isWebViewShown) {
+      isError = false;
+      const timeout = setTimeout(() => {
+        isError = true;
+        setIsWebViewShown(false);
+        onAnimeMovieReady();
+        ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
+      }, 18_000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
+  // if (!useIsFocused()) return null;
   return (
     <View style={{ height: 0, display: 'none' }}>
       {isWebViewShown && (
