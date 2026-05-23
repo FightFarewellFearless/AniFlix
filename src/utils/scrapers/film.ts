@@ -643,9 +643,15 @@ async function getFilmDetails(
     const { claimApi, redeemApi } = await redeemVideo(playInfo, signal, onWaitTime);
     let variants: HlsVariant[] = [];
     try {
-      const manifestContent = await fetchPage(redeemApi.url, { signal });
+      const manifestContent = await fetchPage(redeemApi.url, {
+        headers: {
+          Origin: BASE_URL,
+          Referer: BASE_URL + '/',
+        },
+        signal,
+      });
       variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
-    } catch (e) {}
+    } catch {}
 
     const episodes = epApi.season.episodes;
     const currentIdx = episodes.findIndex(e => e.id === epApi.episode.id);
@@ -722,9 +728,15 @@ async function getFilmDetails(
 
   let variants: HlsVariant[] = [];
   try {
-    const manifestContent = await fetchPage(redeemApi.url, { signal });
+    const manifestContent = await fetchPage(redeemApi.url, {
+      headers: {
+        Origin: BASE_URL,
+        Referer: BASE_URL + '/',
+      },
+      signal,
+    });
     variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
-  } catch (e) {}
+  } catch {}
 
   const year = movieApi.releaseDate?.split('-')[0];
 
@@ -758,7 +770,7 @@ async function redeemVideo(
   redeemApi: RedeemApi;
   claimApi: ClaimApi;
 }> {
-  let timeout: NodeJS.Timeout | undefined;
+  let timeout: number | undefined;
   const totalWaitTime = Math.floor(Math.max(0, playInfo.unlockAt - playInfo.serverNow) / 1000) || 0;
   const startTime = Date.now();
 
@@ -785,7 +797,7 @@ async function redeemVideo(
         clearInterval(interval);
         res(true);
       },
-      Math.max(0, playInfo.unlockAt - Date.now()),
+      Math.max(0, playInfo.unlockAt - playInfo.serverNow),
     );
   });
   const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
@@ -993,7 +1005,7 @@ export const middleServerCallback = async (
       try {
         const arrayBuffer = await segmentResponse.arrayBuffer();
         res.end(arrayBuffer);
-      } catch (err) {
+      } catch {
         res.statusCode = 500;
         res.end();
       }
@@ -1001,7 +1013,7 @@ export const middleServerCallback = async (
       res.statusCode = 404;
       res.end('Not Found', 'utf-8');
     }
-  } catch (e) {
+  } catch {
     res.statusCode = 500;
     res.end('Server Error', 'utf-8');
   }
