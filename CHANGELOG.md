@@ -1,3 +1,23 @@
+# v1.3.0 (Unreleased)
+Halooo... Versi 1.3.0 kini hadir membawa peningkatan performa dan kestabilan aplikasi, ditambah dengan beberapa improvisasi dan perbaikan masalah.
+Ini adalah upgrade framework dari react-native v0.81 ke v0.85.
+Update kali ini hampir semuanya merupakan update dari sisi tech stack aplikasi, perubahan langsung tidak banyak terlihat oleh pengguna.
+## Ditambahkan
+- Informasi waktu tunggu pada next/prev episode series (film)
+## Ditingkatkan
+- Native bottom tab
+  > Bottom tab sekarang di implementasikan secara native, menghasilkan performa yang lebih stabil dan animasi yang lebih mulus
+- Skeleton loading indicator lebih ringan
+- Perbaikan masalah performa pada beberapa bagian di Beranda
+## Diperbaiki
+- Error pada loading proteksi streaming film
+## Perubahan lainnya
+- Upgrade react-native ke 0.85
+- Upgrade expo ke SDK 56
+- Loading anime movie sekarang tidak otomatis batal saat berpindah dari layar beranda
+- Dan banyak perubahan lainnya pada sisi kode aplikasi...
+### Perubahan dan improvisasi lainnya akan di update melalui OTA update
+
 # v1.2.2_JS-3 (17-Mei-2026)
 ## Ditambahkan
 - Menampilkan sisa waktu tunggu saat memproses proteksi pada film
