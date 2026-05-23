@@ -15,6 +15,9 @@ import com.facebook.react.common.ReleaseLevel
 
 import org.wonday.orientation.OrientationActivityLifecycle
 
+import com.nitrodns.NitroOkHttpClientFactory
+import com.facebook.react.modules.network.OkHttpClientProvider
+
 class MainApplication : Application(), ReactApplication {
 
   override val reactHost: ReactHost by lazy {
@@ -31,6 +34,8 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     DefaultNewArchitectureEntryPoint.releaseLevel = ReleaseLevel.EXPERIMENTAL
     super.onCreate()
+    // Inject Nitro DNS factory for global fetch/XHR interception
+    OkHttpClientProvider.setOkHttpClientFactory(NitroOkHttpClientFactory())
     loadReactNative(this)
     registerActivityLifecycleCallbacks(OrientationActivityLifecycle.getInstance())
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
