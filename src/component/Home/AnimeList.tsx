@@ -115,7 +115,7 @@ function HomeList(props: HomeProps) {
 
   useFocusEffect(
     useCallback(() => {
-      const baseDurationPer100px = 2000; // 2000ms per 100px
+      const baseDurationPer100px = 2000;
       const minimumAnimationDuration = 8000;
       const displayNewQuote = (finished?: boolean) => {
         let layoutWidth = textLayoutWidth.get();
@@ -179,25 +179,35 @@ function HomeList(props: HomeProps) {
     const abort = new AbortController();
     setIsHomeLoading(true);
     setIsHomeError(false);
-    fetchLatestDomain(abort.signal)
-      .catch(() => {})
-      .finally(() => {
-        if (abort.signal.aborted) return;
-        AnimeAPI.home(abort.signal)
-          .then(async jsondata => {
-            if (abort.signal.aborted) return;
-            setData?.(jsondata as any);
-          })
-          .catch(() => {
-            if (!abort.signal.aborted) {
-              setIsHomeError(true);
-            }
-          })
+
+    const idleHandle = requestIdleCallback(
+      () => {
+        fetchLatestDomain(abort.signal)
+          .catch(() => {})
           .finally(() => {
-            if (!abort.signal.aborted) setIsHomeLoading(false);
+            if (abort.signal.aborted) return;
+            AnimeAPI.home(abort.signal)
+              .then(async jsondata => {
+                if (abort.signal.aborted) return;
+                setData?.(jsondata as any);
+              })
+              .catch(() => {
+                if (!abort.signal.aborted) {
+                  setIsHomeError(true);
+                }
+              })
+              .finally(() => {
+                if (!abort.signal.aborted) setIsHomeLoading(false);
+              });
           });
-      });
-    return () => abort.abort();
+      },
+      { timeout: 1000 },
+    );
+
+    return () => {
+      cancelIdleCallback(idleHandle);
+      abort.abort();
+    };
   }, [setData]);
 
   const refreshing = useCallback(() => {
@@ -277,15 +287,21 @@ function HomeList(props: HomeProps) {
     setFilmHomepageData({
       featured: [],
       trending: [],
-    }); // so the skeleton loading show
-    setIsFilmError(false);
-    queueMicrotask(() => {
-      getHomepage()
-        .then(setFilmHomepageData)
-        .catch(() => {
-          setIsFilmError(true);
-        });
     });
+    setIsFilmError(false);
+
+    const idleHandle = requestIdleCallback(
+      () => {
+        getHomepage()
+          .then(setFilmHomepageData)
+          .catch(() => {
+            setIsFilmError(true);
+          });
+      },
+      { timeout: 2000 },
+    );
+
+    return () => cancelIdleCallback(idleHandle);
   }, [refreshingKey]);
 
   return (
@@ -424,7 +440,6 @@ function FeaturedFilmListUNMEMO({
   isError: boolean;
 }) {
   const styles = useStyles();
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -483,7 +498,6 @@ function TrendingFilmListUNMEMO({
   isError: boolean;
 }) {
   const styles = useStyles();
-  // const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -551,19 +565,27 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
   );
 
   useEffect(() => {
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
-      getLatestMovies()
-        .then(movieData => {
-          if ('isError' in movieData) {
-            setIsError(true);
-          } else {
-            setData?.(movieData);
-          }
-        })
-        .catch(() => setIsError(true));
-    });
+    setData?.([]);
+    setIsError(false);
+
+    const idleHandle = requestIdleCallback(
+      () => {
+        getLatestMovies()
+          .then(movieData => {
+            if ('isError' in movieData) {
+              setIsError(true);
+            } else {
+              setData?.(movieData);
+            }
+          })
+          .catch(() => setIsError(true));
+      },
+      { timeout: 2000 },
+    );
+
+    return () => cancelIdleCallback(idleHandle);
   }, [setData]);
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -604,6 +626,7 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
     </View>
   );
 }
+
 const LatestSeriesList = memo(LatestSeriesListUNMEMO);
 function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
@@ -624,15 +647,23 @@ function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
   );
 
   useEffect(() => {
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
-      getLatestSeries()
-        .then(movieData => {
-          setData?.(movieData);
-        })
-        .catch(() => setIsError(true));
-    });
+    setData?.([]);
+    setIsError(false);
+
+    const idleHandle = requestIdleCallback(
+      () => {
+        getLatestSeries()
+          .then(movieData => {
+            setData?.(movieData);
+          })
+          .catch(() => setIsError(true));
+      },
+      { timeout: 2000 },
+    );
+
+    return () => cancelIdleCallback(idleHandle);
   }, [setData]);
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -780,18 +811,24 @@ function MovieListUNMEMO({
   useEffect(() => {
     if (!isMovieReady) return;
     setIsError(false);
-    setData?.([]); // so the skeleton loading show
-    queueMicrotask(() => {
-      getLatestMovie()
-        .then(movieData => {
-          if ('isError' in movieData) {
-            setIsError(true);
-          } else {
-            setData?.(movieData);
-          }
-        })
-        .catch(() => setIsError(true));
-    });
+    setData?.([]);
+
+    const idleHandle = requestIdleCallback(
+      () => {
+        getLatestMovie()
+          .then(movieData => {
+            if ('isError' in movieData) {
+              setIsError(true);
+            } else {
+              setData?.(movieData);
+            }
+          })
+          .catch(() => setIsError(true));
+      },
+      { timeout: 2000 },
+    );
+
+    return () => cancelIdleCallback(idleHandle);
   }, [setData, isMovieReady]);
 
   return (
@@ -850,14 +887,20 @@ function ComicListUNMEMO() {
   const { paramsState: data, setParamsState: setData } = useContext(ComicsListContext);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      getLatestComicsReleases()
-        .then(z => {
-          setData?.(z);
-        })
-        .catch(() => setIsError(true));
-    });
+    setIsError(false);
+    const idleHandle = requestIdleCallback(
+      () => {
+        getLatestComicsReleases()
+          .then(z => {
+            setData?.(z);
+          })
+          .catch(() => setIsError(true));
+      },
+      { timeout: 2000 },
+    );
+
     return () => {
+      cancelIdleCallback(idleHandle);
       setData?.([]);
     };
   }, [setData]);
