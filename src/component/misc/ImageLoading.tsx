@@ -94,7 +94,7 @@ const ImageLoading = (
     <Reanimated.View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
-          key={typeof activeSource === 'number' ? activeSource : activeSource?.uri} // fix a native crash possibly related to Fresco
+          // key={typeof activeSource === 'number' ? activeSource : activeSource?.uri} // fix a native crash possibly related to Fresco
           fadeDuration={200}
           {...restProps}
           source={resolvedSource}
