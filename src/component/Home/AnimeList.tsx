@@ -632,6 +632,7 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
     </View>
   );
 }
+
 const LatestSeriesList = memo(LatestSeriesListUNMEMO);
 function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
   const styles = useStyles();
