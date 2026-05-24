@@ -1,3 +1,6 @@
+# v1.2.2_JS-5 (25-Mei-2026)
+## Diperbaiki
+- Film error karena perubahan domain
 # v1.2.2_JS-4 (23-Mei-2026)
 ## Ditambahkan
 - Informasi waktu tunggu pada next/prev episode series (film)
