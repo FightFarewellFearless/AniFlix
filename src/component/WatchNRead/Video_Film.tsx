@@ -76,13 +76,34 @@ function Video_Film(props: Props) {
 
   const [currentResolution, setCurrentResolution] = useState('Auto');
   const dropdownResolutionRef = useRef<IDropdownRef>(null);
+  const dropdownServerModeRef = useRef<IDropdownRef>(null);
 
   const { activeTokenRef, checkAndRotateToken } = useFilmTokenRotate(data);
   const checkAndRotateTokenRef = useRef(checkAndRotateToken);
   checkAndRotateTokenRef.current = checkAndRotateToken;
 
+  const [isLocalServerReady, setIsLocalServerReady] = useState(false);
+  const [serverMode, setServerMode] = useState<'local' | 'server' | undefined>(undefined);
+
   useFocusEffect(
     useCallback(() => {
+      fetch('https://vortexdownloader.rwbcode.com/health')
+        .then(a => {
+          if (a.status === 200) {
+            setServerMode('server');
+          } else {
+            setServerMode('local');
+          }
+        })
+        .catch(() => {
+          setServerMode('local');
+        });
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (serverMode !== 'local') return;
       let server: Server;
       async function autoRestartWhenInactive() {
         try {
@@ -95,11 +116,14 @@ function Video_Film(props: Props) {
           clearTimeout(timeout);
         } catch {
           server?.close?.();
+          // setIsLocalServerReady(false);
           await new Promise(resolve => setTimeout(resolve, 500));
           server = createServer((req, res) => {
             middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
           });
-          server.listen(STREAMING_MIDDLE_SERVER_PORT);
+          server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
+            setIsLocalServerReady(true);
+          });
         }
       }
       const probe = AppState.addEventListener('change', async state => {
@@ -109,7 +133,9 @@ function Video_Film(props: Props) {
       server = createServer((req, res) => {
         middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
       });
-      server.listen(STREAMING_MIDDLE_SERVER_PORT);
+      server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
+        setIsLocalServerReady(true);
+      });
 
       const heartBeat = setInterval(() => {
         autoRestartWhenInactive();
@@ -117,9 +143,10 @@ function Video_Film(props: Props) {
       return () => {
         clearInterval(heartBeat);
         server?.close?.();
+        // setIsLocalServerReady(false);
         probe.remove();
       };
-    }, [activeTokenRef]),
+    }, [activeTokenRef, serverMode]),
   );
 
   const currentLink = useRef(props.route.params.link);
@@ -165,7 +192,10 @@ function Video_Film(props: Props) {
   const [isPaused, setIsPaused] = useState(false);
 
   const { fullscreen, enterFullscreen, exitFullscreen, orientationDidChange, willUnmountHandler } =
-    useFullscreenControl(() => dropdownResolutionRef.current?.close());
+    useFullscreenControl(() => {
+      dropdownResolutionRef.current?.close();
+      dropdownServerModeRef.current?.close();
+    });
 
   const { batteryLevel, batteryTimeEnable, BatteryIcon } = useBatteryAndClock(
     enableBatteryTimeInfo as string,
@@ -490,29 +520,35 @@ function Video_Film(props: Props) {
             position: 'absolute',
           }}
         />
-        <VideoPlayer
-          title={
-            data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
-          }
-          thumbnailURL={data.thumbnailUrl}
-          streamingURL={`http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`}
-          isHls={true}
-          subtitleURL={data.subtitleLink}
-          onSubtitleLoad={onSubtitleLoad}
-          style={{ flex: 1, zIndex: 1 }}
-          videoRef={videoRef}
-          ref={playerRef}
-          fullscreen={fullscreen}
-          onFullscreenUpdate={fullscreenUpdate}
-          onDurationChange={handleProgress}
-          onLoad={handleVideoLoad}
-          batteryAndClock={batteryAndClock}
-          headers={{
-            origin: FILM_BASE_URL,
-            referer: FILM_BASE_URL + '/',
-            Accept: '*/*',
-          }}
-        />
+        {(isLocalServerReady || serverMode === 'server') && (
+          <VideoPlayer
+            title={
+              data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
+            }
+            thumbnailURL={data.thumbnailUrl}
+            streamingURL={
+              serverMode === 'local'
+                ? `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`
+                : `https://vortexdownloader.rwbcode.com/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
+            }
+            isHls={true}
+            subtitleURL={data.subtitleLink}
+            onSubtitleLoad={onSubtitleLoad}
+            style={{ flex: 1, zIndex: 1 }}
+            videoRef={videoRef}
+            ref={playerRef}
+            fullscreen={fullscreen}
+            onFullscreenUpdate={fullscreenUpdate}
+            onDurationChange={handleProgress}
+            onLoad={handleVideoLoad}
+            batteryAndClock={batteryAndClock}
+            headers={{
+              origin: FILM_BASE_URL,
+              referer: FILM_BASE_URL + '/',
+              Accept: '*/*',
+            }}
+          />
+        )}
       </View>
       {/* END OF VIDEO ELEMENT */}
       {/* mengecek apakah sedang dalam keadaan fullscreen atau tidak
@@ -699,6 +735,62 @@ function Video_Film(props: Props) {
             </View>
           </TouchableOpacity>
         </View>
+
+        {serverMode && (
+          <View style={[styles.container, { marginTop: 5 }]}>
+            <Text
+              style={[globalStyles.text, { marginBottom: 5, fontWeight: 'bold', fontSize: 16 }]}>
+              Sumber server streaming
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                dropdownServerModeRef.current?.open();
+              }}>
+              <View pointerEvents="box-only">
+                <Dropdown
+                  ref={dropdownServerModeRef}
+                  value={serverMode}
+                  placeholder="Pilih resolusi"
+                  data={[
+                    {
+                      value: 'server',
+                      label: 'Server',
+                    },
+                    {
+                      value: 'local',
+                      label: 'Local Host',
+                    },
+                  ]}
+                  valueField="value"
+                  labelField="label"
+                  onChange={item => {
+                    saveProgressToHistory();
+                    firstTimeLoad.current = true;
+                    setServerMode(item.value);
+                  }}
+                  style={styles.dropdownStyle}
+                  containerStyle={styles.dropdownContainerStyle}
+                  itemTextStyle={styles.dropdownItemTextStyle}
+                  itemContainerStyle={styles.dropdownItemContainerStyle}
+                  activeColor="#16687c"
+                  selectedTextStyle={styles.dropdownSelectedTextStyle}
+                  placeholderStyle={{ color: globalStyles.text.color }}
+                  autoScroll
+                  dropdownPosition="top"
+                />
+              </View>
+            </TouchableOpacity>
+            <Text style={[globalStyles.text, { marginBottom: 5 }]}>
+              * <Text style={{ fontWeight: 'bold' }}>Server</Text> : Memproxy permintaan mu ke
+              server. Lebih stabil tapi mungkin sedikit lebih lambat, tergantung banyaknya
+              permintaan{'\n'}* <Text style={{ fontWeight: 'bold' }}>Local Host</Text> : Mungkin
+              lebih cepat tapi kurang stabil (Bisa pilih ini kalau server bermasalah atau down)
+            </Text>
+            <Text style={[globalStyles.text, { fontSize: 12, fontStyle: 'italic' }]}>
+              Otomatis dipilih berdasarkan ketersediaan server saat pertama kali loading
+            </Text>
+          </View>
+        )}
 
         <Button
           mode="contained-tonal"
