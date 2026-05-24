@@ -4,6 +4,7 @@ Ini adalah upgrade framework dari react-native v0.81 ke v0.85.
 Update kali ini hampir semuanya merupakan update dari sisi tech stack aplikasi, perubahan langsung tidak banyak terlihat oleh pengguna.
 ## Ditambahkan
 - Informasi waktu tunggu pada next/prev episode series (film)
+- [Film] Opsi untuk mengganti sumber streaming antara local dan server di video player Film/Series
 ## Ditingkatkan
 - Native bottom tab
   > Bottom tab sekarang di implementasikan secara native, menghasilkan performa yang lebih stabil dan animasi yang lebih mulus
