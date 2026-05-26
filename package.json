@@ -15,7 +15,7 @@
     "rename": "mv android/app/build/outputs/apk/release/anime-release.apk android/app/build/outputs/apk/release/aniflix.apk"
   },
   "dependencies": {
-    "@domir/react-native-measure-text": "0.1.8",
+    "@domir/react-native-measure-text": "0.1.9",
     "@legendapp/list": "2.0.19",
     "@pirles/react-native-element-dropdown": "^2.15.0",
     "@preeternal/react-native-cookie-manager": "^6.3.1",

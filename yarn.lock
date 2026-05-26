@@ -1784,14 +1784,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@domir/react-native-measure-text@npm:0.1.8":
-  version: 0.1.8
-  resolution: "@domir/react-native-measure-text@npm:0.1.8"
+"@domir/react-native-measure-text@npm:0.1.9":
+  version: 0.1.9
+  resolution: "@domir/react-native-measure-text@npm:0.1.9"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 1d5757ba14bb480224d7c597745727433124a0d27749c539d08de20ac4c9ce40798ef897f355989ff7abb1d39690c4b4058d1d2766783b09646c8351256a6716
+  checksum: 150e349786c1927d4924cb4be3f69246f2929b64218d99067f0a4aaa06e1f8121f91213f1034a4b57c2e892f9dcc22965b1b48ef517c94a9f9b40929d9569576
   languageName: node
   linkType: hard
 
@@ -4266,7 +4266,7 @@ __metadata:
     "@babel/core": ^7.26.10
     "@babel/preset-env": ^7.26.9
     "@babel/runtime": ^7.27.0
-    "@domir/react-native-measure-text": 0.1.8
+    "@domir/react-native-measure-text": 0.1.9
     "@legendapp/list": 2.0.19
     "@pirles/react-native-element-dropdown": ^2.15.0
     "@preeternal/react-native-cookie-manager": ^6.3.1
