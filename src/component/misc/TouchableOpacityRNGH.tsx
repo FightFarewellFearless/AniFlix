@@ -1,13 +1,6 @@
-import { Ref, useMemo } from 'react';
+import { Ref } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Gesture, GestureDetector, Pressable } from 'react-native-gesture-handler';
-import {
-  default as Reanimated,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { runOnJS } from 'react-native-worklets';
+import { Touchable } from 'react-native-gesture-handler';
 
 type Props = {
   hitSlop: number;
@@ -18,38 +11,18 @@ type Props = {
   disabled: boolean;
 };
 
-export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Pressable> {
-  const opacity = useSharedValue(1);
-  const style = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.get(),
-    };
-  });
-  const onPress = props.onPress;
-  const sigleTaps = useMemo(
-    () =>
-      Gesture.Tap()
-        .hitSlop(props.hitSlop)
-        .maxDuration(Infinity)
-        .enabled(!props.disabled)
-        .onBegin(() => {
-          opacity.set(withTiming(0.3, { duration: 50 }));
-        })
-        .onFinalize(() => {
-          opacity.set(withTiming(1, { duration: 200 }));
-        })
-        .onEnd(() => {
-          if (onPress) {
-            runOnJS(onPress)();
-          }
-        }),
-    [props.hitSlop, props.disabled, opacity, onPress],
-  );
+export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Touchable> {
   return (
-    <GestureDetector gesture={sigleTaps}>
-      <Reanimated.View ref={props.ref} style={[StyleSheet.flatten(props.style), style]}>
-        {props.children}
-      </Reanimated.View>
-    </GestureDetector>
+    <Touchable
+      isTVSelectable={true}
+      accessible={true}
+      focusable={true}
+      onPress={props.onPress}
+      activeOpacity={0.2}
+      animationDuration={{ in: 0, out: 150 }}
+      ref={props.ref}
+      style={[StyleSheet.flatten(props.style)]}>
+      {props.children}
+    </Touchable>
   );
 }

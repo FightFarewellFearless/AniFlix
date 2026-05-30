@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Reanimated, {
   SharedValue,
   useAnimatedStyle,
@@ -49,31 +49,28 @@ export default function SeekBar({
     return withTiming(isScrubbing.value ? 1.5 : 1, { duration: 100 });
   });
 
-  const gesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .onBegin(e => {
-          'worklet';
-          isScrubbing.value = true;
-          const width = parentWidth.get();
-          const newProgress = clampNumber(e.x / width, 0, 1);
-          onProgressChange(newProgress);
-        })
-        .onUpdate(e => {
-          'worklet';
-          const width = parentWidth.get();
-          const newProgress = clampNumber(e.x / width, 0, 1);
-          onProgressChange(newProgress);
-        })
-        .onFinalize(e => {
-          'worklet';
-          isScrubbing.value = false;
-          const width = parentWidth.get();
-          const newProgress = clampNumber(e.x / width, 0, 1);
-          onProgressChangeEnd(newProgress);
-        }),
-    [isScrubbing, onProgressChange, onProgressChangeEnd, parentWidth],
-  );
+  const gesture = usePanGesture({
+    onBegin: e => {
+      'worklet';
+      isScrubbing.value = true;
+      const width = parentWidth.get();
+      const newProgress = clampNumber(e.x / width, 0, 1);
+      onProgressChange(newProgress);
+    },
+    onUpdate: e => {
+      'worklet';
+      const width = parentWidth.get();
+      const newProgress = clampNumber(e.x / width, 0, 1);
+      onProgressChange(newProgress);
+    },
+    onFinalize: e => {
+      'worklet';
+      isScrubbing.value = false;
+      const width = parentWidth.get();
+      const newProgress = clampNumber(e.x / width, 0, 1);
+      onProgressChangeEnd(newProgress);
+    },
+  });
 
   const coveredAreaStyles = useAnimatedStyle(() => ({
     width: `${progress.get() * 100}%`,
