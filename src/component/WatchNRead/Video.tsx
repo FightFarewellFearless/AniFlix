@@ -911,7 +911,7 @@ function Video(props: Props) {
           mode="contained"
           style={{ marginTop: 12, marginHorizontal: 10 }}
           onPress={downloadAnime}>
-          <Icon name="download" size={23} /> Download
+          <Icon name="download" color={globalStyles.text.color} size={23} /> Download
         </Button>
       </ScrollView>
     </View>

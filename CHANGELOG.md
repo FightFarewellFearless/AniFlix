@@ -19,6 +19,19 @@ Update kali ini hampir semuanya merupakan update dari sisi tech stack aplikasi, 
 - Dan banyak perubahan lainnya pada sisi kode aplikasi...
 ### Perubahan dan improvisasi lainnya akan di update melalui OTA update
 
+# v1.2.2_JS-5 (25-Mei-2026)
+## Diperbaiki
+- Film error karena perubahan domain
+# v1.2.2_JS-4 (23-Mei-2026)
+## Ditambahkan
+- Informasi waktu tunggu pada next/prev episode series (film)
+## Diperbaiki
+- [Film] Error saat menunggu proteksi (terutama di detik ke 14) pada beberapa perangkat
+- Tampilan loading retry anime movie
+## Ditingkatkan
+- Performa loading pada beranda
+- Skeleton loading indicator lebih ringan
+- Loading anime movie sekarang tidak otomatis batal saat berpindah dari layar beranda
 # v1.2.2_JS-3 (17-Mei-2026)
 ## Ditambahkan
 - Menampilkan sisa waktu tunggu saat memproses proteksi pada film
