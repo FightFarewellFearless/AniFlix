@@ -119,7 +119,7 @@ function Video_Film(props: Props) {
           server?.close?.();
           // setIsLocalServerReady(false);
           await new Promise(resolve => setTimeout(resolve, 500));
-          server = createServer((req, res) => {
+          server = createServer({ requestTimeout: Infinity }, (req, res) => {
             middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
           });
           server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
@@ -131,7 +131,7 @@ function Video_Film(props: Props) {
         if (state !== 'active') return;
         await autoRestartWhenInactive();
       });
-      server = createServer((req, res) => {
+      server = createServer({ requestTimeout: Infinity }, (req, res) => {
         middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
       });
       server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
