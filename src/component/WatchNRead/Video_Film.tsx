@@ -55,6 +55,7 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
+import LoadingIndicator from '../misc/LoadingIndicator';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -520,7 +521,7 @@ function Video_Film(props: Props) {
             position: 'absolute',
           }}
         />
-        {(isLocalServerReady || serverMode === 'server') && (
+        {isLocalServerReady || serverMode === 'server' ? (
           <VideoPlayer
             title={
               data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : '')
@@ -548,6 +549,10 @@ function Video_Film(props: Props) {
               Accept: '*/*',
             }}
           />
+        ) : (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <LoadingIndicator size={15} />
+          </View>
         )}
       </View>
       {/* END OF VIDEO ELEMENT */}
