@@ -426,33 +426,37 @@ export function useSynopsisControl(
     (fromFullscreen = false) => {
       if (fromFullscreen) {
         if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             initialInfoContainerHeight.current = height;
-          });
+          }
         } else if (!hadSynopsisMeasured) {
           return setTimeout(() => {
-            synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+            if (synopsisTextRef.current) {
+              const { height } = synopsisTextRef.current.getBoundingClientRect();
               if (height === 0) return;
               setSynopsisTextLength(height / 20); // 20: lineheight
               synopsisHeight.current = height;
               setHadSynopsisMeasured(true);
               hadSynopsisMeasuredSharedValue.set(true);
-            });
+            }
           }, 1000);
         }
       } else {
         if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             initialInfoContainerHeight.current = height;
-          });
+          }
         } else if (!hadSynopsisMeasured) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             if (height === 0) return;
             setSynopsisTextLength(height / 20); // 20: lineheight
             synopsisHeight.current = height;
             setHadSynopsisMeasured(true);
             hadSynopsisMeasuredSharedValue.set(true);
-          });
+          }
         }
       }
     },
