@@ -1,7 +1,6 @@
-import * as MeasureText from '@domir/react-native-measure-text';
+import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import MaterialIcon, { MaterialIcons } from '@react-native-vector-icons/material-icons';
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import {
   NavigationProp,
   StackActions,
@@ -20,6 +19,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Platform,
   ScrollViewProps,
   StyleSheet,
   Text,
@@ -71,10 +71,126 @@ import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@ut
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
 
-type HomeProps = BottomTabScreenProps<HomeNavigator, 'AnimeList'>;
+type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 
 const Home = memo(HomeList);
 export default Home;
+
+const MarqueeText = memo(() => {
+  const windowSize = useWindowDimensions();
+  const styles = useStyles();
+  const [animationText, setAnimationText] = useState(randomQuote);
+  const [measuredWidth, setMeasuredWidth] = useState(0);
+
+  const boxTextAnim = useSharedValue(0);
+  const boxTextLayout = useSharedValue(0);
+
+  const nextQuote = useCallback(() => {
+    setMeasuredWidth(0);
+    queueMicrotask(() => {
+      setAnimationText(randomQuote());
+    });
+  }, []);
+
+  const startMarquee = useCallback(
+    (width: number) => {
+      boxTextLayout.set(width);
+      boxTextAnim.set(0);
+
+      const baseDurationPer100px = 2000;
+      const minimumAnimationDuration = 8000;
+      const duration = Math.max(minimumAnimationDuration, (width / 100) * baseDurationPer100px);
+
+      boxTextAnim.set(
+        withDelay(
+          1000,
+          withTiming(
+            1,
+            { duration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
+            finished => {
+              if (finished) {
+                runOnJS(nextQuote)();
+              }
+            },
+          ),
+        ),
+      );
+    },
+    [boxTextAnim, boxTextLayout, nextQuote],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (measuredWidth > 0) {
+        startMarquee(measuredWidth);
+      }
+      return () => {
+        cancelAnimation(boxTextAnim);
+      };
+    }, [measuredWidth, startMarquee, boxTextAnim]),
+  );
+
+  useEffect(() => {
+    if (measuredWidth > 0) {
+      startMarquee(measuredWidth);
+    }
+  }, [measuredWidth, startMarquee]);
+
+  const AnimationTextStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: interpolate(
+            boxTextAnim.get(),
+            [0, 1],
+            [windowSize.width, -boxTextLayout.get()],
+          ),
+        },
+      ],
+    };
+  });
+
+  return (
+    <View
+      style={{
+        overflow: 'hidden',
+        position: 'absolute',
+        bottom: 2,
+        left: 0,
+        right: 0,
+        height: 22,
+      }}>
+      <View style={{ position: 'absolute', opacity: 0, flexDirection: 'row' }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <Text
+            key={animationText}
+            style={[styles.runningText, { width: 'auto', flexShrink: 0 }]}
+            onLayout={e => {
+              const width = e.nativeEvent.layout.width;
+              if (width > 0 && measuredWidth === 0) {
+                setMeasuredWidth(width);
+              }
+            }}>
+            {animationText}
+          </Text>
+        </ScrollView>
+      </View>
+
+      {measuredWidth > 0 && (
+        <Reanimated.Text
+          numberOfLines={1}
+          ellipsizeMode="clip"
+          style={[
+            styles.runningText,
+            AnimationTextStyle,
+            { position: 'absolute', width: measuredWidth, flexShrink: 0 },
+          ]}>
+          {animationText}
+        </Reanimated.Text>
+      )}
+    </View>
+  );
+});
 
 function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
@@ -87,11 +203,7 @@ function HomeList(props: HomeProps) {
   const [refreshingKey, setRefreshingKey] = useState(0);
   const [isHomeLoading, setIsHomeLoading] = useState(true);
   const [isHomeError, setIsHomeError] = useState(false);
-  const windowSize = useWindowDimensions();
 
-  const boxTextAnim = useSharedValue(0);
-  const boxTextLayout = useSharedValue(0);
-  const textLayoutWidth = useSharedValue(0);
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
 
@@ -107,105 +219,33 @@ function HomeList(props: HomeProps) {
     setIsAnimeMovieWebViewOpen(true);
   }, []);
 
-  const [animationText, setAnimationText] = useState(() => {
-    const quote = randomQuote();
-    textLayoutWidth.set(measureQuoteTextWidth(quote));
-    return quote;
-  });
-
-  useFocusEffect(
-    useCallback(() => {
-      const baseDurationPer100px = 2000;
-      const minimumAnimationDuration = 8000;
-      const displayNewQuote = (finished?: boolean) => {
-        let layoutWidth = textLayoutWidth.get();
-        if (finished) {
-          textLayoutWidth.set(0);
-          const quote = randomQuote();
-          const newWidth = measureQuoteTextWidth(quote);
-          textLayoutWidth.set(newWidth);
-          setAnimationText(quote);
-          layoutWidth = newWidth;
-        }
-        boxTextAnim.set(0);
-        if (!finished) return;
-        const duration = Math.max(
-          minimumAnimationDuration,
-          (layoutWidth / 100) * baseDurationPer100px,
-        );
-
-        boxTextAnim.set(
-          withDelay(
-            2000,
-            withTiming(
-              1,
-              { duration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
-              callback,
-            ),
-            ReduceMotion.Never,
-          ),
-        );
-      };
-      function callback(finished?: boolean) {
-        if (finished) runOnJS(displayNewQuote)(finished);
-      }
-      const initialDuration = Math.max(
-        minimumAnimationDuration,
-        (measureQuoteTextWidth(animationText) / 100) * baseDurationPer100px,
-      );
-      boxTextAnim.set(
-        withDelay(
-          1000,
-          withTiming(
-            1,
-            { duration: initialDuration, easing: Easing.linear, reduceMotion: ReduceMotion.Never },
-            callback,
-          ),
-        ),
-      );
-    }, [animationText, boxTextAnim, textLayoutWidth]),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        cancelAnimation(boxTextAnim);
-        boxTextAnim.set(0);
-      };
-    }, [boxTextAnim]),
-  );
-
   useEffect(() => {
     const abort = new AbortController();
-    setIsHomeLoading(true);
-    setIsHomeError(false);
-
-    const idleHandle = requestIdleCallback(
-      () => {
-        fetchLatestDomain(abort.signal)
-          .catch(() => {})
-          .finally(() => {
-            if (abort.signal.aborted) return;
-            AnimeAPI.home(abort.signal)
-              .then(async jsondata => {
-                if (abort.signal.aborted) return;
-                setData?.(jsondata as any);
-              })
-              .catch(() => {
-                if (!abort.signal.aborted) {
-                  setIsHomeError(true);
-                }
-              })
-              .finally(() => {
-                if (!abort.signal.aborted) setIsHomeLoading(false);
-              });
-          });
-      },
-      { timeout: 1000 },
-    );
+    const task = requestIdleCallback(() => {
+      setIsHomeLoading(true);
+      setIsHomeError(false);
+      fetchLatestDomain(abort.signal)
+        .catch(() => {})
+        .finally(() => {
+          if (abort.signal.aborted) return;
+          AnimeAPI.home(abort.signal)
+            .then(async jsondata => {
+              if (abort.signal.aborted) return;
+              setData?.(jsondata as any);
+            })
+            .catch(() => {
+              if (!abort.signal.aborted) {
+                setIsHomeError(true);
+              }
+            })
+            .finally(() => {
+              if (!abort.signal.aborted) setIsHomeLoading(false);
+            });
+        });
+    });
 
     return () => {
-      cancelIdleCallback(idleHandle);
+      cancelIdleCallback(task);
       abort.abort();
     };
   }, [setData]);
@@ -233,21 +273,6 @@ function HomeList(props: HomeProps) {
         });
     }, 0);
   }, [setData]);
-
-  const AnimationTextStyle = useAnimatedStyle(() => {
-    return {
-      width: textLayoutWidth.get() === 0 ? 'auto' : textLayoutWidth.get(),
-      transform: [
-        {
-          translateX: interpolate(
-            boxTextAnim.get(),
-            [0, 1],
-            [windowSize.width, -boxTextLayout.get()],
-          ),
-        },
-      ],
-    };
-  });
 
   const renderJadwalAnime = useCallback(
     ({ item }: { item: keyof JadwalAnime }) => {
@@ -289,19 +314,14 @@ function HomeList(props: HomeProps) {
       trending: [],
     });
     setIsFilmError(false);
-
-    const idleHandle = requestIdleCallback(
-      () => {
-        getHomepage()
-          .then(setFilmHomepageData)
-          .catch(() => {
-            setIsFilmError(true);
-          });
-      },
-      { timeout: 2000 },
-    );
-
-    return () => cancelIdleCallback(idleHandle);
+    const task = requestIdleCallback(() => {
+      getHomepage()
+        .then(setFilmHomepageData)
+        .catch(() => {
+          setIsFilmError(true);
+        });
+    });
+    return () => cancelIdleCallback(task);
   }, [refreshingKey]);
 
   return (
@@ -363,14 +383,7 @@ function HomeList(props: HomeProps) {
                 />
               </View>
 
-              <View
-                style={{ overflow: 'hidden', position: 'absolute', bottom: 2, left: 0, right: 0 }}>
-                <Reanimated.Text
-                  onLayout={nativeEvent => boxTextLayout.set(nativeEvent.nativeEvent.layout.width)}
-                  style={[styles.runningText, AnimationTextStyle]}>
-                  {animationText}
-                </Reanimated.Text>
-              </View>
+              <MarqueeText />
             </View>
             <TouchableOpacity style={styles.refreshButton} onPress={refreshing} disabled={refresh}>
               <MaterialIcon name="refresh" size={20} color="#FFFFFF" style={styles.refreshIcon} />
@@ -566,24 +579,18 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
 
   useEffect(() => {
     setData?.([]);
-    setIsError(false);
-
-    const idleHandle = requestIdleCallback(
-      () => {
-        getLatestMovies()
-          .then(movieData => {
-            if ('isError' in movieData) {
-              setIsError(true);
-            } else {
-              setData?.(movieData);
-            }
-          })
-          .catch(() => setIsError(true));
-      },
-      { timeout: 2000 },
-    );
-
-    return () => cancelIdleCallback(idleHandle);
+    const task = requestIdleCallback(() => {
+      getLatestMovies()
+        .then(movieData => {
+          if ('isError' in movieData) {
+            setIsError(true);
+          } else {
+            setData?.(movieData);
+          }
+        })
+        .catch(() => setIsError(true));
+    });
+    return () => cancelIdleCallback(task);
   }, [setData]);
 
   return (
@@ -648,20 +655,14 @@ function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
 
   useEffect(() => {
     setData?.([]);
-    setIsError(false);
-
-    const idleHandle = requestIdleCallback(
-      () => {
-        getLatestSeries()
-          .then(movieData => {
-            setData?.(movieData);
-          })
-          .catch(() => setIsError(true));
-      },
-      { timeout: 2000 },
-    );
-
-    return () => cancelIdleCallback(idleHandle);
+    const task = requestIdleCallback(() => {
+      getLatestSeries()
+        .then(movieData => {
+          setData?.(movieData);
+        })
+        .catch(() => setIsError(true));
+    });
+    return () => cancelIdleCallback(task);
   }, [setData]);
 
   return (
@@ -812,23 +813,18 @@ function MovieListUNMEMO({
     if (!isMovieReady) return;
     setIsError(false);
     setData?.([]);
-
-    const idleHandle = requestIdleCallback(
-      () => {
-        getLatestMovie()
-          .then(movieData => {
-            if ('isError' in movieData) {
-              setIsError(true);
-            } else {
-              setData?.(movieData);
-            }
-          })
-          .catch(() => setIsError(true));
-      },
-      { timeout: 2000 },
-    );
-
-    return () => cancelIdleCallback(idleHandle);
+    const task = requestIdleCallback(() => {
+      getLatestMovie()
+        .then(movieData => {
+          if ('isError' in movieData) {
+            setIsError(true);
+          } else {
+            setData?.(movieData);
+          }
+        })
+        .catch(() => setIsError(true));
+    });
+    return () => cancelIdleCallback(task);
   }, [setData, isMovieReady]);
 
   return (
@@ -887,20 +883,15 @@ function ComicListUNMEMO() {
   const { paramsState: data, setParamsState: setData } = useContext(ComicsListContext);
 
   useEffect(() => {
-    setIsError(false);
-    const idleHandle = requestIdleCallback(
-      () => {
-        getLatestComicsReleases()
-          .then(z => {
-            setData?.(z);
-          })
-          .catch(() => setIsError(true));
-      },
-      { timeout: 2000 },
-    );
-
+    const task = requestIdleCallback(() => {
+      getLatestComicsReleases()
+        .then(z => {
+          setData?.(z);
+        })
+        .catch(() => setIsError(true));
+    });
     return () => {
-      cancelIdleCallback(idleHandle);
+      cancelIdleCallback(task);
       setData?.([]);
     };
   }, [setData]);
@@ -912,8 +903,7 @@ function ComicListUNMEMO() {
         newAnimeData={item}
         type="comics"
         key={'btn' + item.title}
-        // @ts-expect-error
-        navigationProp={navigation}
+        navigationProp={navigation as any}
       />
     ),
     [navigation],
@@ -966,7 +956,10 @@ function ShowSkeletonLoading() {
   let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
   let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
   LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
-  LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
+  LIST_BACKGROUND_WIDTH = Math.min(
+    Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH),
+    Platform.isTV ? 150 : Infinity,
+  );
   return (
     <View style={{ flexDirection: 'row', gap: 12 }}>
       {[1, 2, 3].map((_, index) => (
@@ -1040,13 +1033,6 @@ function randomQuote() {
   const randomizeQuote = runningText[Math.floor(Math.random() * runningText.length)] ?? {};
   const quote = `"${randomizeQuote.quote}" - ${randomizeQuote.by}`;
   return quote;
-}
-function measureQuoteTextWidth(quote: string) {
-  const width = MeasureText.measureWidth(quote, {
-    fontWeight: 'bold',
-    fontSize: 17,
-  });
-  return width;
 }
 
 export function RenderScrollComponent(renderProps: ScrollViewProps) {

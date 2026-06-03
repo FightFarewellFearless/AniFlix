@@ -14,7 +14,15 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Pressable, ScrollView, Text, ToastAndroid, useColorScheme, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  ToastAndroid,
+  useColorScheme,
+  View,
+} from 'react-native';
 import Orientation from 'react-native-orientation-locker';
 import { Button, useTheme } from 'react-native-paper';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
@@ -51,6 +59,7 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
+import { TVFocusGuideView } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -437,11 +446,6 @@ function Video(props: Props) {
       playerRef.current?.skipTo(historyData.current.lastDuration);
     }
     ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
-
-    // DialogManager.alert('Perhatian', `
-    // Fitur "lanjut menonton dari durasi terakhir" memiliki bug atau masalah.
-    // Dan dinonaktifkan untuk sementara waktu, untuk melanjutkan menonton kamu bisa geser slider ke menit ${moment(historyData.current.lastDuration * 1000).format('mm:ss')}
-    // `)
   }, []);
 
   useEffect(() => {
@@ -517,11 +521,19 @@ function Video(props: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, flexDirection: Platform.isTV && !fullscreen ? 'row' : 'column' }}>
       {/* Loading modal */}
       <LoadingModal setIsPaused={setIsPaused} isLoading={loading} cancelLoading={cancelLoading} />
       {/* VIDEO ELEMENT */}
-      <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
+      <TVFocusGuideView
+        autoFocus
+        style={[
+          fullscreen
+            ? styles.fullscreen
+            : Platform.isTV
+              ? { width: '45%', height: '100%', backgroundColor: 'black' }
+              : styles.notFullscreen,
+        ]}>
         <View
           style={{
             width: '100%',
@@ -554,9 +566,6 @@ function Video(props: Props) {
               batteryAndClock={batteryAndClock}
             />
           ) : data.streamingType === 'embed' ? (
-            // <>
-            //   {/* TEMP|TODO|WORKAROUND: Temporary fix for webview layout not working properly when using native-stack */}
-            //   <VideoPlayer title="" streamingURL="" style={{ display: 'none' }} />
             <WebView
               style={{ flex: 1, zIndex: 1 }}
               ref={webviewRef}
@@ -602,20 +611,21 @@ function Video(props: Props) {
               `}
             />
           ) : (
-            // </>
             <Text style={{ color: 'white' }}>Video tidak tersedia</Text>
           )
         }
         {data.streamingType === 'embed' && batteryAndClock}
-      </View>
+      </TVFocusGuideView>
       {/* END OF VIDEO ELEMENT */}
-      {/* 
-        mengecek apakah sedang dalam keadaan fullscreen atau tidak
+      {/* mengecek apakah sedang dalam keadaan fullscreen atau tidak
         jika ya, maka hanya menampilkan video saja 
        */}
       <ScrollView
         style={{ flex: 1, display: fullscreen ? 'none' : 'flex' }}
-        contentContainerStyle={{ paddingBottom: insets.bottom }}>
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+          paddingHorizontal: Platform.isTV ? 16 : 0,
+        }}>
         {/* movie information */}
         {props.route.params.isMovie && (
           <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>

@@ -77,7 +77,8 @@ const ImageLoading = (
     let computedHeaders: Record<string, string> = { ...baseSourceObj.headers };
 
     if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('softkomik')) {
-      computedHeaders.Referer = BASE_URL;
+      computedHeaders.Referer = BASE_URL + '/';
+      computedHeaders.Origin = BASE_URL;
     }
 
     if (Object.keys(computedHeaders).length > 0) {
@@ -93,7 +94,7 @@ const ImageLoading = (
     <Reanimated.View style={[style, styles.imageBackground]}>
       {isFocused && (
         <Image
-          key={typeof activeSource === 'number' ? activeSource : activeSource?.uri} // fix a native crash possibly related to Fresco
+          // key={typeof activeSource === 'number' ? activeSource : activeSource?.uri} // fix a native crash possibly related to Fresco
           fadeDuration={200}
           {...restProps}
           source={resolvedSource}

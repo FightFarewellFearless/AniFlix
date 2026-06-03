@@ -11,3 +11,4 @@
 
 -dontwarn com.google.android.gms.common.GoogleApiAvailability
 -keep class com.google.android.gms.common.** {*;}
+-keep class com.margelo.nitro.** { *; }

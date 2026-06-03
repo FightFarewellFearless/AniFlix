@@ -38,7 +38,7 @@ local.properties
 # node.js
 #
 node_modules/
-*_node_modules
+*_node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -91,3 +91,4 @@ dist
 .git*
 !.github
 !.gitignore
+.expo

@@ -4,6 +4,7 @@ const ReactCompilerConfig = {
 
 module.exports = {
   presets: [['babel-preset-expo']],
+  // presets: ['@react-native/babel-preset'],
   env: {
     production: {
       plugins: ['react-native-paper/babel'],
@@ -43,12 +44,12 @@ module.exports = {
         },
       },
     ],
-    ['module:react-native-dotenv'],
     [
       'babel-plugin-inline-import',
       {
         extensions: ['.md', '.txt'],
       },
     ],
+    // 'react-native-worklets/plugin',
   ],
 };

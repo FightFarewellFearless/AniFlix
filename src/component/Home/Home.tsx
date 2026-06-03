@@ -1,17 +1,16 @@
-import MaterialIcons from '@react-native-vector-icons/material-icons';
+import { withSuspenseAndSafeArea } from '@/misc/withSuspenseAndSafeArea';
 import {
-  BottomTabNavigationOptions,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
-import { CommonActions, useFocusEffect } from '@react-navigation/native';
+  createNativeBottomTabNavigator,
+  NativeBottomTabNavigationOptions,
+} from '@bottom-tabs/react-navigation';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { lazy, memo, useCallback, useContext, useEffect } from 'react';
+import React, { lazy, memo, startTransition, useCallback, useContext, useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
-import { BottomNavigation, useTheme } from 'react-native-paper';
-
-import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
-import { EpisodeBaruHomeContext } from '@misc/context';
-import { withSuspenseAndSafeArea } from '@misc/withSuspenseAndSafeArea';
+import { useTheme } from 'react-native-paper';
+import { EpisodeBaruHomeContext } from '../../misc/context';
+import { HomeNavigator, RootStackNavigator } from '../../types/navigation';
 
 let EpisodeBaruHome: React.ComponentType<any>;
 let Search: React.ComponentType<any>;
@@ -31,18 +30,18 @@ if (__DEV__) {
 }
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Home'>;
-const Tab = createBottomTabNavigator<HomeNavigator>();
+const Tab = createNativeBottomTabNavigator<HomeNavigator>();
 
 const tabScreens: {
   name: keyof HomeNavigator;
   component: (props: any) => React.JSX.Element;
-  options: BottomTabNavigationOptions;
+  options: NativeBottomTabNavigationOptions;
 }[] = [
   {
     name: 'AnimeList',
     component: withSuspenseAndSafeArea(EpisodeBaruHome, false),
     options: {
-      tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
+      tabBarIcon: () => require('../../assets/icons/home-icon.png'),
       tabBarLabel: 'Beranda',
     },
   },
@@ -50,7 +49,7 @@ const tabScreens: {
     name: 'Search',
     component: withSuspenseAndSafeArea(Search, true, false, true),
     options: {
-      tabBarIcon: ({ color, size }) => <MaterialIcons name="search" size={size} color={color} />,
+      tabBarIcon: () => require('../../assets/icons/search-icon.png'),
       tabBarLabel: 'Pencarian',
     },
   },
@@ -58,7 +57,7 @@ const tabScreens: {
     name: 'Saya',
     component: withSuspenseAndSafeArea(Saya, false),
     options: {
-      tabBarIcon: ({ color, size }) => <MaterialIcons name="person" size={size} color={color} />,
+      tabBarIcon: () => require('../../assets/icons/order-history-icon.png'),
       tabBarLabel: 'Saya',
     },
   },
@@ -66,17 +65,19 @@ const tabScreens: {
     name: 'Utilitas',
     component: withSuspenseAndSafeArea(Utils, false),
     options: {
-      tabBarIcon: ({ color, size }) => <MaterialIcons name="build" size={size} color={color} />,
+      tabBarIcon: () => require('../../assets/icons/administrator-developer-icon.png'),
     },
   },
 ];
 
 function BottomTabs(props: Props) {
   const { setParamsState: setAnimeData } = useContext(EpisodeBaruHomeContext);
-  // const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme();
   const theme = useTheme();
   useEffect(() => {
-    setAnimeData?.(props.route.params.data);
+    startTransition(() => {
+      setAnimeData?.(props.route.params.data);
+    });
   }, [props.route.params.data, setAnimeData]);
   useFocusEffect(
     useCallback(() => {
@@ -88,58 +89,14 @@ function BottomTabs(props: Props) {
   );
   return (
     <Tab.Navigator
-      // tabBarStyle={{
-      //   backgroundColor: colorScheme === 'dark' ? '#181818' : '#f0f0f0',
-      // }}
-      // activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
-      // getFreezeOnBlur={() => true}
-      // TODO: Remove this when the blank screen issue is fixed
-      detachInactiveScreens={false}
-      screenOptions={{
-        animation: 'shift',
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
+      tabBarStyle={{
+        backgroundColor: colorScheme === 'dark' ? '#181818' : '#f0f0f0',
       }}
-      tabBar={({ navigation, state, descriptors, insets }) => (
-        <BottomNavigation.Bar
-          navigationState={state}
-          safeAreaInsets={insets}
-          onTabPress={({ route, preventDefault }) => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (event.defaultPrevented) {
-              preventDefault();
-            } else {
-              navigation.dispatch({
-                ...CommonActions.navigate(route.name, route.params),
-                target: state.key,
-              });
-            }
-          }}
-          renderIcon={({ route, focused, color }) =>
-            descriptors[route.key].options.tabBarIcon?.({
-              focused,
-              color,
-              size: 24,
-            }) || null
-          }
-          getLabelText={({ route }) => {
-            const { options } = descriptors[route.key];
-            const label =
-              typeof options.tabBarLabel === 'string'
-                ? options.tabBarLabel
-                : typeof options.title === 'string'
-                  ? options.title
-                  : route.name;
-
-            return label;
-          }}
-        />
-      )}>
+      activeIndicatorColor={colorScheme === 'dark' ? '#525252' : '#d8d8d8'}
+      screenOptions={{
+        freezeOnBlur: true,
+        tabBarActiveTintColor: theme.colors.primary,
+      }}>
       {tabScreens.map(({ name, component: Component, options }) => (
         <Tab.Screen key={name} name={name} options={options}>
           {Component}

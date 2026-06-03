@@ -1,13 +1,9 @@
-import { Ref, useMemo } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Gesture, GestureDetector, Pressable } from 'react-native-gesture-handler';
-import {
-  default as Reanimated,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { runOnJS } from 'react-native-worklets';
+import { Ref } from 'react';
+import { Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Touchable } from 'react-native-gesture-handler';
+import { TouchableRipple, useTheme } from 'react-native-paper';
+
+const TCHOP = Platform.isTV ? TouchableRipple : Touchable;
 
 type Props = {
   hitSlop: number;
@@ -18,38 +14,21 @@ type Props = {
   disabled: boolean;
 };
 
-export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Pressable> {
-  const opacity = useSharedValue(1);
-  const style = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.get(),
-    };
-  });
-  const onPress = props.onPress;
-  const sigleTaps = useMemo(
-    () =>
-      Gesture.Tap()
-        .hitSlop(props.hitSlop)
-        .maxDuration(Infinity)
-        .enabled(!props.disabled)
-        .onBegin(() => {
-          opacity.set(withTiming(0.3, { duration: 50 }));
-        })
-        .onFinalize(() => {
-          opacity.set(withTiming(1, { duration: 200 }));
-        })
-        .onEnd(() => {
-          if (onPress) {
-            runOnJS(onPress)();
-          }
-        }),
-    [props.hitSlop, props.disabled, opacity, onPress],
-  );
+export function TouchableOpacity(props: Partial<Props>): ReturnType<typeof Touchable> {
+  const theme = useTheme();
   return (
-    <GestureDetector gesture={sigleTaps}>
-      <Reanimated.View ref={props.ref} style={[StyleSheet.flatten(props.style), style]}>
-        {props.children}
-      </Reanimated.View>
-    </GestureDetector>
+    <TCHOP
+      rippleColor={theme.colors.primaryContainer}
+      background={{ color: theme.colors.primaryContainer, foreground: true }}
+      isTVSelectable={true}
+      accessible={true}
+      focusable={true}
+      onPress={props.onPress}
+      activeOpacity={0.2}
+      animationDuration={{ in: 150, out: 250 }}
+      ref={props.ref}
+      style={[StyleSheet.flatten(props.style)]}>
+      <>{props.children}</>
+    </TCHOP>
   );
 }

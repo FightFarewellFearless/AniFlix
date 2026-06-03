@@ -1,0 +1,13 @@
+diff --git a/src/winter/runtime.native.ts b/src/winter/runtime.native.ts
+index 415202b8c6b4af350d012a2511226e813c5678d1..09575a59e0eca5de99519d311ca63a4f2336d934 100644
+--- a/src/winter/runtime.native.ts
++++ b/src/winter/runtime.native.ts
+@@ -35,7 +35,7 @@ installAbortSignalPatch(AbortSignal);
+ Symbol.asyncIterator ??= Symbol.for('Symbol.asyncIterator');
+ 
+ const useRnFetch =
+-  process.env.EXPO_PUBLIC_USE_RN_FETCH === '1' || process.env.EXPO_PUBLIC_USE_RN_FETCH === 'true';
++  true// process.env.EXPO_PUBLIC_USE_RN_FETCH === '1' || process.env.EXPO_PUBLIC_USE_RN_FETCH === 'true';
+ 
+ if (!useRnFetch) {
+   // Reading `Headers` triggers RN's polyfill chain, which also installs

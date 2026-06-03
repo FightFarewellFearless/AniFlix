@@ -1,0 +1,32 @@
+diff --git a/Libraries/Image/Image.android.js b/Libraries/Image/Image.android.js
+index b30c90dc0d4b6e6d6d7342ec14c5087aa8647fb4..ec2cb027841238e4b047c75cb3d3024f2a074325 100644
+--- a/Libraries/Image/Image.android.js
++++ b/Libraries/Image/Image.android.js
+@@ -126,6 +126,7 @@ const EMPTY_IMAGE_SOURCE = {
+   uri: undefined,
+   width: undefined,
+   height: undefined,
++  headers: undefined,
+ };
+ 
+ /**
+@@ -218,10 +219,18 @@ let BaseImage: AbstractImageAndroid = ({
+     }
+     sources_ = source_;
+   } else {
+-    const {uri, width: sourceWidth, height: sourceHeight} = source_;
++    const {
++      uri,
++      width: sourceWidth,
++      height: sourceHeight,
++      headers: sourceHeaders,
++    } = source_;
+     if (uri === '') {
+       console.warn('source.uri should not be an empty string');
+     }
++    if (sourceHeaders != null) {
++      headers_ = sourceHeaders;
++    }
+     style_ = [
+       {width: sourceWidth ?? width, height: sourceHeight ?? height},
+       styles.base,

@@ -203,7 +203,7 @@ function Setting(_props: Props) {
               if (value === 'colorScheme') {
                 modalText.set('Memulihkan tema aplikasi');
                 Appearance.setColorScheme(
-                  restoredData === 'auto' ? undefined : (restoredData as ColorSchemeName),
+                  restoredData === 'auto' ? 'unspecified' : (restoredData as ColorSchemeName),
                 );
               } else if (value === 'searchHistory') {
                 modalText.set('Memulihkan histori pencarian');
@@ -305,7 +305,7 @@ function Setting(_props: Props) {
             if (data.value === 'light' || data.value === 'dark') {
               Appearance.setColorScheme(data.value);
             } else if (data.value === 'auto') {
-              Appearance.setColorScheme(undefined);
+              Appearance.setColorScheme('unspecified');
             }
             DatabaseManager.set('colorScheme', data.value);
           }}

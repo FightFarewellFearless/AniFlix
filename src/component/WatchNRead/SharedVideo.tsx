@@ -1,7 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome';
 import { useFocusEffect } from '@react-navigation/core';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { Platform, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import { DeviceInfoModule } from 'react-native-nitro-device-info';
 import Orientation, { OrientationType } from 'react-native-orientation-locker';
@@ -316,7 +316,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
     SystemNavigationBar.fullScreen(false);
     SystemBars.setHidden(false);
     SystemNavigationBar.navigationShow();
-    Orientation.lockToPortrait();
+    !Platform.isTV && Orientation.lockToPortrait();
     setFullscreen(false);
   }, []);
 
@@ -336,7 +336,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   );
 
   const willUnmountHandler = useCallback(() => {
-    Orientation.lockToPortrait();
+    !Platform.isTV && Orientation.lockToPortrait();
     SystemBars.setHidden(false);
     SystemNavigationBar.navigationShow();
   }, []);
@@ -426,33 +426,37 @@ export function useSynopsisControl(
     (fromFullscreen = false) => {
       if (fromFullscreen) {
         if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             initialInfoContainerHeight.current = height;
-          });
+          }
         } else if (!hadSynopsisMeasured) {
           return setTimeout(() => {
-            synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+            if (synopsisTextRef.current) {
+              const { height } = synopsisTextRef.current.getBoundingClientRect();
               if (height === 0) return;
               setSynopsisTextLength(height / 20); // 20: lineheight
               synopsisHeight.current = height;
               setHadSynopsisMeasured(true);
               hadSynopsisMeasuredSharedValue.set(true);
-            });
+            }
           }, 1000);
         }
       } else {
         if (hadSynopsisMeasured && initialInfoContainerHeight.current === null) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             initialInfoContainerHeight.current = height;
-          });
+          }
         } else if (!hadSynopsisMeasured) {
-          synopsisTextRef.current?.measure((_x, _y, _width, height, _pageX, _pageY) => {
+          if (synopsisTextRef.current) {
+            const { height } = synopsisTextRef.current.getBoundingClientRect();
             if (height === 0) return;
             setSynopsisTextLength(height / 20); // 20: lineheight
             synopsisHeight.current = height;
             setHadSynopsisMeasured(true);
             hadSynopsisMeasuredSharedValue.set(true);
-          });
+          }
         }
       }
     },

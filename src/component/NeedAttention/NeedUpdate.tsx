@@ -1,6 +1,7 @@
 import Icon from '@react-native-vector-icons/fontawesome5';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -183,7 +184,14 @@ function NeedUpdate(props: Props) {
           </Text>
         </View>
         <Markdown
-          flatListProps={{ style: { backgroundColor: styles.updateInfo.backgroundColor } }}
+          flatListProps={{
+            style: { backgroundColor: styles.updateInfo.backgroundColor },
+            scrollEnabled: !Platform.isTV,
+            accessible: false,
+            focusable: false,
+            isTVSelectable: false,
+            scrollsChildToFocus: false,
+          }}
           value={props.route.params.changelog}
         />
         {!isDownloadStart ? (

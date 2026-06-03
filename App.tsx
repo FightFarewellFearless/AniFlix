@@ -10,7 +10,15 @@ import {
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Appearance, Linking, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import {
+  Appearance,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import ErrorBoundary from 'react-native-error-boundary';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -41,6 +49,7 @@ import { CFBypassIsOpenContext, setWebViewOpen } from '@utils/CFBypass';
 import SetupComics1 from '@utils/comics1SessionFetcher/SetupComics1.tsx';
 import { DatabaseManager } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
+import { TVFocusGuideView } from 'react-native';
 
 cleanCbzDir();
 
@@ -279,28 +288,36 @@ function App() {
                       dismissable={false}
                       dismissableBackButton
                       onDismiss={() => setDialogVisible(false)}>
-                      <Dialog.Title>{dialogContent.title}</Dialog.Title>
-                      <Dialog.Content>
-                        <Text style={globalStyles.text}>{dialogContent.message}</Text>
-                      </Dialog.Content>
-                      <Dialog.Actions>
-                        {dialogContent.buttons.map((button, index) => (
-                          <Button
-                            key={index}
-                            onPress={() => {
-                              button.onPress();
-                              setDialogVisible(false);
-                            }}>
-                            {button.text}
-                          </Button>
-                        ))}
-                      </Dialog.Actions>
+                      <TVFocusGuideView
+                        autoFocus
+                        hasTVPreferredFocus={true}
+                        trapFocusDown
+                        trapFocusLeft
+                        trapFocusRight
+                        trapFocusUp>
+                        <Dialog.Title>{dialogContent.title}</Dialog.Title>
+                        <Dialog.Content>
+                          <Text style={globalStyles.text}>{dialogContent.message}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions focusable={true} accessible={true} isTVSelectable={true}>
+                          {dialogContent.buttons.map((button, index) => (
+                            <Button
+                              key={index}
+                              onPress={() => {
+                                button.onPress();
+                                setDialogVisible(false);
+                              }}>
+                              {button.text}
+                            </Button>
+                          ))}
+                        </Dialog.Actions>
+                      </TVFocusGuideView>
                     </Dialog>
                   </Portal>
                   <Stack.Navigator
                     initialRouteName="connectToServer"
                     screenOptions={{
-                      headerShown: false,
+                      headerShown: Platform.isTV,
                       header: props => (
                         <Appbar.Header>
                           {props.back && (

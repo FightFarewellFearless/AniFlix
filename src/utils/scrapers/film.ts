@@ -797,7 +797,7 @@ async function redeemVideo(
         clearInterval(interval);
         res(true);
       },
-      Math.max(0, playInfo.unlockAt - playInfo.serverNow),
+      Math.max(0, playInfo.unlockAt - playInfo.serverNow) + 1000,
     );
   });
   const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
