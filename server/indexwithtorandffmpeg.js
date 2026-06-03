@@ -923,16 +923,24 @@ app.get('/api/getComicsDownload/:id', async (req, res) => {
 // 6. FRONTEND HTML
 // ==========================================
 app.get('/', (req, res) => {
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
   const queryData = req.query.data
     ? JSON.parse(Buffer.from(req.query.data, 'hex').toString())
     : null;
   const data = queryData || {};
-  const title = data.title || '';
-  const vidLink = data.streamingLink || '';
-  const subLink = data.subtitleLink || '';
+  const title = escapeHtml(data.title || '');
+  const vidLink = escapeHtml(data.streamingLink || '');
+  const subLink = escapeHtml(data.subtitleLink || '');
 
-  const claim = data.claim || '';
-  const redeemUrl = data.redeemUrl || '';
+  const claim = escapeHtml(data.claim || '');
+  const redeemUrl = escapeHtml(data.redeemUrl || '');
 
   res.send(`<!DOCTYPE html>
 <html lang="en">
