@@ -1,4 +1,4 @@
-# v1.3.0 (Unreleased)
+# v1.3.0 (03-Juni-2026)
 Halooo... Versi 1.3.0 kini hadir membawa peningkatan performa dan kestabilan aplikasi dan data movie & film, ditambah dengan beberapa improvisasi dan perbaikan masalah. Serta dukungan eksperimental untuk AndroidTV
 Ini adalah upgrade framework dari react-native v0.81 ke v0.85.
 Update kali ini hampir semuanya merupakan update dari sisi tech stack aplikasi, perubahan langsung tidak banyak terlihat oleh pengguna.
