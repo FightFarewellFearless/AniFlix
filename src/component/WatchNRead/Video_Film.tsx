@@ -15,6 +15,7 @@ import React, {
 import {
   AppState,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -56,6 +57,7 @@ import {
   useVideoStyles,
 } from './SharedVideo';
 import LoadingIndicator from '../misc/LoadingIndicator';
+import { TVFocusGuideView } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -501,7 +503,7 @@ function Video_Film(props: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, flexDirection: Platform.isTV && !fullscreen ? 'row' : 'column' }}>
       {/* Loading modal */}
       <LoadingModal
         waitTime={waitTime}
@@ -511,7 +513,15 @@ function Video_Film(props: Props) {
         cancelLoading={cancelLoading}
       />
       {/* VIDEO ELEMENT */}
-      <View style={[fullscreen ? styles.fullscreen : styles.notFullscreen]}>
+      <TVFocusGuideView
+        autoFocus
+        style={[
+          fullscreen
+            ? styles.fullscreen
+            : Platform.isTV
+              ? { width: '45%', height: '100%', backgroundColor: 'black' }
+              : styles.notFullscreen,
+        ]}>
         <View
           style={{
             width: '100%',
@@ -554,14 +564,17 @@ function Video_Film(props: Props) {
             <LoadingIndicator size={15} />
           </View>
         )}
-      </View>
+      </TVFocusGuideView>
       {/* END OF VIDEO ELEMENT */}
       {/* mengecek apakah sedang dalam keadaan fullscreen atau tidak
         jika ya, maka hanya menampilkan video saja 
        */}
       <ScrollView
         style={{ flex: 1, display: fullscreen ? 'none' : 'flex' }}
-        contentContainerStyle={{ paddingBottom: insets.bottom }}>
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+          paddingHorizontal: Platform.isTV ? 16 : 0,
+        }}>
         {data.subtitleLink === undefined && (
           <View style={styles.container}>
             <Text style={[globalStyles.text, { marginLeft: 5, fontSize: 16, fontWeight: '500' }]}>

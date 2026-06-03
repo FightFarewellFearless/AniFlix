@@ -1,0 +1,24 @@
+diff --git a/src/lib/Renderer.tsx b/src/lib/Renderer.tsx
+index bc6f374b5fcb6b93998352d60bd8a723566295fb..24d889943abe71fdadd169f2d348d96008637f94 100644
+--- a/src/lib/Renderer.tsx
++++ b/src/lib/Renderer.tsx
+@@ -101,7 +101,7 @@ class Renderer implements RendererInterface {
+ 	): ReactNode {
+ 		return (
+ 			<Text
+-				selectable
++				// selectable
+ 				accessibilityRole="link"
+ 				accessibilityHint="Opens in a new window"
+ 				accessibilityLabel={title || "Link"}
+@@ -206,7 +206,9 @@ class Renderer implements RendererInterface {
+ 		styles?: TextStyle,
+ 	): ReactNode {
+ 		return (
+-			<Text selectable key={this.getKey()} style={styles}>
++			<Text 
++			// selectable
++			 key={this.getKey()} style={styles}>
+ 				{children}
+ 			</Text>
+ 		);

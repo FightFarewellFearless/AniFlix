@@ -19,6 +19,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Platform,
   ScrollViewProps,
   StyleSheet,
   Text,
@@ -955,7 +956,10 @@ function ShowSkeletonLoading() {
   let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
   let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
   LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
-  LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
+  LIST_BACKGROUND_WIDTH = Math.min(
+    Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH),
+    Platform.isTV ? 150 : Infinity,
+  );
   return (
     <View style={{ flexDirection: 'row', gap: 12 }}>
       {[1, 2, 3].map((_, index) => (

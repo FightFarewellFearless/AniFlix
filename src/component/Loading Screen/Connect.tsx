@@ -5,6 +5,7 @@ import * as Updates from 'expo-updates';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -38,7 +39,7 @@ function Loading(props: Props) {
   const styles = useStyles();
 
   useEffect(() => {
-    Orientation.lockToPortrait();
+    !Platform.isTV && Orientation.lockToPortrait();
   }, []);
 
   const [loadStatus, setLoadStatus] = useState({

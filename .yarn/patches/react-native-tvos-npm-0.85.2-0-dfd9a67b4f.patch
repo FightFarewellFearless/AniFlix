@@ -1,5 +1,5 @@
 diff --git a/Libraries/Image/Image.android.js b/Libraries/Image/Image.android.js
-index b30c90dc0d4b6e6d6d7342ec14c5087aa8647fb4..1af4e6d2f3ebee8c8bcbc5d9981a687751c67e8f 100644
+index b30c90dc0d4b6e6d6d7342ec14c5087aa8647fb4..ec2cb027841238e4b047c75cb3d3024f2a074325 100644
 --- a/Libraries/Image/Image.android.js
 +++ b/Libraries/Image/Image.android.js
 @@ -126,6 +126,7 @@ const EMPTY_IMAGE_SOURCE = {

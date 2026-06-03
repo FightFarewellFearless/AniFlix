@@ -1,5 +1,13 @@
-import { useCallback } from 'react';
-import { LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  LayoutChangeEvent,
+  Platform,
+  StyleSheet,
+  TVFocusGuideView,
+  View,
+  ViewStyle,
+  useTVEventHandler,
+} from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Reanimated, {
   SharedValue,
@@ -44,10 +52,38 @@ export default function SeekBar({
 }: SeekBarProps) {
   const parentWidth = useSharedValue(0);
   const isScrubbing = useSharedValue(false);
+  const [isTvFocused, setIsTvFocused] = useState(false);
+  const isTvFocusedShared = useSharedValue(false);
+
+  useEffect(() => {
+    isTvFocusedShared.value = isTvFocused;
+  }, [isTvFocused, isTvFocusedShared]);
 
   const thumbScale = useDerivedValue(() => {
-    return withTiming(isScrubbing.value ? 1.5 : 1, { duration: 100 });
+    return withTiming(isScrubbing.value || isTvFocusedShared.value ? 1.6 : 1, { duration: 100 });
   });
+
+  useTVEventHandler(
+    useCallback(
+      evt => {
+        if (!Platform.isTV || !isTvFocused) return;
+
+        if (evt && evt.eventKeyAction === 1) {
+          const currentProg = progress.get();
+          if (evt.eventType === 'left') {
+            const nextProg = Math.max(0, currentProg - 0.02);
+            onProgressChange(nextProg);
+            onProgressChangeEnd(nextProg);
+          } else if (evt.eventType === 'right') {
+            const nextProg = Math.min(1, currentProg + 0.02);
+            onProgressChange(nextProg);
+            onProgressChangeEnd(nextProg);
+          }
+        }
+      },
+      [isTvFocused, onProgressChange, onProgressChangeEnd, progress],
+    ),
+  );
 
   const gesture = usePanGesture({
     onBegin: e => {
@@ -111,24 +147,39 @@ export default function SeekBar({
   return (
     <View style={[style, styles.container]} onLayout={onLayout}>
       <GestureDetector gesture={gesture}>
-        <View style={styles.touchableArea}>
-          <View style={styles.trackBackground} />
+        <TVFocusGuideView
+          trapFocusLeft
+          trapFocusRight
+          focusable
+          onFocus={() => setIsTvFocused(true)}
+          onBlur={() => setIsTvFocused(false)}>
+          <View style={styles.touchableArea} focusable accessible>
+            <View style={styles.trackBackground} />
 
-          <Reanimated.View style={[styles.trackFill, coveredAreaStyles]} />
-          <Reanimated.View
-            style={[
-              {
-                position: 'absolute',
-                width: '100%',
-                height: THUMB_SIZE,
-                left: -THUMB_SIZE / 2,
-                zIndex: 3,
-              },
-              thumbPositionStyle,
-            ]}>
-            <Reanimated.View style={[styles.thumb, thumbStyle]} />
-          </Reanimated.View>
-        </View>
+            <Reanimated.View
+              style={[
+                styles.trackFill,
+                coveredAreaStyles,
+                isTvFocused && { backgroundColor: '#FF3333' },
+              ]}
+            />
+            <Reanimated.View
+              style={[
+                {
+                  position: 'absolute',
+                  width: '100%',
+                  height: THUMB_SIZE,
+                  left: -THUMB_SIZE / 2,
+                  zIndex: 3,
+                },
+                thumbPositionStyle,
+              ]}>
+              <Reanimated.View
+                style={[styles.thumb, thumbStyle, isTvFocused && { backgroundColor: '#FF0000' }]}
+              />
+            </Reanimated.View>
+          </View>
+        </TVFocusGuideView>
       </GestureDetector>
     </View>
   );

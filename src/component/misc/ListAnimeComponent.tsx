@@ -4,7 +4,14 @@ import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import moment from 'moment';
 import { useMemo } from 'react';
-import { StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useTheme } from 'react-native-paper';
 
 import { NewAnimeList } from '@/types/anime';
@@ -155,7 +162,10 @@ function useStyles() {
   let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
   let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
   LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
-  LIST_BACKGROUND_WIDTH = Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH);
+  LIST_BACKGROUND_WIDTH = Math.min(
+    Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH),
+    Platform.isTV ? 150 : Infinity,
+  );
   return useMemo(
     () =>
       StyleSheet.create({

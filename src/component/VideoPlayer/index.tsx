@@ -24,7 +24,9 @@ import {
 import {
   AppState,
   GestureResponderEvent,
+  Platform,
   Pressable,
+  StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
@@ -49,6 +51,7 @@ import AniFlixRuntime from '@misc/AniFlixRuntime';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
 import deviceUserAgent from '@utils/deviceUserAgent';
 import SeekBar from './SeekBar';
+import { TVFocusGuideView } from 'react-native';
 
 type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
 export type PlayerRef = {
@@ -185,7 +188,7 @@ function VideoPlayer({
           onSubtitleLoadRef.current?.(subtitleText);
           const subtitle = await parseSubtitles(subtitleText ?? '');
           setSubtitles(subtitle);
-        } catch (error) {
+        } catch {
           setSubtitleError(true);
           ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
         }
@@ -368,7 +371,7 @@ function VideoPlayer({
     };
   });
 
-  const pipTimeout = useRef<NodeJS.Timeout>(null);
+  const pipTimeout = useRef<number>(null);
   const onPiPStop = useCallback(() => {
     pipTimeout.current = setTimeout(() => {
       if (AppState.currentState === 'active' && !paused) {
@@ -388,7 +391,6 @@ function VideoPlayer({
     };
   }, []);
 
-  // run gc on streamingURL change
   useEffect(() => {
     return () => {
       globalThis.gc?.();
@@ -410,6 +412,17 @@ function VideoPlayer({
       />
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
         {batteryAndClock}
+
+        {Platform.isTV && !showControls && (
+          <TVFocusGuideView style={StyleSheet.absoluteFill} autoFocus>
+            <Pressable
+              focusable={true}
+              hasTVPreferredFocus={true}
+              onPress={() => setShowControls(true)}
+              style={StyleSheet.absoluteFill}
+            />
+          </TVFocusGuideView>
+        )}
 
         <View
           style={{
@@ -506,8 +519,8 @@ function VideoPlayer({
             onFullScreenButtonPressed={onFullScreenButtonPressed}
             onProgressChange={e => {
               'worklet';
-              seekBarProgress.set(e);
               seekBarProgressDisabled.set(true);
+              seekBarProgress.set(e);
               currentDurationSecond.set(e * totalDurationSecond.get());
             }}
             onProgressChangeEnd={e => {
@@ -562,6 +575,9 @@ function Top({
   isSubtitleEnabled: boolean;
   onToggleSubtitle: () => void;
 }) {
+  const [focusPip, setFocusPip] = useState(false);
+  const [focusSub, setFocusSub] = useState(false);
+
   const requestPiP = useCallback(() => {
     videoRef?.current?.startPictureInPicture();
   }, [videoRef]);
@@ -578,31 +594,43 @@ function Top({
         alignItems: 'center',
       }}>
       <TouchableOpacity
-        style={{
-          display: isPiPEnabled ? 'flex' : 'none',
-          justifyContent: 'center',
-          marginLeft: 6,
-          backgroundColor: '#00000062',
-          padding: 5,
-          borderRadius: 5,
-        }}
-        /* //rngh - containerStyle */ onPress={requestPiP}
+        focusable={Platform.isTV}
+        onFocus={() => setFocusPip(true)}
+        onBlur={() => setFocusPip(false)}
+        style={[
+          {
+            display: isPiPEnabled ? 'flex' : 'none',
+            justifyContent: 'center',
+            marginLeft: 6,
+            backgroundColor: '#00000062',
+            padding: 5,
+            borderRadius: 5,
+          },
+          focusPip && { backgroundColor: '#16687c' },
+        ]}
+        onPress={requestPiP}
         hitSlop={2}>
         <Icons name={'picture-in-picture'} size={20} color={'white'} />
       </TouchableOpacity>
       {subtitleURL &&
         (subtitleError ? (
           <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              marginLeft: 6,
-              backgroundColor: '#00000062',
-              padding: 5,
-              borderRadius: 5,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 4,
-            }}
+            focusable={Platform.isTV}
+            onFocus={() => setFocusSub(true)}
+            onBlur={() => setFocusSub(false)}
+            style={[
+              {
+                justifyContent: 'center',
+                marginLeft: 6,
+                backgroundColor: '#00000062',
+                padding: 5,
+                borderRadius: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+              },
+              focusSub && { backgroundColor: '#16687c' },
+            ]}
             onPress={onRetrySubtitle}
             hitSlop={2}>
             <Icons name={'closed-caption-off'} size={18} color={'#ff6b6b'} />
@@ -612,13 +640,19 @@ function Top({
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              marginLeft: 6,
-              backgroundColor: '#00000062',
-              padding: 5,
-              borderRadius: 5,
-            }}
+            focusable={Platform.isTV}
+            onFocus={() => setFocusSub(true)}
+            onBlur={() => setFocusSub(false)}
+            style={[
+              {
+                justifyContent: 'center',
+                marginLeft: 6,
+                backgroundColor: '#00000062',
+                padding: 5,
+                borderRadius: 5,
+              },
+              focusSub && { backgroundColor: '#16687c' },
+            ]}
             onPress={onToggleSubtitle}
             hitSlop={2}>
             <Icons
@@ -666,6 +700,10 @@ function CenterControl({
   player: ExpoVideoPlayer;
   lastTimeError: SharedValue<number>;
 } & Pick<VideoPlayerProps, 'streamingURL' | 'headers' | 'onLoad' | 'isHls'>) {
+  const [focusRewind, setFocusRewind] = useState(false);
+  const [focusPlay, setFocusPlay] = useState(false);
+  const [focusForward, setFocusForward] = useState(false);
+
   return (
     <View
       pointerEvents="box-none"
@@ -679,8 +717,15 @@ function CenterControl({
         alignItems: 'center',
         gap: 30,
       }}>
-      {/* Im wrapping the TouchableOpacity in "View" with onStartShouldSetResponder because RNGH's Touchables still execute the parent "Pressable" pressIn/Out */}
-      <TouchableOpacity onPress={onRewind} style={{ borderRadius: 50 }}>
+      <TouchableOpacity
+        focusable={Platform.isTV}
+        onFocus={() => setFocusRewind(true)}
+        onBlur={() => setFocusRewind(false)}
+        onPress={onRewind}
+        style={[
+          { borderRadius: 50, padding: 4 },
+          focusRewind && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+        ]}>
         <Icons name="replay-5" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
       {isBuffering ? (
@@ -690,11 +735,23 @@ function CenterControl({
           size={ICON_SIZE - 10}
         />
       ) : !isError ? (
-        <TouchableOpacity onPress={onPlayPausePressed} style={{ borderRadius: 50 }}>
+        <TouchableOpacity
+          focusable={Platform.isTV}
+          hasTVPreferredFocus={Platform.isTV}
+          onFocus={() => setFocusPlay(true)}
+          onBlur={() => setFocusPlay(false)}
+          onPress={onPlayPausePressed}
+          style={[
+            { borderRadius: 50, padding: 4 },
+            focusPlay && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+          ]}>
           <Icons name={!paused ? 'pause' : 'play-arrow'} size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
+          focusable={Platform.isTV}
+          onFocus={() => setFocusPlay(true)}
+          onBlur={() => setFocusPlay(false)}
           onPress={async () => {
             await player.replaceAsync('');
             await player.replaceAsync({
@@ -709,11 +766,22 @@ function CenterControl({
             if (lastTime > 0) player.currentTime = lastTime;
             else onLoad?.();
           }}
-          style={{ borderRadius: 50 }}>
+          style={[
+            { borderRadius: 50, padding: 4 },
+            focusPlay && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+          ]}>
           <Icons name="refresh" size={ICON_SIZE} color={'white'} />
         </TouchableOpacity>
       )}
-      <TouchableOpacity onPress={onForward} style={{ borderRadius: 50 }}>
+      <TouchableOpacity
+        focusable={Platform.isTV}
+        onFocus={() => setFocusForward(true)}
+        onBlur={() => setFocusForward(false)}
+        onPress={onForward}
+        style={[
+          { borderRadius: 50, padding: 4 },
+          focusForward && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+        ]}>
         <Icons name="forward-10" size={ICON_SIZE} color={'white'} />
       </TouchableOpacity>
     </View>
@@ -741,6 +809,9 @@ function BottomControl({
   currentDurationSecond: SharedValue<number>;
   totalDurationSecond: SharedValue<number>;
 }) {
+  const [focusFit, setFocusFit] = useState(false);
+  const [focusFull, setFocusFull] = useState(false);
+
   const totalSecond = useDerivedValue(() => {
     'worklet';
     const sec = Math.floor(totalDurationSecond.get() % 60);
@@ -809,8 +880,14 @@ function BottomControl({
           </Reanimated.View>
           <View style={{ flexDirection: 'row', gap: 18 }}>
             <TouchableOpacity
-              style={{ justifyContent: 'center' }}
-              /* //rngh - containerStyle */ onPress={() => {
+              focusable={Platform.isTV}
+              onFocus={() => setFocusFit(true)}
+              onBlur={() => setFocusFit(false)}
+              style={[
+                { justifyContent: 'center', padding: 4, borderRadius: 4 },
+                focusFit && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+              ]}
+              onPress={() => {
                 setContentFitMode(val => {
                   const mode = VideoContentFitModeArr.at(
                     (VideoContentFitModeArr.indexOf(val) + 1) % 3,
@@ -822,8 +899,14 @@ function BottomControl({
               <Icons name={'fit-screen'} size={28} color={'white'} />
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ justifyContent: 'center' }}
-              /* //rngh - containerStyle */ onPress={onFullScreenButtonPressed}
+              focusable={Platform.isTV}
+              onFocus={() => setFocusFull(true)}
+              onBlur={() => setFocusFull(false)}
+              style={[
+                { justifyContent: 'center', padding: 4, borderRadius: 4 },
+                focusFull && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+              ]}
+              onPress={onFullScreenButtonPressed}
               hitSlop={2}>
               <Icons
                 name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
@@ -918,7 +1001,6 @@ export const parseSubtitles = async (raw: string) => {
 
 const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
   const uint8Array = new Uint8Array(buffer);
-  // UTF-8 BOM: EF BB BF
   if (
     uint8Array.length >= 3 &&
     uint8Array[0] === 0xef &&
@@ -927,7 +1009,6 @@ const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
   ) {
     return Buffer.from(buffer).toString('utf8');
   }
-  // UTF-16 LE BOM: FF FE
   if (uint8Array.length >= 2 && uint8Array[0] === 0xff && uint8Array[1] === 0xfe) {
     return Buffer.from(buffer).toString('utf16le');
   }
