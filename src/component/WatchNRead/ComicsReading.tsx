@@ -137,7 +137,8 @@ export default function ComicsReading(props: Props) {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
           Expires: '0',
-          ...(props.route.params.link.includes('softkomik')
+          ...(props.route.params.link.includes('softkomik') ||
+          props.route.params.link.includes('komiku')
             ? { Referer: new URL(props.route.params.link).href }
             : {}),
         },

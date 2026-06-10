@@ -893,7 +893,8 @@ app.get('/api/getComicsDownload/:id', async (req, res) => {
         returnStream: true,
         agent: (data.sourceLink ?? imgUrl).includes('softkomik') ? comicAgent : undefined,
         headers: {
-          ...((data.sourceLink ?? imgUrl).includes('softkomik')
+          ...((data.sourceLink ?? imgUrl).includes('softkomik') ||
+          (data.sourceLink ?? imgUrl).includes('komiku')
             ? { Referer: data.sourceLink ?? 'https://softkomik.co' }
             : {}),
         },
@@ -923,7 +924,7 @@ app.get('/api/getComicsDownload/:id', async (req, res) => {
 // 6. FRONTEND HTML
 // ==========================================
 app.get('/', (req, res) => {
-  const escapeHtml = (value) =>
+  const escapeHtml = value =>
     String(value)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
