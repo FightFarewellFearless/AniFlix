@@ -32,7 +32,7 @@
     "axios": "^1.11.0",
     "buffer": "^6.0.3",
     "cheerio": "1.0.0-rc.12",
-    "expo": "56.0.6",
+    "expo": "56.0.8",
     "expo-document-picker": "56.0.4",
     "expo-linear-gradient": "56.0.4",
     "expo-splash-screen": "56.0.10",
