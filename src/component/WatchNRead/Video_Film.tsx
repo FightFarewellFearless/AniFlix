@@ -611,7 +611,10 @@ function Video_Film(props: Props) {
           </View>
         )}
         <Pressable
-          style={[styles.container]}
+          style={({ focused }) => [
+            styles.container,
+            Platform.isTV ? { opacity: focused ? 0.4 : 1 } : undefined,
+          ]}
           onPressIn={onSynopsisPressIn}
           onPressOut={onSynopsisPressOut}
           // onLayout={onSynopsisLayout}

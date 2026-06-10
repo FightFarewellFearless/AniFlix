@@ -40,6 +40,8 @@ const ReText = (props: TextProps) => {
   return (
     <TextInput
       ref={textRef}
+      focusable={false}
+      accessible={false}
       underlineColorAndroid="transparent"
       editable={false}
       value={defaultValue}

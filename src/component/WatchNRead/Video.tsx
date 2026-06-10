@@ -754,7 +754,10 @@ function Video(props: Props) {
           </TouchableOpacity>
         )}
         <Pressable
-          style={[styles.container]}
+          style={({ focused }) => [
+            styles.container,
+            Platform.isTV ? { opacity: focused ? 0.4 : 1 } : undefined,
+          ]}
           onPressIn={onSynopsisPressIn}
           onPressOut={onSynopsisPressOut}
           // onLayout={onSynopsisLayout}
@@ -921,7 +924,7 @@ function Video(props: Props) {
           mode="contained"
           style={{ marginTop: 12, marginHorizontal: 10 }}
           onPress={downloadAnime}>
-          <Icon name="download" color={globalStyles.text.color} size={23} /> Download
+          <Icon name="download" color={theme.colors.background} size={23} /> Download
         </Button>
       </ScrollView>
     </View>

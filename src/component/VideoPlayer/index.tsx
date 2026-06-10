@@ -50,8 +50,10 @@ import ReText from '@component/misc/ReText';
 import AniFlixRuntime from '@misc/AniFlixRuntime';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
 import deviceUserAgent from '@utils/deviceUserAgent';
-import SeekBar from './SeekBar';
 import { TVFocusGuideView } from 'react-native';
+import SeekBar from './SeekBar';
+
+const ViewOrPressable = Platform.isTV ? View : Pressable;
 
 type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
 export type PlayerRef = {
@@ -398,7 +400,7 @@ function VideoPlayer({
   }, [streamingURL]);
 
   return (
-    <View style={[style]}>
+    <TVFocusGuideView focusable style={[style]}>
       <VideoView
         onPictureInPictureStop={onPiPStop}
         allowsPictureInPicture={true}
@@ -413,16 +415,20 @@ function VideoPlayer({
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
         {batteryAndClock}
 
-        {Platform.isTV && !showControls && (
+        {/* {Platform.isTV && (
           <TVFocusGuideView style={StyleSheet.absoluteFill} autoFocus>
             <Pressable
               focusable={true}
-              hasTVPreferredFocus={true}
-              onPress={() => setShowControls(true)}
-              style={StyleSheet.absoluteFill}
+              onPress={() => setShowControls(a => !a)}
+              style={({ focused }) => [
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor: focused ? '#00000078' : '#00000000',
+                },
+              ]}
             />
           </TVFocusGuideView>
-        )}
+        )} */}
 
         <View
           style={{
@@ -487,49 +493,51 @@ function VideoPlayer({
         <Reanimated.View
           pointerEvents="box-none"
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
-          <Top
-            title={title}
-            videoRef={videoRef}
-            subtitleURL={subtitleURL}
-            subtitleError={subtitleError}
-            onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
-            isSubtitleEnabled={isSubtitleEnabled}
-            onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
-          />
-          <CenterControl
-            isBuffering={isBuffering}
-            isError={isError}
-            onRewind={onRewind}
-            onForward={onForward}
-            onPlayPausePressed={onPlayPausePressed}
-            paused={paused}
-            player={player}
-            streamingURL={streamingURL}
-            headers={headers}
-            lastTimeError={currentDurationSecond}
-            onLoad={onLoad}
-            isHls={isHls}
-          />
-          <BottomControl
-            contentFitMode={contentFitMode}
-            setContentFitMode={setContentFitMode}
-            currentDurationSecond={currentDurationSecond}
-            totalDurationSecond={totalDurationSecond}
-            isFullscreen={isFullscreen}
-            onFullScreenButtonPressed={onFullScreenButtonPressed}
-            onProgressChange={e => {
-              'worklet';
-              seekBarProgressDisabled.set(true);
-              seekBarProgress.set(e);
-              currentDurationSecond.set(e * totalDurationSecond.get());
-            }}
-            onProgressChangeEnd={e => {
-              'worklet';
-              seekBarProgress.set(e);
-              runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
-            }}
-            seekBarProgress={seekBarProgress}
-          />
+          <TVFocusGuideView autoFocus trapFocusDown style={StyleSheet.absoluteFill}>
+            <Top
+              title={title}
+              videoRef={videoRef}
+              subtitleURL={subtitleURL}
+              subtitleError={subtitleError}
+              onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
+              isSubtitleEnabled={isSubtitleEnabled}
+              onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
+            />
+            <CenterControl
+              isBuffering={isBuffering}
+              isError={isError}
+              onRewind={onRewind}
+              onForward={onForward}
+              onPlayPausePressed={onPlayPausePressed}
+              paused={paused}
+              player={player}
+              streamingURL={streamingURL}
+              headers={headers}
+              lastTimeError={currentDurationSecond}
+              onLoad={onLoad}
+              isHls={isHls}
+            />
+            <BottomControl
+              contentFitMode={contentFitMode}
+              setContentFitMode={setContentFitMode}
+              currentDurationSecond={currentDurationSecond}
+              totalDurationSecond={totalDurationSecond}
+              isFullscreen={isFullscreen}
+              onFullScreenButtonPressed={onFullScreenButtonPressed}
+              onProgressChange={e => {
+                'worklet';
+                seekBarProgressDisabled.set(true);
+                seekBarProgress.set(e);
+                currentDurationSecond.set(e * totalDurationSecond.get());
+              }}
+              onProgressChangeEnd={e => {
+                'worklet';
+                seekBarProgress.set(e);
+                runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
+              }}
+              seekBarProgress={seekBarProgress}
+            />
+          </TVFocusGuideView>
         </Reanimated.View>
 
         <View
@@ -554,7 +562,7 @@ function VideoPlayer({
           </Text>
         </View>
       </Pressable>
-    </View>
+    </TVFocusGuideView>
   );
 }
 
@@ -852,7 +860,7 @@ function BottomControl({
   }, [contentFitMode, contentFitToastOpacity]);
 
   return (
-    <Pressable
+    <ViewOrPressable
       style={{
         position: 'absolute',
         bottom: 0,
@@ -861,71 +869,69 @@ function BottomControl({
         paddingHorizontal: 15,
         marginBottom: 2,
       }}>
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <ReText style={{ color: 'white', zIndex: 1, fontSize: 12 }} text={currentSecond} />
-            <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
-            <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
-          </View>
-          <Reanimated.View style={contentFitToastStyle}>
-            <Text
-              style={{
-                color: 'white',
-                backgroundColor: '#00000077',
-                fontSize: isFullscreen ? 16 : 12,
-              }}>
-              {contentFitMode.toUpperCase()}
-            </Text>
-          </Reanimated.View>
-          <View style={{ flexDirection: 'row', gap: 18 }}>
-            <TouchableOpacity
-              focusable={Platform.isTV}
-              onFocus={() => setFocusFit(true)}
-              onBlur={() => setFocusFit(false)}
-              style={[
-                { justifyContent: 'center', padding: 4, borderRadius: 4 },
-                focusFit && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
-              ]}
-              onPress={() => {
-                setContentFitMode(val => {
-                  const mode = VideoContentFitModeArr.at(
-                    (VideoContentFitModeArr.indexOf(val) + 1) % 3,
-                  );
-                  return mode!;
-                });
-              }}
-              hitSlop={2}>
-              <Icons name={'fit-screen'} size={28} color={'white'} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              focusable={Platform.isTV}
-              onFocus={() => setFocusFull(true)}
-              onBlur={() => setFocusFull(false)}
-              style={[
-                { justifyContent: 'center', padding: 4, borderRadius: 4 },
-                focusFull && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
-              ]}
-              onPress={onFullScreenButtonPressed}
-              hitSlop={2}>
-              <Icons
-                name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-                size={28}
-                color={'white'}
-              />
-            </TouchableOpacity>
-          </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 2 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <ReText style={{ color: 'white', zIndex: 1, fontSize: 12 }} text={currentSecond} />
+          <Text style={{ color: '#dadada', zIndex: 1, fontSize: 12 }}>/</Text>
+          <ReText style={{ color: '#dadada', zIndex: 1, fontSize: 12 }} text={totalSecond} />
         </View>
-        <View style={{ width: '100%' }}>
-          <SeekBar
-            progress={seekBarProgress}
-            style={{ flex: 1, zIndex: 0 }}
-            onProgressChange={onProgressChange}
-            onProgressChangeEnd={onProgressChangeEnd}
-          />
+        <Reanimated.View style={contentFitToastStyle}>
+          <Text
+            style={{
+              color: 'white',
+              backgroundColor: '#00000077',
+              fontSize: isFullscreen ? 16 : 12,
+            }}>
+            {contentFitMode.toUpperCase()}
+          </Text>
+        </Reanimated.View>
+        <View style={{ flexDirection: 'row', gap: 18 }}>
+          <TouchableOpacity
+            focusable={Platform.isTV}
+            onFocus={() => setFocusFit(true)}
+            onBlur={() => setFocusFit(false)}
+            style={[
+              { justifyContent: 'center', padding: 4, borderRadius: 4 },
+              focusFit && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+            ]}
+            onPress={() => {
+              setContentFitMode(val => {
+                const mode = VideoContentFitModeArr.at(
+                  (VideoContentFitModeArr.indexOf(val) + 1) % 3,
+                );
+                return mode!;
+              });
+            }}
+            hitSlop={2}>
+            <Icons name={'fit-screen'} size={28} color={'white'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            focusable={Platform.isTV}
+            onFocus={() => setFocusFull(true)}
+            onBlur={() => setFocusFull(false)}
+            style={[
+              { justifyContent: 'center', padding: 4, borderRadius: 4 },
+              focusFull && { backgroundColor: 'rgba(255, 255, 255, 0.25)' },
+            ]}
+            onPress={onFullScreenButtonPressed}
+            hitSlop={2}>
+            <Icons
+              name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
+              size={28}
+              color={'white'}
+            />
+          </TouchableOpacity>
         </View>
       </View>
-    </Pressable>
+      <View style={{ width: '100%' }}>
+        <SeekBar
+          progress={seekBarProgress}
+          style={{ flex: 1, zIndex: 0 }}
+          onProgressChange={onProgressChange}
+          onProgressChangeEnd={onProgressChangeEnd}
+        />
+      </View>
+    </ViewOrPressable>
   );
 }
 
