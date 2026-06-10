@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
@@ -66,10 +66,10 @@ function Setting(_props: Props) {
   const enableBatteryTimeInfo = useKeyValueIfFocused('enableBatteryTimeInfo');
 
   const appTheme = useKeyValueIfFocused('colorScheme');
-  const appThemeDropdown = useRef<IDropdownRef>(null);
+  const appThemeDropdown = useRef<PickerRef>(null);
 
   const audioMixingMode = useKeyValueIfFocused('audioMixingMode');
-  const AMMDropdown = useRef<IDropdownRef>(null);
+  const AMMDropdown = useRef<PickerRef>(null);
 
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const batteryTimeSwitchHandler = useCallback(() => {
@@ -266,87 +266,63 @@ function Setting(_props: Props) {
     );
   }, [modalText]);
 
-  const dropdownStyles = {
-    style: {
-      width: 140,
-      backgroundColor: theme.colors.elevation.level2,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 8,
-      borderWidth: 0,
-    },
-    containerStyle: {
-      borderRadius: 8,
-      backgroundColor: theme.colors.elevation.level2,
-      borderWidth: 0,
-    },
-    itemTextStyle: {
-      color: theme.colors.onSurface,
-      fontSize: 13,
-    },
-    itemContainerStyle: {
-      backgroundColor: theme.colors.elevation.level2,
-    },
-    selectedTextStyle: {
-      color: theme.colors.onSurface,
-      fontSize: 13,
-    },
-  };
-
   const settingsData: SettingsData[] = [
     {
       title: 'Tema aplikasi',
       description: 'Beralih ke tema gelap atau terang',
       iconName: 'paint-brush',
       rightComponent: (
-        <Dropdown
-          data={DROPDOWN_THEME_DATA}
-          onChange={data => {
-            if (data.value === 'light' || data.value === 'dark') {
-              Appearance.setColorScheme(data.value);
-            } else if (data.value === 'auto') {
-              Appearance.setColorScheme('unspecified');
-            }
-            DatabaseManager.set('colorScheme', data.value);
-          }}
-          ref={appThemeDropdown}
-          value={appTheme}
-          labelField={'label'}
-          valueField={'value'}
-          maxHeight={300}
-          activeColor={theme.colors.primaryContainer}
-          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
-          {...dropdownStyles}
-        />
+        <View
+          key={appTheme}
+          style={{
+            flex: 1,
+            width: 100,
+          }}>
+          <Picker
+            selectedValue={appTheme}
+            ref={appThemeDropdown}
+            onValueChange={data => {
+              if (data === 'light' || data === 'dark') {
+                Appearance.setColorScheme(data);
+              } else if (data === 'auto') {
+                Appearance.setColorScheme('unspecified');
+              }
+              DatabaseManager.set('colorScheme', data);
+            }}>
+            {DROPDOWN_THEME_DATA.map(a => {
+              return <Picker.Item key={a.label} label={a.label} value={a.value} />;
+            })}
+          </Picker>
+        </View>
       ),
       handler: () => {
-        appThemeDropdown.current?.open();
+        appThemeDropdown.current?.focus();
       },
     },
-    {
-      title: 'Mode mixing audio',
-      description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
-      iconName: 'music',
-      rightComponent: (
-        <Dropdown
-          data={DROPDOWN_AUDIOMIXING_DATA}
-          onChange={data => {
-            DatabaseManager.set('audioMixingMode', data.value);
-          }}
-          ref={AMMDropdown}
-          value={audioMixingMode}
-          labelField={'label'}
-          valueField={'value'}
-          maxHeight={300}
-          activeColor={theme.colors.primaryContainer}
-          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
-          {...dropdownStyles}
-        />
-      ),
-      handler: () => {
-        AMMDropdown.current?.open();
-      },
-    },
+    // {
+    //   title: 'Mode mixing audio',
+    //   description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
+    //   iconName: 'music',
+    //   rightComponent: (
+    //     <Dropdown
+    //       data={DROPDOWN_AUDIOMIXING_DATA}
+    //       onChange={data => {
+    //         DatabaseManager.set('audioMixingMode', data.value);
+    //       }}
+    //       ref={AMMDropdown}
+    //       value={audioMixingMode}
+    //       labelField={'label'}
+    //       valueField={'value'}
+    //       maxHeight={300}
+    //       activeColor={theme.colors.primaryContainer}
+    //       placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
+    //       {...dropdownStyles}
+    //     />
+    //   ),
+    //   handler: () => {
+    //     AMMDropdown.current?.open();
+    //   },
+    // },
     {
       title: 'Info baterai & waktu',
       description: 'Tampilkan persentase baterai dan jam saat mode layar penuh',
@@ -488,13 +464,13 @@ const DROPDOWN_THEME_DATA = [
   { label: 'Sistem', value: 'auto' },
   { label: 'Terang', value: 'light' },
   { label: 'Gelap', value: 'dark' },
-];
+] as const;
 
 const DROPDOWN_AUDIOMIXING_DATA: { label: string; value: AudioMixingMode }[] = [
   { label: 'Otomatis', value: 'auto' },
   { label: 'Mute Lain', value: 'doNotMix' },
   { label: 'Campur', value: 'mixWithOthers' },
   { label: 'Kecilkan Lain', value: 'duckOthers' },
-];
+] as const;
 
 export default memo(Setting);
