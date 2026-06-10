@@ -1,3 +1,8 @@
+# v1.3.0_JS-1 (10-Juni-2026)
+## Diperbaiki
+- Loading terus menerus pada gambar komik komiku
+## Ditingkatkan
+- Perbaikan dan peningkatan dukungan untuk TV (Masih perlu banyak penyesuaian)
 # v1.3.0 (03-Juni-2026)
 Halooo... Versi 1.3.0 kini hadir membawa peningkatan performa dan kestabilan aplikasi dan data movie & film, ditambah dengan beberapa improvisasi dan perbaikan masalah. Serta dukungan eksperimental untuk AndroidTV
 Ini adalah upgrade framework dari react-native v0.81 ke v0.85.
