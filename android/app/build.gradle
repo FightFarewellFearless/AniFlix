@@ -128,6 +128,11 @@ android {
 
     namespace "com.pirles.anime"
     defaultConfig {
+        externalNativeBuild {
+            cmake {
+                arguments "-DCMAKE_OBJECT_PATH_MAX=1024"
+            }
+        }
         applicationId "com.pirles.anime"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
