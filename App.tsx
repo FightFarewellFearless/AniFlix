@@ -320,6 +320,10 @@ function App() {
                                 setDialogVisible(false);
                               }}>
                               {button.text}
+                              {/* WORKAROUND FOR TEXT CLIPPING ON ANDROID 15+ */}
+                              {typeof Platform.Version === 'number' && Platform.Version >= 35
+                                ? ' '
+                                : ''}
                             </Button>
                           ))}
                         </Dialog.Actions>
