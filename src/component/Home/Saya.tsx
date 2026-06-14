@@ -17,8 +17,9 @@ function Saya() {
     <Drawer.Navigator
       screenOptions={{
         header: props => (
-          <Appbar.Header style={{ flexDirection: 'row-reverse' }}>
+          <Appbar.Header style={{ flexDirection: 'row-reverse' }} focusable={false}>
             <Appbar.Content
+              focusable={false}
               titleStyle={{ fontWeight: 'bold' }}
               title={
                 typeof props.options.headerTitle === 'string'

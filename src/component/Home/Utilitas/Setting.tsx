@@ -272,13 +272,13 @@ function Setting(_props: Props) {
       description: 'Beralih ke tema gelap atau terang',
       iconName: 'paint-brush',
       rightComponent: (
-        <View
-          key={appTheme}
-          style={{
-            flex: 1,
-            width: 100,
-          }}>
+        <View>
           <Picker
+            key={appTheme}
+            style={{
+              flex: 1,
+              minWidth: 100,
+            }}
             selectedValue={appTheme}
             ref={appThemeDropdown}
             onValueChange={data => {
@@ -299,30 +299,33 @@ function Setting(_props: Props) {
         appThemeDropdown.current?.focus();
       },
     },
-    // {
-    //   title: 'Mode mixing audio',
-    //   description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
-    //   iconName: 'music',
-    //   rightComponent: (
-    //     <Dropdown
-    //       data={DROPDOWN_AUDIOMIXING_DATA}
-    //       onChange={data => {
-    //         DatabaseManager.set('audioMixingMode', data.value);
-    //       }}
-    //       ref={AMMDropdown}
-    //       value={audioMixingMode}
-    //       labelField={'label'}
-    //       valueField={'value'}
-    //       maxHeight={300}
-    //       activeColor={theme.colors.primaryContainer}
-    //       placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
-    //       {...dropdownStyles}
-    //     />
-    //   ),
-    //   handler: () => {
-    //     AMMDropdown.current?.open();
-    //   },
-    // },
+    {
+      title: 'Mode mixing audio',
+      description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
+      iconName: 'music',
+      rightComponent: (
+        <View>
+          <Picker
+            key={audioMixingMode}
+            style={{
+              flex: 1,
+              minWidth: 100,
+            }}
+            selectedValue={audioMixingMode}
+            ref={AMMDropdown}
+            onValueChange={data => {
+              DatabaseManager.set('audioMixingMode', data);
+            }}>
+            {DROPDOWN_AUDIOMIXING_DATA.map(a => {
+              return <Picker.Item key={a.label} label={a.label} value={a.value} />;
+            })}
+          </Picker>
+        </View>
+      ),
+      handler: () => {
+        AMMDropdown.current?.focus();
+      },
+    },
     {
       title: 'Info baterai & waktu',
       description: 'Tampilkan persentase baterai dan jam saat mode layar penuh',
