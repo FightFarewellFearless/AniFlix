@@ -106,7 +106,6 @@ export function TimeInfo() {
 
 export function useVideoStyles() {
   const theme = useTheme();
-  const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
 
   return useMemo(
@@ -232,25 +231,6 @@ export function useVideoStyles() {
           marginBottom: 15,
         },
         episodeDataControlButton: { flex: 1, alignItems: 'center' },
-        dropdownStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-          padding: 10,
-          borderRadius: 8,
-          borderWidth: 0,
-        },
-        dropdownContainerStyle: {
-          width: 200,
-          borderRadius: 8,
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-          borderWidth: 0,
-          elevation: 5,
-        },
-        dropdownItemTextStyle: { color: globalStyles.text.color, fontSize: 14 },
-        dropdownItemContainerStyle: {
-          borderRadius: 6,
-          backgroundColor: colorScheme === 'dark' ? '#333333' : '#F5F5F5',
-        },
-        dropdownSelectedTextStyle: { color: globalStyles.text.color, fontSize: 14 },
         reloadPlayer: {
           backgroundColor: theme.colors.secondaryContainer,
           borderRadius: 8,
@@ -277,7 +257,7 @@ export function useVideoStyles() {
           lineHeight: 18,
         },
       }),
-    [colorScheme, globalStyles.text.color, theme],
+    [colorScheme, theme],
   );
 }
 
@@ -357,7 +337,7 @@ export function useBatteryAndClock(enableBatteryTimeInfo: string) {
 
   useFocusEffect(
     useCallback(() => {
-      let _batteryEvent: number | null;
+      let _batteryEvent: NodeJS.Timeout | null;
       if (enableBatteryTimeInfo === 'true') {
         const updateLevel = () => {
           const currentLevel = DeviceInfoModule.getBatteryLevel();

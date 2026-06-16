@@ -18,7 +18,6 @@
     "@bottom-tabs/react-navigation": "^1.2.0",
     "@expo/ui": "~56.0.16",
     "@legendapp/list": "2.0.19",
-    "@pirles/react-native-element-dropdown": "^2.15.0",
     "@preeternal/react-native-cookie-manager": "^6.3.2",
     "@react-native-vector-icons/entypo": "^12.4.2",
     "@react-native-vector-icons/fontawesome": "^12.4.2",
@@ -117,7 +116,6 @@
     }
   },
   "resolutions": {
-    "@pirles/react-native-element-dropdown@^2.15.0": "patch:@pirles/react-native-element-dropdown@npm%3A2.15.0#./.yarn/patches/@pirles-react-native-element-dropdown-npm-2.15.0-51dcb6fc77.patch",
     "react-native@npm:react-native-tvos@0.85.2-0": "patch:react-native@npm:react-native-tvos@0.85.2-0#./.yarn/patches/react-native-tvos-npm-0.85.2-0-dfd9a67b4f.patch",
     "expo@56.0.6": "patch:expo@npm%3A56.0.4#./.yarn/patches/expo-npm-56.0.4-9a53e4b90a.patch",
     "react-native-marked@^8.1.0": "patch:react-native-marked@npm%3A8.1.0#./.yarn/patches/react-native-marked-npm-8.1.0-775c67adf8.patch"

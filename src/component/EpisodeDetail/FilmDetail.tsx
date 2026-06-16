@@ -1,4 +1,5 @@
-import { Picker } from '@expo/ui/community/picker';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
@@ -6,12 +7,12 @@ import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/Recycle
 import { LinearGradient } from 'expo-linear-gradient';
 import tr from 'googletrans';
 import moment from 'moment';
-import { memo, startTransition, useCallback, useMemo, useState } from 'react';
+import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   View,
   useColorScheme,
   useWindowDimensions,
@@ -42,6 +43,7 @@ import {
 } from '@utils/scrapers/film';
 import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
 import controlWatchLater from '@utils/watchLaterControl';
+import { TVFocusGuideView } from 'react-native';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<FilmEpisode> & {
@@ -313,9 +315,24 @@ const FilmDetailHeader = memo(
     const globalStyles = useGlobalStyles();
     const theme = useTheme();
     const colorScheme = useColorScheme();
+    const seasonDropdown = useRef<PickerRef>(null);
+
+    // WORKAROUND FOR TRAPPED FOCUS ON TV
+    const firstRenderSelectedSeason = useRef(selectedSeason);
+    useEffect(() => {
+      if (!Platform.isTV) return;
+      setTimeout(() => {
+        setSelectedSeason(0);
+        seasonDropdown.current?.focus();
+        setTimeout(() => {
+          seasonDropdown.current?.blur();
+          setSelectedSeason(firstRenderSelectedSeason.current);
+        });
+      }, 100);
+    }, [setSelectedSeason]);
 
     return (
-      <View style={styles.mainContainer}>
+      <TVFocusGuideView autoFocus style={styles.mainContainer}>
         <ImageLoading
           style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
           source={{ uri: data.info.backgroundImage }}
@@ -507,27 +524,34 @@ const FilmDetailHeader = memo(
           {isEpisode(data) && (
             <View style={styles.seasonContainer}>
               <View style={styles.seasonHeader}>
-                <View style={styles.seasonIndicator} />
-                <Picker
-                  key={selectedSeason}
-                  selectedValue={selectedSeason}
-                  onValueChange={value => {
-                    getFilmSeasonDetails(link + '/season/' + value).then(a => {
-                      setSelectedSeason(value);
-                      startTransition(() => {
-                        setCurrentEpisodeList(a.episodes);
-                      });
-                    });
+                <TouchableOpacity
+                  onPress={() => {
+                    seasonDropdown.current?.focus();
                   }}>
-                  {seasons.map(a => (
-                    <Picker.Item key={a} label={`Season ${a}`} value={a} />
-                  ))}
-                </Picker>
+                  <View pointerEvents="none" focusable={false} accessible={false}>
+                    <Picker
+                      ref={seasonDropdown}
+                      key={selectedSeason}
+                      selectedValue={selectedSeason}
+                      onValueChange={value => {
+                        getFilmSeasonDetails(link + '/season/' + value).then(a => {
+                          setSelectedSeason(value);
+                          startTransition(() => {
+                            setCurrentEpisodeList(a.episodes);
+                          });
+                        });
+                      }}>
+                      {seasons.map(a => (
+                        <Picker.Item key={a} label={`Season ${a}`} value={a} />
+                      ))}
+                    </Picker>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
           )}
         </View>
-      </View>
+      </TVFocusGuideView>
     );
   },
 );
@@ -726,13 +750,6 @@ function useStyles() {
         },
         seasonHeader: {
           marginBottom: 12,
-        },
-        seasonIndicator: {
-          width: 4,
-          height: 20,
-          backgroundColor: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
-          borderRadius: 2,
-          marginRight: 10,
         },
         episodeListContainer: {
           margin: 5,
