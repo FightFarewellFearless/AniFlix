@@ -1,6 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  TVFocusGuideView,
+  View,
+  useTVEventHandler,
+  findNodeHandle,
+} from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { Appbar, ProgressBar, useTheme } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -14,6 +21,8 @@ import {
   commonComicsJS,
   getComicsBgColor,
   getComicsStyles,
+  getTvComicsStyles,
+  tvDpadScrollJS,
   useAutoScroll,
   useComicsFullscreen,
 } from './SharedComics';
@@ -92,7 +101,7 @@ export default function CbzReader(props: Props) {
       } else if (data.type === 'END_REACHED') {
         setIsAutoScrolling(false);
       }
-    } catch (e) {
+    } catch {
       if (event.nativeEvent.data === 'endReached') {
         setIsAutoScrolling(false);
       }
@@ -103,6 +112,7 @@ export default function CbzReader(props: Props) {
 
   const bgColor = getComicsBgColor(theme);
   const styles = getComicsStyles(theme);
+  const tvStyles = getTvComicsStyles();
 
   const body = comicImages
     .map((link, index) => {
@@ -121,7 +131,7 @@ export default function CbzReader(props: Props) {
     })
     .join('\n');
 
-  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body>${body}</body>`;
+  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}${tvStyles}</head><body>${body}</body>`;
 
   const injectedJavaScript = `
     ${commonComicsJS}
@@ -129,8 +139,95 @@ export default function CbzReader(props: Props) {
     allImages.forEach(img => {
       historyObserver.observe(img);
     });
+
+    ${tvDpadScrollJS}
   `;
 
+  // --- TV D-Pad Event Handler ---
+  const [tvWebViewFocused, setTvWebViewFocused] = useState(true);
+  const [webViewPressableNode, setWebViewPressableNode] = useState<number | null>(null);
+  const webViewPressableRef = useCallback((node: any) => {
+    if (node) {
+      setWebViewPressableNode(findNodeHandle(node));
+    }
+  }, []);
+
+  useTVEventHandler(
+    useCallback(
+      evt => {
+        if (!Platform.isTV) return;
+        if (!tvWebViewFocused) return;
+        if (evt && evt.eventKeyAction === 1) {
+          if (evt.eventType === 'up') {
+            webViewRef.current?.injectJavaScript(`window.tvScrollBy(-200); true;`);
+          } else if (evt.eventType === 'down') {
+            webViewRef.current?.injectJavaScript(`window.tvScrollBy(200); true;`);
+          }
+        }
+      },
+      [tvWebViewFocused],
+    ),
+  );
+
+  // TV sidebar layout
+  if (Platform.isTV) {
+    return (
+      <TVFocusGuideView autoFocus style={{ flex: 1, flexDirection: 'row' }}>
+        <FullscreenExitButton isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />
+
+        {/* WebView area */}
+        <Pressable
+          ref={webViewPressableRef}
+          nextFocusUp={webViewPressableNode || undefined}
+          nextFocusDown={webViewPressableNode || undefined}
+          style={{ flex: 1 }}
+          focusable={true}
+          hasTVPreferredFocus={isFullscreen}
+          onFocus={() => setTvWebViewFocused(true)}
+          onBlur={() => setTvWebViewFocused(false)}>
+          <WebView
+            ref={webViewRef}
+            style={{ flex: 1, backgroundColor: bgColor }}
+            overScrollMode="never"
+            cacheEnabled={false}
+            source={{ html }}
+            injectedJavaScript={injectedJavaScript}
+            onMessage={handleMessage}
+            showsVerticalScrollIndicator={false}
+            androidLayerType="hardware"
+            originWhitelist={['*']}
+            allowFileAccess={true}
+            allowUniversalAccessFromFileURLs={true}
+            allowFileAccessFromFileURLs={true}
+          />
+        </Pressable>
+
+        {/* TV Sidebar */}
+        <View style={{ justifyContent: 'center', display: isFullscreen ? 'none' : 'flex' }}>
+          <ComicsBottomBar
+            isAutoScrolling={isAutoScrolling}
+            toggleAutoScroll={toggleAutoScroll}
+            scrollSpeed={scrollSpeed}
+            changeSpeed={changeSpeed}
+            isFullscreen={isFullscreen}
+            tvSidebar={true}
+            toggleFullscreen={() => setIsFullscreen(f => !f)}
+          />
+
+          <ProgressBar
+            style={{
+              marginBottom: isFullscreen ? 4 : 0,
+              height: 4,
+              width: 180,
+            }}
+            progress={currentlyVisibleImageId / (comicImages.length - 1)}
+          />
+        </View>
+      </TVFocusGuideView>
+    );
+  }
+
+  // Mobile layout (unchanged)
   return (
     <View style={{ flex: 1 }}>
       <FullscreenExitButton isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />

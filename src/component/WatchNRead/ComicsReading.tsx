@@ -1,7 +1,15 @@
 import { useFocusEffect } from '@react-navigation/core';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Linking, View } from 'react-native';
+import {
+  Linking,
+  Platform,
+  Pressable,
+  TVFocusGuideView,
+  View,
+  findNodeHandle,
+  useTVEventHandler,
+} from 'react-native';
 import { Appbar, Button, Portal, ProgressBar, Snackbar, useTheme } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
@@ -16,6 +24,8 @@ import {
   commonComicsJS,
   getComicsBgColor,
   getComicsStyles,
+  getTvComicsStyles,
+  tvDpadScrollJS,
   useAutoScroll,
   useComicsFullscreen,
 } from './SharedComics';
@@ -195,6 +205,13 @@ export default function ComicsReading(props: Props) {
         fetchImageAndSendToWebView(data.id, data.url);
       } else if (data.type === 'END_REACHED') {
         setIsAutoScrolling(false);
+      } else if (data.type === 'CHAPTER_NAV' && Platform.isTV) {
+        // TV D-Pad left/right chapter navigation from WebView
+        if (data.direction === 'prev' && props.route.params.data.prevChapter) {
+          moveChapter(props.route.params.data.prevChapter);
+        } else if (data.direction === 'next' && props.route.params.data.nextChapter) {
+          moveChapter(props.route.params.data.nextChapter);
+        }
       }
     } catch {
       if (event.nativeEvent.data === 'endReached') {
@@ -239,6 +256,7 @@ export default function ComicsReading(props: Props) {
 
   const bgColor = getComicsBgColor(theme);
   const styles = getComicsStyles(theme);
+  const tvStyles = getTvComicsStyles();
 
   const body = comicImages
     .map((link, index) => {
@@ -254,7 +272,7 @@ export default function ComicsReading(props: Props) {
     })
     .join('\n');
 
-  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}</head><body>${body}</body>`;
+  const html = `<head><meta name="viewport" content="width=device-width, initial-scale=1.0" />${styles}${tvStyles}</head><body>${body}</body>`;
 
   const injectedJavaScript = `
     ${commonComicsJS}
@@ -381,8 +399,120 @@ export default function ComicsReading(props: Props) {
       historyObserver.observe(img);
       window.fetchObserver.observe(img);
     });
+
+    ${tvDpadScrollJS}
   `;
 
+  // --- TV D-Pad Event Handler ---
+  const [tvWebViewFocused, setTvWebViewFocused] = useState(true);
+  const [webViewPressableNode, setWebViewPressableNode] = useState<number | null>(null);
+  const webViewPressableRef = useCallback((node: any) => {
+    if (node) {
+      setWebViewPressableNode(findNodeHandle(node));
+    }
+  }, []);
+
+  useTVEventHandler(
+    useCallback(
+      evt => {
+        if (!Platform.isTV) return;
+        if (!tvWebViewFocused) return;
+        if (evt && evt.eventKeyAction === 1) {
+          if (evt.eventType === 'up') {
+            webViewRef.current?.injectJavaScript(`window.tvScrollBy(-200); true;`);
+          } else if (evt.eventType === 'down') {
+            webViewRef.current?.injectJavaScript(`window.tvScrollBy(200); true;`);
+          }
+        }
+      },
+      [tvWebViewFocused],
+    ),
+  );
+
+  // TV sidebar layout
+  if (Platform.isTV) {
+    return (
+      <TVFocusGuideView autoFocus style={{ flex: 1, flexDirection: 'row' }}>
+        <FullscreenExitButton isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />
+        <Portal>
+          <Snackbar
+            duration={Infinity}
+            onDismiss={() => setIsSnackBarOpen(false)}
+            visible={isSnackBarOpen}
+            action={{
+              label: 'Batal',
+              onPress: () => {
+                abortController.current?.abort();
+                abortController.current = new AbortController();
+              },
+            }}>
+            {snackBarText}
+          </Snackbar>
+        </Portal>
+
+        {/* WebView area — takes remaining space */}
+        <Pressable
+          ref={webViewPressableRef}
+          nextFocusUp={webViewPressableNode || undefined}
+          nextFocusDown={webViewPressableNode || undefined}
+          style={{ flex: 1 }}
+          focusable={true}
+          hasTVPreferredFocus={isFullscreen}
+          onFocus={() => setTvWebViewFocused(true)}
+          onBlur={() => setTvWebViewFocused(false)}>
+          <WebView
+            ref={webViewRef}
+            style={{ flex: 1, backgroundColor: bgColor }}
+            overScrollMode="never"
+            cacheEnabled={false}
+            source={{ html }}
+            injectedJavaScript={injectedJavaScript}
+            onMessage={handleMessage}
+            showsVerticalScrollIndicator={false}
+            androidLayerType="hardware"
+          />
+        </Pressable>
+
+        {/* TV Sidebar */}
+        <View style={{ justifyContent: 'center', display: isFullscreen ? 'none' : 'flex' }}>
+          <ComicsBottomBar
+            isAutoScrolling={isAutoScrolling}
+            toggleAutoScroll={toggleAutoScroll}
+            scrollSpeed={scrollSpeed}
+            changeSpeed={changeSpeed}
+            isFullscreen={isFullscreen}
+            tvSidebar={true}
+            toggleFullscreen={() => setIsFullscreen(f => !f)}>
+            {data.prevChapter && (
+              <TVChapterButton
+                label="Sebelumnya"
+                icon="arrow-left"
+                onPress={() => moveChapter(data.prevChapter!)}
+              />
+            )}
+            {data.nextChapter && (
+              <TVChapterButton
+                label="Selanjutnya"
+                icon="arrow-right"
+                onPress={() => moveChapter(data.nextChapter!)}
+              />
+            )}
+          </ComicsBottomBar>
+
+          <ProgressBar
+            style={{
+              marginBottom: isFullscreen ? 4 : 0,
+              height: 4,
+              width: 180,
+            }}
+            progress={currentlyVisibleImageId / (comicImages.length - 1)}
+          />
+        </View>
+      </TVFocusGuideView>
+    );
+  }
+
+  // Mobile layout (unchanged)
   return (
     <View style={{ flex: 1 }}>
       <FullscreenExitButton isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />
@@ -451,5 +581,43 @@ export default function ComicsReading(props: Props) {
         />
       </View>
     </View>
+  );
+}
+
+// TV-only chapter nav button with focus highlight
+function TVChapterButton({
+  label,
+  icon,
+  onPress,
+}: {
+  label: string;
+  icon: string;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const [focused, setFocused] = useState(false);
+  return (
+    <Pressable
+      focusable={true}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 8,
+        width: '100%',
+        backgroundColor: focused ? theme.colors.primaryContainer : 'transparent',
+        borderWidth: focused ? 2 : 0,
+        borderColor: focused ? theme.colors.primary : 'transparent',
+      }}>
+      <Button icon={icon} compact>
+        {label}
+      </Button>
+    </Pressable>
   );
 }

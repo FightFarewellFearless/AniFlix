@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/core';
 import React, { useCallback, useState } from 'react';
-import { AppState, View } from 'react-native';
+import { AppState, Platform, Pressable, View } from 'react-native';
 import { SystemBars } from 'react-native-edge-to-edge';
 import { Button, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
@@ -101,6 +101,8 @@ export function ComicsBottomBar({
   changeSpeed,
   isFullscreen,
   children,
+  tvSidebar,
+  toggleFullscreen,
 }: {
   isAutoScrolling: boolean;
   toggleAutoScroll: () => void;
@@ -108,8 +110,62 @@ export function ComicsBottomBar({
   changeSpeed: (delta: number) => void;
   isFullscreen: boolean;
   children?: React.ReactNode;
+  tvSidebar?: boolean;
+  toggleFullscreen?: () => void;
 }) {
   const theme = useTheme();
+
+  // TV Sidebar mode: vertical layout for TV
+  if (tvSidebar && Platform.isTV) {
+    return (
+      <View
+        style={{
+          backgroundColor: theme.colors.elevation.level1,
+          paddingVertical: 12,
+          paddingHorizontal: 8,
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 8,
+          width: 180,
+          display: isFullscreen ? 'none' : 'flex',
+        }}>
+        <TVSidebarButton
+          label={isAutoScrolling ? 'Stop' : 'Auto Scroll'}
+          icon={isAutoScrolling ? 'pause' : 'play'}
+          onPress={toggleAutoScroll}
+          isActive={isAutoScrolling}
+          theme={theme}
+        />
+        {toggleFullscreen && (
+          <TVSidebarButton
+            label="Layar Penuh"
+            icon="fullscreen"
+            onPress={toggleFullscreen}
+            theme={theme}
+          />
+        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          <IconButton
+            icon="minus"
+            size={20}
+            onPress={() => changeSpeed(-0.2)}
+            disabled={scrollSpeed <= 0.2}
+          />
+          <Text variant="labelLarge" style={{ marginHorizontal: 4 }}>
+            {scrollSpeed.toFixed(1)}x
+          </Text>
+          <IconButton
+            icon="plus"
+            size={20}
+            onPress={() => changeSpeed(0.2)}
+            disabled={scrollSpeed >= 10}
+          />
+        </View>
+        {children}
+      </View>
+    );
+  }
+
   return (
     <View
       style={{
@@ -157,6 +213,7 @@ export function FullscreenExitButton({
   setIsFullscreen: (v: boolean) => void;
 }) {
   const theme = useTheme();
+  if (Platform.isTV) return null;
   return (
     <View
       style={{
@@ -205,6 +262,100 @@ export function getComicsStyles(theme: MD3Theme) {
       .img-wrapper.is-error img { display: none; }
     </style>
   `;
+}
+
+// TV-specific CSS: wider prefetch buffer, larger tap targets
+export function getTvComicsStyles() {
+  if (!Platform.isTV) return '';
+  return `
+    <style>
+      body { overflow-y: auto; }
+      .img-wrapper {
+        max-width: 60vw;
+        min-height: 84vw;
+        margin: 0 auto;
+        contain-intrinsic-size: 60vw 84vw;
+      }
+    </style>
+  `;
+}
+
+// JS injected into WebView on TV for D-Pad support
+export const tvDpadScrollJS = Platform.isTV
+  ? `
+    // TV D-Pad handler
+    (function() {
+      // Scroll function called from RN via injectJavaScript
+      window.tvScrollBy = function(amount) {
+        window.scrollBy({ top: amount, behavior: 'smooth' });
+      };
+
+      // Only handle Left/Right for chapter navigation (Up/Down handled by RN layer)
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || e.keyCode === 40 || e.key === 'ArrowUp' || e.keyCode === 38) {
+          e.preventDefault(); // Prevent default scroll, RN layer handles this
+        } else if (e.key === 'ArrowLeft' || e.keyCode === 37) {
+          e.preventDefault();
+          sendToRN({ type: 'CHAPTER_NAV', direction: 'prev' });
+        } else if (e.key === 'ArrowRight' || e.keyCode === 39) {
+          e.preventDefault();
+          sendToRN({ type: 'CHAPTER_NAV', direction: 'next' });
+        }
+      });
+    })();
+  `
+  : '';
+
+function TVSidebarButton({
+  label,
+  icon,
+  onPress,
+  isActive,
+  theme,
+  hasTVPreferredFocus,
+}: {
+  label: string;
+  icon: string;
+  onPress: () => void;
+  isActive?: boolean;
+  theme: MD3Theme;
+  hasTVPreferredFocus?: boolean;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <Pressable
+      focusable={true}
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 8,
+        width: '100%',
+        backgroundColor: focused
+          ? theme.colors.primaryContainer
+          : isActive
+            ? theme.colors.secondaryContainer
+            : 'transparent',
+        borderWidth: focused ? 2 : 0,
+        borderColor: focused ? theme.colors.primary : 'transparent',
+      }}>
+      <IconButton icon={icon} size={20} style={{ margin: 0 }} />
+      <Text
+        variant="labelMedium"
+        style={{
+          color: focused ? theme.colors.onPrimaryContainer : theme.colors.onSurface,
+        }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
 }
 
 export const commonComicsJS = `
