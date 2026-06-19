@@ -363,7 +363,7 @@ function VideoPlayer({
     if (activityTimerRef.current) {
       clearTimeout(activityTimerRef.current);
     }
-    if (!paused) {
+    if (!paused && !isBuffering) {
       activityTimerRef.current = setTimeout(() => {
         if (!seekBarProgressDisabled.get()) {
           setShowControls(false);
@@ -372,7 +372,7 @@ function VideoPlayer({
         }
       }, 3000);
     }
-  }, [paused, seekBarProgressDisabled]);
+  }, [paused, isBuffering, seekBarProgressDisabled]);
 
   useEffect(() => {
     if (showControls && !paused) {
