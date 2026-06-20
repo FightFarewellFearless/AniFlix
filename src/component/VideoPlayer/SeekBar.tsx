@@ -14,6 +14,7 @@ import Reanimated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -35,9 +36,10 @@ type SeekBarProps = {
   >;
 };
 
-const THUMB_SIZE = 14;
-const TRACK_HEIGHT = 4;
-const TOUCH_AREA_HEIGHT = 40;
+const THUMB_SIZE = 10;
+const TRACK_HEIGHT = 1.1;
+const TRACK_HEIGHT_SCRUBBING = 4;
+const TOUCH_AREA_HEIGHT = 20;
 
 function clampNumber(num: number, a: number, b: number) {
   'worklet';
@@ -85,26 +87,27 @@ export default function SeekBar({
     ),
   );
 
+  const newProgressTranslation = useSharedValue(0);
+  const lastProgress = useSharedValue(0);
   const gesture = usePanGesture({
-    onBegin: e => {
+    onBegin: () => {
       'worklet';
       isScrubbing.value = true;
-      const width = parentWidth.get();
-      const newProgress = clampNumber(e.x / width, 0, 1);
-      onProgressChange(newProgress);
+      lastProgress.value = progress.get();
+      newProgressTranslation.value = lastProgress.value;
     },
     onUpdate: e => {
       'worklet';
       const width = parentWidth.get();
-      const newProgress = clampNumber(e.x / width, 0, 1);
+      const newProgress = clampNumber(lastProgress.value + e.translationX / width, 0, 1);
+      newProgressTranslation.value = newProgress;
       onProgressChange(newProgress);
     },
-    onFinalize: e => {
+    onFinalize: () => {
       'worklet';
       isScrubbing.value = false;
-      const width = parentWidth.get();
-      const newProgress = clampNumber(e.x / width, 0, 1);
-      onProgressChangeEnd(newProgress);
+      if (newProgressTranslation.value !== lastProgress.value)
+        onProgressChangeEnd(newProgressTranslation.value);
     },
   });
 
@@ -115,6 +118,18 @@ export default function SeekBar({
   const thumbStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: thumbScale.value }],
+    };
+  });
+  const trackFillStyle = useAnimatedStyle(() => {
+    return {
+      height: withSpring(
+        isScrubbing.value || isTvFocusedShared.value ? TRACK_HEIGHT_SCRUBBING : TRACK_HEIGHT,
+      ),
+      borderRadius: withSpring(
+        isScrubbing.value || isTvFocusedShared.value
+          ? TRACK_HEIGHT_SCRUBBING / 2
+          : TRACK_HEIGHT / 2,
+      ),
     };
   });
   const thumbPositionStyle = useAnimatedStyle(() => {
@@ -154,12 +169,13 @@ export default function SeekBar({
           onFocus={() => setIsTvFocused(true)}
           onBlur={() => setIsTvFocused(false)}>
           <View style={styles.touchableArea} focusable accessible>
-            <View style={styles.trackBackground} />
+            <Reanimated.View style={[styles.trackBackground, trackFillStyle]} />
 
             <Reanimated.View
               style={[
                 styles.trackFill,
                 coveredAreaStyles,
+                trackFillStyle,
                 isTvFocused && { backgroundColor: '#FF3333' },
               ]}
             />
