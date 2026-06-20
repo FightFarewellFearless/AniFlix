@@ -117,7 +117,7 @@
     }
   },
   "resolutions": {
-    "react-native@npm:react-native-tvos@0.85.2-0": "patch:react-native@npm:react-native-tvos@0.85.2-0#./.yarn/patches/react-native-tvos-npm-0.85.2-0-dfd9a67b4f.patch",
+    "react-native@npm:react-native-tvos@0.85.2-0": "patch:react-native@patch%3Areact-native-tvos@npm%253A0.85.2-0%23./.yarn/patches/react-native-tvos-npm-0.85.2-0-dfd9a67b4f.patch%3A%3Aversion=0.85.2-0&hash=2ebbe6&locator=aniflix%2540workspace%253A.#./.yarn/patches/react-native-patch-2c6cb6b5cd.patch",
     "expo@56.0.6": "patch:expo@npm%3A56.0.4#./.yarn/patches/expo-npm-56.0.4-9a53e4b90a.patch",
     "react-native-marked@^8.1.0": "patch:react-native-marked@npm%3A8.1.0#./.yarn/patches/react-native-marked-npm-8.1.0-775c67adf8.patch"
   }
