@@ -21,7 +21,7 @@ import Reanimated, {
 type SeekBarProps = {
   progress: SharedValue<number>;
   onProgressChange: (value: number) => void;
-  onProgressChangeEnd: (lastValue: number) => void;
+  onProgressChangeEnd: (lastValue: number, shouldChangeDuration: boolean) => void;
   style?: Omit<
     ViewStyle,
     | 'margin'
@@ -75,11 +75,11 @@ export default function SeekBar({
           if (evt.eventType === 'left') {
             const nextProg = Math.max(0, currentProg - 0.02);
             onProgressChange(nextProg);
-            onProgressChangeEnd(nextProg);
+            onProgressChangeEnd(nextProg, true);
           } else if (evt.eventType === 'right') {
             const nextProg = Math.min(1, currentProg + 0.02);
             onProgressChange(nextProg);
-            onProgressChangeEnd(nextProg);
+            onProgressChangeEnd(nextProg, true);
           }
         }
       },
@@ -106,8 +106,10 @@ export default function SeekBar({
     onFinalize: () => {
       'worklet';
       isScrubbing.value = false;
-      if (newProgressTranslation.value !== lastProgress.value)
-        onProgressChangeEnd(newProgressTranslation.value);
+      onProgressChangeEnd(
+        newProgressTranslation.value,
+        newProgressTranslation.value !== lastProgress.value,
+      );
     },
   });
 

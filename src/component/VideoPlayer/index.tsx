@@ -309,9 +309,6 @@ function VideoPlayer({
 
   const setPositionAsync = (duration: number) => {
     player.currentTime = duration;
-    queueMicrotask(() => {
-      seekBarProgressDisabled.set(false);
-    });
   };
   const onPressIn = useCallback((e: GestureResponderEvent) => {
     pressableShowControlsLocation.current = {
@@ -630,10 +627,15 @@ function VideoPlayer({
                 seekBarProgress.set(e);
                 currentDurationSecond.set(e * totalDurationSecond.get());
               }}
-              onProgressChangeEnd={e => {
+              onProgressChangeEnd={(e, shouldChangeDuration) => {
                 'worklet';
                 seekBarProgress.set(e);
-                runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
+                queueMicrotask(() => {
+                  seekBarProgressDisabled.set(false);
+                });
+                if (shouldChangeDuration) {
+                  runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
+                }
               }}
               seekBarProgress={seekBarProgress}
             />
@@ -921,7 +923,7 @@ function BottomControl({
   setContentFitMode: React.Dispatch<React.SetStateAction<VideoContentFit>>;
   seekBarProgress: SharedValue<number>;
   onProgressChange: (value: number) => void;
-  onProgressChangeEnd: (lastValue: number) => void;
+  onProgressChangeEnd: (lastValue: number, shouldChangeDuration: boolean) => void;
   onFullScreenButtonPressed: () => void;
   isFullscreen: boolean;
   currentDurationSecond: SharedValue<number>;
