@@ -874,8 +874,9 @@ function Video(props: Props) {
               <Picker
                 ref={dropdownResolutionRef}
                 key={data.resolution}
-                selectedValue={data.resolution}
+                selectedValue={data.resolution ?? 'Pilih Resolusi'}
                 onValueChange={val => {
+                  if (val === 'Pilih Resolusi') return;
                   const selected = resolutionDropdownData.find(e => e.value.resolution === val);
                   if (selected) {
                     setResolution(selected.value.dataContent, selected.label);
@@ -888,6 +889,9 @@ function Video(props: Props) {
                     value={res.value.resolution}
                   />
                 ))}
+                {data.resolution === undefined && (
+                  <Picker.Item label="Pilih Resolusi" value="Pilih Resolusi" />
+                )}
               </Picker>
             </View>
           </TouchableOpacity>
