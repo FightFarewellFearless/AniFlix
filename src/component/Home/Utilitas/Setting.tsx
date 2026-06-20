@@ -23,12 +23,12 @@ import {
   Portal,
   Surface,
   Switch,
-  TouchableRipple,
   useTheme,
 } from 'react-native-paper';
 import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
 
+import { TouchableOpacity } from '@/component/misc/TouchableOpacityRNGH';
 import { HistoryItemKey } from '@/types/databaseTarget';
 import { HistoryJSON } from '@/types/historyJSON';
 import { UtilsStackNavigator } from '@/types/navigation';
@@ -282,6 +282,7 @@ function Setting(_props: Props) {
             selectedValue={appTheme}
             ref={appThemeDropdown}
             onValueChange={data => {
+              if (data === null) return;
               if (data === 'light' || data === 'dark') {
                 Appearance.setColorScheme(data);
               } else if (data === 'auto') {
@@ -314,6 +315,7 @@ function Setting(_props: Props) {
             selectedValue={audioMixingMode}
             ref={AMMDropdown}
             onValueChange={data => {
+              if (data === null) return;
               DatabaseManager.set('audioMixingMode', data);
             }}>
             {DROPDOWN_AUDIOMIXING_DATA.map(a => {
@@ -416,10 +418,7 @@ function Setting(_props: Props) {
             key={item.title}
             elevation={0}
             style={{ backgroundColor: theme.colors.background }}>
-            <TouchableRipple
-              onPress={item.handler}
-              rippleColor={theme.colors.primaryContainer}
-              background={{ color: theme.colors.primaryContainer, foreground: true }}>
+            <TouchableOpacity onPress={item.handler}>
               <View>
                 <List.Item
                   title={item.title}
@@ -454,7 +453,7 @@ function Setting(_props: Props) {
                 />
                 {index < settingsData.length - 1 && <Divider style={{ marginLeft: 56 }} />}
               </View>
-            </TouchableRipple>
+            </TouchableOpacity>
           </Surface>
         ))}
         <View style={{ height: 40 }} />
