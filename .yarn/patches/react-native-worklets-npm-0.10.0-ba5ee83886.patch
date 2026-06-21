@@ -1,0 +1,16 @@
+diff --git a/bundleMode/index.js b/bundleMode/index.js
+index 2544b3c139c329b436bc0c909606c56ddf4be1e7..6c419c9e061c270a09d3b87a5d382d89dc0de2a8 100644
+--- a/bundleMode/index.js
++++ b/bundleMode/index.js
+@@ -151,7 +151,10 @@ function getBundleModeMetroConfig(/** @type {any} */ config) {
+ function bundleModeCreateModuleIdFactory() {
+   let nextId = 0;
+   const idFileMap = new Map();
+-  return (/** @type {string} */ moduleName) => {
++  return (/** @type {string} */ moduleNameRaw) => {
++    // moduleName is a resolved file path, so normalize Windows separators to
++    // match the posix entry/dir paths built above.
++    const moduleName = moduleNameRaw.replace(/\\/g, '/');
+     if (idFileMap.has(moduleName)) {
+       return idFileMap.get(moduleName);
+     }
