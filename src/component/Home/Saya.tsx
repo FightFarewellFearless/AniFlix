@@ -7,6 +7,7 @@ import useGlobalStyles from '@assets/style';
 import { SayaDrawerNavigator } from '@/types/navigation';
 import History from './Saya/History';
 import WatchLater from './Saya/WatchLater';
+import { Platform } from 'react-native';
 
 const Drawer = createDrawerNavigator<SayaDrawerNavigator>();
 
@@ -27,13 +28,15 @@ function Saya() {
                   : (props.options.title ?? '')
               }
             />
-            <Appbar.Action icon="view-headline" onPress={() => props.navigation.openDrawer()} />
+            {!Platform.isTV && (
+              <Appbar.Action icon="view-headline" onPress={() => props.navigation.openDrawer()} />
+            )}
           </Appbar.Header>
         ),
         headerTintColor: globalStyles.text.color,
-        drawerType: 'front',
+        drawerType: Platform.isTV ? 'permanent' : 'front',
         drawerStyle: {
-          width: '65%',
+          width: Platform.isTV ? '25%' : '65%',
         },
         drawerContentStyle: {
           backgroundColor: theme.colors.background,
