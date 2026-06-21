@@ -1,6 +1,7 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const { mergeConfig } = require('@react-native/metro-config');
 const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro-config');
+const { getBundleModeMetroConfig } = require('react-native-worklets/bundleMode');
 
 const defaultConfig = getDefaultConfig(__dirname);
 /**
@@ -24,4 +25,6 @@ const config = {
   },
 };
 
-module.exports = wrapWithReanimatedMetroConfig(mergeConfig(defaultConfig, config));
+module.exports = getBundleModeMetroConfig(
+  wrapWithReanimatedMetroConfig(mergeConfig(defaultConfig, config)),
+);
