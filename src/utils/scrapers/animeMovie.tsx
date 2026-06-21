@@ -508,7 +508,7 @@ export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMo
   }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
   // if (!useIsFocused()) return null;
   return (
-    <View style={{ height: 0, display: 'none' }}>
+    <View style={{ height: 500, display: 'none' }}>
       {isWebViewShown && (
         <WebView
           ref={webviewRef}
