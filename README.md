@@ -7,7 +7,7 @@
 <h1 align="center">AniFlix</h1>
 
 <p align="center">
-  <i>All-in-one!</i> Satu Aplikasi untuk nonton anime dan baca komik.
+  <i>All-in-one!</i> Satu Aplikasi untuk nonton anime dan baca komik. Mendukung Android TV!
   <br />
   <strong><i>Written in TypeScript, built with React Native</i></strong> ❤️
 </p>
@@ -59,7 +59,7 @@ Dapatkan versi terbaru dari AniFlix dengan mudah:
 3.  Klik pada bagian **Assets** untuk melihat file.
 4.  Unduh file `aniflix.apk` dan instal di perangkat Android Anda.
 
-* **Minimum OS**: Android 7.0 (Nougat) atau yang lebih baru.
+* **Minimum OS**: Android 7.0 (Nougat) atau yang lebih baru. Mendukung Android TV!
 
 ---
 
