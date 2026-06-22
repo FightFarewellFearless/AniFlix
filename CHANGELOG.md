@@ -1,3 +1,14 @@
+# v1.4.0 (22-Juni-2026)
+Versi ini dirilis sebagai peningkatan kestabilan dari versi sebelumnya, termasuk dukungan lebih baik untuk AndroidTV, dan optimasi penggunaan memory (RAM).
+## Ditingkatkan
+- Dukungan yang lebih baik untuk AndroidTV (masih belum 100% sempurna namun untuk streaming, dan baca komik sudah cukup nyaman)
+- Optimasi penggunaan RAM, dari 400-600MB menjadi hanya 290-450MB (Bisa sedikit lebih tinggi tergantung versi android)
+## Perubahan lain
+- Seekbar yang ditingkatkan di video player
+  > Sekarang perlu menggeser seekbar untuk berpindah durasi, bukan hanya di pencet. Ini mencegah seekbar tidak sengaja tertekan.
+- Video control otomatis disembunyikan setelah 3 detik tanpa interaksi
+- Menggunakan native dropdown
+
 # v1.3.0_JS-1 (10-Juni-2026)
 ## Diperbaiki
 - Loading terus menerus pada gambar komik komiku
