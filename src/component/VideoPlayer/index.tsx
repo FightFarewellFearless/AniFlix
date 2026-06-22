@@ -422,7 +422,7 @@ function VideoPlayer({
 
   useBackHandler(
     useCallback(() => {
-      if (showControls) {
+      if (showControls && Platform.isTV) {
         setShowControls(false);
         return true;
       }
