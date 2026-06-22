@@ -1,9 +1,22 @@
 const ReactCompilerConfig = {
   target: '19', // '17' | '18' | '19'
 };
+/** @type {import('react-native-worklets/plugin').PluginOptions} */
+const workletsPluginOptions = {
+  bundleMode: true,
+  strictGlobal: true, // optional, but recommended
+};
 
 module.exports = {
-  presets: [['babel-preset-expo']],
+  presets: [
+    [
+      'babel-preset-expo',
+      {
+        reanimated: false,
+        worklets: false,
+      },
+    ],
+  ],
   // presets: ['@react-native/babel-preset'],
   env: {
     production: {
@@ -50,6 +63,6 @@ module.exports = {
         extensions: ['.md', '.txt'],
       },
     ],
-    // 'react-native-worklets/plugin',
+    ['react-native-worklets/plugin', workletsPluginOptions],
   ],
 };

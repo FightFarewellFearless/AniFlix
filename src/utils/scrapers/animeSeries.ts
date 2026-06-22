@@ -272,6 +272,7 @@ const fromUrl = async (
     const isValidResolution = (el: Element) =>
       $(el).text().trim().startsWith('o') ||
       $(el).text().trim().includes('desu') ||
+      $(el).text().trim().includes('moe') ||
       $(el).text().trim().includes('pdrain') ||
       $(el).text().trim().includes('filedon');
     const mirrorStream = aniDetail.find('div.mirrorstream ul');

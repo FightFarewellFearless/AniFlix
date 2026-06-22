@@ -183,17 +183,19 @@ function NeedUpdate(props: Props) {
             {props.route.params.nativeUpdate ? props.route.params.latestVersion : 'OTA Update'}
           </Text>
         </View>
-        <Markdown
-          flatListProps={{
-            style: { backgroundColor: styles.updateInfo.backgroundColor },
-            scrollEnabled: !Platform.isTV,
-            accessible: false,
-            focusable: false,
-            isTVSelectable: false,
-            scrollsChildToFocus: false,
-          }}
-          value={props.route.params.changelog}
-        />
+        <View style={{ flex: 1 }}>
+          <Markdown
+            flatListProps={{
+              style: { backgroundColor: styles.updateInfo.backgroundColor },
+              scrollEnabled: !Platform.isTV,
+              accessible: false,
+              focusable: false,
+              isTVSelectable: false,
+              scrollsChildToFocus: false,
+            }}
+            value={props.route.params.changelog}
+          />
+        </View>
         {!isDownloadStart ? (
           <TouchableOpacity style={styles.download} onPress={downloadUpdate}>
             <Icon

@@ -1,4 +1,3 @@
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { VideoView } from 'expo-video';
@@ -36,6 +35,7 @@ import { useFilmTokenRotate } from '@/hooks/useFilmTokenRotate';
 import { RootStackNavigator } from '@/types/navigation';
 import Skeleton from '@component/misc/Skeleton';
 import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import { useBackHandler } from '@hooks/useBackHandler';
 import { useFocusEffect } from '@react-navigation/core';
 import { useKeyValueIfFocused } from '@utils/DatabaseManager';
@@ -46,8 +46,10 @@ import {
   middleServerCallback,
   STREAMING_MIDDLE_SERVER_PORT,
 } from '@utils/scrapers/film';
+import { TVFocusGuideView } from 'react-native';
 import { createServer, Server } from 'react-native-nitro-http-server';
 import { ActivityIndicator, Button } from 'react-native-paper';
+import LoadingIndicator from '../misc/LoadingIndicator';
 import {
   LoadingModal,
   TimeInfo,
@@ -56,8 +58,6 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
-import LoadingIndicator from '../misc/LoadingIndicator';
-import { TVFocusGuideView } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video_Film'>;
 
@@ -78,8 +78,8 @@ function Video_Film(props: Props) {
   currentData.current = data;
 
   const [currentResolution, setCurrentResolution] = useState('Auto');
-  const dropdownResolutionRef = useRef<IDropdownRef>(null);
-  const dropdownServerModeRef = useRef<IDropdownRef>(null);
+  const dropdownResolutionRef = useRef<PickerRef>(null);
+  const dropdownServerModeRef = useRef<PickerRef>(null);
 
   const { activeTokenRef, checkAndRotateToken } = useFilmTokenRotate(data);
   const checkAndRotateTokenRef = useRef(checkAndRotateToken);
@@ -196,8 +196,8 @@ function Video_Film(props: Props) {
 
   const { fullscreen, enterFullscreen, exitFullscreen, orientationDidChange, willUnmountHandler } =
     useFullscreenControl(() => {
-      dropdownResolutionRef.current?.close();
-      dropdownServerModeRef.current?.close();
+      dropdownResolutionRef.current?.blur();
+      dropdownServerModeRef.current?.blur();
     });
 
   const { batteryLevel, batteryTimeEnable, BatteryIcon } = useBatteryAndClock(
@@ -727,32 +727,23 @@ function Video_Film(props: Props) {
           <Text style={[globalStyles.text, { marginBottom: 5, fontWeight: 'bold' }]}>Resolusi</Text>
           <TouchableOpacity
             onPress={() => {
-              dropdownResolutionRef.current?.open();
+              dropdownResolutionRef.current?.focus();
             }}>
             <View pointerEvents="box-only">
-              <Dropdown
+              <Picker
                 ref={dropdownResolutionRef}
-                value={currentResolution}
-                placeholder="Pilih resolusi"
-                data={resolutionDropdownData}
-                valueField="value"
-                labelField="label"
-                onChange={item => {
+                selectedValue={currentResolution}
+                onValueChange={val => {
                   saveProgressToHistory();
                   firstTimeLoad.current = true;
-                  setCurrentResolution(item.value);
-                  ToastAndroid.show(`Resolusi diubah ke ${item.label}`, ToastAndroid.SHORT);
+                  setCurrentResolution(val);
+                  ToastAndroid.show(`Resolusi diubah ke ${val}`, ToastAndroid.SHORT);
                 }}
-                style={styles.dropdownStyle}
-                containerStyle={styles.dropdownContainerStyle}
-                itemTextStyle={styles.dropdownItemTextStyle}
-                itemContainerStyle={styles.dropdownItemContainerStyle}
-                activeColor="#16687c"
-                selectedTextStyle={styles.dropdownSelectedTextStyle}
-                placeholderStyle={{ color: globalStyles.text.color }}
-                autoScroll
-                dropdownPosition="top"
-              />
+                key={currentResolution}>
+                {resolutionDropdownData.map(item => (
+                  <Picker.Item key={item.value} label={item.label} value={item.value} />
+                ))}
+              </Picker>
             </View>
           </TouchableOpacity>
         </View>
@@ -765,40 +756,21 @@ function Video_Film(props: Props) {
             </Text>
             <TouchableOpacity
               onPress={() => {
-                dropdownServerModeRef.current?.open();
+                dropdownServerModeRef.current?.focus();
               }}>
               <View pointerEvents="box-only">
-                <Dropdown
+                <Picker
                   ref={dropdownServerModeRef}
-                  value={serverMode}
-                  placeholder="Pilih resolusi"
-                  data={[
-                    {
-                      value: 'server',
-                      label: 'Server',
-                    },
-                    {
-                      value: 'local',
-                      label: 'Local Host',
-                    },
-                  ]}
-                  valueField="value"
-                  labelField="label"
-                  onChange={item => {
+                  selectedValue={serverMode}
+                  onValueChange={val => {
                     saveProgressToHistory();
                     firstTimeLoad.current = true;
-                    setServerMode(item.value);
+                    setServerMode(val);
                   }}
-                  style={styles.dropdownStyle}
-                  containerStyle={styles.dropdownContainerStyle}
-                  itemTextStyle={styles.dropdownItemTextStyle}
-                  itemContainerStyle={styles.dropdownItemContainerStyle}
-                  activeColor="#16687c"
-                  selectedTextStyle={styles.dropdownSelectedTextStyle}
-                  placeholderStyle={{ color: globalStyles.text.color }}
-                  autoScroll
-                  dropdownPosition="top"
-                />
+                  key={serverMode}>
+                  <Picker.Item label="Server" value="server" />
+                  <Picker.Item label="Local Host" value="local" />
+                </Picker>
               </View>
             </TouchableOpacity>
             <Text style={[globalStyles.text, { marginBottom: 5 }]}>

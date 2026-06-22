@@ -1,4 +1,4 @@
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
@@ -23,12 +23,12 @@ import {
   Portal,
   Surface,
   Switch,
-  TouchableRipple,
   useTheme,
 } from 'react-native-paper';
 import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
 
+import { TouchableOpacity } from '@/component/misc/TouchableOpacityRNGH';
 import { HistoryItemKey } from '@/types/databaseTarget';
 import { HistoryJSON } from '@/types/historyJSON';
 import { UtilsStackNavigator } from '@/types/navigation';
@@ -66,10 +66,10 @@ function Setting(_props: Props) {
   const enableBatteryTimeInfo = useKeyValueIfFocused('enableBatteryTimeInfo');
 
   const appTheme = useKeyValueIfFocused('colorScheme');
-  const appThemeDropdown = useRef<IDropdownRef>(null);
+  const appThemeDropdown = useRef<PickerRef>(null);
 
   const audioMixingMode = useKeyValueIfFocused('audioMixingMode');
-  const AMMDropdown = useRef<IDropdownRef>(null);
+  const AMMDropdown = useRef<PickerRef>(null);
 
   const batteryTimeInfoSwitch = enableBatteryTimeInfo === 'true';
   const batteryTimeSwitchHandler = useCallback(() => {
@@ -266,61 +266,38 @@ function Setting(_props: Props) {
     );
   }, [modalText]);
 
-  const dropdownStyles = {
-    style: {
-      width: 140,
-      backgroundColor: theme.colors.elevation.level2,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 8,
-      borderWidth: 0,
-    },
-    containerStyle: {
-      borderRadius: 8,
-      backgroundColor: theme.colors.elevation.level2,
-      borderWidth: 0,
-    },
-    itemTextStyle: {
-      color: theme.colors.onSurface,
-      fontSize: 13,
-    },
-    itemContainerStyle: {
-      backgroundColor: theme.colors.elevation.level2,
-    },
-    selectedTextStyle: {
-      color: theme.colors.onSurface,
-      fontSize: 13,
-    },
-  };
-
   const settingsData: SettingsData[] = [
     {
       title: 'Tema aplikasi',
       description: 'Beralih ke tema gelap atau terang',
       iconName: 'paint-brush',
       rightComponent: (
-        <Dropdown
-          data={DROPDOWN_THEME_DATA}
-          onChange={data => {
-            if (data.value === 'light' || data.value === 'dark') {
-              Appearance.setColorScheme(data.value);
-            } else if (data.value === 'auto') {
-              Appearance.setColorScheme('unspecified');
-            }
-            DatabaseManager.set('colorScheme', data.value);
-          }}
-          ref={appThemeDropdown}
-          value={appTheme}
-          labelField={'label'}
-          valueField={'value'}
-          maxHeight={300}
-          activeColor={theme.colors.primaryContainer}
-          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
-          {...dropdownStyles}
-        />
+        <View>
+          <Picker
+            key={appTheme}
+            style={{
+              flex: 1,
+              minWidth: 100,
+            }}
+            selectedValue={appTheme}
+            ref={appThemeDropdown}
+            onValueChange={data => {
+              if (data === null) return;
+              if (data === 'light' || data === 'dark') {
+                Appearance.setColorScheme(data);
+              } else if (data === 'auto') {
+                Appearance.setColorScheme('unspecified');
+              }
+              DatabaseManager.set('colorScheme', data);
+            }}>
+            {DROPDOWN_THEME_DATA.map(a => {
+              return <Picker.Item key={a.label} label={a.label} value={a.value} />;
+            })}
+          </Picker>
+        </View>
       ),
       handler: () => {
-        appThemeDropdown.current?.open();
+        appThemeDropdown.current?.focus();
       },
     },
     {
@@ -328,23 +305,27 @@ function Setting(_props: Props) {
       description: 'Tentukan perilaku audio saat aplikasi lain memutar suara',
       iconName: 'music',
       rightComponent: (
-        <Dropdown
-          data={DROPDOWN_AUDIOMIXING_DATA}
-          onChange={data => {
-            DatabaseManager.set('audioMixingMode', data.value);
-          }}
-          ref={AMMDropdown}
-          value={audioMixingMode}
-          labelField={'label'}
-          valueField={'value'}
-          maxHeight={300}
-          activeColor={theme.colors.primaryContainer}
-          placeholderStyle={{ color: theme.colors.onSurfaceVariant }}
-          {...dropdownStyles}
-        />
+        <View>
+          <Picker
+            key={audioMixingMode}
+            style={{
+              flex: 1,
+              minWidth: 100,
+            }}
+            selectedValue={audioMixingMode}
+            ref={AMMDropdown}
+            onValueChange={data => {
+              if (data === null) return;
+              DatabaseManager.set('audioMixingMode', data);
+            }}>
+            {DROPDOWN_AUDIOMIXING_DATA.map(a => {
+              return <Picker.Item key={a.label} label={a.label} value={a.value} />;
+            })}
+          </Picker>
+        </View>
       ),
       handler: () => {
-        AMMDropdown.current?.open();
+        AMMDropdown.current?.focus();
       },
     },
     {
@@ -437,10 +418,7 @@ function Setting(_props: Props) {
             key={item.title}
             elevation={0}
             style={{ backgroundColor: theme.colors.background }}>
-            <TouchableRipple
-              onPress={item.handler}
-              rippleColor={theme.colors.primaryContainer}
-              background={{ color: theme.colors.primaryContainer, foreground: true }}>
+            <TouchableOpacity onPress={item.handler}>
               <View>
                 <List.Item
                   title={item.title}
@@ -475,7 +453,7 @@ function Setting(_props: Props) {
                 />
                 {index < settingsData.length - 1 && <Divider style={{ marginLeft: 56 }} />}
               </View>
-            </TouchableRipple>
+            </TouchableOpacity>
           </Surface>
         ))}
         <View style={{ height: 40 }} />
@@ -488,13 +466,13 @@ const DROPDOWN_THEME_DATA = [
   { label: 'Sistem', value: 'auto' },
   { label: 'Terang', value: 'light' },
   { label: 'Gelap', value: 'dark' },
-];
+] as const;
 
 const DROPDOWN_AUDIOMIXING_DATA: { label: string; value: AudioMixingMode }[] = [
   { label: 'Otomatis', value: 'auto' },
   { label: 'Mute Lain', value: 'doNotMix' },
   { label: 'Campur', value: 'mixWithOthers' },
   { label: 'Kecilkan Lain', value: 'duckOthers' },
-];
+] as const;
 
 export default memo(Setting);

@@ -1,4 +1,5 @@
-import { Dropdown } from '@pirles/react-native-element-dropdown';
+import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
@@ -6,12 +7,12 @@ import { RecyclerViewProps } from '@shopify/flash-list/dist/recyclerview/Recycle
 import { LinearGradient } from 'expo-linear-gradient';
 import tr from 'googletrans';
 import moment from 'moment';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   ToastAndroid,
-  TouchableOpacity,
   View,
   useColorScheme,
   useWindowDimensions,
@@ -42,6 +43,7 @@ import {
 } from '@utils/scrapers/film';
 import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
 import controlWatchLater from '@utils/watchLaterControl';
+import { TVFocusGuideView } from 'react-native';
 
 type RecyclerViewType = (
   props: RecyclerViewProps<FilmEpisode> & {
@@ -163,15 +165,6 @@ function FilmDetail(props: Props) {
   const [selectedSeason, setSelectedSeason] = useState(
     isEpisode(data) ? data.defaultSeason.seasonNumber : 1,
   );
-  const mappedSeasons = useMemo(() => {
-    if (isEpisode(data)) {
-      return data.seasons.map(s => ({
-        label: `Season ${s}`,
-        value: s,
-      }));
-    }
-    return [];
-  }, [data]);
 
   const [currentEpisodeList, setCurrentEpisodeList] = useState(
     isEpisode(data) ? data.defaultSeason.episodes : [],
@@ -187,11 +180,10 @@ function FilmDetail(props: Props) {
       lastWatchedEpisodeData={lastWatchedEpisodeData}
       lastWatched={lastWatched}
       isInList={isInList}
-      mappedSeasons={mappedSeasons}
+      seasons={data.type === 'detail' ? data.seasons : []}
       selectedSeason={selectedSeason}
       setSelectedSeason={setSelectedSeason}
       setCurrentEpisodeList={setCurrentEpisodeList}
-      currentEpisodeListLength={currentEpisodeList.length}
       link={props.route.params.link}
       navigation={props.navigation}
     />
@@ -294,11 +286,10 @@ interface FilmDetailHeaderProps {
     | undefined;
   lastWatched: HistoryJSON | undefined;
   isInList: boolean;
-  mappedSeasons: { label: string; value: number }[];
+  seasons: number[];
   selectedSeason: number;
   setSelectedSeason: (season: number) => void;
   setCurrentEpisodeList: (episodes: FilmEpisode[]) => void;
-  currentEpisodeListLength: number;
   link: string;
   navigation: Props['navigation'];
 }
@@ -313,11 +304,10 @@ const FilmDetailHeader = memo(
     lastWatchedEpisodeData,
     lastWatched,
     isInList,
-    mappedSeasons,
+    seasons,
     selectedSeason,
     setSelectedSeason,
     setCurrentEpisodeList,
-    currentEpisodeListLength,
     link,
     navigation,
   }: FilmDetailHeaderProps) => {
@@ -325,9 +315,24 @@ const FilmDetailHeader = memo(
     const globalStyles = useGlobalStyles();
     const theme = useTheme();
     const colorScheme = useColorScheme();
+    const seasonDropdown = useRef<PickerRef>(null);
+
+    // WORKAROUND FOR TRAPPED FOCUS ON TV
+    const firstRenderSelectedSeason = useRef(selectedSeason);
+    useEffect(() => {
+      if (!Platform.isTV) return;
+      setTimeout(() => {
+        setSelectedSeason(0);
+        seasonDropdown.current?.focus();
+        setTimeout(() => {
+          seasonDropdown.current?.blur();
+          setSelectedSeason(firstRenderSelectedSeason.current);
+        });
+      }, 100);
+    }, [setSelectedSeason]);
 
     return (
-      <View style={styles.mainContainer}>
+      <TVFocusGuideView autoFocus style={styles.mainContainer}>
         <ImageLoading
           style={[{ width: '100%', height: IMG_HEADER_HEIGHT }, headerImageStyle]}
           source={{ uri: data.info.backgroundImage }}
@@ -519,35 +524,34 @@ const FilmDetailHeader = memo(
           {isEpisode(data) && (
             <View style={styles.seasonContainer}>
               <View style={styles.seasonHeader}>
-                <View style={styles.seasonIndicator} />
-                <Dropdown
-                  data={mappedSeasons}
-                  value={selectedSeason}
-                  placeholder="Pilih Season"
-                  valueField="value"
-                  labelField="label"
-                  onChange={item => {
-                    setSelectedSeason(item.value);
-                    getFilmSeasonDetails(link + '/season/' + item.value).then(a =>
-                      setCurrentEpisodeList(a.episodes),
-                    );
-                  }}
-                  style={styles.dropdownStyle}
-                  containerStyle={styles.dropdownContainerStyle}
-                  itemTextStyle={styles.dropdownItemTextStyle}
-                  itemContainerStyle={styles.dropdownItemContainerStyle}
-                  activeColor={theme.colors.secondaryContainer}
-                  selectedTextStyle={styles.dropdownSelectedTextStyle}
-                  placeholderStyle={styles.dropdownPlaceholderStyle}
-                  iconStyle={styles.dropdownIconStyle}
-                  autoScroll
-                  dropdownPosition={currentEpisodeListLength < 5 ? 'top' : 'auto'}
-                />
+                <TouchableOpacity
+                  onPress={() => {
+                    seasonDropdown.current?.focus();
+                  }}>
+                  <View pointerEvents="none" focusable={false} accessible={false}>
+                    <Picker
+                      ref={seasonDropdown}
+                      key={selectedSeason}
+                      selectedValue={selectedSeason}
+                      onValueChange={value => {
+                        getFilmSeasonDetails(link + '/season/' + value).then(a => {
+                          setSelectedSeason(value);
+                          startTransition(() => {
+                            setCurrentEpisodeList(a.episodes);
+                          });
+                        });
+                      }}>
+                      {seasons.map(a => (
+                        <Picker.Item key={a} label={`Season ${a}`} value={a} />
+                      ))}
+                    </Picker>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
           )}
         </View>
-      </View>
+      </TVFocusGuideView>
     );
   },
 );
@@ -741,65 +745,11 @@ function useStyles() {
           color: globalStyles.text.color,
           opacity: 0.9,
         },
-        // --- DROPDOWN STYLES ---
-        dropdownStyle: {
-          backgroundColor: theme.colors.elevation.level2,
-          paddingHorizontal: 16,
-          paddingVertical: 10,
-          minWidth: dimensions.width * 0.4,
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: theme.colors.outlineVariant || (colorScheme === 'dark' ? '#444' : '#E0E0E0'),
-        },
-        dropdownContainerStyle: {
-          borderRadius: 12,
-          backgroundColor: theme.colors.elevation.level3,
-          borderWidth: 1,
-          borderColor: theme.colors.outlineVariant || (colorScheme === 'dark' ? '#444' : '#E0E0E0'),
-          overflow: 'hidden',
-          elevation: 6,
-        },
-        dropdownItemTextStyle: {
-          color: theme.colors.onSurface,
-          fontSize: 15,
-          fontWeight: '500',
-        },
-        dropdownItemContainerStyle: {
-          // paddingVertical: 10,
-          paddingHorizontal: 12,
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor:
-            theme.colors.outlineVariant || (colorScheme === 'dark' ? '#333' : '#E0E0E0'),
-        },
-        dropdownSelectedTextStyle: {
-          color: theme.colors.primary,
-          fontSize: 15,
-          fontWeight: 'bold',
-        },
-        dropdownPlaceholderStyle: {
-          color: globalStyles.text.color,
-          fontSize: 15,
-          opacity: 0.7,
-        },
-        dropdownIconStyle: {
-          tintColor: theme.colors.onSurface,
-          width: 24,
-          height: 24,
-        },
         seasonContainer: {
           width: '100%',
         },
         seasonHeader: {
-          flexDirection: 'row',
-          alignItems: 'center',
           marginBottom: 12,
-        },
-        seasonIndicator: {
-          width: 4,
-          height: 20,
-          backgroundColor: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
-          borderRadius: 2,
-          marginRight: 10,
         },
         episodeListContainer: {
           margin: 5,

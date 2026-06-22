@@ -770,7 +770,7 @@ async function redeemVideo(
   redeemApi: RedeemApi;
   claimApi: ClaimApi;
 }> {
-  let timeout: number | undefined;
+  let timeout: NodeJS.Timeout | undefined;
   const totalWaitTime = Math.floor(Math.max(0, playInfo.unlockAt - playInfo.serverNow) / 1000) || 0;
   const startTime = Date.now();
 

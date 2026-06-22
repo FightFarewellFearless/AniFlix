@@ -32,6 +32,7 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
+  useTVEventHandler,
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import Reanimated, {
@@ -50,6 +51,7 @@ import ReText from '@component/misc/ReText';
 import AniFlixRuntime from '@misc/AniFlixRuntime';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
 import deviceUserAgent from '@utils/deviceUserAgent';
+import { useBackHandler } from '@hooks/useBackHandler';
 import { TVFocusGuideView } from 'react-native';
 import SeekBar from './SeekBar';
 
@@ -137,6 +139,11 @@ function VideoPlayer({
   const seekBarProgressDisabled = useSharedValue(false);
 
   const pressableShowControlsLocation = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const playPauseRef = useRef<any>(null);
+  const rewindRef = useRef<any>(null);
+  const forwardRef = useRef<any>(null);
+  const activityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isBuffering, setIsBuffering] = useState(true);
   useEffect(() => {
@@ -302,9 +309,6 @@ function VideoPlayer({
 
   const setPositionAsync = (duration: number) => {
     player.currentTime = duration;
-    queueMicrotask(() => {
-      seekBarProgressDisabled.set(false);
-    });
   };
   const onPressIn = useCallback((e: GestureResponderEvent) => {
     pressableShowControlsLocation.current = {
@@ -352,6 +356,95 @@ function VideoPlayer({
     setIsFullscreen(a => !a);
   }, [onFullscreenUpdate, isFullscreen]);
 
+  const resetActivityTimer = useCallback(() => {
+    if (activityTimerRef.current) {
+      clearTimeout(activityTimerRef.current);
+    }
+    if (!paused && !isBuffering) {
+      activityTimerRef.current = setTimeout(() => {
+        if (!seekBarProgressDisabled.get()) {
+          setShowControls(false);
+        } else {
+          resetActivityTimer();
+        }
+      }, 3000);
+    }
+  }, [paused, isBuffering, seekBarProgressDisabled]);
+
+  useEffect(() => {
+    if (showControls && !paused) {
+      resetActivityTimer();
+    } else {
+      if (activityTimerRef.current) {
+        clearTimeout(activityTimerRef.current);
+      }
+    }
+    return () => {
+      if (activityTimerRef.current) {
+        clearTimeout(activityTimerRef.current);
+      }
+    };
+  }, [showControls, paused, resetActivityTimer]);
+
+  useTVEventHandler(
+    useCallback(
+      evt => {
+        if (!Platform.isTV) return;
+        if (evt && evt.eventKeyAction === 1) {
+          const interactionKeys = [
+            'up',
+            'down',
+            'left',
+            'right',
+            'select',
+            'playPause',
+            'rewind',
+            'fastForward',
+          ];
+          if (interactionKeys.includes(evt.eventType)) {
+            if (!showControls) {
+              setShowControls(true);
+            } else {
+              resetActivityTimer();
+            }
+          }
+        }
+        if (evt && evt.eventType === 'playPause' && evt.eventKeyAction === 1) {
+          onPlayPausePressed();
+          if (!showControls) {
+            setShowControls(true);
+          }
+        }
+      },
+      [showControls, resetActivityTimer, onPlayPausePressed],
+    ),
+  );
+
+  useBackHandler(
+    useCallback(() => {
+      if (showControls) {
+        setShowControls(false);
+        return true;
+      }
+      return false;
+    }, [showControls]),
+  );
+
+  useEffect(() => {
+    if (showControls && Platform.isTV) {
+      const timer = setTimeout(() => {
+        if (playPauseRef.current) {
+          playPauseRef.current.focus();
+        } else if (rewindRef.current) {
+          rewindRef.current.focus();
+        } else if (forwardRef.current) {
+          forwardRef.current.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showControls]);
+
   // fix: video is paused when changing streaming url
   // useEffect(() => {
   //   player.play();
@@ -373,7 +466,7 @@ function VideoPlayer({
     };
   });
 
-  const pipTimeout = useRef<number>(null);
+  const pipTimeout = useRef<NodeJS.Timeout>(null);
   const onPiPStop = useCallback(() => {
     pipTimeout.current = setTimeout(() => {
       if (AppState.currentState === 'active' && !paused) {
@@ -492,6 +585,7 @@ function VideoPlayer({
         </View>
         <Reanimated.View
           pointerEvents="box-none"
+          onTouchStart={resetActivityTimer}
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
           <TVFocusGuideView autoFocus trapFocusDown style={StyleSheet.absoluteFill}>
             <Top
@@ -516,6 +610,9 @@ function VideoPlayer({
               lastTimeError={currentDurationSecond}
               onLoad={onLoad}
               isHls={isHls}
+              playPauseRef={playPauseRef}
+              rewindRef={rewindRef}
+              forwardRef={forwardRef}
             />
             <BottomControl
               contentFitMode={contentFitMode}
@@ -530,10 +627,15 @@ function VideoPlayer({
                 seekBarProgress.set(e);
                 currentDurationSecond.set(e * totalDurationSecond.get());
               }}
-              onProgressChangeEnd={e => {
+              onProgressChangeEnd={(e, shouldChangeDuration) => {
                 'worklet';
                 seekBarProgress.set(e);
-                runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
+                queueMicrotask(() => {
+                  seekBarProgressDisabled.set(false);
+                });
+                if (shouldChangeDuration) {
+                  runOnJS(setPositionAsync)?.(e * totalDurationSecond.get());
+                }
               }}
               seekBarProgress={seekBarProgress}
             />
@@ -698,6 +800,9 @@ function CenterControl({
   lastTimeError,
   onLoad,
   isHls,
+  playPauseRef,
+  rewindRef,
+  forwardRef,
 }: {
   isBuffering: boolean;
   isError: boolean;
@@ -707,6 +812,9 @@ function CenterControl({
   onRewind: () => void;
   player: ExpoVideoPlayer;
   lastTimeError: SharedValue<number>;
+  playPauseRef: React.RefObject<any>;
+  rewindRef: React.RefObject<any>;
+  forwardRef: React.RefObject<any>;
 } & Pick<VideoPlayerProps, 'streamingURL' | 'headers' | 'onLoad' | 'isHls'>) {
   const [focusRewind, setFocusRewind] = useState(false);
   const [focusPlay, setFocusPlay] = useState(false);
@@ -726,6 +834,7 @@ function CenterControl({
         gap: 30,
       }}>
       <TouchableOpacity
+        ref={rewindRef}
         focusable={Platform.isTV}
         onFocus={() => setFocusRewind(true)}
         onBlur={() => setFocusRewind(false)}
@@ -744,6 +853,7 @@ function CenterControl({
         />
       ) : !isError ? (
         <TouchableOpacity
+          ref={playPauseRef}
           focusable={Platform.isTV}
           hasTVPreferredFocus={Platform.isTV}
           onFocus={() => setFocusPlay(true)}
@@ -757,6 +867,7 @@ function CenterControl({
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
+          ref={playPauseRef}
           focusable={Platform.isTV}
           onFocus={() => setFocusPlay(true)}
           onBlur={() => setFocusPlay(false)}
@@ -782,6 +893,7 @@ function CenterControl({
         </TouchableOpacity>
       )}
       <TouchableOpacity
+        ref={forwardRef}
         focusable={Platform.isTV}
         onFocus={() => setFocusForward(true)}
         onBlur={() => setFocusForward(false)}
@@ -811,7 +923,7 @@ function BottomControl({
   setContentFitMode: React.Dispatch<React.SetStateAction<VideoContentFit>>;
   seekBarProgress: SharedValue<number>;
   onProgressChange: (value: number) => void;
-  onProgressChangeEnd: (lastValue: number) => void;
+  onProgressChangeEnd: (lastValue: number, shouldChangeDuration: boolean) => void;
   onFullScreenButtonPressed: () => void;
   isFullscreen: boolean;
   currentDurationSecond: SharedValue<number>;

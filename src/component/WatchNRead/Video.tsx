@@ -1,4 +1,3 @@
-import { Dropdown, IDropdownRef } from '@pirles/react-native-element-dropdown';
 import Icon from '@react-native-vector-icons/fontawesome';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useFocusEffect } from '@react-navigation/core';
@@ -40,6 +39,7 @@ import { AniDetail } from '@/types/anime';
 import { RootStackNavigator } from '@/types/navigation';
 import Skeleton from '@component/misc/Skeleton';
 import VideoPlayer, { PlayerRef } from '@component/VideoPlayer';
+import { Picker, PickerRef } from '@expo/ui/community/picker';
 import { useBackHandler } from '@hooks/useBackHandler';
 import AnimeAPI from '@utils/AnimeAPI';
 import { useKeyValueIfFocused } from '@utils/DatabaseManager';
@@ -51,6 +51,7 @@ import {
   getStreamingDetail,
   MovieDetail,
 } from '@utils/scrapers/animeMovie';
+import { TVFocusGuideView } from 'react-native';
 import {
   LoadingModal,
   TimeInfo,
@@ -59,7 +60,6 @@ import {
   useSynopsisControl,
   useVideoStyles,
 } from './SharedVideo';
-import { TVFocusGuideView } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'Video'>;
 
@@ -91,7 +91,7 @@ function Video(props: Props) {
   const videoRef = useRef<VideoView>(null);
   const playerRef = useRef<PlayerRef>(null);
   const webviewRef = useRef<WebView>(null);
-  const dropdownResolutionRef = useRef<IDropdownRef>(null);
+  const dropdownResolutionRef = useRef<PickerRef>(null);
   const embedInformationRef = useRef<View>(null);
 
   const synopsisTextRef = useAnimatedRef<Text>();
@@ -172,7 +172,7 @@ function Video(props: Props) {
   const [isPaused, setIsPaused] = useState(false);
 
   const { fullscreen, enterFullscreen, exitFullscreen, orientationDidChange, willUnmountHandler } =
-    useFullscreenControl(() => dropdownResolutionRef.current?.close());
+    useFullscreenControl(() => dropdownResolutionRef.current?.blur());
 
   const { batteryLevel, batteryTimeEnable, BatteryIcon } = useBatteryAndClock(
     enableBatteryTimeInfo as string,
@@ -868,35 +868,31 @@ function Video(props: Props) {
           <TouchableOpacity
             style={{ maxWidth: '50%' }}
             onPress={() => {
-              dropdownResolutionRef.current?.open();
+              dropdownResolutionRef.current?.focus();
             }}>
             <View pointerEvents="box-only">
-              <Dropdown
+              <Picker
                 ref={dropdownResolutionRef}
-                value={{
-                  label: data.resolution,
-                  value:
-                    data.resolutionRaw?.[
-                      data.resolutionRaw.findIndex(e => e.resolution === data.resolution)
-                    ],
-                }}
-                placeholder="Pilih resolusi"
-                data={resolutionDropdownData}
-                valueField="value"
-                labelField="label"
-                onChange={async val => {
-                  await setResolution(val.value.dataContent, val.label);
-                }}
-                style={styles.dropdownStyle}
-                containerStyle={styles.dropdownContainerStyle}
-                itemTextStyle={styles.dropdownItemTextStyle}
-                itemContainerStyle={styles.dropdownItemContainerStyle}
-                activeColor="#16687c"
-                selectedTextStyle={styles.dropdownSelectedTextStyle}
-                placeholderStyle={{ color: globalStyles.text.color }}
-                autoScroll
-                dropdownPosition="top"
-              />
+                key={data.resolution}
+                selectedValue={data.resolution ?? 'Pilih Resolusi'}
+                onValueChange={val => {
+                  if (val === 'Pilih Resolusi') return;
+                  const selected = resolutionDropdownData.find(e => e.value.resolution === val);
+                  if (selected) {
+                    setResolution(selected.value.dataContent, selected.label);
+                  }
+                }}>
+                {resolutionDropdownData.map(res => (
+                  <Picker.Item
+                    key={res.value.resolution}
+                    label={res.label}
+                    value={res.value.resolution}
+                  />
+                ))}
+                {data.resolution === undefined && (
+                  <Picker.Item label="Pilih Resolusi" value="Pilih Resolusi" />
+                )}
+              </Picker>
             </View>
           </TouchableOpacity>
         </View>
