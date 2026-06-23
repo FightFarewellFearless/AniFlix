@@ -4229,7 +4229,7 @@ __metadata:
     react-native-nitro-modules: ^0.35.9
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.15.3
-    react-native-reanimated: 4.5.0-nightly-20260620-9c2e3b052
+    react-native-reanimated: 4.5.0
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.8.0
     react-native-screens: ~4.25.2
@@ -10856,17 +10856,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.5.0-nightly-20260620-9c2e3b052":
-  version: 4.5.0-nightly-20260620-9c2e3b052
-  resolution: "react-native-reanimated@npm:4.5.0-nightly-20260620-9c2e3b052"
+"react-native-reanimated@npm:4.5.0":
+  version: 4.5.0
+  resolution: "react-native-reanimated@npm:4.5.0"
   dependencies:
     react-native-is-edge-to-edge: ^1.3.1
     semver: ^7.7.3
   peerDependencies:
     react: "*"
     react-native: 0.83 - 0.86
-    react-native-worklets: "*"
-  checksum: 3555ccc3dfe5b6bb9ea21d3fc9c8cae6f23e30e1226108a980b269737fc12465033fd4baa92e78ab6557971aca3554abcf093f8fc8879d512eca047ebc29df0c
+    react-native-worklets: 0.10.x
+  checksum: 03edb8bd77dcc56906fff4a3ae417c186a501d11e9cdbffbbb297cfaa897b62104a88788e7ae1d244466ed5b33fca8005359f7bcd3738c0243383db3191e09f5
   languageName: node
   linkType: hard
 

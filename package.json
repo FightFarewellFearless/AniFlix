@@ -58,7 +58,7 @@
     "react-native-nitro-modules": "^0.35.9",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-paper": "^5.15.3",
-    "react-native-reanimated": "4.5.0-nightly-20260620-9c2e3b052",
+    "react-native-reanimated": "4.5.0",
     "react-native-saf-x": "2.2.3",
     "react-native-safe-area-context": "5.8.0",
     "react-native-screens": "~4.25.2",
