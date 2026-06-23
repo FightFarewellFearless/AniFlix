@@ -4235,7 +4235,7 @@ __metadata:
     react-native-screens: ~4.25.2
     react-native-svg: 15.15.5
     react-native-system-navigation-bar: ^2.8.0
-    react-native-webview: 13.16.1
+    react-native-webview: 14.0.1
     react-native-worklets: next
     react-native-zip-archive: ^7.1.1
     react-test-renderer: 19.2.3
@@ -10977,16 +10977,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.16.1":
-  version: 13.16.1
-  resolution: "react-native-webview@npm:13.16.1"
+"react-native-webview@npm:14.0.1":
+  version: 14.0.1
+  resolution: "react-native-webview@npm:14.0.1"
   dependencies:
     escape-string-regexp: ^4.0.0
     invariant: 2.2.4
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: c202500df090114877d7a92549dbac1c36bdcc2010d50ddffb57aedcec81870d9695f1e4e3ef852cbe02a8ef952ef8626b120b774813c396a32b4fdc5838a4a5
+  checksum: 79936364b8404240d30ca37530910673994ceb4f21e2ce1f9cd3042167e5cd6f52b4e001831d827bf0d5198fab25fcd089e286198d4af8ad962b8a1150f0dc77
   languageName: node
   linkType: hard
 
