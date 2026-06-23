@@ -1,4 +1,4 @@
-# v1.4.0_JS-1 (23-Juni-2026)
+# v1.4.1 (23-Juni-2026)
 ## Diperbaiki
 - Error mengambil data komik
 # v1.4.0 (22-Juni-2026)
