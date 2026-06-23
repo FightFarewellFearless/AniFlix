@@ -1,3 +1,6 @@
+# v1.4.0_JS-1 (23-Juni-2026)
+## Diperbaiki
+- Error mengambil data komik
 # v1.4.0 (22-Juni-2026)
 Versi ini dirilis sebagai peningkatan kestabilan dari versi sebelumnya, termasuk dukungan lebih baik untuk AndroidTV, dan optimasi penggunaan memory (RAM).
 ## Ditingkatkan

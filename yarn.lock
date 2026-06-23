@@ -1858,7 +1858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/cli@npm:^56.1.16":
+"@expo/cli@npm:^56.1.11":
   version: 56.1.16
   resolution: "@expo/cli@npm:56.1.16"
   dependencies:
@@ -2073,7 +2073,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/fingerprint@npm:^0.19.4":
+"@expo/fingerprint@npm:^0.19.2":
   version: 0.19.4
   resolution: "@expo/fingerprint@npm:0.19.4"
   dependencies:
@@ -2128,7 +2128,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/local-build-cache-provider@npm:^56.0.8":
+"@expo/local-build-cache-provider@npm:^56.0.7":
   version: 56.0.8
   resolution: "@expo/local-build-cache-provider@npm:56.0.8"
   dependencies:
@@ -2138,7 +2138,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/log-box@npm:^56.0.13":
+"@expo/log-box@npm:^56.0.12, @expo/log-box@npm:^56.0.13":
   version: 56.0.13
   resolution: "@expo/log-box@npm:56.0.13"
   dependencies:
@@ -2154,7 +2154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/metro-config@npm:~56.0.14":
+"@expo/metro-config@npm:~56.0.12, @expo/metro-config@npm:~56.0.14":
   version: 56.0.14
   resolution: "@expo/metro-config@npm:56.0.14"
   dependencies:
@@ -5009,7 +5009,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-expo@npm:~56.0.15":
+"babel-preset-expo@npm:~56.0.12":
   version: 56.0.15
   resolution: "babel-preset-expo@npm:56.0.15"
   dependencies:
@@ -6847,7 +6847,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-asset@npm:~56.0.17":
+"expo-asset@npm:~56.0.14":
   version: 56.0.17
   resolution: "expo-asset@npm:56.0.17"
   dependencies:
@@ -6861,7 +6861,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-constants@npm:~56.0.18":
+"expo-constants@npm:~56.0.15, expo-constants@npm:~56.0.18":
   version: 56.0.18
   resolution: "expo-constants@npm:56.0.18"
   dependencies:
@@ -6889,7 +6889,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-file-system@npm:~56.0.8":
+"expo-file-system@npm:~56.0.7":
   version: 56.0.8
   resolution: "expo-file-system@npm:56.0.8"
   peerDependencies:
@@ -6899,7 +6899,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-font@npm:~56.0.7":
+"expo-font@npm:~56.0.5":
   version: 56.0.7
   resolution: "expo-font@npm:56.0.7"
   dependencies:
@@ -6951,7 +6951,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-modules-autolinking@npm:~56.0.16":
+"expo-modules-autolinking@npm:~56.0.12, expo-modules-autolinking@npm:~56.0.16":
   version: 56.0.16
   resolution: "expo-modules-autolinking@npm:56.0.16"
   dependencies:
@@ -6965,7 +6965,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-modules-core@npm:~56.0.17":
+"expo-modules-core@npm:~56.0.12":
   version: 56.0.17
   resolution: "expo-modules-core@npm:56.0.17"
   dependencies:
@@ -7085,30 +7085,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo@npm:56.0.12":
-  version: 56.0.12
-  resolution: "expo@npm:56.0.12"
+"expo@npm:56.0.4":
+  version: 56.0.4
+  resolution: "expo@npm:56.0.4"
   dependencies:
     "@babel/runtime": ^7.20.0
-    "@expo/cli": ^56.1.16
+    "@expo/cli": ^56.1.11
     "@expo/config": ~56.0.9
-    "@expo/config-plugins": ~56.0.9
+    "@expo/config-plugins": ~56.0.8
     "@expo/devtools": ~56.0.2
     "@expo/dom-webview": ~56.0.5
-    "@expo/fingerprint": ^0.19.4
-    "@expo/local-build-cache-provider": ^56.0.8
-    "@expo/log-box": ^56.0.13
+    "@expo/fingerprint": ^0.19.2
+    "@expo/local-build-cache-provider": ^56.0.7
+    "@expo/log-box": ^56.0.12
     "@expo/metro": ~56.0.0
-    "@expo/metro-config": ~56.0.14
+    "@expo/metro-config": ~56.0.12
     "@ungap/structured-clone": ^1.3.0
-    babel-preset-expo: ~56.0.15
-    expo-asset: ~56.0.17
-    expo-constants: ~56.0.18
-    expo-file-system: ~56.0.8
-    expo-font: ~56.0.7
+    babel-preset-expo: ~56.0.12
+    expo-asset: ~56.0.14
+    expo-constants: ~56.0.15
+    expo-file-system: ~56.0.7
+    expo-font: ~56.0.5
     expo-keep-awake: ~56.0.3
-    expo-modules-autolinking: ~56.0.16
-    expo-modules-core: ~56.0.17
+    expo-modules-autolinking: ~56.0.12
+    expo-modules-core: ~56.0.12
     pretty-format: ^29.7.0
     react-refresh: ^0.14.2
     whatwg-url-minimum: ^0.1.2
@@ -7135,7 +7135,61 @@ __metadata:
     expo: bin/cli
     expo-modules-autolinking: bin/autolinking
     fingerprint: bin/fingerprint
-  checksum: bd6e3e5a2616fa794710154ab18223648282995296839617d66cdc5026c4afe80716845d4e80451b0f509c9e9be9742b3a309795978adbef0fcbd7b550f79fd4
+  checksum: 4a353de64248b7e5f696a0b6eaa1fda0dcaf250d894622b9dba14c832239e03fab36fafd00478d9f574c8dbc4b699e66d5e73eae8e079b0885997760cfbfdec4
+  languageName: node
+  linkType: hard
+
+"expo@patch:expo@npm%3A56.0.4#./.yarn/patches/expo-npm-56.0.4-9a53e4b90a.patch::locator=aniflix%40workspace%3A.":
+  version: 56.0.4
+  resolution: "expo@patch:expo@npm%3A56.0.4#./.yarn/patches/expo-npm-56.0.4-9a53e4b90a.patch::version=56.0.4&hash=40c353&locator=aniflix%40workspace%3A."
+  dependencies:
+    "@babel/runtime": ^7.20.0
+    "@expo/cli": ^56.1.11
+    "@expo/config": ~56.0.9
+    "@expo/config-plugins": ~56.0.8
+    "@expo/devtools": ~56.0.2
+    "@expo/dom-webview": ~56.0.5
+    "@expo/fingerprint": ^0.19.2
+    "@expo/local-build-cache-provider": ^56.0.7
+    "@expo/log-box": ^56.0.12
+    "@expo/metro": ~56.0.0
+    "@expo/metro-config": ~56.0.12
+    "@ungap/structured-clone": ^1.3.0
+    babel-preset-expo: ~56.0.12
+    expo-asset: ~56.0.14
+    expo-constants: ~56.0.15
+    expo-file-system: ~56.0.7
+    expo-font: ~56.0.5
+    expo-keep-awake: ~56.0.3
+    expo-modules-autolinking: ~56.0.12
+    expo-modules-core: ~56.0.12
+    pretty-format: ^29.7.0
+    react-refresh: ^0.14.2
+    whatwg-url-minimum: ^0.1.2
+  peerDependencies:
+    "@expo/dom-webview": "*"
+    "@expo/metro-runtime": "*"
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+    react-native-web: "*"
+    react-native-webview: "*"
+  peerDependenciesMeta:
+    "@expo/dom-webview":
+      optional: true
+    "@expo/metro-runtime":
+      optional: true
+    react-dom:
+      optional: true
+    react-native-web:
+      optional: true
+    react-native-webview:
+      optional: true
+  bin:
+    expo: bin/cli
+    expo-modules-autolinking: bin/autolinking
+    fingerprint: bin/fingerprint
+  checksum: 4a678928437d83f5f40f4ba20fd5414c1a6967541d2f54543fd535d8a53e2b81eb05596a254c96d5d52e8c9447025a32caef1651907419a4ebd7adf501d0ca68
   languageName: node
   linkType: hard
 
