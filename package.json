@@ -31,7 +31,7 @@
     "@shopify/flash-list": "2.3.2",
     "axios": "^1.11.0",
     "buffer": "^6.0.3",
-    "cheerio": "1.0.0-rc.12",
+    "cheerio": "1.2.0",
     "expo": "56.0.12",
     "expo-document-picker": "56.0.4",
     "expo-linear-gradient": "56.0.4",
