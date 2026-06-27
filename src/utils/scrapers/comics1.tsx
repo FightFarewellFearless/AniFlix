@@ -102,19 +102,19 @@ async function getSession(signal?: AbortSignal): Promise<Session> {
 }
 
 let currentChapterSession: Partial<Session> = {};
-async function getChapterSessionPath(chapterUrl: string, signal?: AbortSignal): Promise<string> {
+async function getChapterSessionPath(signal?: AbortSignal): Promise<string> {
   const onAbort = () => {
     comics1FetchChapterSession.abortCleanup();
   };
   signal?.addEventListener('abort', onAbort, { once: true });
   const data: string = await new Promise((res, rej) =>
-    comics1FetchChapterSession.getChapterSessionPath(chapterUrl, res, rej),
+    comics1FetchChapterSession.getChapterSessionPath(res, rej),
   );
   signal?.removeEventListener('abort', onAbort);
   return data;
 }
 async function fetchNewChapterSession(chapterUrl: string, signal?: AbortSignal): Promise<Session> {
-  const path = await getChapterSessionPath(chapterUrl, signal);
+  const path = await getChapterSessionPath(signal);
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: {
       Accept: 'application/json, text/plain, */*',

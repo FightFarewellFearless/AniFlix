@@ -16,7 +16,6 @@ export default function SetupComics1() {
   const [isComics1FetchChapterSessionOpen, setIsComics1FetchChapterSessionOpen] = useState(false);
   const comics1SessionPromisesCollector = useRef<PromiseResRej[]>([]);
   const comics1ChapterSessionPromisesCollector = useRef<PromiseResRej[]>([]);
-  const comics1ChapterSessionUrl = useRef('');
 
   useEffect(() => {
     comics1FetchSession.getSessionPath = (
@@ -35,11 +34,9 @@ export default function SetupComics1() {
     };
 
     comics1FetchChapterSession.getChapterSessionPath = (
-      chapterUrl: string,
       res: PromiseResRej['resolve'],
       rej: PromiseResRej['reject'],
     ) => {
-      comics1ChapterSessionUrl.current = chapterUrl;
       comics1ChapterSessionPromisesCollector.current.push({ resolve: res, reject: rej });
       setIsComics1FetchChapterSessionOpen(true);
     };
@@ -69,7 +66,6 @@ export default function SetupComics1() {
         value={useMemo(
           () => ({
             isOpen: isComics1FetchChapterSessionOpen,
-            chapterUrl: comics1ChapterSessionUrl,
             setIsOpen: setIsComics1FetchChapterSessionOpen,
             promisesCollector: comics1ChapterSessionPromisesCollector,
           }),

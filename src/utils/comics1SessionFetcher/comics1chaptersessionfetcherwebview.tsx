@@ -5,7 +5,7 @@ import { ToastAndroid, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import deviceUserAgent from '@utils/deviceUserAgent';
-import { BASE_URL, Cookie } from '@utils/scrapers/comics1';
+import { BASE_URL, Cookie, DOMAIN } from '@utils/scrapers/comics1';
 import { Comics1ChapterSessionFetcherContext } from './comics1chaptersessionfetchercontext';
 
 export default function Comics1ChapterSessionWebView() {
@@ -53,7 +53,7 @@ export default function Comics1ChapterSessionWebView() {
           ref={webviewRef}
           userAgent={deviceUserAgent}
           source={{
-            uri: context.chapterUrl?.current ?? '',
+            uri: `https://${DOMAIN}/one-piece-ace-story-bahasa-indonesia/chapter/001`,
             headers: {
               Cookie: Cookie + `; tokkey=${encodeURIComponent(COMICS1_AUTH)}`,
             },
