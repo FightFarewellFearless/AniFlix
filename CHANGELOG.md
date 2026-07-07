@@ -1,3 +1,12 @@
+# v2.0.1 (07-Juli-2026)
+Versi 2.0.0 hadir dengan perbaikan beberapa masalah serta tambahan NOVEL DAN LIGHT NOVEL 🎉🎉
+## Ditambahkan
+- NOVEL DAN LIGHT NOVEL
+## Diperbaiki
+- List anime pada menu pencarian stuck di 150
+- Masalah loading awal pada beberapa komik
+- Crash pada OTA update
+- Error download native update
 # v2.0.0 (07-Juli-2026)
 Versi 2.0.0 hadir dengan perbaikan beberapa masalah serta tambahan NOVEL DAN LIGHT NOVEL 🎉🎉
 ## Ditambahkan
