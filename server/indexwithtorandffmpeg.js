@@ -629,7 +629,7 @@ app.get('/api/proxy-segment/:payload', async (req, res) => {
       returnStream: true,
       headers: { 'User-Agent': USER_AGENT },
     };
-    if (req.headers.range) fetchOptions.headers['Range'] = req.headers.range;
+    if (req.headers.range) fetchOptions.headers.Range = req.headers.range;
 
     const stream = await fetchWithRetry(targetUrl, fetchOptions);
 
@@ -783,7 +783,7 @@ app.get('/api/download', async (req, res) => {
       }
 
       const headers = {};
-      if (i === startIndex && startByteOffset > 0) headers['Range'] = `bytes=${startByteOffset}-`;
+      if (i === startIndex && startByteOffset > 0) headers.Range = `bytes=${startByteOffset}-`;
       let attempt = 0,
         success = false;
       while (!success && attempt < 3 && !isClosed) {

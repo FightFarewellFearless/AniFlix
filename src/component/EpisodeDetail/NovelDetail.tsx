@@ -30,31 +30,24 @@ import watchLaterJSON from '@/types/watchLaterJSON';
 import useGlobalStyles from '@assets/style';
 import ImageLoading from '@component/misc/ImageLoading';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
-import { __ALIAS as Comics1Alias } from '@utils/scrapers/comics1';
-import { __ALIAS as Comics2Alias } from '@utils/scrapers/comics2';
-import { ComicsDetail as ComicsDetailTypeData } from '@utils/scrapers/comicsv2';
-import { __ALIAS as KomikuAlias, KomikuDetail } from '@utils/scrapers/komiku';
+import { NovelDetail as NovelDetailType } from '@utils/scrapers/novel';
 import controlWatchLater from '@utils/watchLaterControl';
 
 type RecyclerViewType = (
-  props: RecyclerViewProps<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]> & {
-    ref?: React.Ref<
-      FlashListRef<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]>
-    >;
+  props: RecyclerViewProps<NovelDetailType['chapters'][0]> & {
+    ref?: React.Ref<FlashListRef<NovelDetailType['chapters'][0]>>;
   },
 ) => React.JSX.Element;
 const ReanimatedFlashList = Reanimated.createAnimatedComponent<RecyclerViewType>(FlashList);
 
-type Props = NativeStackScreenProps<RootStackNavigator, 'ComicsDetail'>;
+type Props = NativeStackScreenProps<RootStackNavigator, 'NovelDetail'>;
 const IMG_HEIGHT = 200;
-export default function ComicsDetail(props: Props) {
+
+export default function NovelDetail(props: Props) {
   const globalStyles = useGlobalStyles();
   const insets = useSafeAreaInsets();
   const styles = useStyles();
-  const scrollRef =
-    useAnimatedRef<
-      FlashListRef<KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0]>
-    >();
+  const scrollRef = useAnimatedRef<FlashListRef<NovelDetailType['chapters'][0]>>();
   const scrollOffset = useScrollOffset(scrollRef as any);
   const imageStyle = useAnimatedStyle(() => {
     return {
@@ -86,7 +79,7 @@ export default function ComicsDetail(props: Props) {
     state => JSON.parse(state) as watchLaterJSON[],
   );
   const isInList = useMemo(
-    () => watchLaterListsJson.some(item => item.title === data.title && item.isComics),
+    () => watchLaterListsJson.some(item => item.title === data.title && item.isNovel),
     [data.title, watchLaterListsJson],
   );
 
@@ -96,55 +89,19 @@ export default function ComicsDetail(props: Props) {
   );
   const lastReaded = useMemo(() => {
     const isLastReaded = historyListsJson.find(
-      z =>
-        z === `historyItem:${data.title.trim()}:true:false` ||
-        z === `historyItem:${data.title.trim()}:true:false:false`,
+      z => z === `historyItem:${data.title.trim()}:false:false:true`,
     );
     if (isLastReaded) {
       return JSON.parse(DatabaseManager.getSync(isLastReaded)!) as HistoryJSON;
     } else return undefined;
   }, [historyListsJson, data.title]);
 
-  const readComic = useCallback(
+  const readNovel = useCallback(
     (url: string, fromHistory?: HistoryJSON) => {
-      let link = url;
-      const currentScraper = [Comics1Alias, Comics2Alias, KomikuAlias].find(alias =>
-        link.includes(alias),
-      );
-      const isSameScraper = props.route.params.link.includes(currentScraper ?? '');
-      if (!isSameScraper) {
-        const lastReadedData =
-          lastReaded &&
-          lastReaded.episode &&
-          data.chapters.find(item => {
-            return (
-              item.chapter
-                .toLowerCase()
-                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-                .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
-                .replace('chapter ', '')
-                .trim() ===
-              lastReaded?.episode
-                ?.toLowerCase()
-                .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-                .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
-                .replace('chapter ', '')
-                .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
-                .trim()
-            );
-          });
-        if (
-          typeof lastReadedData === 'object' &&
-          lastReadedData !== null &&
-          'chapter' in lastReadedData
-        ) {
-          link = lastReadedData.chapterUrl;
-        }
-      }
       props.navigation.navigate('FromUrl', {
         title: props.route.params.data.title,
-        link,
-        type: 'comics',
+        link: url,
+        type: 'novel',
         historyData: fromHistory
           ? {
               lastDuration: fromHistory.lastDuration ?? 0,
@@ -153,16 +110,16 @@ export default function ComicsDetail(props: Props) {
           : undefined,
       });
     },
-    [data, lastReaded, props.navigation, props.route.params.data.title, props.route.params.link],
+    [props.navigation, props.route.params.data.title],
   );
 
   const listHeaderComponent = (
-    <ComicsDetailHeader
+    <NovelDetailHeader
       data={data}
       imageStyle={imageStyle}
       isInList={isInList}
       lastReaded={lastReaded}
-      readComic={readComic}
+      readNovel={readNovel}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}
       link={props.route.params.link}
@@ -183,12 +140,7 @@ export default function ComicsDetail(props: Props) {
           </View>
         )}
         renderItem={({ item }) => (
-          <RenderChapterItem
-            item={item}
-            data={data}
-            lastReaded={lastReaded}
-            readComic={readComic}
-          />
+          <RenderChapterItem item={item} lastReaded={lastReaded} readNovel={readNovel} />
         )}
         ItemSeparatorComponent={() => <Divider />}
         keyExtractor={(item, index) => item.chapter + index}
@@ -206,28 +158,28 @@ export default function ComicsDetail(props: Props) {
   );
 }
 
-interface ComicsDetailHeaderProps {
+interface NovelDetailHeaderProps {
   data: Props['route']['params']['data'];
   imageStyle: any;
   isInList: boolean;
   lastReaded: HistoryJSON | undefined;
-  readComic: (url: string, fromHistory?: HistoryJSON) => void;
+  readNovel: (url: string, fromHistory?: HistoryJSON) => void;
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   link: string;
 }
 
-const ComicsDetailHeader = memo(
+const NovelDetailHeader = memo(
   ({
     data,
     imageStyle,
     isInList,
     lastReaded,
-    readComic,
+    readNovel,
     searchQuery,
     setSearchQuery,
     link,
-  }: ComicsDetailHeaderProps) => {
+  }: NovelDetailHeaderProps) => {
     const styles = useStyles();
     const globalStyles = useGlobalStyles();
     const theme = useTheme();
@@ -271,7 +223,7 @@ const ComicsDetailHeader = memo(
                   backgroundColor: colorScheme === 'dark' ? '#00608d' : '#5ddfff',
                   borderRadius: 10,
                 }}>
-                <Text style={[globalStyles.text, styles.type]}>{data.type}</Text>
+                <Text style={[globalStyles.text, styles.type]}>{data.type || 'Novel'}</Text>
               </Surface>
               <Surface
                 elevation={3}
@@ -280,17 +232,12 @@ const ComicsDetailHeader = memo(
                   borderRadius: 10,
                   borderColor: colorScheme === 'dark' ? 'white' : 'black',
                 }}>
-                <Text style={[globalStyles.text, styles.status]}>{data.status}</Text>
+                <Text style={[globalStyles.text, styles.status]}>Ongoing</Text>
               </Surface>
             </View>
           </View>
           <View style={styles.infoContainer}>
             <Text style={[globalStyles.text, styles.title]}>{data.title}</Text>
-            <Text
-              style={[globalStyles.text, styles.title, styles.indonesianTitle]}
-              numberOfLines={4}>
-              {'indonesianTitle' in data ? data.indonesianTitle : data.altTitle}
-            </Text>
             <Text style={[globalStyles.text, styles.author]}>By {data.author || '-'}</Text>
             <View style={styles.genreContainer}>
               {data.genres.map(z => {
@@ -300,8 +247,7 @@ const ComicsDetailHeader = memo(
                     elevation={3}
                     style={{
                       borderRadius: 8,
-                      backgroundColor:
-                        z === 'Ecchi' ? 'rgba(255, 0, 0, 0.5)' : theme.colors.elevation.level3,
+                      backgroundColor: theme.colors.elevation.level3,
                     }}>
                     <Text style={styles.genre} key={z}>
                       {z}
@@ -314,37 +260,6 @@ const ComicsDetailHeader = memo(
         </View>
         <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
           <View style={styles.secondaryInfoContainer}>
-            <View style={styles.additionalInfo}>
-              {'indonesianTitle' in data ? (
-                <>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="child" /> {data.minAge}
-                    </Text>
-                  </Surface>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="map-signs" />{' '}
-                      {data.readingDirection}
-                    </Text>
-                  </Surface>
-                  <Surface style={styles.additionalInfoTextSurface}>
-                    <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                      <Icon color={styles.additionalInfoText.color} name="tag" /> {data.concept}
-                    </Text>
-                  </Surface>
-                </>
-              ) : undefined}
-              {'releaseYear' in data && (
-                <Surface style={[styles.additionalInfoTextSurface, { marginTop: 10 }]}>
-                  <Text style={[globalStyles.text, styles.additionalInfoText]}>
-                    <Icon color={styles.additionalInfoText.color} name="calendar" />{' '}
-                    {data.releaseYear}
-                  </Text>
-                </Surface>
-              )}
-            </View>
-
             <Text style={[globalStyles.text]}>{data.synopsis}</Text>
           </View>
           <View style={{ flexDirection: 'column', flex: 1, marginTop: 10 }}>
@@ -363,20 +278,15 @@ const ComicsDetailHeader = memo(
                 const watchLaterJson: watchLaterJSON = {
                   title: data.title,
                   link: link,
-                  rating: 'Komik',
-                  releaseYear:
-                    'releaseDate' in lastData
-                      ? lastData.releaseDate
-                      : 'releaseYear' in data
-                        ? (data.releaseYear ?? 'Data tidak tersedia')
-                        : 'Data tidak tersedia',
+                  rating: 'Novel',
+                  releaseYear: lastData.releaseDate || 'Data tidak tersedia',
                   thumbnailUrl: data.thumbnailUrl,
                   genre: data.genres,
                   date: Date.now(),
-                  isComics: true,
+                  isNovel: true,
                 };
                 controlWatchLater('add', watchLaterJson);
-                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+                ToastAndroid.show('Ditambahkan ke daftar baca nanti', ToastAndroid.SHORT);
               }}>
               {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
             </Button>
@@ -387,7 +297,7 @@ const ComicsDetailHeader = memo(
                   mode="elevated"
                   icon="book-open"
                   onPress={() => {
-                    readComic(lastReaded.link, lastReaded);
+                    readNovel(lastReaded.link, lastReaded);
                   }}>
                   Terakhir Dibaca ({lastReaded.episode})
                 </Button>
@@ -399,7 +309,7 @@ const ComicsDetailHeader = memo(
                     ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
                     return;
                   }
-                  readComic(chapterData.chapterUrl);
+                  readNovel(chapterData.chapterUrl);
                 }}
                 buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
@@ -413,7 +323,7 @@ const ComicsDetailHeader = memo(
                     ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
                     return;
                   }
-                  readComic(chapterData?.chapterUrl);
+                  readNovel(chapterData?.chapterUrl);
                 }}
                 buttonColor={styles.additionalInfoTextSurface.backgroundColor}
                 textColor={styles.additionalInfoText.color}
@@ -436,13 +346,12 @@ const ComicsDetailHeader = memo(
 );
 
 interface RenderChapterItemProps {
-  item: KomikuDetail['chapters'][0] | ComicsDetailTypeData['chapters'][0];
-  data: Props['route']['params']['data'];
+  item: NovelDetailType['chapters'][0];
   lastReaded: HistoryJSON | undefined;
-  readComic: (url: string, fromHistory?: HistoryJSON) => void;
+  readNovel: (url: string, fromHistory?: HistoryJSON) => void;
 }
 
-const RenderChapterItem = memo(({ item, data, lastReaded, readComic }: RenderChapterItemProps) => {
+const RenderChapterItem = memo(({ item, lastReaded, readNovel }: RenderChapterItemProps) => {
   const styles = useStyles();
   const globalStyles = useGlobalStyles();
 
@@ -450,43 +359,26 @@ const RenderChapterItem = memo(({ item, data, lastReaded, readComic }: RenderCha
   let isLastReaded =
     lastReaded &&
     lastReaded.episode &&
-    item.chapter
-      .toLowerCase()
-      .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-      .replace(item.chapterUrl.includes('softkomik') ? /^0+/ : '', '')
-      .replace('chapter ', '')
-      .trim() ===
-      lastReaded.episode
-        .toLowerCase()
-        .replace('indonesianTitle' in data ? 'chapter 0' : '', '')
-        .replace(lastReaded.link.includes('softkomik') ? 'chapter 00' : '', '')
-        .replace('chapter ', '')
-        .replace(lastReaded.link.includes('softkomik') ? /^0+/ : '', '')
-        .trim();
+    item.chapter.toLowerCase().replace('chapter ', '').trim() ===
+      lastReaded.episode.toLowerCase().replace('chapter ', '').trim();
   if (!isLastReaded) {
     lastReaded?.link === item.chapterUrl && (isLastReaded = true);
   }
   return (
     <TouchableOpacity
       style={styles.chapterItem}
-      onPress={() => readComic(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
+      onPress={() => readNovel(item.chapterUrl, isLastReaded ? lastReaded : undefined)}>
       <View style={styles.chapterTitleContainer}>
         <Text style={[globalStyles.text, styles.chapterText]}>
           {item.chapter.includes('Chapter') ? item.chapter : `Chapter ${item.chapter}`}
         </Text>
       </View>
       <View style={styles.chapterDetailsContainer}>
-        {'releaseDate' in item && (
-          <>
-            <Text style={[globalStyles.text, styles.chapterDetailText]}>
-              <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
-              {item.releaseDate}
-            </Text>
-            <Text style={[globalStyles.text, styles.chapterDetailText]}>
-              <Icon color={styles.chapterDetailText.color} name="eye" size={12} /> {item.views}x
-              dilihat
-            </Text>
-          </>
+        {item.releaseDate && (
+          <Text style={[globalStyles.text, styles.chapterDetailText]}>
+            <Icon color={styles.chapterDetailText.color} name="calendar" size={12} />{' '}
+            {item.releaseDate}
+          </Text>
         )}
         {isLastReaded && (
           <Text style={[globalStyles.text, styles.chapterDetailText, styles.lastReadedText]}>
@@ -545,103 +437,74 @@ function useStyles() {
           fontSize: 20,
           fontWeight: 'bold',
         },
-        indonesianTitle: {
-          fontSize: 14,
-        },
         author: {
           color: colorScheme === 'dark' ? '#5ddfff' : '#00608d',
+          fontWeight: 'bold',
         },
-        secondaryInfoContainer: {},
         genreContainer: {
-          flex: 1,
-          gap: 4,
           flexWrap: 'wrap',
           flexDirection: 'row',
+          gap: 5,
         },
         genre: {
-          color: globalStyles.text.color,
           fontWeight: 'bold',
-          alignSelf: 'flex-start',
-          padding: 4,
+          padding: 6,
+          color: globalStyles.text.color,
+        },
+        secondaryInfoContainer: {
+          backgroundColor: theme.colors.elevation.level1,
+          padding: 10,
+          borderRadius: 12,
         },
         additionalInfo: {
           flexDirection: 'row',
           gap: 4,
           flexWrap: 'wrap',
-          marginBottom: 12,
+          marginBottom: 10,
         },
         additionalInfoTextSurface: {
           borderRadius: 8,
-          backgroundColor: theme.colors.secondaryContainer,
+          backgroundColor: theme.colors.elevation.level3,
         },
         additionalInfoText: {
-          color: theme.colors.onSecondaryContainer,
+          paddingHorizontal: 8,
+          paddingVertical: 5,
           fontWeight: 'bold',
-          alignSelf: 'flex-start',
-          padding: 4,
+          color: theme.colors.primary,
         },
         listChapterText: {
           fontWeight: 'bold',
           fontSize: 22,
-          marginBottom: 10,
-        },
-        chapterButtonsContainer: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginBottom: 10,
-          gap: 10,
-        },
-        chapterButton: {
-          flex: 1,
-          borderRadius: 10,
-        },
-        chapterButtonLabel: {
-          fontSize: 12,
+          marginVertical: 10,
+          textAlign: 'center',
         },
         chapterItem: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingVertical: 15,
-          paddingHorizontal: 10,
-          backgroundColor: colorScheme === 'dark' ? '#1a1a1a' : '#ffffff',
-          borderRadius: 10,
-          marginBottom: 8,
-          elevation: 3,
+          padding: 15,
+          backgroundColor: theme.colors.surface,
+          flexDirection: 'column',
+          gap: 5,
         },
         chapterTitleContainer: {
-          flex: 2,
+          flex: 1,
         },
         chapterText: {
+          fontWeight: 'bold',
           fontSize: 16,
-          fontWeight: '600',
-          color: colorScheme === 'dark' ? '#ffffff' : '#333333',
         },
         chapterDetailsContainer: {
-          flex: 1,
-          alignItems: 'flex-end',
+          flexDirection: 'row',
+          gap: 10,
         },
         chapterDetailText: {
           fontSize: 12,
-          color: colorScheme === 'dark' ? '#cccccc' : '#666666',
-          marginBottom: 3,
+          color: theme.colors.outline,
+          fontWeight: '500',
         },
         lastReadedText: {
-          color: theme.colors.onPrimaryContainer,
+          color: '#4CAF50',
           fontWeight: 'bold',
         },
-        chapterDivider: {
-          backgroundColor: 'transparent',
-          height: 0,
-        },
       }),
-    [
-      colorScheme,
-      dimensions.width,
-      globalStyles.text.color,
-      theme.colors.onPrimaryContainer,
-      theme.colors.onSecondaryContainer,
-      theme.colors.secondaryContainer,
-    ],
+    [theme, globalStyles, colorScheme, dimensions],
   );
 }

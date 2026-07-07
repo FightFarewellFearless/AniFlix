@@ -21,6 +21,7 @@ import { Movies } from '@utils/scrapers/animeMovie';
 
 import { LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import { FilmHomePage } from '@utils/scrapers/film';
+import { NovelLatestRelease } from '@utils/scrapers/novel';
 import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '@component/Home/AnimeList';
 import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
@@ -34,6 +35,7 @@ export function ListAnimeComponent(
     | { newAnimeData: Movies; type: 'movie' }
     | { newAnimeData: LatestComicsRelease; type: 'comics' }
     | { newAnimeData: FilmHomePage[number]; type: 'film' }
+    | { newAnimeData: NovelLatestRelease; type: 'novel' }
   ) & {
     navigationProp:
       | NativeStackNavigationProp<HomeNavigator, 'AnimeList', undefined>
@@ -51,6 +53,8 @@ export function ListAnimeComponent(
       return 'Movie';
     } else if (props.type === 'comics') {
       return 'Chapter ' + props.newAnimeData.latestChapter;
+    } else if (props.type === 'novel') {
+      return props.newAnimeData.latestChapter;
     } else if (props.type === 'film') {
       return props.newAnimeData.contentType === 'movie' ? 'Movie' : 'Series';
     } else {
@@ -62,6 +66,8 @@ export function ListAnimeComponent(
       return 'Sub Indo';
     } else if (props.type === 'comics') {
       return props.newAnimeData.type + ' | ' + moment(props.newAnimeData.updatedAt).fromNow();
+    } else if (props.type === 'novel') {
+      return props.newAnimeData.type;
     } else {
       return props.type === 'film' ? props.newAnimeData.year : props.newAnimeData.releaseDay;
     }
@@ -87,9 +93,11 @@ export function ListAnimeComponent(
                 ? props.newAnimeData.url
                 : props.type === 'comics'
                   ? props.newAnimeData.detailUrl
-                  : props.type === 'film'
-                    ? props.newAnimeData.url
-                    : props.newAnimeData.streamingLink,
+                  : props.type === 'novel'
+                    ? props.newAnimeData.detailUrl
+                    : props.type === 'film'
+                      ? props.newAnimeData.url
+                      : props.newAnimeData.streamingLink,
             type: props.type,
           }),
         );
@@ -143,7 +151,11 @@ export function ListAnimeComponent(
             <Icon
               color={styles.animeReleaseDay.color}
               name={
-                props.type === 'movie' ? 'check' : props.type === 'comics' ? 'book' : 'calendar'
+                props.type === 'movie'
+                  ? 'check'
+                  : props.type === 'comics' || props.type === 'novel'
+                    ? 'book'
+                    : 'calendar'
               }
             />{' '}
             {releaseDay}

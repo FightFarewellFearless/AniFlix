@@ -64,10 +64,10 @@
     "react-native-screens": "~4.25.2",
     "react-native-svg": "15.15.5",
     "react-native-system-navigation-bar": "^2.8.0",
+    "react-native-url-polyfill": "^3.0.0",
     "react-native-webview": "13.16.1",
     "react-native-worklets": "next",
-    "react-native-zip-archive": "^7.1.1",
-    "url": "^0.11.3"
+    "react-native-zip-archive": "^7.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",

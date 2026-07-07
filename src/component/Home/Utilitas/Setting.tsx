@@ -145,7 +145,8 @@ function Setting(_props: Props) {
           val =>
             val.title?.trim() === result.title?.trim() &&
             val.isComics === result.isComics &&
-            val.isMovie === result.isMovie,
+            val.isMovie === result.isMovie &&
+            (val as any).isNovel === (result as any).isNovel,
         );
 
         if (dataINDEX >= 0) {

@@ -2,6 +2,7 @@ import { MovieDetail, MovieStreamingDetail } from '@utils/scrapers/animeMovie';
 import { ComicsDetail, ComicsReading } from '@utils/scrapers/comicsv2';
 import { FilmDetail_Stream, FilmDetails_Detail } from '@utils/scrapers/film';
 import { KomikuDetail, KomikuReading } from '@utils/scrapers/komiku';
+import { NovelDetail, NovelReading } from '@utils/scrapers/novel';
 import { AniDetail, AniStreaming, EpisodeBaruHome } from './anime';
 
 type HomeNavigator = {
@@ -42,10 +43,21 @@ type RootStackNavigator = {
       lastDuration?: number;
     };
   };
+  NovelDetail: {
+    data: NovelDetail;
+    link: string;
+  };
+  NovelReading: {
+    data: NovelReading;
+    link: string;
+    historyData?: {
+      lastDuration?: number;
+    };
+  };
   FromUrl: {
     link: string;
     title: string;
-    type?: 'comics' | 'anime' | 'movie' | 'film';
+    type?: 'comics' | 'anime' | 'movie' | 'film' | 'novel';
     historyData?: {
       resolution: string;
       lastDuration: number;
@@ -90,7 +102,7 @@ type RootStackNavigator = {
     message?: string;
   };
   SeeMore: {
-    type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList';
+    type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList' | 'NovelList';
   };
   ErrorScreen: { error: Error };
 };

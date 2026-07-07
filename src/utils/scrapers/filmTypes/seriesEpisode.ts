@@ -84,8 +84,7 @@ interface Series {
   updatedAt: CreatedAt;
 }
 
-interface CreatedAt {
-}
+interface CreatedAt {}
 
 interface Keyword {
   id: number;

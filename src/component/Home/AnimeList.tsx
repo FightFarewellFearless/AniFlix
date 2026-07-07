@@ -59,6 +59,7 @@ import {
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
+  NovelListContext,
   SeriesListHomeContext,
 } from '@misc/context';
 import { OTAJSVersion, version } from '@root/package.json';
@@ -67,6 +68,7 @@ import { AnimeMovieWebView, getLatestMovie, Movies } from '@utils/scrapers/anime
 import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
+import { getLatestNovelRelease, NovelLatestRelease } from '@utils/scrapers/novel';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -418,6 +420,7 @@ function HomeList(props: HomeProps) {
               retryMovie={retryMovie}
             />
             <ComicList key={'comick' + refreshingKey} />
+            <NovelList key={'novel' + refreshingKey} />
             <TouchableOpacity
               onPress={toggleJadwal}
               style={[
@@ -940,6 +943,83 @@ function ComicListUNMEMO() {
           horizontal
           data={data.slice(0, 24)}
           renderItem={renderComics}
+          keyExtractor={z => z.title}
+          extraData={styles}
+          showsHorizontalScrollIndicator={false}
+        />
+      ) : (
+        !isError && <ShowSkeletonLoading />
+      )}
+    </View>
+  );
+}
+
+const NovelList = memo(NovelListUNMEMO);
+function NovelListUNMEMO() {
+  const styles = useStyles();
+  const [isError, setIsError] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackNavigator, 'AnimeDetail'>>();
+
+  const { paramsState: data, setParamsState: setData } = useContext(NovelListContext);
+
+  useEffect(() => {
+    const task = requestIdleCallback(() => {
+      getLatestNovelRelease()
+        .then(z => {
+          setData?.(z);
+        })
+        .catch(() => setIsError(true));
+    });
+    return () => {
+      cancelIdleCallback(task);
+      setData?.([]);
+    };
+  }, [setData]);
+
+  const renderNovel = useCallback(
+    ({ item }: ListRenderItemInfo<NovelLatestRelease>) => (
+      <ListAnimeComponent
+        gap
+        newAnimeData={item}
+        type="novel"
+        key={'btn' + item.title}
+        navigationProp={navigation as any}
+      />
+    ),
+    [navigation],
+  );
+
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Novel Terbaru</Text>
+        <TouchableOpacity
+          style={styles.seeMoreButton}
+          disabled={!data || data.length === 0}
+          onPress={() => {
+            navigation.dispatch(StackActions.push('SeeMore', { type: 'NovelList' }));
+          }}>
+          <Text style={styles.seeMoreText}>Lihat Semua</Text>
+          <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
+        </TouchableOpacity>
+      </View>
+
+      {isError && (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+          </Text>
+        </View>
+      )}
+
+      {data && data.length !== 0 ? (
+        <FlashList
+          renderScrollComponent={RenderScrollComponent}
+          contentContainerStyle={{ gap: 3 }}
+          horizontal
+          data={data.slice(0, 10)}
+          renderItem={renderNovel}
           keyExtractor={z => z.title}
           extraData={styles}
           showsHorizontalScrollIndicator={false}

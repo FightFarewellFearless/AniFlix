@@ -4,11 +4,13 @@ import {
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
+  NovelListContext,
   SeriesListHomeContext,
 } from '@misc/context';
 import { Movies } from '@utils/scrapers/animeMovie';
 import { LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import { FilmHomePage } from '@utils/scrapers/film';
+import { NovelLatestRelease } from '@utils/scrapers/novel';
 import React, { useMemo, useState } from 'react';
 
 export default function HomeContext({ children }: { children: React.ReactNode }) {
@@ -20,6 +22,7 @@ export default function HomeContext({ children }: { children: React.ReactNode })
   const [filmParamsState, setFilmParamsState] = useState<FilmHomePage>([]);
   const [seriesParamsState, setSeriesParamsState] = useState<FilmHomePage>([]);
   const [comicsData, setComicsData] = useState<LatestComicsRelease[]>([]);
+  const [novelData, setNovelData] = useState<NovelLatestRelease[]>([]);
 
   return (
     <EpisodeBaruHomeContext value={useMemo(() => ({ paramsState, setParamsState }), [paramsState])}>
@@ -55,7 +58,16 @@ export default function HomeContext({ children }: { children: React.ReactNode })
                 }),
                 [comicsData],
               )}>
-              {children}
+              <NovelListContext
+                value={useMemo(
+                  () => ({
+                    paramsState: novelData,
+                    setParamsState: setNovelData,
+                  }),
+                  [novelData],
+                )}>
+                {children}
+              </NovelListContext>
             </ComicsListContext>
           </MovieListHomeContext>
         </SeriesListHomeContext>

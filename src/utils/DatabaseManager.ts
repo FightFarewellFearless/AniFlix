@@ -106,10 +106,10 @@ export function toNewHistoryStructure(oldHistory: HistoryJSON[]): {
   return {
     keyCollectionsOrder: oldHistory.map(
       x =>
-        `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}` as const,
+        `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}:${x.isNovel ?? 'false'}` as const,
     ),
     newHistory: oldHistory.map(x => ({
-      key: `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}`,
+      key: `historyItem:${x.title.trim()}:${x.isComics ?? 'false'}:${x.isMovie ?? 'false'}:${x.isNovel ?? 'false'}`,
       data: x,
     })),
   };

@@ -27,7 +27,7 @@ import { Button, useTheme } from 'react-native-paper';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
-import url from 'url';
+import { URL } from 'react-native-url-polyfill';
 
 import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 
@@ -573,7 +573,7 @@ function Video(props: Props) {
               setSupportMultipleWindows={false}
               onShouldStartLoadWithRequest={navigator => {
                 const res =
-                  navigator.url.includes(url.parse(data.streamingLink).host as string) ||
+                  navigator.url.includes(new URL(data.streamingLink).host as string) ||
                   navigator.url.includes(defaultLoadingGif);
                 if (!res) {
                   webviewRef.current?.stopLoading();
@@ -598,7 +598,7 @@ function Video(props: Props) {
 </body>`,
                     }
                   : { uri: data.streamingLink }),
-                baseUrl: `https://${url.parse(data.streamingLink).host}`,
+                baseUrl: `https://${new URL(data.streamingLink).host}`,
               }}
               userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
               originWhitelist={['*']}

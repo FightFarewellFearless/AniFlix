@@ -3,12 +3,14 @@ import { __ALIAS as aliasComics1, DOMAIN as comics1Domain } from './scrapers/com
 import { __ALIAS as aliasComics2, DOMAIN as comics2Domain } from './scrapers/comics2';
 import { __ALIAS as filmAlias, FILM_DOMAIN as filmDomain } from './scrapers/film';
 import { __ALIAS as aliasKomiku, DOMAIN as komikuDomain } from './scrapers/komiku';
-import { URL } from 'url';
+import { __ALIAS as aliasNovel, DOMAIN as novelDomain } from './scrapers/novel';
+import { URL } from 'react-native-url-polyfill';
 
-type Type = 'komiku' | 'comics1' | 'comics2' | 'anime' | 'movie' | 'film';
+type Type = 'komiku' | 'comics1' | 'comics2' | 'anime' | 'movie' | 'film' | 'novel';
 
 export function determineType(url: string): Type {
   const urlObj = new URL(url);
+  if (urlObj.hostname.includes(aliasNovel)) return 'novel';
   if (urlObj.hostname.includes(aliasKomiku)) return 'komiku';
   if (urlObj.hostname.includes(aliasComics1)) return 'comics1';
   if (urlObj.hostname.includes(aliasComics2)) return 'comics2';
@@ -25,6 +27,10 @@ export function generateUrlWithLatestDomain(url: string): string {
   let matchedAlias = '';
 
   switch (type) {
+    case 'novel':
+      newDomain = novelDomain;
+      matchedAlias = aliasNovel;
+      break;
     case 'komiku':
       newDomain = komikuDomain;
       matchedAlias = aliasKomiku;

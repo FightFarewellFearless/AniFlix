@@ -19,20 +19,27 @@ import {
   EpisodeBaruHomeContext,
   FilmListHomeContext,
   MovieListHomeContext,
+  NovelListContext,
   SeriesListHomeContext,
 } from '@misc/context';
 import AnimeAPI from '@utils/AnimeAPI';
 import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import { FilmHomePage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
+import { getLatestNovelRelease, NovelLatestRelease } from '@utils/scrapers/novel';
 import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
-type ItemType = NewAnimeList | Movies | LatestComicsRelease | FilmHomePage[number];
+type ItemType =
+  | NewAnimeList
+  | Movies
+  | LatestComicsRelease
+  | FilmHomePage[number]
+  | NovelLatestRelease;
 
 interface SeeMoreUIProps {
   data: ItemType[];
-  type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList';
+  type: 'AnimeList' | 'MovieList' | 'ComicsList' | 'FilmList' | 'SeriesList' | 'NovelList';
   onLoadMore: () => Promise<void>;
   navigation: Props['navigation'];
 }
@@ -58,7 +65,9 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
               ? 'Movie terbaru'
               : type === 'ComicsList'
                 ? 'Komik terbaru'
-                : 'Anime terbaru',
+                : type === 'NovelList'
+                  ? 'Novel terbaru'
+                  : 'Anime terbaru',
     });
   }, [navigation, type]);
 
@@ -67,7 +76,7 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
     setIsLoading(true);
     try {
       await onLoadMore();
-    } catch (e) {
+    } catch {
       ToastAndroid.show('Error saat memuat item', ToastAndroid.SHORT);
     } finally {
       setIsLoading(false);
@@ -113,6 +122,17 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
             fromSeeMore
             type="comics"
             newAnimeData={item as LatestComicsRelease}
+            navigationProp={navigation}
+          />
+        );
+      }
+      if (type === 'NovelList') {
+        return (
+          <ListAnimeComponent
+            gap
+            fromSeeMore
+            type="novel"
+            newAnimeData={item as NovelLatestRelease}
             navigationProp={navigation}
           />
         );
@@ -293,6 +313,29 @@ const ComicsContainer = ({ navigation }: { navigation: Props['navigation'] }) =>
   );
 };
 
+const NovelContainer = ({ navigation }: { navigation: Props['navigation'] }) => {
+  const { paramsState, setParamsState } = useContext(NovelListContext);
+  const data = paramsState || [];
+
+  const handleLoadMore = async () => {
+    const page = Math.floor((data.length ?? 0) / 10) + 1;
+    const newData = await getLatestNovelRelease(page + 1);
+
+    if (setParamsState) {
+      setParamsState(prev => {
+        const combined = [...prev, ...newData];
+        return combined.filter(
+          (item, index, self) => index === self.findIndex(a => a.title === item.title),
+        );
+      });
+    }
+  };
+
+  return (
+    <SeeMoreUI data={data} type="NovelList" onLoadMore={handleLoadMore} navigation={navigation} />
+  );
+};
+
 function SeeMore(props: Props) {
   const { type } = props.route.params;
   switch (type) {
@@ -304,6 +347,8 @@ function SeeMore(props: Props) {
       return <MovieContainer navigation={props.navigation} />;
     case 'ComicsList':
       return <ComicsContainer navigation={props.navigation} />;
+    case 'NovelList':
+      return <NovelContainer navigation={props.navigation} />;
     case 'AnimeList':
     default:
       return <AnimeContainer navigation={props.navigation} />;

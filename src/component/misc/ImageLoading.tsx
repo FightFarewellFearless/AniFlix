@@ -11,11 +11,12 @@ import {
   View,
 } from 'react-native';
 import Reanimated, { AnimatedStyle } from 'react-native-reanimated';
-import URL from 'url';
+import { URL } from 'react-native-url-polyfill';
 
 import { generateUrlWithLatestDomain } from '@utils/domainChanger';
 import { BASE } from '@utils/scrapers/animeSeries';
 import { BASE_URL } from '@utils/scrapers/comics1';
+import { DOMAIN as NOVEL_DOMAIN } from '@utils/scrapers/novel';
 import LoadingIndicator from './LoadingIndicator';
 
 const ImageLoading = (
@@ -63,7 +64,7 @@ const ImageLoading = (
     if (typeof baseSourceObj.uri === 'string') {
       if (typeof source === 'object' && !Array.isArray(source)) {
         if (baseSourceObj.uri.includes('otakudesu')) {
-          const withoutDomain = URL.parse(baseSourceObj.uri);
+          const withoutDomain = new URL(baseSourceObj.uri);
           baseSourceObj.uri = `${withoutDomain.protocol}//${BASE.domain}${withoutDomain.pathname}`;
         } else {
           try {
@@ -79,6 +80,11 @@ const ImageLoading = (
     if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('softkomik')) {
       computedHeaders.Referer = BASE_URL + '/';
       computedHeaders.Origin = BASE_URL;
+    }
+
+    if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('meionovels.com')) {
+      computedHeaders.Referer = `https://${NOVEL_DOMAIN}/`;
+      computedHeaders.Origin = `https://${NOVEL_DOMAIN}`;
     }
 
     if (Object.keys(computedHeaders).length > 0) {

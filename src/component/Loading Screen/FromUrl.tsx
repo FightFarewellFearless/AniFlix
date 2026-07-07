@@ -21,8 +21,9 @@ import { getMovieDetail, getStreamingDetail } from '@utils/scrapers/animeMovie';
 import { ComicsDetail, getComicsDetailFromUrl, getComicsReading } from '@utils/scrapers/comicsv2';
 import { getFilmDetails } from '@utils/scrapers/film';
 import { getKomikuDetailFromUrl, getKomikuReading, KomikuDetail } from '@utils/scrapers/komiku';
+import { getNovelDetail, getNovelReading } from '@utils/scrapers/novel';
 import { setFilmStreamHistory } from '@utils/setFilmStreamHistory';
-import URL from 'url';
+import { URL } from 'react-native-url-polyfill';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'FromUrl'>;
 
@@ -96,7 +97,7 @@ function FromUrl(props: Props) {
         return;
       }
       if (props.route.params.type === 'movie') {
-        if (URL.parse(link)?.pathname?.split('/')[1] === 'anime') {
+        if (new URL(link)?.pathname?.split('/')[1] === 'anime') {
           getMovieDetail(link, abort.signal)
             .then(result => {
               if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
@@ -160,7 +161,10 @@ function FromUrl(props: Props) {
             })
             .catch(handleError);
         }
-      } else if (props.route.params.type === 'anime' || props.route.params.type === undefined) {
+      } else if (
+        (props.route.params.type === 'anime' || props.route.params.type === undefined) &&
+        !link.includes('meionovels.com')
+      ) {
         AnimeAPI.fromUrl(link, resolution, !!resolution, undefined, abort.signal)
           .then(async result => {
             if (result === 'Unsupported') {
@@ -233,6 +237,49 @@ function FromUrl(props: Props) {
             }
           })
           .catch(handleError);
+      } else if (props.route.params.type === 'novel' || link.includes('meionovels.com')) {
+        const pathSegments = new URL(link)?.pathname?.split('/').filter(Boolean) ?? [];
+        const goToDetail = pathSegments.length <= 2;
+
+        if (goToDetail) {
+          getNovelDetail(link, abort.signal)
+            .then(result => {
+              if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+              props.navigation.dispatch(
+                StackActions.replace('NovelDetail', {
+                  data: result,
+                  link: link,
+                }),
+              );
+            })
+            .catch(handleError);
+        } else {
+          getNovelReading(link, abort.signal)
+            .then(async result => {
+              if (abort.signal.aborted || props.navigation.getState().routes.length === 1) return;
+              props.navigation.dispatch(
+                StackActions.replace('NovelReading', {
+                  data: result,
+                  historyData: props.route.params.historyData,
+                  link: link,
+                }),
+              );
+              setHistory(result, link, false, props.route.params.historyData, false, false, true);
+
+              const title = result.title;
+              const watchLater: watchLaterJSON[] = JSON.parse(
+                (await DatabaseManager.get('watchLater'))!,
+              );
+              const watchLaterIndex = watchLater.findIndex(
+                z => z.title.trim() === title.trim() && z.isNovel === true,
+              );
+              if (watchLaterIndex >= 0) {
+                controlWatchLater('delete', watchLaterIndex);
+                ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+              }
+            })
+            .catch(handleError);
+        }
       } else if (props.route.params.type === 'film') {
         if (props.route.params.link.includes('tv12.idlix')) {
           props.navigation.goBack();

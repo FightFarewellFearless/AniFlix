@@ -40,12 +40,18 @@ import { Movies, searchMovie } from '@utils/scrapers/animeMovie';
 import { ComicsSearch, comicsSearch } from '@utils/scrapers/comicsv2';
 import { SearchResult, searchFilm } from '@utils/scrapers/film';
 import { __ALIAS as KomikuAlias, KomikuSearch, komikuSearch } from '@utils/scrapers/komiku';
+import { searchNovel, NovelSearch } from '@utils/scrapers/novel';
 import { RenderScrollComponent } from './AnimeList';
 type SectionHeader = { type: 'header'; title: string };
 type ComicItem = (ComicsSearch | KomikuSearch) & { source?: string };
 type ComicsComboSearch = ComicItem | SectionHeader;
 
-type AnySearchItem = Movies | SearchAnimeResult | ComicsComboSearch | SearchResult[number];
+type AnySearchItem =
+  | Movies
+  | SearchAnimeResult
+  | ComicsComboSearch
+  | SearchResult[number]
+  | NovelSearch;
 
 type SearchRowItem = Exclude<AnySearchItem, SectionHeader>;
 
@@ -64,8 +70,9 @@ function Search(props: Props) {
   const styles = useStyles();
   const theme = useTheme();
 
-  const [searchType, setSearchType] = useState<'anime' | 'comics' | 'film'>('anime');
+  const [searchType, setSearchType] = useState<'anime' | 'comics' | 'novel' | 'film'>('anime');
   const [searchedSearchType, setSearchedSearchType] = useState(searchType);
+  const [readingSubtype, setReadingSubtype] = useState<'comics' | 'novel'>('comics');
   const textInputRef = useRef<TextInputType>(null);
 
   const isFocus = useRef(true);
@@ -97,6 +104,7 @@ function Search(props: Props) {
   const [movieData, setMovieData] = useState<null | Movies[]>(null);
   const [filmData, setFilmData] = useState<null | SearchResult>(null);
   const [comicsData, setComicsData] = useState<null | ComicsComboSearch[]>(null);
+  const [novelData, setNovelData] = useState<null | NovelSearch[]>(null);
   const [loading, setLoading] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('');
   const [showSearchHistory, setShowSearchHistory] = useState(false);
@@ -215,7 +223,7 @@ function Search(props: Props) {
           setCurrentSearchQuery(searchText.trim());
           setLoading(false);
         });
-    } else {
+    } else if (searchType === 'comics') {
       Promise.allSettled([
         comicsSearch(searchText, abortController.current?.signal),
         komikuSearch(searchText, abortController.current?.signal),
@@ -233,6 +241,7 @@ function Search(props: Props) {
           setData(null);
           setMovieData(null);
           setFilmData(null);
+          setNovelData(null);
 
           const allItems: ComicItem[] = [
             ...comicsResult,
@@ -255,6 +264,26 @@ function Search(props: Props) {
           });
 
           setComicsData(sectionedData);
+        })
+        .catch(handleError)
+        .finally(() => {
+          setSearchedSearchType(searchType);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
+          }
+          searchHistory.unshift(searchText.trim());
+          DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
+          setCurrentSearchQuery(searchText.trim());
+          setLoading(false);
+        });
+    } else if (searchType === 'novel') {
+      searchNovel(searchText, abortController.current?.signal)
+        .then(result => {
+          setData(null);
+          setMovieData(null);
+          setFilmData(null);
+          setComicsData(null);
+          setNovelData(result);
         })
         .catch(handleError)
         .finally(() => {
@@ -315,9 +344,11 @@ function Search(props: Props) {
     (data?.result?.length ?? 0) > 0 ||
     (movieData && movieData.length > 0) ||
     (comicsData && comicsData.length > 0) ||
-    (filmData && filmData.length > 0);
+    (filmData && filmData.length > 0) ||
+    (novelData && novelData.length > 0);
   const isSearchEmpty =
-    !hasSearchResults && (data !== null || comicsData !== null || filmData !== null);
+    !hasSearchResults &&
+    (data !== null || comicsData !== null || filmData !== null || novelData !== null);
   const isLoading = listAnimeLoading || isPending;
   const showDefaultList =
     !hasSearchResults && !isSearchEmpty && listAnime !== null && listAnime.length > 0;
@@ -327,13 +358,15 @@ function Search(props: Props) {
     (listAnime === null || listAnime.length === 0) &&
     data === null &&
     comicsData === null &&
-    filmData === null;
+    filmData === null &&
+    novelData === null;
 
   const flashListData: AnySearchItem[] = [
     ...(movieData ?? []),
     ...(data?.result ?? []),
     ...(comicsData ?? []),
     ...(filmData ?? []),
+    ...(novelData ?? []),
   ];
 
   return (
@@ -371,8 +404,14 @@ function Search(props: Props) {
 
       <SegmentedButtons
         style={{ marginTop: 6 }}
-        value={searchType}
-        onValueChange={setSearchType}
+        value={searchType === 'comics' || searchType === 'novel' ? 'reading' : searchType}
+        onValueChange={val => {
+          if (val === 'reading') {
+            setSearchType(readingSubtype);
+          } else {
+            setSearchType(val as any);
+          }
+        }}
         buttons={[
           {
             value: 'anime',
@@ -380,9 +419,9 @@ function Search(props: Props) {
             icon: 'movie-search',
           },
           {
-            value: 'comics',
-            label: 'Cari komik',
-            icon: 'book-search',
+            value: 'reading',
+            label: 'Cari bacaan',
+            icon: 'book-open-page-variant',
           },
           {
             value: 'film',
@@ -391,6 +430,29 @@ function Search(props: Props) {
           },
         ]}
       />
+
+      {(searchType === 'comics' || searchType === 'novel') && (
+        <SegmentedButtons
+          style={{ marginTop: 6, marginHorizontal: 20 }}
+          value={searchType}
+          onValueChange={val => {
+            setSearchType(val as any);
+            setReadingSubtype(val as any);
+          }}
+          buttons={[
+            {
+              value: 'comics',
+              label: 'Komik',
+              icon: 'book',
+            },
+            {
+              value: 'novel',
+              label: 'Novel',
+              icon: 'book-open',
+            },
+          ]}
+        />
+      )}
 
       {isLoading && (
         <View
@@ -513,11 +575,13 @@ function Search(props: Props) {
                   lebih umum.
                 </Text>
                 <View style={{ alignItems: 'flex-start' }}>
-                  {proTips[searchedSearchType].map(proTip => (
-                    <Text style={[globalStyles.text, styles.proTip]} key={proTip}>
-                      <Icon name="lightbulb-o" size={12} color={theme.colors.primary} /> {proTip}
-                    </Text>
-                  ))}
+                  {proTips[searchedSearchType === 'novel' ? 'comics' : searchedSearchType].map(
+                    (proTip: string) => (
+                      <Text style={[globalStyles.text, styles.proTip]} key={proTip}>
+                        <Icon name="lightbulb-o" size={12} color={theme.colors.primary} /> {proTip}
+                      </Text>
+                    ),
+                  )}
                 </View>
               </View>
             </Reanimated.View>
@@ -555,8 +619,14 @@ function Search(props: Props) {
           style={styles.searchHistoryContainer}>
           <View style={{ flex: 1 }}>
             <SegmentedButtons
-              value={searchType}
-              onValueChange={setSearchType}
+              value={searchType === 'comics' || searchType === 'novel' ? 'reading' : searchType}
+              onValueChange={val => {
+                if (val === 'reading') {
+                  setSearchType(readingSubtype);
+                } else {
+                  setSearchType(val as any);
+                }
+              }}
               buttons={[
                 {
                   value: 'anime',
@@ -564,9 +634,9 @@ function Search(props: Props) {
                   icon: 'movie-search',
                 },
                 {
-                  value: 'comics',
-                  label: 'Cari komik',
-                  icon: 'book-search',
+                  value: 'reading',
+                  label: 'Cari bacaan',
+                  icon: 'book-open-page-variant',
                 },
                 {
                   value: 'film',
@@ -575,6 +645,28 @@ function Search(props: Props) {
                 },
               ]}
             />
+            {(searchType === 'comics' || searchType === 'novel') && (
+              <SegmentedButtons
+                style={{ marginTop: 6, marginHorizontal: 20 }}
+                value={searchType}
+                onValueChange={val => {
+                  setSearchType(val as any);
+                  setReadingSubtype(val as any);
+                }}
+                buttons={[
+                  {
+                    value: 'comics',
+                    label: 'Komik',
+                    icon: 'book',
+                  },
+                  {
+                    value: 'novel',
+                    label: 'Novel',
+                    icon: 'book-open',
+                  },
+                ]}
+              />
+            )}
             <FlashList
               drawDistance={250}
               keyboardShouldPersistTaps="always"
@@ -608,20 +700,22 @@ function Search(props: Props) {
           </View>
         </Reanimated_KeyboardAvoidingView>
       )}
-      {(data !== null || comicsData !== null || filmData !== null) && !loading && (
-        <TouchableOpacityAnimated
-          style={styles.closeSearchResult}
-          onPress={() => {
-            setData(null);
-            setMovieData(null);
-            setComicsData(null);
-            setFilmData(null);
-          }}
-          entering={ZoomIn}
-          exiting={ZoomOut}>
-          <Icon name="times" size={30} style={{ alignSelf: 'center' }} color="#dadada" />
-        </TouchableOpacityAnimated>
-      )}
+      {(data !== null || comicsData !== null || filmData !== null || novelData !== null) &&
+        !loading && (
+          <TouchableOpacityAnimated
+            style={styles.closeSearchResult}
+            onPress={() => {
+              setData(null);
+              setMovieData(null);
+              setComicsData(null);
+              setFilmData(null);
+              setNovelData(null);
+            }}
+            entering={ZoomIn}
+            exiting={ZoomOut}>
+            <Icon name="times" size={30} style={{ alignSelf: 'center' }} color="#dadada" />
+          </TouchableOpacityAnimated>
+        )}
       <Snackbar
         style={{ zIndex: 2, position: 'absolute', bottom: 0, alignSelf: 'center' }}
         visible={loading}
@@ -733,12 +827,17 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
     return 'synopsis' in data;
   };
 
+  const isNovel = (data: SearchRowItem): data is NovelSearch => {
+    return 'authors' in data && 'releaseYear' in data;
+  };
+
   return (
     <TouchableOpacityAnimated
       entering={FadeInRight}
       style={[styles.listContainer, { minHeight: 100 }]}
       onPress={() => {
-        if (!isComic(item) && !isAnime(item) && !isMovie(item) && !isFilm(item)) return;
+        if (!isComic(item) && !isAnime(item) && !isMovie(item) && !isFilm(item) && !isNovel(item))
+          return;
 
         props.navigation.dispatch(
           StackActions.push('FromUrl', {
@@ -749,14 +848,18 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                 ? item.url
                 : isComic(item)
                   ? item.detailUrl
-                  : item.animeUrl,
+                  : isNovel(item)
+                    ? item.detailUrl
+                    : item.animeUrl,
             type: isFilm(item)
               ? 'film'
               : isMovie(item)
                 ? 'movie'
                 : isComic(item)
                   ? 'comics'
-                  : 'anime',
+                  : isNovel(item)
+                    ? 'novel'
+                    : 'anime',
           }),
         );
       }}>
@@ -767,7 +870,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
           styles.listImage,
           isComic(item) && 'concept' in item ? { width: 150, height: 'auto' } : undefined,
         ]}>
-        {isComic(item) && (
+        {(isComic(item) || isNovel(item)) && (
           <View
             style={{
               position: 'absolute',
@@ -778,7 +881,8 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
               borderRadius: 8,
             }}>
             <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>
-              {!('concept' in item) && item.latestChapter && 'Chapter'} {item.latestChapter}
+              {isComic(item) && !('concept' in item) && item.latestChapter && 'Chapter'}{' '}
+              {item.latestChapter}
             </Text>
           </View>
         )}
@@ -830,11 +934,19 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                       ? '#920000'
                       : isMovie(item)
                         ? '#a06800'
-                        : '#006600',
+                        : isNovel(item)
+                          ? '#a000a0'
+                          : '#006600',
                 },
               ]}>
               <Text style={[globalStyles.text, styles.animeSearchListDetailText]}>
-                {isMovie(item) ? 'Movie' : isComic(item) || isFilm(item) ? item.type : item.status}
+                {isMovie(item)
+                  ? 'Movie'
+                  : isComic(item) || isFilm(item)
+                    ? item.type
+                    : isNovel(item)
+                      ? 'Novel'
+                      : item.status}
               </Text>
             </View>
           </View>
@@ -873,7 +985,7 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                   ]}
                   numberOfLines={1}>
                   <Icon name="tags" color={styles.animeSearchListDetailText.color} />{' '}
-                  {isAnime(item)
+                  {isAnime(item) || isNovel(item)
                     ? item.genres.join(', ')
                     : 'status' in item
                       ? item.status
@@ -900,6 +1012,49 @@ function SearchList({ item: z, parentProps: props }: { item: AnySearchItem; pare
                   numberOfLines={1}>
                   <Icon name="info" color={styles.animeSearchListDetailText.color} />{' '}
                   {item.additionalInfo}
+                </Text>
+              </View>
+            )}
+            {isNovel(item) && (
+              <View
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.445)',
+                  paddingHorizontal: 6,
+                  paddingVertical: 3,
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.animeSearchListDetailText,
+                    {
+                      fontSize: 14,
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  <Icon name="user" color={styles.animeSearchListDetailText.color} /> {item.authors}
+                </Text>
+              </View>
+            )}
+            {isNovel(item) && item.status && (
+              <View
+                style={{
+                  backgroundColor: theme.colors.tertiaryContainer,
+                  paddingHorizontal: 6,
+                  paddingVertical: 3,
+                  borderRadius: 5,
+                }}>
+                <Text
+                  style={[
+                    globalStyles.text,
+                    styles.animeSearchListDetailText,
+                    {
+                      fontSize: 12,
+                      color: theme.colors.onTertiaryContainer,
+                    },
+                  ]}
+                  numberOfLines={1}>
+                  <Icon name="info" color={theme.colors.onTertiaryContainer} /> {item.status}
                 </Text>
               </View>
             )}

@@ -986,8 +986,8 @@ export const middleServerCallback = async (
         referer: FILM_BASE_URL + '/',
         'User-Agent': deviceUserAgent,
       };
-      if (req.headers['range'] || req.headers['Range']) {
-        fetchHeaders['Range'] = req.headers['range'] || req.headers['Range'];
+      if (req.headers.range || req.headers.Range) {
+        fetchHeaders.Range = req.headers.range || req.headers.Range;
       }
       const segmentResponse = await expoFetch(segmentUrlObj.toString(), {
         headers: fetchHeaders,

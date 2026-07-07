@@ -26,7 +26,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import URL from 'url';
+import { URL } from 'react-native-url-polyfill';
 
 import { HistoryItemKey } from '@/types/databaseTarget';
 import { HistoryJSON } from '@/types/historyJSON';
@@ -55,18 +55,22 @@ function History(props: Props) {
   const [searchKeyword, setSearchKeyword] = useState('');
   const searchKeywordDeferred = useDeferredValue(searchKeyword);
 
-  const filteredData = useMemo(
-    () =>
-      data.filter(item =>
-        item
-          .split(':')
-          .slice(1, -2)
-          .join(':')
-          .toLowerCase()
-          .includes(searchKeywordDeferred.toLowerCase()),
-      ),
-    [searchKeywordDeferred, data],
-  );
+  const filteredData = useMemo(() => {
+    const getTitleFromKey = (key: string) => {
+      const parts = key.split(':');
+      parts.shift();
+      while (
+        parts.length > 0 &&
+        (parts[parts.length - 1] === 'true' || parts[parts.length - 1] === 'false')
+      ) {
+        parts.pop();
+      }
+      return parts.join(':');
+    };
+    return data.filter(item =>
+      getTitleFromKey(item).toLowerCase().includes(searchKeywordDeferred.toLowerCase()),
+    );
+  }, [searchKeywordDeferred, data]);
   const flatListRef = useRef<FlashListRef<HistoryItemKey>>(null);
 
   const scrollLastValue = useSharedValue(0);
@@ -283,13 +287,15 @@ const RenderList = memo(function RenderList({
             title: item?.title,
             link: item?.link,
             historyData: item,
-            type: URL.parse(item?.link ?? '').hostname!?.includes('idlix')
+            type: new URL(item?.link ?? '').hostname!?.includes('idlix')
               ? 'film'
               : item?.isMovie
                 ? 'movie'
                 : item?.isComics
                   ? 'comics'
-                  : 'anime',
+                  : item?.isNovel
+                    ? 'novel'
+                    : 'anime',
           }),
         );
       }}>
@@ -360,6 +366,23 @@ const RenderList = memo(function RenderList({
                   </Text>
                 </View>
               )}{' '}
+              {item?.isNovel && (
+                <View
+                  style={{
+                    backgroundColor: '#a000a0',
+                    borderRadius: 4,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                  }}>
+                  <Text
+                    style={[
+                      styles.listEpisode,
+                      { color: '#ffffff', fontWeight: 'bold', fontSize: 12 },
+                    ]}>
+                    Novel
+                  </Text>
+                </View>
+              )}{' '}
               {item?.isMovie && (
                 <View
                   style={{
@@ -379,25 +402,21 @@ const RenderList = memo(function RenderList({
               )}{' '}
               {item?.episode}
             </Text>
-            {/* this commented code is keep for historical reason (nostalgic lmao) */}
-            {/* {item?.part !== undefined && (
-                  <Text style={styles.listPart}>
-                    {' Part ' + (item?.part + 1)}
-                  </Text>
-                )} */}
           </View>
 
           {item?.lastDuration !== undefined && (
             <View style={styles.lastDuration}>
               <Text style={[globalStyles.text, styles.lastDurationText]}>
                 <FontAwesomeIcon
-                  name={item?.isComics ? 'book' : 'clock-o'}
+                  name={item?.isComics || item?.isNovel ? 'book' : 'clock-o'}
                   size={16}
                   color={globalStyles.text.color}
                 />{' '}
-                {item?.isComics
-                  ? 'Halaman ' + (item?.lastDuration + 1)
-                  : formatTimeFromSeconds(item?.lastDuration)}
+                {item?.isNovel
+                  ? `Scroll ${item?.lastDuration}%`
+                  : item?.isComics
+                    ? 'Halaman ' + (item?.lastDuration + 1)
+                    : formatTimeFromSeconds(item?.lastDuration)}
               </Text>
             </View>
           )}

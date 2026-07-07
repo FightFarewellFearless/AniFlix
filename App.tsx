@@ -86,6 +86,8 @@ let MovieDetail: React.ComponentType<any>;
 let FilmDetail: React.ComponentType<any>;
 let ComicsDetail: React.ComponentType<any>;
 let ComicsReading: React.ComponentType<any>;
+let NovelDetail: React.ComponentType<any>;
+let NovelReading: React.ComponentType<any>;
 let CFBypassWebView: React.ComponentType<any>;
 let Connecting: React.ComponentType<any>;
 let FromUrl: React.ComponentType<any>;
@@ -103,6 +105,8 @@ if (__DEV__) {
   FilmDetail = require('@component/EpisodeDetail/FilmDetail').default;
   ComicsDetail = require('@component/EpisodeDetail/ComicsDetail').default;
   ComicsReading = require('@component/WatchNRead/ComicsReading').default;
+  NovelDetail = require('@component/EpisodeDetail/NovelDetail').default;
+  NovelReading = require('@component/WatchNRead/NovelReading').default;
   CFBypassWebView = require('@utils/CFBypassWebview').default;
   Connecting = require('@component/Loading Screen/Connect').default;
   FromUrl = require('@component/Loading Screen/FromUrl').default;
@@ -119,6 +123,8 @@ if (__DEV__) {
   FilmDetail = lazy(() => import('@component/EpisodeDetail/FilmDetail'));
   ComicsDetail = lazy(() => import('@component/EpisodeDetail/ComicsDetail'));
   ComicsReading = lazy(() => import('@component/WatchNRead/ComicsReading'));
+  NovelDetail = lazy(() => import('@component/EpisodeDetail/NovelDetail'));
+  NovelReading = lazy(() => import('@component/WatchNRead/NovelReading'));
   CFBypassWebView = lazy(() => import('@utils/CFBypassWebview'));
   Connecting = lazy(() => import('@component/Loading Screen/Connect'));
   FromUrl = lazy(() => import('@component/Loading Screen/FromUrl'));
@@ -205,6 +211,16 @@ const screens: Screens = [
   {
     name: 'ComicsReading',
     component: withSuspenseAndSafeArea(ComicsReading, true, true),
+    options: undefined,
+  },
+  {
+    name: 'NovelDetail',
+    component: withSuspenseAndSafeArea(NovelDetail, false),
+    options: undefined,
+  },
+  {
+    name: 'NovelReading',
+    component: withSuspenseAndSafeArea(NovelReading, true, true),
     options: undefined,
   },
   { name: 'FromUrl', component: withSuspenseAndSafeArea(FromUrl), options: { headerShown: true } },

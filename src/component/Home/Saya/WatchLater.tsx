@@ -6,7 +6,7 @@ import moment from 'moment';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import URL from 'url';
+import { URL } from 'react-native-url-polyfill';
 
 import { SayaDrawerNavigator } from '@/types/navigation';
 import watchLaterJSON from '@/types/watchLaterJSON';
@@ -42,13 +42,15 @@ function WatchLater(props: Props) {
               StackActions.push('FromUrl', {
                 title: item.title,
                 link: item.link,
-                type: URL.parse(item.link).hostname!?.includes('idlix')
+                type: new URL(item.link).hostname!?.includes('idlix')
                   ? 'film'
                   : item.isMovie
                     ? 'movie'
                     : item.isComics
                       ? 'comics'
-                      : 'anime',
+                      : item.isNovel
+                        ? 'novel'
+                        : 'anime',
               }),
             );
           }}>
@@ -62,9 +64,15 @@ function WatchLater(props: Props) {
                   ? { backgroundColor: '#ff5252' }
                   : item.isComics
                     ? { backgroundColor: '#3e8bff' }
-                    : undefined,
+                    : item.isNovel
+                      ? { backgroundColor: '#a000a0' }
+                      : undefined,
               ]}>
-              <Icon name={item.rating === 'Film' ? 'movie' : item.isComics ? 'book' : 'star'} />{' '}
+              <Icon
+                name={
+                  item.rating === 'Film' ? 'movie' : item.isComics || item.isNovel ? 'book' : 'star'
+                }
+              />{' '}
               {item.rating}
             </Text>
           </View>

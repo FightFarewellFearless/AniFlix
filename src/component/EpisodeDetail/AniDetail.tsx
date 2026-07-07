@@ -79,7 +79,9 @@ function AniDetail(props: Props) {
   }
   const lastWatched = useMemo(() => {
     const isLastWatched = historyListsJson.find(
-      z => z === `historyItem:${historyTitle}:false:false`,
+      z =>
+        z === `historyItem:${historyTitle}:false:false` ||
+        z === `historyItem:${historyTitle}:false:false:false`,
     );
     if (isLastWatched) {
       return JSON.parse(DatabaseManager.getSync(isLastWatched)!) as HistoryJSON;
