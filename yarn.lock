@@ -4205,7 +4205,7 @@ __metadata:
     expo-document-picker: 56.0.4
     expo-linear-gradient: 56.0.4
     expo-splash-screen: 56.0.10
-    expo-sqlite: 56.0.5
+    expo-sqlite: 57.0.0
     expo-updates: 56.0.19
     expo-video: 56.1.4
     googletrans: ^1.0.28
@@ -6737,16 +6737,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-sqlite@npm:56.0.5":
-  version: 56.0.5
-  resolution: "expo-sqlite@npm:56.0.5"
+"expo-sqlite@npm:57.0.0":
+  version: 57.0.0
+  resolution: "expo-sqlite@npm:57.0.0"
   dependencies:
     await-lock: ^2.2.2
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: f3a7f06208d9444f7cd6a7ee39a15fe6a06961650ef50ba04eba093316eb96455a29bb28254ea1244fb2747d1d232265ac4fee10269ee7dee98809acc31818be
+  checksum: 5a57d25ccdf659a872505beb3712aeec83c7603e80ad8224f6564388bae9d683e3749d56c639052bee02ae507e440128b7328ed0c9eb38183f5b4fe29a961438
   languageName: node
   linkType: hard
 
