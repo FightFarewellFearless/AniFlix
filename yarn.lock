@@ -4222,22 +4222,22 @@ __metadata:
     react-native-edge-to-edge: ^1.8.1
     react-native-error-boundary: ^3.1.0
     react-native-gesture-handler: 3.0.2
-    react-native-keyboard-controller: ^1.21.9
+    react-native-keyboard-controller: ^1.21.14
     react-native-marked: ^8.1.0
-    react-native-nitro-device-info: ^1.8.0
+    react-native-nitro-device-info: ^1.8.1
     react-native-nitro-http-server: ^1.9.2
-    react-native-nitro-modules: ^0.35.9
+    react-native-nitro-modules: ^0.36.1
     react-native-orientation-locker: ^1.7.0
     react-native-paper: ^5.15.3
-    react-native-reanimated: 4.5.0-nightly-20260620-9c2e3b052
+    react-native-reanimated: 4.5.1
     react-native-saf-x: 2.2.3
     react-native-safe-area-context: 5.8.0
     react-native-screens: ~4.25.2
     react-native-svg: 15.15.5
     react-native-system-navigation-bar: ^2.8.0
     react-native-url-polyfill: ^3.0.0
-    react-native-webview: 13.16.1
-    react-native-worklets: next
+    react-native-webview: 14.0.1
+    react-native-worklets: ^0.10.2
     react-native-zip-archive: ^7.1.1
     react-test-renderer: 19.2.3
     typescript: 5.9.3
@@ -10712,16 +10712,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-keyboard-controller@npm:^1.21.9":
-  version: 1.21.12
-  resolution: "react-native-keyboard-controller@npm:1.21.12"
+"react-native-keyboard-controller@npm:^1.21.14":
+  version: 1.21.14
+  resolution: "react-native-keyboard-controller@npm:1.21.14"
   dependencies:
     react-native-is-edge-to-edge: ^1.2.1
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-reanimated: ">=3.0.0"
-  checksum: 1133dbbbef4eb808c1c22c0967328a278a66c15d3e162895775249234b446154c9f91d6304beb8cfbcd1300b02990fb5ec76a9a536d6f3262855f728055713b7
+  checksum: 89ba3cbf5ecb041af757b3e9840422e664d87cebfb7c5b0dc720656488b23254a00097ae4c40c4379e6aa7533195b510846a659a3ff109771caa98f59f5d804b
   languageName: node
   linkType: hard
 
@@ -10774,16 +10774,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-device-info@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "react-native-nitro-device-info@npm:1.8.0"
+"react-native-nitro-device-info@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "react-native-nitro-device-info@npm:1.8.1"
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-nitro-modules: ">=0.35.0 <1.0.0"
   bin:
     react-native-nitro-device-info: bin/migrate.js
-  checksum: 4eb3a27c263304fcf1cfd0365474e8b1891682facaf94d9f0903882a1a388c0af3b6865c61871feff8fda5b533dd3395477b567fd882a68f4da5bf1dceab3fca
+  checksum: c745e379fcac0879bbb98d4bc7b0e5e72b70a0590dad0ea6f4e0aa4d41499bd8eda6f5453ce90c1822e4c81bbeed821b47049c645d81189b161515f395dd012f
   languageName: node
   linkType: hard
 
@@ -10800,13 +10800,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.35.9":
-  version: 0.35.9
-  resolution: "react-native-nitro-modules@npm:0.35.9"
+"react-native-nitro-modules@npm:^0.36.1":
+  version: 0.36.1
+  resolution: "react-native-nitro-modules@npm:0.36.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 2c04481b132ae2fb247ae1658b426c04ddfb73ff7622716db2f5d316bc831ffb5c87fdedf65f39d5d8724daf5a56277d838936b49ec308f2e14f7208bbed130c
+  checksum: f22f81591a1f9bfe53f12616cc4f7abf124eade3f5282e7c79c0d13b8351322bdbe8bae472262945341ade03f5e3e9a9fde27d902363c7d7a3d927bcff96224a
   languageName: node
   linkType: hard
 
@@ -10849,17 +10849,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.5.0-nightly-20260620-9c2e3b052":
-  version: 4.5.0-nightly-20260620-9c2e3b052
-  resolution: "react-native-reanimated@npm:4.5.0-nightly-20260620-9c2e3b052"
+"react-native-reanimated@npm:4.5.1":
+  version: 4.5.1
+  resolution: "react-native-reanimated@npm:4.5.1"
   dependencies:
     react-native-is-edge-to-edge: ^1.3.1
     semver: ^7.7.3
   peerDependencies:
     react: "*"
     react-native: 0.83 - 0.86
-    react-native-worklets: "*"
-  checksum: 3555ccc3dfe5b6bb9ea21d3fc9c8cae6f23e30e1226108a980b269737fc12465033fd4baa92e78ab6557971aca3554abcf093f8fc8879d512eca047ebc29df0c
+    react-native-worklets: 0.10.x
+  checksum: 7ea6e48b4f9ab59f9a7acda40f0a433ff733df3216877390a5a6389fad011c5d7dc81762c4173fba29c7ddbf564dc50068d244bb7b20fdc91a79f83fa3a0e374
   languageName: node
   linkType: hard
 
@@ -10981,22 +10981,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.16.1":
-  version: 13.16.1
-  resolution: "react-native-webview@npm:13.16.1"
+"react-native-webview@npm:14.0.1":
+  version: 14.0.1
+  resolution: "react-native-webview@npm:14.0.1"
   dependencies:
     escape-string-regexp: ^4.0.0
     invariant: 2.2.4
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: c202500df090114877d7a92549dbac1c36bdcc2010d50ddffb57aedcec81870d9695f1e4e3ef852cbe02a8ef952ef8626b120b774813c396a32b4fdc5838a4a5
+  checksum: 79936364b8404240d30ca37530910673994ceb4f21e2ce1f9cd3042167e5cd6f52b4e001831d827bf0d5198fab25fcd089e286198d4af8ad962b8a1150f0dc77
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.10.0":
-  version: 0.10.0
-  resolution: "react-native-worklets@npm:0.10.0"
+"react-native-worklets@npm:^0.10.2":
+  version: 0.10.2
+  resolution: "react-native-worklets@npm:0.10.2"
   dependencies:
     "@babel/plugin-transform-arrow-functions": ^7.27.1
     "@babel/plugin-transform-class-properties": ^7.28.6
@@ -11015,32 +11015,7 @@ __metadata:
     "@react-native/metro-config": "*"
     react: "*"
     react-native: 0.83 - 0.86
-  checksum: 99a289a9638fd2dbaab0095d65bc5735714e1a766b000f88b01ddceb14e7a348d031c4ac7f4bd033518cf09a5b12be49068b0d10caa1d78da6812f2106f66ca6
-  languageName: node
-  linkType: hard
-
-"react-native-worklets@patch:react-native-worklets@npm%3A0.10.0#./.yarn/patches/react-native-worklets-npm-0.10.0-ba5ee83886.patch::locator=aniflix%40workspace%3A.":
-  version: 0.10.0
-  resolution: "react-native-worklets@patch:react-native-worklets@npm%3A0.10.0#./.yarn/patches/react-native-worklets-npm-0.10.0-ba5ee83886.patch::version=0.10.0&hash=a80c7d&locator=aniflix%40workspace%3A."
-  dependencies:
-    "@babel/plugin-transform-arrow-functions": ^7.27.1
-    "@babel/plugin-transform-class-properties": ^7.28.6
-    "@babel/plugin-transform-classes": ^7.28.6
-    "@babel/plugin-transform-nullish-coalescing-operator": ^7.28.6
-    "@babel/plugin-transform-optional-chaining": ^7.28.6
-    "@babel/plugin-transform-shorthand-properties": ^7.27.1
-    "@babel/plugin-transform-template-literals": ^7.27.1
-    "@babel/plugin-transform-unicode-regex": ^7.27.1
-    "@babel/preset-typescript": ^7.28.5
-    "@babel/types": ^7.27.1
-    convert-source-map: ^2.0.0
-    semver: ^7.7.4
-  peerDependencies:
-    "@babel/core": "*"
-    "@react-native/metro-config": "*"
-    react: "*"
-    react-native: 0.83 - 0.86
-  checksum: 3f8b71f5bd69ff4e1949ba2a4f1979df24e9c7bb8a8ff1e8c3c3c0478ff20a5a81e1ab2bf108cfddb2b5f9e295566c74f14db88cf42f4678e8444e6a82f835b4
+  checksum: 9950e9e72e323ce85fb9b1863f08d9cf8adfb4babb3dcf27579ad9586118c8e7904d9f8fa209352dfb8a8a9cbbf5f1caa5e671f356c9d34950f4a1ae5d652671
   languageName: node
   linkType: hard
 
