@@ -32,6 +32,7 @@ function CFBypassWebView() {
       setWebTitle(event.title);
       if (lastTitleLang.includes(lastTitle.current) && lastTitleLang.includes(event.title)) {
         bypassContext.setIsOpen(false);
+        bypassContext.successCallback.current?.();
         ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
       }
       if (!event.loading && lastTitleLang.includes(event.title)) {

@@ -4,17 +4,18 @@ import { LatestMoviesResponse } from './filmTypes/latestMovies';
 import { fetch as expoFetch } from 'expo/fetch';
 
 import deviceUserAgent from '@utils/deviceUserAgent';
+import React from 'react';
+import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
+import { setWebViewOpen } from '../CFBypass';
 import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
 import { FilmMovieDetailsResponse } from './filmTypes/movie';
+import { PlayInfo } from './filmTypes/playInfo';
 import { RedeemApi } from './filmTypes/redeemApi';
 import { SearchFilmResponse } from './filmTypes/searchFilm';
 import { SeriesDetailsResponse } from './filmTypes/series';
 import { SeriesEpisodeResponse } from './filmTypes/seriesEpisode';
 import { SeriesSeasonResponse } from './filmTypes/seriesSeason';
-import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
-import React from 'react';
-import { PlayInfo } from './filmTypes/playInfo';
 
 type FilmHomePage = Array<{
   title: string;
@@ -295,17 +296,52 @@ export const __ALIAS = 'idlix';
 export const FILM_DOMAIN = 'z2.idlixku.com';
 export const FILM_BASE_URL = 'https://' + FILM_DOMAIN;
 const BASE_URL = FILM_BASE_URL;
-function fetchPage(url: string, opt?: RequestInit & { asJson?: false }): Promise<string>;
-function fetchPage(url: string, opt?: RequestInit & { asJson: true }): Promise<any>;
-async function fetchPage(url: string, opt?: RequestInit & { asJson?: boolean }) {
+function fetchPage(
+  url: string,
+  opt?: RequestInit & { asJson?: false; autoCaptcha?: boolean },
+): Promise<string>;
+function fetchPage(
+  url: string,
+  opt?: RequestInit & { asJson: true; autoCaptcha?: boolean },
+): Promise<any>;
+async function fetchPage(
+  url: string,
+  opt?: RequestInit & { asJson?: boolean; autoCaptcha?: boolean },
+) {
   const response = await fetch(url, {
     headers: {
+      accept: '*/*',
+      'accept-language': 'en-US,en;q=0.9',
+      'cache-control': 'no-cache',
+      'content-type': 'application/json',
+      pragma: 'no-cache',
+      priority: 'u=0, i',
+      'sec-ch-ua': '"Not(A:Brand";v="99", "Chromium";v="149", "Google Chrome";v="149"',
+      'sec-ch-ua-arch': '',
+      'sec-ch-ua-bitness': '',
+      'sec-ch-ua-full-version': '149.0.6970.115',
+      'sec-ch-ua-full-version-list':
+        '"Not(A:Brand";v="99.0.0.0", "Chromium";v="149.0.6970.115", "Google Chrome";v="149.0.6970.115"',
+      'sec-ch-ua-mobile': '?1',
+      'sec-ch-ua-model': 'Pixel 9',
+      'sec-ch-ua-platform': 'Android',
+      'sec-ch-ua-platform-version': '15',
+      'sec-fetch-dest': 'document',
+      'sec-fetch-mode': 'navigate',
+      'sec-fetch-site': 'none',
+      'sec-fetch-user': '?1',
+      'upgrade-insecure-requests': '1',
       'User-Agent': deviceUserAgent,
       ...opt?.headers,
     },
     ...opt,
   });
   const asJson = opt?.asJson ?? false;
+  if (response.status === 403) {
+    console.log(await response.text());
+    if (opt?.autoCaptcha !== false) setWebViewOpen.openWebViewCF(true, url);
+    throw new Error('Silahkan selesaikan captcha');
+  }
   return await (asJson ? response.json() : response.text());
 }
 
@@ -413,6 +449,7 @@ async function getHomepage(signal?: AbortSignal) {
   const api: HomepageApiResponse = await fetchPage(BASE_URL + '/api/homepage', {
     signal,
     asJson: true,
+    autoCaptcha: false,
   });
   const allSections = [...api.above, ...api.below];
 
@@ -455,6 +492,7 @@ async function getLatestMovies(page = 1, signal?: AbortSignal) {
     {
       signal,
       asJson: true,
+      autoCaptcha: false,
     },
   );
   return api.data.map(item => ({
@@ -473,6 +511,7 @@ async function getLatestSeries(page = 1, signal?: AbortSignal) {
     {
       signal,
       asJson: true,
+      autoCaptcha: false,
     },
   );
 
@@ -633,10 +672,6 @@ async function getFilmDetails(
       BASE_URL + '/api/watch/play-info/episode/' + epApi.episode.id,
       {
         signal,
-        headers: {
-          Referer: FILM_BASE_URL + '/',
-          Origin: FILM_BASE_URL,
-        },
         asJson: true,
       },
     );
@@ -644,10 +679,6 @@ async function getFilmDetails(
     let variants: HlsVariant[] = [];
     try {
       const manifestContent = await fetchPage(redeemApi.url, {
-        headers: {
-          Origin: BASE_URL,
-          Referer: BASE_URL + '/',
-        },
         signal,
       });
       variants = resolveMasterPlaylist(manifestContent, redeemApi.url);
@@ -717,10 +748,6 @@ async function getFilmDetails(
     BASE_URL + '/api/watch/play-info/movie/' + movieApi.id,
     {
       signal,
-      headers: {
-        Referer: FILM_BASE_URL + '/',
-        Origin: FILM_BASE_URL,
-      },
       asJson: true,
     },
   );
@@ -803,10 +830,6 @@ async function redeemVideo(
   const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
     method: 'POST',
     signal,
-    headers: {
-      Referer: FILM_BASE_URL + '/',
-      Origin: FILM_BASE_URL,
-    },
     asJson: true,
     body: JSON.stringify({ gateToken: playInfo.gateToken }),
   });

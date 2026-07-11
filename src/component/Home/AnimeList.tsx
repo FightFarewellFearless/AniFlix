@@ -67,8 +67,15 @@ import AnimeAPI from '@utils/AnimeAPI';
 import { AnimeMovieWebView, getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
 import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
-import { FilmHomePage, getHomepage, getLatestMovies, getLatestSeries } from '@utils/scrapers/film';
+import {
+  FILM_BASE_URL,
+  FilmHomePage,
+  getHomepage,
+  getLatestMovies,
+  getLatestSeries,
+} from '@utils/scrapers/film';
 import { getLatestNovelRelease, NovelLatestRelease } from '@utils/scrapers/novel';
+import { setWebViewOpen } from '@/utils/CFBypass';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -309,6 +316,7 @@ function HomeList(props: HomeProps) {
     },
   );
   const [isFilmError, setIsFilmError] = useState(false);
+  const [isFilmCaptchaError, setIsFilmCaptchaError] = useState(false);
 
   useEffect(() => {
     setFilmHomepageData({
@@ -316,10 +324,14 @@ function HomeList(props: HomeProps) {
       trending: [],
     });
     setIsFilmError(false);
+    setIsFilmCaptchaError(false);
     const task = requestIdleCallback(() => {
       getHomepage()
         .then(setFilmHomepageData)
-        .catch(() => {
+        .catch(e => {
+          if (e.message === 'Silahkan selesaikan captcha') {
+            setIsFilmCaptchaError(true);
+          }
           setIsFilmError(true);
         });
     });
@@ -400,19 +412,31 @@ function HomeList(props: HomeProps) {
               props={props}
             />
             <FeaturedFilmList
+              refreshing={refreshing}
               data={filmHomepageData.featured}
               isError={isFilmError}
+              isFilmCaptchaError={isFilmCaptchaError}
               props={props}
               key={'film_featured' + refreshingKey}
             />
             <TrendingFilmList
+              refreshing={refreshing}
               data={filmHomepageData.trending}
               isError={isFilmError}
+              isFilmCaptchaError={isFilmCaptchaError}
               props={props}
               key={'film_trending' + refreshingKey}
             />
-            <LatestFilmList props={props} key={'film_latest' + refreshingKey} />
-            <LatestSeriesList props={props} key={'series_latest' + refreshingKey} />
+            <LatestFilmList
+              refreshing={refreshing}
+              props={props}
+              key={'film_latest' + refreshingKey}
+            />
+            <LatestSeriesList
+              refreshing={refreshing}
+              props={props}
+              key={'series_latest' + refreshingKey}
+            />
             <MovieList
               props={props}
               key={'anime_movie' + refreshingKey}
@@ -450,10 +474,14 @@ function FeaturedFilmListUNMEMO({
   props,
   data,
   isError,
+  isFilmCaptchaError,
+  refreshing,
 }: {
   props: HomeProps;
   data: FilmHomePage;
   isError: boolean;
+  isFilmCaptchaError: boolean;
+  refreshing: () => void;
 }) {
   const styles = useStyles();
 
@@ -476,14 +504,25 @@ function FeaturedFilmListUNMEMO({
         <Text style={styles.sectionTitle}>Film Unggulan</Text>
       </View>
 
-      {isError && (
-        <View>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
-          </Text>
-        </View>
-      )}
+      {isError &&
+        (isFilmCaptchaError ? (
+          <TouchableOpacity
+            onPress={() => {
+              setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
+            }}>
+            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
+            <Text style={[styles.errorText, { color: 'yellow' }]}>
+              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View>
+            <MaterialIcon name="error-outline" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+            </Text>
+          </View>
+        ))}
 
       {data?.length !== 0 ? (
         <FlashList
@@ -508,10 +547,14 @@ function TrendingFilmListUNMEMO({
   props,
   data,
   isError,
+  isFilmCaptchaError,
+  refreshing,
 }: {
   props: HomeProps;
   data: FilmHomePage;
   isError: boolean;
+  isFilmCaptchaError: boolean;
+  refreshing: () => void;
 }) {
   const styles = useStyles();
 
@@ -534,14 +577,25 @@ function TrendingFilmListUNMEMO({
         <Text style={styles.sectionTitle}>Film Trending</Text>
       </View>
 
-      {isError && (
-        <View>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
-          </Text>
-        </View>
-      )}
+      {isError &&
+        (isFilmCaptchaError ? (
+          <TouchableOpacity
+            onPress={() => {
+              setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
+            }}>
+            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
+            <Text style={[styles.errorText, { color: 'yellow' }]}>
+              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View>
+            <MaterialIcon name="error-outline" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+            </Text>
+          </View>
+        ))}
 
       {data?.length !== 0 ? (
         <FlashList
@@ -562,10 +616,11 @@ function TrendingFilmListUNMEMO({
 }
 
 const LatestFilmList = memo(LatestFilmListUNMEMO);
-function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
+function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: () => void }) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(FilmListHomeContext);
   const [isError, setIsError] = useState(false);
+  const [isFilmCaptchaError, setIsFilmCaptchaError] = useState(false);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -591,7 +646,12 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
             setData?.(movieData);
           }
         })
-        .catch(() => setIsError(true));
+        .catch(e => {
+          if (e.message === 'Silahkan selesaikan captcha') {
+            setIsFilmCaptchaError(true);
+          }
+          setIsError(true);
+        });
     });
     return () => cancelIdleCallback(task);
   }, [setData]);
@@ -610,14 +670,25 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
         </TouchableOpacity>
       </View>
 
-      {isError && (
-        <View>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
-          </Text>
-        </View>
-      )}
+      {isError &&
+        (isFilmCaptchaError ? (
+          <TouchableOpacity
+            onPress={() => {
+              setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
+            }}>
+            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
+            <Text style={[styles.errorText, { color: 'yellow' }]}>
+              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View>
+            <MaterialIcon name="error-outline" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+            </Text>
+          </View>
+        ))}
 
       {data?.length !== 0 ? (
         <FlashList
@@ -638,10 +709,17 @@ function LatestFilmListUNMEMO({ props }: { props: HomeProps }) {
 }
 
 const LatestSeriesList = memo(LatestSeriesListUNMEMO);
-function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
+function LatestSeriesListUNMEMO({
+  props,
+  refreshing,
+}: {
+  props: HomeProps;
+  refreshing: () => void;
+}) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(SeriesListHomeContext);
   const [isError, setIsError] = useState(false);
+  const [isSeriesCaptchaError, setIsSeriesCaptchaError] = useState(false);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -663,7 +741,12 @@ function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
         .then(movieData => {
           setData?.(movieData);
         })
-        .catch(() => setIsError(true));
+        .catch(e => {
+          if (e.message === 'Silahkan selesaikan captcha') {
+            setIsSeriesCaptchaError(true);
+          }
+          setIsError(true);
+        });
     });
     return () => cancelIdleCallback(task);
   }, [setData]);
@@ -682,14 +765,25 @@ function LatestSeriesListUNMEMO({ props }: { props: HomeProps }) {
         </TouchableOpacity>
       </View>
 
-      {isError && (
-        <View>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
-          </Text>
-        </View>
-      )}
+      {isError &&
+        (isSeriesCaptchaError ? (
+          <TouchableOpacity
+            onPress={() => {
+              setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
+            }}>
+            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
+            <Text style={[styles.errorText, { color: 'yellow' }]}>
+              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <View>
+            <MaterialIcon name="error-outline" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
+            </Text>
+          </View>
+        ))}
 
       {data?.length !== 0 ? (
         <FlashList

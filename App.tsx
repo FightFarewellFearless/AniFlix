@@ -247,14 +247,20 @@ const screens: Screens = [
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [cfUrl, setCfUrl] = useState('');
+  const successCallbackRef = useRef<(() => void) | undefined>(() => undefined);
 
   const colorScheme = useColorScheme();
   const globalStyles = useGlobalStyles();
 
   useEffect(() => {
-    setWebViewOpen.openWebViewCF = (isOpenCF: boolean, url: string) => {
+    setWebViewOpen.openWebViewCF = (
+      isOpenCF: boolean,
+      url: string,
+      successCallback?: () => void,
+    ) => {
       setIsOpen(isOpenCF);
       setCfUrl(url);
+      successCallbackRef.current = successCallback;
     };
   }, []);
 
@@ -377,7 +383,15 @@ function App() {
                     ))}
                   </Stack.Navigator>
                   <CFBypassIsOpenContext
-                    value={useMemo(() => ({ isOpen, url: cfUrl, setIsOpen }), [isOpen, cfUrl])}>
+                    value={useMemo(
+                      () => ({
+                        isOpen,
+                        url: cfUrl,
+                        setIsOpen,
+                        successCallback: successCallbackRef,
+                      }),
+                      [isOpen, cfUrl],
+                    )}>
                     {isOpen && (
                       <Suspense>
                         <CFBypassWebView />

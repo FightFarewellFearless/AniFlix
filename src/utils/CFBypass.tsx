@@ -1,9 +1,10 @@
-import { createContext } from 'react';
+import React, { createContext } from 'react';
 
 export const CFBypassIsOpenContext = createContext({
   isOpen: false,
   url: '',
   setIsOpen: (_isOpen: boolean) => {},
+  successCallback: React.createRef<undefined | (() => void)>(),
 });
 // export class CFCookie {
 //     static #cookie = "";
@@ -15,4 +16,6 @@ export const CFBypassIsOpenContext = createContext({
 //     }
 // }
 
-export const setWebViewOpen = { openWebViewCF: (_isOpen: boolean, _url: string) => {} };
+export const setWebViewOpen = {
+  openWebViewCF: (_isOpen: boolean, _url: string, _successCallback?: () => void) => {},
+};
