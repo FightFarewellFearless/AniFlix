@@ -1,3 +1,6 @@
+# v2.0.1_JS-1 (11-Juli-2026)
+## Diperbaiki
+- Error pada film akibat captcha
 # v2.0.1 (07-Juli-2026)
 Versi 2.0.0 hadir dengan perbaikan beberapa masalah serta tambahan NOVEL DAN LIGHT NOVEL 🎉🎉
 ## Ditambahkan
