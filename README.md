@@ -7,7 +7,7 @@
 <h1 align="center">AniFlix</h1>
 
 <p align="center">
-  <i>All-in-one!</i> Satu Aplikasi untuk nonton anime dan baca komik. Mendukung Android TV!
+  <i>All-in-one!</i> Satu Aplikasi untuk nonton anime, film, baca komik dan novel. Mendukung Android TV!
   <br />
   <strong><i>Written in TypeScript, built with React Native</i></strong> ❤️
 </p>
@@ -33,8 +33,8 @@
 
 | Fitur | Deskripsi |
 | :--- | :--- |
-| ✨ **Lengkap dan Terbaru** | Tonton anime dan baca komik favoritmu dengan episode dan chapter yang selalu <i>up-to-date</i>. |
-| 📱 **Satu aplikasi untuk semua** | Mau nonton anime, movie, atau baca Manga/Manhwa/Manhua? AniFlix menyediakan semua nya! |
+| ✨ **Lengkap dan Terbaru** | Tonton anime dan baca komik atau novel favoritmu dengan episode dan chapter yang selalu <i>up-to-date</i>. |
+| 📱 **Satu aplikasi untuk semua** | Mau nonton anime, movie, atau baca Manga/Manhwa/Manhua/Novel? AniFlix menyediakan semua nya! |
 | 🎨 **UI Simpel & Modern** | Antarmuka yang bersih dan intuitif untuk pengalaman menonton terbaik. |
 | 📥 **Download Sekali Klik** | Unduh episode favoritmu dan tonton secara offline tanpa ribet. |
 | 🚫 **Bebas Iklan** | Nikmati pengalaman menonton tanpa gangguan iklan dari kami. |
