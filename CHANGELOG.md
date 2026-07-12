@@ -1,3 +1,8 @@
+# v2.0.1_JS-2 (12-Juli-2026)
+## Ditambahkan
+- Tekan dan tahan lama di video player untuk mempercepat 2X
+## Diperbaiki
+- [Detail film] Pemberitahuan terakhir di tonton
 # v2.0.1_JS-1 (11-Juli-2026)
 ## Diperbaiki
 - Error pada film akibat captcha
