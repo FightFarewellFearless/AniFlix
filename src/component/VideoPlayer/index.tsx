@@ -169,6 +169,9 @@ function VideoPlayer({
   const preventAutoHideControls = useRef(true);
   const showControlsOpacity = useSharedValue(1);
 
+  const [is2XSpeed, setIs2XSpeed] = useState(false);
+  const isPressHandledByLongPress = useRef(false);
+
   const [subtitles, setSubtitles] = useState<Awaited<ReturnType<typeof parseSubtitles>> | null>(
     null,
   );
@@ -317,6 +320,11 @@ function VideoPlayer({
     };
   }, []);
   const onPressOut = useCallback((e: GestureResponderEvent) => {
+    if (isPressHandledByLongPress.current) {
+      isPressHandledByLongPress.current = false;
+      setIs2XSpeed(false);
+      return;
+    }
     if (
       Math.abs(e.nativeEvent.locationX - pressableShowControlsLocation.current.x) < 10 &&
       Math.abs(e.nativeEvent.locationY - pressableShowControlsLocation.current.y) < 10
@@ -328,6 +336,16 @@ function VideoPlayer({
       });
     }
   }, []);
+  const handle2X = useCallback(() => {
+    setIs2XSpeed(true);
+  }, []);
+
+  useEffect(() => {
+    if (is2XSpeed) {
+      isPressHandledByLongPress.current = true;
+    }
+    player.playbackRate = is2XSpeed ? 2 : 1;
+  }, [player, is2XSpeed]);
 
   const onRewind = useCallback(() => {
     const rewind = Math.max(0, currentDurationSecond.get() - 5);
@@ -505,7 +523,12 @@ function VideoPlayer({
         style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: 0, zIndex: 0 }}
         ref={videoRef}
       />
-      <Pressable onPressIn={onPressIn} onPressOut={onPressOut} style={{ flex: 1 }}>
+      <Pressable
+        onLongPress={handle2X}
+        delayLongPress={500}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={{ flex: 1 }}>
         {batteryAndClock}
 
         {/* {Platform.isTV && (
@@ -522,6 +545,25 @@ function VideoPlayer({
             />
           </TVFocusGuideView>
         )} */}
+
+        {is2XSpeed && (
+          <View style={{ zIndex: 10, position: 'absolute', top: 40, left: 0, right: 0 }}>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              <Text
+                style={{
+                  backgroundColor: '#0000006f',
+                  fontSize: isFullscreen ? 22 : 12,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  textShadowColor: 'black',
+                  textShadowOffset: { width: -1, height: 1 },
+                  textShadowRadius: 1,
+                }}>
+                2X Speed <Icons name="fast-forward" color="white" size={isFullscreen ? 22 : 12} />
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View
           style={{
@@ -588,15 +630,7 @@ function VideoPlayer({
           onTouchStart={resetActivityTimer}
           style={[{ flex: 1, zIndex: 999, backgroundColor: '#00000094' }, showControlsStyle]}>
           <TVFocusGuideView autoFocus trapFocusDown style={StyleSheet.absoluteFill}>
-            <Top
-              title={title}
-              videoRef={videoRef}
-              subtitleURL={subtitleURL}
-              subtitleError={subtitleError}
-              onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
-              isSubtitleEnabled={isSubtitleEnabled}
-              onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
-            />
+            <Top title={title} videoRef={videoRef} />
             <CenterControl
               isBuffering={isBuffering}
               isError={isError}
@@ -638,6 +672,11 @@ function VideoPlayer({
                 }
               }}
               seekBarProgress={seekBarProgress}
+              subtitleURL={subtitleURL}
+              subtitleError={subtitleError}
+              onRetrySubtitle={() => setSubtitleRetryToken(p => p + 1)}
+              isSubtitleEnabled={isSubtitleEnabled}
+              onToggleSubtitle={() => setIsSubtitleEnabled(p => !p)}
             />
           </TVFocusGuideView>
         </Reanimated.View>
@@ -668,25 +707,8 @@ function VideoPlayer({
   );
 }
 
-function Top({
-  title,
-  videoRef,
-  subtitleURL,
-  subtitleError,
-  onRetrySubtitle,
-  isSubtitleEnabled,
-  onToggleSubtitle,
-}: {
-  title: string;
-  videoRef?: React.RefObject<VideoView | null>;
-  subtitleURL?: string;
-  subtitleError: boolean;
-  onRetrySubtitle: () => void;
-  isSubtitleEnabled: boolean;
-  onToggleSubtitle: () => void;
-}) {
+function Top({ title, videoRef }: { title: string; videoRef?: React.RefObject<VideoView | null> }) {
   const [focusPip, setFocusPip] = useState(false);
-  const [focusSub, setFocusSub] = useState(false);
 
   const requestPiP = useCallback(() => {
     videoRef?.current?.startPictureInPicture();
@@ -722,56 +744,6 @@ function Top({
         hitSlop={2}>
         <Icons name={'picture-in-picture'} size={20} color={'white'} />
       </TouchableOpacity>
-      {subtitleURL &&
-        (subtitleError ? (
-          <TouchableOpacity
-            focusable={Platform.isTV}
-            onFocus={() => setFocusSub(true)}
-            onBlur={() => setFocusSub(false)}
-            style={[
-              {
-                justifyContent: 'center',
-                marginLeft: 6,
-                backgroundColor: '#00000062',
-                padding: 5,
-                borderRadius: 5,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-              },
-              focusSub && { backgroundColor: '#16687c' },
-            ]}
-            onPress={onRetrySubtitle}
-            hitSlop={2}>
-            <Icons name={'closed-caption-off'} size={18} color={'#ff6b6b'} />
-            <Text style={{ color: '#ff6b6b', fontSize: 10, fontWeight: 'bold' }}>
-              RETRY SUBTITLE
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            focusable={Platform.isTV}
-            onFocus={() => setFocusSub(true)}
-            onBlur={() => setFocusSub(false)}
-            style={[
-              {
-                justifyContent: 'center',
-                marginLeft: 6,
-                backgroundColor: '#00000062',
-                padding: 5,
-                borderRadius: 5,
-              },
-              focusSub && { backgroundColor: '#16687c' },
-            ]}
-            onPress={onToggleSubtitle}
-            hitSlop={2}>
-            <Icons
-              name={isSubtitleEnabled ? 'closed-caption' : 'closed-caption-off'}
-              size={20}
-              color={'white'}
-            />
-          </TouchableOpacity>
-        ))}
       <Text
         style={{
           color: '#dadada',
@@ -918,6 +890,11 @@ function BottomControl({
   isFullscreen,
   currentDurationSecond,
   totalDurationSecond,
+  subtitleURL,
+  subtitleError,
+  onRetrySubtitle,
+  isSubtitleEnabled,
+  onToggleSubtitle,
 }: {
   contentFitMode: VideoContentFit;
   setContentFitMode: React.Dispatch<React.SetStateAction<VideoContentFit>>;
@@ -928,9 +905,15 @@ function BottomControl({
   isFullscreen: boolean;
   currentDurationSecond: SharedValue<number>;
   totalDurationSecond: SharedValue<number>;
+  subtitleURL?: string;
+  subtitleError: boolean;
+  onRetrySubtitle: () => void;
+  isSubtitleEnabled: boolean;
+  onToggleSubtitle: () => void;
 }) {
   const [focusFit, setFocusFit] = useState(false);
   const [focusFull, setFocusFull] = useState(false);
+  const [focusSub, setFocusSub] = useState(false);
 
   const totalSecond = useDerivedValue(() => {
     'worklet';
@@ -998,6 +981,54 @@ function BottomControl({
           </Text>
         </Reanimated.View>
         <View style={{ flexDirection: 'row', gap: 18 }}>
+          {subtitleURL &&
+            (subtitleError ? (
+              <TouchableOpacity
+                focusable={Platform.isTV}
+                onFocus={() => setFocusSub(true)}
+                onBlur={() => setFocusSub(false)}
+                style={[
+                  {
+                    justifyContent: 'center',
+                    marginLeft: 6,
+                    backgroundColor: '#00000062',
+                    padding: 5,
+                    borderRadius: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                  },
+                  focusSub && { backgroundColor: '#16687c' },
+                ]}
+                onPress={onRetrySubtitle}
+                hitSlop={2}>
+                <Icons name={'closed-caption-off'} size={24} color={'#ff6b6b'} />
+                <Text style={{ color: '#ff6b6b', fontSize: 10, fontWeight: 'bold' }}>RETRY</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                focusable={Platform.isTV}
+                onFocus={() => setFocusSub(true)}
+                onBlur={() => setFocusSub(false)}
+                style={[
+                  {
+                    justifyContent: 'center',
+                    marginLeft: 6,
+                    backgroundColor: '#00000062',
+                    padding: 5,
+                    borderRadius: 5,
+                  },
+                  focusSub && { backgroundColor: '#16687c' },
+                ]}
+                onPress={onToggleSubtitle}
+                hitSlop={2}>
+                <Icons
+                  name={isSubtitleEnabled ? 'closed-caption' : 'closed-caption-off'}
+                  size={24}
+                  color={'white'}
+                />
+              </TouchableOpacity>
+            ))}
           <TouchableOpacity
             focusable={Platform.isTV}
             onFocus={() => setFocusFit(true)}
