@@ -103,7 +103,9 @@ function FilmDetail(props: Props) {
   const historyTitle = data.info.title.split(': Season')[0].trim();
   const lastWatched = useMemo(() => {
     const isLastWatched = historyListsJson.find(
-      z => z === `historyItem:${historyTitle}:false:true`,
+      z =>
+        z === `historyItem:${historyTitle}:false:true` ||
+        z === `historyItem:${historyTitle}:false:true:false`,
     );
     if (isLastWatched) {
       return JSON.parse(DatabaseManager.getSync(isLastWatched)!) as HistoryJSON;
