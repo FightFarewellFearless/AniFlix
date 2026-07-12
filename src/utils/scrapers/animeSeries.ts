@@ -11,7 +11,7 @@ import {
   listAnimeTypeList,
 } from '@/types/anime';
 import runtime from '@misc/AniFlixRuntime';
-import deviceUserAgent from '@utils/deviceUserAgent';
+import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import { runOnRuntimeAsync, scheduleOnRN } from 'react-native-worklets';
 
 export const __ALIAS = 'otakudesu';
@@ -477,21 +477,7 @@ async function getBloggerVideo(url: string, signal?: AbortSignal) {
             'accept-language': 'en-US,en;q=0.9',
             'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
             priority: 'u=1, i',
-            'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
-            'sec-ch-ua-arch': '"x86"',
-            'sec-ch-ua-bitness': '"64"',
-            'sec-ch-ua-form-factors': '"Desktop"',
-            'sec-ch-ua-full-version': '"145.0.7632.75"',
-            'sec-ch-ua-full-version-list':
-              '"Not:A-Brand";v="99.0.0.0", "Google Chrome";v="145.0.7632.75", "Chromium";v="145.0.7632.75"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-model': '""',
-            'sec-ch-ua-platform': '"Linux"',
-            'sec-ch-ua-platform-version': '""',
-            'sec-ch-ua-wow64': '?0',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
+            ...userAgentSEC,
             'User-Agent': deviceUserAgent,
             'x-same-domain': '1',
             Referer: 'https://www.blogger.com/',

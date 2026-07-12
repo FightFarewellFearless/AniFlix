@@ -3,7 +3,7 @@ import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
 import { fetch as expoFetch } from 'expo/fetch';
 
-import deviceUserAgent from '@utils/deviceUserAgent';
+import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import React from 'react';
 import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
 import { setWebViewOpen } from '../CFBypass';
@@ -316,20 +316,7 @@ async function fetchPage(
       'content-type': 'application/json',
       pragma: 'no-cache',
       priority: 'u=0, i',
-      'sec-ch-ua': '"Not(A:Brand";v="99", "Chromium";v="149", "Google Chrome";v="149"',
-      'sec-ch-ua-arch': '',
-      'sec-ch-ua-bitness': '',
-      'sec-ch-ua-full-version': '149.0.6970.115',
-      'sec-ch-ua-full-version-list':
-        '"Not(A:Brand";v="99.0.0.0", "Chromium";v="149.0.6970.115", "Google Chrome";v="149.0.6970.115"',
-      'sec-ch-ua-mobile': '?1',
-      'sec-ch-ua-model': 'Pixel 9',
-      'sec-ch-ua-platform': 'Android',
-      'sec-ch-ua-platform-version': '15',
-      'sec-fetch-dest': 'document',
-      'sec-fetch-mode': 'navigate',
-      'sec-fetch-site': 'none',
-      'sec-fetch-user': '?1',
+      ...userAgentSEC,
       'upgrade-insecure-requests': '1',
       'User-Agent': deviceUserAgent,
       ...opt?.headers,
