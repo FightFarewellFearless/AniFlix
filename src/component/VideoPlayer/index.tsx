@@ -132,6 +132,7 @@ function VideoPlayer({
       initialPlayer.audioMixingMode = DatabaseManager.getSync('audioMixingMode') as AudioMixingMode;
       initialPlayer.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : 1;
       initialPlayer.showNowPlayingNotification = enableNowPlayingNotification;
+      initialPlayer.preservesPitch = true;
     },
   );
 
