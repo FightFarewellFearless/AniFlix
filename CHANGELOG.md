@@ -1,3 +1,6 @@
+# v2.0.1_JS-3 (16-Juli-2026)
+## Diperbaiki
+- High pitch audio ketika fast forward
 # v2.0.1_JS-2 (12-Juli-2026)
 ## Ditambahkan
 - Tekan dan tahan lama di video player untuk mempercepat 2X
