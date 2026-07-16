@@ -550,18 +550,29 @@ function VideoPlayer({
         {is2XSpeed && (
           <View style={{ zIndex: 10, position: 'absolute', top: 40, left: 0, right: 0 }}>
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-              <Text
+              <View
                 style={{
                   backgroundColor: '#0000006f',
-                  fontSize: isFullscreen ? 22 : 12,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  textShadowColor: 'black',
-                  textShadowOffset: { width: -1, height: 1 },
-                  textShadowRadius: 1,
+                  borderRadius: 22,
+                  padding: 5,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 4,
                 }}>
-                2X Speed <Icons name="fast-forward" color="white" size={isFullscreen ? 22 : 12} />
-              </Text>
+                <Text
+                  style={{
+                    fontSize: isFullscreen ? 22 : 12,
+                    fontWeight: 'bold',
+                    color: 'white',
+                    textShadowColor: 'black',
+                    textShadowOffset: { width: -1, height: 1 },
+                    textShadowRadius: 1,
+                  }}>
+                  2×
+                </Text>
+                <Icons name="fast-forward" color="white" size={isFullscreen ? 22 : 12} />
+              </View>
             </View>
           </View>
         )}
