@@ -16,6 +16,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -341,10 +342,14 @@ function VideoPlayer({
     setIs2XSpeed(true);
   }, []);
 
+  const changeUpdateTimeInterval = useEffectEvent((x2Speed: boolean) => {
+    player.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : x2Speed ? 0.5 : 1;
+  });
   useEffect(() => {
     if (is2XSpeed) {
       isPressHandledByLongPress.current = true;
     }
+    changeUpdateTimeInterval(is2XSpeed);
     player.playbackRate = is2XSpeed ? 2 : 1;
   }, [player, is2XSpeed]);
 
