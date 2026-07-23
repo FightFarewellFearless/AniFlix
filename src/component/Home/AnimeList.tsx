@@ -531,7 +531,7 @@ function FeaturedFilmListUNMEMO({
           horizontal
           data={data?.slice(0, 25) ?? []}
           renderItem={renderMovie}
-          keyExtractor={z => 'featured' + z.title}
+          keyExtractor={z => 'featured' + z.url}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -604,7 +604,7 @@ function TrendingFilmListUNMEMO({
           horizontal
           data={data?.slice(0, 25) ?? []}
           renderItem={renderMovie}
-          keyExtractor={z => 'featured' + z.title}
+          keyExtractor={z => 'featured' + z.url}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -697,7 +697,7 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
           horizontal
           data={data?.slice(0, 36) ?? []}
           renderItem={renderMovie}
-          keyExtractor={z => 'latest' + z.title}
+          keyExtractor={z => 'latest' + z.url}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -792,7 +792,7 @@ function LatestSeriesListUNMEMO({
           horizontal
           data={data?.slice(0, 36) ?? []}
           renderItem={renderMovie}
-          keyExtractor={z => 'latest' + z.title}
+          keyExtractor={z => 'latest' + z.url}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -858,7 +858,7 @@ function EpisodeBaruUNMEMO({
           contentContainerStyle={{ gap: 3 }}
           horizontal
           data={(data?.newAnime ?? []).slice(0, 25)}
-          keyExtractor={z => z.title}
+          keyExtractor={z => z.streamingLink}
           renderItem={renderNewAnime}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
@@ -960,7 +960,7 @@ function MovieListUNMEMO({
           horizontal
           data={data?.slice(0, 25) ?? []}
           renderItem={renderMovie}
-          keyExtractor={z => z.title}
+          keyExtractor={z => z.url}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -1037,7 +1037,7 @@ function ComicListUNMEMO() {
           horizontal
           data={data.slice(0, 24)}
           renderItem={renderComics}
-          keyExtractor={z => z.title}
+          keyExtractor={z => z.detailUrl}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
@@ -1114,7 +1114,7 @@ function NovelListUNMEMO() {
           horizontal
           data={data.slice(0, 10)}
           renderItem={renderNovel}
-          keyExtractor={z => z.title}
+          keyExtractor={z => z.detailUrl}
           extraData={styles}
           showsHorizontalScrollIndicator={false}
         />
