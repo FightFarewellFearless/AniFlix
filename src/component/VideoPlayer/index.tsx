@@ -16,7 +16,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useEffectEvent,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -49,10 +48,10 @@ import Reanimated, {
 import { runOnJS, runOnRuntime } from 'react-native-worklets';
 
 import ReText from '@component/misc/ReText';
+import { useBackHandler } from '@hooks/useBackHandler';
 import AniFlixRuntime from '@misc/AniFlixRuntime';
 import { DatabaseManager, useModifiedKeyValueIfFocused } from '@utils/DatabaseManager';
 import deviceUserAgent from '@utils/deviceUserAgent';
-import { useBackHandler } from '@hooks/useBackHandler';
 import { TVFocusGuideView } from 'react-native';
 import SeekBar from './SeekBar';
 
@@ -342,16 +341,13 @@ function VideoPlayer({
     setIs2XSpeed(true);
   }, []);
 
-  const changeUpdateTimeInterval = useEffectEvent((x2Speed: boolean) => {
-    player.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : x2Speed ? 0.5 : 1;
-  });
   useEffect(() => {
     if (is2XSpeed) {
       isPressHandledByLongPress.current = true;
     }
-    changeUpdateTimeInterval(is2XSpeed);
+    player.timeUpdateEventInterval = subtitleURL ? 150 / 1000 : is2XSpeed ? 0.5 : 1;
     player.playbackRate = is2XSpeed ? 2 : 1;
-  }, [player, is2XSpeed]);
+  }, [is2XSpeed, player, subtitleURL]);
 
   const onRewind = useCallback(() => {
     const rewind = Math.max(0, currentDurationSecond.get() - 5);

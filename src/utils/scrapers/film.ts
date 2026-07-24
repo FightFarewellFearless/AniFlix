@@ -325,7 +325,6 @@ async function fetchPage(
   });
   const asJson = opt?.asJson ?? false;
   if (response.status === 403) {
-    console.log(await response.text());
     if (opt?.autoCaptcha !== false) setWebViewOpen.openWebViewCF(true, url);
     throw new Error('Silahkan selesaikan captcha');
   }
