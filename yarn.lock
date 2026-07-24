@@ -3061,6 +3061,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-vector-icons/common@npm:^13.0.1":
+  version: 13.0.1
+  resolution: "@react-native-vector-icons/common@npm:13.0.1"
+  dependencies:
+    find-up: ^8.0.0
+    picocolors: ^1.1.1
+    plist: ^3.1.0
+  peerDependencies:
+    "@react-native-vector-icons/get-image": ^13.0.0
+    "@react-native/assets-registry": "*"
+    expo-font: "*"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    "@react-native-vector-icons/get-image":
+      optional: true
+    "@react-native/assets-registry":
+      optional: true
+    expo-font:
+      optional: true
+  bin:
+    rnvi-update-plist: lib/commonjs/scripts/updatePlist.js
+  checksum: 004fcd6c56fb0341e542abf4615685543f21b0e3d911b63938c8eea6b12dfe94c88dc414fa37aab489302cbd05969516d0747ba1ccb58133576859ac0beea899
+  languageName: node
+  linkType: hard
+
 "@react-native-vector-icons/entypo@npm:^12.5.0":
   version: 12.5.0
   resolution: "@react-native-vector-icons/entypo@npm:12.5.0"
@@ -3109,15 +3135,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-vector-icons/material-design-icons@npm:^12.5.0":
-  version: 12.5.0
-  resolution: "@react-native-vector-icons/material-design-icons@npm:12.5.0"
+"@react-native-vector-icons/material-design-icons@npm:^13.1.2":
+  version: 13.1.2
+  resolution: "@react-native-vector-icons/material-design-icons@npm:13.1.2"
   dependencies:
-    "@react-native-vector-icons/common": ^12.4.2
+    "@react-native-vector-icons/common": ^13.0.1
   peerDependencies:
+    "@expo/config-plugins": ">=10.0.0"
     react: "*"
     react-native: "*"
-  checksum: c34edc01d425ea32c3c54cc0d7cb230d7c20c1016c67dff5db1d8d0014ab3113c52339541143cb64f17e2c97eab680dffdb89d05b87296548bf917bac226a1c6
+  peerDependenciesMeta:
+    "@expo/config-plugins":
+      optional: true
+  checksum: 2394e34e0eef8bbb46526fc5b82eea0b2763e98d635bbc3c76cb4846413ddcbe575276a38ba88f2f74cbd4d2a3720e3ab78e109cdf0218e5207bf3c15b5ea917
   languageName: node
   linkType: hard
 
@@ -4173,7 +4203,7 @@ __metadata:
     "@react-native-vector-icons/fontawesome": ^12.5.0
     "@react-native-vector-icons/fontawesome5": ^12.4.0
     "@react-native-vector-icons/fontisto": ^12.5.0
-    "@react-native-vector-icons/material-design-icons": ^12.5.0
+    "@react-native-vector-icons/material-design-icons": ^13.1.2
     "@react-native-vector-icons/material-icons": ^12.5.0
     "@react-native/babel-preset": 0.85.2
     "@react-native/eslint-config": 0.85.2
@@ -7127,6 +7157,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"find-up@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "find-up@npm:8.0.0"
+  dependencies:
+    locate-path: ^8.0.0
+    unicorn-magic: ^0.3.0
+  checksum: 925dbb66d8323ac70b14c76480971d25574ba3c9443871ec3b6a89e1888e5c1ddd9a1f73d310f9ccc85ce1b82c157452365827994c402bd0575f277e8d2a0630
+  languageName: node
+  linkType: hard
+
 "findup-sync@npm:^5.0.0":
   version: 5.0.0
   resolution: "findup-sync@npm:5.0.0"
@@ -9084,6 +9124,15 @@ __metadata:
   dependencies:
     p-locate: ^6.0.0
   checksum: c1b653bdf29beaecb3d307dfb7c44d98a2a98a02ebe353c9ad055d1ac45d6ed4e1142563d222df9b9efebc2bcb7d4c792b507fad9e7150a04c29530b7db570f8
+  languageName: node
+  linkType: hard
+
+"locate-path@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "locate-path@npm:8.0.0"
+  dependencies:
+    p-locate: ^6.0.0
+  checksum: e604ea32835df31dc218c478c6d5b858ca7d9cd1b6c141b0bacf05b59a5ca59383225631e355b9b565f2b789862e43e31a61bca587cba471d0f3109aa54695b4
   languageName: node
   linkType: hard
 
@@ -12484,6 +12533,13 @@ __metadata:
   version: 0.1.0
   resolution: "unicorn-magic@npm:0.1.0"
   checksum: 48c5882ca3378f380318c0b4eb1d73b7e3c5b728859b060276e0a490051d4180966beeb48962d850fd0c6816543bcdfc28629dcd030bb62a286a2ae2acb5acb6
+  languageName: node
+  linkType: hard
+
+"unicorn-magic@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "unicorn-magic@npm:0.3.0"
+  checksum: bdd7d7c522f9456f32a0b77af23f8854f9a7db846088c3868ec213f9550683ab6a2bdf3803577eacbafddb4e06900974385841ccb75338d17346ccef45f9cb01
   languageName: node
   linkType: hard
 
