@@ -1,3 +1,6 @@
+# v2.0.1_JS-5 (24-Juli-2026)
+## Diperbaiki
+- Crash saat pindah ke next/prev episode
 # v2.0.1_JS-4 (24-Juli-2026)
 ## Ditingkatkan
 - Sistem bypass anime movie sekarang perlu interaksi langsung dengan pengguna untuk memastikan tingkat keberhasilan. Perubahan ini sekaligus memisahkan antara pencarian anime series dan anime movie
