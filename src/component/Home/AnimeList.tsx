@@ -64,7 +64,7 @@ import {
 } from '@misc/context';
 import { OTAJSVersion, version } from '@root/package.json';
 import AnimeAPI from '@utils/AnimeAPI';
-import { AnimeMovieWebView, getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
 import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import {
@@ -216,18 +216,6 @@ function HomeList(props: HomeProps) {
   const localTime = useLocalTime();
   const battery = useBatteryLevel();
 
-  const [isAnimeMovieWebViewOpen, setIsAnimeMovieWebViewOpen] = useState(true);
-  const [isMovieReady, setIsMovieReady] = useState(false);
-  const onAnimeMovieReady = useCallback(() => {
-    setIsAnimeMovieWebViewOpen(false);
-    setIsMovieReady(true);
-  }, []);
-
-  const retryMovie = useCallback(() => {
-    setIsMovieReady(false);
-    setIsAnimeMovieWebViewOpen(true);
-  }, []);
-
   useEffect(() => {
     const abort = new AbortController();
     const task = requestIdleCallback(() => {
@@ -340,15 +328,6 @@ function HomeList(props: HomeProps) {
 
   return (
     <>
-      {isAnimeMovieWebViewOpen && (
-        <React.Suspense>
-          <AnimeMovieWebView
-            isWebViewShown={isAnimeMovieWebViewOpen}
-            setIsWebViewShown={setIsAnimeMovieWebViewOpen}
-            onAnimeMovieReady={onAnimeMovieReady}
-          />
-        </React.Suspense>
-      )}
       <LegendList
         ref={listRef}
         recycleItems
@@ -437,12 +416,7 @@ function HomeList(props: HomeProps) {
               props={props}
               key={'series_latest' + refreshingKey}
             />
-            <MovieList
-              props={props}
-              key={'anime_movie' + refreshingKey}
-              isMovieReady={isMovieReady}
-              retryMovie={retryMovie}
-            />
+            <MovieList props={props} refreshing={refreshing} key={'anime_movie' + refreshingKey} />
             <ComicList key={'comick' + refreshingKey} />
             <NovelList key={'novel' + refreshingKey} />
             <TouchableOpacity
@@ -880,18 +854,11 @@ function EpisodeBaruUNMEMO({
 }
 
 const MovieList = memo(MovieListUNMEMO);
-function MovieListUNMEMO({
-  props,
-  isMovieReady,
-  retryMovie,
-}: {
-  props: HomeProps;
-  isMovieReady?: boolean;
-  retryMovie: () => void;
-}) {
+function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: () => void }) {
   const styles = useStyles();
   const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
   const [isError, setIsError] = useState(false);
+  const [isMovieCaptchaError, setIsMovieCaptchaError] = useState(false);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<Movies>) => (
@@ -907,22 +874,23 @@ function MovieListUNMEMO({
   );
 
   useEffect(() => {
-    if (!isMovieReady) return;
     setIsError(false);
+    setIsMovieCaptchaError(false);
     setData?.([]);
     const task = requestIdleCallback(() => {
       getLatestMovie()
         .then(movieData => {
-          if ('isError' in movieData) {
-            setIsError(true);
-          } else {
-            setData?.(movieData);
-          }
+          setData?.(movieData);
         })
-        .catch(() => setIsError(true));
+        .catch(e => {
+          if (e.message === 'Silahkan selesaikan captcha') {
+            setIsMovieCaptchaError(true);
+          }
+          setIsError(true);
+        });
     });
     return () => cancelIdleCallback(task);
-  }, [setData, isMovieReady]);
+  }, [setData]);
 
   return (
     <View style={styles.sectionContainer}>
@@ -939,19 +907,29 @@ function MovieListUNMEMO({
         </TouchableOpacity>
       </View>
 
-      {isError && (
-        <TouchableOpacity
-          onPress={() => {
-            setIsError(false);
-            retryMovie();
-          }}
-          style={styles.errorContainer}>
-          <MaterialIcon name="refresh" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Ketuk disini untuk mencoba ulang.
-          </Text>
-        </TouchableOpacity>
-      )}
+      {isError &&
+        (isMovieCaptchaError ? (
+          <TouchableOpacity
+            onPress={() => {
+              setWebViewOpen.openWebViewCF(true, 'https://154.26.137.28/genre/', refreshing);
+            }}>
+            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
+            <Text style={[styles.errorText, { color: 'yellow' }]}>
+              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => {
+              refreshing();
+            }}
+            style={styles.errorContainer}>
+            <MaterialIcon name="refresh" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Ketuk disini untuk mencoba ulang.
+            </Text>
+          </TouchableOpacity>
+        ))}
 
       {data?.length !== 0 ? (
         <FlashList

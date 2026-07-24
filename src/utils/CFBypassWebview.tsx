@@ -13,6 +13,7 @@ import Icon from '@react-native-vector-icons/material-design-icons';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
+import { updateAnimeMovieCookie } from './scrapers/animeMovie';
 
 const { height, width } = Dimensions.get('window');
 
@@ -28,14 +29,30 @@ function CFBypassWebView() {
 
   const handleNavigationStateChange = useCallback(
     (event: WebViewNavigation) => {
-      const lastTitleLang = ['Just a moment...', 'Tunggu sebentar...'];
+      const challengeTitles = [
+        'Just a moment...',
+        'Tunggu sebentar...',
+        'Loading..',
+        'Loading...',
+        'Loading',
+      ];
       setWebTitle(event.title);
-      if (lastTitleLang.includes(lastTitle.current) && lastTitleLang.includes(event.title)) {
+
+      const isChallengeTitle = (t: string) =>
+        Boolean(t) && challengeTitles.some(ct => t.toLowerCase().includes(ct.toLowerCase()));
+
+      const wasChallenge = isChallengeTitle(lastTitle.current);
+      const nowNotChallenge = !isChallengeTitle(event.title) || event.title.includes('AnimeSail');
+
+      if (wasChallenge && nowNotChallenge) {
+        if (bypassContext.url.includes('154.26.137.28')) {
+          updateAnimeMovieCookie();
+        }
         bypassContext.setIsOpen(false);
         bypassContext.successCallback.current?.();
         ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
       }
-      if (!event.loading && lastTitleLang.includes(event.title)) {
+      if (!event.loading && isChallengeTitle(event.title)) {
         lastTitle.current = event.title;
       }
     },
@@ -67,6 +84,8 @@ function CFBypassWebView() {
                 'Accept-Language': 'en-US,en;q=0.9',
               },
             }}
+            incognito={bypassContext.url.includes('154.26.137.28')}
+            cacheEnabled={false}
             onNavigationStateChange={handleNavigationStateChange}
             sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={true}
@@ -82,6 +101,10 @@ function CFBypassWebView() {
             }}>
             <Text style={{ color: theme.colors.onSurface, textAlign: 'center', fontSize: 13 }}>
               Selesaikan verifikasi di atas untuk melanjutkan.
+            </Text>
+            <Text style={{ color: theme.colors.onSurface, textAlign: 'center', fontSize: 13 }}>
+              Jika setelah verifikasi selesai namun halaman ini tidak tertutup otomatis, kamu boleh
+              menutupnya manual
             </Text>
             <TouchableOpacity
               style={{

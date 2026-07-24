@@ -213,11 +213,7 @@ const MovieContainer = ({ navigation }: { navigation: Props['navigation'] }) => 
     const page = Math.round((data.length ?? 0) / 20);
     const newData = await getLatestMovie(undefined, page + 1);
 
-    if ('isError' in newData) {
-      throw new Error('API Error');
-    }
-
-    if (setParamsState) {
+    if (Array.isArray(newData) && setParamsState) {
       setParamsState(prev => {
         const combined = [...prev, ...newData];
         return combined.filter(

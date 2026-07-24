@@ -1,13 +1,12 @@
 import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
-import { useEffect, useRef } from 'react';
-import { ToastAndroid, View } from 'react-native';
-import { WebView } from 'react-native-webview';
 
+import { setWebViewOpen } from '@utils/CFBypass';
 import deviceUserAgent from '@utils/deviceUserAgent';
 
 import cheerio from 'cheerio';
 
 import { unpack } from '@utils/unpacker';
+import { ToastAndroid } from 'react-native';
 
 export interface Movies {
   title: string;
@@ -28,25 +27,66 @@ export interface MovieDetail {
   updateDate: string;
 }
 
-type Props = {
-  isWebViewShown: boolean;
-  setIsWebViewShown: (state: boolean) => void;
-  onAnimeMovieReady: () => void;
-};
-let isError = false;
 let Cookie = '';
-export async function getLatestMovie(signal?: AbortSignal, page?: number) {
-  if (isError) {
-    return { isError };
+
+export function makeCookieString(cookies: Cookies) {
+  return Object.entries(cookies)
+    .map(([key, details]) => `${key}=${details.value}`)
+    .join('; ');
+}
+
+export async function updateAnimeMovieCookie() {
+  try {
+    const cookies = await CookieManager.get('https://154.26.137.28/');
+    Cookie = makeCookieString(cookies);
+  } catch (e) {
+    console.error('Failed to update anime movie cookies:', e);
   }
-  const response = await fetch(
-    `https://154.26.137.28/movie-terbaru/${page ? `page/${page}/` : ''}`,
-    {
-      signal,
-      headers: { 'User-Agent': deviceUserAgent, Cookie },
+}
+
+async function fetchMoviePage(
+  url: string,
+  signal?: AbortSignal,
+  opt?: RequestInit & { autoCaptcha?: boolean },
+): Promise<string> {
+  if (!Cookie) {
+    await updateAnimeMovieCookie();
+  }
+
+  const response = await fetch(url, {
+    signal,
+    headers: {
+      'User-Agent': deviceUserAgent,
+      Cookie,
+      ...opt?.headers,
     },
-  );
-  const data = await response.text();
+    ...opt,
+  });
+
+  const text = await response.text();
+
+  if (
+    response.status === 403 ||
+    text.toLowerCase().includes('<title>loading') ||
+    text.includes('Just a moment...') ||
+    text.includes('Tunggu sebentar...')
+  ) {
+    if (opt?.autoCaptcha !== false) {
+      setWebViewOpen.openWebViewCF(true, url);
+    }
+    throw new Error('Silahkan selesaikan captcha');
+  }
+
+  return text;
+}
+
+export async function getLatestMovie(
+  signal?: AbortSignal,
+  page?: number,
+  autoCaptcha = false,
+): Promise<Movies[]> {
+  const url = `https://154.26.137.28/movie-terbaru/${page ? `page/${page}/` : ''}`;
+  const data = await fetchMoviePage(url, signal, { autoCaptcha });
   const $ = cheerio.load(data);
   const movies: Movies[] = [];
   $('div.listupd article').each((i, el) => {
@@ -55,31 +95,15 @@ export async function getLatestMovie(signal?: AbortSignal, page?: number) {
       url: $(el).find('div > a').attr('href')!,
       thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!,
     });
-  })!;
+  });
   return movies;
 }
 
-export async function getMovieDetail(
-  url: string,
-  signal?: AbortSignal,
-): Promise<MovieDetail | { isError: true }> {
-  if (isError) {
-    return { isError };
-  }
-  let err;
-  const response = await fetch(url, {
-    signal,
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
-  }).catch(erro => {
-    err = erro;
-  });
+export async function getMovieDetail(url: string, signal?: AbortSignal): Promise<MovieDetail> {
+  const data = await fetchMoviePage(url, signal);
   if (signal?.aborted) {
     throw new Error('canceled');
   }
-  if (response === undefined) {
-    throw err;
-  }
-  const data = await response.text();
   const $ = cheerio.load(data);
   const title = $('header > h1.entry-title').text().trim();
   const thumbnailUrl = $('div.entry-content.serial-info > img').attr('src')!;
@@ -141,15 +165,8 @@ export type MovieStreamingDetail = {
 export async function getStreamingDetail(
   url: string,
   signal?: AbortSignal,
-): Promise<MovieStreamingDetail | { isError: true }> {
-  if (isError) {
-    return { isError };
-  }
-  const response = await fetch(url, {
-    signal,
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
-  });
-  const data = await response.text();
+): Promise<MovieStreamingDetail> {
+  const data = await fetchMoviePage(url, signal);
   const $ = cheerio.load(data);
 
   const episodeData = {
@@ -458,15 +475,9 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
     .attr('src')!;
 }
 
-export async function searchMovie(query: string, signal?: AbortSignal) {
-  if (isError) {
-    return { isError };
-  }
-  const response = await fetch('https://154.26.137.28/?s=' + encodeURIComponent(query), {
-    signal,
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
-  });
-  const data = await response.text();
+export async function searchMovie(query: string, signal?: AbortSignal): Promise<Movies[]> {
+  const url = 'https://154.26.137.28/?s=' + encodeURIComponent(query);
+  const data = await fetchMoviePage(url, signal);
   const $ = cheerio.load(data);
   const list = $('div.listupd article');
   const movies: Movies[] = [];
@@ -482,69 +493,4 @@ export async function searchMovie(query: string, signal?: AbortSignal) {
       });
     });
   return movies;
-}
-
-function makeCookieString(cookies: Cookies) {
-  return Object.entries(cookies)
-    .map(([key, details]) => `${key}=${details.value}`)
-    .join('; ');
-}
-
-export function AnimeMovieWebView({ isWebViewShown, setIsWebViewShown, onAnimeMovieReady }: Props) {
-  const webviewRef = useRef<WebView>(null);
-  useEffect(() => {
-    if (isWebViewShown) {
-      isError = false;
-      const timeout = setTimeout(() => {
-        isError = true;
-        setIsWebViewShown(false);
-        onAnimeMovieReady();
-        ToastAndroid.show('Gagal mengambil data movie: timeout', ToastAndroid.SHORT);
-      }, 25_000);
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-  }, [isWebViewShown, onAnimeMovieReady, setIsWebViewShown]);
-  // if (!useIsFocused()) return null;
-  return (
-    <View style={{ height: 500, display: 'none' }}>
-      {isWebViewShown && (
-        <WebView
-          ref={webviewRef}
-          sharedCookiesEnabled
-          userAgent={deviceUserAgent}
-          source={{ uri: 'https://154.26.137.28/' }}
-          setSupportMultipleWindows={false}
-          onError={() => {
-            isError = true;
-            setIsWebViewShown(false);
-            onAnimeMovieReady();
-            ToastAndroid.show('Gagal mempersiapkan data untuk movie', ToastAndroid.SHORT);
-          }}
-          onNavigationStateChange={event => {
-            if (event.title.includes('AnimeSail')) {
-              CookieManager.get('https://154.26.137.28/')
-                .then(makeCookieString)
-                .then(a => {
-                  Cookie = a;
-                })
-                .then(() => {
-                  setIsWebViewShown(false);
-                  onAnimeMovieReady();
-                });
-            } else if (event.title.toLowerCase().includes('error')) {
-              isError = true;
-              setIsWebViewShown(false);
-              onAnimeMovieReady();
-              ToastAndroid.show(
-                'Error saat mempersiapkan data, coba lagi nanti',
-                ToastAndroid.SHORT,
-              );
-            }
-          }}
-        />
-      )}
-    </View>
-  );
 }

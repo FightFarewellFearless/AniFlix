@@ -70,8 +70,11 @@ function Search(props: Props) {
   const styles = useStyles();
   const theme = useTheme();
 
-  const [searchType, setSearchType] = useState<'anime' | 'comics' | 'novel' | 'film'>('anime');
+  const [searchType, setSearchType] = useState<'anime' | 'movie' | 'comics' | 'novel' | 'film'>(
+    'anime',
+  );
   const [searchedSearchType, setSearchedSearchType] = useState(searchType);
+  const [animeSubtype, setAnimeSubtype] = useState<'anime' | 'movie'>('anime');
   const [readingSubtype, setReadingSubtype] = useState<'comics' | 'novel'>('comics');
   const textInputRef = useRef<TextInputType>(null);
 
@@ -181,18 +184,34 @@ function Search(props: Props) {
     textInputRef.current?.blur();
 
     if (searchType === 'anime') {
-      Promise.all([
-        AnimeAPI.search(searchText, abortController.current?.signal),
-        searchMovie(searchText, abortController.current?.signal),
-      ])
-        .then(([animeResult, movieResult]) => {
+      AnimeAPI.search(searchText, abortController.current?.signal)
+        .then(animeResult => {
           setCurrentSearchQuery(searchText);
           setFilmData(null);
+          setMovieData(null);
           setComicsData(null);
-          if (!('isError' in movieResult)) {
-            setMovieData(movieResult);
-          }
+          setNovelData(null);
           setData(animeResult);
+        })
+        .finally(() => {
+          setSearchedSearchType(searchType);
+          if (searchHistory.includes(searchText.trim())) {
+            searchHistory.splice(searchHistory.indexOf(searchText.trim()), 1);
+          }
+          searchHistory.unshift(searchText.trim());
+          DatabaseManager.set('searchHistory', JSON.stringify(searchHistory));
+          setLoading(false);
+        })
+        .catch(handleError);
+    } else if (searchType === 'movie') {
+      searchMovie(searchText, abortController.current?.signal)
+        .then(movieResult => {
+          setCurrentSearchQuery(searchText);
+          setData(null);
+          setFilmData(null);
+          setComicsData(null);
+          setNovelData(null);
+          setMovieData(movieResult);
         })
         .finally(() => {
           setSearchedSearchType(searchType);
@@ -348,7 +367,11 @@ function Search(props: Props) {
     (novelData && novelData.length > 0);
   const isSearchEmpty =
     !hasSearchResults &&
-    (data !== null || comicsData !== null || filmData !== null || novelData !== null);
+    (data !== null ||
+      movieData !== null ||
+      comicsData !== null ||
+      filmData !== null ||
+      novelData !== null);
   const isLoading = listAnimeLoading || isPending;
   const showDefaultList =
     !hasSearchResults && !isSearchEmpty && listAnime !== null && listAnime.length > 0;
@@ -357,6 +380,7 @@ function Search(props: Props) {
     !isLoading &&
     (listAnime === null || listAnime.length === 0) &&
     data === null &&
+    movieData === null &&
     comicsData === null &&
     filmData === null &&
     novelData === null;
@@ -404,18 +428,26 @@ function Search(props: Props) {
 
       <SegmentedButtons
         style={{ marginTop: 6 }}
-        value={searchType === 'comics' || searchType === 'novel' ? 'reading' : searchType}
+        value={
+          searchType === 'comics' || searchType === 'novel'
+            ? 'reading'
+            : searchType === 'anime' || searchType === 'movie'
+              ? 'animeGroup'
+              : searchType
+        }
         onValueChange={val => {
           if (val === 'reading') {
             setSearchType(readingSubtype);
+          } else if (val === 'animeGroup') {
+            setSearchType(animeSubtype);
           } else {
             setSearchType(val as any);
           }
         }}
         buttons={[
           {
-            value: 'anime',
-            label: 'Cari anime/movie',
+            value: 'animeGroup',
+            label: 'Cari anime',
             icon: 'movie-search',
           },
           {
@@ -430,6 +462,29 @@ function Search(props: Props) {
           },
         ]}
       />
+
+      {(searchType === 'anime' || searchType === 'movie') && (
+        <SegmentedButtons
+          style={{ marginTop: 6, marginHorizontal: 20 }}
+          value={searchType}
+          onValueChange={val => {
+            setSearchType(val as any);
+            setAnimeSubtype(val as any);
+          }}
+          buttons={[
+            {
+              value: 'anime',
+              label: 'Series',
+              icon: 'television-classic',
+            },
+            {
+              value: 'movie',
+              label: 'Movie',
+              icon: 'filmstrip',
+            },
+          ]}
+        />
+      )}
 
       {(searchType === 'comics' || searchType === 'novel') && (
         <SegmentedButtons
@@ -575,13 +630,19 @@ function Search(props: Props) {
                   lebih umum.
                 </Text>
                 <View style={{ alignItems: 'flex-start' }}>
-                  {proTips[searchedSearchType === 'novel' ? 'comics' : searchedSearchType].map(
-                    (proTip: string) => (
-                      <Text style={[globalStyles.text, styles.proTip]} key={proTip}>
-                        <Icon name="lightbulb-o" size={12} color={theme.colors.primary} /> {proTip}
-                      </Text>
-                    ),
-                  )}
+                  {(
+                    proTips[
+                      searchedSearchType === 'novel'
+                        ? 'comics'
+                        : searchedSearchType === 'movie'
+                          ? 'anime'
+                          : searchedSearchType
+                    ] as string[]
+                  ).map((proTip: string) => (
+                    <Text style={[globalStyles.text, styles.proTip]} key={proTip}>
+                      <Icon name="lightbulb-o" size={12} color={theme.colors.primary} /> {proTip}
+                    </Text>
+                  ))}
                 </View>
               </View>
             </Reanimated.View>
@@ -619,18 +680,26 @@ function Search(props: Props) {
           style={styles.searchHistoryContainer}>
           <View style={{ flex: 1 }}>
             <SegmentedButtons
-              value={searchType === 'comics' || searchType === 'novel' ? 'reading' : searchType}
+              value={
+                searchType === 'comics' || searchType === 'novel'
+                  ? 'reading'
+                  : searchType === 'anime' || searchType === 'movie'
+                    ? 'animeGroup'
+                    : searchType
+              }
               onValueChange={val => {
                 if (val === 'reading') {
                   setSearchType(readingSubtype);
+                } else if (val === 'animeGroup') {
+                  setSearchType(animeSubtype);
                 } else {
                   setSearchType(val as any);
                 }
               }}
               buttons={[
                 {
-                  value: 'anime',
-                  label: 'Cari anime/movie',
+                  value: 'animeGroup',
+                  label: 'Cari anime',
                   icon: 'movie-search',
                 },
                 {
@@ -645,6 +714,28 @@ function Search(props: Props) {
                 },
               ]}
             />
+            {(searchType === 'anime' || searchType === 'movie') && (
+              <SegmentedButtons
+                style={{ marginTop: 6, marginHorizontal: 20 }}
+                value={searchType}
+                onValueChange={val => {
+                  setSearchType(val as any);
+                  setAnimeSubtype(val as any);
+                }}
+                buttons={[
+                  {
+                    value: 'anime',
+                    label: 'Series',
+                    icon: 'television-classic',
+                  },
+                  {
+                    value: 'movie',
+                    label: 'Movie',
+                    icon: 'filmstrip',
+                  },
+                ]}
+              />
+            )}
             {(searchType === 'comics' || searchType === 'novel') && (
               <SegmentedButtons
                 style={{ marginTop: 6, marginHorizontal: 20 }}
@@ -700,7 +791,11 @@ function Search(props: Props) {
           </View>
         </Reanimated_KeyboardAvoidingView>
       )}
-      {(data !== null || comicsData !== null || filmData !== null || novelData !== null) &&
+      {(data !== null ||
+        movieData !== null ||
+        comicsData !== null ||
+        filmData !== null ||
+        novelData !== null) &&
         !loading && (
           <TouchableOpacityAnimated
             style={styles.closeSearchResult}
