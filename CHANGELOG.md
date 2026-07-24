@@ -1,3 +1,10 @@
+# v2.0.1_JS-4 (24-Juli-2026)
+## Ditingkatkan
+- Sistem bypass anime movie sekarang perlu interaksi langsung dengan pengguna untuk memastikan tingkat keberhasilan. Perubahan ini sekaligus memisahkan antara pencarian anime series dan anime movie
+  > ini memperbaiki error anime movie yang sering dilaporkan
+## Diperbaiki
+- [Video player] Interval update durasi ketika speed up 2x
+- List tidak muncul di beranda ketika ada 2 judul yang sama persis
 # v2.0.1_JS-3 (16-Juli-2026)
 ## Diperbaiki
 - High pitch audio ketika fast forward
