@@ -3,6 +3,10 @@ import { __ALIAS as aliasComics1, DOMAIN as comics1Domain } from './scrapers/com
 import { __ALIAS as aliasComics2, DOMAIN as comics2Domain } from './scrapers/comics2';
 import { __ALIAS as filmAlias, FILM_DOMAIN as filmDomain } from './scrapers/film';
 import { __ALIAS as aliasKomiku, DOMAIN as komikuDomain } from './scrapers/komiku';
+import {
+  __ALIAS as animeMovieAlias,
+  ANIME_MOVIE_BASE_DOMAIN as animeMovieDomain,
+} from './scrapers/animemovie';
 import { __ALIAS as aliasNovel, DOMAIN as novelDomain } from './scrapers/novel';
 import { URL } from 'react-native-url-polyfill';
 
@@ -52,7 +56,8 @@ export function generateUrlWithLatestDomain(url: string): string {
       matchedAlias = filmAlias;
       break;
     case 'movie':
-      return urlObj.toString();
+      newDomain = animeMovieDomain;
+      matchedAlias = animeMovieAlias;
   }
 
   const oldAliasIndex = urlObj.hostname.indexOf(matchedAlias);

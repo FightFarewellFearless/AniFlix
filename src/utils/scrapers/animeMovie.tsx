@@ -29,6 +29,11 @@ export interface MovieDetail {
 
 let Cookie = '';
 
+export const __ALIAS = 'animesail';
+export let ANIME_MOVIE_BASE_DOMAIN = 'v1.' + __ALIAS + '.xyz';
+export let ANIME_MOVIE_BASE_URL = 'https://' + ANIME_MOVIE_BASE_DOMAIN + '/';
+const BASE_URL = ANIME_MOVIE_BASE_URL;
+
 export function makeCookieString(cookies: Cookies) {
   return Object.entries(cookies)
     .map(([key, details]) => `${key}=${details.value}`)
@@ -37,7 +42,7 @@ export function makeCookieString(cookies: Cookies) {
 
 export async function updateAnimeMovieCookie() {
   try {
-    const cookies = await CookieManager.get('https://154.26.137.28/');
+    const cookies = await CookieManager.get(BASE_URL);
     Cookie = makeCookieString(cookies);
   } catch (e) {
     console.error('Failed to update anime movie cookies:', e);
@@ -85,7 +90,7 @@ export async function getLatestMovie(
   page?: number,
   autoCaptcha = false,
 ): Promise<Movies[]> {
-  const url = `https://154.26.137.28/movie-terbaru/${page ? `page/${page}/` : ''}`;
+  const url = `${BASE_URL}movie-terbaru/${page ? `page/${page}/` : ''}`;
   const data = await fetchMoviePage(url, signal, { autoCaptcha });
   const $ = cheerio.load(data);
   const movies: Movies[] = [];
@@ -476,7 +481,7 @@ async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: Abort
 }
 
 export async function searchMovie(query: string, signal?: AbortSignal): Promise<Movies[]> {
-  const url = 'https://154.26.137.28/?s=' + encodeURIComponent(query);
+  const url = BASE_URL + '?s=' + encodeURIComponent(query);
   const data = await fetchMoviePage(url, signal);
   const $ = cheerio.load(data);
   const list = $('div.listupd article');

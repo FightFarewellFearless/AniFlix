@@ -13,7 +13,7 @@ import Icon from '@react-native-vector-icons/material-design-icons';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
-import { updateAnimeMovieCookie } from './scrapers/animeMovie';
+import { ANIME_MOVIE_BASE_DOMAIN, updateAnimeMovieCookie } from './scrapers/animeMovie';
 
 const { height, width } = Dimensions.get('window');
 
@@ -45,7 +45,7 @@ function CFBypassWebView() {
       const nowNotChallenge = !isChallengeTitle(event.title) || event.title.includes('AnimeSail');
 
       if (wasChallenge && nowNotChallenge) {
-        if (bypassContext.url.includes('154.26.137.28')) {
+        if (bypassContext.url.includes(ANIME_MOVIE_BASE_DOMAIN)) {
           updateAnimeMovieCookie();
         }
         bypassContext.setIsOpen(false);
@@ -84,7 +84,7 @@ function CFBypassWebView() {
                 'Accept-Language': 'en-US,en;q=0.9',
               },
             }}
-            incognito={bypassContext.url.includes('154.26.137.28')}
+            incognito={bypassContext.url.includes(ANIME_MOVIE_BASE_DOMAIN)}
             cacheEnabled={false}
             onNavigationStateChange={handleNavigationStateChange}
             sharedCookiesEnabled={true}
