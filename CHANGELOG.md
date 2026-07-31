@@ -1,3 +1,8 @@
+# v2.0.1_JS-6 (31-Juli-2026)
+## Ditingkatkan
+- Tampilan tombol 'perlihatkan captcha' di beranda
+## Diperbaiki
+- Anime Movie
 # v2.0.1_JS-5 (24-Juli-2026)
 ## Diperbaiki
 - Crash saat pindah ke next/prev episode
