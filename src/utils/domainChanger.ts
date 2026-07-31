@@ -6,7 +6,7 @@ import { __ALIAS as aliasKomiku, DOMAIN as komikuDomain } from './scrapers/komik
 import {
   __ALIAS as animeMovieAlias,
   ANIME_MOVIE_BASE_DOMAIN as animeMovieDomain,
-} from './scrapers/animemovie';
+} from './scrapers/animeMovie';
 import { __ALIAS as aliasNovel, DOMAIN as novelDomain } from './scrapers/novel';
 import { URL } from 'react-native-url-polyfill';
 
