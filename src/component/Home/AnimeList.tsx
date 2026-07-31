@@ -64,7 +64,7 @@ import {
 } from '@misc/context';
 import { OTAJSVersion, version } from '@root/package.json';
 import AnimeAPI from '@utils/AnimeAPI';
-import { getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
+import { ANIME_MOVIE_BASE_URL, getLatestMovie, Movies } from '@utils/scrapers/animeMovie';
 import { fetchLatestDomain } from '@utils/scrapers/animeSeries';
 import { getLatestComicsReleases, LatestComicsRelease } from '@utils/scrapers/comicsv2';
 import {
@@ -76,6 +76,7 @@ import {
 } from '@utils/scrapers/film';
 import { getLatestNovelRelease, NovelLatestRelease } from '@utils/scrapers/novel';
 import { setWebViewOpen } from '@/utils/CFBypass';
+import { Home_ShowCaptchaButton } from '../misc/Home_ShowCaptchaButton';
 
 export const MIN_IMAGE_HEIGHT = 200;
 export const MIN_IMAGE_WIDTH = 100;
@@ -480,15 +481,11 @@ function FeaturedFilmListUNMEMO({
 
       {isError &&
         (isFilmCaptchaError ? (
-          <TouchableOpacity
-            onPress={() => {
+          <Home_ShowCaptchaButton
+            callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
-            }}>
-            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
-            <Text style={[styles.errorText, { color: 'yellow' }]}>
-              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
-            </Text>
-          </TouchableOpacity>
+            }}
+          />
         ) : (
           <View>
             <MaterialIcon name="error-outline" size={24} color="#d80000" />
@@ -553,15 +550,11 @@ function TrendingFilmListUNMEMO({
 
       {isError &&
         (isFilmCaptchaError ? (
-          <TouchableOpacity
-            onPress={() => {
+          <Home_ShowCaptchaButton
+            callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
-            }}>
-            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
-            <Text style={[styles.errorText, { color: 'yellow' }]}>
-              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
-            </Text>
-          </TouchableOpacity>
+            }}
+          />
         ) : (
           <View>
             <MaterialIcon name="error-outline" size={24} color="#d80000" />
@@ -646,15 +639,11 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
 
       {isError &&
         (isFilmCaptchaError ? (
-          <TouchableOpacity
-            onPress={() => {
+          <Home_ShowCaptchaButton
+            callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
-            }}>
-            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
-            <Text style={[styles.errorText, { color: 'yellow' }]}>
-              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
-            </Text>
-          </TouchableOpacity>
+            }}
+          />
         ) : (
           <View>
             <MaterialIcon name="error-outline" size={24} color="#d80000" />
@@ -741,15 +730,11 @@ function LatestSeriesListUNMEMO({
 
       {isError &&
         (isSeriesCaptchaError ? (
-          <TouchableOpacity
-            onPress={() => {
+          <Home_ShowCaptchaButton
+            callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
-            }}>
-            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
-            <Text style={[styles.errorText, { color: 'yellow' }]}>
-              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
-            </Text>
-          </TouchableOpacity>
+            }}
+          />
         ) : (
           <View>
             <MaterialIcon name="error-outline" size={24} color="#d80000" />
@@ -909,15 +894,11 @@ function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: 
 
       {isError &&
         (isMovieCaptchaError ? (
-          <TouchableOpacity
-            onPress={() => {
-              setWebViewOpen.openWebViewCF(true, 'https://154.26.137.28/genre/', refreshing);
-            }}>
-            <MaterialIcon name="error-outline" size={24} color="#d8d800" />
-            <Text style={[styles.errorText, { color: 'yellow' }]}>
-              Halaman terlindungi captcha, ketuk disini untuk bypass manual!
-            </Text>
-          </TouchableOpacity>
+          <Home_ShowCaptchaButton
+            callback={() => {
+              setWebViewOpen.openWebViewCF(true, ANIME_MOVIE_BASE_URL + 'genre/', refreshing);
+            }}
+          />
         ) : (
           <TouchableOpacity
             onPress={() => {
