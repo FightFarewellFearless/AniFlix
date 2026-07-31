@@ -12,7 +12,7 @@ import { URL } from 'react-native-url-polyfill';
 
 type Type = 'komiku' | 'comics1' | 'comics2' | 'anime' | 'movie' | 'film' | 'novel';
 
-export function determineType(url: string): Type {
+export function determineType(url: string): Type | undefined {
   const urlObj = new URL(url);
   if (urlObj.hostname.includes(aliasNovel)) return 'novel';
   if (urlObj.hostname.includes(aliasKomiku)) return 'komiku';
@@ -20,12 +20,15 @@ export function determineType(url: string): Type {
   if (urlObj.hostname.includes(aliasComics2)) return 'comics2';
   if (urlObj.hostname.includes(aliasAnime)) return 'anime';
   if (urlObj.hostname.includes(filmAlias)) return 'film';
-  return 'movie';
+  if (urlObj.hostname.includes(animeMovieAlias)) return 'movie';
+  return undefined;
 }
 
 export function generateUrlWithLatestDomain(url: string): string {
   const urlObj = new URL(url);
   const type = determineType(url);
+
+  if (!type) return urlObj.toString();
 
   let newDomain = '';
   let matchedAlias = '';
