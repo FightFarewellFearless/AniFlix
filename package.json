@@ -36,7 +36,7 @@
     "expo-document-picker": "56.0.4",
     "expo-linear-gradient": "56.0.4",
     "expo-splash-screen": "56.0.10",
-    "expo-sqlite": "56.0.5",
+    "expo-sqlite": "57.0.0",
     "expo-updates": "56.0.19",
     "expo-video": "56.1.4",
     "googletrans": "^1.0.28",
