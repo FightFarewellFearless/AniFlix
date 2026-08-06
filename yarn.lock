@@ -3434,9 +3434,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.21.1":
-  version: 7.21.1
-  resolution: "@react-navigation/core@npm:7.21.1"
+"@react-navigation/core@npm:^7.21.5":
+  version: 7.21.5
+  resolution: "@react-navigation/core@npm:7.21.5"
   dependencies:
     "@react-navigation/routers": ^7.6.0
     escape-string-regexp: ^4.0.0
@@ -3448,7 +3448,7 @@ __metadata:
     use-sync-external-store: ^1.5.0
   peerDependencies:
     react: ">= 18.2.0"
-  checksum: 5609f1233abea6d662cbdc8f9f6bd4c5dd3d982e05b99fbc4d0dee7060af38b284355a765fe26dd8ea1c5028043b2c213455218e09f82284bf1aaa321e69b13e
+  checksum: 7104ce21eed2f82fcd1256ad32f369cb7f6891b28a8004b2c24554897f23e651291c1ad0fa85006f0f8654882be5bc6369b39953b7d35f23a74372c6010e090d
   languageName: node
   linkType: hard
 
@@ -3510,11 +3510,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.3.3":
-  version: 7.3.3
-  resolution: "@react-navigation/native@npm:7.3.3"
+"@react-navigation/native@npm:^7.3.7":
+  version: 7.3.7
+  resolution: "@react-navigation/native@npm:7.3.7"
   dependencies:
-    "@react-navigation/core": ^7.21.1
+    "@react-navigation/core": ^7.21.5
     escape-string-regexp: ^4.0.0
     fast-deep-equal: ^3.1.3
     nanoid: ^3.3.11
@@ -3523,7 +3523,7 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
     react-native: "*"
-  checksum: 8527d23d0899fec29beedc7486b1851754b752fb5fe81f14809f09b221d607d926a7bd78c77a56f37d770aa35980b17cc3670b39e21383b12633035ac30585fb
+  checksum: 627f285a9c156561194e531a7b7646d601cdeddd1e4797fb5342a0242d8692521c43340ab4c3fcb58ec2735c950fb354c8975c9d15df80042ef87fc36e90e6f6
   languageName: node
   linkType: hard
 
@@ -4180,7 +4180,7 @@ __metadata:
     "@react-native/metro-config": 0.85.2
     "@react-native/typescript-config": 0.85.2
     "@react-navigation/drawer": ^7.12.2
-    "@react-navigation/native": ^7.3.3
+    "@react-navigation/native": ^7.3.7
     "@react-navigation/native-stack": ^7.17.5
     "@rnx-kit/align-deps": ^3.4.1
     "@shopify/flash-list": 2.3.2
