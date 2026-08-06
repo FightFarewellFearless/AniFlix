@@ -408,10 +408,11 @@ export async function getComicsReading1(
         });
     })(),
   );
-  const detectedCdn = await detectCDNImage($, signal);
-  const cdn1 = detectedCdn?.[0]?.link;
+  const id = await getImageID($, signal);
+  // const detectedCdn = await detectCDNImage($, signal);
+  const cdn1 = undefined; // detectedCdn?.[0]?.link;
   const comicImages = jsonApi.imageSrc.map((src: string) => {
-    return (cdn1 ? cdn1 : `https://image.komik.im/softkomik`) + '/' + src;
+    return (cdn1 ? cdn1 : `https://image.komik.im/softkomik`) + '/' + src + `?id=${id}`;
   });
   const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
   const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';
@@ -430,29 +431,38 @@ export async function getComicsReading1(
         : BASE_URL + '/' + jsonPage.komik.title_slug + '/chapter/' + prevChapter,
   };
 }
-
-async function detectCDNImage(
-  $: CheerioAPI,
-  signal?: AbortSignal,
-): Promise<
-  | null
-  | {
-      link: string;
-      name: string;
-      value: string;
-    }[]
-> {
-  const scriptUrl = $('script').eq(17).attr('src');
-  if (!scriptUrl) return null;
-  const scriptRes = await fetch(BASE_URL + scriptUrl, {
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
+async function getImageID($: CheerioAPI, signal?: AbortSignal): Promise<string | null> {
+  const linkToScript = $('script').eq(17).attr('src');
+  if (!linkToScript) return null;
+  const res = await fetch(BASE_URL + linkToScript, {
     signal,
+    headers: { 'User-Agent': deviceUserAgent, Cookie },
   });
-  const scriptData = await scriptRes.text();
-  const cdnMatch = scriptData.match(/(\[\{.*?CDN 1.*?\},?\])/g);
-  // eslint-disable-next-line no-new-func
-  return cdnMatch ? new Function(`return ${cdnMatch[1] ?? cdnMatch[0]}`)() : null;
+  const scriptText = await res.text();
+  return scriptText.split('let t=String("')[1].split('"')[0];
 }
+// async function detectCDNImage(
+//   $: CheerioAPI,
+//   signal?: AbortSignal,
+// ): Promise<
+//   | null
+//   | {
+//       link: string;
+//       name: string;
+//       value: string;
+//     }[]
+// > {
+//   const scriptUrl = $('script').eq(16).attr('src');
+//   if (!scriptUrl) return null;
+//   const scriptRes = await fetch(BASE_URL + scriptUrl, {
+//     headers: { 'User-Agent': deviceUserAgent, Cookie },
+//     signal,
+//   });
+//   const scriptData = await scriptRes.text();
+//   const cdnMatch = scriptData.match(/(\[\{.*?CDN 1.*?\},?\])/g);
+//   // eslint-disable-next-line no-new-func
+//   return cdnMatch ? new Function(`return ${cdnMatch[1] ?? cdnMatch[0]}`)() : null;
+// }
 export interface ComicsSearch1 {
   title: string;
   thumbnailUrl: string;
