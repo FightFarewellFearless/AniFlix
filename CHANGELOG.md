@@ -1,3 +1,6 @@
+# v2.0.1_JS-7 (06-Agustus-2026)
+## Diperbaiki
+- Gambar komik yang terus-menerus loading
 # v2.0.1_JS-6 (31-Juli-2026)
 ## Ditingkatkan
 - Tampilan tombol 'perlihatkan captcha' di beranda
