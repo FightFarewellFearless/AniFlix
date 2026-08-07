@@ -29,11 +29,9 @@ import { useSharedValue } from 'react-native-reanimated';
 import { createDocument } from 'react-native-saf-x';
 
 import { TouchableOpacity } from '@/component/misc/TouchableOpacityRNGH';
-import { HistoryItemKey } from '@/types/databaseTarget';
 import { HistoryJSON } from '@/types/historyJSON';
 import { UtilsStackNavigator } from '@/types/navigation';
 import watchLaterJSON from '@/types/watchLaterJSON';
-import { HistoryDatabaseCache } from '@component/Home/Saya/History';
 import ReText from '@component/misc/ReText';
 import defaultDatabaseValue from '@misc/defaultDatabaseValue.json';
 import {
@@ -231,42 +229,6 @@ function Setting(_props: Props) {
     }
   }, [modalText, restoreHistoryOrWatchLater, restoreSearchHistory]);
 
-  const clearHistory = useCallback(() => {
-    DialogManager.alert(
-      'Peringatan!!!',
-      'Ini akan menghapus semua histori tontonan kamu.\nApakah kamu yakin ingin lanjut?',
-      [
-        {
-          text: 'Batal',
-        },
-        {
-          text: 'Lanjut dan hapus',
-          onPress: async () => {
-            modalText.set('Menghapus histori tontonan kamu...');
-            setModalVisible(true);
-            await new Promise(res => setTimeout(res, 1));
-            try {
-              const keyOrder: HistoryItemKey[] = JSON.parse(
-                DatabaseManager.getSync('historyKeyCollectionsOrder') ?? '[]',
-              );
-              for (const key of keyOrder) {
-                modalText.set(`Menghapus\n${key.split(':').slice(1, -2).join(':')}`);
-                await DatabaseManager.delete(key);
-              }
-              DatabaseManager.set('historyKeyCollectionsOrder', '[]');
-              HistoryDatabaseCache.clear();
-              DialogManager.alert('Histori dihapus', 'Histori tontonan kamu sudah di hapus');
-            } catch (e: any) {
-              DialogManager.alert('Gagal menghapus histori!', e.message);
-            } finally {
-              setModalVisible(false);
-            }
-          },
-        },
-      ],
-    );
-  }, [modalText]);
-
   const settingsData: SettingsData[] = [
     {
       title: 'Tema aplikasi',
@@ -361,13 +323,6 @@ function Setting(_props: Props) {
       description: 'Kembalikan data aplikasi dari file backup',
       iconName: 'history',
       handler: restoreData,
-    },
-    {
-      title: 'Hapus histori',
-      description: 'Hapus permanen semua riwayat tontonan',
-      iconName: 'trash',
-      iconColor: theme.colors.error,
-      handler: clearHistory,
     },
     {
       title: 'Muat ulang',
