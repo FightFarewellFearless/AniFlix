@@ -1,3 +1,11 @@
+# v2.1.0 (07-Agustus-2026)
+## Ditingkatkan
+- Banyak dependencies di tingkatkan ke versi paling baru untuk meningkatkan stabilitas aplikasi
+## Diperbaiki
+- Teks yang terpotong di versi android 15 ke atas
+## Dihapus
+- Tombol clear history di pengaturan
+
 # v2.0.1_JS-7 (06-Agustus-2026)
 ## Diperbaiki
 - Gambar komik yang terus-menerus loading
