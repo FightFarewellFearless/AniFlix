@@ -1,1 +1,0 @@
-Bagian "Komik Terbaru" di beranda dan komik melalui histori sedang bermasalah. Untuk sementara kamu bisa cari ulang komik yang ingin dibaca dan pilih dari daftar yang tersedia di menu pencarian

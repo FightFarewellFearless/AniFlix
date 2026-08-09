@@ -1,3 +1,6 @@
+# v2.1.0_JS-1 (09-Agustus-2026)
+## Diperbaiki
+- Error pada komik
 # v2.1.0 (07-Agustus-2026)
 ## Ditingkatkan
 - Banyak dependencies di tingkatkan ke versi paling baru untuk meningkatkan stabilitas aplikasi
