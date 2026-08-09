@@ -111,7 +111,7 @@ export default function Comics1ChapterSessionWebView() {
 `}
           onMessage={event => {
             const data = JSON.parse(event.nativeEvent.data);
-            if (data.url?.startsWith('/api/')) {
+            if (data.url?.startsWith('/api/session')) {
               resolveAllPromisesCollector(data.url);
             }
           }}
