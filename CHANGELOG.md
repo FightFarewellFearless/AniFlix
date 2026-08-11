@@ -1,3 +1,7 @@
+# v2.1.1 (11-Agustus-2026)
+## Diperbaiki
+- [Video player]: Masalah pada seek bar
+
 # v2.1.0_JS-1 (09-Agustus-2026)
 ## Diperbaiki
 - Error pada komik
