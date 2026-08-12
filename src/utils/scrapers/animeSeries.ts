@@ -10,7 +10,7 @@ import {
   SearchAnimeList,
   listAnimeTypeList,
 } from '@/types/anime';
-import runtime from '@misc/AniFlixRuntime';
+import { default as aniflixruntime } from '@misc/AniFlixRuntime';
 import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import { runOnRuntimeAsync, scheduleOnRN } from 'react-native-worklets';
 
@@ -57,29 +57,31 @@ const newAnime = async (page = 1, signal?: AbortSignal): Promise<NewAnimeList[]>
     throw errorObj;
   }
   const html = response!.data;
-  const $ = cheerio.load(html);
-  const links: Cheerio<Element>[] = [];
-  const data = [];
-  $('div.venz > ul li').each((i, el) => {
-    links.push($(el).find('div.detpost'));
-  });
-  for (const _link of links) {
-    const link = _link.find('div.thumb > a').attr('href')!;
-    const title = _link.find('h2.jdlflm').text().trim();
-    const episode = _link.find('div.epz').text().trim();
-    const thumbnailUrl = _link.find('div.thumbz > img').attr('src')!;
-    const releaseDate = _link.find('div.newnime').text().trim();
-    const releaseDay = _link.find('div.epztipe').text().trim();
-    data.push({
-      title,
-      episode,
-      thumbnailUrl,
-      streamingLink: link,
-      releaseDate,
-      releaseDay,
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    const $ = cheerio.load(html);
+    const links: Cheerio<Element>[] = [];
+    const data = [];
+    $('div.venz > ul li').each((i, el) => {
+      links.push($(el).find('div.detpost'));
     });
-  }
-  return data;
+    for (const _link of links) {
+      const link = _link.find('div.thumb > a').attr('href')!;
+      const title = _link.find('h2.jdlflm').text().trim();
+      const episode = _link.find('div.epz').text().trim();
+      const thumbnailUrl = _link.find('div.thumbz > img').attr('src')!;
+      const releaseDate = _link.find('div.newnime').text().trim();
+      const releaseDay = _link.find('div.epztipe').text().trim();
+      data.push({
+        title,
+        episode,
+        thumbnailUrl,
+        streamingLink: link,
+        releaseDate,
+        releaseDay,
+      });
+    }
+    return data;
+  });
 };
 
 const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAnimeList[]> => {
@@ -102,34 +104,37 @@ const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAn
     throw errorObj;
   }
   const searchdata = data!.data;
-  const $ = cheerio.load(searchdata);
-  const result: SearchAnimeList[] = [];
-  $('div.vezone > div.venser > div.venutama > div.page > ul li').each((i, el) => {
-    const _link = $(el);
-    const animeUrl = _link.find('h2 > a').attr('href')!;
-    const title = _link.find('h2 > a').text().trim();
-    const rating = _link.find('div.set').eq(2).text().replace('Rating : ', '').trim();
-    const status = _link.find('div.set').eq(1).text().replace('Status : ', '').trim();
-    const thumbnailUrl = _link.find('img').attr('src')!;
-    const genres: string[] = [];
-    _link
-      .find('div.set')
-      .eq(0)
-      .find('a')
-      .each((_, ell) => {
-        genres.push($(ell).text().trim());
-      });
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(searchdata);
+    const result: SearchAnimeList[] = [];
+    $('div.vezone > div.venser > div.venutama > div.page > ul li').each((i, el) => {
+      const _link = $(el);
+      const animeUrl = _link.find('h2 > a').attr('href')!;
+      const title = _link.find('h2 > a').text().trim();
+      const rating = _link.find('div.set').eq(2).text().replace('Rating : ', '').trim();
+      const status = _link.find('div.set').eq(1).text().replace('Status : ', '').trim();
+      const thumbnailUrl = _link.find('img').attr('src')!;
+      const genres: string[] = [];
+      _link
+        .find('div.set')
+        .eq(0)
+        .find('a')
+        .each((_, ell) => {
+          genres.push($(ell).text().trim());
+        });
 
-    result.push({
-      title,
-      genres,
-      status,
-      animeUrl,
-      thumbnailUrl,
-      rating,
+      result.push({
+        title,
+        genres,
+        status,
+        animeUrl,
+        thumbnailUrl,
+        rating,
+      });
     });
+    return result;
   });
-  return result;
 };
 
 const fromUrl = async (
@@ -165,179 +170,197 @@ const fromUrl = async (
   }
   const data = _axios?.data;
   if (data === undefined) return;
-  const $ = cheerio.load(data, { xmlMode: true });
-  const isAnimeDetail = $('div.episodelist').length === 3;
+  const parsed = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data, { xmlMode: true });
+    const isAnimeDetail = $('div.episodelist').length === 3;
 
-  const aniDetail = $('div.venser');
+    const aniDetail = $('div.venser');
 
-  if (isAnimeDetail) {
-    function getSecondTwoDots(text: string) {
-      return text.split(':')[1];
-    }
+    if (isAnimeDetail) {
+      function getSecondTwoDots(text: string) {
+        return text.split(':')[1];
+      }
 
-    const filmStats = aniDetail.find('div.infozin > div.infozingle');
-    const title = aniDetail.find('div.jdlrx').text().trim();
-    const synopsis: string[] = [];
-    aniDetail
-      .find('div.sinopc')
-      .find('p')
-      .each((i, el) => {
-        synopsis.push($(el).text().trim());
-      });
-    const epsTotal = getSecondTwoDots(filmStats.find('p').eq(6).text()).trim();
-    const minutesPerEp = getSecondTwoDots(filmStats.find('p').eq(7).text()).trim();
-    const thumbnailUrl = $('div.fotoanime > img').attr('src')!;
-
-    const alternativeTitle = getSecondTwoDots(filmStats.find('p').eq(1).text()).trim();
-    const rating = getSecondTwoDots(filmStats.find('p').eq(2).text()).trim();
-    const aired = getSecondTwoDots(filmStats.find('p').eq(8).text()).trim();
-    const status = getSecondTwoDots(filmStats.find('p').eq(5).text()).trim();
-    const studio = getSecondTwoDots(filmStats.find('p').eq(9).text()).trim();
-    const animeType = getSecondTwoDots(filmStats.find('p').eq(4).text()).trim();
-
-    const genres: string[] = [];
-    filmStats
-      .find('p')
-      .eq(10)
-      .find('a')
-      .each((i, el) => {
-        genres.push($(el).text().trim());
-      });
-
-    const episodelist = $('div.episodelist').eq(1);
-    const episodeList: AniDetailEpsList[] = [];
-    if (!detailOnly)
-      episodelist.find('ul li').each((i, el) => {
-        const link = $(el).find('a').attr('href')!;
-        const detailTitle = $(el).find('a').text().trim();
-        const releaseDate = $(el).find('span').eq(1).text().trim();
-        episodeList.push({
-          title: detailTitle,
-          link,
-          releaseDate,
+      const filmStats = aniDetail.find('div.infozin > div.infozingle');
+      const title = aniDetail.find('div.jdlrx').text().trim();
+      const synopsis: string[] = [];
+      aniDetail
+        .find('div.sinopc')
+        .find('p')
+        .each((i, el) => {
+          synopsis.push($(el).text().trim());
         });
-      });
+      const epsTotal = getSecondTwoDots(filmStats.find('p').eq(6).text()).trim();
+      const minutesPerEp = getSecondTwoDots(filmStats.find('p').eq(7).text()).trim();
+      const thumbnailUrl = $('div.fotoanime > img').attr('src')!;
 
-    return {
-      type: 'animeDetail',
-      title,
-      genres,
-      synopsis: synopsis.join('\n'),
-      detailOnly,
-      episodeList,
-      epsTotal,
-      minutesPerEp,
-      thumbnailUrl,
-      alternativeTitle,
-      rating,
-      releaseYear: aired,
-      status,
-      studio,
-      animeType,
-    };
-  } else {
-    const title = aniDetail.find('h1.posttl').text().trim();
-    let streamingLink = await getStreamLink(
-      aniDetail.find('div.responsive-embed-stream > iframe').attr('src'),
-      signal,
-    ).catch(() => undefined);
-    const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
+      const alternativeTitle = getSecondTwoDots(filmStats.find('p').eq(1).text()).trim();
+      const rating = getSecondTwoDots(filmStats.find('p').eq(2).text()).trim();
+      const aired = getSecondTwoDots(filmStats.find('p').eq(8).text()).trim();
+      const status = getSecondTwoDots(filmStats.find('p').eq(5).text()).trim();
+      const studio = getSecondTwoDots(filmStats.find('p').eq(9).text()).trim();
+      const animeType = getSecondTwoDots(filmStats.find('p').eq(4).text()).trim();
 
-    const thumbnailUrl = $('div.cukder > img').attr('src')!;
+      const genres: string[] = [];
+      filmStats
+        .find('p')
+        .eq(10)
+        .find('a')
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
 
-    const episode = aniDetail.find('div.flir a');
-    const episodeData: { previous?: string; animeDetail: string; next?: string } = {
-      animeDetail: episode
-        .filter((i, el) => $(el).text().trim() === 'See All Episodes')
-        .attr('href')!,
-    };
+      const episodelist = $('div.episodelist').eq(1);
+      const episodeList: AniDetailEpsList[] = [];
+      if (!detailOnly)
+        episodelist.find('ul li').each((i, el) => {
+          const link = $(el).find('a').attr('href')!;
+          const detailTitle = $(el).find('a').text().trim();
+          const releaseDate = $(el).find('span').eq(1).text().trim();
+          episodeList.push({
+            title: detailTitle,
+            link,
+            releaseDate,
+          });
+        });
 
-    const prev = episode.filter((i, el) => $(el).text().trim() === 'Previous Eps.');
-    if (prev.length !== 0) {
-      episodeData.previous = prev.attr('href');
-    }
-    const next = episode.filter((i, el) => $(el).text().trim() === 'Next Eps.');
-    if (next.length !== 0) {
-      episodeData.next = next.attr('href');
-    }
+      return {
+        isAnimeDetail: true as const,
+        type: 'animeDetail' as const,
+        title,
+        genres,
+        synopsis: synopsis.join('\n'),
+        detailOnly,
+        episodeList,
+        epsTotal,
+        minutesPerEp,
+        thumbnailUrl,
+        alternativeTitle,
+        rating,
+        releaseYear: aired,
+        status,
+        studio,
+        animeType,
+      };
+    } else {
+      const title = aniDetail.find('h1.posttl').text().trim();
+      const rawStreamSrc = aniDetail.find('div.responsive-embed-stream > iframe').attr('src');
+      const downloadLink = aniDetail.find('div.responsive-embed > iframe').attr('src')!;
 
-    const changeResScript = $('script').eq(16).text();
-    const reqNonceAction = changeResScript
-      .split('processData:!0,cache:!0,data:{action:"')[1]
-      .split('"')[0];
-    const reqResolutionWithNonceAction = changeResScript
-      .split('processData:!0,cache:!0,data:{...e,nonce:window.__x__nonce,action:"')[1]
-      .split('"')[0];
+      const thumbnailUrl = $('div.cukder > img').attr('src')!;
 
-    const isValidResolution = (el: Element) =>
-      $(el).text().trim().startsWith('o') ||
-      $(el).text().trim().includes('desu') ||
-      $(el).text().trim().includes('moe') ||
-      $(el).text().trim().includes('pdrain') ||
-      $(el).text().trim().includes('filedon');
-    const mirrorStream = aniDetail.find('div.mirrorstream ul');
-    const m360p = mirrorStream
-      .filter((i, el) => $(el).hasClass('m360p'))
-      .find('a')
-      .filter((i, el) => isValidResolution(el));
-    const m480p = mirrorStream
-      .filter((i, el) => $(el).hasClass('m480p'))
-      .find('a')
-      .filter((i, el) => isValidResolution(el));
-    const m720p = mirrorStream
-      .filter((i, el) => $(el).hasClass('m720p'))
-      .find('a')
-      .filter((i, el) => isValidResolution(el));
+      const episode = aniDetail.find('div.flir a');
+      const episodeData: { previous?: string; animeDetail: string; next?: string } = {
+        animeDetail: episode
+          .filter((i, el) => $(el).text().trim() === 'See All Episodes')
+          .attr('href')!,
+      };
 
-    const resolutionRaw: AniStreaming['resolutionRaw'] = [
-      ...m360p.toArray().map(el => ({
-        resolution: '360p ' + $(el).text(),
-        dataContent: $(el).attr('data-content')!,
-      })),
-      ...m480p.toArray().map(el => ({
-        resolution: '480p ' + $(el).text(),
-        dataContent: $(el).attr('data-content')!,
-      })),
-      ...m720p.toArray().map(el => ({
-        resolution: '720p ' + $(el).text(),
-        dataContent: $(el).attr('data-content')!,
-      })),
-    ];
-    let resolution: string | undefined;
-    if (streamingLink === undefined && resolutionRaw[0] !== undefined) {
-      streamingLink = await fetchStreamingResolution(
-        resolutionRaw[0].dataContent,
+      const prev = episode.filter((i, el) => $(el).text().trim() === 'Previous Eps.');
+      if (prev.length !== 0) {
+        episodeData.previous = prev.attr('href');
+      }
+      const next = episode.filter((i, el) => $(el).text().trim() === 'Next Eps.');
+      if (next.length !== 0) {
+        episodeData.next = next.attr('href');
+      }
+
+      const changeResScript = $('script').eq(16).text();
+      const reqNonceAction = changeResScript
+        .split('processData:!0,cache:!0,data:{action:"')[1]
+        .split('"')[0];
+      const reqResolutionWithNonceAction = changeResScript
+        .split('processData:!0,cache:!0,data:{...e,nonce:window.__x__nonce,action:"')[1]
+        .split('"')[0];
+
+      const isValidResolution = (el: Element) =>
+        $(el).text().trim().startsWith('o') ||
+        $(el).text().trim().includes('desu') ||
+        $(el).text().trim().includes('moe') ||
+        $(el).text().trim().includes('pdrain') ||
+        $(el).text().trim().includes('filedon');
+      const mirrorStream = aniDetail.find('div.mirrorstream ul');
+      const m360p = mirrorStream
+        .filter((i, el) => $(el).hasClass('m360p'))
+        .find('a')
+        .filter((i, el) => isValidResolution(el));
+      const m480p = mirrorStream
+        .filter((i, el) => $(el).hasClass('m480p'))
+        .find('a')
+        .filter((i, el) => isValidResolution(el));
+      const m720p = mirrorStream
+        .filter((i, el) => $(el).hasClass('m720p'))
+        .find('a')
+        .filter((i, el) => isValidResolution(el));
+
+      const resolutionRaw: AniStreaming['resolutionRaw'] = [
+        ...m360p.toArray().map(el => ({
+          resolution: '360p ' + $(el).text(),
+          dataContent: $(el).attr('data-content')!,
+        })),
+        ...m480p.toArray().map(el => ({
+          resolution: '480p ' + $(el).text(),
+          dataContent: $(el).attr('data-content')!,
+        })),
+        ...m720p.toArray().map(el => ({
+          resolution: '720p ' + $(el).text(),
+          dataContent: $(el).attr('data-content')!,
+        })),
+      ];
+
+      return {
+        isAnimeDetail: false as const,
+        title,
+        rawStreamSrc,
+        downloadLink,
+        thumbnailUrl,
+        episodeData,
         reqNonceAction,
         reqResolutionWithNonceAction,
-        undefined,
-        signal,
-      );
-      resolution = resolutionRaw[0].resolution;
+        resolutionRaw,
+      };
     }
+  });
 
-    const returnObj: AniStreaming = {
-      type: 'animeStreaming',
-      title,
-      // @ts-expect-error
-      streamingLink,
-      streamingType: 'raw',
-      downloadLink,
-      resolution,
-      resolutionRaw,
-      // synopsis: synopsis,
-      thumbnailUrl,
-      // releaseYear: aniStats.find('span.item').eq(1).text().trim(),
-      // status: aniStats.find('span.item').eq(0).text().trim(),
-      episodeData,
-      reqNonceAction,
-      reqResolutionWithNonceAction,
-    };
-    if (streamingLink === undefined) {
-      returnObj.streamingLink = aniDetail.find('div.responsive-embed-stream > iframe').attr('src')!;
-      returnObj.streamingType = 'embed';
-    }
-    return returnObj;
+  if (parsed.isAnimeDetail) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { isAnimeDetail: _, ...detailObj } = parsed;
+    return detailObj;
   }
+
+  let streamingLink = await getStreamLink(parsed.rawStreamSrc, signal).catch(() => undefined);
+  let resolution: string | undefined;
+  if (streamingLink === undefined && parsed.resolutionRaw[0] !== undefined) {
+    streamingLink = await fetchStreamingResolution(
+      parsed.resolutionRaw[0].dataContent,
+      parsed.reqNonceAction,
+      parsed.reqResolutionWithNonceAction,
+      undefined,
+      signal,
+    );
+    resolution = parsed.resolutionRaw[0].resolution;
+  }
+
+  const returnObj: AniStreaming = {
+    type: 'animeStreaming',
+    title: parsed.title,
+    // @ts-expect-error
+    streamingLink,
+    streamingType: 'raw',
+    downloadLink: parsed.downloadLink,
+    resolution,
+    resolutionRaw: parsed.resolutionRaw,
+    thumbnailUrl: parsed.thumbnailUrl,
+    episodeData: parsed.episodeData,
+    reqNonceAction: parsed.reqNonceAction,
+    reqResolutionWithNonceAction: parsed.reqResolutionWithNonceAction,
+  };
+  if (streamingLink === undefined) {
+    returnObj.streamingLink = parsed.rawStreamSrc!;
+    returnObj.streamingType = 'embed';
+  }
+  return returnObj;
 };
 
 const getStreamLink = async (
@@ -380,9 +403,16 @@ const getStreamLink = async (
         //odstream
         return data.split('{id:"playerjs", file:"')[1].split('"')[0];
       } else if (data.includes('blogger.com/video.g') && data.includes('iframe')) {
-        return await getBloggerVideo(cheerio.load(data)('iframe').attr('src') ?? '', signal);
+        const iframeSrc = await runOnRuntimeAsync(aniflixruntime, () => {
+          'worklet';
+          return cheerio.load(data)('iframe').attr('src') ?? '';
+        });
+        return await getBloggerVideo(iframeSrc, signal);
       } else if (data.includes('source src=')) {
-        return cheerio.load(data)('source').attr('src');
+        return await runOnRuntimeAsync(aniflixruntime, () => {
+          'worklet';
+          return cheerio.load(data)('source').attr('src');
+        });
       } else {
         throw new Error(
           'Gagal mendapatkan link streaming, tidak ada data yang cocok, ' +
@@ -410,8 +440,11 @@ const getStreamLink = async (
       throw errorObj;
     }
     const data = response!.data;
-    const $ = cheerio.load(data);
-    return $('meta[property="og:video:secure_url"]').attr('content');
+    return await runOnRuntimeAsync(aniflixruntime, () => {
+      'worklet';
+      const $ = cheerio.load(data);
+      return $('meta[property="og:video:secure_url"]').attr('content');
+    });
   } else if (downLink.includes('filedon')) {
     return await getFiledonVideo(downLink);
   }
@@ -443,8 +476,12 @@ async function getFiledonVideo(url: string, signal?: AbortSignal) {
       throw new Error('Invalid JSON structure after sanitization.');
     }
   };
-  const $ = cheerio.load(data.data);
-  const link = convertToValidJson($('div#app').attr('data-page')!);
+  const dataPage = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data.data);
+    return $('div#app').attr('data-page')!;
+  });
+  const link = convertToValidJson(dataPage);
   return link.props.url;
 }
 let requestCounter = 0;
@@ -526,7 +563,7 @@ const listAnime = async (
 
   const data = response!.data as string;
 
-  return await runOnRuntimeAsync(runtime, () => {
+  return await runOnRuntimeAsync(aniflixruntime, () => {
     'worklet';
     function removeHtmlTags(str: string) {
       return str.replace(/<[^>]*>?/gm, '');
@@ -629,10 +666,12 @@ async function fetchStreamingResolution(
     throw errorObj;
   }
   const data = response.data;
-  return await getStreamLink(
-    cheerio.load(Buffer.from(data, 'base64').toString('utf8'))('div > iframe').attr('src')!,
-    signal,
-  );
+  const decodedData = Buffer.from(data, 'base64').toString('utf8');
+  const iframeSrc = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(decodedData)('div > iframe').attr('src')!;
+  });
+  return await getStreamLink(iframeSrc, signal);
 }
 
 async function jadwalAnime(signal?: AbortSignal) {
@@ -654,24 +693,27 @@ async function jadwalAnime(signal?: AbortSignal) {
     throw errorObj;
   }
   const data = response!.data;
-  const $ = cheerio.load(data);
-  const list = $('div.kglist321');
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data);
+    const list = $('div.kglist321');
 
-  const jadwal: { [key: string]: { title: string; link: string }[] } = {};
+    const jadwal: { [key: string]: { title: string; link: string }[] } = {};
 
-  list.each((i, el) => {
-    const $$ = $(el);
-    const arr: { title: string; link: string }[] = [];
-    $$.find('ul li > a').each((_, a) => {
-      arr.push({
-        title: $(a).text().trim(),
-        link: $(a).attr('href')!,
+    list.each((i, el) => {
+      const $$ = $(el);
+      const arr: { title: string; link: string }[] = [];
+      $$.find('ul li > a').each((_, a) => {
+        arr.push({
+          title: $(a).text().trim(),
+          link: $(a).attr('href')!,
+        });
       });
+      jadwal[$$.find('h2').text().trim()] = arr;
     });
-    jadwal[$$.find('h2').text().trim()] = arr;
-  });
 
-  return jadwal;
+    return jadwal;
+  });
 }
 
 export {

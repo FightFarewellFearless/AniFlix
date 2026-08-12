@@ -7,8 +7,9 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { FlashList, ListRenderItemInfo, useMappingHelper } from '@shopify/flash-list';
+import { FlashList, FlashListRef, ListRenderItemInfo, useMappingHelper } from '@shopify/flash-list';
 import React, {
+  Activity,
   memo,
   use,
   useCallback,
@@ -251,8 +252,8 @@ function HomeList(props: HomeProps) {
   const refreshing = useCallback(() => {
     setRefresh(true);
     setIsHomeError(false);
-    setData?.(val => ({ ...val, newAnime: [] }));
     setRefreshingKey(val => val + 1);
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
 
     setTimeout(() => {
       fetchLatestDomain()
@@ -304,14 +305,12 @@ function HomeList(props: HomeProps) {
       trending: [],
     },
   );
+  const [isFilmLoading, setIsFilmLoading] = useState(true);
   const [isFilmError, setIsFilmError] = useState(false);
   const [isFilmCaptchaError, setIsFilmCaptchaError] = useState(false);
 
   useEffect(() => {
-    setFilmHomepageData({
-      featured: [],
-      trending: [],
-    });
+    setIsFilmLoading(true);
     setIsFilmError(false);
     setIsFilmCaptchaError(false);
     const task = requestIdleCallback(() => {
@@ -322,6 +321,9 @@ function HomeList(props: HomeProps) {
             setIsFilmCaptchaError(true);
           }
           setIsFilmError(true);
+        })
+        .finally(() => {
+          setIsFilmLoading(false);
         });
     });
     return () => cancelIdleCallback(task);
@@ -390,6 +392,7 @@ function HomeList(props: HomeProps) {
               globalStyles={globalStyles}
               data={data}
               props={props}
+              refreshingKey={refreshingKey}
             />
             <FeaturedFilmList
               refreshing={refreshing}
@@ -397,7 +400,8 @@ function HomeList(props: HomeProps) {
               isError={isFilmError}
               isFilmCaptchaError={isFilmCaptchaError}
               props={props}
-              key={'film_featured' + refreshingKey}
+              isLoading={isFilmLoading || refresh}
+              refreshingKey={refreshingKey}
             />
             <TrendingFilmList
               refreshing={refreshing}
@@ -405,21 +409,14 @@ function HomeList(props: HomeProps) {
               isError={isFilmError}
               isFilmCaptchaError={isFilmCaptchaError}
               props={props}
-              key={'film_trending' + refreshingKey}
+              isLoading={isFilmLoading || refresh}
+              refreshingKey={refreshingKey}
             />
-            <LatestFilmList
-              refreshing={refreshing}
-              props={props}
-              key={'film_latest' + refreshingKey}
-            />
-            <LatestSeriesList
-              refreshing={refreshing}
-              props={props}
-              key={'series_latest' + refreshingKey}
-            />
-            <MovieList props={props} refreshing={refreshing} key={'anime_movie' + refreshingKey} />
-            <ComicList key={'comick' + refreshingKey} />
-            <NovelList key={'novel' + refreshingKey} />
+            <LatestFilmList refreshing={refreshing} refreshingKey={refreshingKey} props={props} />
+            <LatestSeriesList refreshing={refreshing} refreshingKey={refreshingKey} props={props} />
+            <MovieList props={props} refreshing={refreshing} refreshingKey={refreshingKey} />
+            <ComicList refreshingKey={refreshingKey} />
+            <NovelList refreshingKey={refreshingKey} />
             <TouchableOpacity
               onPress={toggleJadwal}
               style={[
@@ -451,14 +448,25 @@ function FeaturedFilmListUNMEMO({
   isError,
   isFilmCaptchaError,
   refreshing,
+  isLoading,
+  refreshingKey,
 }: {
   props: HomeProps;
   data: FilmHomePage;
   isError: boolean;
   isFilmCaptchaError: boolean;
   refreshing: () => void;
+  isLoading?: boolean;
+  refreshingKey?: number;
 }) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<FilmHomePage[number]>>(null);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -479,8 +487,10 @@ function FeaturedFilmListUNMEMO({
         <Text style={styles.sectionTitle}>Film Unggulan</Text>
       </View>
 
-      {isError &&
-        (isFilmCaptchaError ? (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
+        isFilmCaptchaError ? (
           <Home_ShowCaptchaButton
             callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
@@ -493,21 +503,24 @@ function FeaturedFilmListUNMEMO({
               Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
             </Text>
           </View>
-        ))}
+        )
+      ) : null}
 
-      {data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data?.slice(0, 25) ?? []}
-          renderItem={renderMovie}
-          keyExtractor={z => 'featured' + z.url}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 25) ?? []}
+            renderItem={renderMovie}
+            keyExtractor={z => 'featured' + z.url}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
@@ -520,14 +533,25 @@ function TrendingFilmListUNMEMO({
   isError,
   isFilmCaptchaError,
   refreshing,
+  isLoading,
+  refreshingKey,
 }: {
   props: HomeProps;
   data: FilmHomePage;
   isError: boolean;
   isFilmCaptchaError: boolean;
   refreshing: () => void;
+  isLoading?: boolean;
+  refreshingKey?: number;
 }) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<FilmHomePage[number]>>(null);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -548,8 +572,10 @@ function TrendingFilmListUNMEMO({
         <Text style={styles.sectionTitle}>Film Trending</Text>
       </View>
 
-      {isError &&
-        (isFilmCaptchaError ? (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
+        isFilmCaptchaError ? (
           <Home_ShowCaptchaButton
             callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
@@ -562,32 +588,51 @@ function TrendingFilmListUNMEMO({
               Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
             </Text>
           </View>
-        ))}
+        )
+      ) : null}
 
-      {data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data?.slice(0, 25) ?? []}
-          renderItem={renderMovie}
-          keyExtractor={z => 'featured' + z.url}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 25) ?? []}
+            renderItem={renderMovie}
+            keyExtractor={z => 'featured' + z.url}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
 }
 
 const LatestFilmList = memo(LatestFilmListUNMEMO);
-function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: () => void }) {
+function LatestFilmListUNMEMO({
+  props,
+  refreshing,
+  refreshingKey,
+}: {
+  props: HomeProps;
+  refreshing: () => void;
+  refreshingKey?: number;
+}) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<FilmHomePage[number]>>(null);
   const { paramsState: data, setParamsState: setData } = useContext(FilmListHomeContext);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isFilmCaptchaError, setIsFilmCaptchaError] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -603,7 +648,9 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
   );
 
   useEffect(() => {
-    setData?.([]);
+    setIsLoading(true);
+    setIsError(false);
+    setIsFilmCaptchaError(false);
     const task = requestIdleCallback(() => {
       getLatestMovies()
         .then(movieData => {
@@ -618,10 +665,11 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
             setIsFilmCaptchaError(true);
           }
           setIsError(true);
-        });
+        })
+        .finally(() => setIsLoading(false));
     });
     return () => cancelIdleCallback(task);
-  }, [setData]);
+  }, [setData, refreshingKey]);
 
   return (
     <View style={styles.sectionContainer}>
@@ -637,8 +685,10 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
         </TouchableOpacity>
       </View>
 
-      {isError &&
-        (isFilmCaptchaError ? (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
+        isFilmCaptchaError ? (
           <Home_ShowCaptchaButton
             callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
@@ -651,21 +701,24 @@ function LatestFilmListUNMEMO({ props, refreshing }: { props: HomeProps; refresh
               Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
             </Text>
           </View>
-        ))}
+        )
+      ) : null}
 
-      {data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data?.slice(0, 36) ?? []}
-          renderItem={renderMovie}
-          keyExtractor={z => 'latest' + z.url}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 36) ?? []}
+            renderItem={renderMovie}
+            keyExtractor={z => 'latest' + z.url}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
@@ -675,14 +728,24 @@ const LatestSeriesList = memo(LatestSeriesListUNMEMO);
 function LatestSeriesListUNMEMO({
   props,
   refreshing,
+  refreshingKey,
 }: {
   props: HomeProps;
   refreshing: () => void;
+  refreshingKey?: number;
 }) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<FilmHomePage[number]>>(null);
   const { paramsState: data, setParamsState: setData } = useContext(SeriesListHomeContext);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isSeriesCaptchaError, setIsSeriesCaptchaError] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<FilmHomePage[number]>) => (
@@ -698,7 +761,9 @@ function LatestSeriesListUNMEMO({
   );
 
   useEffect(() => {
-    setData?.([]);
+    setIsLoading(true);
+    setIsError(false);
+    setIsSeriesCaptchaError(false);
     const task = requestIdleCallback(() => {
       getLatestSeries()
         .then(movieData => {
@@ -709,10 +774,11 @@ function LatestSeriesListUNMEMO({
             setIsSeriesCaptchaError(true);
           }
           setIsError(true);
-        });
+        })
+        .finally(() => setIsLoading(false));
     });
     return () => cancelIdleCallback(task);
-  }, [setData]);
+  }, [setData, refreshingKey]);
 
   return (
     <View style={styles.sectionContainer}>
@@ -728,8 +794,10 @@ function LatestSeriesListUNMEMO({
         </TouchableOpacity>
       </View>
 
-      {isError &&
-        (isSeriesCaptchaError ? (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
+        isSeriesCaptchaError ? (
           <Home_ShowCaptchaButton
             callback={() => {
               setWebViewOpen.openWebViewCF(true, FILM_BASE_URL, refreshing);
@@ -742,21 +810,24 @@ function LatestSeriesListUNMEMO({
               Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
             </Text>
           </View>
-        ))}
+        )
+      ) : null}
 
-      {data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data?.slice(0, 36) ?? []}
-          renderItem={renderMovie}
-          keyExtractor={z => 'latest' + z.url}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 36) ?? []}
+            renderItem={renderMovie}
+            keyExtractor={z => 'latest' + z.url}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
@@ -765,6 +836,7 @@ function LatestSeriesListUNMEMO({
 const EpisodeBaru = memo(
   EpisodeBaruUNMEMO,
   (prev, next) =>
+    prev.refreshingKey === next.refreshingKey &&
     prev.data?.newAnime[0]?.title === next.data?.newAnime[0]?.title &&
     prev.isLoading === next.isLoading &&
     prev.isError === next.isError &&
@@ -778,6 +850,7 @@ function EpisodeBaruUNMEMO({
   props,
   isLoading,
   isError,
+  refreshingKey,
 }: {
   data: EpisodeBaruType | undefined;
   props: HomeProps;
@@ -785,7 +858,15 @@ function EpisodeBaruUNMEMO({
   isError?: boolean;
   styles: ReturnType<typeof useStyles>;
   globalStyles: ReturnType<typeof useGlobalStyles>;
+  refreshingKey?: number;
 }) {
+  const flashListRef = useRef<FlashListRef<NewAnimeList>>(null);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
   const renderNewAnime = useCallback(
     ({ item }: ListRenderItemInfo<NewAnimeList>) => (
       <ListAnimeComponent
@@ -811,39 +892,64 @@ function EpisodeBaruUNMEMO({
           <MaterialIcon name="chevron-right" style={styles.seeMoreText} />
         </TouchableOpacity>
       </View>
-      {(data?.newAnime.length || 0) > 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={(data?.newAnime ?? []).slice(0, 25)}
-          keyExtractor={z => z.streamingLink}
-          renderItem={renderNewAnime}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : isLoading ? (
+      {isLoading ? (
         <ShowSkeletonLoading />
-      ) : (
+      ) : isError && (data?.newAnime.length || 0) === 0 ? (
         <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
           <Text style={styles.errorText}>
-            {isError
-              ? 'Error mendapatkan data. Silahkan refresh data untuk mencoba lagi'
-              : 'Data tidak tersedia'}
+            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
           </Text>
         </View>
+      ) : (data?.newAnime.length || 0) === 0 ? (
+        <View>
+          <MaterialIcon name="error-outline" size={24} color="#d80000" />
+          <Text style={styles.errorText}>Data tidak tersedia</Text>
+        </View>
+      ) : null}
+
+      {(data?.newAnime.length || 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={(data?.newAnime ?? []).slice(0, 25)}
+            keyExtractor={z => z.streamingLink}
+            renderItem={renderNewAnime}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
 }
 
 const MovieList = memo(MovieListUNMEMO);
-function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: () => void }) {
+function MovieListUNMEMO({
+  props,
+  refreshing,
+  refreshingKey,
+}: {
+  props: HomeProps;
+  refreshing: () => void;
+  refreshingKey?: number;
+}) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<Movies>>(null);
   const { paramsState: data, setParamsState: setData } = useContext(MovieListHomeContext);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isMovieCaptchaError, setIsMovieCaptchaError] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
 
   const renderMovie = useCallback(
     ({ item }: ListRenderItemInfo<Movies>) => (
@@ -859,9 +965,9 @@ function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: 
   );
 
   useEffect(() => {
+    setIsLoading(true);
     setIsError(false);
     setIsMovieCaptchaError(false);
-    setData?.([]);
     const task = requestIdleCallback(() => {
       getLatestMovie()
         .then(movieData => {
@@ -872,10 +978,11 @@ function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: 
             setIsMovieCaptchaError(true);
           }
           setIsError(true);
-        });
+        })
+        .finally(() => setIsLoading(false));
     });
     return () => cancelIdleCallback(task);
-  }, [setData]);
+  }, [setData, refreshingKey]);
 
   return (
     <View style={styles.sectionContainer}>
@@ -892,8 +999,10 @@ function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: 
         </TouchableOpacity>
       </View>
 
-      {isError &&
-        (isMovieCaptchaError ? (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
+        isMovieCaptchaError ? (
           <Home_ShowCaptchaButton
             callback={() => {
               setWebViewOpen.openWebViewCF(true, ANIME_MOVIE_BASE_URL + 'genre/', refreshing);
@@ -910,47 +1019,60 @@ function MovieListUNMEMO({ props, refreshing }: { props: HomeProps; refreshing: 
               Error mendapatkan data. Ketuk disini untuk mencoba ulang.
             </Text>
           </TouchableOpacity>
-        ))}
+        )
+      ) : null}
 
-      {data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data?.slice(0, 25) ?? []}
-          renderItem={renderMovie}
-          keyExtractor={z => z.url}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 25) ?? []}
+            renderItem={renderMovie}
+            keyExtractor={z => z.url}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
 }
 
 const ComicList = memo(ComicListUNMEMO);
-function ComicListUNMEMO() {
+function ComicListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<LatestComicsRelease>>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
   const navigation = useNavigation<NavigationProp<RootStackNavigator, 'AnimeDetail'>>();
 
   const { paramsState: data, setParamsState: setData } = useContext(ComicsListContext);
 
   useEffect(() => {
+    setIsLoading(true);
+    setIsError(false);
     const task = requestIdleCallback(() => {
       getLatestComicsReleases()
         .then(z => {
           setData?.(z);
         })
-        .catch(() => setIsError(true));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     });
     return () => {
       cancelIdleCallback(task);
-      setData?.([]);
     };
-  }, [setData]);
+  }, [setData, refreshingKey]);
 
   const renderComics = useCallback(
     ({ item }: ListRenderItemInfo<LatestComicsRelease>) => (
@@ -980,54 +1102,68 @@ function ComicListUNMEMO() {
         </TouchableOpacity>
       </View>
 
-      {isError && (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
         <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
           <Text style={styles.errorText}>
             Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
           </Text>
         </View>
-      )}
+      ) : null}
 
-      {data && data?.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data.slice(0, 24)}
-          renderItem={renderComics}
-          keyExtractor={z => z.detailUrl}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 24)}
+            renderItem={renderComics}
+            keyExtractor={z => z.detailUrl}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );
 }
 
 const NovelList = memo(NovelListUNMEMO);
-function NovelListUNMEMO() {
+function NovelListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
   const styles = useStyles();
+  const flashListRef = useRef<FlashListRef<NovelLatestRelease>>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && refreshingKey) {
+      flashListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isLoading, refreshingKey]);
   const navigation = useNavigation<NavigationProp<RootStackNavigator, 'AnimeDetail'>>();
 
   const { paramsState: data, setParamsState: setData } = useContext(NovelListContext);
 
   useEffect(() => {
+    setIsLoading(true);
+    setIsError(false);
     const task = requestIdleCallback(() => {
       getLatestNovelRelease()
         .then(z => {
           setData?.(z);
         })
-        .catch(() => setIsError(true));
+        .catch(() => setIsError(true))
+        .finally(() => setIsLoading(false));
     });
     return () => {
       cancelIdleCallback(task);
-      setData?.([]);
     };
-  }, [setData]);
+  }, [setData, refreshingKey]);
 
   const renderNovel = useCallback(
     ({ item }: ListRenderItemInfo<NovelLatestRelease>) => (
@@ -1057,28 +1193,32 @@ function NovelListUNMEMO() {
         </TouchableOpacity>
       </View>
 
-      {isError && (
+      {isLoading ? (
+        <ShowSkeletonLoading />
+      ) : isError ? (
         <View>
           <MaterialIcon name="error-outline" size={24} color="#d80000" />
           <Text style={styles.errorText}>
             Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
           </Text>
         </View>
-      )}
+      ) : null}
 
-      {data && data.length !== 0 ? (
-        <FlashList
-          renderScrollComponent={RenderScrollComponent}
-          contentContainerStyle={{ gap: 3 }}
-          horizontal
-          data={data.slice(0, 10)}
-          renderItem={renderNovel}
-          keyExtractor={z => z.detailUrl}
-          extraData={styles}
-          showsHorizontalScrollIndicator={false}
-        />
-      ) : (
-        !isError && <ShowSkeletonLoading />
+      {(data?.length ?? 0) > 0 && (
+        <Activity mode={isLoading ? 'hidden' : 'visible'}>
+          <FlashList
+            key={refreshingKey}
+            ref={flashListRef}
+            renderScrollComponent={RenderScrollComponent}
+            contentContainerStyle={{ gap: 3 }}
+            horizontal
+            data={data?.slice(0, 10)}
+            renderItem={renderNovel}
+            keyExtractor={z => z.detailUrl}
+            extraData={styles}
+            showsHorizontalScrollIndicator={false}
+          />
+        </Activity>
       )}
     </View>
   );

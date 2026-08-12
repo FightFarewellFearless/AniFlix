@@ -1,6 +1,8 @@
+import aniflixruntime from '@/misc/AniFlixRuntime';
 import cheerio from 'cheerio';
 import he from 'he';
 import { ToastAndroid } from 'react-native';
+import { runOnRuntimeAsync } from 'react-native-worklets';
 
 import deviceUserAgent from '@utils/deviceUserAgent';
 
@@ -10,6 +12,7 @@ const BASE_URL = `https://${DOMAIN}`;
 const API_URL = `https://api.${DOMAIN}`;
 
 function normalizeUrl(url: string) {
+  'worklet';
   if (url === '') return url;
   return url.startsWith('http') ? url : `${BASE_URL}${url}`;
 }
@@ -33,31 +36,41 @@ export async function getLatestKomikuReleases(
     signal,
   });
   const data = await response.text();
-  const $ = cheerio.load(data);
-  const list = $('div.bge');
-  return list
-    .map((i, el) => {
-      const listItem = $(el);
-      const title = listItem.find('div.kan h3').text().trim();
-      const thumbnailUrl = listItem.find('img').attr('src') || '';
-      const detailUrl = listItem.find('a').attr('href') || '';
-      const type = listItem.find('div.tpe1_inf b').text().trim() as LatestKomikuRelease['type'];
-      const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
-      const concept = listItem.find('div.tpe1_inf').clone().find('b').remove().end().text().trim();
-      const shortDescription = listItem.find('div.kan p').text().trim();
-      const additionalInfo = listItem.find('span.judul2').text().trim();
-      return {
-        title,
-        thumbnailUrl: normalizeUrl(thumbnailUrl),
-        detailUrl: normalizeUrl(detailUrl),
-        type,
-        latestChapter,
-        concept,
-        shortDescription,
-        additionalInfo,
-      };
-    })
-    .toArray();
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data);
+    const list = $('div.bge');
+    return list
+      .map((i, el) => {
+        const listItem = $(el);
+        const title = listItem.find('div.kan h3').text().trim();
+        const thumbnailUrl = listItem.find('img').attr('src') || '';
+        const detailUrl = listItem.find('a').attr('href') || '';
+        const type = listItem.find('div.tpe1_inf b').text().trim() as LatestKomikuRelease['type'];
+        const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
+        const concept = listItem
+          .find('div.tpe1_inf')
+          .clone()
+          .find('b')
+          .remove()
+          .end()
+          .text()
+          .trim();
+        const shortDescription = listItem.find('div.kan p').text().trim();
+        const additionalInfo = listItem.find('span.judul2').text().trim();
+        return {
+          title,
+          thumbnailUrl: normalizeUrl(thumbnailUrl),
+          detailUrl: normalizeUrl(detailUrl),
+          type,
+          latestChapter,
+          concept,
+          shortDescription,
+          additionalInfo,
+        };
+      })
+      .toArray();
+  });
 }
 
 export interface KomikuDetail {
@@ -85,46 +98,43 @@ export async function getKomikuDetailFromUrl(
 ): Promise<KomikuDetail> {
   const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
   const data = await response.text();
-  const $ = cheerio.load(data, {
-    xmlMode: true,
-    decodeEntities: false,
-  });
-  const tableInfo = $('table.inftable tr')
-    .map((_i, el) => {
-      const row = $(el).find('td');
-      const key = row.eq(0).text().trim();
-      const value = row.eq(1).text().trim();
-      return { key, value };
-    })
-    .toArray();
-  const titleRaw = tableInfo.find(item => item.key === 'Judul:')?.value ?? 'Data tidak tersedia';
-  const title = he.decode(titleRaw);
-  const indonesianTitleRaw =
-    tableInfo.find(item => item.key === 'Judul Alternatif:')?.value ?? 'Data tidak tersedia';
-  const indonesianTitle = he.decode(indonesianTitleRaw);
-  const type =
-    (tableInfo.find(item => item.key === 'Tipe:')?.value as KomikuDetail['type']) ??
-    'Data tidak tersedia';
-  const author = tableInfo.find(item => item.key === 'Author:')?.value ?? 'Data tidak tersedia';
-  const status =
-    (tableInfo.find(item => item.key === 'Status:')?.value as KomikuDetail['status']) ??
-    'Data tidak tersedia';
-  const minAge = tableInfo.find(item => item.key === 'Rating:')?.value ?? 'Data tidak tersedia';
-  const concept = tableInfo.find(item => item.key === 'Tema:')?.value ?? 'Data tidak tersedia';
-  const readingDirection =
-    tableInfo.find(item => item.key === 'Cara Baca:')?.value ?? 'Data tidak tersedia';
-  const thumbnailUrl = $('.ims > img').attr('src') ?? '';
-  const genres = $('ul.genre > li')
-    .map((_i, el) => $(el).text().trim())
-    .toArray();
-  const synopsis = $('section#Sinopsis > p').text().trim();
-  const allChapterElements = $('table#Daftar_Chapter tr:has(td)').toArray();
-  const batchSize = 150;
-  const chapters = [];
-  for (let i = 0; i < allChapterElements.length; i += batchSize) {
-    if (signal?.aborted) break;
-    const batch = allChapterElements.slice(i, i + batchSize);
-    const batchResults = batch.map(el => {
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data, {
+      xmlMode: true,
+      decodeEntities: false,
+    });
+    const tableInfo = $('table.inftable tr')
+      .map((_i, el) => {
+        const row = $(el).find('td');
+        const key = row.eq(0).text().trim();
+        const value = row.eq(1).text().trim();
+        return { key, value };
+      })
+      .toArray();
+    const titleRaw = tableInfo.find(item => item.key === 'Judul:')?.value ?? 'Data tidak tersedia';
+    const title = he.decode(titleRaw);
+    const indonesianTitleRaw =
+      tableInfo.find(item => item.key === 'Judul Alternatif:')?.value ?? 'Data tidak tersedia';
+    const indonesianTitle = he.decode(indonesianTitleRaw);
+    const type =
+      (tableInfo.find(item => item.key === 'Tipe:')?.value as KomikuDetail['type']) ??
+      'Data tidak tersedia';
+    const author = tableInfo.find(item => item.key === 'Author:')?.value ?? 'Data tidak tersedia';
+    const status =
+      (tableInfo.find(item => item.key === 'Status:')?.value as KomikuDetail['status']) ??
+      'Data tidak tersedia';
+    const minAge = tableInfo.find(item => item.key === 'Rating:')?.value ?? 'Data tidak tersedia';
+    const concept = tableInfo.find(item => item.key === 'Tema:')?.value ?? 'Data tidak tersedia';
+    const readingDirection =
+      tableInfo.find(item => item.key === 'Cara Baca:')?.value ?? 'Data tidak tersedia';
+    const thumbnailUrl = $('.ims > img').attr('src') ?? '';
+    const genres = $('ul.genre > li')
+      .map((_i, el) => $(el).text().trim())
+      .toArray();
+    const synopsis = $('section#Sinopsis > p').text().trim();
+    const allChapterElements = $('table#Daftar_Chapter tr:has(td)').toArray();
+    const chapters = allChapterElements.map(el => {
       const td = $(el);
       const judulseries = td.find('.judulseries');
       const chapterUrl = judulseries.find('a').attr('href');
@@ -135,26 +145,22 @@ export async function getKomikuDetailFromUrl(
         views: td.find('.pembaca > i').text().trim(),
       };
     });
-    chapters.push(...batchResults);
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
 
-  if (signal?.aborted) throw new Error('canceled');
-
-  return {
-    title,
-    indonesianTitle,
-    type,
-    author,
-    status,
-    minAge,
-    concept,
-    readingDirection,
-    thumbnailUrl,
-    genres,
-    synopsis,
-    chapters,
-  };
+    return {
+      title,
+      indonesianTitle,
+      type,
+      author,
+      status,
+      minAge,
+      concept,
+      readingDirection,
+      thumbnailUrl,
+      genres,
+      synopsis,
+      chapters,
+    };
+  });
 }
 
 export interface KomikuReading {
@@ -169,57 +175,70 @@ export interface KomikuReading {
 export async function getKomikuReading(url: string, signal?: AbortSignal): Promise<KomikuReading> {
   const response = await fetch(url, { signal, headers: { 'User-Agent': deviceUserAgent } });
   const data = await response.text();
-  const $ = cheerio.load(data, {
-    xmlMode: true,
-    decodeEntities: false,
-  });
-  const titleRaw = $('header > h1').text().trim() || 'Data tidak tersedia';
-  const title = he.decode(titleRaw);
-  const chapter =
-    $('div[data-chapter-title]').attr('data-chapter-title')?.trim() || 'Data tidak tersedia';
-  let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
-  if (!thumbnailUrl) {
-    const coverUrl = data
-      .split('const data = [')[1]
-      ?.split('];')[0]
-      ?.split(',')
-      .filter(a => a.trim() !== '')
-      .at(-1)
-      ?.trim()
-      ?.replace(new RegExp('\'|"', 'g'), '');
-    if (!coverUrl) {
-      thumbnailUrl = data
-        .split(/thumbnail:\s*"/)[1]
-        ?.split('"')[0]
-        ?.replace(new RegExp('\\\\', 'g'), '');
-      if (!thumbnailUrl) {
-        ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
-        thumbnailUrl = '';
-      }
-    } else thumbnailUrl = coverUrl;
-  }
-  const releaseDate = $('time[property="datePublished"]').text().trim() || 'Data tidak tersedia';
-  const comicImages = $('div#Baca_Komik img')
-    .map((_i, el) => {
-      return $(el).attr('src');
-    })
-    .toArray();
-  const nextChapter = normalizeUrl(
-    $('svg[data-icon="caret-right"], svg.fa-caret-right').parent().attr('href') ?? '',
-  );
-  const prevChapter = normalizeUrl(
-    $('svg[data-icon="caret-left"], svg.fa-caret-left').parent().attr('href') ?? '',
-  );
+  const res = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data, {
+      xmlMode: true,
+      decodeEntities: false,
+    });
+    const titleRaw = $('header > h1').text().trim() || 'Data tidak tersedia';
+    const title = he.decode(titleRaw);
+    const chapter =
+      $('div[data-chapter-title]').attr('data-chapter-title')?.trim() || 'Data tidak tersedia';
+    let thumbnailUrl = data.split("data[5] = '")[1]?.split("'")[0];
+    let failedThumbnail = false;
+    if (!thumbnailUrl) {
+      const coverUrl = data
+        .split('const data = [')[1]
+        ?.split('];')[0]
+        ?.split(',')
+        .filter(a => a.trim() !== '')
+        .at(-1)
+        ?.trim()
+        ?.replace(new RegExp('\'|"', 'g'), '');
+      if (!coverUrl) {
+        thumbnailUrl = data
+          .split(/thumbnail:\s*"/)[1]
+          ?.split('"')[0]
+          ?.replace(new RegExp('\\\\', 'g'), '');
+        if (!thumbnailUrl) {
+          failedThumbnail = true;
+          thumbnailUrl = '';
+        }
+      } else thumbnailUrl = coverUrl;
+    }
+    const releaseDate = $('time[property="datePublished"]').text().trim() || 'Data tidak tersedia';
+    const comicImages = $('div#Baca_Komik img')
+      .map((_i, el) => {
+        return $(el).attr('src');
+      })
+      .toArray();
+    const nextChapter = normalizeUrl(
+      $('svg[data-icon="caret-right"], svg.fa-caret-right').parent().attr('href') ?? '',
+    );
+    const prevChapter = normalizeUrl(
+      $('svg[data-icon="caret-left"], svg.fa-caret-left').parent().attr('href') ?? '',
+    );
 
-  return {
-    title,
-    chapter,
-    thumbnailUrl,
-    releaseDate,
-    comicImages,
-    nextChapter: nextChapter === '' ? undefined : nextChapter,
-    prevChapter: prevChapter === '' ? undefined : prevChapter,
-  };
+    return {
+      title,
+      chapter,
+      thumbnailUrl,
+      failedThumbnail,
+      releaseDate,
+      comicImages,
+      nextChapter: nextChapter === '' ? undefined : nextChapter,
+      prevChapter: prevChapter === '' ? undefined : prevChapter,
+    };
+  });
+
+  if (res.failedThumbnail) {
+    ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { failedThumbnail, ...reading } = res;
+  return reading;
 }
 
 export interface KomikuSearch {
@@ -237,27 +256,37 @@ export async function komikuSearch(query: string, signal?: AbortSignal): Promise
     signal,
   });
   const data = await response.text();
-  const $ = cheerio.load(data);
-  const list = $('div.bge');
-  return list
-    .map((i, el) => {
-      const listItem = $(el);
-      const title = listItem.find('div.kan h3').text().trim();
-      const thumbnailUrl = listItem.find('img').attr('src') || '';
-      const detailUrl = listItem.find('a').attr('href') || '';
-      const type = listItem.find('div.tpe1_inf b').text().trim() as KomikuSearch['type'];
-      const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
-      const concept = listItem.find('div.tpe1_inf').clone().find('b').remove().end().text().trim();
-      const additionalInfo = listItem.find('div.kan p').text().trim();
-      return {
-        title,
-        thumbnailUrl: normalizeUrl(thumbnailUrl),
-        detailUrl: normalizeUrl(detailUrl),
-        type,
-        latestChapter,
-        concept,
-        additionalInfo,
-      };
-    })
-    .toArray();
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data);
+    const list = $('div.bge');
+    return list
+      .map((i, el) => {
+        const listItem = $(el);
+        const title = listItem.find('div.kan h3').text().trim();
+        const thumbnailUrl = listItem.find('img').attr('src') || '';
+        const detailUrl = listItem.find('a').attr('href') || '';
+        const type = listItem.find('div.tpe1_inf b').text().trim() as KomikuSearch['type'];
+        const latestChapter = listItem.find('div.new1').eq(1).find('span').eq(1).text().trim();
+        const concept = listItem
+          .find('div.tpe1_inf')
+          .clone()
+          .find('b')
+          .remove()
+          .end()
+          .text()
+          .trim();
+        const additionalInfo = listItem.find('div.kan p').text().trim();
+        return {
+          title,
+          thumbnailUrl: normalizeUrl(thumbnailUrl),
+          detailUrl: normalizeUrl(detailUrl),
+          type,
+          latestChapter,
+          concept,
+          additionalInfo,
+        };
+      })
+      .toArray();
+  });
 }

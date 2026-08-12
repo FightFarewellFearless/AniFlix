@@ -1,11 +1,13 @@
-import Config from 'react-native-config';
-const COMICS1_AUTH = Config.COMICS1_AUTH;
-import cheerio, { CheerioAPI } from 'cheerio';
+import aniflixruntime from '@/misc/AniFlixRuntime';
+import cheerio from 'cheerio';
 import he from 'he';
 import moment from 'moment';
 import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
+import Config from 'react-native-config';
 import WebView from 'react-native-webview';
+import { runOnRuntimeAsync } from 'react-native-worklets';
+const COMICS1_AUTH = Config.COMICS1_AUTH;
 
 import { comics1FetchChapterSession } from '@utils/comics1SessionFetcher/comics1chaptersessionfetchercontext';
 import { comics1FetchSession } from '@utils/comics1SessionFetcher/comics1sessionfetchercontext';
@@ -368,12 +370,18 @@ export async function getComicsReading1(
     },
   });
   const data = await response.text();
-  const $ = cheerio.load(data, {
-    xmlMode: true,
-    decodeEntities: false,
+  const { nextDataText, scriptSrc } = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data, {
+      xmlMode: true,
+      decodeEntities: false,
+    });
+    return {
+      nextDataText: $('script#__NEXT_DATA__').text(),
+      scriptSrc: $('script').eq(17).attr('src') ?? null,
+    };
   });
-  const jsonPage: ComicsReadingRawJSON = JSON.parse($('script#__NEXT_DATA__').text()).props
-    .pageProps.data;
+  const jsonPage: ComicsReadingRawJSON = JSON.parse(nextDataText).props.pageProps.data;
   const session = await getChapterSession(url, signal);
   const jsonApi = await fetch(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
@@ -408,7 +416,7 @@ export async function getComicsReading1(
         });
     })(),
   );
-  const id = await getImageID($, signal);
+  const id = await getImageID(scriptSrc, signal);
   // const detectedCdn = await detectCDNImage($, signal);
   const cdn1 = undefined; // detectedCdn?.[0]?.link;
   const comicImages = jsonApi.imageSrc.map((src: string) => {
@@ -431,8 +439,10 @@ export async function getComicsReading1(
         : BASE_URL + '/' + jsonPage.komik.title_slug + '/chapter/' + prevChapter,
   };
 }
-async function getImageID($: CheerioAPI, signal?: AbortSignal): Promise<string | null> {
-  const linkToScript = $('script').eq(17).attr('src');
+async function getImageID(
+  linkToScript: string | null,
+  signal?: AbortSignal,
+): Promise<string | null> {
   if (!linkToScript) return null;
   const res = await fetch(BASE_URL + linkToScript, {
     signal,

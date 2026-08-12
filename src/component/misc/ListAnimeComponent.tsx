@@ -3,7 +3,7 @@ import { NativeBottomTabNavigationProp } from '@bottom-tabs/react-navigation';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import moment from 'moment';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -26,7 +26,7 @@ import { MIN_IMAGE_HEIGHT, MIN_IMAGE_WIDTH } from '@component/Home/AnimeList';
 import ImageLoading from './ImageLoading';
 import { TouchableOpacity } from './TouchableOpacityRNGH';
 
-export function ListAnimeComponent(
+function ListAnimeComponentRaw(
   props: (
     | {
         newAnimeData: NewAnimeList;
@@ -242,3 +242,5 @@ function useStyles() {
     ],
   );
 }
+
+export const ListAnimeComponent = memo(ListAnimeComponentRaw);

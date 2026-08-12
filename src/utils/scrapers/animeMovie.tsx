@@ -5,8 +5,10 @@ import deviceUserAgent from '@utils/deviceUserAgent';
 
 import cheerio from 'cheerio';
 
+import aniflixruntime from '@/misc/AniFlixRuntime';
 import { unpack } from '@utils/unpacker';
 import { ToastAndroid } from 'react-native';
+import { runOnRuntimeAsync } from 'react-native-worklets';
 
 export interface Movies {
   title: string;
@@ -92,16 +94,18 @@ export async function getLatestMovie(
 ): Promise<Movies[]> {
   const url = `${BASE_URL}movie-terbaru/${page ? `page/${page}/` : ''}`;
   const data = await fetchMoviePage(url, signal, { autoCaptcha });
-  const $ = cheerio.load(data);
-  const movies: Movies[] = [];
-  $('div.listupd article').each((i, el) => {
-    movies.push({
-      title: $(el).find('div > a > .tt > h2').text().trim(),
-      url: $(el).find('div > a').attr('href')!,
-      thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!,
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    const $ = cheerio.load(data);
+    const movies: Movies[] = [];
+    $('div.listupd article').each((i, el) => {
+      movies.push({
+        title: $(el).find('div > a > .tt > h2').text().trim(),
+        url: $(el).find('div > a').attr('href')!,
+        thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!,
+      });
     });
+    return movies;
   });
-  return movies;
 }
 
 export async function getMovieDetail(url: string, signal?: AbortSignal): Promise<MovieDetail> {
@@ -109,52 +113,55 @@ export async function getMovieDetail(url: string, signal?: AbortSignal): Promise
   if (signal?.aborted) {
     throw new Error('canceled');
   }
-  const $ = cheerio.load(data);
-  const title = $('header > h1.entry-title').text().trim();
-  const thumbnailUrl = $('div.entry-content.serial-info > img').attr('src')!;
-  const episodeList = $('ul.daftar > li a');
-  const streamingUrl = episodeList.last().attr('href')!;
-  const mightBeSynopsisArray = $('div.entry-content.serial-info p').toArray();
-  const synopsisText = [];
-  for (const synopsis of mightBeSynopsisArray) {
-    if ($(synopsis).text().trim() !== '') {
-      synopsisText.push($(synopsis).text().trim());
-    } else {
-      break;
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    const $ = cheerio.load(data);
+    const title = $('header > h1.entry-title').text().trim();
+    const thumbnailUrl = $('div.entry-content.serial-info > img').attr('src')!;
+    const episodeList = $('ul.daftar > li a');
+    const streamingUrl = episodeList.last().attr('href')!;
+    const mightBeSynopsisArray = $('div.entry-content.serial-info p').toArray();
+    const synopsisText = [];
+    for (const synopsis of mightBeSynopsisArray) {
+      if ($(synopsis).text().trim() !== '') {
+        synopsisText.push($(synopsis).text().trim());
+      } else {
+        break;
+      }
     }
-  }
-  const table = $('table > tbody > tr');
-  const tableContents: { title: string; content: string }[] = [];
-  table.each((i, el) => {
-    tableContents[i] = {
-      title: $(el).find('th').text().trim(),
-      content: $(el).find('td').text().trim(),
+    const table = $('table > tbody > tr');
+    const tableContents: { title: string; content: string }[] = [];
+    table.each((i, el) => {
+      tableContents[i] = {
+        title: $(el).find('th').text().trim(),
+        content: $(el).find('td').text().trim(),
+      };
+    });
+    const rating =
+      tableContents.find(el => el.title === 'Skor Anime:')?.content ?? 'Data Tidak Tersedia';
+    const genres = tableContents.find(el => el.title === 'Genre:')?.content.split(', ') ?? [
+      'Data Tidak Tersedia',
+    ];
+    const studio =
+      tableContents.find(el => el.title === 'Studio:')?.content ?? 'Data Tidak Tersedia';
+    const releaseDate =
+      tableContents.find(el => el.title === 'Dirilis:')?.content ?? 'Data Tidak Tersedia';
+    const updateDate = $('header > div > span.updated').text().trim();
+
+    return {
+      title,
+      synopsis: synopsisText.join('\n'),
+      streamingUrl,
+      episodeList: episodeList
+        .map((_i, el) => ({ title: $(el).text().trim(), url: $(el).attr('href')! }))
+        .toArray(),
+      thumbnailUrl,
+      genres,
+      rating,
+      studio,
+      releaseDate,
+      updateDate,
     };
   });
-  const rating =
-    tableContents.find(el => el.title === 'Skor Anime:')?.content ?? 'Data Tidak Tersedia';
-  const genres = tableContents.find(el => el.title === 'Genre:')?.content.split(', ') ?? [
-    'Data Tidak Tersedia',
-  ];
-  const studio = tableContents.find(el => el.title === 'Studio:')?.content ?? 'Data Tidak Tersedia';
-  const releaseDate =
-    tableContents.find(el => el.title === 'Dirilis:')?.content ?? 'Data Tidak Tersedia';
-  const updateDate = $('header > div > span.updated').text().trim();
-
-  return {
-    title,
-    synopsis: synopsisText.join('\n'),
-    streamingUrl,
-    episodeList: episodeList
-      .map((_i, el) => ({ title: $(el).text().trim(), url: $(el).attr('href')! }))
-      .toArray(),
-    thumbnailUrl,
-    genres,
-    rating,
-    studio,
-    releaseDate,
-    updateDate,
-  };
 }
 
 type LinksType = { title: string; url: string }[];
@@ -172,133 +179,146 @@ export async function getStreamingDetail(
   signal?: AbortSignal,
 ): Promise<MovieStreamingDetail> {
   const data = await fetchMoviePage(url, signal);
-  const $ = cheerio.load(data);
+  const parsed = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data);
 
-  const episodeData = {
-    animeDetail: $('div.nvs.nvsc > a').attr('href')!,
-    next: $('a[rel="next"]').attr('href') ?? undefined,
-    previous: $('a[rel="prev"]').attr('href') ?? undefined,
-  };
+    const episodeData = {
+      animeDetail: $('div.nvs.nvsc > a').attr('href')!,
+      next: $('a[rel="next"]').attr('href') ?? undefined,
+      previous: $('a[rel="prev"]').attr('href') ?? undefined,
+    };
 
-  const animeTitle = $('div.entry-content > i:nth-child(5) > a').text().trim();
-  const animeTitleWithEpisode = $('div.entry-content > h2').text().trim();
-  const title =
-    episodeData.next || episodeData.previous
-      ? animeTitle +
-        ' Episode ' +
-        (animeTitleWithEpisode.match(/(\d+)\s+Subtitle Indonesia/) ?? [])[0]
-      : animeTitle;
+    const animeTitle = $('div.entry-content > i:nth-child(5) > a').text().trim();
+    const animeTitleWithEpisode = $('div.entry-content > h2').text().trim();
+    const title =
+      episodeData.next || episodeData.previous
+        ? animeTitle +
+          ' Episode ' +
+          (animeTitleWithEpisode.match(/(\d+)\s+Subtitle Indonesia/) ?? [])[0]
+        : animeTitle;
 
-  const thumbnailUrl = $('div.entry-content > img').attr('src')!;
+    const thumbnailUrl = $('div.entry-content > img').attr('src')!;
 
-  const mirror = $('select.mirror option').filter((i, el) => {
-    return $(el).attr('data-em') !== undefined && $(el).attr('data-em') !== '';
-  });
+    const mirror = $('select.mirror option').filter((i, el) => {
+      return $(el).attr('data-em') !== undefined && $(el).attr('data-em') !== '';
+    });
 
-  const pixelLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (titleMirror.toLowerCase().includes('pixel')) {
-      pixelLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  const pompomLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (titleMirror.toLowerCase().includes('pompom')) {
-      pompomLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  const mp4UploadLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (titleMirror.toLowerCase().includes('mp4')) {
-      mp4UploadLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  const acefileLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (
-      titleMirror.toLowerCase().includes('acefile') ||
-      titleMirror.toLowerCase().includes('video')
-    ) {
-      acefileLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  const pogoLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (titleMirror.toLowerCase().includes('pogo')) {
-      pogoLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  // lokalLinks has no raw supported at the moment because of complex anti-bot system
-  const lokalLinks: LinksType = [];
-  mirror.each((i, el) => {
-    const titleMirror = $(el).text().trim();
-    if (titleMirror.toLowerCase().includes('lokal')) {
-      lokalLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
-    }
-  });
-
-  let isRawAvailable = true;
-  let supportedRawLinks = [
-    ...pixelLinks,
-    ...pompomLinks,
-    ...mp4UploadLinks,
-    ...acefileLinks,
-    ...pogoLinks,
-  ];
-  if (supportedRawLinks.length === 0) {
-    isRawAvailable = false;
+    const pixelLinks: LinksType = [];
     mirror.each((i, el) => {
       const titleMirror = $(el).text().trim();
-      supportedRawLinks.push({
-        title: titleMirror,
-        url: $(el).attr('data-em')!,
-      });
+      if (titleMirror.toLowerCase().includes('pixel')) {
+        pixelLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
     });
-  } else {
-    supportedRawLinks = [...supportedRawLinks, ...lokalLinks];
-  }
 
-  supportedRawLinks = supportedRawLinks.filter(
-    (v, i, a) => a.findIndex(t => t.url === v.url) === i,
-  );
-  supportedRawLinks = supportedRawLinks.map((v, i, a) => {
-    const filtered = a.filter(z => z.title === v.title);
-    if (filtered.length > 1) {
-      return {
-        ...v,
-        title: `${v.title} (${filtered.indexOf(v) + 1})`,
-      };
+    const pompomLinks: LinksType = [];
+    mirror.each((i, el) => {
+      const titleMirror = $(el).text().trim();
+      if (titleMirror.toLowerCase().includes('pompom')) {
+        pompomLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
+    });
+
+    const mp4UploadLinks: LinksType = [];
+    mirror.each((i, el) => {
+      const titleMirror = $(el).text().trim();
+      if (titleMirror.toLowerCase().includes('mp4')) {
+        mp4UploadLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
+    });
+
+    const acefileLinks: LinksType = [];
+    mirror.each((i, el) => {
+      const titleMirror = $(el).text().trim();
+      if (
+        titleMirror.toLowerCase().includes('acefile') ||
+        titleMirror.toLowerCase().includes('video')
+      ) {
+        acefileLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
+    });
+
+    const pogoLinks: LinksType = [];
+    mirror.each((i, el) => {
+      const titleMirror = $(el).text().trim();
+      if (titleMirror.toLowerCase().includes('pogo')) {
+        pogoLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
+    });
+
+    const lokalLinks: LinksType = [];
+    mirror.each((i, el) => {
+      const titleMirror = $(el).text().trim();
+      if (titleMirror.toLowerCase().includes('lokal')) {
+        lokalLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      }
+    });
+
+    let isRawAvailable = true;
+    let supportedRawLinks = [
+      ...pixelLinks,
+      ...pompomLinks,
+      ...mp4UploadLinks,
+      ...acefileLinks,
+      ...pogoLinks,
+    ];
+    if (supportedRawLinks.length === 0) {
+      isRawAvailable = false;
+      mirror.each((i, el) => {
+        const titleMirror = $(el).text().trim();
+        supportedRawLinks.push({
+          title: titleMirror,
+          url: $(el).attr('data-em')!,
+        });
+      });
+    } else {
+      supportedRawLinks = [...supportedRawLinks, ...lokalLinks];
     }
-    return v;
+
+    supportedRawLinks = supportedRawLinks.filter(
+      (v, i, a) => a.findIndex(t => t.url === v.url) === i,
+    );
+    supportedRawLinks = supportedRawLinks.map((v, i, a) => {
+      const filtered = a.filter(z => z.title === v.title);
+      if (filtered.length > 1) {
+        return {
+          ...v,
+          title: `${v.title} (${filtered.indexOf(v) + 1})`,
+        };
+      }
+      return v;
+    });
+
+    return {
+      title,
+      thumbnailUrl,
+      episodeData,
+      isRawAvailable,
+      supportedRawLinks,
+    };
   });
+
+  let isRawAvailable = parsed.isRawAvailable;
+  let supportedRawLinks = parsed.supportedRawLinks;
 
   const streamingLink = await getRawDataIfAvailable(
     supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0],
@@ -310,21 +330,24 @@ export async function getStreamingDetail(
   if (signal?.aborted) {
     throw new Error('canceled');
   }
+
+  let embedLink = '';
+  if (!isRawAvailable) {
+    const rawUrl = (supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0])
+      .url;
+    const decodedUrl = Buffer.from(rawUrl, 'base64').toString('utf8');
+    embedLink = await runOnRuntimeAsync(aniflixruntime, () => {
+      'worklet';
+      return cheerio.load(decodedUrl)('iframe').attr('src')!;
+    });
+  }
+
   return {
-    title,
-    thumbnailUrl,
-    episodeData,
+    title: parsed.title,
+    thumbnailUrl: parsed.thumbnailUrl,
+    episodeData: parsed.episodeData,
     streamingType: isRawAvailable ? 'raw' : 'embed',
-    streamingLink: isRawAvailable
-      ? (streamingLink as string)
-      : cheerio
-          .load(
-            Buffer.from(
-              (supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0]).url,
-              'base64',
-            ).toString('utf8'),
-          )('iframe')
-          .attr('src')!,
+    streamingLink: isRawAvailable ? (streamingLink as string) : embedLink,
     resolution: (supportedRawLinks.find(z => z.title.includes('480p')) ?? supportedRawLinks[0])
       .title,
     resolutionRaw: supportedRawLinks.map(x => ({
@@ -374,7 +397,11 @@ export async function getRawDataIfAvailable(data: LinksType[number], signal?: Ab
 }
 
 async function getPogoRawData(pogodata: string, signal?: AbortSignal) {
-  const url = cheerio.load(Buffer.from(pogodata, 'base64').toString('utf8'))('iframe').attr('src')!;
+  const decodedPogo = Buffer.from(pogodata, 'base64').toString('utf8');
+  const url = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(decodedPogo)('iframe').attr('src')!;
+  });
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
@@ -384,21 +411,31 @@ async function getPogoRawData(pogodata: string, signal?: AbortSignal) {
 }
 
 async function getAceRawData(acedata: string, signal?: AbortSignal): Promise<string | false> {
-  const url = cheerio.load(Buffer.from(acedata, 'base64').toString('utf8'))('iframe').attr('src')!;
+  const decodedAceData = Buffer.from(acedata, 'base64').toString('utf8');
+  const url = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(decodedAceData)('iframe').attr('src')!;
+  });
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
   });
   const text = await response.text();
-  const $ = cheerio.load(text);
+  const { isAlreadyAceFile, iframeSrc } = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(text);
+    return {
+      isAlreadyAceFile: $('title').text().trim() === 'AceFile',
+      iframeSrc: $('iframe').attr('src') ?? null,
+    };
+  });
   let responseAce: Response;
   let aceLink: string;
-  const isAlreadyAceFile = $('title').text().trim() === 'AceFile';
   if (isAlreadyAceFile) {
     aceLink = url;
     responseAce = response;
   } else {
-    const iframe = $('iframe').attr('src')!;
+    const iframe = iframeSrc!;
     aceLink = iframe;
     responseAce = await fetch(iframe.startsWith('https') ? iframe : 'https:' + iframe, {
       signal,
@@ -411,14 +448,18 @@ async function getAceRawData(acedata: string, signal?: AbortSignal): Promise<str
     headers: { 'User-Agent': deviceUserAgent },
   }).catch(() => {});
   const ace = isAlreadyAceFile ? text : await responseAce.text();
-  const $ace = cheerio.load(ace);
-  const script = unpack($ace('script').text().trim());
-  if (script.includes('var DUAR=false')) {
-    const service = script
+  const script = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ace = cheerio.load(ace);
+    return $ace('script').text().trim();
+  });
+  const unpackedScript = unpack(script);
+  if (unpackedScript.includes('var DUAR=false')) {
+    const service = unpackedScript
       .split('var service=')[1]
       .split(';')[0]
       .replace(/['"\\]/g, '');
-    const link = script.split('$.getJSON("https://"+service+"')[1].split('"')[0];
+    const link = unpackedScript.split('$.getJSON("https://"+service+"')[1].split('"')[0];
 
     const serviceResponse = await fetch(`https://${service}${link}`, {
       signal,
@@ -433,8 +474,8 @@ async function getAceRawData(acedata: string, signal?: AbortSignal): Promise<str
       return false;
     }
   }
-  const nfck = script.split('var nfck="')[1].split('"')[0];
-  const id = script.split('var DUAR=[{"id":"')[1].split('"')[0];
+  const nfck = unpackedScript.split('var nfck="')[1].split('"')[0];
+  const id = unpackedScript.split('var DUAR=[{"id":"')[1].split('"')[0];
 
   const acefileVideoServer = 'https://acefile.co/local/' + id + '?key=' + nfck;
   const responseAcefile = await fetch(acefileVideoServer, {
@@ -453,7 +494,11 @@ async function getAceRawData(acedata: string, signal?: AbortSignal): Promise<str
 }
 
 async function getMP4rawData(mp4data: string, signal?: AbortSignal) {
-  const url = cheerio.load(Buffer.from(mp4data, 'base64').toString('utf8'))('iframe').attr('src')!;
+  const decodedMp4 = Buffer.from(mp4data, 'base64').toString('utf8');
+  const url = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(decodedMp4)('iframe').attr('src')!;
+  });
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
@@ -461,41 +506,50 @@ async function getMP4rawData(mp4data: string, signal?: AbortSignal) {
   return (await response.text()).split('src: "')[1].split('"')[0];
 }
 async function getPixelOrPompomRawData(pixelorpompomdata: string, signal?: AbortSignal) {
-  const link = cheerio
-    .load(Buffer.from(pixelorpompomdata, 'base64').toString('utf8'))('iframe')
-    .attr('src')!;
+  const decodedData = Buffer.from(pixelorpompomdata, 'base64').toString('utf8');
+  const link = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(decodedData)('iframe').attr('src')!;
+  });
   const hasUrlQuery = new URL(link).searchParams.has('url');
   const url = hasUrlQuery ? decodeURIComponent(new URL(link).searchParams.get('url')!) : link;
   const response = await fetch(url, {
     signal,
     headers: { 'User-Agent': deviceUserAgent },
   });
+  const resText = await response.text();
   if (url.includes('pixel')) {
-    const text = await response.text();
-    const $ = cheerio.load(text, { xmlMode: true });
-    return $('meta[property="og:video:secure_url"]').attr('content')!;
+    return await runOnRuntimeAsync(aniflixruntime, () => {
+      'worklet';
+      const $ = cheerio.load(resText, { xmlMode: true });
+      return $('meta[property="og:video:secure_url"]').attr('content')!;
+    });
   }
-  return cheerio
-    .load(await response.text(), { xmlMode: true })('source')
-    .attr('src')!;
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio.load(resText, { xmlMode: true })('source').attr('src')!;
+  });
 }
 
 export async function searchMovie(query: string, signal?: AbortSignal): Promise<Movies[]> {
   const url = BASE_URL + '?s=' + encodeURIComponent(query);
   const data = await fetchMoviePage(url, signal);
-  const $ = cheerio.load(data);
-  const list = $('div.listupd article');
-  const movies: Movies[] = [];
-  list
-    .filter((i, el) => {
-      return $(el).find('div > a > .tt > span').text().trim().toLowerCase().startsWith('movie');
-    })
-    .each((i, el) => {
-      movies.push({
-        title: $(el).find('div > a > .tt > h2').text().trim(),
-        url: $(el).find('div > a').attr('href')!,
-        thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!,
+  return await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    const $ = cheerio.load(data);
+    const list = $('div.listupd article');
+    const movies: Movies[] = [];
+    list
+      .filter((i, el) => {
+        return $(el).find('div > a > .tt > span').text().trim().toLowerCase().startsWith('movie');
+      })
+      .each((i, el) => {
+        movies.push({
+          title: $(el).find('div > a > .tt > h2').text().trim(),
+          url: $(el).find('div > a').attr('href')!,
+          thumbnailUrl: $(el).find('div > a > .limit > img').attr('src')!,
+        });
       });
-    });
-  return movies;
+    return movies;
+  });
 }

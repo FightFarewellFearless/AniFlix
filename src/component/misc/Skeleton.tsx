@@ -1,13 +1,42 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
-import { StyleSheet, useColorScheme, ViewStyle } from 'react-native';
-import Reanimated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import { Animated, StyleSheet, useColorScheme, ViewStyle } from 'react-native';
+
+const globalOpacity = new Animated.Value(1);
+let activeSkeletonCount = 0;
+let animationLoop: Animated.CompositeAnimation | null = null;
+
+function retainSkeleton() {
+  activeSkeletonCount++;
+  if (activeSkeletonCount === 1) {
+    animationLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(globalOpacity, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(globalOpacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    animationLoop.start();
+  }
+}
+
+function releaseSkeleton() {
+  activeSkeletonCount = Math.max(0, activeSkeletonCount - 1);
+  if (activeSkeletonCount === 0) {
+    if (animationLoop) {
+      animationLoop.stop();
+      animationLoop = null;
+    }
+    globalOpacity.setValue(1);
+  }
+}
 
 export default function Skeleton({
   height,
@@ -21,43 +50,33 @@ export default function Skeleton({
   stopOnBlur?: boolean;
 }) {
   const styles = useStyles();
-  const opacity = useSharedValue(1);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const startAnimation = () => {
-      opacity.value = withRepeat(withTiming(0.4, { duration: 800 }), -1, true);
-    };
-
-    startAnimation();
+    retainSkeleton();
 
     let navigationFocus: ReturnType<typeof navigation.addListener>;
     let navigationBlur: ReturnType<typeof navigation.addListener>;
 
-    if (stopOnBlur) {
+    if (stopOnBlur && navigation) {
       navigationBlur = navigation.addListener('blur', () => {
-        cancelAnimation(opacity);
+        releaseSkeleton();
       });
       navigationFocus = navigation.addListener('focus', () => {
-        opacity.value = 1;
-        startAnimation();
+        retainSkeleton();
       });
     }
 
     return () => {
-      cancelAnimation(opacity);
+      releaseSkeleton();
       navigationFocus && navigationFocus();
       navigationBlur && navigationBlur();
     };
-  }, [navigation, stopOnBlur, opacity]);
+  }, [navigation, stopOnBlur]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-    };
-  });
-
-  return <Reanimated.View style={[styles.container, { height, width }, animatedStyle, style]} />;
+  return (
+    <Animated.View style={[styles.container, { height, width, opacity: globalOpacity }, style]} />
+  );
 }
 
 function useStyles() {
