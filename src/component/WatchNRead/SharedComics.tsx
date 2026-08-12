@@ -13,12 +13,11 @@ export function useComicsFullscreen() {
 
   useFocusEffect(
     useCallback(() => {
-      SystemNavigationBar.fullScreen(isFullscreen);
       if (isFullscreen) {
-        SystemNavigationBar.navigationHide();
+        SystemNavigationBar.hide('both');
         SystemBars.setHidden(true);
       } else {
-        SystemNavigationBar.navigationShow();
+        SystemNavigationBar.show('both');
         SystemBars.setHidden(false);
       }
     }, [isFullscreen]),
@@ -27,8 +26,7 @@ export function useComicsFullscreen() {
   useFocusEffect(
     useCallback(() => {
       return () => {
-        SystemNavigationBar.fullScreen(false);
-        SystemNavigationBar.navigationShow();
+        SystemNavigationBar.show('both');
         SystemBars.setHidden(false);
       };
     }, []),

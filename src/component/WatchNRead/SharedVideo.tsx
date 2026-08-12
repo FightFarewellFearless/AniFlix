@@ -284,18 +284,16 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
             Orientation.lockToLandscape();
         }
       }
-      SystemNavigationBar.fullScreen(true);
+      SystemNavigationBar.hide('both');
       SystemBars.setHidden(true);
-      SystemNavigationBar.navigationHide();
       setFullscreen(true);
     },
     [onEnterFullscreen],
   );
 
   const exitFullscreen = useCallback(() => {
-    SystemNavigationBar.fullScreen(false);
+    SystemNavigationBar.show('both');
     SystemBars.setHidden(false);
-    SystemNavigationBar.navigationShow();
     !Platform.isTV && Orientation.lockToPortrait();
     setFullscreen(false);
   }, []);
@@ -318,7 +316,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   const willUnmountHandler = useCallback(() => {
     !Platform.isTV && Orientation.lockToPortrait();
     SystemBars.setHidden(false);
-    SystemNavigationBar.navigationShow();
+    SystemNavigationBar.show('both');
   }, []);
 
   return {

@@ -273,8 +273,7 @@ function App() {
       Appearance.setColorScheme(colorSchemeValue);
     }
     SystemBars.setHidden(false);
-    SystemNavigationBar.fullScreen(false);
-    SystemNavigationBar.navigationShow();
+    SystemNavigationBar.show('both');
     SplashScreen.hideAsync();
   }, []);
 
