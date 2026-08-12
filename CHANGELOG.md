@@ -1,3 +1,7 @@
+# v2.1.1_JS-1 (12-Agustus-2026)
+## Diperbaiki
+- Masalah performa dan frame drop di beranda
+- Memperbaiki masalah frame drop dan delay saat mengambil data
 # v2.1.1 (11-Agustus-2026)
 ## Diperbaiki
 - [Video player]: Masalah pada seek bar
