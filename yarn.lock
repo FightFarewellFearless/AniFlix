@@ -4250,7 +4250,7 @@ __metadata:
     react-native-system-navigation-bar: ^3.0.0
     react-native-url-polyfill: ^4.0.0
     react-native-webview: 14.0.1
-    react-native-worklets: ^0.11.3
+    react-native-worklets: ^0.11.4
     react-native-zip-archive: ^7.1.1
     react-test-renderer: 19.2.3
     typescript: 5.9.3
@@ -11055,9 +11055,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:^0.11.3":
-  version: 0.11.3
-  resolution: "react-native-worklets@npm:0.11.3"
+"react-native-webview@patch:react-native-webview@npm%3A14.0.1#./.yarn/patches/react-native-webview-npm-14.0.1-5188b52144.patch::locator=aniflix%40workspace%3A.":
+  version: 14.0.1
+  resolution: "react-native-webview@patch:react-native-webview@npm%3A14.0.1#./.yarn/patches/react-native-webview-npm-14.0.1-5188b52144.patch::version=14.0.1&hash=273507&locator=aniflix%40workspace%3A."
+  dependencies:
+    escape-string-regexp: ^4.0.0
+    invariant: 2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 072083bfc7c4ff1974379f09bce72e77d4916d8a41f81e05c4d40e35664332583f741e4f8faf168f64e30abd9c219658aa33a3e15317cdb4e173f7f08c3a9948
+  languageName: node
+  linkType: hard
+
+"react-native-worklets@npm:^0.11.4":
+  version: 0.11.4
+  resolution: "react-native-worklets@npm:0.11.4"
   dependencies:
     "@babel/generator": ^7.27.1
     "@babel/plugin-transform-arrow-functions": ^7.27.1
@@ -11078,7 +11091,7 @@ __metadata:
     "@react-native/metro-config": "*"
     react: "*"
     react-native: 0.83 - 0.86
-  checksum: 049fc7a99eeb822aebabec1ca3586f7a9048db2b672d5c598e5e951ec646915e3952d871c45e001b360bdd92b049d5cb78a415a560c45ee183379f50711ca1a8
+  checksum: 311a9030991cc97280269c63c03be474d39a047f7229fc47fd61c322d1b5ea469c385fc34d5f30ce371daeca3bbd01a9406b97c4b6f8e2be8ed787937177c3a3
   languageName: node
   linkType: hard
 
