@@ -137,7 +137,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 311
-        versionName "v2.1.1"
+        versionName "v2.2.0-LTS"
         resValue "string", "build_config_package", "com.pirles.anime"
     }
     signingConfigs {
