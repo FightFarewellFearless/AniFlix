@@ -5,7 +5,7 @@ const ReactCompilerConfig = {
 const workletsPluginOptions = {
   bundleMode: true,
   strictGlobal: true, // optional, but recommended
-  importForwarding: { moduleNames: ['cheerio'] },
+  importForwarding: { moduleNames: ['cheerio', 'he'] },
 };
 
 module.exports = {
