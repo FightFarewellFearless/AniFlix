@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-1 (15-Agustus-2026)
+## Diperbaiki
+- Error pada komiku
 # v2.2.0-LTS (14-Agustus-2026)
 HALOOO, Terimakasih karena sudah menggunakan AniFlix hingga saat ini, mimin mau menginfokan bahwa mulai saat ini pengembangan AniFlix akan mengalami keterlambatan yang signifikan untuk ke depannya. Dikarenakan mimin saat ini sudah mulai sibuk. Jadi mimin merilis versi LTS (Long Term Support) ini sebagai versi paling stabil untuk digunakan hingga ditemukan masalah serius atau error pada konten utama AniFlix.
 Sekali lagi mimin mengucapkan terima kasih karena sudah menggunakan AniFlix, versi ini dirilis bukan sebagai akhir dari AniFlix, tapi versi ini sebagai penanda kesibukan mimin, yang mengakibatkan aniflix akan mulai jarang mendapat update, kecuali update untuk perbaikan fatal, dan demikianlah informasi ini mimin sampaikan, jika ada kendala silahkan laporkan ke server discord AniFlix. Terima kasih...
