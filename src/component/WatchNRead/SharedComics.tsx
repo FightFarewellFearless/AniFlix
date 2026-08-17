@@ -14,9 +14,11 @@ export function useComicsFullscreen() {
   useFocusEffect(
     useCallback(() => {
       if (isFullscreen) {
+        SystemNavigationBar.setImmersive('sticky', true);
         SystemNavigationBar.hide('both');
         SystemBars.setHidden(true);
       } else {
+        SystemNavigationBar.setImmersive('sticky', false);
         SystemNavigationBar.show('both');
         SystemBars.setHidden(false);
       }
@@ -26,6 +28,7 @@ export function useComicsFullscreen() {
   useFocusEffect(
     useCallback(() => {
       return () => {
+        SystemNavigationBar.setImmersive('sticky', false);
         SystemNavigationBar.show('both');
         SystemBars.setHidden(false);
       };

@@ -284,6 +284,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
             Orientation.lockToLandscape();
         }
       }
+      SystemNavigationBar.setImmersive('sticky', true);
       SystemNavigationBar.hide('both');
       SystemBars.setHidden(true);
       setFullscreen(true);
@@ -292,6 +293,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   );
 
   const exitFullscreen = useCallback(() => {
+    SystemNavigationBar.setImmersive('sticky', false);
     SystemNavigationBar.show('both');
     SystemBars.setHidden(false);
     !Platform.isTV && Orientation.lockToPortrait();
@@ -316,6 +318,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   const willUnmountHandler = useCallback(() => {
     !Platform.isTV && Orientation.lockToPortrait();
     SystemBars.setHidden(false);
+    SystemNavigationBar.setImmersive('sticky', false);
     SystemNavigationBar.show('both');
   }, []);
 
