@@ -1,0 +1,5 @@
+{
+  "WEBHOOK_WHITELIST_URL": "webhook link (discord)",
+  "COMICS1_AUTH": "Bearer [Softkomik cookie]",
+  "WEBHOOK_REPORT_ERROR": "webhoook link (discord)"
+}

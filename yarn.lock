@@ -4231,7 +4231,6 @@ __metadata:
     react-native-animateable-text: ^0.19.3
     react-native-blob-util: 0.24.7
     react-native-bottom-tabs: ^1.4.0
-    react-native-config: ^1.6.1
     react-native-edge-to-edge: ^1.8.1
     react-native-error-boundary: ^3.1.0
     react-native-gesture-handler: 3.1.0
@@ -10699,20 +10698,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e84355b726a05dd4711f8fa8a764d5801279c7f7222a3352865bc386e094906561de22a4b894dabd617b4967a9f66c207569fc4560ab819b70061145222c01c6
-  languageName: node
-  linkType: hard
-
-"react-native-config@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "react-native-config@npm:1.6.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-    react-native-windows: ">=0.61"
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-  checksum: 356419af35bdc5eed6328c0ada41b49efd5e280d1843ecfb14a37cc37b23c5c28ced038a2ae5ccc9e1d9af324202393f83ad0e1fae4bf0d4ba5798f3c895b8f9
   languageName: node
   linkType: hard
 

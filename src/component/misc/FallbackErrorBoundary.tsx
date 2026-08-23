@@ -1,5 +1,5 @@
 import useGlobalStyles from '@assets/style';
-import Config from 'react-native-config';
+import Config from '@root/aniflixConfig.json';
 const WEBHOOK_REPORT_ERROR = Config.WEBHOOK_REPORT_ERROR;
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';

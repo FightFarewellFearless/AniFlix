@@ -4,7 +4,7 @@ import he from 'he';
 import moment from 'moment';
 import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
-import Config from 'react-native-config';
+import Config from '@root/aniflixConfig.json';
 import WebView from 'react-native-webview';
 import { runOnRuntimeAsync } from 'react-native-worklets';
 const COMICS1_AUTH = Config.COMICS1_AUTH;

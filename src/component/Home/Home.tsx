@@ -66,6 +66,7 @@ const tabScreens: {
     component: withSuspenseAndSafeArea(Utils, false),
     options: {
       tabBarIcon: () => require('../../assets/icons/administrator-developer-icon.png'),
+      tabBarLabel: 'Utilitas',
     },
   },
 ];

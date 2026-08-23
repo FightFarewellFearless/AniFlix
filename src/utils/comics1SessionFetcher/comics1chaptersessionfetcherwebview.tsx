@@ -1,4 +1,4 @@
-import Config from 'react-native-config';
+import Config from '@root/aniflixConfig.json';
 const COMICS1_AUTH = Config.COMICS1_AUTH;
 import { use, useCallback, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';

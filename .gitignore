@@ -92,3 +92,5 @@ dist
 !.github
 !.gitignore
 .expo
+
+aniflixConfig.json
