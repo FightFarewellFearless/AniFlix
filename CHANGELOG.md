@@ -1,3 +1,9 @@
+# v2.2.0-LTS_JS-2 (23-Agustus-2026)
+## Diperbaiki
+- system navigation bar di set ke immersive
+- Masalah konfigurasi source code aplikasi. Termasuk perbaikan untuk:
+  - Kirim error ke dev
+  - Genre ecchi komik
 # v2.2.0-LTS_JS-1 (15-Agustus-2026)
 ## Diperbaiki
 - Error pada komiku
