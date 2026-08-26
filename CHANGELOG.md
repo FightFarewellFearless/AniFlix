@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-3 (26-Agustus-2026)
+## Diperbaiki
+- Novel terdeteksi captcha
 # v2.2.0-LTS_JS-2 (23-Agustus-2026)
 ## Diperbaiki
 - system navigation bar di set ke immersive
