@@ -13,10 +13,11 @@ import {
 import Reanimated, { AnimatedStyle } from 'react-native-reanimated';
 import { URL } from 'react-native-url-polyfill';
 
+import deviceuseragent from '@/utils/deviceUserAgent';
 import { generateUrlWithLatestDomain } from '@utils/domainChanger';
 import { BASE } from '@utils/scrapers/animeSeries';
 import { BASE_URL } from '@utils/scrapers/comics1';
-import { DOMAIN as NOVEL_DOMAIN } from '@utils/scrapers/novel';
+import { DOMAIN as NOVEL_DOMAIN, NovelCookie } from '@utils/scrapers/novel';
 import LoadingIndicator from './LoadingIndicator';
 
 const ImageLoading = (
@@ -85,6 +86,8 @@ const ImageLoading = (
     if (typeof baseSourceObj.uri === 'string' && baseSourceObj.uri.includes('meionovels.com')) {
       computedHeaders.Referer = `https://${NOVEL_DOMAIN}/`;
       computedHeaders.Origin = `https://${NOVEL_DOMAIN}`;
+      computedHeaders.Cookie = NovelCookie;
+      computedHeaders['User-Agent'] = deviceuseragent;
     }
 
     if (Object.keys(computedHeaders).length > 0) {

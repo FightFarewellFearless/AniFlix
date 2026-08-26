@@ -1,4 +1,7 @@
+import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
 import aniflixruntime from '@/misc/AniFlixRuntime';
+import { setWebViewOpen } from '@utils/CFBypass';
+import deviceUserAgent from '@utils/deviceUserAgent';
 import cheerio from 'cheerio';
 import he from 'he';
 import { URL } from 'react-native-url-polyfill';
@@ -6,7 +9,60 @@ import { runOnRuntimeAsync } from 'react-native-worklets';
 
 export const __ALIAS = 'meionovels';
 export const DOMAIN = __ALIAS + '.com';
-const BASE_URL = `https://${DOMAIN}`;
+export const BASE_URL = `https://${DOMAIN}`;
+
+export let NovelCookie = '';
+
+export function makeCookieString(cookies: Cookies) {
+  return Object.entries(cookies)
+    .map(([key, details]) => `${key}=${details.value}`)
+    .join('; ');
+}
+
+export async function updateNovelCookie() {
+  try {
+    const cookies = await CookieManager.get(BASE_URL);
+    NovelCookie = makeCookieString(cookies);
+  } catch (e) {
+    console.error('Failed to update novel cookies:', e);
+  }
+}
+
+async function fetchNovelPage(
+  url: string,
+  signal?: AbortSignal,
+  opt?: RequestInit & { autoCaptcha?: boolean },
+): Promise<string> {
+  if (!NovelCookie) {
+    await updateNovelCookie();
+  }
+
+  const response = await fetch(url, {
+    signal,
+    headers: {
+      'User-Agent': deviceUserAgent,
+      NovelCookie,
+      ...opt?.headers,
+    },
+    ...opt,
+  });
+
+  const text = await response.text();
+
+  if (
+    response.status === 403 ||
+    text.toLowerCase().includes('<title>loading') ||
+    text.includes('Just a moment...') ||
+    text.includes('Tunggu sebentar...')
+  ) {
+    if (opt?.autoCaptcha !== false) {
+      setWebViewOpen.openWebViewCF(true, url);
+    }
+    throw new Error('Silahkan selesaikan captcha');
+  }
+
+  return text;
+}
 
 export interface NovelLatestRelease {
   title: string;
@@ -18,9 +74,9 @@ export interface NovelLatestRelease {
 export async function getLatestNovelRelease(
   page = 1,
   signal?: AbortSignal,
+  autoCaptcha = false,
 ): Promise<NovelLatestRelease[]> {
-  const response = await fetch(`${BASE_URL}/page/${page}/`, { signal });
-  const data = await response.text();
+  const data = await fetchNovelPage(`${BASE_URL}/page/${page}/`, signal, { autoCaptcha });
   return await runOnRuntimeAsync(aniflixruntime, () => {
     'worklet';
     const $ = cheerio.load(data);
@@ -54,35 +110,22 @@ export interface NovelDetail {
     releaseDate: string;
   }[];
 }
-export async function getNovelDetail(url: string, signal?: AbortSignal): Promise<NovelDetail> {
-  const response = await fetch(url, { signal });
-  const data = await response.text();
+export async function getNovelDetail(
+  url: string,
+  signal?: AbortSignal,
+  autoCaptcha = true,
+): Promise<NovelDetail> {
+  const data = await fetchNovelPage(url, signal, { autoCaptcha });
 
   const chapterRequestUrl = new URL(url);
   chapterRequestUrl.pathname = `${chapterRequestUrl.pathname}/ajax/chapters/`.replace(/\/+/g, '/');
   chapterRequestUrl.searchParams.set('t', '1');
 
-  const chaptersResponse = await fetch(chapterRequestUrl.toString(), {
-    headers: {
-      accept: '*/*',
-      'accept-language': 'en-US,en;q=0.9',
-      'cache-control': 'no-cache',
-      pragma: 'no-cache',
-      priority: 'u=1, i',
-      'sec-ch-ua': '"Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Windows"',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
-      'x-requested-with': 'XMLHttpRequest',
-      Referer: url,
-    },
+  const chaptersData = await fetchNovelPage(chapterRequestUrl.toString(), signal, {
     body: null,
     method: 'POST',
-    signal,
+    autoCaptcha,
   });
-  const chaptersData = await chaptersResponse.text();
 
   return await runOnRuntimeAsync(aniflixruntime, () => {
     'worklet';
@@ -160,9 +203,12 @@ export interface NovelReading {
   prev?: string;
   next?: string;
 }
-export async function getNovelReading(url: string, signal?: AbortSignal): Promise<NovelReading> {
-  const response = await fetch(url, { signal });
-  const data = await response.text();
+export async function getNovelReading(
+  url: string,
+  signal?: AbortSignal,
+  autoCaptcha = true,
+): Promise<NovelReading> {
+  const data = await fetchNovelPage(url, signal, { autoCaptcha });
   return await runOnRuntimeAsync(aniflixruntime, () => {
     'worklet';
     const $ = cheerio.load(data, {
@@ -199,11 +245,16 @@ export interface NovelSearch {
   status: string;
   releaseYear: string;
 }
-export async function searchNovel(query: string, signal?: AbortSignal): Promise<NovelSearch[]> {
-  const response = await fetch(`${BASE_URL}/?s=${encodeURIComponent(query)}&post_type=wp-manga`, {
+export async function searchNovel(
+  query: string,
+  signal?: AbortSignal,
+  autoCaptcha = true,
+): Promise<NovelSearch[]> {
+  const data = await fetchNovelPage(
+    `${BASE_URL}/?s=${encodeURIComponent(query)}&post_type=wp-manga`,
     signal,
-  });
-  const data = await response.text();
+    { autoCaptcha },
+  );
   return await runOnRuntimeAsync(aniflixruntime, () => {
     'worklet';
     const $ = cheerio.load(data);

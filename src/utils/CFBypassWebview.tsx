@@ -14,6 +14,7 @@ import { WebView, WebViewNavigation } from 'react-native-webview';
 import { CFBypassIsOpenContext } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 import { ANIME_MOVIE_BASE_DOMAIN, updateAnimeMovieCookie } from './scrapers/animeMovie';
+import { DOMAIN as NOVEL_BASE_DOMAIN, updateNovelCookie } from './scrapers/novel';
 
 const { height, width } = Dimensions.get('window');
 
@@ -47,6 +48,9 @@ function CFBypassWebView() {
       if (wasChallenge && nowNotChallenge) {
         if (bypassContext.url.includes(ANIME_MOVIE_BASE_DOMAIN)) {
           updateAnimeMovieCookie();
+        }
+        if (bypassContext.url.includes(NOVEL_BASE_DOMAIN)) {
+          updateNovelCookie();
         }
         bypassContext.setIsOpen(false);
         bypassContext.successCallback.current?.();
@@ -84,7 +88,10 @@ function CFBypassWebView() {
                 'Accept-Language': 'en-US,en;q=0.9',
               },
             }}
-            incognito={bypassContext.url.includes(ANIME_MOVIE_BASE_DOMAIN)}
+            incognito={
+              bypassContext.url.includes(ANIME_MOVIE_BASE_DOMAIN) ||
+              bypassContext.url.includes(NOVEL_BASE_DOMAIN)
+            }
             cacheEnabled={false}
             onNavigationStateChange={handleNavigationStateChange}
             sharedCookiesEnabled={true}

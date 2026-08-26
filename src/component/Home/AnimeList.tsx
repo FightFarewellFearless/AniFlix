@@ -75,7 +75,11 @@ import {
   getLatestMovies,
   getLatestSeries,
 } from '@utils/scrapers/film';
-import { getLatestNovelRelease, NovelLatestRelease } from '@utils/scrapers/novel';
+import {
+  BASE_URL as NOVEL_BASE_URL,
+  getLatestNovelRelease,
+  NovelLatestRelease,
+} from '@utils/scrapers/novel';
 import { setWebViewOpen } from '@/utils/CFBypass';
 import { Home_ShowCaptchaButton } from '../misc/Home_ShowCaptchaButton';
 
@@ -416,7 +420,7 @@ function HomeList(props: HomeProps) {
             <LatestSeriesList refreshing={refreshing} refreshingKey={refreshingKey} props={props} />
             <MovieList props={props} refreshing={refreshing} refreshingKey={refreshingKey} />
             <ComicList refreshingKey={refreshingKey} />
-            <NovelList refreshingKey={refreshingKey} />
+            <NovelList refreshing={refreshing} refreshingKey={refreshingKey} />
             <TouchableOpacity
               onPress={toggleJadwal}
               style={[
@@ -1134,11 +1138,18 @@ function ComicListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
 }
 
 const NovelList = memo(NovelListUNMEMO);
-function NovelListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
+function NovelListUNMEMO({
+  refreshing,
+  refreshingKey,
+}: {
+  refreshing?: () => void;
+  refreshingKey?: number;
+}) {
   const styles = useStyles();
   const flashListRef = useRef<FlashListRef<NovelLatestRelease>>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [isNovelCaptchaError, setIsNovelCaptchaError] = useState(false);
 
   useEffect(() => {
     if (!isLoading && refreshingKey) {
@@ -1152,12 +1163,18 @@ function NovelListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
   useEffect(() => {
     setIsLoading(true);
     setIsError(false);
+    setIsNovelCaptchaError(false);
     const task = requestIdleCallback(() => {
       getLatestNovelRelease()
         .then(z => {
           setData?.(z);
         })
-        .catch(() => setIsError(true))
+        .catch(e => {
+          if (e.message === 'Silahkan selesaikan captcha') {
+            setIsNovelCaptchaError(true);
+          }
+          setIsError(true);
+        })
         .finally(() => setIsLoading(false));
     });
     return () => {
@@ -1196,12 +1213,24 @@ function NovelListUNMEMO({ refreshingKey }: { refreshingKey?: number }) {
       {isLoading ? (
         <ShowSkeletonLoading />
       ) : isError ? (
-        <View>
-          <MaterialIcon name="error-outline" size={24} color="#d80000" />
-          <Text style={styles.errorText}>
-            Error mendapatkan data. Silahkan refresh data untuk mencoba lagi
-          </Text>
-        </View>
+        isNovelCaptchaError ? (
+          <Home_ShowCaptchaButton
+            callback={() => {
+              setWebViewOpen.openWebViewCF(true, NOVEL_BASE_URL, refreshing);
+            }}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={() => {
+              refreshing?.();
+            }}
+            style={styles.errorContainer}>
+            <MaterialIcon name="refresh" size={24} color="#d80000" />
+            <Text style={styles.errorText}>
+              Error mendapatkan data. Ketuk disini untuk mencoba ulang.
+            </Text>
+          </TouchableOpacity>
+        )
       ) : null}
 
       {(data?.length ?? 0) > 0 && (
