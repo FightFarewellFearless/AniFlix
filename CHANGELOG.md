@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-4 (11-September-2026)
+## Diperbaiki
+- Fitur auto translate film subtitle terkadang tidak menampilkan isi subtitle nya.
 # v2.2.0-LTS_JS-3 (26-Agustus-2026)
 ## Diperbaiki
 - Novel terdeteksi captcha
