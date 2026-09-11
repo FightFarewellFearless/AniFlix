@@ -34,7 +34,7 @@ import setHistory from '@utils/historyControl';
 import { useFilmTokenRotate } from '@/hooks/useFilmTokenRotate';
 import { RootStackNavigator } from '@/types/navigation';
 import Skeleton from '@component/misc/Skeleton';
-import VideoPlayer, { parseSubtitles, PlayerRef } from '@component/VideoPlayer';
+import VideoPlayer, { parseSubtitles, PlayerRef, stringifySubtitles } from '@component/VideoPlayer';
 import { Picker, PickerRef } from '@expo/ui/community/picker';
 import { useBackHandler } from '@hooks/useBackHandler';
 import { useFocusEffect } from '@react-navigation/core';
@@ -437,7 +437,7 @@ function Video_Film(props: Props) {
   const applyTranslation = useCallback(async () => {
     setSubTranslationLoading(true);
     try {
-      const splittedSub = splitStringByLimit(originalSub.current ?? '');
+      const splittedSub = await splitStringByLimit(originalSub.current ?? '');
       const allTrRes = await Promise.all(
         splittedSub.map(string => {
           return tr(string, {
@@ -797,13 +797,23 @@ function Video_Film(props: Props) {
   );
 }
 
-function splitStringByLimit(text: string, charLimit = 8000): string[] {
+async function splitStringByLimit(text: string, charLimit = 3000): Promise<string[]> {
   const result: string[] = [];
 
-  for (let i = 0; i < text.length; i += charLimit) {
-    result.push(text.slice(i, i + charLimit));
-  }
+  const parsed = await parseSubtitles(text);
 
+  let currentCharLength = 0;
+
+  for (let i = 0, lastResultSubI = 0; i < parsed.length; i++) {
+    const currentSub = parsed[i];
+    if (currentCharLength + currentSub.text.length < charLimit) {
+      currentCharLength += currentSub.text.length;
+    } else {
+      result.push(await stringifySubtitles(parsed.slice(lastResultSubI, i)));
+      lastResultSubI = i;
+      currentCharLength = 0;
+    }
+  }
   return result;
 }
 

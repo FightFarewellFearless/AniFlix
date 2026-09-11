@@ -1161,6 +1161,48 @@ export const parseSubtitles = async (raw: string) => {
   });
 };
 
+export type SubtitleItem = {
+  startTime: number;
+  endTime: number;
+  text: string;
+};
+
+const formatTime = (seconds: number): string => {
+  'worklet';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const ms = Math.floor((seconds % 1) * 1000);
+
+  const pad = (num: number, size = 2) => String(num).padStart(size, '0');
+
+  return `${pad(h)}:${pad(m)}:${pad(s)}.${pad(ms, 3)}`;
+};
+
+export const stringifySubtitles = async (items: SubtitleItem[]): Promise<string> => {
+  return await new Promise<string>(resolve => {
+    runOnRuntime(AniFlixRuntime, () => {
+      'worklet';
+
+      const blocks = items.map((item, index) => {
+        const startTimeStr = formatTime(item.startTime);
+        const endTimeStr = formatTime(item.endTime);
+
+        const encodedText = item.text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        return `${index + 1}\n${startTimeStr} --> ${endTimeStr}\n${encodedText}`;
+      });
+
+      const rawResult = `WEBVTT\n\n` + blocks.join('\n\n');
+
+      runOnJS(resolve)(rawResult);
+    })();
+  });
+};
+
 const decodeSubtitleBuffer = (buffer: ArrayBuffer): string => {
   const uint8Array = new Uint8Array(buffer);
   if (
