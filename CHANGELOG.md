@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-5 (19-September-2026)
+## Diperbaiki
+- (part 2) Fitur auto translate film subtitle terkadang tidak menampilkan isi subtitle nya.
 # v2.2.0-LTS_JS-4 (11-September-2026)
 ## Diperbaiki
 - Fitur auto translate film subtitle terkadang tidak menampilkan isi subtitle nya.
