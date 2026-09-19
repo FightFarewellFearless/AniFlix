@@ -449,7 +449,8 @@ function Video_Film(props: Props) {
       allTrRes.forEach(res => {
         translatedSub.current.push(res.text);
       });
-      playerRef.current?.overwriteSubtitleObj(await parseSubtitles(translatedSub.current.join('')));
+      const subtitleJSON = await parseSubtitles(translatedSub.current.join(''));
+      playerRef.current?.overwriteSubtitleObj(subtitleJSON);
       setIsUsingTranslatedSub(true);
     } catch (e: any) {
       if (e.message === 'canceled') return;
@@ -803,16 +804,19 @@ async function splitStringByLimit(text: string, charLimit = 3000): Promise<strin
   const parsed = await parseSubtitles(text);
 
   let currentCharLength = 0;
-
-  for (let i = 0, lastResultSubI = 0; i < parsed.length; i++) {
+  let lastResultSubI = 0;
+  for (let i = 0; i < parsed.length; i++) {
     const currentSub = parsed[i];
     if (currentCharLength + currentSub.text.length < charLimit) {
       currentCharLength += currentSub.text.length;
     } else {
       result.push(await stringifySubtitles(parsed.slice(lastResultSubI, i)));
       lastResultSubI = i;
-      currentCharLength = 0;
+      currentCharLength = currentSub.text.length;
     }
+  }
+  if (lastResultSubI < parsed.length) {
+    result.push(await stringifySubtitles(parsed.slice(lastResultSubI)));
   }
   return result;
 }

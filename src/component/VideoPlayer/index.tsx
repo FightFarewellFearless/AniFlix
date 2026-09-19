@@ -275,7 +275,6 @@ function VideoPlayer({
     if (subtitles) {
       for (let i = 0; i < subtitles.length; i++) {
         const sub = subtitles[i];
-
         if (sub.startTime > currentTime) break;
 
         if (currentTime >= sub.startTime && currentTime <= sub.endTime) {
@@ -1095,18 +1094,31 @@ const RE_BLOCK =
   /(?:\d+\s+)?((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})\s+(?:-->|--&gt;)\s+((?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3})[^\n\r]*\s+([\s\S]*?)(?=\s*(?:\d+\s+)?(?:\d{1,2}:)?\d{2}:\d{2}[.,]\d{3}|$)/g;
 const RE_TAGS = /\{[^}]*\}|<\/?[^>]+>/g;
 const RE_ASS_NL = /\\N/g;
-const RE_SPLIT = /[:.,]/;
 
-const toSec = (t: string) => {
+const toSec = (t: string): number => {
   'worklet';
-  const d = t.split(RE_SPLIT);
-  if (d.length === 3) {
-    return +d[0] * 60 + +d[1] + +d[2] / 1000;
+  if (!t) return 0;
+
+  const [timePart, msPart = '0'] = t.trim().replace(',', '.').split('.');
+  const timeUnits = timePart.split(':').map(Number);
+
+  let seconds = 0;
+
+  if (timeUnits.length === 3) {
+    // HH:MM:SS
+    seconds = timeUnits[0] * 3600 + timeUnits[1] * 60 + timeUnits[2];
+  } else if (timeUnits.length === 2) {
+    // MM:SS
+    seconds = timeUnits[0] * 60 + timeUnits[1];
+  } else if (timeUnits.length === 1) {
+    // SS
+    seconds = timeUnits[0];
   }
-  if (d.length === 4) {
-    return +d[0] * 3600 + +d[1] * 60 + +d[2] + +d[3] / 1000;
-  }
-  return 0;
+
+  const msFormatted = msPart.padEnd(3, '0').slice(0, 3);
+  const milliseconds = Number(msFormatted) / 1000;
+
+  return seconds + milliseconds;
 };
 
 export const parseSubtitles = async (raw: string) => {
@@ -1124,22 +1136,33 @@ export const parseSubtitles = async (raw: string) => {
       RE_BLOCK.lastIndex = 0;
 
       while ((m = RE_BLOCK.exec(raw)) !== null) {
+        let start = toSec(m[1]);
+        let end = toSec(m[2]);
         const rawText = m[3];
         const lines = rawText.split(/\r?\n/);
-
         const cleanLines = [];
 
         for (let i = 0; i < lines.length; i++) {
-          let line = lines[i];
-          line = line.replace(RE_ASS_NL, ' ');
-          line = line.replace(RE_TAGS, '');
+          let line = lines[i].trim();
+
+          if (
+            line.toUpperCase().startsWith('WEBVTT') ||
+            line.toUpperCase().startsWith('NOTE') ||
+            line.toUpperCase().startsWith('X-TIMESTAMP')
+          ) {
+            continue;
+          }
+
           line = line
+            .replace(/WEBVTT/gi, '')
+            .replace(RE_ASS_NL, ' ')
+            .replace(RE_TAGS, '')
             .replace(/&nbsp;/g, ' ')
             .replace(/&amp;/g, '&')
             .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>');
-
-          line = line.trim();
+            .replace(/&gt;/g, '>')
+            .replace(/\\h/g, ' ')
+            .trim();
 
           if (line.length > 0) {
             cleanLines.push(line);
@@ -1149,10 +1172,24 @@ export const parseSubtitles = async (raw: string) => {
         const finalTxt = cleanLines.join('\n');
 
         if (finalTxt) {
+          if (start > end) {
+            if (start - end > 30000) {
+              const diff = start - end;
+              const hoursToSubtract = Math.round(diff / 3600);
+              start = start - hoursToSubtract * 3600;
+            } else {
+              start = Math.max(0, end - 3);
+            }
+          }
+
+          if (end - start > 10) {
+            end = start + 4;
+          }
+
           res.push({
-            startTime: toSec(m[1]),
-            endTime: toSec(m[2]),
-            text: finalTxt.replaceAll('\\h', ' '),
+            startTime: start,
+            endTime: end,
+            text: finalTxt,
           });
         }
       }
