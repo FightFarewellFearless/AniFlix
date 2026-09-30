@@ -559,7 +559,7 @@ function Video(props: Props) {
               onDurationChange={handleProgress}
               onLoad={handleVideoLoad}
               headers={
-                props.route.params.isMovie && data.streamingLink.includes('mp4upload')
+                props.route.params.isMovie && data.streamingLink?.includes('mp4upload')
                   ? { Referer: 'https://www.mp4upload.com/' }
                   : undefined
               }
@@ -598,7 +598,13 @@ function Video(props: Props) {
 </body>`,
                     }
                   : { uri: data.streamingLink }),
-                baseUrl: `https://${new URL(data.streamingLink).host}`,
+                baseUrl: `https://${(() => {
+                  try {
+                    return new URL(data.streamingLink).host;
+                  } catch {
+                    return '';
+                  }
+                })()}`,
               }}
               userAgent={data.resolution?.includes('lokal') ? undefined : deviceUserAgent}
               originWhitelist={['*']}
