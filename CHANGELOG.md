@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-6 (30-September-2026)
+## Diperbaiki
+- Crash di layar streaming video saat link streaming tidak tersedia
 # v2.2.0-LTS_JS-5 (19-September-2026)
 ## Diperbaiki
 - (part 2) Fitur auto translate film subtitle terkadang tidak menampilkan isi subtitle nya.
