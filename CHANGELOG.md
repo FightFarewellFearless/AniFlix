@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-7 (03-Oktober-2026)
+## Diperbaiki
+- Error pada streaming anime series
 # v2.2.0-LTS_JS-6 (30-September-2026)
 ## Diperbaiki
 - Crash di layar streaming video saat link streaming tidak tersedia
