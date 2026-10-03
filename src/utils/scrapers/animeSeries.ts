@@ -372,7 +372,9 @@ const getStreamLink = async (
       'Gagal mendapatkan link streaming, kemungkinan ini adalah anime dari history lama, ' +
         'untuk menonton anime ini, silahkan cari melalui pencarian dan pilih episode yang sesuai',
     );
-  if (downLink.includes('desustream') || downLink.includes('desudrive')) {
+  if (downLink.includes('blogger.com')) {
+    return await getBloggerVideo(downLink, signal);
+  } else if (downLink.includes('desustream') || downLink.includes('desudrive')) {
     let err = false;
     let errorObj: Error | null = null;
     const response = await axios
@@ -413,6 +415,8 @@ const getStreamLink = async (
           'worklet';
           return cheerio.load(data)('source').attr('src');
         });
+      } else if (data.includes('const videoURL =')) {
+        return data.split('const videoURL =')[1].split('"')[1].split('"')[0];
       } else {
         throw new Error(
           'Gagal mendapatkan link streaming, tidak ada data yang cocok, ' +
@@ -497,6 +501,7 @@ async function getBloggerVideo(url: string, signal?: AbortSignal) {
     headers: {
       'User-Agent': deviceUserAgent,
     },
+    signal,
   });
   try {
     return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
@@ -524,18 +529,26 @@ async function getBloggerVideo(url: string, signal?: AbortSignal) {
         },
       );
       return await response.text().then(res => {
-        const encodedLink = res
-          .split('https://rr')
-          .at(-1)! // select the last available video (usually higher resolution)
-          .split('\\",[')[0]
-          .replace(/\\\\/g, '\\');
-        const link = JSON.parse(`"https://rr${encodedLink}"`);
-        return link;
+        return extractVideoUrl(res);
       });
     } catch (e) {
       throw e;
     }
   }
+}
+function extractVideoUrl(res: string): string {
+  const match = res.match(/\[\["wrb\.fr"[\s\S]*?\]\](?=\r?\n\d+|\s*$)/);
+  if (!match) throw new Error('Video payload chunk not found');
+
+  const outer = JSON.parse(match[0]);
+
+  const inner = JSON.parse(outer[0][2]);
+
+  const directUrl = inner[2]?.[0]?.[0];
+  if (directUrl) return directUrl;
+
+  const streamingData = JSON.parse(inner[7])?.streamingData;
+  return streamingData?.formats?.[0]?.url;
 }
 
 const listAnime = async (
