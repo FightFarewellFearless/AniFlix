@@ -11,14 +11,12 @@ export function useFilmTokenRotate(data: FilmDetail_Stream) {
         const urlObj = new URL(data.streamingLink);
         const token = urlObj.searchParams.get('t');
         if (token) activeTokenRef.current = token;
-      } catch (e) {}
+      } catch {}
     }
   }, [data]);
 
   const checkAndRotateToken = useCallback(async () => {
-    const expired: number = JSON.parse(
-      Buffer.from(activeTokenRef.current.split('.').shift()!, 'base64').toString(),
-    ).e;
+    const expired: number = Number(activeTokenRef.current.split('.')[1].split('-')[0]);
     const now = Math.floor(Date.now() / 1000);
     if (expired < now) {
       try {
