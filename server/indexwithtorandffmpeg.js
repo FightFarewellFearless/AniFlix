@@ -132,8 +132,8 @@ async function getOrRotateToken(claim, redeemUrl) {
   // Fungsi untuk mengekstrak expiry dari token string (dikembalikan ke versi aslinya)
   const getExpiry = t => {
     try {
-      const payload = JSON.parse(Buffer.from(t.split('.')[0], 'base64').toString());
-      return payload.e || 0;
+      const payload = Number(t.split('.')[1].split('-')[0]);
+      return payload || 0;
     } catch (e) {
       debugLog('⚠️ Parse Token Failed', e.message);
       return 0;
