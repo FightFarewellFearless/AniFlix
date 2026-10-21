@@ -132,6 +132,8 @@ async function fetchNewChapterSession(chapterUrl: string, signal?: AbortSignal):
   const expired = data.ex;
   return { token: sessionToken, sign: sessionSign, ex: expired };
 }
+
+// not used for now, potentially gonna be removed in the future
 async function getChapterSession(chapterUrl: string, signal?: AbortSignal): Promise<Session> {
   // if (isError) throw new Error('Data awal error, mohon muat ulang aplikasi');
   if (!Cookie) {
@@ -382,7 +384,7 @@ export async function getComicsReading1(
     };
   });
   const jsonPage: ComicsReadingRawJSON = JSON.parse(nextDataText).props.pageProps.data;
-  const session = await getChapterSession(url, signal);
+  // const session = await getChapterSession(url, signal);
   const jsonApi = await fetch(
     `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
     {
@@ -392,8 +394,8 @@ export async function getComicsReading1(
         // needed for explicit genre to works
         Authorization: COMICS1_AUTH,
         'User-Agent': deviceUserAgent,
-        'X-Token': session.token,
-        'X-Sign': session.sign,
+        // 'X-Token': session.token,
+        // 'X-Sign': session.sign,
         Cookie,
       },
       signal,
