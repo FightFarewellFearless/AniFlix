@@ -1,3 +1,7 @@
+# v2.2.0-LTS_JS-8 (21-Oktober-2026)
+## Diperbaiki
+- [Film] Parser pengecekan untuk waktu kadaluarsa token
+- [Komik] Memperbaiki masalah loading pada pengambilan chapter
 # v2.2.0-LTS_JS-7 (03-Oktober-2026)
 ## Diperbaiki
 - Error pada streaming anime series
