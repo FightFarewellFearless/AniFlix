@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-9 (22-Oktober-2026)
+## Diperbaiki
+- [Komik] Memperbaiki error pada komik
 # v2.2.0-LTS_JS-8 (21-Oktober-2026)
 ## Diperbaiki
 - [Film] Parser pengecekan untuk waktu kadaluarsa token
