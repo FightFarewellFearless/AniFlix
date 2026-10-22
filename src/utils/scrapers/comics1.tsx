@@ -1,13 +1,12 @@
 import aniflixruntime from '@/misc/AniFlixRuntime';
 import cheerio from 'cheerio';
+import CryptoJS from 'crypto-js';
 import he from 'he';
 import moment from 'moment';
 import { useEffect, useRef } from 'react';
 import { ToastAndroid, View } from 'react-native';
-import Config from '@root/aniflixConfig.json';
 import WebView from 'react-native-webview';
 import { runOnRuntimeAsync } from 'react-native-worklets';
-const COMICS1_AUTH = Config.COMICS1_AUTH;
 
 import { comics1FetchChapterSession } from '@utils/comics1SessionFetcher/comics1chaptersessionfetchercontext';
 import { comics1FetchSession } from '@utils/comics1SessionFetcher/comics1sessionfetchercontext';
@@ -15,11 +14,12 @@ import deviceUserAgent from '@utils/deviceUserAgent';
 
 // let isError = false;
 export const __ALIAS = 'softkomik';
-export const DOMAIN = __ALIAS + '.co';
+export const DOMAIN = __ALIAS + '.app';
 const API_DOMAIN = 'v2.softdevices.my.id';
 export const BASE_URL = `https://${DOMAIN}`; // export needed for referer header
 const API_URL = `https://${API_DOMAIN}`;
 const IMAGE_COVER_BASE_URL = 'https://cover.softdevices.my.id/softkomik-cover';
+const CHAPTER_ENCRYPTION_KEY = 'nYTInq9MwR4pWa8yeXtu/2iO3t9nGP65WHpWEvqpEdU=';
 
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
   ? Acc[number]
@@ -245,6 +245,7 @@ interface Rating {
   value: number;
   member: number;
 }
+
 interface ChaptersData {
   title: string;
   startChapter: StartChapter[];
@@ -255,6 +256,12 @@ interface ChaptersData {
 interface StartChapter {
   chapter: string;
 }
+
+interface ComicsDetailEncryptedPayload {
+  data: ComicsDetailRawJSON;
+  chapterData: ChaptersData;
+}
+
 export async function getComicsDetailFromUrl1(
   url: string,
   signal?: AbortSignal,
@@ -264,32 +271,29 @@ export async function getComicsDetailFromUrl1(
     signal,
   });
   const data = await response.text();
-  const buildId = /"buildId":"([^"]+)"/.exec(data)?.[1];
-  if (!buildId) throw new Error('Failed to extract buildId');
-  const titleSlug = new URL(url).pathname;
-  const json = (await fetch(
-    `${BASE_URL}/_next/data/${buildId}${titleSlug}.json?title_slug=${titleSlug.replace(/\//g, '')}`,
-    {
-      headers: { 'User-Agent': deviceUserAgent, Cookie },
-      signal,
-    },
-  )
-    .then(res => res.json())
-    .then(x => x.pageProps.data)) as ComicsDetailRawJSON;
-  const chapterUrl = `${API_URL}/komik/${json.title_slug}/chapter?limit=9999999`;
-  const session = await getSession(signal);
-  const chaptersResponse = await fetch(chapterUrl, {
-    signal,
-    headers: {
-      Referer: url,
-      Origin: BASE_URL,
-      'User-Agent': deviceUserAgent,
-      'X-Token': session.token,
-      'X-Sign': session.sign,
-      Cookie,
-    },
+  const nextDataText = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio
+      .load(data, {
+        xmlMode: true,
+        decodeEntities: false,
+      })('script#__NEXT_DATA__')
+      .text();
   });
-  const chaptersData: ChaptersData = await chaptersResponse.json();
+  const pageProps = JSON.parse(nextDataText).props?.pageProps;
+  const encryptedPayload = pageProps?._stk;
+  if (typeof encryptedPayload !== 'string') {
+    throw new Error('Failed to extract encrypted detail payload');
+  }
+  const decryptedPayload = CryptoJS.AES.decrypt(encryptedPayload, CHAPTER_ENCRYPTION_KEY).toString(
+    CryptoJS.enc.Utf8,
+  );
+  if (!decryptedPayload) {
+    throw new Error('Failed to decrypt detail payload');
+  }
+  const payload = JSON.parse(decryptedPayload) as ComicsDetailEncryptedPayload;
+  const json = payload.data;
+  const chaptersData = payload.chapterData;
   const chapters = chaptersData.chapter.map(chapter => ({
     chapter: chapter.chapter,
     chapterUrl: `${BASE_URL}/${json.title_slug}/chapter/${chapter.chapter}`,
@@ -336,6 +340,11 @@ interface ComicsReadingRawJSON {
   data: Data;
   prevChapter?: Chapter[];
   nextChapter?: Chapter[];
+  imgList?: string[];
+}
+interface ComicsReadingPayload {
+  data: ComicsReadingRawJSON;
+  imgList: string[];
 }
 interface Chapter {
   chapter: string;
@@ -343,7 +352,10 @@ interface Chapter {
 interface Data {
   _id: string;
   chapter: string;
-  imageSrc: string[];
+  imageSrc?: string[];
+  imgList?: string[];
+  backBS3?: boolean | string;
+  storageInter2?: boolean | string;
 }
 interface Komik {
   rating: Rating;
@@ -360,6 +372,40 @@ interface Rating {
   value: number;
   member: number;
 }
+
+async function getChapterImageId(html: string, signal?: AbortSignal): Promise<string> {
+  const scriptSources = await runOnRuntimeAsync(aniflixruntime, () => {
+    'worklet';
+    return cheerio
+      .load(html, {
+        xmlMode: true,
+        decodeEntities: false,
+      })('script[src]')
+      .map((_, element) => element.attribs.src)
+      .get()
+      .filter(src => /\/_next\/static\/chunks\//.test(src));
+  });
+
+  let fallbackImageId: string | undefined;
+  for (const scriptSource of scriptSources) {
+    const scriptUrl = new URL(scriptSource, BASE_URL).toString();
+    const scriptResponse = await fetch(scriptUrl, {
+      signal,
+      headers: { 'User-Agent': deviceUserAgent, Cookie },
+    });
+    if (!scriptResponse.ok) continue;
+    const scriptText = await scriptResponse.text();
+    const imageId = /(?:let\s+t\s*=\s*)String\(\s*["']([A-Za-z0-9_-]{6,64})["']\s*\)/.exec(
+      scriptText,
+    )?.[1];
+    if (imageId) return imageId;
+    fallbackImageId ??= /String\(\s*["']([A-Za-z0-9_-]{6,64})["']\s*\)/.exec(scriptText)?.[1];
+  }
+
+  if (fallbackImageId) return fallbackImageId;
+  throw new Error('Failed to extract chapter image id');
+}
+
 export async function getComicsReading1(
   url: string,
   signal?: AbortSignal,
@@ -372,35 +418,61 @@ export async function getComicsReading1(
     },
   });
   const data = await response.text();
-  const { nextDataText, scriptSrc } = await runOnRuntimeAsync(aniflixruntime, () => {
-    'worklet';
-    const $ = cheerio.load(data, {
-      xmlMode: true,
-      decodeEntities: false,
-    });
-    return {
-      nextDataText: $('script#__NEXT_DATA__').text(),
-      scriptSrc: $('script').eq(17).attr('src') ?? null,
-    };
-  });
-  const jsonPage: ComicsReadingRawJSON = JSON.parse(nextDataText).props.pageProps.data;
-  // const session = await getChapterSession(url, signal);
-  const jsonApi = await fetch(
-    `${API_URL}/komik/${jsonPage.komik.title_slug}/chapter/${jsonPage.chapter}/imgs/${jsonPage.data._id}`,
+  const buildId = /"buildId":"([^"]+)"/.exec(data)?.[1];
+  if (!buildId) {
+    throw new Error('Failed to extract chapter buildId');
+  }
+  const chapterPath = new URL(url).pathname;
+  const chapterPathParts = chapterPath.split('/').filter(Boolean);
+  const titleSlug = chapterPathParts.at(-2);
+  const routeChapter = chapterPathParts.at(-1);
+  if (!titleSlug || !routeChapter) {
+    throw new Error('Failed to extract chapter route parameters');
+  }
+  const htmlPageProps = JSON.parse(
+    await runOnRuntimeAsync(aniflixruntime, () => {
+      'worklet';
+      return cheerio
+        .load(data, {
+          xmlMode: true,
+          decodeEntities: false,
+        })('script#__NEXT_DATA__')
+        .text();
+    }),
+  ).props?.pageProps;
+  const htmlEncryptedPayload = htmlPageProps?._stk;
+  if (typeof htmlEncryptedPayload !== 'string') {
+    throw new Error('Failed to extract encrypted chapter HTML payload');
+  }
+  const htmlDecryptedPayload = CryptoJS.AES.decrypt(
+    htmlEncryptedPayload,
+    CHAPTER_ENCRYPTION_KEY,
+  ).toString(CryptoJS.enc.Utf8);
+  if (!htmlDecryptedPayload) {
+    throw new Error('Failed to decrypt chapter HTML payload');
+  }
+  const htmlPayload = JSON.parse(htmlDecryptedPayload) as ComicsReadingPayload;
+  const htmlChapter = htmlPayload.data;
+  const imageId = await getChapterImageId(data, signal);
+  const nextDataResponse = await fetch(
+    `${BASE_URL}/_next/data/${buildId}${chapterPath}.json?title_slug=${encodeURIComponent(titleSlug)}&chapter=${encodeURIComponent(routeChapter)}`,
     {
-      headers: {
-        Referer: url,
-        Origin: BASE_URL,
-        // needed for explicit genre to works
-        Authorization: COMICS1_AUTH,
-        'User-Agent': deviceUserAgent,
-        // 'X-Token': session.token,
-        // 'X-Sign': session.sign,
-        Cookie,
-      },
       signal,
+      headers: { 'User-Agent': deviceUserAgent, Cookie },
     },
-  ).then(res => res.json());
+  );
+  const pageProps = (await nextDataResponse.json()).pageProps;
+  const encryptedPayload = pageProps?._stk;
+  if (typeof encryptedPayload !== 'string') {
+    throw new Error('Failed to extract encrypted chapter payload');
+  }
+  const decryptedPayload = CryptoJS.AES.decrypt(encryptedPayload, CHAPTER_ENCRYPTION_KEY).toString(
+    CryptoJS.enc.Utf8,
+  );
+  if (!decryptedPayload) {
+    throw new Error('Failed to decrypt chapter payload');
+  }
+  const jsonPage = JSON.parse(decryptedPayload).data as ComicsReadingRawJSON;
   const title = jsonPage.komik.title;
   const chapter = jsonPage.chapter;
   const thumbnailUrl = compressedImageUrl(
@@ -418,12 +490,21 @@ export async function getComicsReading1(
         });
     })(),
   );
-  const id = await getImageID(scriptSrc, signal);
-  // const detectedCdn = await detectCDNImage($, signal);
-  const cdn1 = undefined; // detectedCdn?.[0]?.link;
-  const comicImages = jsonApi.imageSrc.map((src: string) => {
-    return (cdn1 ? cdn1 : `https://image.komik.im/softkomik`) + '/' + src + `?id=${id}`;
+  const imageSources = (
+    htmlPayload.imgList?.length
+      ? htmlPayload.imgList
+      : (htmlChapter.data.imageSrc ?? htmlChapter.data.imgList ?? [])
+  ).map(src => {
+    if (/^https?:\/\//i.test(src)) return src;
+    const configuredBaseUrl =
+      typeof htmlChapter.data.backBS3 === 'string' ? htmlChapter.data.backBS3 : undefined;
+    const baseUrl =
+      configuredBaseUrl ||
+      (htmlChapter.data.backBS3 ? 'https://psy1.komik.im' : 'https://image.komik.im/softkomik');
+    const imageUrl = `${baseUrl.replace(/\/+$/, '')}/${src.replace(/^\/+/, '')}`;
+    return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}id=${encodeURIComponent(imageId)}`;
   });
+  const comicImages = imageSources;
   const nextChapter = jsonPage.nextChapter ? jsonPage.nextChapter[0]?.chapter : '';
   const prevChapter = jsonPage.prevChapter ? jsonPage.prevChapter[0]?.chapter : '';
   return {
@@ -440,18 +521,6 @@ export async function getComicsReading1(
         ? undefined
         : BASE_URL + '/' + jsonPage.komik.title_slug + '/chapter/' + prevChapter,
   };
-}
-async function getImageID(
-  linkToScript: string | null,
-  signal?: AbortSignal,
-): Promise<string | null> {
-  if (!linkToScript) return null;
-  const res = await fetch(BASE_URL + linkToScript, {
-    signal,
-    headers: { 'User-Agent': deviceUserAgent, Cookie },
-  });
-  const scriptText = await res.text();
-  return scriptText.split('let t=String("')[1].split('"')[0];
 }
 // async function detectCDNImage(
 //   $: CheerioAPI,
