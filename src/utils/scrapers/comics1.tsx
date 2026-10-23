@@ -262,10 +262,10 @@ interface ComicsDetailEncryptedPayload {
   chapterData: ChaptersData;
 }
 
-export async function getComicsDetailFromUrl1(
+async function getComicDetailPayloadFromUrl1(
   url: string,
   signal?: AbortSignal,
-): Promise<ComicsDetail1> {
+): Promise<ComicsDetailEncryptedPayload> {
   const response = await fetch(url, {
     headers: { 'User-Agent': deviceUserAgent, Cookie },
     signal,
@@ -291,7 +291,14 @@ export async function getComicsDetailFromUrl1(
   if (!decryptedPayload) {
     throw new Error('Failed to decrypt detail payload');
   }
-  const payload = JSON.parse(decryptedPayload) as ComicsDetailEncryptedPayload;
+  return JSON.parse(decryptedPayload) as ComicsDetailEncryptedPayload;
+}
+
+export async function getComicsDetailFromUrl1(
+  url: string,
+  signal?: AbortSignal,
+): Promise<ComicsDetail1> {
+  const payload = await getComicDetailPayloadFromUrl1(url, signal);
   const json = payload.data;
   const chaptersData = payload.chapterData;
   const chapters = chaptersData.chapter.map(chapter => ({
@@ -475,21 +482,11 @@ export async function getComicsReading1(
   const jsonPage = JSON.parse(decryptedPayload).data as ComicsReadingRawJSON;
   const title = jsonPage.komik.title;
   const chapter = jsonPage.chapter;
-  const thumbnailUrl = compressedImageUrl(
-    await (async () => {
-      const baseChapterUrl = `${BASE_URL}/${jsonPage.komik.title_slug}`;
-      return (
-        await fetch(baseChapterUrl, { headers: { 'User-Agent': deviceUserAgent, Cookie }, signal })
-      )
-        .text()
-        .then(x => {
-          return `${IMAGE_COVER_BASE_URL}/${/["']?gambar["']?\s*:\s*["']([^"']+)["']/.exec(x)?.[1]}`;
-        })
-        .catch(() => {
-          return '';
-        });
-    })(),
+  const detailData = await getComicDetailPayloadFromUrl1(
+    `${BASE_URL}/${jsonPage.komik.title_slug}`,
+    signal,
   );
+  const thumbnailUrl = compressedImageUrl(`${IMAGE_COVER_BASE_URL}/${detailData.data.gambar}`);
   const imageSources = (
     htmlPayload.imgList?.length
       ? htmlPayload.imgList
