@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-11 (31-Oktober-2026)
+## Diperbaiki
+- Memperbaiki server streaming yang down
 # v2.2.0-LTS_JS-10 (23-Oktober-2026)
 ## Diperbaiki
 - [Komik] Gambar cover komik error di history setelah membaca
