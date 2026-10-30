@@ -90,7 +90,7 @@ function Video_Film(props: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      fetch('https://vortexdownloader.rwbcode.com/health')
+      fetch('https://vortexbridge.pirles.my.id/health')
         .then(a => {
           if (a.status === 200) {
             setServerMode('server');
@@ -468,7 +468,7 @@ function Video_Film(props: Props) {
 
   const downloadFilm = useCallback(() => {
     Linking.openURL(
-      `https://vortexdownloader.rwbcode.com/?data=${Buffer.from(
+      `https://vortexbridge.pirles.my.id/?data=${Buffer.from(
         JSON.stringify({
           title:
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
@@ -541,7 +541,7 @@ function Video_Film(props: Props) {
             streamingURL={
               serverMode === 'local'
                 ? `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`
-                : `https://vortexdownloader.rwbcode.com/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
+                : `https://vortexbridge.pirles.my.id/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
             }
             isHls={true}
             subtitleURL={data.subtitleLink}

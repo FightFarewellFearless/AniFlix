@@ -64,7 +64,7 @@ export default function ComicsReading(props: Props) {
   const startComicsDownload = useCallback(() => {
     if (comicsDownloadLoading.current) return;
     comicsDownloadLoading.current = true;
-    fetch('https://vortexdownloader.rwbcode.com/api/requestComicsDownloadId', {
+    fetch('https://vortexbridge.pirles.my.id/api/requestComicsDownloadId', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -76,7 +76,7 @@ export default function ComicsReading(props: Props) {
     })
       .then(res => res.json())
       .then(res => {
-        Linking.openURL(`https://vortexdownloader.rwbcode.com/api/getComicsDownload/${res.id}`);
+        Linking.openURL(`https://vortexbridge.pirles.my.id/api/getComicsDownload/${res.id}`);
       })
       .finally(() => {
         setIsSnackBarOpen(false);

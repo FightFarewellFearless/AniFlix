@@ -10,7 +10,7 @@ const { URL } = require('url');
 const { execSync, spawn } = require('child_process');
 const { Transform } = require('stream');
 
-let gotScraping; // Deklarasi untuk dynamic import ESM
+let gotScraping;
 
 // === DEBUG MODE TOGGLE ===
 const DEBUG_MODE = true;
@@ -20,18 +20,17 @@ function debugLog(...args) {
   }
 }
 
-const TOKEN_STORAGE = new Map(); // Simpan { token, expires } berdasarkan claim
+const TOKEN_STORAGE = new Map();
 
 const app = express();
 app.set('trust proxy', true);
-const PORT = process.env.PORT || process.env.SERVER_PORT || 20132;
+const PORT = 10282; //process.env.PORT || process.env.SERVER_PORT || 20132;
 const TOR_PROXY_PORT = 9050;
 const TIMEOUT_MS = 20000;
 const MAX_RETRIES = 5;
 const USER_AGENT =
   'Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36';
 
-// === KELAS THROTTLE UNTUK MEMBATASI SPEED ===
 class BandwidthThrottle extends Transform {
   constructor(bytesPerSecond) {
     super();
