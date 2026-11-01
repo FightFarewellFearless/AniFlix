@@ -1,4 +1,4 @@
-import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
+import { CookieManager } from '@/platform/CookieManager';
 
 import { setWebViewOpen } from '@utils/CFBypass';
 import deviceUserAgent from '@utils/deviceUserAgent';
@@ -7,7 +7,7 @@ import cheerio from 'cheerio';
 
 import aniflixruntime from '@/misc/AniFlixRuntime';
 import { unpack } from '@utils/unpacker';
-import { ToastAndroid } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { runOnRuntimeAsync } from 'react-native-worklets';
 
 export interface Movies {
@@ -36,16 +36,16 @@ export let ANIME_MOVIE_BASE_DOMAIN = 'v1.' + __ALIAS + '.xyz';
 export let ANIME_MOVIE_BASE_URL = 'https://' + ANIME_MOVIE_BASE_DOMAIN + '/';
 const BASE_URL = ANIME_MOVIE_BASE_URL;
 
-export function makeCookieString(cookies: Cookies) {
+export function makeCookieString(cookies: Record<string, string>) {
   return Object.entries(cookies)
-    .map(([key, details]) => `${key}=${details.value}`)
+    .map(([key, value]) => `${key}=${value}`)
     .join('; ');
 }
 
 export async function updateAnimeMovieCookie() {
   try {
     const cookies = await CookieManager.get(BASE_URL);
-    Cookie = makeCookieString(cookies);
+    Cookie = makeCookieString(cookies as any);
   } catch (e) {
     console.error('Failed to update anime movie cookies:', e);
   }
@@ -378,10 +378,7 @@ export async function getRawDataIfAvailable(data: LinksType[number], signal?: Ab
         if (e.name === 'AbortError' || signal?.aborted) throw new Error('canceled');
 
         // Try again in 2 seconds (sometimes the data is not ready yet, so we need to try again [only in acefile])
-        ToastAndroid.show(
-          'AceFile error, mencoba lagi otomatis dalam 2.5 detik...',
-          ToastAndroid.SHORT,
-        );
+        Toast.show('AceFile error, mencoba lagi otomatis dalam 2.5 detik...');
         await new Promise(resolve => setTimeout(resolve, 2500));
         const res = await getAceRawData(data.url, signal);
         return res;

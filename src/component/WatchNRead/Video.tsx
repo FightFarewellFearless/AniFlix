@@ -18,11 +18,12 @@ import {
   Pressable,
   ScrollView,
   Text,
-  ToastAndroid,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+import { Toast } from '@/platform/Toast';
+import { Orientation } from '@/platform/Orientation';
 import { Button, useTheme } from 'react-native-paper';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -192,10 +193,10 @@ function Video(props: Props) {
   useFocusEffect(
     useCallback(() => {
       abortController.current = new AbortController();
-      Orientation.addDeviceOrientationListener(orientationDidChange);
+      Orientation.addDeviceOrientationListener(orientationDidChange as any);
 
       return () => {
-        Orientation.removeDeviceOrientationListener(orientationDidChange);
+        Orientation.removeDeviceOrientationListener(orientationDidChange as any);
         willUnmountHandler();
         abortController.current?.abort();
       };
@@ -315,10 +316,7 @@ function Video(props: Props) {
 
   const downloadAnime = useCallback(async () => {
     if (data.streamingType === 'embed') {
-      return ToastAndroid.show(
-        'Jenis format ini tidak mendukung fitur download',
-        ToastAndroid.SHORT,
-      );
+      return Toast.show('Jenis format ini tidak mendukung fitur download');
     }
     const source = data.streamingLink;
     const resolution = data.resolution;
@@ -330,7 +328,7 @@ function Video(props: Props) {
       undefined,
       () => {
         downloadSource.current = [...downloadSource.current, source];
-        ToastAndroid.show('Sedang mendownload...', ToastAndroid.SHORT);
+        Toast.show('Sedang mendownload...');
       },
     );
   }, [data, downloadAnimeFunction]);
@@ -442,18 +440,18 @@ function Video(props: Props) {
     if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    if (videoRef.current && videoRef.current.props.player) {
-      playerRef.current?.skipTo(historyData.current.lastDuration);
+    if (playerRef.current) {
+      playerRef.current.skipTo(historyData.current.lastDuration);
+      Toast.show('Otomatis kembali ke durasi terakhir');
     }
-    ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
   }, []);
 
   useEffect(() => {
     if (isPaused) {
-      videoRef.current?.props?.player?.pause();
+      playerRef.current?.pause();
       saveProgressToHistory();
     } else {
-      videoRef.current?.props?.player?.play();
+      playerRef.current?.play();
     }
   }, [isPaused, saveProgressToHistory]);
 
@@ -519,6 +517,15 @@ function Video(props: Props) {
   }, [data.resolutionRaw]);
 
   const insets = useSafeAreaInsets();
+  const windowDimensions = useWindowDimensions();
+  // Electron reports `Platform.OS === 'web'`; Android keeps using the original
+  // aspect-ratio based layout below.
+  const isDesktopWeb = Platform.OS === 'web' && !Platform.isTV;
+  const desktopPlayerWidth = Math.min(windowDimensions.width, 1180);
+  const desktopPlayerHeight = Math.min(
+    (desktopPlayerWidth * 9) / 16,
+    Math.max(280, windowDimensions.height * 0.58),
+  );
 
   return (
     <View style={{ flex: 1, flexDirection: Platform.isTV && !fullscreen ? 'row' : 'column' }}>
@@ -532,7 +539,15 @@ function Video(props: Props) {
             ? styles.fullscreen
             : Platform.isTV
               ? { width: '45%', height: '100%', backgroundColor: 'black' }
-              : styles.notFullscreen,
+              : isDesktopWeb
+                ? {
+                    width: '100%',
+                    maxWidth: 1180,
+                    height: desktopPlayerHeight,
+                    alignSelf: 'center',
+                    backgroundColor: 'black',
+                  }
+                : styles.notFullscreen,
         ]}>
         <View
           style={{
@@ -631,8 +646,27 @@ function Video(props: Props) {
         contentContainerStyle={{
           paddingBottom: insets.bottom,
           paddingHorizontal: Platform.isTV ? 16 : 0,
+          ...(isDesktopWeb
+            ? {
+                width: '100%',
+                maxWidth: 1180,
+                alignSelf: 'center',
+                paddingHorizontal: 16,
+                paddingTop: 14,
+              }
+            : null),
         }}>
         {/* movie information */}
+        {isDesktopWeb && (
+          <Text
+            style={[
+              globalStyles.text,
+              { color: '#8f8f8f', fontSize: 12, marginHorizontal: 10, marginTop: 10 },
+            ]}>
+            Tips: Spasi memutar/menjeda · ←/→ mundur/maju 5 detik · ↑/↓ volume · F layar penuh · C
+            subtitle · P Picture-in-Picture
+          </Text>
+        )}
         {props.route.params.isMovie && (
           <View style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 5 }}>
             <Icon
@@ -724,7 +758,9 @@ function Video(props: Props) {
                 style={{ alignSelf: 'center' }}
               />
               <Text style={{ color: theme.colors.onTertiaryContainer }}>
-                Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape
+                {isDesktopWeb
+                  ? 'Gunakan tombol layar penuh di kanan bawah player untuk masuk ke mode layar penuh.'
+                  : 'Untuk masuk ke mode fullscreen silahkan miringkan ponsel ke mode landscape'}
               </Text>
             </View>
           </View>
@@ -922,12 +958,14 @@ function Video(props: Props) {
           </Text>
         )}
 
-        <Button
-          mode="contained"
-          style={{ marginTop: 12, marginHorizontal: 10 }}
-          onPress={downloadAnime}>
-          <Icon name="download" color={theme.colors.background} size={23} /> Download
-        </Button>
+        {(data.streamingType !== 'embed' || !isDesktopWeb) && (
+          <Button
+            mode="contained"
+            style={{ marginTop: 12, marginHorizontal: 10 }}
+            onPress={downloadAnime}>
+            <Icon name="download" color={theme.colors.background} size={23} /> Download
+          </Button>
+        )}
       </ScrollView>
     </View>
   );

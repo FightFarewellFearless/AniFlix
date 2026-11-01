@@ -2,9 +2,6 @@ import Icon from '@react-native-vector-icons/fontawesome';
 import { useFocusEffect } from '@react-navigation/core';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, Text, View, useColorScheme } from 'react-native';
-import { SystemBars } from 'react-native-edge-to-edge';
-import { DeviceInfoModule } from 'react-native-nitro-device-info';
-import Orientation, { OrientationType } from 'react-native-orientation-locker';
 import { ActivityIndicator, useTheme } from 'react-native-paper';
 import ReAnimated, {
   AnimatedRef,
@@ -15,11 +12,14 @@ import ReAnimated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 import useGlobalStyles, { darkText } from '@assets/style';
 import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import { useBackHandler } from '@hooks/useBackHandler';
+import { SystemBars } from '@/platform/SystemBars';
+import { SystemNavigationBar } from '@/platform/SystemNavigationBar';
+import { Orientation } from '@/platform/Orientation';
+import { DeviceInfo } from '@/platform/DeviceInfo';
 
 export function LoadingModal({
   isLoading,
@@ -268,7 +268,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   const [fullscreen, setFullscreen] = useState(false);
 
   const enterFullscreen = useCallback(
-    (landscape?: OrientationType) => {
+    (landscape?: string) => {
       onEnterFullscreen.current?.();
       if (landscape === undefined) {
         Orientation.lockToLandscape();
@@ -301,7 +301,7 @@ export function useFullscreenControl(onEnterFullscreenFunc?: () => void) {
   }, []);
 
   const orientationDidChange = useCallback(
-    (orientation: OrientationType) => {
+    (orientation: string) => {
       Orientation.getAutoRotateState(state => {
         if (state) {
           if (orientation === 'PORTRAIT') {
@@ -340,12 +340,14 @@ export function useBatteryAndClock(enableBatteryTimeInfo: string) {
     useCallback(() => {
       let _batteryEvent: NodeJS.Timeout | null;
       if (enableBatteryTimeInfo === 'true') {
-        const updateLevel = () => {
-          const currentLevel = DeviceInfoModule.getBatteryLevel();
+        const updateLevel = async () => {
+          const currentLevel = await DeviceInfo.getBatteryLevel();
           setBatteryLevel(prev => (prev === currentLevel ? prev : currentLevel));
         };
         updateLevel();
-        _batteryEvent = setInterval(updateLevel, 5000);
+        _batteryEvent = setInterval(() => {
+          updateLevel();
+        }, 5000);
         setBatteryTimeEnable(true);
       }
       return () => {

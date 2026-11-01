@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
-import { PermissionsAndroid, Platform } from 'react-native';
-import RNFetchBlob from 'react-native-blob-util';
+import { Platform } from 'react-native';
+import { FileSystem } from '@/platform/FileSystem';
+import { Toast } from '@/platform/Toast';
+import { DocumentPicker } from '@/platform/DocumentPicker';
 import deviceUserAgent from './deviceUserAgent';
 import DialogManager from './dialogManager';
 
@@ -39,53 +41,75 @@ function useDownloadAnime() {
         Title += ' (' + sourceLength + ')';
       }
 
-      const isGranted = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      );
+      if (Platform.OS === 'windows') {
+        // Windows: use save file dialog
+        const result = await DocumentPicker.getDocumentAsync({
+          type: 'video/mp4',
+          copyToCacheDirectory: true,
+        });
+        if (result.assets && result.assets.length > 0) {
+          const savePath = result.assets[0].uri;
+          try {
+            // Download via fetch and save to file
+            const response = await fetch(source, {
+              headers: {
+                'User-Agent': deviceUserAgent,
+                ...(source.includes('mp4upload') ? { Referer: 'https://www.mp4upload.com/' } : {}),
+              },
+            });
+            if (response.ok) {
+              const arrayBuffer = await response.arrayBuffer();
+              const fs = await import('fs');
+              const filePath = savePath + '.' + resolution + '.mp4';
+              fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
+              callback?.();
+              Toast.show('Sedang mendownload...');
+            } else {
+              DialogManager.alert('Error', 'Gagal mendownload video');
+            }
+          } catch (err) {
+            DialogManager.alert('Error', 'Gagal mendownload: ' + (err as Error).message);
+          }
+        }
+        return;
+      }
+
+      // Android: use react-native-blob-util via platform abstraction
+      const androidDirs = await FileSystem.getDirs();
+      const isGranted = await FileSystem.exists(androidDirs.DownloadDir);
       if (isGranted || Number(Platform.Version) >= 33) {
         download();
       } else {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        DialogManager.alert(
+          'Akses ditolak',
+          'Gagal mendownload karena akses ke penyimpanan di tolak',
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          download();
-        } else {
-          DialogManager.alert(
-            'Akses ditolak',
-            'Gagal mendownload karena akses ke penyimpanan di tolak',
-          );
-        }
       }
 
       async function download() {
         if (source.includes('mp4upload')) {
           DialogManager.alert('Perhatian', 'Download movie dari mp4upload mungkin akan gagal!');
         }
-        RNFetchBlob.config({
-          trusty: true,
-          addAndroidDownloads: {
-            useDownloadManager: true,
-            notification: true,
-            mime: 'video/mp4',
-            title: Title + ' ' + resolution + '.mp4',
-            path: RNFetchBlob.fs.dirs.LegacySDCardDir + '/Download/' + `${Title} ${resolution}.mp4`,
-          },
-        })
-          .fetch('GET', source, {
-            'User-Agent': deviceUserAgent,
-            ...(source.includes('mp4upload')
-              ? {
-                  Referer: 'https://www.mp4upload.com/',
-                }
-              : {}),
-          })
-          // .then(resp => {
-          //   // the path of downloaded file
-          //   console.log(resp.path());
-          // })
-          .catch(() => {});
-        callback?.();
+        const dirs = await FileSystem.getDirs();
+        const savePath = dirs.LegacySDCardDir + '/Download/' + `${Title} ${resolution}.mp4`;
+        try {
+          const response = await fetch(source, {
+            headers: {
+              'User-Agent': deviceUserAgent,
+              ...(source.includes('mp4upload') ? { Referer: 'https://www.mp4upload.com/' } : {}),
+            },
+          });
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            await FileSystem.writeFile(savePath, Buffer.from(arrayBuffer));
+            callback?.();
+            Toast.show('Sedang mendownload...');
+          } else {
+            DialogManager.alert('Error', 'Gagal mendownload video');
+          }
+        } catch (err) {
+          DialogManager.alert('Error', 'Gagal mendownload: ' + (err as Error).message);
+        }
       }
     },
     [],

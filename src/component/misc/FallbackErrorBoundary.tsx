@@ -4,7 +4,7 @@ const WEBHOOK_REPORT_ERROR = Config.WEBHOOK_REPORT_ERROR;
 import { reloadAppAsync } from 'expo';
 import React, { useMemo } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
-import { DeviceInfoModule } from 'react-native-nitro-device-info';
+import { DeviceInfo } from '@/platform/DeviceInfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type Props = { error: Error };
@@ -77,7 +77,13 @@ function useStyles() {
   }, [isDarkMode]);
 }
 
-function reportToDev(error: Error) {
+async function reportToDev(error: Error) {
+  const [version, brand, manufacturer, product] = await Promise.all([
+    DeviceInfo.getVersion(),
+    DeviceInfo.getBrand(),
+    DeviceInfo.getModel(),
+    DeviceInfo.getUniqueId(),
+  ]);
   fetch(WEBHOOK_REPORT_ERROR, {
     method: 'POST',
     headers: {
@@ -94,19 +100,19 @@ function reportToDev(error: Error) {
           fields: [
             {
               name: 'System version',
-              value: DeviceInfoModule.systemVersion,
+              value: version,
             },
             {
               name: 'Brand',
-              value: DeviceInfoModule.brand,
+              value: brand,
             },
             {
               name: 'Manufacturer name',
-              value: DeviceInfoModule.manufacturer,
+              value: manufacturer,
             },
             {
               name: 'Product',
-              value: DeviceInfoModule.product,
+              value: product,
             },
           ],
         },

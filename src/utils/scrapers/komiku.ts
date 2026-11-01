@@ -1,7 +1,7 @@
 import aniflixruntime from '@/misc/AniFlixRuntime';
 import cheerio from 'cheerio';
 import he from 'he';
-import { ToastAndroid } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { runOnRuntimeAsync } from 'react-native-worklets';
 
 import deviceUserAgent from '@utils/deviceUserAgent';
@@ -233,7 +233,7 @@ export async function getKomikuReading(url: string, signal?: AbortSignal): Promi
   });
 
   if (res.failedThumbnail) {
-    ToastAndroid.show('Gagal mendapatkan url thumbnail', ToastAndroid.SHORT);
+    Toast.show('Gagal mendapatkan url thumbnail');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

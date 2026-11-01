@@ -1,6 +1,22 @@
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { memo, useMemo } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  createNativeStackNavigator,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  NavigationIndependentTree,
+} from '@react-navigation/native';
+import { Fragment, memo, useMemo, type ReactNode } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Appbar, Surface, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 
@@ -12,45 +28,62 @@ import Setting from './Utilitas/Setting';
 
 const Stack = createNativeStackNavigator<UtilsStackNavigator>();
 
+function NavigatorBoundary({ children }: { children: ReactNode }) {
+  const colorScheme = useColorScheme();
+
+  if (Platform.OS !== 'web') {
+    return <Fragment>{children}</Fragment>;
+  }
+  return (
+    <NavigationIndependentTree>
+      <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        {children}
+      </NavigationContainer>
+    </NavigationIndependentTree>
+  );
+}
+
 function Utils() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        header: props => (
-          <Appbar.Header>
-            {props.back && (
-              <Appbar.BackAction
-                onPress={() => {
-                  props.navigation.goBack();
-                }}
+    <NavigatorBoundary>
+      <Stack.Navigator
+        screenOptions={{
+          header: props => (
+            <Appbar.Header>
+              {props.back && (
+                <Appbar.BackAction
+                  onPress={() => {
+                    props.navigation.goBack();
+                  }}
+                />
+              )}
+              <Appbar.Content
+                titleStyle={{ fontWeight: 'bold' }}
+                title={
+                  typeof props.options.headerTitle === 'string'
+                    ? props.options.headerTitle
+                    : (props.options.title ?? '')
+                }
               />
-            )}
-            <Appbar.Content
-              titleStyle={{ fontWeight: 'bold' }}
-              title={
-                typeof props.options.headerTitle === 'string'
-                  ? props.options.headerTitle
-                  : (props.options.title ?? '')
-              }
-            />
-          </Appbar.Header>
-        ),
-      }}
-      initialRouteName="ChooseScreen">
-      <Stack.Screen
-        name="ChooseScreen"
-        component={ChooseScreen}
-        options={{ title: 'Pilih utilitas' }}
-      />
-      <Stack.Screen
-        name="SearchAnimeByImage"
-        component={SearchAnimeByImage}
-        options={{ title: 'Cari Anime dari Gambar' }}
-      />
-      <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
-      <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
-      <Stack.Screen name="About" component={About} options={{ title: 'Tentang' }} />
-    </Stack.Navigator>
+            </Appbar.Header>
+          ),
+        }}
+        initialRouteName="ChooseScreen">
+        <Stack.Screen
+          name="ChooseScreen"
+          component={ChooseScreen}
+          options={{ title: 'Pilih utilitas' }}
+        />
+        <Stack.Screen
+          name="SearchAnimeByImage"
+          component={SearchAnimeByImage}
+          options={{ title: 'Cari Anime dari Gambar' }}
+        />
+        <Stack.Screen name="Changelog" component={Changelog} options={{ title: 'Changelog' }} />
+        <Stack.Screen name="Setting" component={Setting} options={{ title: 'Pengaturan' }} />
+        <Stack.Screen name="About" component={About} options={{ title: 'Tentang' }} />
+      </Stack.Navigator>
+    </NavigatorBoundary>
   );
 }
 
@@ -131,7 +164,8 @@ function useStyles() {
   const dimensions = useWindowDimensions();
   const theme = useTheme();
   const GAP = 12;
-  const devidedWidth = (dimensions.width - GAP * 3) / 2;
+  const columns = dimensions.width >= 1500 ? 4 : dimensions.width >= 980 ? 3 : 2;
+  const devidedWidth = (dimensions.width - GAP * (columns + 1)) / columns;
 
   return useMemo(
     () =>
@@ -141,6 +175,8 @@ function useStyles() {
           flexWrap: 'wrap',
           padding: GAP,
           gap: GAP,
+          maxWidth: 1500,
+          alignSelf: 'center',
           paddingBottom: 24,
         },
         surface: {
@@ -148,7 +184,7 @@ function useStyles() {
           overflow: 'hidden',
           backgroundColor: theme.colors.surface,
           width: devidedWidth < 150 ? '100%' : devidedWidth,
-          minHeight: 160,
+          minHeight: dimensions.width >= 980 ? 190 : 160,
         },
         touchable: {
           flex: 1,
@@ -176,6 +212,6 @@ function useStyles() {
           textAlign: 'center',
         },
       }),
-    [theme.colors.surface, devidedWidth],
+    [theme.colors.surface, devidedWidth, dimensions.width, columns],
   );
 }

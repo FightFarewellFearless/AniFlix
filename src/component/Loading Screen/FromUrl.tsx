@@ -1,7 +1,8 @@
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useRef, useState } from 'react';
-import { Text, ToastAndroid, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { Toast } from '@/platform/Toast';
 
 import { RootStackNavigator } from '@/types/navigation';
 import watchLaterJSON from '@/types/watchLaterJSON';
@@ -156,7 +157,7 @@ function FromUrl(props: Props) {
               );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
-                ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+                Toast.show(`${title} dihapus dari daftar tonton nanti`);
               }
             })
             .catch(handleError);
@@ -225,10 +226,7 @@ function FromUrl(props: Props) {
                 );
                 if (watchLaterIndex >= 0) {
                   controlWatchLater('delete', watchLaterIndex);
-                  ToastAndroid.show(
-                    `${title} dihapus dari daftar tonton nanti`,
-                    ToastAndroid.SHORT,
-                  );
+                  Toast.show(`${title} dihapus dari daftar tonton nanti`);
                 }
               }
             } catch (e: any) {
@@ -275,7 +273,7 @@ function FromUrl(props: Props) {
               );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
-                ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+                Toast.show(`${title} dihapus dari daftar tonton nanti`);
               }
             })
             .catch(handleError);
@@ -378,7 +376,7 @@ function FromUrl(props: Props) {
               );
               if (watchLaterIndex >= 0) {
                 controlWatchLater('delete', watchLaterIndex);
-                ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+                Toast.show(`${title} dihapus dari daftar tonton nanti`);
               }
             })
             .catch(handleError);

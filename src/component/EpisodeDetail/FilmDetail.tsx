@@ -1,3 +1,5 @@
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Toast } from '@/platform/Toast';
 import { TouchableOpacity } from '@component/misc/TouchableOpacityRNGH';
 import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon from '@react-native-vector-icons/fontawesome';
@@ -12,12 +14,11 @@ import {
   Platform,
   StyleSheet,
   Text,
-  ToastAndroid,
   View,
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+
 import { ActivityIndicator, Button, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -158,7 +159,7 @@ function FilmDetail(props: Props) {
       setTranslatedSynopsis(translationResult);
     } catch {
       setTranslatedSynopsis(null);
-      ToastAndroid.show('Translate gagal', ToastAndroid.SHORT);
+      Toast.show('Translate gagal');
     } finally {
       setIsSynopsisTranslationPending(false);
     }
@@ -284,8 +285,7 @@ interface FilmDetailHeaderProps {
   translatedSynopsis: string | null;
   translateSynopsisToIndonesia: () => void;
   lastWatchedEpisodeData:
-    | { episodeNumber: string | null; episodeTitle: string; episodeUrl: string }
-    | undefined;
+    { episodeNumber: string | null; episodeTitle: string; episodeUrl: string } | undefined;
   lastWatched: HistoryJSON | undefined;
   isInList: boolean;
   seasons: number[];
@@ -517,7 +517,7 @@ const FilmDetailHeader = memo(
                   isMovie: true,
                 };
                 controlWatchLater('add', watchLaterJson);
-                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+                Toast.show('Ditambahkan ke tonton nanti');
               }}
               disabled={isInList}>
               {isInList ? 'Sudah Ditambahkan' : 'Tonton Nanti'}
@@ -654,6 +654,7 @@ function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const dimensions = useWindowDimensions();
+  const isDesktop = dimensions.width >= 980;
   return useMemo(
     () =>
       StyleSheet.create({
@@ -668,21 +669,25 @@ function useStyles() {
           flexDirection: 'row',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          paddingHorizontal: 20,
-          paddingVertical: 15,
-          marginTop: -20,
+          paddingHorizontal: isDesktop ? 40 : 20,
+          paddingVertical: isDesktop ? 28 : 15,
+          marginTop: isDesktop ? -36 : -20,
+          maxWidth: isDesktop ? 1180 : undefined,
+          alignSelf: isDesktop ? 'center' : undefined,
+          borderRadius: isDesktop ? 24 : undefined,
         },
         infoContainer: {
           gap: 5,
           flex: 1,
+          minWidth: 0,
           flexDirection: 'column',
         },
         thumbnail: {
-          margin: 15,
-          width: dimensions.width * 0.3,
-          height: 150,
+          margin: isDesktop ? 0 : 15,
+          width: isDesktop ? 230 : dimensions.width * 0.3,
+          height: isDesktop ? 230 : 150,
           borderRadius: 10,
-          transform: [{ translateY: -40 }],
+          transform: [{ translateY: isDesktop ? 0 : -40 }],
         },
         type: {
           color: colorScheme === 'dark' ? 'white' : 'black',
@@ -690,7 +695,7 @@ function useStyles() {
         },
         title: {
           flexShrink: 1,
-          fontSize: 22,
+          fontSize: isDesktop ? 30 : 22,
           fontWeight: 'bold',
           color: globalStyles.text.color,
         },

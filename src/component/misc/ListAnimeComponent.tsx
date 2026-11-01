@@ -171,8 +171,9 @@ function useStyles() {
   const theme = useTheme();
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
-  let LIST_BACKGROUND_HEIGHT = (dimensions.height * 120) / 200 / 2.5;
-  let LIST_BACKGROUND_WIDTH = (dimensions.width * 120) / 200 / 2;
+  const isDesktop = Platform.OS === 'web' && dimensions.width >= 980;
+  let LIST_BACKGROUND_HEIGHT = isDesktop ? 260 : (dimensions.height * 120) / 200 / 2.5;
+  let LIST_BACKGROUND_WIDTH = isDesktop ? 190 : (dimensions.width * 120) / 200 / 2;
   LIST_BACKGROUND_HEIGHT = Math.max(LIST_BACKGROUND_HEIGHT, MIN_IMAGE_HEIGHT);
   LIST_BACKGROUND_WIDTH = Math.min(
     Math.max(LIST_BACKGROUND_WIDTH, MIN_IMAGE_WIDTH),
@@ -236,6 +237,7 @@ function useStyles() {
       theme.colors.onBackground,
       theme.colors.tertiary,
       colorScheme,
+      isDesktop,
       LIST_BACKGROUND_WIDTH,
       LIST_BACKGROUND_HEIGHT,
       globalStyles.text.color,

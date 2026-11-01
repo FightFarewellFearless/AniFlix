@@ -1,3 +1,5 @@
+import { DeviceInfo } from '@/platform/DeviceInfo';
+import { Toast } from '@/platform/Toast';
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { LegendList, LegendListRef } from '@legendapp/list';
 import MaterialIcon, { MaterialIcons } from '@react-native-vector-icons/material-icons';
@@ -24,13 +26,11 @@ import {
   ScrollViewProps,
   StyleSheet,
   Text,
-  ToastAndroid,
   useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import { useBatteryLevel } from 'react-native-nitro-device-info';
 import { useTheme } from 'react-native-paper';
 import Reanimated, {
   cancelAnimation,
@@ -47,6 +47,7 @@ import { runOnJS } from 'react-native-worklets';
 
 import { EpisodeBaruHome as EpisodeBaruType, JadwalAnime, NewAnimeList } from '@/types/anime';
 import { HomeNavigator, RootStackNavigator } from '@/types/navigation';
+import { setWebViewOpen } from '@/utils/CFBypass';
 import runningText from '@assets/runningText.json';
 import useGlobalStyles from '@assets/style';
 import Announcment from '@component/misc/Announcement';
@@ -76,11 +77,10 @@ import {
   getLatestSeries,
 } from '@utils/scrapers/film';
 import {
-  BASE_URL as NOVEL_BASE_URL,
   getLatestNovelRelease,
+  BASE_URL as NOVEL_BASE_URL,
   NovelLatestRelease,
 } from '@utils/scrapers/novel';
-import { setWebViewOpen } from '@/utils/CFBypass';
 import { Home_ShowCaptchaButton } from '../misc/Home_ShowCaptchaButton';
 
 export const MIN_IMAGE_HEIGHT = 200;
@@ -91,7 +91,7 @@ type HomeProps = NativeBottomTabScreenProps<HomeNavigator, 'AnimeList'>;
 const Home = memo(HomeList);
 export default Home;
 
-const MarqueeText = memo(() => {
+const MarqueeTextNative = memo(() => {
   const windowSize = useWindowDimensions();
   const styles = useStyles();
   const [animationText, setAnimationText] = useState(randomQuote);
@@ -207,6 +207,13 @@ const MarqueeText = memo(() => {
   );
 });
 
+const MarqueeText = memo(() => {
+  if (Platform.OS === 'web' || Platform.OS === 'windows') {
+    return null;
+  }
+  return <MarqueeTextNative />;
+});
+
 function HomeList(props: HomeProps) {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
@@ -220,7 +227,11 @@ function HomeList(props: HomeProps) {
   const [isHomeError, setIsHomeError] = useState(false);
 
   const localTime = useLocalTime();
-  const battery = useBatteryLevel();
+  const [battery, setBattery] = useState(0);
+
+  useEffect(() => {
+    Promise.resolve(DeviceInfo.getBatteryLevel()).then(setBattery);
+  }, []);
 
   useEffect(() => {
     const abort = new AbortController();
@@ -269,7 +280,7 @@ function HomeList(props: HomeProps) {
               setRefresh(false);
             })
             .catch(() => {
-              ToastAndroid.show('Gagal terhubung ke server.', ToastAndroid.SHORT);
+              Toast.show('Gagal terhubung ke server.');
               setRefresh(false);
               setIsHomeError(true);
             });
@@ -1344,21 +1355,23 @@ export function RenderScrollComponent(renderProps: ScrollViewProps) {
 function useStyles() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
+  const dimensions = useWindowDimensions();
   const isDark = colorScheme === 'dark';
+  const isDesktop = dimensions.width >= 980;
 
   return useMemo(
     () =>
       StyleSheet.create({
         container: {
           flex: 1,
-          backgroundColor: isDark ? '#121212' : '#f5f5f7',
+          backgroundColor: isDark ? '#101216' : '#f5f5f7',
         },
         headerCard: {
           backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
-          borderRadius: 16,
-          padding: 5,
-          paddingBottom: 16,
-          margin: 16,
+          borderRadius: isDesktop ? 20 : 16,
+          padding: isDesktop ? 20 : 5,
+          paddingBottom: isDesktop ? 22 : 16,
+          margin: isDesktop ? 24 : 16,
           marginBottom: 12,
           elevation: 4,
         },
@@ -1384,7 +1397,7 @@ function useStyles() {
           marginBottom: 16,
         },
         appName: {
-          fontSize: 24,
+          fontSize: isDesktop ? 30 : 24,
           fontWeight: 'bold',
           color: isDark ? '#E0E0E0' : '#333',
           marginRight: 8,
@@ -1412,7 +1425,7 @@ function useStyles() {
           backgroundColor: theme.colors.secondaryContainer,
           paddingVertical: 4,
           borderRadius: 8,
-          marginHorizontal: 16,
+          marginHorizontal: isDesktop ? 24 : 16,
           marginBottom: 16,
         },
         refreshIcon: {
@@ -1428,7 +1441,7 @@ function useStyles() {
           backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
           borderRadius: 16,
           paddingVertical: 8,
-          marginHorizontal: 3,
+          marginHorizontal: isDesktop ? 24 : 3,
           marginBottom: 16,
           elevation: 2,
         },

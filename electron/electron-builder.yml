@@ -1,0 +1,37 @@
+directories:
+  output: release
+  app: .
+appId: com.aniflix.app
+productName: AniFlix
+copyright: Copyright (C) 2026 AniFlix Team
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: AniFlix
+  installerIcon: assets/icon.ico
+  installerHeaderIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+files:
+  - filter:
+      - '**/*'
+      - 'assets/**/*'
+      - '!release/**'
+      - '!release-new/**'
+      - '!release-test/**'
+      - '!scratch_asar/**'
+      - '!build.log'
+      - '!electron-builder.yml'
+      - '!scripts/**'
+asarUnpack:
+  - electron-updater
+extraMetadata:
+  main: dist/main.js
+win:
+  icon: assets/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64

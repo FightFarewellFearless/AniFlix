@@ -1,26 +1,18 @@
 import Icon from '@react-native-vector-icons/fontawesome5';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Markdown from 'react-native-marked';
+import { Toast } from '@/platform/Toast';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import * as Updates from 'expo-updates';
-import RNFetchBlob from 'react-native-blob-util';
+import { Updates } from '@/platform/Updates';
 import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from 'react-native-reanimated';
 import { runOnJS } from 'react-native-worklets';
+import { FileSystem } from '@/platform/FileSystem';
 
 import { RootStackNavigator } from '@/types/navigation';
 import useGlobalStyles from '@assets/style';
@@ -39,10 +31,8 @@ function NeedUpdate(props: Props) {
   const downloadProgress = useSharedValue(0);
   const [isProgress100, setIsProgress100] = useState(true);
 
-  const lastMB = useRef(0);
-  const lastMS = useRef(0);
-  const [totalMB, setTotalMB] = useState(0);
-  const [netSpeed, setNetSpeed] = useState('0 MB/s');
+  const [totalMB] = useState(0);
+  const [netSpeed] = useState('0 MB/s');
   const [progressPercent, setProgressPercent] = useState(0); // new state
 
   const OTAUpdateStatus = Updates.useUpdates();
@@ -72,55 +62,49 @@ function NeedUpdate(props: Props) {
   );
 
   useEffect(() => {
-    if (props.route.params.nativeUpdate) {
-      RNFetchBlob.fs
-        .exists(
-          `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-        )
-        .then(value => {
-          setIsDownloadStart(value);
-          downloadProgress.set(value ? 100 : 0);
-        });
-    }
+    const checkDownloadedUpdate = async () => {
+      if (props.route.params.nativeUpdate) {
+        const dirs = await FileSystem.getDirs();
+        const apkPath = `${dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`;
+        const exists = await FileSystem.exists(apkPath);
+        setIsDownloadStart(exists);
+        downloadProgress.set(exists ? 100 : 0);
+      }
+    };
+    void checkDownloadedUpdate();
   }, [downloadProgress, props.route.params]);
 
-  const downloadUpdate = useCallback(() => {
+  const downloadUpdate = useCallback(async () => {
     setIsDownloadStart(true);
     if (props.route.params.nativeUpdate) {
-      RNFetchBlob.config({
-        path: `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-      })
-        .fetch('GET', props.route.params.download)
-        .progress((receivedS, totalS) => {
-          const received = Number(receivedS);
-          const total = Number(totalS);
-          const percent = Math.floor((received / total) * 100);
-          downloadProgress.set(withTiming(percent));
-          setProgressPercent(percent); // update progress percentage
-          setNetSpeed(
-            `${(
-              (received - lastMB.current) /
-              MB /
-              MB /
-              ((Date.now() - lastMS.current) / 1000)
-            ).toFixed(2)} MB/s`,
-          );
-          lastMB.current = received;
-          lastMS.current = Date.now();
-          setTotalMB(total);
-        })
-        .then(async res => {
+      const dirs = await FileSystem.getDirs();
+      const apkPath = `${dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`;
+      try {
+        const response = await fetch(props.route.params.download);
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          const fs = await import('fs');
+          fs.writeFileSync(apkPath, Buffer.from(arrayBuffer));
           setIsDownloadStart(true);
           downloadProgress.set(100);
-          await RNFetchBlob.android.actionViewIntent(
-            res.path(),
-            'application/vnd.android.package-archive',
-          );
-        })
-        .catch(() => {
+          // On Windows, just notify download complete
+          Toast.show('Download selesai');
+          DialogManager.alert('Download selesai', 'Restart aplikasi untuk melakukan update', [
+            {
+              text: 'Restart',
+              onPress: () => {
+                Updates.reloadAsync();
+              },
+            },
+          ]);
+        } else {
           setIsDownloadStart(false);
-          ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
-        });
+          Toast.show('Download gagal!');
+        }
+      } catch {
+        setIsDownloadStart(false);
+        Toast.show('Download gagal!');
+      }
     } else {
       setIsDownloadStart(true);
       Updates.fetchUpdateAsync()
@@ -137,22 +121,24 @@ function NeedUpdate(props: Props) {
         })
         .catch(() => {
           setIsDownloadStart(false);
-          ToastAndroid.show('Download gagal!', ToastAndroid.SHORT);
+          Toast.show('Download gagal!');
         });
     }
-    ToastAndroid.show('Mendownload update...', ToastAndroid.SHORT);
+    Toast.show('Mendownload update...');
     DialogManager.alert(
       'Perhatian',
       'Selama proses download, tolong jangan keluar aplikasi untuk menghindari kesalahan',
     );
   }, [downloadProgress, props.route.params]);
 
-  const installUpdate = useCallback(() => {
+  const installUpdate = useCallback(async () => {
     if (props.route.params.nativeUpdate) {
-      RNFetchBlob.android.actionViewIntent(
-        `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`,
-        'application/vnd.android.package-archive',
-      );
+      const dirs = await FileSystem.getDirs();
+      const apkPath = `${dirs.DownloadDir}/AniFlix-${props.route.params.latestVersion}.apk`;
+      const { shell } = await import('electron');
+      shell.openPath(apkPath).catch(() => {
+        Toast.show('Gagal membuka file installer');
+      });
     } else {
       Updates.reloadAsync();
     }

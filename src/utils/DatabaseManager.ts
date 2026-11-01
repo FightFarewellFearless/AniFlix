@@ -1,8 +1,8 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { EventEmitter } from 'expo';
-import SQLiteKV from 'expo-sqlite/kv-store';
 import { useCallback, useRef, useState } from 'react';
 
+import { Database } from '@/platform/DatabaseManager';
 import { HistoryItemKey, SetDatabaseTarget } from '@/types/databaseTarget';
 import { HistoryJSON } from '@/types/historyJSON';
 
@@ -17,31 +17,31 @@ export class DatabaseManager {
   static #event = new EventEmitter<Record<string, (value: string) => void>>();
 
   static async set(key: string, value: string) {
-    await SQLiteKV.setItem(key, value);
+    await Database.setItem(key, value);
     this.#event.emit('valueChanged', key);
   }
   static setSync(key: DataKey, value: string) {
-    SQLiteKV.setItemSync(key, value);
+    Database.setItemSync(key, value);
     this.#event.emit('valueChanged', key);
   }
   static get(key: DataKey) {
-    return SQLiteKV.getItem(key);
+    return Database.getItem(key);
   }
   static getSync(key: DataKey) {
-    return SQLiteKV.getItemSync(key);
+    return Database.getItemSync(key);
   }
   static getAllKeys() {
-    return SQLiteKV.getAllKeys();
+    return Database.getAllKeys();
   }
   static getAllKeysSync() {
-    return SQLiteKV.getAllKeysSync();
+    return Database.getAllKeysSync();
   }
   static async delete(key: string) {
-    await SQLiteKV.removeItem(key);
+    await Database.removeItem(key);
     this.#event.emit('valueChanged', key);
   }
   static deleteSync(key: DataKey) {
-    SQLiteKV.removeItemSync(key);
+    Database.removeItemSync(key);
     this.#event.emit('valueChanged', key);
   }
 

@@ -8,13 +8,13 @@ import {
   useTVEventHandler,
   findNodeHandle,
 } from 'react-native';
-import ReactNativeBlobUtil from 'react-native-blob-util';
+import { FileSystem } from '@/platform/FileSystem';
 import { Appbar, ProgressBar, useTheme } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import { unzip } from 'react-native-zip-archive';
+import AdmZip from 'adm-zip';
 
 import { RootStackNavigator } from '@/types/navigation';
-import { cbzDir, cleanCbzDir } from '@utils/cbzCleaner';
+import { cleanCbzDir, getCbzDir } from '@utils/cbzCleaner';
 import {
   ComicsBottomBar,
   FullscreenExitButton,
@@ -42,16 +42,34 @@ export default function CbzReader(props: Props) {
   const [comicImages, setComicsImages] = useState<string[]>([]);
   useEffect(() => {
     (async () => {
-      const newSource = cbzDir + 'a.cbz';
+      const cbzDirPath = await getCbzDir();
+      const newSource = cbzDirPath + 'a.cbz';
       await cleanCbzDir();
-      await ReactNativeBlobUtil.fs.cp(props.route.params.fileUrl, newSource);
-      await unzip(newSource, cbzDir);
-      await ReactNativeBlobUtil.fs.unlink(newSource);
-      setComicsImages(
-        (await ReactNativeBlobUtil.fs.ls(cbzDir)).map(file => {
-          return 'file://' + cbzDir + file;
-        }),
-      );
+
+      // Copy file using FileSystem
+      await FileSystem.cp(props.route.params.fileUrl, newSource);
+
+      // Extract zip using adm-zip on Windows, react-native-zip-archive on Android
+      if (
+        Platform.OS === 'windows' ||
+        (typeof window !== 'undefined' && (window as any).electronAPI?.isWindows)
+      ) {
+        const zip = new AdmZip(newSource);
+        zip.extractAllTo(cbzDirPath, true);
+        const fs = await import('fs');
+        fs.unlinkSync(newSource);
+        const files = fs.readdirSync(cbzDirPath);
+        setComicsImages(files.map(file => 'file://' + cbzDirPath + file));
+      } else {
+        await FileSystem.cp(props.route.params.fileUrl, newSource);
+        // For Android, use react-native-zip-archive via platform abstraction
+        // (kept as-is for Android compatibility)
+        const { unzip } = await import('react-native-zip-archive');
+        await unzip(newSource, cbzDirPath);
+        await FileSystem.unlink(newSource);
+        const files = await FileSystem.ls(cbzDirPath);
+        setComicsImages(files.map(file => 'file://' + cbzDirPath + file));
+      }
     })();
   }, [props.route.params.fileUrl]);
   // --- Layout & Handlers ---

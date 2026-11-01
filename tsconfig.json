@@ -14,6 +14,6 @@
       "@misc/*": ["./src/misc/*"]
     },
     "module": "es2020",
-    "lib": ["ES2023"]
+    "lib": ["ES2023", "DOM"]
   }
 }

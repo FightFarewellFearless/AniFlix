@@ -1,4 +1,4 @@
-import CookieManager, { Cookies } from '@preeternal/react-native-cookie-manager';
+import { CookieManager } from '@/platform/CookieManager';
 import aniflixruntime from '@/misc/AniFlixRuntime';
 import { setWebViewOpen } from '@utils/CFBypass';
 import deviceUserAgent from '@utils/deviceUserAgent';
@@ -13,16 +13,16 @@ export const BASE_URL = `https://${DOMAIN}`;
 
 export let NovelCookie = '';
 
-export function makeCookieString(cookies: Cookies) {
+export function makeCookieString(cookies: Record<string, string>) {
   return Object.entries(cookies)
-    .map(([key, details]) => `${key}=${details.value}`)
+    .map(([key, value]) => `${key}=${value}`)
     .join('; ');
 }
 
 export async function updateNovelCookie() {
   try {
     const cookies = await CookieManager.get(BASE_URL);
-    NovelCookie = makeCookieString(cookies);
+    NovelCookie = makeCookieString(cookies as any);
   } catch (e) {
     console.error('Failed to update novel cookies:', e);
   }

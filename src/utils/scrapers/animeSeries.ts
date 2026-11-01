@@ -11,7 +11,6 @@ import {
   listAnimeTypeList,
 } from '@/types/anime';
 import { default as aniflixruntime } from '@misc/AniFlixRuntime';
-import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import { runOnRuntimeAsync, scheduleOnRN } from 'react-native-worklets';
 
 export const __ALIAS = 'otakudesu';
@@ -43,10 +42,6 @@ const newAnime = async (page = 1, signal?: AbortSignal): Promise<NewAnimeList[]>
   const response = await axios
     .get(BASE.url + `/ongoing-anime/page/${page}`, {
       timeout: 40_000,
-      headers: {
-        'Accept-Encoding': '*',
-        'User-Agent': deviceUserAgent,
-      },
       signal,
     })
     .catch(e => {
@@ -90,10 +85,6 @@ const searchAnime = async (name: string, signal?: AbortSignal): Promise<SearchAn
   const data = await axios
     .get(BASE.url + `/?s=${name}&post_type=anime`, {
       timeout: 40_000,
-      headers: {
-        'Accept-Encoding': '*',
-        'User-Agent': deviceUserAgent,
-      },
       signal,
     })
     .catch(e => {
@@ -155,8 +146,6 @@ const fromUrl = async (
     .get(url, {
       timeout: 40_000,
       headers: {
-        'Accept-Encoding': '*',
-        'User-Agent': deviceUserAgent,
         'Cache-Control': 'no-cache',
       },
       signal,
@@ -380,9 +369,6 @@ const getStreamLink = async (
     const response = await axios
       .get(downLink, {
         timeout: 40_000,
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
         signal,
       })
       .catch(e => {
@@ -431,9 +417,6 @@ const getStreamLink = async (
     const response = await axios
       .get(downLink, {
         timeout: 40_000,
-        headers: {
-          'User-Agent': deviceUserAgent,
-        },
         signal,
       })
       .catch(e => {
@@ -455,12 +438,7 @@ const getStreamLink = async (
 };
 
 async function getFiledonVideo(url: string, signal?: AbortSignal) {
-  const data = await axios.get(url, {
-    headers: {
-      'User-Agent': deviceUserAgent,
-    },
-    signal,
-  });
+  const data = await axios.get(url, { signal });
   const convertToValidJson = (jsonString: string) => {
     let sanitizedString = jsonString.replace(/&quot;/g, '"');
     sanitizedString = sanitizedString.replace(/&#039;/g, "'");
@@ -497,12 +475,7 @@ function getReqId() {
   return reqid;
 }
 async function getBloggerVideo(url: string, signal?: AbortSignal) {
-  const data = await axios.get(url, {
-    headers: {
-      'User-Agent': deviceUserAgent,
-    },
-    signal,
-  });
+  const data = await axios.get(url, { signal });
   try {
     return data.data.split('"streams":[{"play_url":"')[1].split('"')[0];
   } catch {
@@ -519,8 +492,6 @@ async function getBloggerVideo(url: string, signal?: AbortSignal) {
             'accept-language': 'en-US,en;q=0.9',
             'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
             priority: 'u=1, i',
-            ...userAgentSEC,
-            'User-Agent': deviceUserAgent,
             'x-same-domain': '1',
             Referer: 'https://www.blogger.com/',
           },
@@ -561,9 +532,6 @@ const listAnime = async (
   const response = await axios
     .get(url, {
       timeout: 40_000,
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
       signal,
     })
     .catch(e => {
@@ -626,7 +594,6 @@ async function fetchStreamingResolution(
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       Accept: '*/*',
       'X-Requested-With': 'XMLHttpRequest',
-      // 'User-Agent': deviceUserAgent
     },
     // body: new URLSearchParams({ ...requestData, action: reqResolutionWithNonceAction, nonce }).toString(),
     timeout: 40_000,
@@ -692,9 +659,6 @@ async function jadwalAnime(signal?: AbortSignal) {
   let errorObj: Error | null = null;
   const response = await axios
     .get(BASE.url + '/jadwal-rilis/', {
-      headers: {
-        'User-Agent': deviceUserAgent,
-      },
       timeout: 40_000,
       signal,
     })

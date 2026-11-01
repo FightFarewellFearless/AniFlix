@@ -1,7 +1,7 @@
 import MaterialIcon from '@react-native-vector-icons/material-design-icons';
 import { StackActions, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import * as Updates from 'expo-updates';
+import { Updates } from '@/platform/Updates';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,12 +9,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  ToastAndroid,
   useColorScheme,
   View,
 } from 'react-native';
-import RNFetchBlob from 'react-native-blob-util';
-import Orientation from 'react-native-orientation-locker';
+import { FileSystem } from '@/platform/FileSystem';
+import { Orientation } from '@/platform/Orientation';
+import { Toast } from '@/platform/Toast';
 import { useTheme } from 'react-native-paper';
 import {
   default as Reanimated,
@@ -64,7 +64,7 @@ function Loading(props: Props) {
     // @ts-expect-error
     const history = await DatabaseManager.get('history');
     if (history) {
-      ToastAndroid.show('Mengoptimalkan data history...', ToastAndroid.SHORT);
+      Toast.show('Mengoptimalkan data history...');
       await DANGER_MIGRATE_OLD_HISTORY(JSON.parse(history));
     }
     const isInDatabase = (key: string): key is SetDatabaseTarget => {
@@ -82,11 +82,12 @@ function Loading(props: Props) {
   }, []);
 
   const deleteUnnecessaryUpdate = useCallback(async () => {
-    const downloadPath = `${RNFetchBlob.fs.dirs.DownloadDir}/AniFlix-${appVersion}.apk`;
-    const isExist = await RNFetchBlob.fs.exists(downloadPath);
+    const dirs = await FileSystem.getDirs();
+    const downloadPath = `${dirs.DownloadDir}/AniFlix-${appVersion}.apk`;
+    const isExist = await FileSystem.exists(downloadPath);
     if (isExist) {
-      await RNFetchBlob.fs.unlink(downloadPath);
-      ToastAndroid.show('Menghapus update tidak terpakai', ToastAndroid.SHORT);
+      await FileSystem.unlink(downloadPath);
+      Toast.show('Menghapus update tidak terpakai');
     }
   }, []);
 
@@ -113,12 +114,12 @@ function Loading(props: Props) {
     if (signal.aborted) return null;
 
     if (data === undefined) {
-      ToastAndroid.show('Error saat mengecek versi', ToastAndroid.SHORT);
+      Toast.show('Error saat mengecek versi');
       return true;
     } else if (data[0]?.tag_name === appVersion) {
       return true;
     } else if (data[0] === undefined) {
-      ToastAndroid.show('Melewatkan pengecekan versi karna terkena rate limit', ToastAndroid.SHORT);
+      Toast.show('Melewatkan pengecekan versi karna terkena rate limit');
       return true;
     }
     return data[0];
@@ -175,13 +176,13 @@ function Loading(props: Props) {
           }
           const OTATimeout = setTimeout(() => {
             if (signal.aborted) return;
-            ToastAndroid.show('Pengecekan versi dilewati', ToastAndroid.SHORT);
+            Toast.show('Pengecekan versi dilewati');
             OTADone();
           }, 6_000);
           const OTAUpdate = await Updates.checkForUpdateAsync()
             .catch(() => {
               if (!signal.aborted) {
-                ToastAndroid.show('Gagal mengecek OTA update', ToastAndroid.SHORT);
+                Toast.show('Gagal mengecek OTA update');
               }
               return null;
             })

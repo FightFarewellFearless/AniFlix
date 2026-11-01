@@ -244,7 +244,7 @@ const RenderList = memo(function RenderList({
   );
 
   const fetchItem = useCallback(() => {
-    DatabaseManager.get(keyItem).then(value => {
+    DatabaseManager.get(keyItem).then((value: string | null) => {
       if (currentItem.current !== keyItem) return;
       const historyDb = JSON.parse(value ?? '{}');
       HistoryDatabaseCache.set(keyItem, historyDb);
@@ -274,31 +274,47 @@ const RenderList = memo(function RenderList({
     }, []),
   );
 
+  const openHistory = useCallback(async () => {
+    let historyData = item;
+    if (!historyData) {
+      const value = await DatabaseManager.get(keyItem);
+      if (value) {
+        historyData = JSON.parse(value) as HistoryJSON;
+        HistoryDatabaseCache.set(keyItem, historyData);
+        setItem(historyData);
+      }
+    }
+
+    if (!historyData?.link || !historyData.title) {
+      DialogManager.alert('Error', 'Data histori tidak ditemukan. Silakan muat ulang halaman.');
+      return;
+    }
+
+    props.navigation.dispatch(
+      StackActions.push('FromUrl', {
+        title: historyData.title,
+        link: historyData.link,
+        historyData,
+        type: new URL(historyData.link).hostname.includes('idlix')
+          ? 'film'
+          : historyData.isMovie
+            ? 'movie'
+            : historyData.isComics
+              ? 'comics'
+              : historyData.isNovel
+                ? 'novel'
+                : 'anime',
+      }),
+    );
+  }, [item, keyItem, props.navigation, setItem]);
+
   return (
     <TouchableOpacity
       // entering={FadeInRight}
       // exiting={FadeOutLeft}
       // layout={LinearTransition}
       style={styles.listContainerButton}
-      disabled={!item}
-      onPress={() => {
-        props.navigation.dispatch(
-          StackActions.push('FromUrl', {
-            title: item?.title,
-            link: item?.link,
-            historyData: item,
-            type: new URL(item?.link ?? '').hostname!?.includes('idlix')
-              ? 'film'
-              : item?.isMovie
-                ? 'movie'
-                : item?.isComics
-                  ? 'comics'
-                  : item?.isNovel
-                    ? 'novel'
-                    : 'anime',
-          }),
-        );
-      }}>
+      onPress={openHistory}>
       <ImageLoading
         resizeMode="stretch"
         source={{ uri: item?.thumbnailUrl }}

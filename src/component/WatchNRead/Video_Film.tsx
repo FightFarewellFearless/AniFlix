@@ -18,11 +18,12 @@ import {
   Pressable,
   ScrollView,
   Text,
-  ToastAndroid,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+import { Toast } from '@/platform/Toast';
+import { Orientation } from '@/platform/Orientation';
 import ReAnimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -47,7 +48,7 @@ import {
   STREAMING_MIDDLE_SERVER_PORT,
 } from '@utils/scrapers/film';
 import { TVFocusGuideView } from 'react-native';
-import { createServer, Server } from 'react-native-nitro-http-server';
+import { HttpServer } from '@/platform/HttpServer';
 import { ActivityIndicator, Button } from 'react-native-paper';
 import LoadingIndicator from '../misc/LoadingIndicator';
 import {
@@ -90,7 +91,13 @@ function Video_Film(props: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      fetch('https://vortexdownloader.rwbcode.com/health')
+      // The browser renderer cannot host a Node HTTP server, so the Windows
+      // build always uses the remote playlist proxy instead of the local one.
+      if (Platform.OS === 'web' && !Platform.isTV) {
+        setServerMode('server');
+        return;
+      }
+      fetch('https://vortexbridge.pirles.my.id/health')
         .then(a => {
           if (a.status === 200) {
             setServerMode('server');
@@ -107,7 +114,7 @@ function Video_Film(props: Props) {
   useFocusEffect(
     useCallback(() => {
       if (serverMode !== 'local') return;
-      let server: Server;
+      let server: any;
       async function autoRestartWhenInactive() {
         try {
           const controller = new AbortController();
@@ -121,7 +128,7 @@ function Video_Film(props: Props) {
           server?.close?.();
           // setIsLocalServerReady(false);
           await new Promise(resolve => setTimeout(resolve, 500));
-          server = createServer({ requestTimeout: Infinity }, (req, res) => {
+          server = HttpServer.createServer({ requestTimeout: Infinity }, (req: any, res: any) => {
             middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
           });
           server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
@@ -133,7 +140,7 @@ function Video_Film(props: Props) {
         if (state !== 'active') return;
         await autoRestartWhenInactive();
       });
-      server = createServer({ requestTimeout: Infinity }, (req, res) => {
+      server = HttpServer.createServer({ requestTimeout: Infinity }, (req: any, res: any) => {
         middleServerCallback(req, res, checkAndRotateTokenRef, activeTokenRef);
       });
       server.listen(STREAMING_MIDDLE_SERVER_PORT, () => {
@@ -218,10 +225,10 @@ function Video_Film(props: Props) {
   useFocusEffect(
     useCallback(() => {
       abortController.current = new AbortController();
-      Orientation.addDeviceOrientationListener(orientationDidChange);
+      Orientation.addDeviceOrientationListener(orientationDidChange as any);
 
       return () => {
-        Orientation.removeDeviceOrientationListener(orientationDidChange);
+        Orientation.removeDeviceOrientationListener(orientationDidChange as any);
         willUnmountHandler();
         abortController.current?.abort();
       };
@@ -331,21 +338,21 @@ function Video_Film(props: Props) {
     if (historyData.current === undefined || historyData.current.lastDuration === undefined) {
       return;
     }
-    if (videoRef.current && videoRef.current.props.player) {
-      playerRef.current?.skipTo(historyData.current.lastDuration);
+    if (playerRef.current) {
+      playerRef.current.skipTo(historyData.current.lastDuration);
       if (!isPaused) {
-        videoRef.current.props.player.play();
+        playerRef.current.play();
       }
+      Toast.show('Otomatis kembali ke durasi terakhir');
     }
-    ToastAndroid.show('Otomatis kembali ke durasi terakhir', ToastAndroid.SHORT);
   }, [isPaused]);
 
   useEffect(() => {
     if (isPaused) {
-      videoRef.current?.props?.player?.pause();
+      playerRef.current?.pause();
       saveProgressToHistory();
     } else {
-      videoRef.current?.props?.player?.play();
+      playerRef.current?.play();
     }
   }, [isPaused, saveProgressToHistory]);
 
@@ -454,7 +461,7 @@ function Video_Film(props: Props) {
       setIsUsingTranslatedSub(true);
     } catch (e: any) {
       if (e.message === 'canceled') return;
-      ToastAndroid.show('Gagal menerjemahkan subtitle', ToastAndroid.SHORT);
+      Toast.show('Gagal menerjemahkan subtitle');
     } finally {
       setSubTranslationLoading(false);
     }
@@ -468,7 +475,7 @@ function Video_Film(props: Props) {
 
   const downloadFilm = useCallback(() => {
     Linking.openURL(
-      `https://vortexdownloader.rwbcode.com/?data=${Buffer.from(
+      `https://vortexbridge.pirles.my.id/?data=${Buffer.from(
         JSON.stringify({
           title:
             data.title + (data.episode ? ` Season ${data.season} Episode ${data.episode}` : ''),
@@ -502,6 +509,13 @@ function Video_Film(props: Props) {
   }, [data]);
 
   const insets = useSafeAreaInsets();
+  const windowDimensions = useWindowDimensions();
+  const isDesktopWeb = Platform.OS === 'web' && !Platform.isTV;
+  const desktopPlayerWidth = Math.min(windowDimensions.width, 1180);
+  const desktopPlayerHeight = Math.min(
+    (desktopPlayerWidth * 9) / 16,
+    Math.max(280, windowDimensions.height * 0.58),
+  );
 
   return (
     <View style={{ flex: 1, flexDirection: Platform.isTV && !fullscreen ? 'row' : 'column' }}>
@@ -521,7 +535,15 @@ function Video_Film(props: Props) {
             ? styles.fullscreen
             : Platform.isTV
               ? { width: '45%', height: '100%', backgroundColor: 'black' }
-              : styles.notFullscreen,
+              : isDesktopWeb
+                ? {
+                    width: '100%',
+                    maxWidth: 1180,
+                    height: desktopPlayerHeight,
+                    alignSelf: 'center',
+                    backgroundColor: 'black',
+                  }
+                : styles.notFullscreen,
         ]}>
         <View
           style={{
@@ -541,7 +563,7 @@ function Video_Film(props: Props) {
             streamingURL={
               serverMode === 'local'
                 ? `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`
-                : `https://vortexdownloader.rwbcode.com/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
+                : `https://vortexbridge.pirles.my.id/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
             }
             isHls={true}
             subtitleURL={data.subtitleLink}
@@ -575,7 +597,26 @@ function Video_Film(props: Props) {
         contentContainerStyle={{
           paddingBottom: insets.bottom,
           paddingHorizontal: Platform.isTV ? 16 : 0,
+          ...(isDesktopWeb
+            ? {
+                width: '100%',
+                maxWidth: 1180,
+                alignSelf: 'center',
+                paddingHorizontal: 16,
+                paddingTop: 14,
+              }
+            : null),
         }}>
+        {isDesktopWeb && (
+          <Text
+            style={[
+              globalStyles.text,
+              { color: '#8f8f8f', fontSize: 12, marginHorizontal: 10, marginTop: 10 },
+            ]}>
+            Tips: Spasi memutar/menjeda · ←/→ mundur/maju 5 detik · ↑/↓ volume · F layar penuh · C
+            subtitle · P Picture-in-Picture
+          </Text>
+        )}
         {data.subtitleLink === undefined && (
           <View style={styles.container}>
             <Text style={[globalStyles.text, { marginLeft: 5, fontSize: 16, fontWeight: '500' }]}>
@@ -738,7 +779,7 @@ function Video_Film(props: Props) {
                   saveProgressToHistory();
                   firstTimeLoad.current = true;
                   setCurrentResolution(val);
-                  ToastAndroid.show(`Resolusi diubah ke ${val}`, ToastAndroid.SHORT);
+                  Toast.show(`Resolusi diubah ke ${val}`);
                 }}
                 key={currentResolution}>
                 {resolutionDropdownData.map(item => (

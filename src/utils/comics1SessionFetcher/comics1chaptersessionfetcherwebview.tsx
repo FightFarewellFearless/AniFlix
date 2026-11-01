@@ -1,7 +1,8 @@
 import Config from '@root/aniflixConfig.json';
 const COMICS1_AUTH = Config.COMICS1_AUTH;
 import { use, useCallback, useRef } from 'react';
-import { ToastAndroid, View } from 'react-native';
+import { View } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { WebView } from 'react-native-webview';
 
 import deviceUserAgent from '@utils/deviceUserAgent';
@@ -118,7 +119,7 @@ export default function Comics1ChapterSessionWebView() {
           onError={() => {
             // isError = true;
             rejectAllPromisesCollector();
-            ToastAndroid.show('Gagal mempersiapkan data untuk komik', ToastAndroid.SHORT);
+            Toast.show('Gagal mempersiapkan data untuk komik');
           }}
         />
       )}

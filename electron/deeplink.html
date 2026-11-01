@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AniFlix Deep Link</title>
+  </head>
+  <body>
+    <script>
+      // Deep link handler - redirects to main app
+      window.opener?.postMessage('deep-link', '*');
+      window.close();
+    </script>
+  </body>
+</html>

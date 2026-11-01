@@ -6,7 +6,7 @@ import {
   NewAnimeList,
   SearchAnime,
 } from '@/types/anime';
-import { ToastAndroid } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { setWebViewOpen } from './CFBypass';
 import deviceUserAgent from './deviceUserAgent';
 import {
@@ -132,7 +132,7 @@ class AnimeAPI {
     } catch (e: any) {
       // console.error(e.message)
       if (e.message === 'Silahkan selesaikan captcha') {
-        ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
+        Toast.show('Silahkan selesaikan captcha');
         throw e;
       } else if (
         e.message !== 'Network Error' ||

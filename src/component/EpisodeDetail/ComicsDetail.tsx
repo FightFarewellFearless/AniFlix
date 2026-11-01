@@ -1,3 +1,5 @@
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Toast } from '@/platform/Toast';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
@@ -7,13 +9,12 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
-  ToastAndroid,
   TouchableOpacity,
   useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+
 import { Button, Divider, Searchbar, Surface, useTheme } from 'react-native-paper';
 import Reanimated, {
   interpolate,
@@ -356,7 +357,7 @@ const ComicsDetailHeader = memo(
               disabled={isInList}
               onPress={() => {
                 if (!data.chapters[data.chapters.length - 1]) {
-                  ToastAndroid.show('Data chapter tidak ditemukan', ToastAndroid.SHORT);
+                  Toast.show('Data chapter tidak ditemukan');
                   return;
                 }
                 const lastData = data.chapters[data.chapters.length - 1];
@@ -376,7 +377,7 @@ const ComicsDetailHeader = memo(
                   isComics: true,
                 };
                 controlWatchLater('add', watchLaterJson);
-                ToastAndroid.show('Ditambahkan ke tonton nanti', ToastAndroid.SHORT);
+                Toast.show('Ditambahkan ke tonton nanti');
               }}>
               {isInList ? 'Sudah Ditambahkan' : 'Baca Nanti'}
             </Button>
@@ -396,7 +397,7 @@ const ComicsDetailHeader = memo(
                 onPress={() => {
                   const chapterData = data.chapters[data.chapters.length - 1];
                   if (!chapterData?.chapterUrl) {
-                    ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                    Toast.show('Chapter tidak ditemukan');
                     return;
                   }
                   readComic(chapterData.chapterUrl);
@@ -410,7 +411,7 @@ const ComicsDetailHeader = memo(
                 onPress={() => {
                   const chapterData = data.chapters[0];
                   if (!chapterData?.chapterUrl) {
-                    ToastAndroid.show('Chapter tidak ditemukan', ToastAndroid.SHORT);
+                    Toast.show('Chapter tidak ditemukan');
                     return;
                   }
                   readComic(chapterData?.chapterUrl);
@@ -503,6 +504,7 @@ function useStyles() {
   const globalStyles = useGlobalStyles();
   const colorScheme = useColorScheme();
   const dimensions = useWindowDimensions();
+  const isDesktop = dimensions.width >= 980;
   return useMemo(
     () =>
       StyleSheet.create({
@@ -517,19 +519,26 @@ function useStyles() {
           flexDirection: 'row',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
+          paddingHorizontal: isDesktop ? 40 : 0,
+          paddingVertical: isDesktop ? 28 : 0,
+          marginTop: isDesktop ? -36 : 0,
+          maxWidth: isDesktop ? 1180 : undefined,
+          alignSelf: isDesktop ? 'center' : undefined,
+          borderRadius: isDesktop ? 24 : undefined,
         },
         infoContainer: {
           gap: 5,
           flex: 1,
+          minWidth: 0,
           flexDirection: 'column',
           marginTop: 10,
         },
         thumbnail: {
-          margin: 15,
-          width: dimensions.width * 0.3,
-          height: 150,
+          margin: isDesktop ? 0 : 15,
+          width: isDesktop ? 230 : dimensions.width * 0.3,
+          height: isDesktop ? 230 : 150,
           borderRadius: 10,
-          transform: [{ translateY: -30 }],
+          transform: [{ translateY: isDesktop ? 0 : -30 }],
         },
         type: {
           color: colorScheme === 'dark' ? 'white' : 'black',
@@ -542,7 +551,7 @@ function useStyles() {
         },
         title: {
           flexShrink: 1,
-          fontSize: 20,
+          fontSize: isDesktop ? 30 : 20,
           fontWeight: 'bold',
         },
         indonesianTitle: {

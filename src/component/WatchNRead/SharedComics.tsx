@@ -1,12 +1,12 @@
 import { useFocusEffect } from '@react-navigation/core';
 import React, { useCallback, useState } from 'react';
 import { AppState, Platform, Pressable, View } from 'react-native';
-import { SystemBars } from 'react-native-edge-to-edge';
 import { Button, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import WebView from 'react-native-webview';
 
 import { useBackHandler } from '@hooks/useBackHandler';
+import { SystemBars } from '@/platform/SystemBars';
+import { SystemNavigationBar } from '@/platform/SystemNavigationBar';
 
 export function useComicsFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -54,9 +54,11 @@ export function useAutoScroll(webViewRef: React.RefObject<WebView<{}> | null>) {
 
   useFocusEffect(
     useCallback(() => {
-      const appState = AppState.addEventListener('blur', () => {
-        webViewRef.current?.injectJavaScript(`window.stopAutoScroll(); true;`);
-        setIsAutoScrolling(false);
+      const appState = AppState.addEventListener('change', nextAppState => {
+        if (nextAppState !== 'active') {
+          webViewRef.current?.injectJavaScript(`window.stopAutoScroll(); true;`);
+          setIsAutoScrolling(false);
+        }
       });
       return () => {
         appState.remove();
@@ -249,7 +251,7 @@ export function getComicsStyles(theme: MD3Theme) {
   return `
     <style>
       body { margin: 0; background-color: ${bgColor}; overflow-anchor: auto; }
-      .img-wrapper { min-height: 140vw; width: 100%; position: relative; background-color: ${shimmerBase}; overflow: hidden; display: flex; justify-content: center; align-items: center; content-visibility: auto; contain-intrinsic-size: 100vw 140vw; }
+      .img-wrapper { min-height: 140vw; width: 100%; max-width: 900px; margin: 0 auto; position: relative; background-color: ${shimmerBase}; overflow: hidden; display: flex; justify-content: center; align-items: center; content-visibility: auto; contain-intrinsic-size: 100vw 140vw; }
       .img-wrapper::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, ${shimmerBase} 25%, ${shimmerHighlight} 50%, ${shimmerBase} 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; z-index: 1; will-change: background-position; }
       @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       img { width: 100%; height: auto; display: block; opacity: 0; transition: opacity 0.2s ease-in; position: relative; z-index: 2; min-height: 50px; }

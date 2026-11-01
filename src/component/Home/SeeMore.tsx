@@ -1,13 +1,8 @@
+import { Toast } from '@/platform/Toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  ToastAndroid,
-  useColorScheme,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ActivityIndicator, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -31,11 +26,7 @@ import { MIN_IMAGE_WIDTH, RenderScrollComponent } from './AnimeList';
 
 type Props = NativeStackScreenProps<RootStackNavigator, 'SeeMore'>;
 type ItemType =
-  | NewAnimeList
-  | Movies
-  | LatestComicsRelease
-  | FilmHomePage[number]
-  | NovelLatestRelease;
+  NewAnimeList | Movies | LatestComicsRelease | FilmHomePage[number] | NovelLatestRelease;
 
 interface SeeMoreUIProps {
   data: ItemType[];
@@ -77,7 +68,7 @@ const SeeMoreUI = memo(({ data, type, onLoadMore, navigation }: SeeMoreUIProps) 
     try {
       await onLoadMore();
     } catch {
-      ToastAndroid.show('Error saat memuat item', ToastAndroid.SHORT);
+      Toast.show('Error saat memuat item');
     } finally {
       setIsLoading(false);
     }

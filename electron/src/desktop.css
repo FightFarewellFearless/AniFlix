@@ -1,0 +1,66 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  background: #101216;
+  color: #eef1f6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3b424d transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #3b424d;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+body {
+  background:
+    radial-gradient(circle at 75% -10%, rgba(77, 208, 225, 0.08), transparent 32rem),
+    #101216;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #4dd0e1 !important;
+  outline-offset: 2px;
+}
+
+@media (min-width: 980px) {
+  #root {
+    background: transparent !important;
+  }
+
+  [data-focusable="true"] {
+    transition: background-color 140ms ease, transform 140ms ease;
+  }
+}

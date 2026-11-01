@@ -1,3 +1,5 @@
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Toast } from '@/platform/Toast';
 import Icon from '@react-native-vector-icons/fontawesome';
 import { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { CompositeScreenProps, StackActions, useFocusEffect } from '@react-navigation/native';
@@ -8,11 +10,9 @@ import {
   ActivityIndicator,
   BackHandler,
   Keyboard,
-  KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextInput as TextInputType,
-  ToastAndroid,
   TouchableOpacity as TouchableOpacityReactNative,
   View,
   useColorScheme,
@@ -47,11 +47,7 @@ type ComicItem = (ComicsSearch | KomikuSearch) & { source?: string };
 type ComicsComboSearch = ComicItem | SectionHeader;
 
 type AnySearchItem =
-  | Movies
-  | SearchAnimeResult
-  | ComicsComboSearch
-  | SearchResult[number]
-  | NovelSearch;
+  Movies | SearchAnimeResult | ComicsComboSearch | SearchResult[number] | NovelSearch;
 
 type SearchRowItem = Exclude<AnySearchItem, SectionHeader>;
 
@@ -150,7 +146,7 @@ function Search(props: Props) {
       .catch(() => {
         setListAnime(null);
         setIsError(true);
-        ToastAndroid.show('Gagal memuat daftar anime', ToastAndroid.SHORT);
+        Toast.show('Gagal memuat daftar anime');
       })
       .finally(() => {
         setListAnimeLoading(false);
@@ -167,7 +163,7 @@ function Search(props: Props) {
         return;
       }
       if (err.message === 'Silahkan selesaikan captcha') {
-        return ToastAndroid.show('Silahkan selesaikan captcha', ToastAndroid.SHORT);
+        return Toast.show('Silahkan selesaikan captcha');
       }
       const errMessage =
         err.message === 'Network Error'

@@ -2,10 +2,12 @@ import { Datum, Datum2, HomepageApiResponse } from './filmTypes/homepage';
 import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
 import { fetch as expoFetch } from 'expo/fetch';
+import type { IncomingMessage, ServerResponse } from 'http';
 
 import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import React from 'react';
-import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
+
+import { CookieManager } from '@/platform/CookieManager';
 import { setWebViewOpen } from '../CFBypass';
 import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
@@ -308,21 +310,50 @@ async function fetchPage(
   url: string,
   opt?: RequestInit & { asJson?: boolean; autoCaptcha?: boolean },
 ) {
-  const response = await fetch(url, {
-    headers: {
-      accept: '*/*',
-      'accept-language': 'en-US,en;q=0.9',
-      'cache-control': 'no-cache',
-      'content-type': 'application/json',
-      pragma: 'no-cache',
-      priority: 'u=0, i',
-      ...userAgentSEC,
-      'upgrade-insecure-requests': '1',
-      'User-Agent': deviceUserAgent,
-      ...opt?.headers,
-    },
-    ...opt,
-  });
+  if (!url || !/^https?:\/\//i.test(url)) {
+    throw new Error(`Invalid film request URL: ${String(url)}`);
+  }
+  const cookies = await CookieManager.get(BASE_URL);
+  const cookieHeader = Object.entries(cookies ?? {})
+    .map(([name, value]) => `${name}=${value}`)
+    .join('; ');
+  const electronApi = typeof window !== 'undefined' ? window.electronAPI : undefined;
+  const electronResponse =
+    typeof electronApi?.filmRequest === 'function' && new URL(url).hostname === FILM_DOMAIN
+      ? await electronApi.filmRequest({
+          url,
+          method: opt?.method ?? 'GET',
+          headers: {
+            ...(opt?.headers as Record<string, string> | undefined),
+            ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+          },
+          body: typeof opt?.body === 'string' ? opt.body : undefined,
+        })
+      : undefined;
+  const response = electronResponse
+    ? new Response(electronResponse.body, { status: electronResponse.status })
+    : await fetch(url, {
+        ...opt,
+        headers: {
+          accept: '*/*',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'no-cache',
+          'content-type': 'application/json',
+          pragma: 'no-cache',
+          priority: 'u=1, i',
+          ...userAgentSEC,
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'cross-site',
+          'User-Agent': deviceUserAgent,
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+          ...opt?.headers,
+        },
+        // The Electron renderer is served from file://, so the film API is
+        // cross-origin. Browser fetch otherwise omits the challenge/session
+        // cookies that were created by the shared Electron WebView.
+        credentials: 'include',
+      });
   const asJson = opt?.asJson ?? false;
   if (response.status === 403) {
     if (opt?.autoCaptcha !== false) setWebViewOpen.openWebViewCF(true, url);
@@ -661,7 +692,7 @@ async function getFilmDetails(
         asJson: true,
       },
     );
-    const { claimApi, redeemApi } = await redeemVideo(playInfo, signal, onWaitTime);
+    const { claimApi, redeemApi } = await redeemVideo(playInfo, filmUrl, signal, onWaitTime);
     let variants: HlsVariant[] = [];
     try {
       const manifestContent = await fetchPage(redeemApi.url, {
@@ -737,7 +768,7 @@ async function getFilmDetails(
       asJson: true,
     },
   );
-  const { redeemApi, claimApi } = await redeemVideo(playInfo, signal, onWaitTime);
+  const { redeemApi, claimApi } = await redeemVideo(playInfo, filmUrl, signal, onWaitTime);
 
   let variants: HlsVariant[] = [];
   try {
@@ -777,6 +808,7 @@ async function getFilmDetails(
 
 async function redeemVideo(
   playInfo: PlayInfo,
+  referer: string,
   signal?: AbortSignal,
   onWaitTime?: (waitTime: number, totalWaitTime: number) => void,
 ): Promise<{
@@ -813,9 +845,15 @@ async function redeemVideo(
       Math.max(0, playInfo.unlockAt - playInfo.serverNow) + 1000,
     );
   });
+  const pageReferer = getFilmPageUrl(referer);
   const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
     method: 'POST',
     signal,
+    headers: {
+      Origin: BASE_URL,
+      Referer: pageReferer,
+      'X-AniFlix-Referer': pageReferer,
+    },
     asJson: true,
     body: JSON.stringify({ gateToken: playInfo.gateToken }),
   });
@@ -830,6 +868,14 @@ async function redeemVideo(
     body: JSON.stringify({ claim: claimApi.claim }),
   });
   return { redeemApi, claimApi };
+}
+
+function getFilmPageUrl(apiUrl: string): string {
+  const url = new URL(apiUrl);
+  url.pathname = url.pathname
+    .replace(/^\/api\/movies/, '/movie')
+    .replace(/^\/api\/series/, '/series');
+  return url.toString();
 }
 
 async function getFilmSeasonDetails(seasonUrl: string, signal?: AbortSignal): Promise<FilmSeason> {
@@ -980,7 +1026,7 @@ export const middleServerCallback = async (
       );
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.end(rebuildHLS, 'utf-8');
-    } else if (req.url.startsWith('/segment')) {
+    } else if (req.url!.startsWith('/segment')) {
       await checkAndRotateTokenRef.current();
       const originalSegmentUrl = decodeURIComponent(localUrlObj.searchParams.get('url')!);
       const segmentUrlObj = new URL(originalSegmentUrl);

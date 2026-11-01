@@ -1,7 +1,8 @@
+import { Toast } from '@/platform/Toast';
 import Icon from '@react-native-vector-icons/fontawesome';
 import MaterialIcon from '@react-native-vector-icons/material-icons';
 import { FlashList } from '@shopify/flash-list';
-import * as DocumentPicker from 'expo-document-picker';
+import { DocumentPicker } from '@/platform/DocumentPicker';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import moment from 'moment';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -10,7 +11,6 @@ import {
   Modal,
   StyleSheet,
   Text,
-  ToastAndroid,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -125,10 +125,10 @@ function SearchAnimeByImage() {
                     DocumentPicker.getDocumentAsync({
                       type: ['image/*'],
                       copyToCacheDirectory: false,
-                    }).then(result => {
+                    }).then((result: any) => {
                       setChoosenImage(result.assets?.[0].uri);
                       const formData = new FormData();
-                      formData.append('image', {
+                      (formData as any).append('image', {
                         uri: result.assets?.[0].uri,
                         name: 'image.png',
                         type: 'image/png',
@@ -149,7 +149,7 @@ function SearchAnimeByImage() {
                             error: '',
                             result: exampleResultArray,
                           });
-                          ToastAndroid.show('Terjadi kesalahan!', ToastAndroid.SHORT);
+                          Toast.show('Terjadi kesalahan!');
                         });
                     });
                   }}>

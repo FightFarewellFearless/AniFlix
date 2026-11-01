@@ -94,3 +94,8 @@ dist
 .expo
 
 aniflixConfig.json
+
+electron/.yarn/*
+electron/dist
+electron/node_modules
+electron/release*

@@ -28,12 +28,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  ToastAndroid,
   TouchableOpacity,
   View,
   ViewStyle,
   useTVEventHandler,
 } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { ActivityIndicator } from 'react-native-paper';
 import Reanimated, {
   ReduceMotion,
@@ -61,6 +61,11 @@ type SubtitleObj = Awaited<ReturnType<typeof parseSubtitles>>;
 export type PlayerRef = {
   skipTo: (duration: number) => void;
   overwriteSubtitleObj: (obj: SubtitleObj) => void;
+  play: () => void;
+  pause: () => void;
+  setPaused: (paused: boolean) => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
 };
 type VideoPlayerProps = {
   title: string;
@@ -203,7 +208,7 @@ function VideoPlayer({
           setSubtitles(subtitle);
         } catch {
           setSubtitleError(true);
-          ToastAndroid.show('Gagal mendapatkan subtitle', ToastAndroid.SHORT);
+          Toast.show('Gagal mendapatkan subtitle');
         }
       }
       subtitleURL && fetchSubtitles(subtitleURL);
@@ -303,6 +308,21 @@ function VideoPlayer({
       overwriteSubtitleObj: (obj: SubtitleObj) => {
         setSubtitles(obj);
       },
+      play: () => {
+        player.play();
+      },
+      pause: () => {
+        player.pause();
+      },
+      setPaused: (nextPaused: boolean) => {
+        if (nextPaused) {
+          player.pause();
+        } else {
+          player.play();
+        }
+      },
+      getCurrentTime: () => player.currentTime,
+      getDuration: () => player.duration ?? 0,
     }),
     [player, currentDurationSecond, seekBarProgress],
   );

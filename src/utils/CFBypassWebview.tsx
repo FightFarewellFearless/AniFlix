@@ -1,13 +1,6 @@
 import { useCallback, useContext, useMemo, useRef, useState } from 'react';
-import {
-  Dimensions,
-  Modal,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { useTheme } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { WebView, WebViewNavigation } from 'react-native-webview';
@@ -54,7 +47,7 @@ function CFBypassWebView() {
         }
         bypassContext.setIsOpen(false);
         bypassContext.successCallback.current?.();
-        ToastAndroid.show('Bypass berhasil, silahkan lanjutkan!', ToastAndroid.SHORT);
+        Toast.show('Bypass berhasil, silahkan lanjutkan!');
       }
       if (!event.loading && isChallengeTitle(event.title)) {
         lastTitle.current = event.title;

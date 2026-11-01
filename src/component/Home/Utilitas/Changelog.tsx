@@ -1,4 +1,4 @@
-import CHANGELOG from '@root/CHANGELOG.md';
+import CHANGELOG from '@root/CHANGELOG.md?raw';
 import { memo } from 'react';
 import { Platform } from 'react-native';
 import Markdown from 'react-native-marked';

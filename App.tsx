@@ -145,6 +145,9 @@ const linking: LinkingOptions<RootStackNavigator> = {
   },
 
   async getInitialURL() {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      return null;
+    }
     const url = await Linking.getInitialURL();
     if (
       url &&
@@ -158,6 +161,9 @@ const linking: LinkingOptions<RootStackNavigator> = {
   },
 
   subscribe(listener) {
+    if (typeof window !== 'undefined' && window.electronAPI) {
+      return () => undefined;
+    }
     const onReceiveURL = async ({ url }: { url: string }) => {
       if (
         url &&
@@ -175,7 +181,7 @@ const linking: LinkingOptions<RootStackNavigator> = {
 };
 
 // Handle JavaScript Error globally
-if (!__DEV__) {
+if (!__DEV__ && typeof ErrorUtils !== 'undefined') {
   ErrorUtils.setGlobalHandler((error, isFatal) => {
     if (error instanceof Error && isFatal) {
       replaceAllWith('ErrorScreen', { error });
@@ -309,7 +315,9 @@ function App() {
             <HomeContext>
               <PaperProvider theme={colorScheme === 'dark' ? MDDark : MDLight}>
                 <NavigationContainer
-                  linking={linking}
+                  linking={
+                    typeof window !== 'undefined' && window.electronAPI ? undefined : linking
+                  }
                   ref={navigationRef}
                   theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedDefaultTheme}>
                   {Platform.isTV ? (

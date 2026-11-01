@@ -1,5 +1,5 @@
 import watchLaterJSON from '@/types/watchLaterJSON';
-import { ToastAndroid } from 'react-native';
+import { Toast } from '@/platform/Toast';
 import { DatabaseManager } from './DatabaseManager';
 import setHistory from './historyControl';
 import { FilmDetail_Stream } from './scrapers/film';
@@ -17,7 +17,7 @@ export async function setFilmStreamHistory(
   );
   if (watchLaterIndex >= 0) {
     controlWatchLater('delete', watchLaterIndex);
-    ToastAndroid.show(`${title} dihapus dari daftar tonton nanti`, ToastAndroid.SHORT);
+    Toast.show(`${title} dihapus dari daftar tonton nanti`);
   }
   setHistory(data, link, false, historyData, true);
 }

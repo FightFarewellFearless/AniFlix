@@ -15,7 +15,7 @@ export function unpack(source: string) {
   let unbase: Unbaser;
   try {
     unbase = new Unbaser(radix);
-  } catch (e) {
+  } catch {
     throw Error('Unknown p.a.c.k.e.r. encoding.');
   }
 
@@ -59,7 +59,7 @@ export function unpack(source: string) {
             radix: parseInt(a[2]),
             count: parseInt(a[3]),
           };
-        } catch (ValueError) {
+        } catch {
           throw Error('Corrupted p.a.c.k.e.r. data.');
         }
       }
@@ -101,7 +101,7 @@ class Unbaser {
         [...this.ALPHABET[base]].forEach((cipher, index) => {
           this.dictionary[cipher] = index;
         });
-      } catch (er) {
+      } catch {
         throw Error('Unsupported base encoding.');
       }
       this.unbase = this._dictunbaser;

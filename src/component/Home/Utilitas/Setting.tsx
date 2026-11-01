@@ -2,19 +2,10 @@ import { Picker, PickerRef } from '@expo/ui/community/picker';
 import Icon, { FontAwesomeIconName } from '@react-native-vector-icons/fontawesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { reloadAppAsync } from 'expo';
-import * as DocumentPicker from 'expo-document-picker';
 import { AudioMixingMode } from 'expo-video';
 import moment from 'moment';
 import { JSX, memo, useCallback, useRef, useState } from 'react';
-import {
-  Appearance,
-  ColorSchemeName,
-  PermissionsAndroid,
-  Platform,
-  ScrollView,
-  View,
-} from 'react-native';
-import RNFetchBlob from 'react-native-blob-util';
+import { Appearance, ColorSchemeName, ScrollView, View } from 'react-native';
 import {
   ActivityIndicator,
   Divider,
@@ -26,7 +17,8 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useSharedValue } from 'react-native-reanimated';
-import { createDocument } from 'react-native-saf-x';
+import { SafStorage } from '@/platform/SafStorage';
+import { DocumentPicker } from '@/platform/DocumentPicker';
 
 import { TouchableOpacity } from '@/component/misc/TouchableOpacityRNGH';
 import { HistoryJSON } from '@/types/historyJSON';
@@ -89,40 +81,20 @@ function Setting(_props: Props) {
 
   const backupData = useCallback(async () => {
     try {
-      const isGranted = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      );
-      if (isGranted || Number(Platform.Version) >= 33) {
-        backup();
-      } else {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          backup();
-        } else {
-          DialogManager.alert(
-            'Akses ditolak',
-            'Gagal mencadangkan data dikarenakan akses ke penyimpanan di tolak',
-          );
-        }
-      }
-      async function backup() {
-        const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
-        modalText.set('Membuat Backup Data...');
-        setModalVisible(true);
-        const data = Buffer.from(
-          JSON.stringify(await DatabaseManager.getDataForBackup()),
-          'utf8',
-        ).toString('base64');
-        setModalVisible(false);
-        const backupFile = await createDocument(data, {
-          initialName: fileuri,
-          mimeType: 'text/plain',
-        });
-        if (backupFile) {
-          DialogManager.alert('Berhasil', `Data berhasil di backup!`);
-        }
+      const fileuri = 'AniFlix_backup_' + moment().format('YYYY-MM-DD_HH-mm-ss') + '.aniflix.txt';
+      modalText.set('Membuat Backup Data...');
+      setModalVisible(true);
+      const data = Buffer.from(
+        JSON.stringify(await DatabaseManager.getDataForBackup()),
+        'utf8',
+      ).toString('base64');
+      setModalVisible(false);
+      const backupFile = await SafStorage.createDocument(data, {
+        initialName: fileuri,
+        mimeType: 'text/plain',
+      });
+      if (backupFile) {
+        DialogManager.alert('Berhasil', `Data berhasil di backup!`);
       }
     } catch (e: any) {
       DialogManager.alert('Error', e.message);
@@ -186,9 +158,12 @@ function Setting(_props: Props) {
 
       if (!doc.assets) return;
 
-      const data = await RNFetchBlob.fs.readFile(doc.assets?.[0].uri, 'utf8');
+      const fs = await import('fs');
+      const data = fs.readFileSync(doc.assets?.[0].uri, 'utf8');
       const backupDataJSON: BackupJSON = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
-      await RNFetchBlob.fs.unlink(doc.assets?.[0].uri);
+      try {
+        fs.unlinkSync(doc.assets?.[0].uri);
+      } catch {}
       modalText.set('Memulihkan data kamu mohon tunggu...');
       setModalVisible(true);
       try {
