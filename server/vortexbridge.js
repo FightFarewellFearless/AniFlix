@@ -24,7 +24,7 @@ const TOKEN_STORAGE = new Map();
 
 const app = express();
 app.set('trust proxy', true);
-const PORT = 10282; //process.env.PORT || process.env.SERVER_PORT || 20132;
+const PORT = 10282; // process.env.PORT || process.env.SERVER_PORT || 20132;
 const TOR_PROXY_PORT = 9050;
 const TIMEOUT_MS = 20000;
 const MAX_RETRIES = 5;
@@ -58,6 +58,30 @@ class BandwidthThrottle extends Transform {
       this.push(chunk);
       callback();
     }
+  }
+}
+
+// ==========================================
+// HELPER: URL RESOLUTION WITH QUERY INHERITANCE
+// ==========================================
+function resolveUrlWithQuery(targetUrlStr, parentUrlStr) {
+  try {
+    const parentUrl = new URL(parentUrlStr);
+    const resolvedUrl = new URL(targetUrlStr, parentUrl);
+
+    if (!targetUrlStr.includes('?') && parentUrl.search) {
+      resolvedUrl.search = parentUrl.search;
+    } else if (parentUrl.search) {
+      parentUrl.searchParams.forEach((value, key) => {
+        if (!resolvedUrl.searchParams.has(key)) {
+          resolvedUrl.searchParams.set(key, value);
+        }
+      });
+    }
+
+    return resolvedUrl.toString();
+  } catch (e) {
+    return targetUrlStr;
   }
 }
 
@@ -116,76 +140,119 @@ async function initTorProxy() {
 initTorProxy();
 
 // ==========================================
-// 2. CORE HLS & PROXY LOGIC
+// 2. CORE HLS & PROXY LOGIC (AUTO RENEW SYSTEM)
 // ==========================================
 const MAP_CACHE = new Map();
 const httpAgent = new http.Agent({ keepAlive: true });
 const httpsAgent = new https.Agent({ keepAlive: true });
 
-async function getOrRotateToken(claim, redeemUrl) {
-  if (!claim || !redeemUrl) return null;
+async function getOrRotateToken(
+  claim,
+  redeemUrl,
+  expiresTokenAt,
+  renewalToken,
+  claimExpiresAt,
+  didCookie,
+) {
+  if (!claim && !renewalToken) return null;
 
   const now = Math.floor(Date.now() / 1000);
-  let entry = TOKEN_STORAGE.get(claim);
+  const storageKey = claim || renewalToken;
+  let entry = TOKEN_STORAGE.get(storageKey);
 
-  // Fungsi untuk mengekstrak expiry dari token string (dikembalikan ke versi aslinya)
-  const getExpiry = t => {
-    try {
-      const payload = Number(t.split('.')[1].split('-')[0]);
-      return payload || 0;
-    } catch (e) {
-      debugLog('⚠️ Parse Token Failed', e.message);
-      return 0;
-    }
-  };
-
-  if (entry) {
-    debugLog(`🔍 Checking existing token... Expires in: ${entry.expires - now}s`);
+  if (!entry) {
+    entry = {
+      token: null,
+      expiresTokenAt: expiresTokenAt ? Number(expiresTokenAt) : 0,
+      claim: claim || null,
+      claimExpiresAt: claimExpiresAt ? Number(claimExpiresAt) : 0,
+      renewalToken: renewalToken || null,
+      redeemUrl: redeemUrl || null,
+    };
+    TOKEN_STORAGE.set(storageKey, entry);
   }
 
-  // Rotasi jika belum ada ATAU jika kedaluwarsa dlm <= 30 detik
-  if (!entry || entry.expires < now + 30) {
-    debugLog('🔄 Triggering Token Rotation to:', redeemUrl);
-    try {
-      gotScraping ??= (await import('got-scraping')).gotScraping;
+  gotScraping ??= (await import('got-scraping')).gotScraping;
 
-      const response = await gotScraping.post(redeemUrl, {
-        json: { claim },
+  let baseOrigin = 'https://z2.idlixku.com';
+  if (entry.redeemUrl && entry.redeemUrl.startsWith('http')) {
+    baseOrigin = new URL(entry.redeemUrl).origin;
+  }
+
+  // TAHAP 1: Refresh Claim jika Claim mendekati kadaluarsa (<= 60s)
+  if (entry.renewalToken && (!entry.claimExpiresAt || entry.claimExpiresAt < now + 60)) {
+    debugLog('🔄 Claim expired or close to expiration. Refreshing claim via renewalToken...');
+    try {
+      const refreshEndpoint = `${baseOrigin}/api/watch/session/refresh-claim`;
+      const response = await gotScraping.post(refreshEndpoint, {
+        json: { renewalToken: entry.renewalToken },
         headers: {
-          Referer: 'https://z1.idlixku.com/',
-          Origin: 'https://z1.idlixku.com',
+          Referer: `${baseOrigin}/`,
+          Origin: baseOrigin,
+          'Content-Type': 'application/json',
+          Cookie: didCookie ? `did=${didCookie}` : '',
         },
         responseType: 'json',
       });
 
-      const result = response.body;
-      debugLog('📩 Rotation Result Body:', JSON.stringify(result));
+      const resBody = response.body;
+      debugLog('📩 Refresh Claim Body:', JSON.stringify(resBody));
 
-      if (result && result.url) {
-        const newToken = new URL(result.url).searchParams.get('t');
+      if (resBody && resBody.claim) {
+        entry.claim = resBody.claim;
+        if (resBody.claimExpiresAt) entry.claimExpiresAt = Number(resBody.claimExpiresAt);
+        if (resBody.renewalToken) entry.renewalToken = resBody.renewalToken;
+        if (resBody.redeemUrl) entry.redeemUrl = resBody.redeemUrl;
+        debugLog(`✅ Claim Refreshed! Valid until Unix: ${entry.claimExpiresAt}`);
+      }
+    } catch (e) {
+      console.error('❌ Refresh Claim Failed:', e.message);
+    }
+  }
+
+  // TAHAP 2: Redeem Token streaming (t=) jika token stream kadaluarsa (<= 30s)
+  if (entry.claim && (!entry.token || entry.expiresTokenAt < now + 30)) {
+    debugLog('🔄 Stream token expired or close to expiration. Redeeming via claim...');
+    try {
+      let targetRedeem = entry.redeemUrl || '/api/watch/session/redeem';
+      if (!targetRedeem.startsWith('http')) {
+        if (!targetRedeem.startsWith('/api/') && targetRedeem.startsWith('/watch/')) {
+          targetRedeem = '/api' + targetRedeem;
+        }
+        targetRedeem = `${baseOrigin}${targetRedeem.startsWith('/') ? '' : '/'}${targetRedeem}`;
+      }
+
+      const response = await gotScraping.post(targetRedeem, {
+        json: { claim: entry.claim, mode: 'browser' },
+        headers: {
+          Referer: `${baseOrigin}/`,
+          Origin: baseOrigin,
+          'Content-Type': 'application/json',
+          Cookie: didCookie ? `did=${didCookie}` : '',
+        },
+        responseType: 'json',
+      });
+
+      const resBody = response.body;
+      debugLog('📩 Redeem Body:', JSON.stringify(resBody));
+
+      if (resBody && resBody.url) {
+        const parsedUrl = new URL(resBody.url);
+        const newToken = parsedUrl.searchParams.get('t');
         if (newToken) {
-          const newExp = getExpiry(newToken);
-          entry = {
-            token: newToken,
-            expires: newExp,
-          };
-          TOKEN_STORAGE.set(claim, entry);
-          debugLog(
-            `✅ Token Rotated Successfully. Valid for ${newExp - Math.floor(Date.now() / 1000)}s`,
-          );
-        } else {
-          debugLog("⚠️ Rotation failed to extract 't' param from URL.");
+          entry.token = newToken;
+          if (resBody.expiresAt) entry.expiresTokenAt = Number(resBody.expiresAt);
+          TOKEN_STORAGE.set(storageKey, entry);
+          if (entry.claim) TOKEN_STORAGE.set(entry.claim, entry);
+          debugLog(`✅ Stream Token Renewed! Expires at Unix: ${entry.expiresTokenAt}`);
         }
       }
     } catch (e) {
-      console.error('❌ Token Rotation Failed:', e.message);
-      debugLog('❌ Rotation Error Stack:', e.stack);
+      console.error('❌ Redeem Token Failed:', e.message);
     }
-  } else {
-    debugLog('⚡ Using cached valid token.');
   }
 
-  return entry ? entry.token : null;
+  return entry.token;
 }
 
 function fetchWithRetry(url, options = {}, attempt = 1) {
@@ -249,9 +316,13 @@ function fetchWithRetry(url, options = {}, attempt = 1) {
 
 function syncToken(targetUrl, token) {
   if (!token) return targetUrl;
-  const urlObj = new URL(targetUrl);
-  urlObj.searchParams.set('t', token);
-  return urlObj.toString();
+  try {
+    const urlObj = new URL(targetUrl);
+    urlObj.searchParams.set('t', token);
+    return urlObj.toString();
+  } catch {
+    return targetUrl;
+  }
 }
 
 function filterManifestByResolution(manifest, targetRes) {
@@ -276,12 +347,16 @@ function filterManifestByResolution(manifest, targetRes) {
 
 function rewriteManifestToLocalProxy(
   data,
-  baseUrl,
+  parentManifestUrl,
   masterResolution,
   token,
   claim,
   redeemUrl,
   localBaseUrl,
+  expiresTokenAt,
+  renewalToken,
+  claimExpiresAt,
+  didCookie,
 ) {
   const lines = data.split('\n');
   let result = '';
@@ -291,6 +366,10 @@ function rewriteManifestToLocalProxy(
     let params = `url=${encodeURIComponent(fullUrl)}`;
     if (claim) params += `&claim=${encodeURIComponent(claim)}`;
     if (redeemUrl) params += `&redeemUrl=${encodeURIComponent(redeemUrl)}`;
+    if (expiresTokenAt) params += `&expiresTokenAt=${encodeURIComponent(expiresTokenAt)}`;
+    if (renewalToken) params += `&renewalToken=${encodeURIComponent(renewalToken)}`;
+    if (claimExpiresAt) params += `&claimExpiresAt=${encodeURIComponent(claimExpiresAt)}`;
+    if (didCookie) params += `&didCookie=${encodeURIComponent(didCookie)}`;
     return params;
   };
 
@@ -305,17 +384,10 @@ function rewriteManifestToLocalProxy(
       if (line.includes('URI="')) {
         result +=
           line.replace(/URI="([^"]+)"/g, (_, url) => {
-            let fullUrl;
-            const urlSplit = url.split('/');
-            if (urlSplit.length - 1 > 3) {
-              fullUrl = url.startsWith('http') ? url : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
-            } else {
-              fullUrl = url.startsWith('http') ? url : `${baseUrl}/${url}`;
-            }
+            const fullUrl = resolveUrlWithQuery(url, parentManifestUrl);
             const isMediaTag = line.startsWith('#EXT-X-MEDIA');
             const params = getProxyParams(fullUrl);
 
-            // GANTI DISINI: Menggunakan localBaseUrl dinamis
             if (isMaster && isMediaTag) {
               return `URI="${localBaseUrl}/api/proxy-playlist/stream.m3u8?res=${encodeURIComponent(masterResolution)}&${params}"`;
             } else {
@@ -327,16 +399,9 @@ function rewriteManifestToLocalProxy(
         result += line + '\n';
       }
     } else {
-      let fullUrl;
-      const urlSplit = line.split('/');
-      if (urlSplit.length - 1 > 3) {
-        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${urlSplit.slice(-3).join('/')}`;
-      } else {
-        fullUrl = line.startsWith('http') ? line : `${baseUrl}/${line}`;
-      }
+      const fullUrl = resolveUrlWithQuery(line, parentManifestUrl);
       const params = getProxyParams(fullUrl);
 
-      // GANTI DISINI: Menggunakan localBaseUrl dinamis
       if (isMaster) {
         result += `${localBaseUrl}/api/proxy-playlist/stream.m3u8?res=${encodeURIComponent(masterResolution)}&${params}\n`;
       } else {
@@ -347,6 +412,7 @@ function rewriteManifestToLocalProxy(
   }
   return result;
 }
+
 function parseMasterVariants(content, masterUrl) {
   if (!content.includes('#EXT-X-STREAM-INF')) return [];
   const lines = content.split('\n');
@@ -360,7 +426,7 @@ function parseMasterVariants(content, masterUrl) {
       while (j < lines.length && (lines[j].trim() === '' || lines[j].trim().startsWith('#'))) j++;
       if (j < lines.length) {
         const u = lines[j].trim();
-        const fullUrl = u.startsWith('http') ? u : new URL(u, masterUrl).toString();
+        const fullUrl = resolveUrlWithQuery(u, masterUrl);
         variants.push({ bw: parseInt(bw), resolution: res, name: name, url: fullUrl });
       }
     }
@@ -390,14 +456,12 @@ async function getChildPlaylist(masterUrl, targetRes) {
 function parseSegments(content, playlistUrl, token) {
   const lines = content.split('\n');
   const segments = [];
-  const u = new URL(playlistUrl);
-  const baseUrl = u.origin + u.pathname.substring(0, u.pathname.lastIndexOf('/') + 1);
   lines.forEach(line => {
     const l = line.trim();
     if (l && !l.startsWith('#')) {
-      segments.push({
-        url: syncToken(l.startsWith('http') ? l : new URL(l, baseUrl).toString(), token),
-      });
+      let segUrl = resolveUrlWithQuery(l, playlistUrl);
+      if (token) segUrl = syncToken(segUrl, token);
+      segments.push({ url: segUrl });
     }
   });
   return segments;
@@ -484,15 +548,21 @@ app.get('/api/analyze', async (req, res) => {
   try {
     debugLog('➡️ Incoming /api/analyze request');
     let masterUrl = req.query.url;
-    const { claim, redeemUrl } = req.query;
+    const { claim, redeemUrl, expiresTokenAt, renewalToken, claimExpiresAt, didCookie } = req.query;
     const targetRes = req.query.res || 'Auto';
 
-    if (claim && redeemUrl) {
-      debugLog('⚙️ Rotation triggered for quick analyze');
-      const activeToken = await getOrRotateToken(claim, redeemUrl);
+    if (claim || renewalToken) {
+      debugLog('⚙️ Session rotation check for analyze...');
+      const activeToken = await getOrRotateToken(
+        claim,
+        redeemUrl,
+        expiresTokenAt,
+        renewalToken,
+        claimExpiresAt,
+        didCookie,
+      );
       if (activeToken) {
         masterUrl = syncToken(masterUrl, activeToken);
-        debugLog('🔗 Analyzer Final Master URL synchronized with new token.');
       }
     }
 
@@ -545,10 +615,25 @@ app.get('/api/deep-scan', async (req, res) => {
   try {
     debugLog('➡️ Incoming /api/deep-scan request');
     let hlsUrl = req.query.url;
-    const { claim, redeemUrl, res: targetRes } = req.query;
+    const {
+      claim,
+      redeemUrl,
+      expiresTokenAt,
+      renewalToken,
+      claimExpiresAt,
+      didCookie,
+      res: targetRes,
+    } = req.query;
 
-    if (claim && redeemUrl) {
-      const activeToken = await getOrRotateToken(claim, redeemUrl);
+    if (claim || renewalToken) {
+      const activeToken = await getOrRotateToken(
+        claim,
+        redeemUrl,
+        expiresTokenAt,
+        renewalToken,
+        claimExpiresAt,
+        didCookie,
+      );
       if (activeToken) hlsUrl = syncToken(hlsUrl, activeToken);
     }
     await buildByteMap(hlsUrl, targetRes || 'Auto', (cur, total) => {
@@ -567,11 +652,17 @@ app.get(['/api/proxy-playlist', '/api/proxy-playlist/stream.m3u8'], async (req, 
     debugLog('➡️ Incoming /api/proxy-playlist');
     let originalManifestUrl = req.query.url;
     const targetRes = req.query.res || 'Auto';
-    const claim = req.query.claim;
-    const redeemUrl = req.query.redeemUrl;
+    const { claim, redeemUrl, expiresTokenAt, renewalToken, claimExpiresAt, didCookie } = req.query;
 
-    if (claim && redeemUrl) {
-      const activeToken = await getOrRotateToken(claim, redeemUrl);
+    if (claim || renewalToken) {
+      const activeToken = await getOrRotateToken(
+        claim,
+        redeemUrl,
+        expiresTokenAt,
+        renewalToken,
+        claimExpiresAt,
+        didCookie,
+      );
       if (activeToken) {
         originalManifestUrl = syncToken(originalManifestUrl, activeToken);
       }
@@ -586,19 +677,20 @@ app.get(['/api/proxy-playlist', '/api/proxy-playlist/stream.m3u8'], async (req, 
       manifestText = filterManifestByResolution(manifestText, targetRes);
     }
 
-    const baseUrl = urlObj.origin + urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/'));
-
-    // TAMBAHKAN DISINI: Membuat base URL dinamis (contoh: http://192.168.1.5:20132 atau https://domain.com)
     const localBaseUrl = `${req.get('host').includes('vortexbridge') ? 'https' : 'http'}://${req.get('host')}`;
 
     const rebuildHLS = rewriteManifestToLocalProxy(
       manifestText,
-      baseUrl,
+      originalManifestUrl,
       targetRes,
       token,
       claim,
       redeemUrl,
-      localBaseUrl, // MASUKKAN DISINI
+      localBaseUrl,
+      expiresTokenAt,
+      renewalToken,
+      claimExpiresAt,
+      didCookie,
     );
 
     res.set('Content-Type', 'application/vnd.apple.mpegurl').send(rebuildHLS);
@@ -610,15 +702,21 @@ app.get(['/api/proxy-playlist', '/api/proxy-playlist/stream.m3u8'], async (req, 
 
 app.get('/api/proxy-segment/:payload', async (req, res) => {
   try {
-    const { claim, redeemUrl } = req.query;
+    const { claim, redeemUrl, expiresTokenAt, renewalToken, claimExpiresAt, didCookie } = req.query;
     const payload = req.params.payload;
     const hexStr = payload.replace(/\.ts$/, '');
 
-    // BUG FIX: Gunakan let, BUKAN const untuk targetUrl agar bisa di-reassign
     let targetUrl = Buffer.from(hexStr, 'hex').toString('utf8');
 
-    if (claim && redeemUrl) {
-      const activeToken = await getOrRotateToken(claim, redeemUrl);
+    if (claim || renewalToken) {
+      const activeToken = await getOrRotateToken(
+        claim,
+        redeemUrl,
+        expiresTokenAt,
+        renewalToken,
+        claimExpiresAt,
+        didCookie,
+      );
       if (activeToken) {
         targetUrl = syncToken(targetUrl, activeToken);
       }
@@ -647,20 +745,41 @@ app.get('/api/proxy-segment/:payload', async (req, res) => {
 });
 
 app.get('/api/download', async (req, res) => {
-  let { url: hlsUrl, mode, name, res: targetRes, claim, redeemUrl } = req.query;
+  let {
+    url: hlsUrl,
+    mode,
+    name,
+    res: targetRes,
+    claim,
+    redeemUrl,
+    expiresTokenAt,
+    renewalToken,
+    claimExpiresAt,
+    didCookie,
+  } = req.query;
   debugLog(`➡️ Incoming /api/download (Mode: ${mode})`);
   const resParam = targetRes || 'Auto';
   const fileName = (name || 'video').replace(/[^a-z0-9_-]/gi, '_') + '.mp4';
 
-  if (claim && redeemUrl) {
-    const activeToken = await getOrRotateToken(claim, redeemUrl);
+  if (claim || renewalToken) {
+    const activeToken = await getOrRotateToken(
+      claim,
+      redeemUrl,
+      expiresTokenAt,
+      renewalToken,
+      claimExpiresAt,
+      didCookie,
+    );
     if (activeToken) hlsUrl = syncToken(hlsUrl, activeToken);
   }
 
-  const extraParams =
-    claim && redeemUrl
-      ? `&claim=${encodeURIComponent(claim)}&redeemUrl=${encodeURIComponent(redeemUrl)}`
-      : '';
+  let extraParams = '';
+  if (claim) extraParams += `&claim=${encodeURIComponent(claim)}`;
+  if (redeemUrl) extraParams += `&redeemUrl=${encodeURIComponent(redeemUrl)}`;
+  if (expiresTokenAt) extraParams += `&expiresTokenAt=${encodeURIComponent(expiresTokenAt)}`;
+  if (renewalToken) extraParams += `&renewalToken=${encodeURIComponent(renewalToken)}`;
+  if (claimExpiresAt) extraParams += `&claimExpiresAt=${encodeURIComponent(claimExpiresAt)}`;
+  if (didCookie) extraParams += `&didCookie=${encodeURIComponent(didCookie)}`;
 
   if (mode === 'stream') {
     const proxy = `/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(hlsUrl)}&res=${encodeURIComponent(resParam)}${extraParams}`;
@@ -774,8 +893,15 @@ app.get('/api/download', async (req, res) => {
       if (i >= segments.length || isClosed || res.writableEnded) return res.end();
       let segUrl = segments[i].url;
 
-      if (claim && redeemUrl) {
-        const activeToken = await getOrRotateToken(claim, redeemUrl);
+      if (claim || renewalToken) {
+        const activeToken = await getOrRotateToken(
+          claim,
+          redeemUrl,
+          expiresTokenAt,
+          renewalToken,
+          claimExpiresAt,
+          didCookie,
+        );
         if (activeToken) {
           segUrl = syncToken(segUrl, activeToken);
         }
@@ -957,6 +1083,10 @@ app.get('/', (req, res) => {
 
   const claim = escapeHtml(data.claim || '');
   const redeemUrl = escapeHtml(data.redeemUrl || '');
+  const renewalToken = escapeHtml(data.renewalToken || '');
+  const expiresTokenAt = escapeHtml(data.expiresTokenAt || data.expiresAt || '');
+  const claimExpiresAt = escapeHtml(data.claimExpiresAt || '');
+  const didCookie = escapeHtml(data.didCookie || '');
 
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -1015,7 +1145,7 @@ app.get('/', (req, res) => {
         #log { font-size: 10px; color: var(--text-dim); margin-top: 6px; letter-spacing: 0.05em; min-height: 14px; }
         .footer-notice { margin-top: 24px; padding: 10px 14px; border: 1px dashed var(--border); border-radius: 8px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-align: center; }
         .footer-notice strong { color: var(--text-dim); }
-        #u, #subLink, #claim, #redeemUrl { display: none; }
+        #u, #subLink, #claim, #redeemUrl, #renewalToken, #expiresTokenAt, #claimExpiresAt, #didCookie { display: none; }
     </style>
 </head>
 <body>
@@ -1031,6 +1161,10 @@ app.get('/', (req, res) => {
         
         <div id="claim">${claim}</div>
         <div id="redeemUrl">${redeemUrl}</div>
+        <div id="renewalToken">${renewalToken}</div>
+        <div id="expiresTokenAt">${expiresTokenAt}</div>
+        <div id="claimExpiresAt">${claimExpiresAt}</div>
+        <div id="didCookie">${didCookie || ''}</div>
 
         <div class="title-box">
             <div class="title-label">Source Title</div>
@@ -1108,7 +1242,18 @@ app.get('/', (req, res) => {
 
         const claimData = document.getElementById('claim').textContent.trim();
         const redeemData = document.getElementById('redeemUrl').textContent.trim();
-        const extraParams = (claimData && redeemData) ? \`&claim=\${encodeURIComponent(claimData)}&redeemUrl=\${encodeURIComponent(redeemData)}\` : "";
+        const renewalData = document.getElementById('renewalToken').textContent.trim();
+        const expiresTokenData = document.getElementById('expiresTokenAt').textContent.trim();
+        const claimExpiresData = document.getElementById('claimExpiresAt').textContent.trim();
+        const didCookie = document.getElementById('didCookie').textContent.trim();
+
+        let extraParams = '';
+        if (claimData) extraParams += \`&claim=\${encodeURIComponent(claimData)}\`;
+        if (redeemData) extraParams += \`&redeemUrl=\${encodeURIComponent(redeemData)}\`;
+        if (renewalData) extraParams += \`&renewalToken=\${encodeURIComponent(renewalData)}\`;
+        if (expiresTokenData) extraParams += \`&expiresTokenAt=\${encodeURIComponent(expiresTokenData)}\`;
+        if (claimExpiresData) extraParams += \`&claimExpiresAt=\${encodeURIComponent(claimExpiresData)}\`;
+        if (didCookie) extraParams += \`&didCookie=\${encodeURIComponent(didCookie)}\`;
 
         const log = m => {
             document.getElementById('log').innerText = m;

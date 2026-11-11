@@ -476,6 +476,10 @@ function Video_Film(props: Props) {
           subtitleLink: data.subtitleLink,
           claim: data.claim,
           redeemUrl: data.redeemUrl,
+          renewalToken: data.renewalToken,
+          claimExpiresAt: data.claimExpiresAt,
+          expiresTokenAt: data.expiresTokenAt,
+          didCookie: data.didCookie,
         }),
       ).toString('hex')}`,
     ).catch(err => {
@@ -541,7 +545,7 @@ function Video_Film(props: Props) {
             streamingURL={
               serverMode === 'local'
                 ? `http://localhost:${STREAMING_MIDDLE_SERVER_PORT}/manifest?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}`
-                : `https://vortexbridge.pirles.my.id/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}`
+                : `https://vortexbridge.pirles.my.id/api/proxy-playlist/stream.m3u8?url=${encodeURIComponent(data.streamingLink)}&res=${encodeURIComponent(currentResolution)}&redeemUrl=${data.redeemUrl}&claim=${data.claim}&renewalToken=${data.renewalToken}&claimExpiresAt=${data.claimExpiresAt}&expiresTokenAt=${data.expiresTokenAt}&didCookie=${data.didCookie}`
             }
             isHls={true}
             subtitleURL={data.subtitleLink}

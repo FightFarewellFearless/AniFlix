@@ -3,6 +3,7 @@ import { LatestMoviesResponse } from './filmTypes/latestMovies';
 
 import { fetch as expoFetch } from 'expo/fetch';
 
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import React from 'react';
 import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
@@ -609,6 +610,10 @@ type FilmDetail_Stream = {
   variants?: HlsVariant[];
   claim?: string;
   redeemUrl?: string;
+  renewalToken: string;
+  claimExpiresAt: number;
+  expiresTokenAt: number;
+  didCookie?: string;
 };
 type FilmDetails = FilmDetails_Detail | FilmDetail_Stream;
 type PossibleAPIResponse = SeriesDetailsResponse | SeriesEpisodeResponse | FilmMovieDetailsResponse;
@@ -708,6 +713,10 @@ async function getFilmDetails(
         ? `${BASE_URL}/api/series/${epApi.series.slug}/season/${epApi.season.seasonNumber}/episode/${prevEp.episodeNumber}`
         : undefined,
       variants,
+      renewalToken: claimApi.renewalToken,
+      claimExpiresAt: claimApi.claimExpiresAt,
+      expiresTokenAt: redeemApi.expiresAt,
+      didCookie: (await CookieManager.get(BASE_URL))?.did?.value,
     };
   }
 
@@ -772,6 +781,10 @@ async function getFilmDetails(
     thumbnailUrl: `https://image.tmdb.org/t/p/w500${movieApi.posterPath}`,
     backgroundImage: `https://image.tmdb.org/t/p/w780${movieApi.backdropPath}`,
     variants,
+    renewalToken: claimApi.renewalToken,
+    claimExpiresAt: claimApi.claimExpiresAt,
+    expiresTokenAt: redeemApi.expiresAt,
+    didCookie: (await CookieManager.get(BASE_URL))?.did?.value,
   };
 }
 
@@ -819,6 +832,9 @@ async function redeemVideo(
     asJson: true,
     body: JSON.stringify({ gateToken: playInfo.gateToken }),
   });
+  claimApi.redeemUrl = claimApi.redeemUrl.startsWith('/')
+    ? BASE_URL + '/api' + claimApi.redeemUrl
+    : claimApi.redeemUrl;
   const redeemApi: RedeemApi = await fetchPage(claimApi.redeemUrl, {
     method: 'POST',
     signal,
@@ -827,7 +843,7 @@ async function redeemVideo(
       Origin: FILM_BASE_URL,
     },
     asJson: true,
-    body: JSON.stringify({ claim: claimApi.claim }),
+    body: JSON.stringify({ claim: claimApi.claim, mode: 'browser' }),
   });
   return { redeemApi, claimApi };
 }
