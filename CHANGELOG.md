@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-12 (12-November-2026)
+## Diperbaiki
+- Error pada film dan peningkatan kestabilan ketika sedang streaming
 # v2.2.0-LTS_JS-11 (31-Oktober-2026)
 ## Diperbaiki
 - Memperbaiki server streaming yang down
