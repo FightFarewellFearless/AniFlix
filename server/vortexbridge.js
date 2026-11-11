@@ -589,7 +589,7 @@ app.get(['/api/proxy-playlist', '/api/proxy-playlist/stream.m3u8'], async (req, 
     const baseUrl = urlObj.origin + urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/'));
 
     // TAMBAHKAN DISINI: Membuat base URL dinamis (contoh: http://192.168.1.5:20132 atau https://domain.com)
-    const localBaseUrl = `${req.get('host').includes('vortexdownloader') ? 'https' : 'http'}://${req.get('host')}`;
+    const localBaseUrl = `${req.get('host').includes('vortexbridge') ? 'https' : 'http'}://${req.get('host')}`;
 
     const rebuildHLS = rewriteManifestToLocalProxy(
       manifestText,
