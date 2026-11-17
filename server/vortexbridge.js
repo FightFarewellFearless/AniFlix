@@ -174,7 +174,7 @@ async function getOrRotateToken(
 
   gotScraping ??= (await import('got-scraping')).gotScraping;
 
-  let baseOrigin = 'https://z2.idlixku.com';
+  let baseOrigin = 'https://z3.idlixku.com';
   if (entry.redeemUrl && entry.redeemUrl.startsWith('http')) {
     baseOrigin = new URL(entry.redeemUrl).origin;
   }

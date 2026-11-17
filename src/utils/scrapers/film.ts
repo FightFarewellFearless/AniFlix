@@ -294,7 +294,7 @@ function resolveMasterPlaylist(content: string, masterUrl: string): HlsVariant[]
 }
 
 export const __ALIAS = 'idlix';
-export const FILM_DOMAIN = 'z2.idlixku.com';
+export const FILM_DOMAIN = 'z3.idlixku.com';
 export const FILM_BASE_URL = 'https://' + FILM_DOMAIN;
 const BASE_URL = FILM_BASE_URL;
 function fetchPage(
