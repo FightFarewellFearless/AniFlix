@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-13 (17-November-2026)
+## Diperbaiki
+- [Film] Error pada data fetch video stream
 # v2.2.0-LTS_JS-12 (12-November-2026)
 ## Diperbaiki
 - Error pada film dan peningkatan kestabilan ketika sedang streaming
