@@ -6,6 +6,12 @@ export interface PlayInfo {
   viewerTier: string;
   maxHeight: number;
   preroll: Preroll;
+  verification?: PlayVerification | null;
+}
+
+interface PlayVerification {
+  siteKey: string;
+  action: string;
 }
 
 interface Preroll {

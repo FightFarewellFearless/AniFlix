@@ -57,6 +57,10 @@ function FromUrl(props: Props) {
       if (err.message === 'canceled' || err.message === 'Aborted') {
         return;
       }
+      if (err.message === 'Verifikasi dibatalkan') {
+        props.navigation.goBack();
+        return;
+      }
       const errMessage =
         err.message === 'Network Error' || err.message === 'Network request failed'
           ? 'Permintaan gagal: Jaringan Error\nPastikan kamu terhubung dengan internet'

@@ -9,7 +9,7 @@ import {
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Appearance,
   Linking,
@@ -49,6 +49,7 @@ import { CFBypassIsOpenContext, setWebViewOpen } from '@utils/CFBypass';
 import SetupComics1 from '@utils/comics1SessionFetcher/SetupComics1.tsx';
 import { DatabaseManager } from '@utils/DatabaseManager';
 import DialogManager from '@utils/dialogManager';
+import { turnstileSolver } from '@utils/turnstile';
 import { TVDialog } from '@/misc/TVDialog';
 
 cleanCbzDir();
@@ -89,6 +90,7 @@ let ComicsReading: React.ComponentType<any>;
 let NovelDetail: React.ComponentType<any>;
 let NovelReading: React.ComponentType<any>;
 let CFBypassWebView: React.ComponentType<any>;
+let TurnstileWebView: React.ComponentType<any>;
 let Connecting: React.ComponentType<any>;
 let FromUrl: React.ComponentType<any>;
 let SeeMore: React.ComponentType<any>;
@@ -108,6 +110,7 @@ if (__DEV__) {
   NovelDetail = require('@component/EpisodeDetail/NovelDetail').default;
   NovelReading = require('@component/WatchNRead/NovelReading').default;
   CFBypassWebView = require('@utils/CFBypassWebview').default;
+  TurnstileWebView = require('@utils/TurnstileWebView').default;
   Connecting = require('@component/Loading Screen/Connect').default;
   FromUrl = require('@component/Loading Screen/FromUrl').default;
   SeeMore = require('@component/Home/SeeMore').default;
@@ -126,6 +129,7 @@ if (__DEV__) {
   NovelDetail = lazy(() => import('@component/EpisodeDetail/NovelDetail'));
   NovelReading = lazy(() => import('@component/WatchNRead/NovelReading'));
   CFBypassWebView = lazy(() => import('@utils/CFBypassWebview'));
+  TurnstileWebView = lazy(() => import('@utils/TurnstileWebView'));
   Connecting = lazy(() => import('@component/Loading Screen/Connect'));
   FromUrl = lazy(() => import('@component/Loading Screen/FromUrl'));
   SeeMore = lazy(() => import('@component/Home/SeeMore'));
@@ -264,6 +268,74 @@ function App() {
     };
   }, []);
 
+  const [turnstileRequest, setTurnstileRequest] = useState<{
+    id: number;
+    siteKey: string;
+    action: string;
+    pageUrl: string;
+  } | null>(null);
+  const turnstileRequestIdRef = useRef(0);
+  const turnstilePendingRef = useRef<{
+    resolve: (token: string) => void;
+    reject: (error: Error) => void;
+    cleanup: () => void;
+  } | null>(null);
+
+  const settleTurnstile = useCallback((token?: string, error?: Error) => {
+    const pending = turnstilePendingRef.current;
+    turnstilePendingRef.current = null;
+    setTurnstileRequest(null);
+    if (!pending) return;
+    pending.cleanup();
+    if (token) pending.resolve(token);
+    else pending.reject(error ?? new Error('Verifikasi dibatalkan'));
+  }, []);
+
+  useEffect(() => {
+    turnstileSolver.solve = (siteKey, action, pageUrl, signal) =>
+      new Promise<string>((resolve, reject) => {
+        const previous = turnstilePendingRef.current;
+        if (previous) {
+          turnstilePendingRef.current = null;
+          previous.cleanup();
+          previous.reject(new Error('Verifikasi baru dimulai'));
+        }
+
+        const onAbort = () => {
+          if (turnstilePendingRef.current?.resolve !== resolve) return;
+          settleTurnstile(undefined, new Error('Aborted'));
+        };
+        const cleanup = () => signal?.removeEventListener('abort', onAbort);
+
+        turnstilePendingRef.current = { resolve, reject, cleanup };
+        setTurnstileRequest({
+          id: ++turnstileRequestIdRef.current,
+          siteKey,
+          action,
+          pageUrl,
+        });
+
+        if (signal?.aborted) {
+          settleTurnstile(undefined, new Error('Aborted'));
+          return;
+        }
+        signal?.addEventListener('abort', onAbort, { once: true });
+      });
+  }, [settleTurnstile]);
+
+  const handleTurnstileSuccess = useCallback(
+    (token: string) => settleTurnstile(token),
+    [settleTurnstile],
+  );
+  const handleTurnstileError = useCallback(
+    (error: Error) => settleTurnstile(undefined, error),
+    [settleTurnstile],
+  );
+  const handleTurnstileCancel = useCallback(
+    () => settleTurnstile(undefined, new Error('Verifikasi dibatalkan')),
+    [settleTurnstile],
+  );
+
   useEffect(() => {
     const colorSchemeValue = DatabaseManager.getSync('colorScheme');
     if (
@@ -398,6 +470,19 @@ function App() {
                       </Suspense>
                     )}
                   </CFBypassIsOpenContext>
+                  {turnstileRequest && (
+                    <Suspense fallback={null}>
+                      <TurnstileWebView
+                        key={turnstileRequest.id}
+                        siteKey={turnstileRequest.siteKey}
+                        action={turnstileRequest.action}
+                        pageUrl={turnstileRequest.pageUrl}
+                        onSuccess={handleTurnstileSuccess}
+                        onError={handleTurnstileError}
+                        onCancel={handleTurnstileCancel}
+                      />
+                    </Suspense>
+                  )}
                   <SetupComics1 />
                   {__DEV__ && (
                     <View style={styles.Dev} pointerEvents="none">

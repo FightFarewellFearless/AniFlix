@@ -8,6 +8,7 @@ import deviceUserAgent, { userAgentSEC } from '@utils/deviceUserAgent';
 import React from 'react';
 import { IncomingMessage, ServerResponse } from 'react-native-nitro-http-server';
 import { setWebViewOpen } from '../CFBypass';
+import { turnstileSolver } from '@utils/turnstile';
 import { ClaimApi } from './filmTypes/claimApi';
 import { LatestSeriesResponse } from './filmTypes/latestSeries';
 import { FilmMovieDetailsResponse } from './filmTypes/movie';
@@ -788,6 +789,62 @@ async function getFilmDetails(
   };
 }
 
+async function claimSession(playInfo: PlayInfo, signal?: AbortSignal): Promise<ClaimApi> {
+  const verification = playInfo.verification;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const verificationToken = verification
+      ? await turnstileSolver.solve(
+          verification.siteKey,
+          verification.action || 'play',
+          BASE_URL + '/',
+          signal,
+        )
+      : undefined;
+
+    const response = await fetch(BASE_URL + '/api/watch/session/claim', {
+      method: 'POST',
+      signal,
+      headers: {
+        accept: '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/json',
+        pragma: 'no-cache',
+        ...userAgentSEC,
+        'upgrade-insecure-requests': '1',
+        'User-Agent': deviceUserAgent,
+        origin: BASE_URL,
+        referer: BASE_URL + '/',
+      },
+      body: JSON.stringify({
+        gateToken: playInfo.gateToken,
+        ...(verificationToken ? { verificationToken } : {}),
+      }),
+    });
+
+    if (response.ok) {
+      return (await response.json()) as ClaimApi;
+    }
+
+    const error = await response.json().catch(() => null);
+
+    if (response.status === 403 && error?.code === 'VERIFICATION_REQUIRED') {
+      if (attempt === 0) continue;
+      throw new Error('Verifikasi pemutaran gagal, silakan coba lagi');
+    }
+
+    if (response.status === 403) {
+      setWebViewOpen.openWebViewCF(true, BASE_URL + '/');
+      throw new Error('Silahkan selesaikan captcha');
+    }
+
+    throw new Error(error?.error ?? 'Gagal memulai sesi pemutaran');
+  }
+
+  throw new Error('Verifikasi pemutaran gagal');
+}
+
 async function redeemVideo(
   playInfo: PlayInfo,
   signal?: AbortSignal,
@@ -826,12 +883,7 @@ async function redeemVideo(
       Math.max(0, playInfo.unlockAt - playInfo.serverNow) + 1000,
     );
   });
-  const claimApi: ClaimApi = await fetchPage(BASE_URL + '/api/watch/session/claim', {
-    method: 'POST',
-    signal,
-    asJson: true,
-    body: JSON.stringify({ gateToken: playInfo.gateToken }),
-  });
+  const claimApi: ClaimApi = await claimSession(playInfo, signal);
   claimApi.redeemUrl = claimApi.redeemUrl.startsWith('/')
     ? BASE_URL + '/api' + claimApi.redeemUrl
     : claimApi.redeemUrl;
