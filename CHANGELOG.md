@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-14 (18-November-2026)
+## Diperbaiki
+- [Film] Verifikasi video player agar video dapat di putar tanpa error
 # v2.2.0-LTS_JS-13 (17-November-2026)
 ## Diperbaiki
 - [Film] Error pada data fetch video stream
