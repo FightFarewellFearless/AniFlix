@@ -1,3 +1,6 @@
+# v2.2.0-LTS_JS-15 (22-November-2026)
+## Ditingkatkan
+- [Film] Verifikasi video player ditingkatkan
 # v2.2.0-LTS_JS-14 (18-November-2026)
 ## Diperbaiki
 - [Film] Verifikasi video player agar video dapat di putar tanpa error
