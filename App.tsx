@@ -12,6 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Appearance,
+  AppState,
   Linking,
   Platform,
   StyleSheet,
@@ -268,28 +269,72 @@ function App() {
     };
   }, []);
 
-  const [turnstileRequest, setTurnstileRequest] = useState<{
-    id: number;
+  // The Turnstile WebView is only mounted while a token is needed (plus a short
+  // grace period for retries and quick episode switches). It is unmounted when
+  // idle, so a long movie does not keep a browser engine in memory. Cookies are
+  // kept by the WebView cookie manager, so the next solve is usually invisible.
+  const [turnstileSession, setTurnstileSession] = useState<{
     siteKey: string;
     action: string;
     pageUrl: string;
   } | null>(null);
+  const [turnstileRequestId, setTurnstileRequestId] = useState(0);
+  const [turnstileVisible, setTurnstileVisible] = useState(false);
   const turnstileRequestIdRef = useRef(0);
+  const turnstileIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const turnstileKeepAliveRef = useRef(60_000);
+  const turnstileInteractionSeenRef = useRef(false);
   const turnstilePendingRef = useRef<{
+    requestId: number;
     resolve: (token: string) => void;
     reject: (error: Error) => void;
     cleanup: () => void;
   } | null>(null);
 
-  const settleTurnstile = useCallback((token?: string, error?: Error) => {
-    const pending = turnstilePendingRef.current;
-    turnstilePendingRef.current = null;
-    setTurnstileRequest(null);
-    if (!pending) return;
-    pending.cleanup();
-    if (token) pending.resolve(token);
-    else pending.reject(error ?? new Error('Verifikasi dibatalkan'));
+  const clearTurnstileIdleTimer = useCallback(() => {
+    if (turnstileIdleTimerRef.current) {
+      clearTimeout(turnstileIdleTimerRef.current);
+      turnstileIdleTimerRef.current = null;
+    }
   }, []);
+
+  const scheduleTurnstileIdle = useCallback(() => {
+    clearTurnstileIdleTimer();
+    turnstileIdleTimerRef.current = setTimeout(() => {
+      turnstileIdleTimerRef.current = null;
+      if (turnstilePendingRef.current) return;
+      setTurnstileSession(null);
+    }, turnstileKeepAliveRef.current);
+  }, [clearTurnstileIdleTimer]);
+
+  const settleTurnstile = useCallback(
+    (requestId: number, token?: string, error?: Error) => {
+      const pending = turnstilePendingRef.current;
+      if (!pending || pending.requestId !== requestId) return;
+      turnstilePendingRef.current = null;
+      setTurnstileVisible(false);
+      pending.cleanup();
+      if (token) pending.resolve(token);
+      else pending.reject(error ?? new Error('Verifikasi dibatalkan'));
+      scheduleTurnstileIdle();
+    },
+    [scheduleTurnstileIdle],
+  );
+
+  useEffect(() => {
+    return () => clearTurnstileIdleTimer();
+  }, [clearTurnstileIdleTimer]);
+
+  useEffect(() => {
+    // Free the WebView engine when the app is not visible. Never do this while a
+    // token request is in flight: the user may be solving an interactive challenge.
+    const subscription = AppState.addEventListener('change', state => {
+      if (state !== 'background' || turnstilePendingRef.current) return;
+      clearTurnstileIdleTimer();
+      setTurnstileSession(null);
+    });
+    return () => subscription.remove();
+  }, [clearTurnstileIdleTimer]);
 
   useEffect(() => {
     turnstileSolver.solve = (siteKey, action, pageUrl, signal) =>
@@ -298,43 +343,75 @@ function App() {
         if (previous) {
           turnstilePendingRef.current = null;
           previous.cleanup();
-          previous.reject(new Error('Verifikasi baru dimulai'));
+          const superseded = new Error('Aborted');
+          superseded.name = 'AbortError';
+          previous.reject(superseded);
         }
 
-        const onAbort = () => {
-          if (turnstilePendingRef.current?.resolve !== resolve) return;
-          settleTurnstile(undefined, new Error('Aborted'));
-        };
-        const cleanup = () => signal?.removeEventListener('abort', onAbort);
+        const requestId = ++turnstileRequestIdRef.current;
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        clearTurnstileIdleTimer();
+        setTurnstileVisible(false);
 
-        turnstilePendingRef.current = { resolve, reject, cleanup };
-        setTurnstileRequest({
-          id: ++turnstileRequestIdRef.current,
-          siteKey,
-          action,
-          pageUrl,
-        });
+        const onAbort = () => settleTurnstile(requestId, undefined, new Error('Aborted'));
+        const cleanup = () => {
+          signal?.removeEventListener('abort', onAbort);
+          if (timer) clearTimeout(timer);
+        };
+
+        turnstilePendingRef.current = { requestId, resolve, reject, cleanup };
+        setTurnstileSession(current =>
+          current &&
+          current.siteKey === siteKey &&
+          current.action === action &&
+          current.pageUrl === pageUrl
+            ? current
+            : { siteKey, action, pageUrl },
+        );
+        setTurnstileRequestId(requestId);
+
+        timer = setTimeout(
+          () =>
+            settleTurnstile(
+              requestId,
+              undefined,
+              new Error('Verifikasi timeout, silakan coba lagi'),
+            ),
+          120000,
+        );
 
         if (signal?.aborted) {
-          settleTurnstile(undefined, new Error('Aborted'));
+          settleTurnstile(requestId, undefined, new Error('Aborted'));
           return;
         }
         signal?.addEventListener('abort', onAbort, { once: true });
       });
-  }, [settleTurnstile]);
+  }, [clearTurnstileIdleTimer, settleTurnstile]);
 
-  const handleTurnstileSuccess = useCallback(
-    (token: string) => settleTurnstile(token),
+  const handleTurnstileToken = useCallback(
+    (requestId: number, token: string) => settleTurnstile(requestId, token),
     [settleTurnstile],
   );
   const handleTurnstileError = useCallback(
-    (error: Error) => settleTurnstile(undefined, error),
+    (requestId: number, error: Error) => settleTurnstile(requestId, undefined, error),
     [settleTurnstile],
   );
-  const handleTurnstileCancel = useCallback(
-    () => settleTurnstile(undefined, new Error('Verifikasi dibatalkan')),
-    [settleTurnstile],
-  );
+  const handleTurnstileInteractive = useCallback((requestId: number) => {
+    const pending = turnstilePendingRef.current;
+    if (!pending || pending.requestId !== requestId) return;
+    if (!turnstileInteractionSeenRef.current) {
+      // Cloudflare asked for interaction once. Keep the browser context around
+      // longer so the rest of this session does not get challenged repeatedly.
+      turnstileInteractionSeenRef.current = true;
+      turnstileKeepAliveRef.current = 10 * 60_000;
+    }
+    setTurnstileVisible(true);
+  }, []);
+  const handleTurnstileCancel = useCallback(() => {
+    const pending = turnstilePendingRef.current;
+    if (!pending) return;
+    settleTurnstile(pending.requestId, undefined, new Error('Verifikasi dibatalkan'));
+  }, [settleTurnstile]);
 
   useEffect(() => {
     const colorSchemeValue = DatabaseManager.getSync('colorScheme');
@@ -470,14 +547,17 @@ function App() {
                       </Suspense>
                     )}
                   </CFBypassIsOpenContext>
-                  {turnstileRequest && (
+                  {turnstileSession && (
                     <Suspense fallback={null}>
                       <TurnstileWebView
-                        key={turnstileRequest.id}
-                        siteKey={turnstileRequest.siteKey}
-                        action={turnstileRequest.action}
-                        pageUrl={turnstileRequest.pageUrl}
-                        onSuccess={handleTurnstileSuccess}
+                        key={`${turnstileSession.siteKey}|${turnstileSession.action}|${turnstileSession.pageUrl}`}
+                        siteKey={turnstileSession.siteKey}
+                        action={turnstileSession.action}
+                        pageUrl={turnstileSession.pageUrl}
+                        requestId={turnstileRequestId}
+                        visible={turnstileVisible}
+                        onToken={handleTurnstileToken}
+                        onInteractive={handleTurnstileInteractive}
                         onError={handleTurnstileError}
                         onCancel={handleTurnstileCancel}
                       />

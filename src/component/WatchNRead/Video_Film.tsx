@@ -282,7 +282,13 @@ function Video_Film(props: Props) {
           setTotalWaitTime(total);
         },
       ).catch(err => {
-        if (err.message === 'Aborted') {
+        if (err.message === 'Aborted' || err.message === 'canceled') {
+          return;
+        }
+        if (err.message === 'Verifikasi dibatalkan') {
+          // The user closed the Turnstile overlay; keep the current video
+          // playing instead of showing an error dialog.
+          setLoading(false);
           return;
         }
         const errMessage =

@@ -789,18 +789,28 @@ async function getFilmDetails(
   };
 }
 
-async function claimSession(playInfo: PlayInfo, signal?: AbortSignal): Promise<ClaimApi> {
+async function claimSession(
+  playInfo: PlayInfo,
+  signal?: AbortSignal,
+  presetVerificationToken?: string,
+): Promise<ClaimApi> {
   const verification = playInfo.verification;
+  let presetToken = presetVerificationToken;
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const verificationToken = verification
-      ? await turnstileSolver.solve(
-          verification.siteKey,
-          verification.action || 'play',
-          BASE_URL + '/',
-          signal,
-        )
-      : undefined;
+    const verificationToken =
+      presetToken ??
+      (verification
+        ? await turnstileSolver.solve(
+            verification.siteKey,
+            verification.action || 'play',
+            BASE_URL + '/',
+            signal,
+          )
+        : undefined);
+    // A Turnstile token is single-use, so only the first attempt may reuse the
+    // token that was solved while waiting for the gate to unlock.
+    presetToken = undefined;
 
     const response = await fetch(BASE_URL + '/api/watch/session/claim', {
       method: 'POST',
@@ -854,8 +864,24 @@ async function redeemVideo(
   claimApi: ClaimApi;
 }> {
   let timeout: NodeJS.Timeout | undefined;
-  const totalWaitTime = Math.floor(Math.max(0, playInfo.unlockAt - playInfo.serverNow) / 1000) || 0;
+  const unlockDelayMs = Math.max(0, playInfo.unlockAt - playInfo.serverNow);
+  const totalWaitTime = Math.floor(unlockDelayMs / 1000) || 0;
   const startTime = Date.now();
+
+  // Solve Turnstile while the gate countdown runs. The token is valid for a few
+  // minutes, so this hides the WebView startup behind a wait the user already has.
+  const verification = playInfo.verification;
+  let prefetchedToken: Promise<string> | undefined;
+  if (verification && unlockDelayMs <= 240_000) {
+    prefetchedToken = turnstileSolver.solve(
+      verification.siteKey,
+      verification.action || 'play',
+      BASE_URL + '/',
+      signal,
+    );
+    // Do not leave an unhandled rejection if the wait is aborted before we await it.
+    prefetchedToken.catch(() => {});
+  }
 
   const updateProgress = () => {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -874,16 +900,32 @@ async function redeemVideo(
     };
     if (signal?.aborted) return handler();
     signal?.addEventListener('abort', handler, { once: true });
-    timeout = setTimeout(
-      () => {
-        signal?.removeEventListener('abort', handler);
-        clearInterval(interval);
-        res(true);
-      },
-      Math.max(0, playInfo.unlockAt - playInfo.serverNow) + 1000,
-    );
+    timeout = setTimeout(() => {
+      signal?.removeEventListener('abort', handler);
+      clearInterval(interval);
+      res(true);
+    }, unlockDelayMs + 1000);
   });
-  const claimApi: ClaimApi = await claimSession(playInfo, signal);
+  let verificationToken: string | undefined;
+  if (prefetchedToken) {
+    try {
+      verificationToken = await prefetchedToken;
+    } catch (error) {
+      const fatal =
+        signal?.aborted ||
+        (error instanceof Error &&
+          (error.name === 'AbortError' ||
+            error.message === 'Aborted' ||
+            error.message === 'Verifikasi dibatalkan' ||
+            error.message.includes('timeout')));
+      if (fatal) throw error;
+      // The prefetch may have failed transiently (for example the first attempt
+      // on the minimal host page). Let claimSession try once more instead of
+      // failing the playback immediately.
+      verificationToken = undefined;
+    }
+  }
+  const claimApi: ClaimApi = await claimSession(playInfo, signal, verificationToken);
   claimApi.redeemUrl = claimApi.redeemUrl.startsWith('/')
     ? BASE_URL + '/api' + claimApi.redeemUrl
     : claimApi.redeemUrl;
